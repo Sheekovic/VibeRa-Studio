@@ -402,6 +402,8 @@ inline juce::var commandArgumentSchema(const juce::String &id)
                                  R"("beat":{"type":"number","exclusiveMinimum":0,"description":"Song beat on a bar line of the time signature before it."},"numerator":{"type":"integer","minimum":1,"maximum":32},"denominator":{"type":"integer","enum":[2,4,8,16]}},"required":[)" +
                                  (id == "meter.change.set" ? R"("target",)" : "") + R"("beat","numerator","denominator"]})");
     }
+    if (id == "performance.assignPad")
+        return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{"value":{"type":"integer","minimum":1,"maximum":16,"description":"Pad number."},"pattern":{"type":"integer","minimum":0,"description":"Stable Pattern ID the pad launches; 0 restores the default (the n-th Pattern). Saved with the project (v55)."}},"required":["value","pattern"]})");
     if (id == "performance.saveScene")
         return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{"value":{"type":"integer","minimum":1,"maximum":8,"description":"Scene number."},"ids":{"type":"array","maxItems":1024,"items":{"type":"integer","minimum":1},"description":"Stable Pattern IDs the scene launches together (empty clears it). Saved with the project (v52); performance.scene1..8 launch it."}},"required":["value","ids"]})");
     if (id.startsWith("notes.controller."))

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VibeRa Studio — a free, open-source music studio</title>
+<meta name="description" content="VibeRa Studio is a free, open-source music studio for Windows with a pattern-first workflow: Channel Rack, Piano Roll, Playlist, Mixer, VST3, audio recording and microtonal maqam tuning.">
+<meta property="og:title" content="VibeRa Studio">
+<meta property="og:description" content="A free, open-source music studio for Windows. Made with love for music, given to everyone for free.">
+<meta property="og:image" content="img/screenshot.png">
+<link rel="icon" href="img/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#top"><img src="img/icon.png" alt=""><span>VibeRa Studio</span></a>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#microtonal">Maqam</a>
+    <a href="#download">Download</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#contribute">Contribute</a>
+    <a class="gh" href="https://github.com/Sheekovic/VibeRa-Studio" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main id="top">
+
+<!-- HERO: a living studio -->
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow"><span class="dot"></span> Free &middot; Open source &middot; Windows</p>
+    <h1>Your studio.<br><span class="accent">Free, forever.</span></h1>
+    <p class="lead">VibeRa Studio is a complete music production studio with the pattern-first workflow
+      producers already love: Channel Rack, Piano Roll, Playlist and Mixer, built from scratch and
+      given to everyone for free.</p>
+    <div class="cta">
+      <a class="btn primary" href="#download">Download for Windows</a>
+      <a class="btn ghost" href="https://github.com/Sheekovic/VibeRa-Studio" target="_blank" rel="noopener">Star on GitHub</a>
+    </div>
+    <p class="fine" id="latest-version">Early preview &middot; AGPL-3.0</p>
+  </div>
+
+  <div class="studio" aria-hidden="true">
+    <div class="window">
+      <div class="win-bar"><i></i><i></i><i></i><span>Playlist — Midnight Session</span>
+        <span class="transport"><b class="play"></b><em id="clock">01:01:000</em><em>128 BPM</em></span></div>
+      <div class="ruler" id="ruler"></div>
+      <div class="lanes" id="lanes"><div class="playhead" id="playhead"></div></div>
+    </div>
+    <div class="window rack">
+      <div class="win-bar"><i></i><i></i><i></i><span>Channel Rack</span></div>
+      <div id="rack"></div>
+    </div>
+    <div class="window mixer">
+      <div class="win-bar"><i></i><i></i><i></i><span>Mixer</span></div>
+      <div class="meters" id="meters"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="story">
+  <div class="story-card">
+    <h2>Why VibeRa exists</h2>
+    <p>Making music should not depend on what you can afford. VibeRa was built by one music lover who
+      put <b>hundreds of hours</b> and <b>thousands of dollars</b> of his own time and money into a real
+      studio, and gave it away for free, so anyone, anywhere, can make the music in their head.</p>
+    <p>It is a passion for music production, shared with you. Use it, enjoy it, and if you can,
+      help make it better.</p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="section">
+  <h2 class="section-title">Everything you need to make a track</h2>
+  <p class="section-sub">One studio, from the first beat to the final export.</p>
+  <div class="grid">
+    <article class="card"><div class="ico">&#9638;</div><h3>Compose</h3>
+      <p>Step sequencer and Piano Roll with slides, portamento, chords, arpeggios, strumming, humanize and scale snapping.</p></article>
+    <article class="card"><div class="ico">&#9776;</div><h3>Arrange</h3>
+      <p>Playlist with coloured tracks, mute and solo, collapsible groups, markers, multiple arrangements, tempo and time-signature changes.</p></article>
+    <article class="card"><div class="ico">&#9881;</div><h3>VibeRa Synth</h3>
+      <p>An original instrument with 77 presets, from synthesized basses to recorded pianos, strings, brass and guitars.</p></article>
+    <article class="card"><div class="ico">&#9673;</div><h3>Sampler</h3>
+      <p>Envelopes, filters, LFOs, pitch bend, time stretching, loops and automatic slicing to Channels.</p></article>
+    <article class="card"><div class="ico">&#9711;</div><h3>Record</h3>
+      <p>Audio recording with loop takes, comping, punch-in, several inputs at once and crash-safe takes. MIDI recording too.</p></article>
+    <article class="card"><div class="ico">&#9636;</div><h3>Mix</h3>
+      <p>Full Mixer with routing, sends, sidechains, automation, latency compensation and 25 built-in effects.</p></article>
+    <article class="card"><div class="ico">&#9883;</div><h3>VST3 plugins</h3>
+      <p>Instruments and effects run in a protected process, so a crashing plugin cannot take your session down.</p></article>
+    <article class="card"><div class="ico">&#9654;</div><h3>Perform live</h3>
+      <p>Launch Patterns from pads or a MIDI controller, with launch quantum and scenes.</p></article>
+    <article class="card"><div class="ico">&#8681;</div><h3>Export</h3>
+      <p>WAV, FLAC, OGG and MP3 at 44.1 or 48 kHz, 16, 24 or 32-bit, or one file per Mixer insert.</p></article>
+  </div>
+</section>
+
+<!-- SCREENSHOT -->
+<section class="section shot">
+  <h2 class="section-title">A studio that feels like home</h2>
+  <p class="section-sub">Dark, focused and fast. Choose your colours and font, or switch to high contrast.</p>
+  <figure class="frame"><img src="img/screenshot.png" alt="VibeRa Studio workspace with Playlist, Piano Roll, Channel Rack and Mixer" loading="lazy"></figure>
+</section>
+
+<!-- MICROTONAL -->
+<section id="microtonal" class="section split">
+  <div>
+    <h2 class="section-title left">Made for maqam, too</h2>
+    <p>VibeRa speaks quarter tones. Write in Rast, Bayati, Saba, Sikah, Hijaz and more with a Piano Roll
+      guide that marks every half-flat degree, snap notes to a maqam, tune each Channel with maqam presets,
+      or load any Scala scale, such as 24-EDO, mapped across your keyboard.</p>
+    <ul class="ticks">
+      <li>Scale and maqam guide in the Piano Roll</li>
+      <li>Snap to maqam with real quarter tones</li>
+      <li>Scala (<code>.scl</code>) scales of any size</li>
+      <li>Pitch-correction effect with maqam targets</li>
+    </ul>
+  </div>
+  <div class="keys" id="keys" aria-hidden="true"></div>
+</section>
+
+<!-- DOWNLOAD / RELEASES -->
+<section id="download" class="section">
+  <h2 class="section-title">Download</h2>
+  <p class="section-sub">Windows 10 and 11, 64-bit. No account, no license key, no cost.</p>
+  <div id="releases" class="releases"><p class="muted">Loading releases&hellip;</p></div>
+  <p class="muted center">Prefer to build it yourself? See the <a href="https://github.com/Sheekovic/VibeRa-Studio#getting-started">build guide</a>.</p>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap" class="section">
+  <h2 class="section-title">Where we are going</h2>
+  <p class="section-sub">The goal: a complete, professional studio that belongs to everyone.</p>
+  <div class="timeline">
+    <div class="step done"><b>Now</b><span>Pattern workflow, Piano Roll, Playlist, Mixer, VST3, audio and MIDI recording, VibeRa Synth, maqam tuning</span></div>
+    <div class="step next"><b>Next</b><span>Warping audio to tempo, tempo curves, MPE / MTS-ESP microtuning for plugins</span></div>
+    <div class="step later"><b>Later</b><span>More original instruments and effects, deeper real-world hardware and accessibility testing</span></div>
+  </div>
+</section>
+
+<!-- CONTRIBUTE -->
+<section id="contribute" class="section contribute">
+  <h2 class="section-title">Build it with us</h2>
+  <p class="section-sub">A studio made by a community of musicians and developers goes further than one person ever could.</p>
+  <div class="grid three">
+    <a class="card link" href="https://github.com/Sheekovic/VibeRa-Studio/issues" target="_blank" rel="noopener"><h3>Musicians</h3><p>Make music with VibeRa and tell us what sounds, looks or feels off.</p></a>
+    <a class="card link" href="https://github.com/Sheekovic/VibeRa-Studio/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener"><h3>Developers</h3><p>C++20, JUCE and Tracktion Engine. Pick an issue and open a pull request.</p></a>
+    <a class="card link" href="https://github.com/Sheekovic/VibeRa-Studio/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener"><h3>Sound and design</h3><p>Create original presets, instruments, themes and artwork under a free license.</p></a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><img src="img/icon.png" alt=""> VibeRa Studio &middot; Free software under the GNU AGPL v3.0 &middot;
+    <a href="https://github.com/Sheekovic/VibeRa-Studio">Source on GitHub</a></p>
+  <p class="muted">An independent project, not affiliated with any other music software company.
+    Made with love for music, and given to everyone for free.</p>
+</footer>
+
+<script src="site.js"></script>
+</body>
+</html>

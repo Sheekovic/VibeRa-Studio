@@ -637,6 +637,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"pattern.launchQuantum", "Set Pattern launch quantum", Scope::patterns, true, true, "command"},
         {"performance.stopAll", "Performance: stop all launched Patterns", Scope::global, false, true, "action"},
         {"performance.saveScene", "Save launched Patterns as a performance scene", Scope::global, true, true, "command"},
+        {"performance.assignPad", "Assign a Pattern to a performance pad", Scope::global, true, true, "command"},
         {"performance.scene1", "Performance scene 1", Scope::global, false, true, "action"},
         {"performance.scene2", "Performance scene 2", Scope::global, false, true, "action"},
         {"performance.scene3", "Performance scene 3", Scope::global, false, true, "action"},
@@ -4812,6 +4813,14 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             if (check.barPosition(next.meterChanges[i].beat).beatInBar > 1.e-6)
                 return juce::Result::fail("That would move a later time-signature change off its bar line");
         }
+    }
+    if (id == "performance.assignPad")
+    {
+        // value = pad 1..16; pattern = the Pattern it launches, 0 = back to the n-th Pattern.
+        const int pad = juce::roundToInt(a.value);
+        if (pad < 1 || pad > 16 || (a.pattern != 0 && !next.pattern(a.pattern)))
+            return juce::Result::fail("Assign pads 1..16 to an existing Pattern (or 0 to reset)");
+        next.padPatterns[size_t(pad - 1)] = a.pattern;
     }
     if (id == "performance.saveScene")
     {

@@ -204,7 +204,7 @@ struct Arrangement
 };
 struct Project
 {
-    static constexpr int currentVersion = 54;
+    static constexpr int currentVersion = 55;
     int version = currentVersion;
     Id nextId = 1;
     juce::String name = "Untitled";
@@ -252,6 +252,16 @@ struct Project
     }
     // Performance scenes 1..8: the Patterns each scene launches together (version 52).
     std::array<std::vector<Id>, 8> performanceScenes;
+    // Performance pads 1..16 (version 55): an assigned Pattern, or 0 for the n-th Pattern.
+    std::array<Id, 16> padPatterns{};
+    Id padPattern(int index) const
+    {
+        if (index < 0 || index >= 16)
+            return 0;
+        if (padPatterns[size_t(index)] && pattern(padPatterns[size_t(index)]))
+            return padPatterns[size_t(index)];
+        return index < int(patterns.size()) ? patterns[size_t(index)].id : 0;
+    }
     const PlaylistTrack *track(int lane) const
     {
         for (const auto &t : tracks)

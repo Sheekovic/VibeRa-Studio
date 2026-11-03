@@ -15,6 +15,11 @@
   <a href="CONTRIBUTING.md"><img alt="Contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen"></a>
 </p>
 
+<p align="center"><a href="https://sheekovic.github.io/VibeRa-Studio/"><b>Website</b></a> &middot;
+  <a href="../../releases"><b>Download</b></a> &middot;
+  <a href="docs/ROADMAP.md"><b>Roadmap</b></a> &middot;
+  <a href="CONTRIBUTING.md"><b>Contribute</b></a></p>
+
 ---
 
 ## Why VibeRa exists

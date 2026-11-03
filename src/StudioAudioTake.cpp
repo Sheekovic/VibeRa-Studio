@@ -681,12 +681,12 @@ juce::var Studio::performanceState() const
 // Pad n (performance.padN, MIDI-learnable on the Controller page) toggles the n-th Pattern.
 bool Studio::togglePerformancePad(int index)
 {
-    if (index < 0 || index >= int(controller.project.patterns.size()))
+    const auto id = controller.project.padPattern(index);
+    if (id == 0)
     {
         status = "Performance pad " + juce::String(index + 1) + " has no Pattern";
         return false;
     }
-    const auto id = controller.project.patterns[size_t(index)].id;
     if (auto r = launchPattern(id, !performancePads.count(id)); r.failed())
     {
         status = r.getErrorMessage();
@@ -716,25 +716,63 @@ void Studio::showPerformance()
         }
         void rebuild()
         {
+            // 16 fixed pads; each launches its assigned Pattern (default: the n-th Pattern).
             buttons.clear();
-            for (const auto &part : s.controller.project.patterns)
+            for (int index = 0; index < 16; ++index)
             {
-                auto *b = buttons.add(new juce::TextButton(part.name));
-                const auto id = part.id;
+                const auto id = s.controller.project.padPattern(index);
+                const auto *part = s.controller.project.pattern(id);
+                auto *b = buttons.add(new juce::TextButton(part ? part->name : juce::String("Pad ") + juce::String(index + 1)));
                 b->setClickingTogglesState(false);
-                b->setTooltip("Pad " + juce::String(buttons.size()) + ": launch / stop " + part.name +
-                              " (right-click: launch quantum; bind a MIDI pad on the Controller page)");
-                const int index = buttons.size() - 1;
-                b->onClick = [this, index, id]
+                b->setAlpha(part ? 1.f : .45f);
+                b->setTooltip("Pad " + juce::String(index + 1) + (part ? ": launch / stop " + part->name : juce::String(": empty")) +
+                              " (right-click: assign a Pattern, launch quantum; bind a MIDI pad on the Controller page)");
+                b->onClick = [this, index]
                 {
                     if (juce::ModifierKeys::currentModifiers.isPopupMenu())
-                        return quantumMenu(id);
+                        return padMenu(index);
                     s.togglePerformancePad(index);
                     s.repaint();
                 };
                 addAndMakeVisible(b);
             }
+            layoutSignature = signature();
             resized();
+        }
+        juce::String layoutSignature;
+        juce::String signature() const
+        {
+            juce::String text;
+            for (int index = 0; index < 16; ++index)
+                if (const auto *part = s.controller.project.pattern(s.controller.project.padPattern(index)))
+                    text << part->name << "|";
+                else
+                    text << "-|";
+            return text;
+        }
+        void padMenu(int index)
+        {
+            juce::PopupMenu menu, assign;
+            const auto &project = s.controller.project;
+            assign.addItem(1000, "Default (Pattern " + juce::String(index + 1) + ")", true, project.padPatterns[size_t(index)] == 0);
+            for (size_t i = 0; i < project.patterns.size() && i < 500; ++i)
+                assign.addItem(1001 + int(i), project.patterns[i].name, true,
+                               project.padPatterns[size_t(index)] == project.patterns[i].id);
+            menu.addSubMenu("Assign Pattern to pad " + juce::String(index + 1), assign);
+            const auto id = project.padPattern(index);
+            menu.addItem(2, "Launch quantum...", id != 0);
+            menu.showMenuAsync(juce::PopupMenu::Options(),
+                               [this, index, id](int chosen)
+                               {
+                                   if (chosen == 2)
+                                       return quantumMenu(id);
+                                   if (chosen < 1000)
+                                       return;
+                                   CommandArgs a;
+                                   a.value = index + 1;
+                                   a.pattern = chosen == 1000 ? 0 : s.controller.project.patterns[size_t(chosen - 1001)].id;
+                                   s.command("performance.assignPad", a);
+                               });
         }
         void quantumMenu(Id id)
         {
@@ -797,10 +835,10 @@ void Studio::showPerformance()
         }
         void timerCallback() override
         {
-            if (buttons.size() != int(s.controller.project.patterns.size()))
+            if (signature() != layoutSignature)
                 rebuild();
-            for (int i = 0; i < buttons.size() && i < int(s.controller.project.patterns.size()); ++i)
-                buttons[i]->setToggleState(s.performancePads.count(s.controller.project.patterns[size_t(i)].id) > 0,
+            for (int i = 0; i < buttons.size(); ++i)
+                buttons[i]->setToggleState(s.performancePads.count(s.controller.project.padPattern(i)) > 0,
                                            juce::dontSendNotification);
         }
     };

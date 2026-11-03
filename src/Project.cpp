@@ -405,6 +405,13 @@ juce::ValueTree Project::state() const
             tree.appendChild(arrangements::toTree(a), nullptr);
         root.appendChild(tree, nullptr);
     }
+    if (std::any_of(padPatterns.begin(), padPatterns.end(), [](Id id) { return id != 0; }))
+    {
+        juce::StringArray ids;
+        for (const auto id : padPatterns)
+            ids.add(juce::String(juce::int64(id)));
+        set(root, "padPatterns", ids.joinIntoString(","));
+    }
     if (!meterChanges.empty())
     {
         juce::ValueTree meterTree("METER_CHANGES");
@@ -893,6 +900,14 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 return parsed;
             p.arrangements.push_back(std::move(a));
         }
+    }
+    if (t.hasProperty("padPatterns"))
+    {
+        const auto ids = juce::StringArray::fromTokens(t["padPatterns"].toString(), ",", "");
+        if (fileVersion < 55 || ids.size() != 16)
+            return juce::Result::fail("Performance pad layout needs project version 55 and 16 entries");
+        for (int i = 0; i < 16; ++i)
+            p.padPatterns[size_t(i)] = Id(ids[i].getLargeIntValue());
     }
     if (const auto meterTree = t.getChildWithName("METER_CHANGES"); meterTree.isValid())
     {
