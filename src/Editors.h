@@ -3391,8 +3391,12 @@ class Studio::Editor final : public juce::Component,
                     g.drawRoundedRectangle(float(x) + .75f, 32.75f, float(width) - 6.5f,
                                            float(getHeight()) - 45.5f, 3.f, 1.5f);
                 }
-                g.setColour(colour.darker(.35f));
+                // Header: a dark tint of the insert colour with a solid colour cap, instead of a
+                // saturated block, so a row of strips stays calm and the names stay readable.
+                g.setColour(bg.interpolatedWith(colour, .28f));
                 g.fillRoundedRectangle(float(x + 2), 34.f, float(width - 9), 24.f, 2);
+                g.setColour(colour);
+                g.fillRoundedRectangle(float(x + 2), 34.f, float(width - 9), 3.f, 1.5f);
                 g.setColour(ink);
                 g.setFont(juce::Font(vibera::uiFont, 13, juce::Font::bold));
                 g.drawFittedText(m.name, {x + 9, 34, width - 20, 24}, juce::Justification::centredLeft, 1, .9f);
@@ -3439,10 +3443,16 @@ class Studio::Editor final : public juce::Component,
                 const float displayGain =
                     s.audio.playing() ? s.audio.mixerDisplayGain(m.index).value_or(m.gain) : m.gain;
                 const float y = mixerGainY(displayGain);
+                // Neutral fader cap with a coloured centre line, like a hardware console.
+                const auto thumb = mixerFaderThumbBounds(m.index, displayGain);
+                g.setGradientFill(juce::ColourGradient(panel.brighter(m.muted ? .12f : .42f), thumb.getX(), thumb.getY(),
+                                                       panel.brighter(m.muted ? .04f : .2f), thumb.getX(),
+                                                       thumb.getBottom(), false));
+                g.fillRoundedRectangle(thumb, 3);
+                g.setColour(juce::Colours::black.withAlpha(.35f));
+                g.drawRoundedRectangle(thumb.reduced(.5f), 3, 1.f);
                 g.setColour(m.muted ? muted : colour);
-                g.fillRoundedRectangle(mixerFaderThumbBounds(m.index, displayGain), 3);
-                g.setColour(ink.withAlpha(.8f));
-                g.drawHorizontalLine(int(y), float(fader.getCentreX() - 8), float(fader.getCentreX() + 8));
+                g.fillRect(thumb.getX() + 3.f, float(y) - 1.f, thumb.getWidth() - 6.f, 2.f);
                 const auto meter = s.audio.mixerMeter(m.index);
                 if (mixerOverloadProject != s.controller.projectIdentity)
                 {
