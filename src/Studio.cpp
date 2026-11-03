@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "FlpImport.h"
 #include "Studio.h"
 #include "SliceDetect.h"
 #include "VideoPlayer.h"
@@ -5703,7 +5704,7 @@ void Studio::chooseOpen()
     if (auto ready = refreshProjectTransitionState(code); ready.failed())
     { status = ready.getErrorMessage(); return; }
     const auto project = controller.projectIdentity;
-    chooser = std::make_unique<juce::FileChooser>("Open VibeRa project", juce::File{}, "*.vibra");
+    chooser = std::make_unique<juce::FileChooser>("Open VibeRa or FL Studio project", juce::File{}, "*.vibra;*.flp");
     auto safe = juce::Component::SafePointer<Studio>(this);
     chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
         [safe, project](const juce::FileChooser &fc)
@@ -5744,7 +5745,10 @@ juce::Result Studio::openProjectFile(const juce::File &file, bool discardChanges
     { status = ready.getErrorMessage(); return ready; }
     const auto identity = controller.projectIdentity;
     Project p;
-    auto result = loadProject(file, p);
+    // FL Studio projects are converted into a new, unsaved VibeRa project.
+    const bool flp = file.hasFileExtension("flp");
+    FlpImportReport flpReport;
+    auto result = flp ? importFlp(file, p, flpReport) : loadProject(file, p);
     if (result.failed())
     {
         status = result.getErrorMessage();
@@ -5774,7 +5778,7 @@ juce::Result Studio::openProjectFile(const juce::File &file, bool discardChanges
     if (deferredReplacement)
         audio.retireDeferredProjectReplacement(*deferredReplacement, deferredMetadata);
     static_cast<Editor *>(windows[3]->getContentComponent())->resetMixerEffectView();
-    projectFile = file;
+    projectFile = flp ? juce::File{} : file;
     selectedPattern = controller.project.patterns.front().id;
     if (!controller.project.channels.empty())
         selectedChannel = controller.project.channels.back().id;
@@ -5782,6 +5786,8 @@ juce::Result Studio::openProjectFile(const juce::File &file, bool discardChanges
     if (const auto missing = missingMedia(controller.project); !missing.empty())
         status = "Opened " + file.getFileName() + " | " + juce::String(int(missing.size())) +
                  " sample(s) missing: Tools > Find missing samples...";
+    if (flp)
+        status = flpReport.summary() + " Save it as a VibeRa project.";
     const bool nativeAccess =
         std::any_of(controller.project.channels.begin(), controller.project.channels.end(),
                     [](const auto &channel) { return channel.instrument.has_value(); }) ||

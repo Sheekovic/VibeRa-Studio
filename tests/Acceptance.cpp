@@ -276,6 +276,7 @@ static juce::Result awaitProjection(AudioEngine &, const Project &, bool, Id);
 #include "CompositionToolsAcceptance.h"
 #include "PlaylistMarkerAcceptance.h"
 #include "TempoMapAcceptance.h"
+#include "FlpImportAcceptance.h"
 #include "ControllerRecordingAcceptance.h"
 #include "ChannelTuningAcceptance.h"
 #include "AudioStretchAcceptance.h"
@@ -4926,6 +4927,14 @@ int main(int argc, char **argv)
             require(test::prepareBuildAcceptanceAttempt(argv[2], output).wasOk(), "Owned controller output");
             controller_recording_acceptance::tests(output);
             std::cout << "PASS controller recording " << assertions << " assertions" << std::endl;
+            return 0;
+        }
+        if (argc == 3 && juce::String(argv[1]) == "--flp-import-check")
+        {
+            juce::File output;
+            require(test::prepareBuildAcceptanceAttempt(argv[2], output).wasOk(), "Owned FLP output");
+            flp_import_acceptance::tests(output);
+            std::cout << "PASS flp import " << assertions << " assertions" << std::endl;
             return 0;
         }
         if (argc == 3 && juce::String(argv[1]) == "--tempo-map-check")
