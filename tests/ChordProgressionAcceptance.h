@@ -77,5 +77,29 @@ inline void tests()
     require(written == a.recordedNotes.size(), "Every chord tone lands on the Channel");
     controller.undoEdit();
     require(controller.project.state().isEquivalentTo(before), "Accepting a progression is one Undo step");
+
+    // MIDI take modes: overdub keeps earlier notes; replace clears the recorded span only.
+    Controller takes;
+    const auto lead = takes.project.channels.back().id;
+    auto &part = takes.project.patterns.front();
+    for (double beat : {0., 1., 2., 3.})
+        part.notes.push_back({takes.project.allocate(), lead, beat, .5, 60, .8f, false});
+    CommandArgs take;
+    take.pattern = part.id;
+    take.recordedNotes = {{0, lead, 1.2, .5, 67, .9f, false}, {0, lead, 2.1, .4, 69, .9f, false}};
+    require(takes.execute("notes.record", take).wasOk(), "An overdub take records");
+    size_t kept = 0;
+    for (const auto &n : takes.project.patterns.front().notes)
+        kept += n.channel == lead && n.pitch == 60;
+    require(kept == 4, "Overdub keeps every earlier note");
+    takes.undoEdit();
+    take.replaceRecorded = true;
+    require(takes.execute("notes.record", take).wasOk(), "A replace take records");
+    std::vector<double> remaining;
+    for (const auto &n : takes.project.patterns.front().notes)
+        if (n.channel == lead && n.pitch == 60)
+            remaining.push_back(n.beat);
+    std::sort(remaining.begin(), remaining.end());
+    require(remaining == std::vector<double>{0., 3.}, "Replace clears only the notes inside the recorded span");
 }
 } // namespace chord_progression_acceptance

@@ -750,6 +750,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Step record: with the transport stopped, played notes (MIDI or typing keyboard) are
     // written at a cursor in the selected Pattern; a chord commits when every key is up and
     // the cursor then advances by the snap (one Undo per chord).
+    bool midiRecordReplace = false; // MIDI takes replace notes in the recorded span (else overdub).
     bool stepRecord = false;
     double stepCursor = 0;
     std::map<int, float> stepHeld;

@@ -3354,6 +3354,7 @@ void Studio::toolsMenu()
     menu.addItem(205, "Drum pads (play and load a kit)");
     menu.addItem(206, "Create a chord progression...");
     menu.addItem(207, "Step record (write played notes at a cursor)", true, stepRecord);
+    menu.addItem(209, "MIDI recording replaces notes (off = overdub)", true, midiRecordReplace);
     menu.addItem(208, "Step record: insert a rest", stepRecord);
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
@@ -3402,6 +3403,13 @@ void Studio::toolsMenu()
             if (choice == 207)
             {
                 safe->performAction("transport.stepRecord");
+                return;
+            }
+            if (choice == 209)
+            {
+                safe->midiRecordReplace = !safe->midiRecordReplace;
+                safe->status = safe->midiRecordReplace ? "MIDI recording: replace notes in the recorded span"
+                                                       : "MIDI recording: overdub (merge with existing notes)";
                 return;
             }
             if (choice == 208)
@@ -5103,6 +5111,7 @@ juce::Result Studio::retryMidiTake(std::uint64_t expectedSerial)
         if (!take.args.recordedNotes.empty() || !take.args.recordedControllers.empty())
         {
             take.phase = PendingMidiTake::Phase::applying;
+            take.args.replaceRecorded = midiRecordReplace;
             const auto result = controller.execute("notes.record", take.args); // NEVER move out.
             if (result.failed())
             {

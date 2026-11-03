@@ -3620,6 +3620,22 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             if (!a.enabled)
                 std::erase_if(pat->notes, [&](const auto &note) { return note.channel == ch->id; });
         }
+        if (id == "notes.record" && a.replaceRecorded)
+        {
+            std::map<Id, std::pair<double, double>> spans;
+            for (const auto &note : a.recordedNotes)
+            {
+                auto [it, inserted] = spans.try_emplace(note.channel, note.beat, note.beat + note.length);
+                if (!inserted)
+                    it->second = {std::min(it->second.first, note.beat), std::max(it->second.second, note.beat + note.length)};
+            }
+            std::erase_if(pat->notes, [&](const auto &note)
+                          {
+                              const auto span = spans.find(note.channel);
+                              return span != spans.end() && !note.step && note.beat < span->second.second &&
+                                     note.beat + note.length > span->second.first;
+                          });
+        }
         for (auto note : a.recordedNotes)
         {
             if (id == "notes.import")

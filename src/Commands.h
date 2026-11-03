@@ -103,6 +103,9 @@ struct CommandArgs
     std::vector<Id> ids;
     std::vector<Note> recordedNotes;
     std::vector<ControllerEvent> recordedControllers; // notes.record: take controllers (ids allocated).
+    // notes.record: Replace mode removes each recorded Channel's earlier notes inside the
+    // recorded span before adding the take (default overdub keeps them).
+    bool replaceRecorded = false;
     // notes.import: optional file tempo map (beat, BPM) and meter applied in the same Undo step.
     struct ImportedTempo
     {
