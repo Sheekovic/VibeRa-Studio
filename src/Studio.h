@@ -850,6 +850,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Song/Pattern/stem export format (export menu, MCP sampleRate/bitDepth).
     double exportRate = 48000;
     int exportBits = 24;
+    int exportTail = 0; // 0 cut, 1 leave the remainder, 2 wrap it onto the start.
     bool exportCancelRequested = false;
     // Stops the running export render (and any stems still queued); false when none runs.
     bool cancelExport();

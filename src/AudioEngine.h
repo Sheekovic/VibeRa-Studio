@@ -393,7 +393,9 @@ class AudioEngine
     juce::Result renderSync(const Project &, const juce::File &, double rate = 48000, int bits = 24,
                             int block = 512);
     // Offline WAV render: 44100/48000 Hz, 16/24-bit integer or 32-bit float.
-    juce::Result startRender(const Project &, const juce::File &, double rate = 48000, int bits = 24);
+    // tail: 0 cut at the Song end, 1 leave the remainder (effect tails until silence, at most
+    // 8 s), 2 wrap the remainder onto the start (seamless loops).
+    juce::Result startRender(const Project &, const juce::File &, double rate = 48000, int bits = 24, int tail = 0);
     bool rendering() const;
     float renderProgress() const;
     juce::Result finishRender();

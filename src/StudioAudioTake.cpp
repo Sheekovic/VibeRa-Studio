@@ -465,11 +465,23 @@ void Studio::exportMenu()
     quality.addItem(43, "24-bit", true, exportBits == 24);
     quality.addItem(44, "32-bit float", true, exportBits == 32);
     menu.addSubMenu("Sample rate / bit depth (" + format + ")", quality);
+    juce::PopupMenu tail;
+    tail.addItem(45, "Cut remainder (stop at the Song end)", true, exportTail == 0);
+    tail.addItem(46, "Leave remainder (keep effect tails)", true, exportTail == 1);
+    tail.addItem(47, "Wrap remainder (tails onto the start, for loops)", true, exportTail == 2);
+    menu.addSubMenu("Tail", tail);
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&exportWav),
                        [this](int chosen)
                        {
                            if (chosen <= 0)
                                return;
+                           if (chosen >= 45 && chosen <= 47)
+                           {
+                               exportTail = chosen - 45;
+                               const char *names[]{"cut", "leave", "wrap"};
+                               status = juce::String("Export tail: ") + names[exportTail] + " remainder";
+                               return;
+                           }
                            if (chosen >= 40 && chosen <= 44)
                            {
                                if (chosen <= 41)

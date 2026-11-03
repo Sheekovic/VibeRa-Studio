@@ -5328,7 +5328,7 @@ void Studio::timerCallback()
     }
     if (pendingExport)
     {
-        auto result = audio.startRender(*pendingExport, pendingExportFile, exportRate, exportBits);
+        auto result = audio.startRender(*pendingExport, pendingExportFile, exportRate, exportBits, exportTail);
         if (result.wasOk())
         {
             renderWasActive = true;

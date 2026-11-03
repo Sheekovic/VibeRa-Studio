@@ -4051,10 +4051,18 @@ class AudioEngine::RenderWorker final : public juce::Thread
         return std::any_of(hosts.begin(), hosts.end(),
                            [](auto &host) { return !host->alive() || host->deliveryFailed(); });
     }
+    int tailMode = 0, bitDepth = 24;
+    double songSeconds = 0, sampleRate = 48000;
     RenderWorker(te::Edit &edit, const juce::File &file, double rate, int bits, int block, double endSeconds,
-                 std::vector<std::shared_ptr<PluginHost>> plugins = {})
+                 std::vector<std::shared_ptr<PluginHost>> plugins = {}, int tail = 0)
         : juce::Thread("VibeRa WAV render"), target(file), temporary(file), hosts(std::move(plugins))
     {
+        tailMode = std::clamp(tail, 0, 2);
+        bitDepth = bits;
+        sampleRate = rate;
+        songSeconds = endSeconds;
+        if (tailMode != 0)
+            endSeconds += 8.; // Render room for reverb/delay tails; trimmed or wrapped afterwards.
         for (const auto *track : te::getAudioTracks(edit))
             for (auto *plugin : track->pluginList.getPlugins())
                 if (auto *sampler = dynamic_cast<FixedSampler *>(plugin))
@@ -4084,7 +4092,47 @@ class AudioEngine::RenderWorker final : public juce::Thread
                 break;
             }
         }
+        if (completed && tailMode != 0)
+            completed = applyTail();
         done = true;
+    }
+    // Leave: trim trailing silence (below -90 dBFS) after the Song end. Wrap: mix everything
+    // past the Song end back onto the start, then cut at the Song end.
+    bool applyTail()
+    {
+        juce::WavAudioFormat wav;
+        std::unique_ptr<juce::AudioFormatReader> reader(wav.createReaderFor(temporary.getFile().createInputStream().release(), true));
+        if (!reader)
+            return false;
+        const int frames = int(reader->lengthInSamples), channels = int(reader->numChannels);
+        juce::AudioBuffer<float> pcm(channels, frames);
+        reader->read(&pcm, 0, frames, 0, true, true);
+        reader.reset();
+        const int songEnd = std::min(frames, int(std::lround(songSeconds * sampleRate)));
+        int keep = frames;
+        if (tailMode == 1)
+        {
+            int last = songEnd;
+            const float floor = juce::Decibels::decibelsToGain(-90.f);
+            for (int i = frames - 1; i >= songEnd; --i)
+                if (std::abs(pcm.getSample(0, i)) > floor || (channels > 1 && std::abs(pcm.getSample(1, i)) > floor))
+                {
+                    last = i + 1;
+                    break;
+                }
+            keep = std::min(frames, last + int(sampleRate * .05));
+        }
+        else
+        {
+            for (int c = 0; c < channels; ++c)
+                for (int i = songEnd; i < frames; ++i)
+                    pcm.addSample(c, (i - songEnd) % std::max(1, songEnd), pcm.getSample(c, i));
+            keep = songEnd;
+        }
+        temporary.getFile().deleteFile();
+        std::unique_ptr<juce::AudioFormatWriter> writer(wav.createWriterFor(temporary.getFile().createOutputStream().release(),
+                                                                           sampleRate, unsigned(channels), bitDepth, {}, 0));
+        return writer && writer->writeFromAudioSampleBuffer(pcm, 0, keep);
     }
     juce::Result commit()
     {
@@ -4134,7 +4182,7 @@ juce::Result AudioEngine::renderSync(const Project &p, const juce::File &file, d
         throw;
     }
 }
-juce::Result AudioEngine::startRender(const Project &p, const juce::File &file, double rate, int bits)
+juce::Result AudioEngine::startRender(const Project &p, const juce::File &file, double rate, int bits, int tail)
 {
     if (worker)
         return juce::Result::fail("A render is already active");
@@ -4158,7 +4206,7 @@ juce::Result AudioEngine::startRender(const Project &p, const juce::File &file, 
     worker =
         std::make_unique<RenderWorker>(*renderEdit, file, rate, bits, 512, p.songSeconds(p.endBeat()),
                                        std::vector<std::shared_ptr<PluginHost>>(
-                                           ownedHosts.begin() + std::ptrdiff_t(firstHost), ownedHosts.end()));
+                                           ownedHosts.begin() + std::ptrdiff_t(firstHost), ownedHosts.end()), tail);
     worker->startThread();
     preparation[1].reset();
     return juce::Result::ok();
