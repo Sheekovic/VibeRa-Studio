@@ -765,6 +765,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tempo.change.set", "Edit tempo change", Scope::playlist, true, true, "command"},
         {"tempo.change.delete", "Delete tempo change", Scope::playlist, true, true, "command"},
         {"tempo.curve", "Draw tempo curve", Scope::playlist, true, true, "command"},
+        {"tempo.fromAutomation", "Use automation clip as tempo", Scope::playlist, true, true, "command"},
         {"marker.add", "Add Playlist marker", Scope::playlist, true, true, "command"},
         {"marker.rename", "Rename Playlist marker", Scope::playlist, true, true, "command"},
         {"marker.move", "Move Playlist marker", Scope::playlist, true, true, "command"},
@@ -4988,6 +4989,54 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 return juce::Result::fail("Tuning offsets are +/-100 cents");
         target->tuning = *a.tuning;
         target->scale.clear(); // A 12-tone table replaces a keyboard-mapped scale.
+    }
+    if (id == "tempo.fromAutomation")
+    {
+        // A freehand tempo curve: the automation clip's drawn shape (0..1) maps to
+        // offset..value BPM across its placement, sampled every 1/4 beat as linear ramps
+        // (collinear samples dropped). Changes inside the span are replaced; the clip stays.
+        const auto clip = std::find_if(next.automation.placements.begin(), next.automation.placements.end(),
+                                       [&](const auto &p) { return p.id == std::int64_t(a.target); });
+        if (clip == next.automation.placements.end())
+            return missing();
+        const auto source = std::find_if(next.automation.sources.begin(), next.automation.sources.end(),
+                                         [&](const auto &s) { return s.id == clip->source; });
+        if (source == next.automation.sources.end() || source->points.empty() || !(source->length > 0))
+            return juce::Result::fail("The automation clip has no drawn points");
+        if (!std::isfinite(a.offset) || !std::isfinite(a.value) || a.offset < 10 || a.value > 999 ||
+            a.offset >= a.value)
+            return juce::Result::fail("Give the BPM range: offset (bottom) < value (top), 10..999");
+        const double from = clip->beat, length = clip->length;
+        auto bpmAt = [&](double t)
+        {
+            const double position = std::fmod(clip->offset + t, source->length);
+            return a.offset + (a.value - a.offset) * juce::jlimit(0., 1., double(automationSourceValueAt(*source, position)));
+        };
+        std::vector<std::pair<double, double>> samples;
+        for (double t = 0; t < length - 1.e-9; t += .25)
+            samples.emplace_back(t, bpmAt(t));
+        samples.emplace_back(length, bpmAt(std::max(0., length - 1.e-6)));
+        std::vector<std::pair<double, double>> kept{samples.front()};
+        for (size_t i = 1; i + 1 < samples.size(); ++i)
+        {
+            const auto &p = kept.back(), &q = samples[i + 1];
+            const double predicted = p.second + (q.second - p.second) * (samples[i].first - p.first) / (q.first - p.first);
+            if (std::abs(samples[i].second - predicted) > .01)
+                kept.push_back(samples[i]);
+        }
+        kept.push_back(samples.back());
+        std::erase_if(next.tempoChanges, [&](const auto &change)
+                      { return change.beat >= from - 1.e-9 && change.beat <= from + length + 1.e-9; });
+        if (next.tempoChanges.size() + kept.size() > 4096)
+            return juce::Result::fail("Too many tempo changes; use a shorter clip");
+        if (from > 0)
+            next.tempoChanges.push_back({next.allocate(), from, kept.front().second, false});
+        else
+            next.tempo = juce::jlimit(20., 400., kept.front().second);
+        for (size_t i = 1; i < kept.size(); ++i)
+            next.tempoChanges.push_back({next.allocate(), from + kept[i].first, kept[i].second, true});
+        std::sort(next.tempoChanges.begin(), next.tempoChanges.end(),
+                  [](const auto &x, const auto &y) { return x.beat < y.beat; });
     }
     if (id == "tempo.curve")
     {

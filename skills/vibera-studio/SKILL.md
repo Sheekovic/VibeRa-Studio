@@ -255,6 +255,8 @@ Tempo map: `vibera_command tempo.change.add {beat (> 0), value: BPM 10..999, ste
 `vibera_inspect {"entity":"tempo"}` (row 0 is the base tempo; `seconds` per change). Song
 mode only. Shaped curves: `tempo.curve {beat, length, value, text: linear|ease|in|out}`
 glides from the tempo at `beat` to `value` (16 ramps, changes inside replaced, one Undo).
+Freehand tempo: draw an automation clip, then `tempo.fromAutomation {target: clip, offset:
+lowBpm, value: highBpm}` turns its curve into ramps over the clip (1/4-beat samples).
 Audio Clips keep their seconds unless warped: `vibera_project warpClip {clip, bpm}`.
 
 Arrangements: `vibera_command arrangement.add|clone {text}`, `arrangement.select|rename|delete

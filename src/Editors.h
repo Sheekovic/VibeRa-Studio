@@ -4708,6 +4708,8 @@ class Studio::Editor final : public juce::Component,
                 m.addItem(3, automationClip(id) ? "Automation source / targets"
                              : audioClip(id)    ? "Channel settings"
                                                 : "Edit Pattern");
+                if (automationClip(id))
+                    m.addItem(50, "Use as tempo curve...");
                 if (audioClip(id))
                 {
                     // Comping: offered for audio takes grouped with other audio takes.
@@ -4829,6 +4831,29 @@ class Studio::Editor final : public juce::Component,
                                         else
                                             a.fadeOut = 1.;
                                         safe->s.command("audio.fade", a);
+                                    }
+                                    if (n == 50)
+                                    {
+                                        auto *box = new juce::AlertWindow(
+                                            "Use as tempo curve",
+                                            "The drawn curve becomes the Song tempo over this clip: bottom = low BPM, top = high BPM.",
+                                            juce::MessageBoxIconType::NoIcon);
+                                        box->addTextEditor("low", "80", "Low BPM (bottom)");
+                                        box->addTextEditor("high", "160", "High BPM (top)");
+                                        box->addButton("Apply", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                                        box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                                        box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                            [box, safe, id](int choice)
+                                            {
+                                                if (choice == 0 || !safe)
+                                                    return;
+                                                CommandArgs args;
+                                                args.target = id;
+                                                args.offset = box->getTextEditorContents("low").getDoubleValue();
+                                                args.value = box->getTextEditorContents("high").getDoubleValue();
+                                                safe->s.command("tempo.fromAutomation", args);
+                                            }), true);
+                                        return;
                                     }
                                     if (n == 3)
                                     {
