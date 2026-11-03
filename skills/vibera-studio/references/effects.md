@@ -55,6 +55,19 @@ transpose -12..12 semitones. Shifting uses the vendored Signalsmith Stretch; the
 (about 110 ms at 48 kHz) is reported as plugin latency and compensated by the host.
 Monophonic sources only.
 
+Mixing and mastering processors:
+- Parametric EQ (`parametric-eq`): low cut (20 Hz = off), low shelf frequency/gain, two
+  bells (frequency, gain, Q), high shelf frequency/gain, high cut (20 kHz = off). The editor
+  draws the exact response curve.
+- De-esser (`de-esser`): frequency, threshold, range (max reduction dB), listen (hear only
+  what is removed). Turns down only the band above the frequency while it is loud.
+- Transient Shaper (`transient-shaper`): attack and sustain -100..100 %, output, mix.
+- Multiband Dynamics (`multiband`): low/high crossover, depth, time, upward, downward
+  (OTT-style three-band compression), low/mid/high gain, output. Depth 0 is transparent.
+- Saturator (`saturator`): drive, character (tape to tube), tone tilt, mix, output.
+- Maximizer (`maximizer`): gain, ceiling, release; 1.5 ms lookahead (reported latency),
+  the output never exceeds the ceiling. De-esser, Multiband and Maximizer show gain reduction.
+
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);
 `release` sets band decay, plus mix and output gain. There is no external carrier input.

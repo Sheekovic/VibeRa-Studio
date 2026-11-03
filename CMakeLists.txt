@@ -104,7 +104,7 @@ add_custom_command(TARGET VibeRaTests POST_BUILD COMMAND ${CMAKE_COMMAND} -E cop
 juce_add_gui_app(VibeRaPluginWorker PRODUCT_NAME "VibeRa Plugin Worker" COMPANY_NAME "VibeRa")
 target_sources(VibeRaPluginWorker PRIVATE src/PluginWorker.cpp src/PluginEditorClock.cpp)
 target_sources(VibeRaPluginWorker PRIVATE src/effects/NativeEffects.cpp src/effects/NativeEffectsEditor.cpp
-  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp)
+  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp src/effects/dsp/StudioEffects.cpp)
 target_sources(VibeRaPluginWorker PRIVATE src/synth/SynthPlugin.cpp src/synth/SynthPresets.cpp
   src/synth/SynthEngine.cpp src/synth/SynthEditor.cpp)
 target_compile_definitions(VibeRaPluginWorker PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0
@@ -125,12 +125,12 @@ endforeach()
 enable_testing()
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_executable(VibeRaEffectsDspTests tests/effects/DspTests.cpp
-  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp)
+  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp src/effects/dsp/StudioEffects.cpp)
 target_include_directories(VibeRaEffectsDspTests PRIVATE src/effects tests/effects)
 juce_add_console_app(VibeRaNativeEffectsTests PRODUCT_NAME "VibeRa native effects acceptance")
 target_sources(VibeRaNativeEffectsTests PRIVATE tests/NativeEffectsTests.cpp src/synth/SynthPresets.cpp
   src/effects/NativeEffects.cpp src/effects/NativeEffectsEditor.cpp
-  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp)
+  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp src/effects/dsp/StudioEffects.cpp)
 target_include_directories(VibeRaNativeEffectsTests PRIVATE src tests/effects)
 target_compile_definitions(VibeRaNativeEffectsTests PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0
   JUCE_MODAL_LOOPS_PERMITTED=0)
@@ -1002,7 +1002,7 @@ juce_add_console_app(VibeRaSynthPluginTests PRODUCT_NAME "VibeRa Synthesizer acc
 set_target_properties(VibeRaSynthPluginTests PROPERTIES OUTPUT_NAME VibeRaSynthPluginTests)
 target_sources(VibeRaSynthPluginTests PRIVATE tests/SynthPluginTests.cpp
   src/synth/SynthPlugin.cpp src/synth/SynthPresets.cpp src/synth/SynthEngine.cpp src/synth/SynthEditor.cpp
-  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp)
+  src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp src/effects/dsp/StudioEffects.cpp)
 target_include_directories(VibeRaSynthPluginTests PRIVATE src)
 target_compile_definitions(VibeRaSynthPluginTests PRIVATE JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_MODAL_LOOPS_PERMITTED=0)
 target_link_libraries(VibeRaSynthPluginTests PRIVATE juce::juce_audio_utils juce::juce_cryptography)

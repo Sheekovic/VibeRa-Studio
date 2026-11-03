@@ -33,6 +33,12 @@ enum class EffectId
     autoPan,
     pitchCorrect,
     vocoder,
+    parametricEq,
+    deEsser,
+    transientShaper,
+    multiband,
+    saturator,
+    maximizer,
     count
 };
 inline constexpr std::size_t maximumParameters = 12;

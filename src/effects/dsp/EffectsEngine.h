@@ -5,6 +5,7 @@
 #include "Dynamics.h"
 #include "TimeEffects.h"
 #include "PitchCorrect.h"
+#include "StudioEffects.h"
 #include "Vocoder.h"
 #include <cmath>
 #include <stdexcept>
@@ -18,6 +19,7 @@ class Engine
     TimeEffects time;
     PitchCorrect tune;
     Vocoder vocoder;
+    StudioEffects studio;
     EffectId selected = EffectId::balance;
     bool prepared = false;
     bool configured = false;
@@ -26,7 +28,7 @@ class Engine
     // Fixed added delay of an effect (only Tune delays its output).
     int latencySamples(EffectId effect) const noexcept
     {
-        return effect == EffectId::pitchCorrect ? tune.latencySamples() : 0;
+        return effect == EffectId::pitchCorrect ? tune.latencySamples() : studio.latencySamples(effect);
     }
     void prepare(double sampleRate)
     {
@@ -37,6 +39,7 @@ class Engine
         time.prepare(sampleRate);
         tune.prepare(sampleRate);
         vocoder.prepare(sampleRate);
+        studio.prepare(sampleRate);
         prepared = true;
         selected = EffectId::balance;
         configured = false;
@@ -48,7 +51,10 @@ class Engine
         time.reset();
         tune.reset();
         vocoder.reset();
+        studio.reset();
     }
+    // Last gain reduction (dB) of the selected dynamics processor, for editor meters.
+    float gainReductionDb() const noexcept { return studio.gainReductionDb(); }
     // Bad automation values are refused before changing the active DSP settings.
     bool setParameters(EffectId effect, const Values &values) noexcept
     {
@@ -76,8 +82,10 @@ class Engine
             time.setParameters(effect, values);
         else if (effect == EffectId::pitchCorrect)
             tune.setParameters(values);
-        else
+        else if (effect == EffectId::vocoder)
             vocoder.setParameters(values);
+        else
+            studio.setParameters(effect, values);
         return true;
     }
     void process(float *left, float *right, int frames) noexcept
@@ -96,8 +104,10 @@ class Engine
                 time.process(l, r);
             else if (selected == EffectId::pitchCorrect)
                 tune.process(l, r);
-            else
+            else if (selected == EffectId::vocoder)
                 vocoder.process(l, r);
+            else
+                studio.process(l, r);
             left[i] = std::isfinite(l) ? l : 0.0f;
             right[i] = std::isfinite(r) ? r : 0.0f;
         }

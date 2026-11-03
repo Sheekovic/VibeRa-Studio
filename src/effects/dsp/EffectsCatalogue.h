@@ -92,6 +92,35 @@ inline constexpr ParameterSpec vocoder[] = {{"note", "Carrier note (MIDI)", 24, 
                                             {"noise", "Noise", 0, 1, .15f, ""},
                                             {"mix", "Mix", 0, 1, 1, ""},
                                             {"output", "Output", -24, 24, 0, "dB"}};
+inline constexpr ParameterSpec parametric[] = {
+    {"low-cut", "Low cut", 20, 1000, 20, "Hz", .3f},          {"low-shelf-frequency", "Low shelf", 30, 1000, 100, "Hz", .3f},
+    {"low-shelf-gain", "Low shelf gain", -18, 18, 0, "dB"},   {"bell-1-frequency", "Bell 1", 40, 12000, 400, "Hz", .3f},
+    {"bell-1-gain", "Bell 1 gain", -18, 18, 0, "dB"},         {"bell-1-q", "Bell 1 Q", .2f, 10, 1, "", .4f},
+    {"bell-2-frequency", "Bell 2", 200, 18000, 3000, "Hz", .3f}, {"bell-2-gain", "Bell 2 gain", -18, 18, 0, "dB"},
+    {"bell-2-q", "Bell 2 Q", .2f, 10, 1, "", .4f},            {"high-shelf-frequency", "High shelf", 1000, 20000, 8000, "Hz", .3f},
+    {"high-shelf-gain", "High shelf gain", -18, 18, 0, "dB"}, {"high-cut", "High cut", 1000, 20000, 20000, "Hz", .3f}};
+inline constexpr ParameterSpec deEsser[] = {{"frequency", "Frequency", 2000, 12000, 6500, "Hz", .4f},
+                                            {"threshold", "Threshold", -60, 0, -30, "dB"},
+                                            {"range", "Range", 0, 24, 10, "dB"},
+                                            {"listen", "Listen", 0, 1, 0, "", 1, 1}};
+inline constexpr ParameterSpec transient[] = {{"attack", "Attack", -100, 100, 0, "%"},
+                                              {"sustain", "Sustain", -100, 100, 0, "%"},
+                                              {"output", "Output", -12, 12, 0, "dB"},
+                                              {"mix", "Mix", 0, 1, 1, ""}};
+inline constexpr ParameterSpec multiband[] = {
+    {"low-crossover", "Low crossover", 40, 1000, 120, "Hz", .3f}, {"high-crossover", "High crossover", 1000, 12000, 2500, "Hz", .3f},
+    {"depth", "Depth", 0, 1, .5f, ""},                           {"time", "Time", .1f, 10, 1, "x", .3f},
+    {"upward", "Upward", 0, 1, .5f, ""},                         {"downward", "Downward", 0, 1, .5f, ""},
+    {"low-gain", "Low", -12, 12, 0, "dB"},                       {"mid-gain", "Mid", -12, 12, 0, "dB"},
+    {"high-gain", "High", -12, 12, 0, "dB"},                     {"output", "Output", -12, 12, 0, "dB"}};
+inline constexpr ParameterSpec saturator[] = {{"drive", "Drive", 0, 24, 6, "dB"},
+                                              {"character", "Character: tape to tube", 0, 1, 0, ""},
+                                              {"tone", "Tone", -1, 1, 0, ""},
+                                              {"mix", "Mix", 0, 1, 1, ""},
+                                              {"output", "Output", -24, 12, 0, "dB"}};
+inline constexpr ParameterSpec maximizer[] = {{"gain", "Gain", 0, 24, 0, "dB"},
+                                              {"ceiling", "Ceiling", -12, 0, -.3f, "dB"},
+                                              {"release", "Release", 1, 1000, 80, "ms", .35f}};
 template <std::size_t N>
 constexpr EffectSpec entry(EffectId id, const char *slug, const char *name, const char *category,
                            const ParameterSpec (&parameters)[N])
@@ -124,7 +153,13 @@ inline constexpr std::array effects = {
     entry(EffectId::ringMod, "ring-mod", "Ring Mod", "Modulation", ring),
     entry(EffectId::autoPan, "auto-pan", "Auto Pan", "Modulation", pan),
     entry(EffectId::pitchCorrect, "tune", "Tune (pitch correction)", "Pitch", tune),
-    entry(EffectId::vocoder, "vocoder", "Vocoder", "Pitch", vocoder)};
+    entry(EffectId::vocoder, "vocoder", "Vocoder", "Pitch", vocoder),
+    entry(EffectId::parametricEq, "parametric-eq", "Parametric EQ", "EQ", parametric),
+    entry(EffectId::deEsser, "de-esser", "De-esser", "Dynamics", deEsser),
+    entry(EffectId::transientShaper, "transient-shaper", "Transient Shaper", "Dynamics", transient),
+    entry(EffectId::multiband, "multiband", "Multiband Dynamics", "Dynamics", multiband),
+    entry(EffectId::saturator, "saturator", "Saturator", "Distortion", saturator),
+    entry(EffectId::maximizer, "maximizer", "Maximizer", "Dynamics", maximizer)};
 static_assert(effects.size() == static_cast<std::size_t>(EffectId::count));
 } // namespace catalogue
 inline std::span<const EffectSpec> catalogueEntries() noexcept

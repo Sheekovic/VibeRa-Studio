@@ -286,6 +286,7 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
         maximumRight = std::max(maximumRight, std::abs(right[i]));
     }
     peakLeft_.store(maximumLeft, std::memory_order_relaxed);
+    reduction_.store(engine_.gainReductionDb(), std::memory_order_relaxed);
     peakRight_.store(maximumRight, std::memory_order_relaxed);
 }
 float NativeEffectInstance::peak(int channel) const noexcept

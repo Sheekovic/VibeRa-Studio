@@ -45,6 +45,8 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
         return restoreAccepted_.load(std::memory_order_relaxed);
     }
     float peak(int channel) const noexcept;
+    // Gain reduction of the dynamics processors (dB, <= 0), for the editor meter.
+    float gainReductionDb() const noexcept { return reduction_.load(std::memory_order_relaxed); }
 
     void fillInPluginDescription(juce::PluginDescription &) const override;
     const juce::String getName() const override;
@@ -100,6 +102,7 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     // Negative sentinel means no actual native output block since preparation.
     // Existing DSP peak stores replace it; zero then means genuine silence.
     std::atomic<float> peakLeft_{-1}, peakRight_{-1};
+    std::atomic<float> reduction_{0};
 };
 
 std::unique_ptr<juce::AudioPluginInstance> createNativeEffect(const juce::PluginDescription &);

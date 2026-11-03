@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "NativeEffectsEditor.h"
+#include "dsp/StudioEffects.h"
+#include "dsp/PitchCorrect.h"
 #include <cmath>
 
 namespace vibera::effects
@@ -130,15 +132,19 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
 {
     const auto &spec = effectSpec(instance.effectId());
     const bool equalizer = spec.id == EffectId::graphicEq;
+    curve_ = spec.id == EffectId::parametricEq;
+    reduction_ = spec.id == EffectId::deEsser || spec.id == EffectId::multiband || spec.id == EffectId::maximizer;
+    const int displayHeight = curve_ ? 220 : reduction_ ? 74 : 0;
     const int minimumColumns = juce::jmin(3, int(spec.parameterCount));
     const int minimumRows = (int(spec.parameterCount) + minimumColumns - 1) / minimumColumns;
-    const int minimumHeight = equalizer ? 500 : headerHeight + bottomHeight + minimumRows * 164;
+    const int minimumHeight =
+        (equalizer ? 500 : headerHeight + bottomHeight + minimumRows * 164) + displayHeight;
     setResizable(true, false);
     setResizeLimits(equalizer ? 720 : 560, minimumHeight, 1440, 1200);
-    setSize(equalizer                  ? 1000
+    setSize(equalizer || curve_        ? 1000
             : spec.parameterCount <= 2 ? 600
                                        : 780,
-            juce::jmax(minimumHeight, equalizer ? 540 : 510));
+            juce::jmax(minimumHeight, (equalizer ? 540 : 510) + displayHeight));
     brand_.setText("V I B E R A   /   E F F E C T S", juce::dontSendNotification);
     brand_.setFont(juce::FontOptions(11.f, juce::Font::bold));
     brand_.setColour(juce::Label::textColourId, teal);
@@ -164,7 +170,12 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
         auto row = std::make_unique<Row>();
         row->parameter = instance.getHostedParameter(int(i));
         row->range = {p.minimum, p.maximum, p.interval, p.skew};
-        row->label.setText(p.name, juce::dontSendNotification);
+        // Short label: the text before any ":" (the rest documents values for MCP).
+        const juce::String fullName(p.name);
+        const auto shortName = juce::String(p.id) == "scale" ? juce::String("Scale")
+                               : fullName.containsChar(':') ? fullName.upToFirstOccurrenceOf(":", false, false)
+                               : fullName.upToFirstOccurrenceOf(" (", false, false);
+        row->label.setText(shortName, juce::dontSendNotification);
         row->label.setFont(juce::FontOptions(equalizer ? 12.f : 14.f, juce::Font::bold));
         row->label.setJustificationType(juce::Justification::centred);
         row->label.setColour(juce::Label::textColourId, foreground);
@@ -188,6 +199,27 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
                                                                                                 : 2);
         row->slider.setNormalisableRange(
             juce::NormalisableRange<double>(p.minimum, p.maximum, p.interval, p.skew));
+        // Choice parameters read as words, not numbers.
+        const juce::String id(p.id);
+        if (spec.id == EffectId::pitchCorrect && id == "key")
+            row->slider.textFromValueFunction = [](double v)
+            {
+                static const char *notes[]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+                return juce::String(notes[juce::jlimit(0, 11, int(std::lround(v)))]);
+            };
+        else if (spec.id == EffectId::pitchCorrect && id == "scale")
+            row->slider.textFromValueFunction = [](double v)
+            { return juce::String(PitchCorrect::scaleName(juce::jlimit(0, PitchCorrect::scaleCount - 1, int(std::lround(v))))); };
+        else if (spec.id == EffectId::filter && id == "mode")
+            row->slider.textFromValueFunction = [](double v)
+            {
+                static const char *modes[]{"Low pass", "High pass", "Band pass"};
+                return juce::String(modes[juce::jlimit(0, 2, int(std::lround(v)))]);
+            };
+        else if (p.interval == 1 && p.minimum == 0 && p.maximum == 1)
+            row->slider.textFromValueFunction = [](double v) { return juce::String(v >= .5 ? "On" : "Off"); };
+        if (row->slider.textFromValueFunction)
+            row->slider.setTextValueSuffix({});
         row->slider.setDoubleClickReturnValue(true, p.initial);
         row->slider.setValue(row->range.convertFrom0to1(row->parameter->getValue()),
                              juce::dontSendNotification);
@@ -246,6 +278,14 @@ void NativeEffectsEditor::timerCallback()
             row->slider.setValue(row->range.convertFrom0to1(row->parameter->getValue()),
                                  juce::dontSendNotification);
     outputMeter_.update(instance_.peak(0), instance_.peak(1));
+    if (reduction_)
+    {
+        // Fast attack, slower fall so short reductions stay readable.
+        const float now = instance_.gainReductionDb();
+        shownReduction_ = now < shownReduction_ ? now : shownReduction_ + (now - shownReduction_) * .25f;
+    }
+    if (!display_.isEmpty())
+        repaint(display_);
     const bool valid = instance_.lastRestoreAccepted();
     footer_.setText(valid ? "Double-click to reset  /  Drag to adjust  /  Values follow host automation"
                           : "Invalid saved state refused; controls preserved",
@@ -273,6 +313,87 @@ void NativeEffectsEditor::paint(juce::Graphics &graphics)
         graphics.setColour(teal.withAlpha(.35f));
         graphics.drawHorizontalLine(row->card.getY() + 1, card.getX() + 14.f, card.getRight() - 14.f);
     }
+    if (!display_.isEmpty())
+        paintDisplay(graphics);
+}
+void NativeEffectsEditor::paintDisplay(juce::Graphics &g)
+{
+    const auto box = display_.toFloat();
+    g.setColour(juce::Colour(0xff111a20));
+    g.fillRoundedRectangle(box, 12.f);
+    g.setColour(border);
+    g.drawRoundedRectangle(box.reduced(.5f), 12.f, 1.f);
+    auto plot = box.reduced(16.f, 14.f);
+    if (curve_)
+    {
+        Values values{};
+        for (size_t i = 0; i < rows_.size(); ++i)
+            values[i] = float(rows_[i]->slider.getValue());
+        const auto xOf = [&](double hz) { return plot.getX() + float(std::log(hz / 20.) / std::log(1000.)) * plot.getWidth(); };
+        const auto yOf = [&](double db) { return plot.getCentreY() - float(db / 18.) * plot.getHeight() * .5f; };
+        g.setFont(juce::FontOptions(10.f));
+        for (double hz : {50., 100., 200., 500., 1000., 2000., 5000., 10000.})
+        {
+            g.setColour(border.withAlpha(.5f));
+            g.drawVerticalLine(int(xOf(hz)), plot.getY(), plot.getBottom());
+            g.setColour(secondary);
+            g.drawText(hz >= 1000 ? juce::String(int(hz / 1000)) + "k" : juce::String(int(hz)),
+                       int(xOf(hz)) + 3, int(plot.getBottom()) - 13, 32, 12, juce::Justification::centredLeft);
+        }
+        for (double db : {-12., -6., 0., 6., 12.})
+        {
+            g.setColour(db == 0 ? secondary.withAlpha(.6f) : border.withAlpha(.5f));
+            g.drawHorizontalLine(int(yOf(db)), plot.getX(), plot.getRight());
+            g.setColour(secondary);
+            g.drawText(juce::String(int(db)) + " dB", int(plot.getX()) + 3, int(yOf(db)) - 13, 50, 12,
+                       juce::Justification::centredLeft);
+        }
+        juce::Path curve, fill;
+        for (int x = 0; x <= int(plot.getWidth()); x += 2)
+        {
+            const double hz = 20. * std::pow(1000., x / double(plot.getWidth()));
+            const float y = juce::jlimit(plot.getY(), plot.getBottom(),
+                                         yOf(StudioEffects::eqResponseDb(values, hz, 48000)));
+            if (x == 0)
+            {
+                curve.startNewSubPath(plot.getX(), y);
+                fill.startNewSubPath(plot.getX(), yOf(0));
+            }
+            curve.lineTo(plot.getX() + float(x), y);
+            fill.lineTo(plot.getX() + float(x), y);
+        }
+        fill.lineTo(plot.getRight(), yOf(0));
+        fill.closeSubPath();
+        g.setColour(teal.withAlpha(.16f));
+        g.fillPath(fill);
+        g.setColour(teal);
+        g.strokePath(curve, juce::PathStrokeType(2.2f, juce::PathStrokeType::curved));
+        // Band handles at each control frequency.
+        const std::array<std::pair<int, int>, 4> handles{{{1, 2}, {3, 4}, {6, 7}, {9, 10}}};
+        for (const auto &[frequency, gain] : handles)
+        {
+            const float x = xOf(values[size_t(frequency)]), y = yOf(values[size_t(gain)]);
+            g.setColour(juce::Colour(0xff111a20));
+            g.fillEllipse(x - 6.f, y - 6.f, 12.f, 12.f);
+            g.setColour(teal);
+            g.drawEllipse(x - 6.f, y - 6.f, 12.f, 12.f, 2.f);
+        }
+        return;
+    }
+    // Gain reduction: a bar growing left from 0 dB to -24 dB with its value.
+    g.setColour(secondary);
+    g.setFont(juce::FontOptions(11.f, juce::Font::bold));
+    g.drawText("GAIN REDUCTION", plot.removeFromTop(16.f), juce::Justification::centredLeft);
+    auto bar = plot.removeFromTop(16.f).withTrimmedRight(90.f);
+    g.setColour(cardFill);
+    g.fillRoundedRectangle(bar, 4.f);
+    const float fraction = juce::jlimit(0.f, 1.f, -shownReduction_ / 24.f);
+    g.setColour(juce::Colour(0xffffb35c));
+    g.fillRoundedRectangle(bar.withWidth(bar.getWidth() * fraction), 4.f);
+    g.setColour(foreground);
+    g.setFont(juce::FontOptions(13.f, juce::Font::bold));
+    g.drawText(juce::String(shownReduction_, 1) + " dB", int(bar.getRight()) + 10, int(bar.getY()) - 2, 80, 20,
+               juce::Justification::centredLeft);
 }
 void NativeEffectsEditor::resized()
 {
@@ -281,8 +402,11 @@ void NativeEffectsEditor::resized()
     subtitle_.setBounds(24, 82, getWidth() - 48, 24);
     outputMeter_.setBounds(24, getHeight() - 112, getWidth() - 48, 76);
     footer_.setBounds(24, getHeight() - 28, getWidth() - 48, 20);
-    const auto area =
+    auto area =
         juce::Rectangle<int>(20, headerHeight, getWidth() - 40, getHeight() - headerHeight - bottomHeight);
+    display_ = curve_ ? area.removeFromTop(210) : reduction_ ? area.removeFromTop(64) : juce::Rectangle<int>{};
+    if (!display_.isEmpty())
+        area.removeFromTop(10);
     if (rows_.empty())
         return;
     const bool equalizer = instance_.effectId() == EffectId::graphicEq;

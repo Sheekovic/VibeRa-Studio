@@ -34,6 +34,11 @@ class NativeEffectsEditor final : public juce::AudioProcessorEditor, private juc
         bool gesture = false;
     };
     NativeEffectInstance &instance_;
+    // Response curve (Parametric EQ) or gain reduction meter (studio dynamics).
+    juce::Rectangle<int> display_;
+    bool curve_ = false, reduction_ = false;
+    float shownReduction_ = 0;
+    void paintDisplay(juce::Graphics &);
     juce::Label brand_, heading_, subtitle_, footer_;
     std::vector<std::unique_ptr<Row>> rows_;
     void timerCallback() override;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "dsp/EffectsEngine.h"
 #include "AllocationGuard.h"
+#include <functional>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -451,6 +452,122 @@ void vocoderOracles()
     require(rest < 1.e-4, "Without a modulator the carrier stays closed");
 }
 } // namespace
+// Studio processors: each one measured on what it is for.
+struct Rendered
+{
+    std::vector<float> left, right;
+};
+Rendered renderEffect(EffectId effect, Values values, const std::function<float(int)> &source, int count,
+                      double rate = 48000)
+{
+    Engine engine;
+    engine.prepare(rate);
+    require(engine.setParameters(effect, values), "Studio effect parameters accepted");
+    Rendered out{std::vector<float>(size_t(count)), std::vector<float>(size_t(count))};
+    for (int i = 0; i < count; ++i)
+        out.left[size_t(i)] = out.right[size_t(i)] = source(i);
+    const auto before = effects_test::allocations;
+    for (int position = 0; position < count; position += 256)
+    {
+        effects_test::CallbackScope scope;
+        engine.process(out.left.data() + position, out.right.data() + position, std::min(256, count - position));
+    }
+    require(effects_test::allocations == before, "Studio effect processing allocates nothing");
+    return out;
+}
+double rmsOf(const std::vector<float> &x, int from, int to)
+{
+    double sum = 0;
+    for (int i = from; i < to; ++i)
+        sum += double(x[size_t(i)]) * x[size_t(i)];
+    return std::sqrt(sum / std::max(1, to - from));
+}
+std::function<float(int)> sine(double hz, double amplitude = .25)
+{
+    return [=](int i) { return float(amplitude * std::sin(2 * std::numbers::pi * hz * i / 48000)); };
+}
+void studioOracles()
+{
+    const int n = 48000;
+    // Parametric EQ: a +12 dB bell at 1 kHz lifts 1 kHz by 12 dB, leaves 100 Hz alone,
+    // and the editor response function agrees with the measurement.
+    auto eq = defaultValues(EffectId::parametricEq);
+    eq[3] = 1000;
+    eq[4] = 12;
+    eq[5] = 1;
+    const double lifted = 20 * std::log10(rmsOf(renderEffect(EffectId::parametricEq, eq, sine(1000), n).left, 24000, n) /
+                                          rmsOf(renderEffect(EffectId::balance, defaultValues(EffectId::balance), sine(1000), n).left, 24000, n));
+    require(std::abs(lifted - 12) < .3, "Parametric EQ bell lifts its centre by its gain");
+    const double low = 20 * std::log10(rmsOf(renderEffect(EffectId::parametricEq, eq, sine(100), n).left, 24000, n) /
+                                       (.25 / std::sqrt(2.)));
+    require(std::abs(low) < .5, "Parametric EQ bell leaves distant frequencies alone");
+    require(std::abs(StudioEffects::eqResponseDb(eq, 1000, 48000) - 12) < .05 &&
+                std::abs(StudioEffects::eqResponseDb(eq, 100, 48000) - low) < .3,
+            "Parametric EQ response curve matches the measured gain");
+    eq = defaultValues(EffectId::parametricEq);
+    eq[0] = 400;
+    const double cut = 20 * std::log10(rmsOf(renderEffect(EffectId::parametricEq, eq, sine(50), n).left, 24000, n) /
+                                       (.25 / std::sqrt(2.)));
+    require(cut < -30, "Parametric EQ low cut removes rumble");
+    // De-esser: loud 8 kHz is turned down, 300 Hz is untouched.
+    auto ds = defaultValues(EffectId::deEsser);
+    ds[0] = 7000;
+    ds[1] = -40;
+    ds[2] = 12;
+    const double hiss = rmsOf(renderEffect(EffectId::deEsser, ds, sine(8000, .5), n).left, 24000, n) / (.5 / std::sqrt(2.));
+    const double body = rmsOf(renderEffect(EffectId::deEsser, ds, sine(300, .5), n).left, 24000, n) / (.5 / std::sqrt(2.));
+    require(20 * std::log10(hiss) < -4 && std::abs(20 * std::log10(body)) < .5,
+            "De-esser reduces sibilance and leaves the body of the voice");
+    // Transient shaper: +100% attack makes a struck note's first 5 ms louder than its tail.
+    const auto hit = [](int i)
+    {
+        const int t = i % 12000;
+        return float(.3 * std::exp(-t / 2400.) * std::sin(2 * std::numbers::pi * 220 * t / 48000));
+    };
+    auto ts = defaultValues(EffectId::transientShaper);
+    ts[0] = 100;
+    const auto punchy = renderEffect(EffectId::transientShaper, ts, hit, n);
+    const auto flat = renderEffect(EffectId::balance, defaultValues(EffectId::balance), hit, n);
+    require(rmsOf(punchy.left, 24000, 24240) / rmsOf(flat.left, 24000, 24240) >
+                1.15 * rmsOf(punchy.left, 30000, 34000) / rmsOf(flat.left, 30000, 34000),
+            "Transient shaper attack emphasises the hit over the tail");
+    // Multiband at zero depth: the three bands sum back flat across the spectrum.
+    auto mb = defaultValues(EffectId::multiband);
+    mb[2] = 0;
+    for (double hz : {60., 120., 700., 2500., 9000.})
+    {
+        const double g = rmsOf(renderEffect(EffectId::multiband, mb, sine(hz), n).left, 24000, n) / (.25 / std::sqrt(2.));
+        require(std::abs(20 * std::log10(g)) < .5, "Multiband crossovers sum flat at zero depth");
+    }
+    mb[2] = 1;
+    const double squashed =
+        rmsOf(renderEffect(EffectId::multiband, mb, sine(700, .9), n).left, 24000, n) / (.9 / std::sqrt(2.));
+    require(20 * std::log10(squashed) < -3, "Multiband downward compression turns loud bands down");
+    // Saturator: adds harmonics; mix 0 is the dry signal.
+    auto sat = defaultValues(EffectId::saturator);
+    sat[0] = 18;
+    const auto driven = renderEffect(EffectId::saturator, sat, sine(200, .5), n);
+    double third = 0;
+    for (int i = 24000; i < n; ++i)
+        third += driven.left[size_t(i)] * std::sin(2 * std::numbers::pi * 600 * i / 48000);
+    require(std::abs(third) / 12000 > .01, "Saturator adds harmonics");
+    sat[3] = 0;
+    const auto dry = renderEffect(EffectId::saturator, sat, sine(200, .5), n);
+    require(std::abs(rmsOf(dry.left, 24000, n) / (.5 / std::sqrt(2.)) - 1) < .02, "Saturator mix 0 is dry");
+    // Maximizer: +18 dB never passes the ceiling, and the lookahead is reported.
+    auto mx = defaultValues(EffectId::maximizer);
+    mx[0] = 18;
+    mx[1] = -1;
+    const auto loud = renderEffect(EffectId::maximizer, mx, sine(100, .5), n);
+    float top = 0;
+    for (float v : loud.left)
+        top = std::max(top, std::abs(v));
+    require(top <= std::pow(10.f, -1.f / 20) + 1e-6f && rmsOf(loud.left, 24000, n) > .5,
+            "Maximizer holds the ceiling while raising loudness");
+    Engine engine;
+    engine.prepare(48000);
+    require(engine.latencySamples(EffectId::maximizer) == 72, "Maximizer reports its 1.5 ms lookahead");
+}
 int main()
 {
     const auto start = std::chrono::steady_clock::now();
@@ -464,6 +581,7 @@ int main()
         modulatedFilterRegression();
         safetyAndSwitching();
         tuneOracles();
+        studioOracles();
         vocoderOracles();
         std::cout << "PASS " << catalogueEntries().size() << " original effects; " << checks
                   << " checks; callback allocations=" << effects_test::allocations
