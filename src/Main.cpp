@@ -482,6 +482,7 @@ class VibeRaApplication final : public juce::JUCEApplication
         bool noteSliceCheck = args.size() == 2 && args[0] == "--note-slice-ui-check";
         bool noteMuteCheck = args.size() == 2 && args[0] == "--note-mute-ui-check";
         bool clipGroupsCheck = args.size() == 2 && args[0] == "--clip-groups-ui-check";
+        const bool dropTargetsCheck = args.size() == 2 && args[0] == "--drop-targets-check";
         bool controllerCheck = args.size() == 2 && args[0] == "--controller-check";
         bool automationCheck = args.size() == 2 && args[0] == "--automation-check";
         bool parameterCheck = args.size() == 3 && (args[0] == "--parameter-ui-check" || args[0] == "--wrapper-ui-check" ||
@@ -511,7 +512,7 @@ class VibeRaApplication final : public juce::JUCEApplication
         bool mcpMode = args.contains("--mcp") || args.contains("--mcp-test");
         window = std::make_unique<Window>(
             smoke || mixerControlsCheck || mixerRoutingCheck || noteStretchCheck || noteSliceCheck ||
-                noteMuteCheck || clipGroupsCheck || samplerCheck || noteModesCheck || controllerCheck ||
+                noteMuteCheck || clipGroupsCheck || dropTargetsCheck || samplerCheck || noteModesCheck || controllerCheck ||
                 automationCheck || parameterCheck || catalogueCheck || instrumentCheck ||
                 channelManagementCheck || liveBurnCheck || aiUiCheck || stepVelocityCheck || pianoCheck || coProducerCheck ||
                 midiFileCheck || browserLiveCheck || audioTakeCheck || accessibilityCheck || performanceCheck || patternCheck || audioPlaylistCheck ||
@@ -614,6 +615,22 @@ class VibeRaApplication final : public juce::JUCEApplication
                 {
                     auto *studio = dynamic_cast<vibera::Studio *>(window->getContentComponent());
                     const auto result = studio->verifyNoteMute(folder);
+                    setApplicationReturnValue(result.wasOk() ? 0 : 1);
+                    quit();
+                });
+        }
+        if (dropTargetsCheck)
+        {
+            const auto folder = juce::File(args[1]);
+            juce::MessageManager::callAsync(
+                [this, folder]
+                {
+                    auto *studio = dynamic_cast<vibera::Studio *>(window->getContentComponent());
+                    const auto result = studio->verifyDropTargets(folder);
+                    if (result.failed())
+                        juce::Logger::writeToLog(result.getErrorMessage());
+                    else
+                        juce::Logger::writeToLog("PASS drop targets");
                     setApplicationReturnValue(result.wasOk() ? 0 : 1);
                     quit();
                 });

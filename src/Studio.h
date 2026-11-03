@@ -254,6 +254,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result verifyRackVelocity(const juce::File &, const juce::File &fixture = {});
     juce::Result verifyRackGroups(const juce::File &);
     juce::Result verifyClipGroups(const juce::File &);
+    juce::Result verifyDropTargets(const juce::File &);
     juce::Result verifyNoteMute(const juce::File &);
     juce::Result verifyNoteSlice(const juce::File &);
     juce::Result verifyNoteStretch(const juce::File &);

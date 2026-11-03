@@ -44,7 +44,7 @@ if(MSVC)
 endif()
 juce_add_gui_app(VibeRa PRODUCT_NAME "VibeRa Studio" COMPANY_NAME "VibeRa" VERSION "${PROJECT_VERSION}" ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-512.png" ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-64.png")
 juce_add_binary_data(VibeRaBranding SOURCES assets/vibera-symbol.svg)
-target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp)
+target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioDropCheck.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp)
 target_include_directories(VibeRa PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_sources(VibeRa PRIVATE src/StudioPicker.cpp)
 
@@ -184,6 +184,8 @@ add_test(NAME note_mute_gui COMMAND VibeRa --note-mute-ui-check "${CMAKE_CURRENT
 set_tests_properties(note_mute_gui PROPERTIES TIMEOUT 30)
 add_test(NAME clip_groups_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-clip-groups-mcp.py" "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/clip_groups_mcp_acceptance")
 set_tests_properties(clip_groups_mcp PROPERTIES TIMEOUT 90)
+add_test(NAME drop_targets_gui COMMAND VibeRa --drop-targets-check "${CMAKE_CURRENT_BINARY_DIR}/drop_targets_gui")
+set_tests_properties(drop_targets_gui PROPERTIES TIMEOUT 120)
 add_test(NAME clip_groups_gui COMMAND VibeRa --clip-groups-ui-check "${CMAKE_CURRENT_BINARY_DIR}/clip_groups_gui")
 set_tests_properties(clip_groups_gui PROPERTIES TIMEOUT 30)
 add_test(NAME mcp_semantics COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tests/mcp_acceptance.py"
