@@ -4,6 +4,8 @@
 #include "Studio.h"
 #include "McpSchema.h"
 #include "AudioStretch.h"
+#include "AudioFileCheck.h"
+#include "SamplerTempo.h"
 #include "VideoPlayer.h"
 
 namespace vibera
@@ -658,6 +660,70 @@ void Studio::followTempoWarps()
         status = "Re-warp: " + started.getErrorMessage();
     else
         status = "Re-warping a clip to the new tempo...";
+}
+
+double Studio::detectFileTempo(const juce::File &file, juce::String &how) const
+{
+    juce::AudioFormatManager formats;
+    formats.registerBasicFormats();
+    std::unique_ptr<juce::AudioFormatReader> reader(decodableAudioFile(file) ? formats.createReaderFor(file) : nullptr);
+    if (!reader || reader->sampleRate <= 0 || reader->lengthInSamples < 64)
+        return 0;
+    const double seconds = double(reader->lengthInSamples) / reader->sampleRate;
+    if (seconds >= 4.5)
+    {
+        Sample sample;
+        sample.sampleRate = reader->sampleRate;
+        const int frames = int(std::min<juce::int64>(reader->lengthInSamples, juce::int64(reader->sampleRate * 120)));
+        sample.data.setSize(int(std::min(2u, reader->numChannels)), frames);
+        reader->read(&sample.data, 0, frames, 0, true, sample.data.getNumChannels() > 1);
+        if (const double bpm = estimateSampleTempo(sample); bpm > 0)
+        {
+            how = "rhythm analysis";
+            return bpm;
+        }
+    }
+    // Loops are a whole number of beats: choose the count whose tempo is plausible and
+    // nearest the Song tempo.
+    const double song = controller.project.tempo;
+    double best = 0, distance = 1e9;
+    int bestBeats = 0;
+    for (int beats : {1, 2, 4, 8, 16, 32, 64}) // Loops are powers of two in beats.
+    {
+        const double bpm = beats * 60. / seconds;
+        if (bpm < 70 || bpm > 180)
+            continue;
+        if (std::abs(bpm - song) < distance)
+        {
+            distance = std::abs(bpm - song);
+            best = bpm;
+            bestBeats = beats;
+        }
+    }
+    if (best > 0)
+        how = "length (" + juce::String(bestBeats) + " beats)";
+    return best;
+}
+juce::Result Studio::fitAudioClipToTempo(Id clip, double sourceBpm)
+{
+    const auto found = std::find_if(controller.project.audioPlacements.begin(), controller.project.audioPlacements.end(),
+                                    [&](const auto &p) { return p.id == clip; });
+    if (found == controller.project.audioPlacements.end())
+        return juce::Result::fail("Select an Audio Clip");
+    const auto *channel = controller.project.channel(found->warpBpm > 0 && controller.project.channel(found->warpChannel)
+                                                         ? found->warpChannel
+                                                         : found->channel);
+    if (!channel)
+        return juce::Result::fail("The clip has no source");
+    juce::String how = "your setting";
+    if (!(sourceBpm > 0))
+        sourceBpm = detectFileTempo(juce::File(channel->source), how);
+    if (!(sourceBpm > 0))
+        return juce::Result::fail("Could not detect the tempo; use Set tempo... with the BPM it was made at");
+    if (auto started = warpAudioClip(clip, sourceBpm); started.failed())
+        return started;
+    status = "Fitting to the Song tempo from " + juce::String(sourceBpm, 1) + " BPM (" + how + "), pitch kept...";
+    return juce::Result::ok();
 }
 
 juce::Result Studio::editAudioClip(Id clip, const juce::String &edit, double value, const juce::String &operation)

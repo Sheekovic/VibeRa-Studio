@@ -4822,6 +4822,11 @@ class Studio::Editor final : public juce::Component,
                     editAudio.addItem(33, "Gain -3 dB");
                     editAudio.addItem(34, "Consolidate (bake window and fades)");
                     m.addItem(40, "Align first transient to the grid (1/16)");
+                    juce::PopupMenu tempo;
+                    tempo.addItem(41, "Detect tempo");
+                    tempo.addItem(42, "Fit to tempo (detect, keep pitch)");
+                    tempo.addItem(43, "Set source tempo and fit...");
+                    m.addSubMenu("Tempo", tempo);
                     m.addSubMenu("Edit audio", editAudio);
                 }
                 m.showMenuAsync({},
@@ -4849,6 +4854,41 @@ class Studio::Editor final : public juce::Component,
                                     if (n == 40)
                                         if (auto r = safe->s.alignClipToGrid(id); r.failed())
                                             safe->s.status = r.getErrorMessage();
+                                    if (n >= 41 && n <= 43)
+                                    {
+                                        const auto *clip = safe->audioClip(id);
+                                        const auto *source = clip ? safe->s.controller.project.channel(clip->channel) : nullptr;
+                                        if (!source)
+                                            return;
+                                        juce::String how;
+                                        const double bpm = safe->s.detectFileTempo(juce::File(source->source), how);
+                                        if (n == 41)
+                                            safe->s.status = bpm > 0 ? "Detected " + juce::String(bpm, 1) + " BPM (" + how + ")"
+                                                                     : juce::String("Could not detect the tempo of this clip");
+                                        else if (n == 42)
+                                        {
+                                            if (auto r = safe->s.fitAudioClipToTempo(id, bpm); r.failed())
+                                                safe->s.status = r.getErrorMessage();
+                                        }
+                                        else
+                                        {
+                                            auto *box = new juce::AlertWindow("Source tempo", "The tempo this clip was played at. It is fitted to the Song tempo with its pitch kept.",
+                                                                              juce::MessageBoxIconType::NoIcon);
+                                            box->addTextEditor("bpm", bpm > 0 ? juce::String(bpm, 2) : juce::String("120"), "BPM");
+                                            box->addButton("Fit", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                                            box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                                            box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                                [box, safe, id](int choice)
+                                                {
+                                                    const double value = box->getTextEditorContents("bpm").getDoubleValue();
+                                                    if (choice == 1 && safe)
+                                                        if (auto r = safe->s.fitAudioClipToTempo(id, value); r.failed())
+                                                            safe->s.status = r.getErrorMessage();
+                                                }), true);
+                                        }
+                                        safe->s.repaint();
+                                        return;
+                                    }
                                     if (n >= 30 && n <= 34)
                                     {
                                         const char *edits[] = {"reverse", "normalize", "gain", "gain", "consolidate"};

@@ -195,13 +195,14 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                 return;
             }
             updating = true;
-            setTempo.setEnabled(!c->audioClip && bool(owner->audio.channelSample(channel)));
+            // Audio Clips: detect from the file and fit by warping (pitch kept).
+            setTempo.setEnabled(c->audioClip || bool(owner->audio.channelSample(channel)));
             detectTempo.setEnabled(setTempo.isEnabled() || detecting);
             detectTempo.setButtonText(detecting ? "Cancel detect" : "Detect tempo");
             fitTempo.setEnabled(setTempo.isEnabled());
-            fitLength.setEnabled(setTempo.isEnabled());
+            fitLength.setEnabled(setTempo.isEnabled() && !c->audioClip);
             fitTempo.setButtonText(c->sampler.fitTempo ? "Unfit tempo" : "Fit to tempo");
-            keepPitch.setEnabled(setTempo.isEnabled());
+            keepPitch.setEnabled(setTempo.isEnabled() && !c->audioClip);
             keepPitch.setToggleState(c->sampler.stretch, juce::dontSendNotification);
             if (!detecting)
                 tempoInfo.setText(tempoError.isNotEmpty() ? tempoError : c->sampler.sourceTempo > 0
@@ -396,6 +397,40 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                 tempoInfo.setText(tempoError, juce::dontSendNotification);
             }
             return {};
+        }
+        // First Playlist placement of this Audio Clip Channel (the one Fit to tempo warps).
+        Id firstClip() const
+        {
+            if (owner)
+                for (const auto &placement : owner->controller.project.audioPlacements)
+                    if (placement.channel == channel || (placement.warpBpm > 0 && placement.warpChannel == channel))
+                        return placement.id;
+            return 0;
+        }
+        void askClipTempo()
+        {
+            const auto *c = owner ? owner->controller.project.channel(channel) : nullptr;
+            if (!c)
+                return;
+            juce::String how;
+            const double bpm = owner->detectFileTempo(juce::File(c->source), how);
+            auto *box = new juce::AlertWindow("Source tempo", "The tempo this clip was played at. It is fitted to the Song tempo with its pitch kept.",
+                                              juce::MessageBoxIconType::NoIcon);
+            box->addTextEditor("bpm", bpm > 0 ? juce::String(bpm, 2) : juce::String("120"), "BPM");
+            box->addButton("Fit", 1, juce::KeyPress(juce::KeyPress::returnKey));
+            box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+            auto safe = juce::Component::SafePointer<juce::Component>(this);
+            box->enterModalState(true, juce::ModalCallbackFunction::create(
+                [this, box, safe](int choice)
+                {
+                    const double value = box->getTextEditorContents("bpm").getDoubleValue();
+                    if (choice != 1 || !safe || !owner)
+                        return;
+                    const auto clip = firstClip();
+                    const auto result = clip ? owner->fitAudioClipToTempo(clip, value)
+                                             : juce::Result::fail("Place this clip in the Playlist first");
+                    tempoInfo.setText(result.wasOk() ? owner->status : result.getErrorMessage(), juce::dontSendNotification);
+                }), true);
         }
         void pollTempo()
         {
@@ -870,7 +905,11 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
             {
                 if (owner)
                     if (auto *c = owner->controller.project.channel(channel))
+                    {
+                        if (c->audioClip)
+                            return askClipTempo();
                         askTempo(c->sampler.sourceTempo, false);
+                    }
             };
             fitTempo.onClick = [this]
             {
@@ -878,6 +917,13 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                     return;
                 if (auto *c = owner->controller.project.channel(channel))
                 {
+                    if (c->audioClip)
+                    {
+                        const auto clip = firstClip();
+                        const auto result = clip ? owner->fitAudioClipToTempo(clip) : juce::Result::fail("Place this clip in the Playlist first");
+                        tempoInfo.setText(result.wasOk() ? owner->status : result.getErrorMessage(), juce::dontSendNotification);
+                        return;
+                    }
                     if (c->sampler.sourceTempo <= 0)
                     {
                         askTempo(0, true);
@@ -892,6 +938,16 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
             };
             detectTempo.onClick = [this]
             {
+                if (owner)
+                    if (auto *c = owner->controller.project.channel(channel); c && c->audioClip)
+                    {
+                        juce::String how;
+                        const double bpm = owner->detectFileTempo(juce::File(c->source), how);
+                        tempoInfo.setText(bpm > 0 ? "Detected " + juce::String(bpm, 1) + " BPM (" + how + "). Fit to tempo uses it."
+                                                  : juce::String("Could not detect the tempo; use Set tempo..."),
+                                          juce::dontSendNotification);
+                        return;
+                    }
                 if (detecting)
                 {
                     tempoRequest("cancel", tempoOperation);

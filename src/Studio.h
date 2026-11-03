@@ -869,6 +869,12 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::var videoState() const;
     juce::Result stretchAudioClip(Id clip, double ratio, const juce::String &operation = {});
     juce::Result warpAudioClip(Id clip, double sourceBpm, const juce::String &operation = {});
+    // Tempo of an audio file: rhythm analysis for longer audio, otherwise the whole-beat
+    // length (1, 2, 4 ... 64 beats) giving a tempo in 70..180 BPM closest to the Song tempo.
+    // `how` says which method answered.
+    double detectFileTempo(const juce::File &, juce::String &how) const;
+    // Fits an Audio Clip to the Song tempo (pitch kept) from its source tempo; 0 detects it.
+    juce::Result fitAudioClipToTempo(Id clip, double sourceBpm = 0);
     // reverse | normalize (value dBFS) | gain (value dB) | consolidate, as a new source.
     juce::Result editAudioClip(Id clip, const juce::String &edit, double value, const juce::String &operation = {});
     void pollStretchJob();

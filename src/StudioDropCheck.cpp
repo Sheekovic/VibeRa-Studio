@@ -80,6 +80,34 @@ juce::Result Studio::verifyDropTargets(const juce::File &folder)
     if (status.startsWith("Choose WAV") ||
         std::none_of(recent.begin(), recent.end(), [&](const auto &e) { return e.source == sample.getFullPathName(); }))
         return fail("a Playlist drop above the grid was not imported (status: " + status + ")");
+    // 5. Audio Clip tempo detection: short loops by whole-beat length, longer audio by rhythm.
+    const auto writeClicks = [&](const juce::String &name, double seconds, double interval)
+    {
+        const auto file = folder.getChildFile(name);
+        const int frames = int(seconds * 48000);
+        juce::AudioBuffer<float> pcm(1, frames);
+        pcm.clear();
+        for (double t = 0; t < seconds; t += interval)
+            for (int i = 0; i < 2400 && int(t * 48000) + i < frames; ++i)
+                pcm.setSample(0, int(t * 48000) + i, .8f * std::exp(-i / 300.f) * std::sin(i * .2f));
+        file.deleteFile();
+        juce::WavAudioFormat wav;
+        std::unique_ptr<juce::AudioFormatWriter> writer(
+            wav.createWriterFor(file.createOutputStream().release(), 48000., 1, 24, {}, 0));
+        writer->writeFromAudioSampleBuffer(pcm, 0, frames);
+        return file;
+    };
+    controller.project.tempo = 120;
+    juce::String how;
+    const double twoSeconds = detectFileTempo(writeClicks("loop-2s.wav", 2., .5), how);
+    if (std::abs(twoSeconds - 120) > .5 || !how.startsWith("length"))
+        return fail("a 2 s loop did not read as 120 BPM by length (" + juce::String(twoSeconds) + ", " + how + ")");
+    const double short150 = detectFileTempo(writeClicks("loop-1.6s.wav", 1.6, .4), how);
+    if (std::abs(short150 - 150) > .5)
+        return fail("a 1.6 s loop did not read as 150 BPM (" + juce::String(short150) + ")");
+    const double long120 = detectFileTempo(writeClicks("groove-10s.wav", 10., .5), how);
+    if (std::abs(long120 - 120) > 3 && std::abs(long120 - 60) > 2 && std::abs(long120 - 240) > 5)
+        return fail("a 10 s groove at 120 BPM was not detected (" + juce::String(long120) + ", " + how + ")");
     return juce::Result::ok();
 }
 } // namespace vibera
