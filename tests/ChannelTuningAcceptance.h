@@ -3,6 +3,8 @@
 #include "Commands.h"
 #include "LiveTimeline.h"
 #include "Tuning.h"
+#include "LiveMidi.h"
+#include "MtsEsp.h"
 
 // Channel tuning tables: Scala parsing, maqam presets, the canonical command with
 // persistence, and the pitch ratio the local sampler receives per note.
@@ -123,6 +125,73 @@ inline void tests(const juce::File &)
         table.tuning = rast;
         require(controller.execute("channel.tuning", table).wasOk() && controller.project.channel(channel)->scale.empty(),
                 "A 12-tone table replaces the mapped scale");
+
+        // MTS-ESP source: one Channel at a time, saved; key frequencies follow the table.
+        CommandArgs mts;
+        mts.channel = channel;
+        require(controller.execute("channel.mtsEsp", mts).wasOk() && controller.project.channel(channel)->mtsEsp,
+                "channel.mtsEsp marks the tuning source");
+        Project reloaded;
+        require(Project::parse(controller.project.state(), reloaded).wasOk() && reloaded.channel(channel)->mtsEsp,
+                "The MTS-ESP source survives save/load");
+        const auto freqs = channelFrequencies(*controller.project.channel(channel));
+        require(same(freqs[69], 440.) && std::abs(freqs[64] - 440. * std::pow(2., (64 - 69 - .5) / 12.)) < 1.e-6,
+                "Rast on C: A stays 440 Hz, E sounds a quarter tone flat");
+        mts.enabled = false;
+        require(controller.execute("channel.mtsEsp", mts).wasOk() && !controller.project.channel(channel)->mtsEsp,
+                "channel.mtsEsp off clears it");
+        CommandArgs mpe;
+        mpe.channel = channel;
+        require(controller.execute("channel.mpe", mpe).failed(), "MPE tuning is refused on sampler Channels");
+    }
+    {
+        // MPE output: each note on its own member channel, preceded by its pitch bend; the
+        // zone is announced on playback start; note-offs use the member channel.
+        LiveDocument doc;
+        doc.generation = 1;
+        LiveChannel lane;
+        lane.id = 1;
+        lane.sampleInstrument = false;
+        lane.mpe = true;
+        for (int i = 0; i < 2; ++i)
+        {
+            LiveNote n;
+            n.note = i + 1;
+            n.start = .01;
+            n.end = .02;
+            n.pitch = 64 + i * 7;
+            n.cents = i == 0 ? -50.f : 0.f;
+            lane.notes.push_back(n);
+        }
+        for (std::uint32_t i = 0; i < 2; ++i)
+        {
+            lane.events.push_back({lane.notes[i].start, i, true});
+            lane.events.push_back({lane.notes[i].end, i, false});
+        }
+        std::sort(lane.events.begin(), lane.events.end(), [](const auto &a, const auto &b)
+                  { return std::tie(a.time, a.on, a.index) < std::tie(b.time, b.on, b.index); });
+        doc.channels.push_back(std::move(lane));
+        LiveMidi midi;
+        std::vector<std::array<int, 4>> all;
+        for (int block = 0; block < 8; ++block)
+        {
+            const int count = midi.process(doc, 1, block * 256 / 48000., 256, 48000, true);
+            for (int i = 0; i < count; ++i)
+                all.push_back({midi.events[size_t(i)].frame + block * 256, midi.events[size_t(i)].bytes[0],
+                               midi.events[size_t(i)].bytes[1], midi.events[size_t(i)].bytes[2]});
+        }
+        auto has = [&](int status, int a, int b)
+        { return std::any_of(all.begin(), all.end(), [&](const auto &e) { return e[1] == status && e[2] == a && e[3] == b; }); };
+        require(has(0xb0, 100, 6) && has(0xb0, 6, 15) && has(0xb1, 6, 48) && has(0xbf, 6, 48),
+                "MPE lower zone with 15 members and a 48-semitone bend range is announced");
+        const int quarterFlat = 8192 - 8192 / 96;
+        require(has(0xe1, quarterFlat & 127, quarterFlat >> 7) && has(0x91, 64, 102) && has(0xe2, 0, 64) &&
+                    has(0x92, 71, 102),
+                "Each note gets its own member channel and its cents as pitch bend");
+        require(has(0x81, 64, 0) && has(0x82, 71, 0), "Note-offs go to the same member channels");
+        const auto bend = std::find_if(all.begin(), all.end(), [](const auto &e) { return e[1] == 0xe1; });
+        const auto on = std::find_if(all.begin(), all.end(), [](const auto &e) { return e[1] == 0x91; });
+        require(bend < on, "The bend precedes its note-on");
     }
 }
 } // namespace channel_tuning_acceptance

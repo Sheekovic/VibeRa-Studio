@@ -118,5 +118,49 @@ inline void tests(const juce::File &folder)
     require(controller.execute("audio.stretchApply", apply).wasOk() &&
                 controller.project.audioPlacements[0].fadeIn == 0,
             "Applying a consolidated file clears the clip fades");
+    controller.undoEdit();
+
+    // Tempo warp: variable-ratio render follows the map; pitch kept.
+    const auto warped = folder.getChildFile("warped.wav");
+    require(warpAudioFile(source, 0, 2, {{0., 0.}, {1., 1.}, {2., 3.}}, warped).wasOk(),
+            "A map of 1 s as is + 1 s doubled renders");
+    {
+        const auto pcm = load(warped);
+        require(std::abs(pcm.getNumSamples() - 144000) <= 1, "Warped length follows the map end (3 s)");
+        const double early = zeroCrossingHz(pcm, 6000, 40000, 48000), late = zeroCrossingHz(pcm, 70000, 140000, 48000);
+        require(std::abs(early - 220) < 3 && std::abs(late - 220) < 3,
+                "Warped pitch is kept in both spans (" + juce::String(early, 1).toStdString() + ", " +
+                    juce::String(late, 1).toStdString() + " Hz)");
+        require(pcm.getMagnitude(0, 6000, 130000) > .3f, "Warped audio has no dropout");
+    }
+    require(warpAudioFile(source, 0, 2, {{0., 0.}, {2., 10.}}, warped).failed(), "Warp spans beyond 4x are refused");
+
+    // A warp apply remembers the original; a re-warp keeps it; a plain stretch ends it.
+    const auto originalChannel = controller.project.audioPlacements[0].channel;
+    apply.step = false;
+    apply.warpBpm = 120;
+    apply.text = warped.getFullPathName();
+    require(controller.execute("audio.stretchApply", apply).wasOk(), "Warp applied");
+    {
+        const auto &w = controller.project.audioPlacements[0];
+        require(w.warpBpm == 120 && w.warpChannel == originalChannel && w.warpOffset == 0 && w.warpDuration == 2 &&
+                    controller.project.channel(originalChannel) != nullptr,
+                "The warped clip keeps its original source Channel and window");
+    }
+    const auto saved = controller.project.state();
+    Project reloaded;
+    require(Project::parse(saved, reloaded).wasOk() && reloaded.audioPlacements[0].warpBpm == 120 &&
+                reloaded.audioPlacements[0].warpChannel == originalChannel,
+            "Warp origin survives save/load");
+    apply.text = stretched.getFullPathName();
+    require(controller.execute("audio.stretchApply", apply).wasOk() &&
+                controller.project.audioPlacements[0].warpChannel == originalChannel &&
+                controller.project.channel(originalChannel) != nullptr,
+            "A re-warp still points at the first original");
+    apply.warpBpm = 0;
+    require(controller.execute("audio.stretchApply", apply).wasOk() &&
+                controller.project.audioPlacements[0].warpBpm == 0 &&
+                controller.project.channel(originalChannel) == nullptr,
+            "A plain stretch ends the warp and drops the unused original");
 }
 } // namespace audio_stretch_acceptance

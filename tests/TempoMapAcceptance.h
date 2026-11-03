@@ -131,5 +131,51 @@ inline void tests(const juce::File &folder)
         require(lands(ramped, rampSeconds) && lands(ramped, rampSeconds + 4),
                 "A ramp into 60 BPM places the hits at its exact integral");
     }
+    {
+        // Shaped curves: 16 ramps from the tempo at the start to the target, one Undo.
+        Controller controller;
+        controller.project.tempo = 100;
+        CommandArgs curve;
+        curve.beat = 8;
+        curve.length = 16;
+        curve.value = 140;
+        curve.text = "ease";
+        const auto before = controller.project.state();
+        require(controller.execute("tempo.curve", curve).wasOk() && controller.project.tempoChanges.size() == 17,
+                "tempo.curve writes an anchor and 16 ramps");
+        const auto map = controller.project.songTempo();
+        require(same(map.bpmAt(8), 100) && same(map.bpmAt(16), 120, 1.e-6) && same(map.bpmAt(24), 140) &&
+                    same(map.bpmAt(40), 140) && map.bpmAt(10) < 100 + 40 * .25 * .5,
+                "Ease: starts slowly, crosses the middle at half, ends on the target");
+        controller.undoEdit();
+        require(controller.project.state().isEquivalentTo(before), "A tempo curve is one Undo step");
+        curve.text = "zigzag";
+        require(controller.execute("tempo.curve", curve).failed(), "Unknown shapes are refused");
+
+        // Freehand: a drawn automation clip becomes the tempo over its span.
+        AutomationSource source;
+        source.id = controller.project.allocate();
+        source.length = 8;
+        source.points = {{controller.project.allocate(), 0, 0.f}, {controller.project.allocate(), 8, 1.f}};
+        controller.project.automation.sources.push_back(source);
+        AutomationPlacement placed;
+        placed.id = controller.project.allocate();
+        placed.source = source.id;
+        placed.beat = 4;
+        placed.length = 8;
+        controller.project.automation.placements.push_back(placed);
+        CommandArgs drawn;
+        drawn.target = placed.id;
+        drawn.offset = 80;
+        drawn.value = 160;
+        const auto applied = controller.execute("tempo.fromAutomation", drawn);
+        require(applied.wasOk(), "tempo.fromAutomation applies: " + applied.getErrorMessage().toStdString());
+        const auto freehand = controller.project.songTempo();
+        require(same(freehand.bpmAt(4), 80, 1.e-6) && same(freehand.bpmAt(8), 120, .5) &&
+                    same(freehand.bpmAt(12), 160, .5) && controller.project.tempoChanges.size() < 12,
+                "The drawn line maps bottom..top to 80..160 BPM with collinear samples merged");
+        drawn.offset = 200;
+        require(controller.execute("tempo.fromAutomation", drawn).failed(), "An inverted BPM range is refused");
+    }
 }
 } // namespace tempo_map_acceptance

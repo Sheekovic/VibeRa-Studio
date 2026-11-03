@@ -4366,6 +4366,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             found->warpOffset = found->offset;
             found->warpDuration = found->duration;
         }
+        const auto endedWarp = a.warpBpm > 0 ? Id(0) : found->warpChannel;
         found->warpBpm = a.warpBpm;
         if (!(a.warpBpm > 0))
             found->warpChannel = 0, found->warpOffset = found->warpDuration = 0;
@@ -4378,6 +4379,10 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         if (std::none_of(next.audioPlacements.begin(), next.audioPlacements.end(), [&](const auto &clip)
                          { return clip.channel == oldChannel || (clip.warpBpm > 0 && clip.warpChannel == oldChannel); }))
             std::erase_if(next.channels, [&](const auto &c) { return c.id == oldChannel; });
+        // A plain stretch/edit ends a warp; its original source goes when nothing uses it.
+        if (endedWarp && std::none_of(next.audioPlacements.begin(), next.audioPlacements.end(), [&](const auto &clip)
+                                      { return clip.channel == endedWarp || clip.warpChannel == endedWarp; }))
+            std::erase_if(next.channels, [&](const auto &c) { return c.id == endedWarp; });
     }
     else if (id == "audio.fade")
     {
