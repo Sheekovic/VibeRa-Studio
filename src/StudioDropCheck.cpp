@@ -158,6 +158,12 @@ juce::Result Studio::verifyDropTargets(const juce::File &folder)
     performAction("transport.stepRecord");
     if (stepRecord)
         return fail("step record did not turn off");
+    // Current project tree lists the project's samples and Patterns.
+    const auto tree = browser->projectTreeForTest(folder.getChildFile("project-tree.png"));
+    const auto text = tree.joinIntoString(" || ");
+    if (!text.contains("SAMPLES (") || !text.contains("drop-kick.wav") || !text.contains("PATTERNS ("))
+        return fail("project tree misses samples or Patterns: " + text);
+    folder.getChildFile("project-tree.txt").replaceWithText(text);
     return juce::Result::ok();
 }
 } // namespace vibera

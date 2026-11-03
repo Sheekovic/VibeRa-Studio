@@ -6627,6 +6627,162 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
     bool started = false;
     bool movingHeader = false;
     juce::Rectangle<int> dragBounds;
+    // Current project tree (the "Project" view of the top section): every sample, instrument,
+    // effect, Pattern and Automation Clip of the open project, grouped. Samples drag like
+    // Browser files; double-click opens the item.
+    bool projectView = false;
+    struct ProjectAssets final : juce::ListBoxModel
+    {
+        enum class Kind
+        {
+            heading,
+            sample,
+            instrument,
+            effect,
+            pattern,
+            automation
+        };
+        struct Entry
+        {
+            Kind kind = Kind::heading;
+            juce::String name, detail, source;
+            std::int64_t id = 0;
+            int insert = 0;
+        };
+        Browser &owner;
+        std::vector<Entry> entries;
+        std::uint64_t revision = std::numeric_limits<std::uint64_t>::max();
+        explicit ProjectAssets(Browser &b) : owner(b) {}
+        void rebuild()
+        {
+            const auto &p = owner.s.controller.project;
+            revision = owner.s.controller.revision;
+            entries.clear();
+            std::vector<Entry> samples, instruments, effects, patterns, automation;
+            for (const auto &c : p.channels)
+            {
+                if (c.instrument)
+                    instruments.push_back({Kind::instrument, c.name, c.instrument->name, {}, c.id, 0});
+                else
+                    samples.push_back({Kind::sample, c.name,
+                                       c.source.startsWith("builtin:") ? juce::String("built-in")
+                                       : c.audioClip                   ? "audio clip | " + juce::File(c.source).getFileName()
+                                                                       : juce::File(c.source).getFileName(),
+                                       c.source, c.id, 0});
+            }
+            for (const auto &m : p.mixer)
+                for (const auto &fx : m.effects)
+                    effects.push_back({Kind::effect, fx.name,
+                                       (m.index == 0 ? juce::String("Master") : "Insert " + juce::String(m.index)) +
+                                           (fx.bypass ? " | bypassed" : ""),
+                                       {}, fx.id, m.index});
+            for (const auto &pattern : p.patterns)
+                patterns.push_back({Kind::pattern, pattern.name, juce::String(int(pattern.notes.size())) + " notes",
+                                    {}, pattern.id, 0});
+            for (const auto &source : p.automation.sources)
+                automation.push_back({Kind::automation, juce::String(source.name),
+                                      juce::String(int(source.points.size())) + " points", {}, source.id, 0});
+            auto group = [&](const char *title, std::vector<Entry> &items)
+            {
+                if (items.empty())
+                    return;
+                entries.push_back({Kind::heading, juce::String(title) + " (" + juce::String(int(items.size())) + ")"});
+                entries.insert(entries.end(), items.begin(), items.end());
+            };
+            group("SAMPLES", samples);
+            group("INSTRUMENTS", instruments);
+            group("EFFECTS", effects);
+            group("PATTERNS", patterns);
+            group("AUTOMATION CLIPS", automation);
+            if (entries.empty())
+                entries.push_back({Kind::heading, "EMPTY PROJECT"});
+        }
+        const Entry *entry(int row) const
+        {
+            return juce::isPositiveAndBelow(row, int(entries.size())) ? &entries[size_t(row)] : nullptr;
+        }
+        int getNumRows() override
+        {
+            if (revision != owner.s.controller.revision)
+                rebuild();
+            return int(entries.size());
+        }
+        void paintListBoxItem(int row, juce::Graphics &g, int width, int height, bool selected) override
+        {
+            const auto *e = entry(row);
+            if (!e)
+                return;
+            if (e->kind == Kind::heading)
+            {
+                g.setColour(muted);
+                g.setFont(juce::Font(vibera::uiFont, 10.f, juce::Font::bold));
+                g.drawText(e->name, 6, 0, width - 12, height, juce::Justification::bottomLeft, true);
+                return;
+            }
+            if (selected)
+                g.fillAll(accent.withAlpha(.22f));
+            const juce::Colour colours[]{muted, juce::Colour(0xff6ec6ff), juce::Colour(0xffb38cff),
+                                         juce::Colour(0xff7fdc9a), juce::Colour(0xffffc46b), juce::Colour(0xffff8fb1)};
+            g.setColour(colours[int(e->kind)]);
+            g.fillRoundedRectangle(8.f, 5.f, 3.f, float(height - 10), 1.5f);
+            g.setColour(ink);
+            g.setFont(juce::Font(vibera::uiFont, 12.f, juce::Font::plain));
+            g.drawText(e->name, 18, 0, width / 2 + 20, height, juce::Justification::centredLeft, true);
+            g.setColour(muted);
+            g.setFont(juce::Font(vibera::uiFont, 10.f, juce::Font::plain));
+            g.drawText(e->detail, width / 2 + 40, 0, width / 2 - 46, height, juce::Justification::centredRight, true);
+        }
+        void listBoxItemClicked(int row, const juce::MouseEvent &) override
+        {
+            const auto *e = entry(row);
+            if (!e)
+                return;
+            auto &s = owner.s;
+            if (e->kind == Kind::sample || e->kind == Kind::instrument)
+            {
+                s.selectedChannel = e->id;
+                s.audio.setMidiTarget(e->id);
+                if (e->kind == Kind::sample && !e->source.isEmpty())
+                    s.audio.requestAudition(e->source);
+            }
+            else if (e->kind == Kind::effect)
+                s.selectedInsert = e->insert;
+            else if (e->kind == Kind::pattern)
+                s.selectPattern(e->id);
+            s.repaint();
+        }
+        void listBoxItemDoubleClicked(int row, const juce::MouseEvent &) override
+        {
+            const auto *e = entry(row);
+            if (!e)
+                return;
+            if (e->kind == Kind::sample || e->kind == Kind::instrument)
+                owner.s.openInstrument(e->id);
+            else if (e->kind == Kind::effect)
+                owner.s.openPluginEditorUI(e->id);
+        }
+        juce::var getDragSourceDescription(const juce::SparseSet<int> &rows) override
+        {
+            const auto *e = rows.size() == 1 ? entry(rows[0]) : nullptr;
+            return e && e->kind == Kind::sample && !e->source.isEmpty() ? juce::var(e->source) : juce::var{};
+        }
+        juce::String getTooltipForRow(int row) override
+        {
+            const auto *e = entry(row);
+            return e && e->kind != Kind::heading
+                       ? e->name + "\n" + (e->source.isNotEmpty() && !e->source.startsWith("builtin:") ? e->source : e->detail) +
+                             (e->kind == Kind::sample ? "\nDrag to the Channel Rack or Playlist; double-click for settings"
+                              : e->kind == Kind::effect ? "\nDouble-click to open the effect"
+                              : e->kind == Kind::pattern ? "\nClick to select the Pattern"
+                                                         : juce::String("\nDouble-click to open"))
+                       : juce::String{};
+        }
+    } projectAssets{*this};
+    juce::ListBox projectList{"Current project", &projectAssets};
+    juce::Rectangle<int> viewToggleBounds() const
+    {
+        return {getWidth() - 86, nativeHosted ? 12 : 42, 74, 20};
+    }
     ToolbarButton dock{"Dock"}, detach{"Detach"};
     WorkspacePanelBounds constraints;
     juce::ResizableBorderComponent edges{this, &constraints};
@@ -6657,6 +6813,10 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
         addAndMakeVisible(import);
         addAndMakeVisible(plugins);
         addAndMakeVisible(files);
+        addChildComponent(projectList);
+        projectList.setRowHeight(24);
+        projectList.setColour(juce::ListBox::backgroundColourId, juce::Colours::transparentBlack);
+        projectList.setOutlineThickness(0);
         files.rootChanged = [this]
         {
             if (getHeight() < 700)
@@ -6709,6 +6869,10 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
         if (compact && getHeight() > 0 && !wasCompact)
             soundsCollapsed = true;
         wasCompact = compact && getHeight() > 0;
+        projectList.setVisible(projectView && !soundsCollapsed);
+        projectList.setBounds(8, soundTop(), getWidth() - 16, recentRows * soundStride() - 4);
+        if (projectList.isVisible())
+            projectList.updateContent();
         const int importY = sampleHeading() + 32;
         import.setBounds(12, importY, getWidth() - 24, 30);
         const bool compactFiles = compact;
@@ -6728,9 +6892,25 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
             g.drawHorizontalLine(30, 0, float(getWidth()));
             label(g, "Browser", {12, 0, getWidth() - (s.floatingWindows[4] ? 100 : 48), 30}, ink, 13);
         }
-        label(g, soundsCollapsed ? ">  RECENT SAMPLES / INSTRUMENTS" : "v  RECENT SAMPLES / INSTRUMENTS",
-              {12, nativeHosted ? 10 : 40, getWidth() - 24, 24}, muted, 11);
-        const auto list = recent();
+        label(g, juce::String(soundsCollapsed ? ">  " : "v  ") +
+                     (projectView ? "CURRENT PROJECT" : "RECENT SAMPLES / INSTRUMENTS"),
+              {12, nativeHosted ? 10 : 40, getWidth() - 100, 24}, muted, 11);
+        {
+            // Recent | Project switch.
+            const auto toggle = viewToggleBounds().toFloat();
+            g.setColour(panel.brighter(.06f));
+            g.fillRoundedRectangle(toggle, 10.f);
+            const auto half = toggle.withWidth(toggle.getWidth() / 2);
+            g.setColour(accent.withAlpha(.35f));
+            g.fillRoundedRectangle(projectView ? half.translated(half.getWidth(), 0) : half, 10.f);
+            g.setColour(ink);
+            g.setFont(juce::Font(vibera::uiFont, 10.f, juce::Font::bold));
+            g.drawText("Recent", half, juce::Justification::centred);
+            g.drawText("Project", half.translated(half.getWidth(), 0), juce::Justification::centred);
+        }
+        if (projectView && projectList.isVisible() && projectAssets.revision != s.controller.revision)
+            projectList.updateContent();
+        const auto list = projectView ? std::vector<juce::String>{} : recent();
         static const juce::StringArray roleOrder{"Kick", "Snare", "Clap", "Hat", "808", "Cymbal", "Perc", "Bass", "Vocal", "FX", "Sample"};
         for (int i = 0; i < (soundsCollapsed ? 0 : int(list.size())); ++i)
         {
@@ -6794,6 +6974,28 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
     {
         return files;
     }
+    // Shows the Project view and returns its rows ("name | detail"); `png` gets a snapshot.
+    juce::StringArray projectTreeForTest(const juce::File &png)
+    {
+        projectView = true;
+        soundsCollapsed = false;
+        resized();
+        projectAssets.rebuild();
+        projectList.updateContent();
+        juce::StringArray rows;
+        for (const auto &entry : projectAssets.entries)
+            rows.add(entry.name + " | " + entry.detail);
+        if (png != juce::File{} && getWidth() > 0 && getHeight() > 0)
+        {
+            const auto image = createComponentSnapshot(getLocalBounds());
+            png.deleteFile();
+            juce::FileOutputStream out(png);
+            juce::PNGImageFormat().writeImageToStream(image, out);
+        }
+        projectView = false;
+        resized();
+        return rows;
+    }
     void mouseDown(const juce::MouseEvent &e) override
     {
         movingHeader = !nativeHosted && e.y < 30 && e.mods.isLeftButtonDown();
@@ -6801,6 +7003,15 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
         if (movingHeader)
         {
             toFront(false);
+            return;
+        }
+        if (viewToggleBounds().contains(e.getPosition()))
+        {
+            projectView = e.x >= viewToggleBounds().getCentreX();
+            soundsCollapsed = false;
+            pressed = -1;
+            resized();
+            repaint();
             return;
         }
         if (e.y >= (nativeHosted ? 10 : 40) && e.y < (nativeHosted ? 34 : 64))
@@ -6811,7 +7022,7 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
             repaint();
             return;
         }
-        const auto list = recent();
+        const auto list = projectView ? std::vector<juce::String>{} : recent();
         pressed = (!soundsCollapsed && e.y >= soundTop() && e.y < soundTop() + int(list.size()) * soundStride())
                       ? juce::jlimit(0, int(list.size()) - 1, (e.y - soundTop()) / soundStride())
                       : -1;
