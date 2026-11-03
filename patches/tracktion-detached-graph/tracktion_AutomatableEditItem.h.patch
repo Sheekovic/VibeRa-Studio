@@ -1,0 +1,20 @@
+--- a/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.h
++++ b/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.h
+@@ -16,7 +16,8 @@
+ class AutomatableEditItem  : public EditItem
+ {
+ public:
+-    AutomatableEditItem (Edit&, const juce::ValueTree&);
++    AutomatableEditItem (Edit&, const juce::ValueTree&, bool detachedGraphItem = false);
++    bool isDetachedGraphItem() const noexcept { return detachedFromEdit; }
+     ~AutomatableEditItem() override;
+ 
+     //==============================================================================
+@@ -100,6 +101,7 @@
+     void restoreChangedParametersFromState();
+ 
+ private:
++    const bool detachedFromEdit;
+     RealTimeSpinLock activeParameterLock;
+     juce::ReferenceCountedArray<AutomatableParameter> automatableParams, activeParameters;
+     mutable AutomatableParameterTree parameterTree;

@@ -1,0 +1,315 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
+@@ -10,6 +10,9 @@
+ 
+ #include <thread>
+ #include <type_traits>
++#include <cmath>
++#include <limits>
++#include <stdexcept>
+ #if JUCE_INTEL
+  #include <emmintrin.h>
+ #endif
+@@ -33,10 +36,12 @@
+ {
+     if (numThreadsToUse > 0)
+         clearThreads();
++    if (readyOwnerIdentity) readyOwnerIdentity->player = nullptr;
+ }
+ 
+ void LockFreeMultiThreadedNodePlayer::setNumThreads (size_t newNumThreads)
+ {
++    requireNoFixedPreparation();
+     if (newNumThreads == numThreadsToUse)
+         return;
+ 
+@@ -52,6 +57,7 @@
+ 
+ void LockFreeMultiThreadedNodePlayer::setNode (std::unique_ptr<Node> newNode, double sampleRateToUse, int blockSizeToUse)
+ {
++    requireNoFixedPreparation();
+     // The prepare and set the new Node, passing in the old graph
+     postNewGraph (prepareToPlay (std::move (newNode), lastGraphPosted,
+                                  sampleRateToUse, blockSizeToUse,
+@@ -61,6 +67,7 @@
+ 
+ void LockFreeMultiThreadedNodePlayer::prepareToPlay (double sampleRateToUse, int blockSizeToUse)
+ {
++    requireNoFixedPreparation();
+     if (sampleRateToUse == sampleRate && blockSizeToUse == blockSize)
+         return;
+ 
+@@ -163,6 +170,7 @@
+ 
+ void LockFreeMultiThreadedNodePlayer::clearNode()
+ {
++    requireNoFixedPreparation();
+     // N.B. The threads will be trying to read the preparedNodes so we need to actually stop these first
+     clearThreads();
+ 
+@@ -182,20 +190,32 @@
+ //==============================================================================
+ void LockFreeMultiThreadedNodePlayer::enablePooledMemoryAllocations (bool usePool)
+ {
++    requireNoFixedPreparation();
+     if (useMemoryPool.exchange (usePool) != usePool)
++    {
++        invalidateReadyGraphs();
+         prepareToPlay (sampleRate, blockSize);
++    }
+ }
+ 
+ void LockFreeMultiThreadedNodePlayer::enableNodeMemorySharing (bool shouldBeEnabled)
+ {
++    requireNoFixedPreparation();
+     if (std::exchange (nodeMemorySharingEnabled, shouldBeEnabled) != shouldBeEnabled)
++    {
++        invalidateReadyGraphs();
+         prepareToPlay (sampleRate, blockSize);
++    }
+ }
+ 
+ void LockFreeMultiThreadedNodePlayer::setLatencyCompensationEnabled (bool shouldEnable)
+ {
++    requireNoFixedPreparation();
+     if (disableLatencyComp.exchange (! shouldEnable) != ! shouldEnable)
++    {
++        invalidateReadyGraphs();
+         prepareToPlay (sampleRate, blockSize);
++    }
+ }
+ 
+ //==============================================================================
+@@ -232,12 +252,14 @@
+ //==============================================================================
+ void LockFreeMultiThreadedNodePlayer::clearThreads()
+ {
++    invalidateReadyGraphs();
+     const std::scoped_lock<RealTimeSpinLock> sl (processMutex);
+     threadPool->clearThreads();
+ }
+ 
+ void LockFreeMultiThreadedNodePlayer::createThreads()
+ {
++    invalidateReadyGraphs();
+     const std::scoped_lock<RealTimeSpinLock> sl (processMutex);
+     threadPool->createThreads (numThreadsToUse.load(), audioWorkgroup);
+ }
+@@ -249,17 +271,10 @@
+ }
+ 
+ //==============================================================================
+-void LockFreeMultiThreadedNodePlayer::postNewGraph (std::unique_ptr<NodeGraph> newGraph,
+-                                                       double sampleRateToUse, int blockSizeToUse)
+-{
+-    if (! newGraph)
+-    {
+-        clearNode();
+-        sampleRate.store (sampleRateToUse, std::memory_order_release);
+-        blockSize.store (blockSizeToUse, std::memory_order_release);
+-        return;
+-    }
+-
++std::unique_ptr<LockFreeMultiThreadedNodePlayer::PreparedNode> LockFreeMultiThreadedNodePlayer::prepareGraphHolder(
++    std::unique_ptr<NodeGraph> newGraph, bool pooled, size_t threads, int blockSizeToUse)
++{
++    if (!newGraph || !newGraph->rootNode) throw std::invalid_argument("Ready graph has no root");
+     std::stable_sort (newGraph->orderedNodes.begin(), newGraph->orderedNodes.end(),
+                       [] (auto n1, auto n2)
+                       {
+@@ -271,7 +286,7 @@
+     newPreparedNode.nodesReadyToBeProcessed = std::make_unique<LockFreeFifo<Node*>> ((int) newPreparedNode.graph->orderedNodes.size());
+     buildNodesOutputLists (newPreparedNode);
+ 
+-    if (useMemoryPool)
++    if (pooled)
+     {
+         const size_t poolCapacity = newPreparedNode.graph->orderedNodes.size();
+         newPreparedNode.audioBufferPool = std::make_unique<AudioBufferPool> (poolCapacity);
+@@ -279,22 +294,172 @@
+         node_player_utils::reserveAudioBufferPool (newPreparedNode.graph->rootNode.get(),
+                                                    newPreparedNode.graph->orderedNodes,
+                                                    *newPreparedNode.audioBufferPool,
+-                                                   numThreadsToUse, blockSizeToUse);
++                                                   threads, blockSizeToUse);
+     }
+ 
+     // Pin the noexcept move premise used by LockFreeObject's allocation-before-publication.
+     static_assert (std::is_nothrow_move_constructible_v<PreparedNode>);
+-    auto* nextRoot = newPreparedNode.graph->rootNode.get();
+-    auto* nextGraph = newPreparedNode.graph.get();
+-    auto* nextPool = newPreparedNode.audioBufferPool.get();
+     // Node properties may allocate (for example ReturnNode input enumeration).
+     // Resolve them before publication; callers read only this cached integer.
+-    const auto nextLatency = nextRoot->getNodeProperties().latencyNumSamples;
++    newPreparedNode.preparedLatencySamples = newPreparedNode.graph->rootNode->getNodeProperties().latencyNumSamples;
+ 
+     // Allocate the publication holder before committing any raw caches. Keep
+     // the pool cache ready BEFORE audio can adopt the graph; pooled callbacks
+     // consult it from DSP. The following prepared publication cannot allocate.
+-    auto storage = std::make_unique<PreparedNode> (std::move (newPreparedNode));
++    return std::make_unique<PreparedNode> (std::move (newPreparedNode));
++}
++
++void LockFreeMultiThreadedNodePlayer::invalidateReadyGraphs() noexcept
++{
++    if (readyMutationGeneration == std::numeric_limits<uint64_t>::max()) readyGenerationExhausted = true;
++    else ++readyMutationGeneration;
++}
++void LockFreeMultiThreadedNodePlayer::requireNoFixedPreparation() const
++{
++    if (fixedPreparationActive) throw std::logic_error("Reentrant player mutation during fixed graph preparation");
++}
++LockFreeMultiThreadedNodePlayer::ReadyConfiguration LockFreeMultiThreadedNodePlayer::readyConfiguration() const noexcept
++{
++    return {sampleRate.load(std::memory_order_acquire), blockSize.load(std::memory_order_acquire),
++            numThreadsToUse.load(std::memory_order_acquire), useMemoryPool.load(std::memory_order_acquire),
++            nodeMemorySharingEnabled, disableLatencyComp.load(std::memory_order_acquire)};
++}
++void LockFreeMultiThreadedNodePlayer::ensureReadyOwner()
++{
++    if (!readyOwnerIdentity) readyOwnerIdentity = std::make_shared<ReadyOwnerIdentity>(ReadyOwnerIdentity{this});
++}
++LockFreeMultiThreadedNodePlayer::ReadyGraphStatus LockFreeMultiThreadedNodePlayer::fixedGraphPreparationReadiness() const noexcept
++{
++    if (fixedPreparationActive) return ReadyGraphStatus::preparationBusy;
++    if (readyGenerationExhausted) return ReadyGraphStatus::generationExhausted;
++    if (!rootNode || !lastGraphPosted || !threadPool || !std::isfinite(getSampleRate()) ||
++        getSampleRate() <= 0 || getBlockSize() <= 0) return ReadyGraphStatus::noCurrentGraph;
++    if (useMemoryPool.load(std::memory_order_acquire)) return ReadyGraphStatus::pooledMemoryUnsupported;
++    return ReadyGraphStatus::ready;
++}
++LockFreeMultiThreadedNodePlayer::ReadyGraph LockFreeMultiThreadedNodePlayer::prepareFixedGraph(std::unique_ptr<Node> node)
++{
++    if (fixedGraphPreparationReadiness() != ReadyGraphStatus::ready || !node)
++        throw std::invalid_argument("Fixed graph preparation requires an existing supported non-pooled graph");
++    ensureReadyOwner();
++    ReadyGraph result;
++    result.owner = readyOwnerIdentity;
++    result.configuration = readyConfiguration();
++    result.generation = readyMutationGeneration;
++    const juce::ScopedValueSetter<bool> preparing(fixedPreparationActive, true);
++    // Last POSTED and actual DSP-adopted scopes can differ: B may be queued
++    // while the callback still uses A. The sole CONTROL owner prevents post,
++    // retirement or clear during this snapshot's use. Callback adoption only
++    // transfers old ownership to pending storage; it never destroys holders.
++    const auto* adopted = threadPool->getCurrentNodeForPreparation();
++    const auto* adoptedGraph = adopted ? adopted->graph.get() : nullptr;
++    const auto contains = [] (const NodeGraph* scope, const Node* candidate)
++    {
++        return scope && std::find(scope->orderedNodes.begin(), scope->orderedNodes.end(), candidate) !=
++                        scope->orderedNodes.end();
++    };
++    // Sharing live DSP BANKS via existing preparation contracts is permitted;
++    // re-initialising the same actual Node is not. Refuse borrowed objects in
++    // either scope before transforms/initialise can touch runtime bookkeeping.
++    for (auto* candidate : getNodes(*node, VertexOrdering::postordering))
++        if (contains(lastGraphPosted, candidate) || contains(adoptedGraph, candidate))
++            throw std::invalid_argument("Fixed graph candidate shares a posted or adopted Node object");
++    auto graph = node_player_utils::prepareToPlay(std::move(node), lastGraphPosted,
++                         result.configuration.rate, result.configuration.block,
++                         nullptr, nullptr, result.configuration.sharing, result.configuration.disableLatency);
++    result.storage = prepareGraphHolder(std::move(graph), false, result.configuration.threads, result.configuration.block);
++    if (result.generation != readyMutationGeneration || result.configuration != readyConfiguration() || readyGenerationExhausted)
++        throw std::logic_error("Player configuration changed while preparing a fixed graph");
++    return result;
++}
++LockFreeMultiThreadedNodePlayer::GraphRetirementSlot LockFreeMultiThreadedNodePlayer::makeGraphRetirementSlot()
++{
++    ensureReadyOwner();
++    return GraphRetirementSlot(readyOwnerIdentity);
++}
++LockFreeMultiThreadedNodePlayer::ReadyGraphStatus LockFreeMultiThreadedNodePlayer::validateReadyGraph(
++    const ReadyGraph& candidate, const GraphRetirementSlot& retired) const noexcept
++{
++    if (fixedPreparationActive) return ReadyGraphStatus::preparationBusy;
++    if (candidate.empty()) return ReadyGraphStatus::emptyCandidate;
++    if (!candidate.owner || candidate.owner != readyOwnerIdentity || candidate.owner->player != this)
++        return ReadyGraphStatus::foreignOwner;
++    if (!retired.owner || retired.owner != readyOwnerIdentity || retired.owner->player != this)
++        return ReadyGraphStatus::foreignRetirementSlot;
++    if (!retired.empty()) return ReadyGraphStatus::retirementSlotNotEmpty;
++    if (readyGenerationExhausted) return ReadyGraphStatus::generationExhausted;
++    if (candidate.generation != readyMutationGeneration) return ReadyGraphStatus::staleGeneration;
++    if (candidate.configuration != readyConfiguration()) return ReadyGraphStatus::configurationChanged;
++    return fixedGraphPreparationReadiness();
++}
++LockFreeMultiThreadedNodePlayer::ReadyGraphStatus LockFreeMultiThreadedNodePlayer::publishReadyGraph(
++    ReadyGraph& candidate, GraphRetirementSlot& retired) noexcept
++{
++    const auto admitted = validateReadyGraph(candidate, retired);
++    if (admitted != ReadyGraphStatus::ready) return admitted;
++    auto* nextRoot = candidate.storage->graph->rootNode.get();
++    auto* nextGraph = candidate.storage->graph.get();
++    auto* nextPool = candidate.storage->audioBufferPool.get();
++    const auto latency = candidate.storage->preparedLatencySamples;
++    static_assert(std::is_nothrow_move_assignable_v<decltype(retired.storage)>);
++    // Slot is EMPTY and both identity pins stay where they are: no old owner or
++    // resource can be released as a side-effect of these unique-pointer moves.
++    auto old = preparedNodeObject.pushPreparedNonRealTime(std::move(candidate.storage));
++    retired.storage = std::move(old);
++    rootNode = nextRoot;
++    lastGraphPosted = nextGraph;
++    lastAudioBufferPoolPosted = nextPool; // Fixed path is explicitly non-pooled.
++    preparedLatencySamples = latency;
++    invalidateReadyGraphs();
++    return ReadyGraphStatus::ready;
++}
++bool LockFreeMultiThreadedNodePlayer::retireReadyGraph(GraphRetirementSlot& retired) noexcept
++{
++    if (!retired.owner || retired.owner != readyOwnerIdentity || retired.owner->player != this) return false;
++    if (retired.storage)
++    {
++        threadPool->waitForThreadsToQuiesce();
++        retired.storage.reset();
++    }
++    return true;
++}
++LockFreeMultiThreadedNodePlayer::GraphRetirementSlot::GraphRetirementSlot(GraphRetirementSlot&& other) noexcept
++    : owner(std::move(other.owner)), storage(std::move(other.storage)) {}
++LockFreeMultiThreadedNodePlayer::GraphRetirementSlot& LockFreeMultiThreadedNodePlayer::GraphRetirementSlot::operator=(GraphRetirementSlot&& other) noexcept
++{
++    if (this != &other)
++    {
++        releaseOnControlThread();
++        owner = std::move(other.owner);
++        storage = std::move(other.storage);
++    }
++    return *this;
++}
++void LockFreeMultiThreadedNodePlayer::GraphRetirementSlot::releaseOnControlThread() noexcept
++{
++    if (storage && owner && owner->player) owner->player->retireReadyGraph(*this);
++    // If the player is gone, its destructor already stopped its pool threads.
++    // Caller must still retain external Edit/plugin owners for graph lifetime.
++    storage.reset();
++}
++LockFreeMultiThreadedNodePlayer::GraphRetirementSlot::~GraphRetirementSlot() noexcept { releaseOnControlThread(); }
++
++void LockFreeMultiThreadedNodePlayer::postNewGraph (std::unique_ptr<NodeGraph> newGraph,
++                                                       double sampleRateToUse, int blockSizeToUse)
++{
++    if (! newGraph)
++    {
++        clearNode();
++        sampleRate.store (sampleRateToUse, std::memory_order_release);
++        blockSize.store (blockSizeToUse, std::memory_order_release);
++        return;
++    }
++
++    auto storage = prepareGraphHolder(std::move(newGraph), useMemoryPool.load(), numThreadsToUse.load(), blockSizeToUse);
++    auto* nextRoot = storage->graph->rootNode.get();
++    auto* nextGraph = storage->graph.get();
++    auto* nextPool = storage->audioBufferPool.get();
++    const auto nextLatency = storage->preparedLatencySamples;
+     // Commit accepted candidate configuration only after all fallible work.
+     // Refused preparation/publication must preserve old graph metadata too.
+     sampleRate.store (sampleRateToUse, std::memory_order_release);
+@@ -303,6 +468,7 @@
+     lastGraphPosted = nextGraph;
+     lastAudioBufferPoolPosted = nextPool;
+     preparedLatencySamples = nextLatency;
++    invalidateReadyGraphs();
+     auto retiredPreparedNode = preparedNodeObject.pushPreparedNonRealTime (std::move (storage));
+ 
+     if (retiredPreparedNode)

@@ -1,0 +1,367 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -17,6 +17,8 @@
+ #include <cmath>
+ #include <limits>
+ #include <cstdint>
++#include <array>
++#include <memory>
+ 
+ namespace tracktion::inline graph {
+ 
+@@ -178,7 +180,7 @@
+ // ORIGINAL one-shot, graph-pinned capability for exactly one registered D->0
+ // output queue. Not a project ID, graph-generation receipt, MIDI bridge, or
+ // general changed-path admission. Only LatencyNode can mint/admit this proof.
+-class ForwardOutputDrain final
++class ForwardOutputDrain final : public std::enable_shared_from_this<ForwardOutputDrain>
+ {
+ public:
+     enum class State : uint32_t { prepared, admitted, draining, finished, notAdmitted,
+@@ -239,6 +241,7 @@
+     Result refuseUnexpectedMidi() noexcept { return fail (State::nativeMidi); }
+ private:
+     friend class LatencyNode;
++    friend class FinishedForwardContinuation;
+     ForwardOutputDrain (Node& node, NodeGraph& current, NodeGraph& old, const void* ownerToken,
+                         const void* previousOrigin, const void* nextOrigin, const Node* writer,
+                         std::shared_ptr<LatencyProcessor> queue, double preparedRate,
+@@ -452,6 +455,153 @@
+ };
+ 
+ 
++// ORIGINAL same-latency continuation after an explicitly finished forward drain.
++// Internal audited application contracts, never project/user supplied authority.
++// Both actual stage-origin Nodes pin these immutable owners. In particular the
++// old forward graph must bind this evidence BEFORE it is first published.
++struct FinishedForwardOutputIdentity
++{
++    const void* stageRuntime = nullptr;
++    const void* sourceRuntime = nullptr;
++    const void* processingRuntime = nullptr;
++    const void* preparedPlan = nullptr;
++    std::array<uint8_t, 16> instance {};
++    uint64_t declarationGeneration = 0;
++    int nativeLatency = 0, producingLatency = 0;
++    bool operator== (const FinishedForwardOutputIdentity&) const = default;
++    bool valid() const noexcept
++    {
++        bool nonzero = false;
++        for (auto value : instance) nonzero = nonzero || value != 0;
++        return stageRuntime && sourceRuntime && processingRuntime && preparedPlan &&
++               nonzero && declarationGeneration && nativeLatency >= 0 && producingLatency > 0 &&
++               nativeLatency <= producingLatency;
++    }
++};
++class FinishedForwardContinuationOutput
++{
++public:
++    virtual ~FinishedForwardContinuationOutput() = default;
++    virtual FinishedForwardOutputIdentity preparedFinishedForwardOutputIdentity() const noexcept = 0;
++    // False on the original wet port; true ONLY for the admitted removal shell
++    // owning the actual same Host pre-FX history and its existing bypass fade.
++    virtual bool isRetainedDryContinuation() const noexcept = 0;
++    // Sole DSP owner. The adapter checks actual ring/provider ownership, native
++    // packet/config lineage and range BEFORE input, then exact produced range
++    // AFTER processing. Not a claim that latency bounds an arbitrary effect tail.
++    virtual bool validateFinishedForwardOutput (juce::Range<int64_t>, bool afterProcessing) const noexcept = 0;
++    virtual void refuseFinishedForwardOutput() noexcept = 0;
++};
++class FinishedForwardContinuation;
++class FinishedForwardContinuationRoot
++{
++public:
++    virtual ~FinishedForwardContinuationRoot() = default;
++    virtual const void* finishedForwardContinuityIdentity() const noexcept = 0;
++    virtual uint64_t finishedForwardGeneration() const noexcept = 0;
++    virtual const void* finishedForwardContinuationStage() const noexcept = 0;
++    virtual FinishedForwardContinuation* preparedFinishedForwardContinuation() const noexcept = 0;
++};
++class FinishedForwardContinuation final
++{
++public:
++    enum class State : uint32_t
++    { prepared, admitted, active, notAdmitted, wrongRoot, wrongContinuity,
++      invalidReference, stalePredecessor, discontinuity, priorFailed, sourceChanged, incompleteOutput };
++    FinishedForwardContinuation (const FinishedForwardContinuation&) = delete;
++    FinishedForwardContinuation& operator= (const FinishedForwardContinuation&) = delete;
++    State observation() const noexcept
++    { return static_cast<State> (observed.load (std::memory_order_acquire)); }
++    // Actual final-root prefetch, BEFORE children. Witnesses are DSP-only shared
++    // root state, never CONTROL receipt values. No ownership/refcount operations.
++    bool begin (const Node& root, const void* actualContinuity, const Node* previous,
++                uint64_t previousGeneration, int64_t previousEnd,
++                juce::Range<int64_t> reference) noexcept
++    {
++        if (failed) return false;
++        if (!admitted) return fail (State::notAdmitted);
++        if (&root != bindingNode) return fail (State::wrongRoot);
++        if (actualContinuity != continuity) return fail (State::wrongContinuity);
++        if (scopeOpen || reference.getStart() < 0 || reference.getEnd() <= reference.getStart() ||
++            reference.getEnd() - reference.getStart() > blockSize)
++            return fail (State::invalidReference);
++        if (!started)
++        {
++            // Prior proof is shared-owned across actual old-graph retirement.
++            // These plain fields have the SAME serialized native DSP writer.
++            // Its old FIFO is never read, reset or used for future output here.
++            if (!prior->admitted || !prior->started || prior->failed || prior->remaining != 0 ||
++                prior->observation().state != ForwardOutputDrain::State::finished)
++                return fail (State::priorFailed);
++            if (previous != previousRoot || previousGeneration != beforeGeneration ||
++                previousEnd != reference.getStart() || prior->expectedNextReference != reference.getStart())
++                return fail (State::stalePredecessor);
++        }
++        else if (previous != bindingNode || previousGeneration != afterGeneration ||
++                 previousEnd != reference.getStart() || expectedNext != reference.getStart())
++            return fail (State::discontinuity);
++        if (!output->validateFinishedForwardOutput (reference, false))
++            return fail (State::sourceChanged);
++        current = reference;
++        scopeOpen = true;
++        return true;
++    }
++    // Graph result only: physical/source Session end occurs LATER and must also
++    // succeed before application completion. END failure cannot roll back work.
++    bool end (const Node& root, juce::Range<int64_t> reference) noexcept
++    {
++        if (failed) return false;
++        if (!scopeOpen || &root != bindingNode || reference != current || !origin->hasProcessed() ||
++            !output->validateFinishedForwardOutput (reference, true))
++            return fail (State::incompleteOutput);
++        scopeOpen = false;
++        started = true;
++        expectedNext = reference.getEnd();
++        observed.store (uint32_t (State::active), std::memory_order_release);
++        return true;
++    }
++private:
++    friend class LatencyNode;
++    FinishedForwardContinuation (Node& root, NodeGraph& next, NodeGraph& old, const void* stage,
++        Node& producer, FinishedForwardContinuationOutput& adapter,
++        FinishedForwardOutputIdentity evidence, std::shared_ptr<ForwardOutputDrain> completed,
++        const void* clock, uint64_t before, uint64_t after, double rateToUse, int maximumBlock)
++        : bindingNode (&root), candidateGraph (&next), previousGraph (&old), previousRoot (old.rootNode.get()),
++          owner (stage), origin (&producer), output (&adapter), identity (evidence), prior (std::move (completed)),
++          continuity (clock), beforeGeneration (before), afterGeneration (after), rate (rateToUse), blockSize (maximumBlock)
++    {}
++    bool fail (State state) noexcept
++    {
++        if (!failed)
++        {
++            failed = true;
++            scopeOpen = false;
++            output->refuseFinishedForwardOutput(); // Before children on BEGIN fault.
++            observed.store (uint32_t (state), std::memory_order_release);
++        }
++        return false;
++    }
++    Node* const bindingNode;
++    NodeGraph* const candidateGraph;
++    NodeGraph* const previousGraph;
++    const Node* const previousRoot; // Identity comparison only after retirement.
++    const void* const owner;
++    Node* const origin;
++    FinishedForwardContinuationOutput* const output;
++    const FinishedForwardOutputIdentity identity;
++    const std::shared_ptr<ForwardOutputDrain> prior; // No Node/Plugin/graph owner cycle.
++    const void* const continuity;
++    const uint64_t beforeGeneration, afterGeneration;
++    const double rate;
++    const int blockSize;
++    bool admitted = false; // CONTROL final seal, immutable after publication.
++    bool started = false, failed = false, scopeOpen = false; // Sole DSP owner.
++    int64_t expectedNext = 0;
++    juce::Range<int64_t> current;
++    std::atomic<uint32_t> observed { uint32_t (State::prepared) };
++    static_assert (std::atomic<uint32_t>::is_always_lock_free);
++};
++
+ class LatencyNode final : public Node
+ {
+ public:
+@@ -833,6 +983,122 @@
+                 "routing.pdcZeroProof: Exact unconsumed root/inventory/final-queue capability required");
+     }
+ 
++    struct FinishedForwardScope
++    {
++        Node* origin = nullptr;
++        FinishedForwardContinuationOutput* output = nullptr;
++        FinishedForwardOutputIdentity identity;
++        std::shared_ptr<ForwardOutputDrain> prior;
++        const void* continuity = nullptr;
++        uint64_t beforeGeneration = 0, afterGeneration = 0;
++    };
++    static FinishedForwardScope requireFinishedForwardScope (NodeGraph& candidate, NodeGraph& previous,
++        const Stages& next, const Stages& old, const void* target, double rate, int block)
++    {
++        const auto reject = [] { throw OutputStageError (OutputStageStatus::configuration,
++            "routing.pdcFinishedForwardScope: Exact completed bridge, retained dry owner and unchanged whole graph required"); };
++        auto* root = dynamic_cast<FinishedForwardContinuationRoot*> (candidate.rootNode.get());
++        auto* beforeRoot = dynamic_cast<FinishedForwardContinuationRoot*> (previous.rootNode.get());
++        if (!target || !root || !beforeRoot || !std::isfinite (rate) || rate <= 0 || block <= 0 ||
++            root->finishedForwardContinuationStage() != target ||
++            !root->finishedForwardContinuityIdentity() ||
++            root->finishedForwardContinuityIdentity() != beforeRoot->finishedForwardContinuityIdentity() ||
++            !beforeRoot->finishedForwardGeneration() ||
++            root->finishedForwardGeneration() <= beforeRoot->finishedForwardGeneration() ||
++            root->finishedForwardGeneration() == std::numeric_limits<uint64_t>::max() ||
++            next.empty() || next.size() != old.size()) reject();
++        const auto nextRoot = candidate.rootNode->getNodeProperties();
++        const auto oldRoot = previous.rootNode->getNodeProperties();
++        if (!nextRoot.hasAudio || !oldRoot.hasAudio || nextRoot.hasMidi || oldRoot.hasMidi ||
++            nextRoot.numberOfChannels != oldRoot.numberOfChannels ||
++            nextRoot.latencyNumSamples != oldRoot.latencyNumSamples) reject();
++        FinishedForwardScope result;
++        result.continuity = root->finishedForwardContinuityIdentity();
++        result.beforeGeneration = beforeRoot->finishedForwardGeneration();
++        result.afterGeneration = root->finishedForwardGeneration();
++        unsigned targets = 0;
++        for (const auto& [owner, now] : next)
++        {
++            const auto found = old.find (owner);
++            if (found == old.end()) reject();
++            const auto& before = found->second;
++            if (!before.origin || !now.origin || before.hasMidi || now.hasMidi ||
++                before.channels != now.channels || !before.producerPathKnown || !now.producerPathKnown ||
++                !before.boundaryPathKnown || !now.boundaryPathKnown ||
++                before.producerPathLatencySamples != now.producerPathLatencySamples ||
++                before.boundaryPathLatencySamples != now.boundaryPathLatencySamples ||
++                before.inverse || now.inverse || now.forward) reject();
++            if (owner != target)
++            {
++                if (before.forward || bool (before.delay) != bool (now.delay) ||
++                    (before.delay && before.delay->requestedDelay != now.delay->requestedDelay)) reject();
++                // Final ordinary validation below checks exact prepared queue
++                // pointers after ALL sibling initialisation. Never skip it.
++                continue;
++            }
++            ++targets;
++            if (!before.forward || before.delay || now.delay) reject(); // No output FIFO.
++            auto* oldOrigin = stageOriginNode (previous, before);
++            auto* newOrigin = stageOriginNode (candidate, now);
++            auto* observed = dynamic_cast<FinishedForwardContinuationOutput*> (oldOrigin);
++            auto* continuation = dynamic_cast<FinishedForwardContinuationOutput*> (newOrigin);
++            auto* completed = before.forward->preparedForwardOutputDrain();
++            if (!observed || !continuation || observed->isRetainedDryContinuation() ||
++                !continuation->isRetainedDryContinuation() || !completed ||
++                completed->observation().state != ForwardOutputDrain::State::finished ||
++                completed->bindingNode != before.forwardNode || completed->owner != target ||
++                completed->afterOrigin != before.origin || completed->delay <= 0 ||
++                completed->sampleRate != rate || completed->blockSize != block ||
++                completed->channels != now.channels || !completed->processor ||
++                !completed->processor->hasConfiguration (completed->delay, rate, now.channels)) reject();
++            result.identity = observed->preparedFinishedForwardOutputIdentity();
++            if (!result.identity.valid() || result.identity != continuation->preparedFinishedForwardOutputIdentity() ||
++                result.identity.stageRuntime != target ||
++                result.identity.producingLatency != now.producerPathLatencySamples ||
++                result.identity.producingLatency != completed->delay) reject();
++            // Legacy unique-owned drains remain one-shot. The opt-in append
++            // adapter must establish shared ownership before its publication.
++            result.prior = completed->weak_from_this().lock();
++            if (!result.prior || result.prior.get() != completed) reject();
++            result.origin = newOrigin;
++            result.output = continuation;
++        }
++        if (targets != 1 || !result.origin || !result.output) reject();
++        return result;
++    }
++public:
++    static std::unique_ptr<FinishedForwardContinuation> prepareFinishedForwardContinuation (
++        Node& actualRoot, const PlaybackInitialisationInfo& info, const void* target)
++    {
++        if (info.nodeGraph.rootNode.get() != &actualRoot || !info.nodeGraphToReplace)
++            throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcFinishedForwardPreparation: Actual prepared final root and predecessor required");
++        const auto next = collectOutputStages (info.nodeGraph);
++        const auto old = collectOutputStages (*info.nodeGraphToReplace);
++        const auto scope = requireFinishedForwardScope (info.nodeGraph, *info.nodeGraphToReplace,
++                                                       next, old, target, info.sampleRate, info.blockSize);
++        return std::unique_ptr<FinishedForwardContinuation> (new FinishedForwardContinuation (
++            actualRoot, info.nodeGraph, *info.nodeGraphToReplace, target, *scope.origin, *scope.output,
++            scope.identity, scope.prior, scope.continuity, scope.beforeGeneration, scope.afterGeneration,
++            info.sampleRate, info.blockSize));
++    }
++private:
++    static void validateFinishedForwardContinuation (FinishedForwardContinuation& proof,
++        NodeGraph& candidate, NodeGraph& previous, const Stages& next, const Stages& old)
++    {
++        auto* root = dynamic_cast<FinishedForwardContinuationRoot*> (candidate.rootNode.get());
++        const auto scope = requireFinishedForwardScope (candidate, previous, next, old,
++                                                       proof.owner, proof.rate, proof.blockSize);
++        if (!root || root->preparedFinishedForwardContinuation() != &proof || proof.admitted ||
++            proof.bindingNode != candidate.rootNode.get() || proof.candidateGraph != &candidate ||
++            proof.previousGraph != &previous || proof.previousRoot != previous.rootNode.get() ||
++            proof.origin != scope.origin || proof.output != scope.output || proof.identity != scope.identity ||
++            proof.prior != scope.prior || proof.continuity != scope.continuity ||
++            proof.beforeGeneration != scope.beforeGeneration || proof.afterGeneration != scope.afterGeneration)
++            throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcFinishedForwardProof: Exact unconsumed root/owner/graph capability required");
++    }
++
+     static void requireForwardScope (NodeGraph& candidate, NodeGraph& previous,
+                                      const Stages& next, const Stages& old, const void* target)
+     {
+@@ -1003,11 +1269,18 @@
+     // queued tail. This is not variable-delay/route-wide PDC qualification.
+     static bool validateStableOutputStages (NodeGraph& candidate, NodeGraph* previous)
+     {
++        auto* continuationRoot = dynamic_cast<FinishedForwardContinuationRoot*> (candidate.rootNode.get());
++        auto* continuation = continuationRoot ? continuationRoot->preparedFinishedForwardContinuation() : nullptr;
++        if (continuationRoot && bool (continuationRoot->finishedForwardContinuationStage()) != bool (continuation))
++            throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcFinishedForwardMissing: Requested continuation requires its exact prepared capability");
+         auto* zeroRoot = dynamic_cast<ZeroStageExchangeRoot*> (candidate.rootNode.get());
+         auto* zeroToAdmit = zeroRoot ? zeroRoot->preparedZeroStageExchange() : nullptr;
+         const auto next = collectOutputStages (candidate);
+         if (! previous)
+         {
++            if (continuation) throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcFinishedForwardCold: Actual completed predecessor required");
+             if (zeroToAdmit) throw OutputStageError (OutputStageStatus::configuration,
+                 "routing.pdcZeroCold: An exchange requires an actual predecessor graph");
+             for (const auto& [owner, stage] : next)
+@@ -1021,6 +1294,8 @@
+         const auto old = collectOutputStages (*previous);
+         if (next.empty() && old.empty())
+         {
++            if (continuation) throw OutputStageError (OutputStageStatus::missing,
++                "routing.pdcFinishedForwardEmpty: Actual registered stage inventory required");
+             if (zeroToAdmit) throw OutputStageError (OutputStageStatus::missing,
+                 "routing.pdcZeroEmpty: Registered whole-graph stage inventory required");
+             return false;
+@@ -1064,6 +1339,12 @@
+             }
+             return receipt;
+         };
++        if (continuation)
++        {
++            if (zeroToAdmit) throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcFinishedForwardComposition: Independent capabilities cannot authorize one graph");
++            validateFinishedForwardContinuation (*continuation, candidate, *previous, next, old);
++        }
+         if (zeroToAdmit) validateZeroStageExchange (*zeroToAdmit, candidate, *previous, next, old);
+         ForwardOutputDrain* forwardToAdmit = nullptr;
+         InverseOutputResidual* inverseToAdmit = nullptr;
+@@ -1074,7 +1355,7 @@
+                 throw OutputStageError (OutputStageStatus::owner, "routing.pdcStageOwner: Exact graph-pinned bus owner must match");
+             if (now.channels != found->second.channels)
+                 throw OutputStageError (OutputStageStatus::shape, "routing.pdcStageShape: Bus output channels changed");
+-            if (found->second.forward)
++            if (found->second.forward && !(continuation && continuation->owner == identity))
+                 throw OutputStageError (OutputStageStatus::configuration,
+                     "routing.pdcForwardOneShot: A prior bridge requires separately qualified continuation");
+             if (found->second.inverse)
+@@ -1173,6 +1454,11 @@
+         {
+             zeroToAdmit->admitted = true;
+             zeroToAdmit->observed.store (uint32_t (ZeroStageExchange::State::admitted), std::memory_order_release);
++        }
++        if (continuation)
++        {
++            continuation->admitted = true;
++            continuation->observed.store (uint32_t (FinishedForwardContinuation::State::admitted), std::memory_order_release);
+         }
+         if (forwardToAdmit)
+         {

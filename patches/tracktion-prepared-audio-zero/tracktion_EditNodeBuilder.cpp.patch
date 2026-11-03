@@ -1,0 +1,57 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -2510,3 +2510,54 @@
+ }
+ 
+ } // namespace tracktion::inline engine
++
++
++namespace tracktion::inline engine {
++bool EditNodeBuilder::hasPreparedAudioZeroOutput (graph::Node& root,
++    const std::function<bool (Plugin&)>& plugin,
++    const std::function<std::optional<graph::Node*> (graph::Node&)>& port)
++{
++    // Source graph is already transformed/acyclic. Memoisation + active-cycle
++    // guard additionally bound this explicit proof, including shared DAGs.
++    std::map<graph::Node*, bool> completed;
++    std::set<graph::Node*> visiting;
++    const auto visit = [&] (auto&& self, graph::Node& node, size_t depth) -> bool
++    {
++        if (const auto it = completed.find (&node); it != completed.end()) return it->second;
++        if (depth > 256 || completed.size() + visiting.size() >= 4096 ||
++            !visiting.insert (&node).second) return false;
++        const auto done = [&] (bool value)
++        { visiting.erase (&node); completed.emplace (&node, value); return value; };
++        if (port) if (const auto input = port (node))
++            return done (*input && self (self, **input, depth + 1));
++        // Re-audit actual audio inputs even for a prepared port. A cached true
++        // must NEVER resurrect an upstream queue's permanently invalidated proof.
++        if (typeid (node) == typeid (graph::SilentNode)) return done (true);
++        if (auto* delay = dynamic_cast<graph::LatencyNode*> (&node))
++            return done (delay->hasStructuralZeroHistory()); // Actual final queue, never current input alone.
++        if (auto* p = dynamic_cast<PluginNode*> (&node))
++        {
++            if (!plugin || !plugin (p->getPlugin())) return done (false);
++            const auto inputs = p->getDirectInputNodes();
++            if (inputs.size() != 1 || !inputs.front() ||
++                node.getNodeProperties().latencyNumSamples != inputs.front()->getNodeProperties().latencyNumSamples)
++                return done (false); // Hidden native dry/history path not admitted.
++            return done (self (self, *inputs.front(), depth + 1));
++        }
++        const bool returnNode = typeid (node) == typeid (graph::ReturnNode);
++        const bool sum = typeid (node) == typeid (graph::SummingNode);
++        // Remapping is deliberately UNKNOWN: passthrough has a hidden original
++        // input and arbitrary explicit gains need a separate exact proof.
++        const bool oneInput = typeid (node) == typeid (TrackMutingNode) || typeid (node) == typeid (LiveMidiInjectingNode);
++        if (!returnNode && !sum && !oneInput) return done (false);
++        const auto inputs = node.getDirectInputNodes();
++        if (oneInput && inputs.size() != 1) return done (false);
++        // Return's genuinely empty bus and empty SummingNode clear output;
++        // native MIDI pass/panic has no audio synthesis in these exact types.
++        for (auto* input : inputs)
++            if (!input || !self (self, *input, depth + 1)) return done (false);
++        return done (true);
++    };
++    return visit (visit, root, 0);
++}
++} // namespace tracktion::inline engine

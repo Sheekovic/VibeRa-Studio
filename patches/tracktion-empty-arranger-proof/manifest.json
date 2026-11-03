@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original CONTROL audio-zero proof for exact zero-channel/no-audio/no-latency empty native arranger or combining branches only. Populated/launcher/history/unknown paths retain refusal; no generic joint route authorization or runtime qualification.",
+  "sourceProvenance": {
+    "draftFreezeSha256": "e746ab49e5455fa3814f47e658010f5f15b07cf074636a3d3d58a34b8cd14d3a",
+    "draftPayloadSha256": "af58b24fe108e057f460607b59f91e8186bab4fae9cd249d70987b19f888707a",
+    "referenceImplementation": "Independent original extension around pinned Tracktion source; upstream license/notices retained"
+  },
+  "appliesAfter": "patches/tracktion-context-memory-policy/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-empty-arranger-proof/tracktion_EditNodeBuilder.cpp.patch",
+      "originalSha256": "a6c5ad7a65f46ad8053ab9e226b5fda6b104f11d229a1c346b24fd67e7b8ccf5",
+      "patchedSha256": "a11e6a85c98aceea8f4ae548ae5574c569d1d3579c9943f9d6c2c5a0c8089ca0",
+      "patchSha256": "384367108b1c65bf2c174b1bbf187583d22d8d1ee238973e19661d716a0d9f7c",
+      "addedLines": 22,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-owned-metering/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-send-gain-block/manifest.json",
+        "patches/tracktion-native-midi-ingress/manifest.json",
+        "patches/tracktion-plugin-final-output/manifest.json",
+        "patches/tracktion-app-source-port-bridge/manifest.json",
+        "patches/tracktion-prepared-audio-zero/manifest.json",
+        "patches/tracktion-context-memory-policy/manifest.json"
+      ]
+    }
+  ]
+}

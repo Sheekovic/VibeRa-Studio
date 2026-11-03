@@ -1,0 +1,16 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_NodeRenderContext.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_NodeRenderContext.cpp
+@@ -57,9 +57,12 @@
+     jassert (r.edit != nullptr);
+     jassert (r.time.getLength() > 0.0s);
+ 
+-    nodePlayer = std::make_unique<TracktionNodePlayer> (std::move (n), *processState, r.sampleRateForAudio, r.blockSizeForAudio,
++    // Set the requested worker policy before the first graph preparation.
++    // The node-taking constructor prepares immediately with the default worker count.
++    nodePlayer = std::make_unique<TracktionNodePlayer> (*processState,
+                                                         getPoolCreatorFunction (static_cast<tracktion::graph::ThreadPoolStrategy> (EditPlaybackContext::getThreadPoolStrategy())));
+     nodePlayer->setNumThreads ((size_t) p.engine->getEngineBehaviour().getNumberOfCPUsToUseForAudio() - 1);
++    nodePlayer->setNode (std::move (n), r.sampleRateForAudio, r.blockSizeForAudio);
+ 
+     numLatencySamplesToDrop = nodePlayer->getNode()->getNodeProperties().latencyNumSamples;
+     r.time = r.time.withEnd (r.time.getEnd() + TimeDuration::fromSamples (numLatencySamplesToDrop, r.sampleRateForAudio));

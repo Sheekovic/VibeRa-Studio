@@ -1,0 +1,31 @@
+{
+  "revision": "1d95888bec3ae0a17c0c4af791810d5a63f6bc35",
+  "license": "GPL-2.0-or-later",
+  "path": "src/common/BQResampler.cpp",
+  "originalSha256": "058efe3179a80188050f69d67e865f96f2a33119a4a06929368532bbddd6ccab",
+  "preparedSha256": "7a8fb1623e02980743521c7cab86d13b082cdbb479941ae0342ef0967dfa2867",
+  "old": "    int phase_reserve = 2 * int(round(m_initial_rate));",
+  "new": "    // VibeRa Tune experiment (2026-10-15): prepare phase storage for +/-12 semitones.\n    int phase_reserve = max(2 * int(round(m_initial_rate)), m_qparams.rational_max + 2);",
+  "scope": "Experimental prepared capacity for the VibeRa +/- octave correction range; unchanged resampling math. Not a full library realtime guarantee. Prepared storage reuse after measured C/aligned allocation failure; device/block sizes unchanged.",
+  "legacyPreparedSha256": [
+    "7107bd4b83c4a41ccc9cfaf4566a9eae621a6a49fd4b1e6b8e9674745e031451"
+  ],
+  "legacyEdits": [
+    {
+      "old": "target_state.buffer = floatbuf(buffer_length, 0.0);",
+      "new": "target_state.buffer.assign(buffer_length, 0.0);",
+      "count": 2
+    }
+  ],
+  "edits": [
+    {
+      "old": "    int phase_reserve = 2 * int(round(m_initial_rate));",
+      "new": "    // VibeRa Tune experiment (2026-10-15): prepare phase storage for +/-12 semitones.\n    int phase_reserve = max(2 * int(round(m_initial_rate)), m_qparams.rational_max + 2);"
+    },
+    {
+      "old": "target_state.buffer = floatbuf(buffer_length, 0.0);",
+      "new": "target_state.buffer.assign(buffer_length, 0.0);",
+      "count": 2
+    }
+  ]
+}

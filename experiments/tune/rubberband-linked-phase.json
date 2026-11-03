@@ -1,0 +1,10 @@
+{
+  "revision": "1d95888bec3ae0a17c0c4af791810d5a63f6bc35",
+  "license": "GPL-2.0-or-later",
+  "path": "src/finer/PhaseAdvance.h",
+  "originalSha256": "f65a6f1161fb843efab318b4517c6446fd55f02d9dc68116c1231c1fb74ca2be",
+  "preparedSha256": "44d07b833826f7f61844175032ecbb73312602f9bbbd687e90357e2554e9a41b",
+  "old": "        for (int c = 0; c < channels; ++c) {\r\n            for (int i = lowest; i <= highest; ++i) {\r\n                m_prevInPhase[c][i] = phase[c][i];",
+  "new": "        // VibeRa experiment: share pitch correction while retaining input phase offsets.\r\n        if (usingMidSide && channels == 2) {\r\n            for (int i = lowest; i <= highest; ++i) {\r\n                int reference = m_greatestChannel[i];\r\n                int other = 1 - reference;\r\n                outPhase[other][i] = princarg(outPhase[reference][i] +\r\n                    phase[other][i] - phase[reference][i]);\r\n            }\r\n        }\r\n\r\n        for (int c = 0; c < channels; ++c) {\r\n            for (int i = lowest; i <= highest; ++i) {\r\n                m_prevInPhase[c][i] = phase[c][i];",
+  "scope": "Experimental shared spectral correction for mid/side stereo; preserves input phase offsets. Musical, latency and runtime qualification remain required."
+}

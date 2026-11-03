@@ -1,0 +1,98 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
+@@ -1410,7 +1410,8 @@
+         bool sourceAdmitted = true;
+         for (auto c : activeContexts)
+             sourceAdmitted &= c->preflightSourceBurst (numSamples, totalNumOutputChannels, sourceBurstInnerOffset, sourceBurstOffsetKnown,
+-                sourceBurstEpoch, sourceBurstSerial, currentSampleRate, maxBlockSize);
++                sourceBurstEpoch, sourceBurstSerial, currentSampleRate, maxBlockSize)
++                    != SourceBurstSession::Decision::fault;
+         if (sourceAdmitted)
+             for (auto c : activeContexts)
+                 if (!c->beginSourceBurst()) { sourceAdmitted = false; break; }
+@@ -1425,7 +1426,7 @@
+         if (currentCpuUsage > cpuLimitBeforeMuting)
+         {
+             bool anyBound = false;
+-            for (auto c : activeContexts) anyBound |= bool (c->sourceBurstSession);
++            for (auto c : activeContexts) anyBound |= c->sourceBurstShouldProcess() && bool (c->sourceBurstSession);
+             if (anyBound)
+             {
+                 for (auto c : activeContexts) c->abortSourceBurst (SourceBurstSession::Status::cpuOverload);
+@@ -1449,7 +1450,7 @@
+                 // Existing MIDI lock/order only; no new lock in admission helpers.
+                 broadcastStreamTimeToMidiDevices (streamTime + outputLatencyTime);
+                 for (auto c : activeContexts)
+-                    c->nextBlockStarted();
++                    if (c->sourceBurstShouldProcess()) c->nextBlockStarted();
+ 
+                 for (auto wi : waveInputs)
+                     wi->consumeNextAudioBlock (inputChannelData, numInputChannels, numSamples, streamTime);
+@@ -1464,7 +1465,7 @@
+ 
+                 bool sourceProcessed = true;
+                 for (auto c : activeContexts)
+-                    if (!c->fillNextNodeBlock (outputChannelData, totalNumOutputChannels, numSamples))
++                    if (c->sourceBurstShouldProcess() && !c->fillNextNodeBlock (outputChannelData, totalNumOutputChannels, numSamples))
+                     { sourceProcessed = false; break; }
+                 if (sourceProcessed)
+                     for (auto c : activeContexts) sourceProcessed &= c->finishSourceBurst();
+@@ -1741,12 +1742,39 @@
+ }
+ 
+ SourceBurstSession::Status DeviceManager::installSourceBurstSession (EditPlaybackContext& context, SourceBurstSession::Ptr candidate)
++{ return installSourceBurstSessionInternal (context, std::move (candidate), false); }
++SourceBurstSession::Status DeviceManager::installInitialSourceBurstSession (EditPlaybackContext& context, SourceBurstSession::Ptr candidate)
++{ return installSourceBurstSessionInternal (context, std::move (candidate), true); }
++SourceBurstSession::Status DeviceManager::installSourceBurstSessionInternal (EditPlaybackContext& context, SourceBurstSession::Ptr candidate, bool initial)
+ {
+     TRACKTION_ASSERT_MESSAGE_THREAD
+     SourceBurstSession::Ptr retired;
+     {
+         const std::unique_lock sl (contextLock); // CONTROL; the existing callback exclusion.
+         if (!activeContexts.contains (&context)) return SourceBurstSession::Status::contextUnavailable;
++        if (initial)
++        {
++            if (context.localSourceLifecycleInvalidated.load (std::memory_order_acquire))
++                return SourceBurstSession::Status::localLifecycleInvalidated;
++            if (candidate && context.sourceBurstSession == candidate &&
++                context.edit.initialSourceGeneration == candidate->configuration().generation)
++            {
++                SourceBurstSession::Outcome outcome;
++                if (!candidate->read (outcome)) return SourceBurstSession::Status::telemetryUnavailable;
++                if (outcome.failed || outcome.retired) return outcome.status;
++                const auto phase = context.sourceInitialPhase.load (std::memory_order_acquire);
++                if (phase == EditPlaybackContext::InitialSourcePhase::waitingFirstSerial)
++                    return SourceBurstSession::Status::pendingFirstSerial;
++                if (phase == EditPlaybackContext::InitialSourcePhase::active)
++                    return SourceBurstSession::Status::ready;
++            }
++            if (!candidate || !context.edit.closedNativeIO || !context.edit.initialSourceGeneration ||
++                candidate->configuration().generation != context.edit.initialSourceGeneration ||
++                context.sourceInitialPhase.load (std::memory_order_acquire) != EditPlaybackContext::InitialSourcePhase::awaitingSession ||
++                context.sourceBurstSession || context.nodeContextToSyncTo || context.contextToSyncTo || !context.waveInputs.isEmpty() || !context.midiInputs.isEmpty() || !context.midiOutputs.isEmpty())
++                return SourceBurstSession::Status::initialContextRequired;
++        }
++        else if (context.edit.initialSourceGeneration) return SourceBurstSession::Status::initialContextRequired;
+         if (context.sourceBurstSession == candidate) return SourceBurstSession::Status::prepared;
+         if (context.sourceBurstSession && context.sourceBurstSession->scopeOpen()) return SourceBurstSession::Status::scopeInProgress;
+         if (candidate)
+@@ -1756,14 +1784,16 @@
+             const auto prepared = context.prepareSourceBurstResources (candidate->configuration(),
+                 device->getActiveOutputChannels().countNumberOfSetBits());
+             if (prepared != SourceBurstSession::Status::prepared) return prepared;
+-            const auto status = candidate->claim (deviceManager, &context);
++            const auto status = candidate->claim (deviceManager, &context, initial);
+             if (status != SourceBurstSession::Status::prepared) return status;
+         }
+         retired = std::move (context.sourceBurstSession);
+         context.sourceBurstSession = std::move (candidate); // No owner destruction under the lock.
++        if (initial)
++            context.sourceInitialPhase.store (EditPlaybackContext::InitialSourcePhase::waitingFirstSerial, std::memory_order_release);
+     }
+     if (retired) retired->retire (SourceBurstSession::Status::retired);
+-    return SourceBurstSession::Status::prepared;
++    return initial ? SourceBurstSession::Status::pendingFirstSerial : SourceBurstSession::Status::prepared;
+ }
+ void DeviceManager::removeContext (EditPlaybackContext* c)
+ {

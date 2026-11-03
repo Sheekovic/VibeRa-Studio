@@ -1,0 +1,13 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -100,6 +100,10 @@
+     // prepare bounded source/fan-in/sink MIDI reservation from the baseline;
+     // legacy/default graphs and incumbent policy migration are not enabled.
+     bool boundedNativeMidiIngress = false;
++    // ORIGINAL CONTROL-only per-build split, after native clip/live injection
++    // and before incoming Track audio fan-in. Empty keeps ordinary behavior.
++    std::function<std::unique_ptr<graph::Node> (AudioTrack&, std::unique_ptr<graph::Node>)>
++        prepareNativeTrackClipOutput = {};
+ 
+     // ORIGINAL CONTROL-only output-port experiment. Empty preserves native
+     // behavior. Caller admits exact producer/type/short-MIDI universe first.

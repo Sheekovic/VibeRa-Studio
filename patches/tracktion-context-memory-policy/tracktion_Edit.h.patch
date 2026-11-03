@@ -1,0 +1,22 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.h
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.h
+@@ -132,6 +132,9 @@
+         juce::uint64 initialSourceGeneration = 0;
+         bool closedNativeIO = false; // Native wave/MIDI inputs and MIDI outputs are not supported in this Edit.
+         NodeGraphPreparation configureNodeGraphForPreparation = {};
++        // Nonserialized construction policy. Appended to preserve old aggregate
++        // initializers. Default keeps global policy; exclusion is per Edit only.
++        bool disableNodeMemorySharing = false;
+     };
+ 
+     /** Creates an Edit from a set of Options.
+@@ -150,6 +153,9 @@
+     Engine& engine;
+     const juce::uint64 initialSourceGeneration;
+     const bool closedNativeIO; // Immutable construction policy, never read from project ValueTree.
++    const bool disableNodeMemorySharing;
++    bool shouldUseNodeMemorySharing (bool defaultEnabled) const noexcept
++    { return defaultEnabled && !disableNodeMemorySharing; }
+     // Invoked after effective overlay fields, before baseline/private factory.
+     // Ownership is fixed at construction; exceptions refuse preparation before publication.
+     void configureNodeGraphForPreparation (CreateNodeParams&);

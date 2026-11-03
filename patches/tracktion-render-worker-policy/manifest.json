@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": true,
+  "qualification": "Install the unchanged EngineBehaviour worker policy before first offline graph preparation. Same existing setNode path and sample/transport/render contracts; no source-handoff or PCM authority granted. Runtime and performance qualification are separate.",
+  "sourceProvenance": {
+    "draftFreezeSha256": "a6efd476444d0013a8c62c5a6094baa63f753f0aa3bfc1f198c440ac7bbe1e82",
+    "referenceImplementation": "Independent original construction ordering; upstream source and license notices retained"
+  },
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_NodeRenderContext.cpp",
+      "patch": "patches/tracktion-render-worker-policy/tracktion_NodeRenderContext.cpp.patch",
+      "originalSha256": "b3e480e824dd91350bb86574f07c17ee5ee5618e5d38d3dba209a2adca2cb343",
+      "patchedSha256": "570f9487a286d0dc43ca6617167b454044fe62e34904bd557af71f2300d47c35",
+      "patchSha256": "02e8174b81b9f4f4aa5550828174d0473e5dc8b363aea218e40624c0d265c3f7",
+      "addedLines": 4,
+      "deletedLines": 1,
+      "lineage": []
+    }
+  ]
+}

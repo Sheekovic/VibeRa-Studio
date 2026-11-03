@@ -1,0 +1,10 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_MidiOutputDevice.cpp
++++ b/modules/tracktion_engine/playback/devices/tracktion_MidiOutputDevice.cpp
+@@ -612,6 +612,7 @@
+ 
+ MidiOutputDeviceInstance* MidiOutputDevice::createInstance (EditPlaybackContext& c)
+ {
++    if (c.refuseNativeIOAttachment()) return nullptr;
+     return new MidiOutputDeviceInstance (*this, c);
+ }
+ 

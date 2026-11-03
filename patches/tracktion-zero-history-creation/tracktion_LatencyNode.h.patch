@@ -1,0 +1,113 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -13,6 +13,7 @@
+ #include <atomic>
+ #include <stdexcept>
+ #include <map>
++#include <set>
+ #include <cmath>
+ #include <limits>
+ #include <cstdint>
+@@ -20,6 +21,17 @@
+ namespace tracktion::inline graph {
+ 
+ class LatencyNode;
++
++// Internal declaration by audited, independently implemented graph types.
++// No existing/app/native type is admitted by this prototype. Immutable for
++// the graph lifetime; promises numerical-zero audio AND empty MIDI/no panic.
++class StructuralAudioSilence
++{
++public:
++    enum class Kind { unknown, zeroLeaf, zeroPreservingInputs };
++    virtual ~StructuralAudioSilence() = default;
++    virtual Kind structuralAudioSilenceKind() const noexcept = 0;
++};
+ 
+ // ORIGINAL one-shot, graph-pinned capability for exactly one registered D->0
+ // output queue. Not a project ID, graph-generation receipt, MIDI bridge, or
+@@ -139,6 +151,12 @@
+ class LatencyNode final : public Node
+ {
+ public:
++    // Read-only metadata, NOT FIFO content or changed-stage admission.
++    bool hasStructuralZeroHistory() const noexcept
++    { return latencyProcessor && latencyProcessor->hasStructuralZeroHistory(); }
++    const void* structuralZeroHistoryRuntimeToken() const noexcept
++    { return latencyProcessor.get(); } // Nonpersistent; caller pins actual graph.
++
+     enum class RuntimeAudioDelayStatus : uint32_t { ready, invalidReceipt, capacityExceeded };
+     struct RuntimeAudioDelay { RuntimeAudioDelayStatus status = RuntimeAudioDelayStatus::invalidReceipt; uint32_t samples = 0; };
+     struct RuntimeAudioDelayBinding
+@@ -503,7 +521,7 @@
+     LatencyNode (std::shared_ptr<Node> n, int delay) : LatencyNode (n.get(), delay) { sharedInput = std::move (n); }
+     LatencyNode (Node* n, int delay) : input (n), requestedDelay (delay), latencyProcessor (std::make_shared<LatencyProcessor>())
+     {
+-        latencyProcessor->setLatencyNumSamples (delay);
++        latencyProcessor->setInitialLatencyNumSamples (delay);
+         setOptimisations ({ ClearBuffers::no, AllocateAudioBuffer::yes });
+     }
+     LatencyNode (std::unique_ptr<Node> n, int delay, RetainedAudioEdge edge) : LatencyNode (n.get(), delay, edge) { ownedInput = std::move (n); }
+@@ -596,8 +614,13 @@
+     {
+         if (!historyEnabled)
+         {
++            const bool zeroInput = isStructurallySilent (*input);
+             latencyProcessor->prepareToPlay (info.sampleRate, info.blockSize, getNodeProperties().numberOfChannels);
++            latencyProcessor->sealStructuralZeroCreation (zeroInput);
+             replaceLatencyProcessorIfPossible (info.nodeGraphToReplace);
++            // FINAL possibly inherited processor: never copy the temporary
++            // processor's pristine flag onto unknown prior history.
++            if (!zeroInput) latencyProcessor->invalidateStructuralZero();
+         }
+         else
+             prepareHistory (info);
+@@ -612,8 +635,8 @@
+         if (!historyEnabled)
+         {
+             const auto referenceBefore = latencyProcessor->referenceBeforeAudio();
+-            latencyProcessor->writeAudio (source.audio);
+-            if (!midiHistoryRaw) latencyProcessor->writeMIDI (source.midi);
++            latencyProcessor->writePreparedAudio (source.audio);
++            if (!midiHistoryRaw) latencyProcessor->writePreparedMIDI (source.midi);
+             pc.buffers.midi.clear();
+             latencyProcessor->readAudioOverwriting (pc.buffers.audio);
+             if (midiHistoryRaw) processBoundedMidi (pc, source.midi);
+@@ -883,6 +906,37 @@
+         return midiHistoryRaw ? midiHistoryRaw->observation() : vibera::dsp::MidiHistoryObservation{};
+     }
+ private:
++    // CONTROL only after graph transforms; no current-sample inspection.
++    static bool isStructurallySilent (Node& root)
++    {
++        std::set<Node*> visiting;
++        std::map<Node*, bool> completed;
++        constexpr size_t maximumNodes = 4096, maximumDepth = 256;
++        const auto visit = [&] (auto&& self, Node& node, size_t depth) -> bool
++        {
++            if (const auto found = completed.find (&node); found != completed.end())
++                return found->second;
++            const auto* declaration = dynamic_cast<const StructuralAudioSilence*> (&node);
++            if (!declaration) return false; // Default unknown: no traversal/allocation.
++            if (depth > maximumDepth || completed.size() + visiting.size() >= maximumNodes ||
++                !visiting.insert (&node).second) return false;
++            const auto finish = [&] (bool zero)
++            { visiting.erase (&node); completed.emplace (&node, zero); return zero; };
++            const auto kind = declaration->structuralAudioSilenceKind();
++            const auto properties = node.getNodeProperties();
++            if (kind == StructuralAudioSilence::Kind::unknown || properties.hasMidi ||
++                !properties.hasAudio || properties.numberOfChannels <= 0 || node.canShareOutputBuffer())
++                return finish (false);
++            const auto inputs = node.getDirectInputNodes();
++            bool zero = kind == StructuralAudioSilence::Kind::zeroLeaf ? inputs.empty() :
++                        kind == StructuralAudioSilence::Kind::zeroPreservingInputs && !inputs.empty();
++            if (kind == StructuralAudioSilence::Kind::zeroPreservingInputs)
++                for (auto* source : inputs) zero = zero && source && self (self, *source, depth + 1);
++            return finish (zero);
++        };
++        return visit (visit, root, 0);
++    }
++
+     void replaceLatencyProcessorIfPossible (NodeGraph* oldGraph)
+     {
+         if (!oldGraph) return;

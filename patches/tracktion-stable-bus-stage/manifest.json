@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original bounded same-stage fixed-configuration FIFO carry; software acceptance pending, general route-wide PDC remains required",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_Node.h",
+      "patch": "patches/tracktion-stable-bus-stage/tracktion_Node.h.patch",
+      "originalSha256": "50d2778280604e460431b3dc67150c5827bbffbbe39b3990f3e47b74b9974f6a",
+      "patchedSha256": "90b50daea67f5bc310e8d04c4d86577a48b1629bc5d0bbba1dd2e76d1a0cb623",
+      "patchSha256": "1dbc8a7ea58b9797d9fdd1ed4af3daef65e8820d7c6aa20a5902a4fff64b7c6f",
+      "addedLines": 6,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/plugins/tracktion_Plugin.h",
+      "patch": "patches/tracktion-stable-bus-stage/tracktion_Plugin.h.patch",
+      "originalSha256": "c10314cd075e1ace0959147caa8410325ef38dc9c74ad7d277836d261e18569c",
+      "patchedSha256": "f3f8b11ca783f77b4233c1430590d54deabcf6aad0a47a17c9eb8a842d3ba90c",
+      "patchSha256": "b9d1b8c7c8873801491c94a70050bf4e8b9aa8ef28888405728e7894f3edb4a6",
+      "addedLines": 6,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp",
+      "patch": "patches/tracktion-stable-bus-stage/tracktion_PluginNode.cpp.patch",
+      "originalSha256": "bd4046a43af0b9b3bc7d41e8d2fbd139ee50f9143a4018addfcc369bdab33a46",
+      "patchedSha256": "da46100fc63eb5d7db7ace3917634f84ca8abdbc48b2136061b9f9fddf79aa12",
+      "patchSha256": "20ed959cdd04dc5e58eedcb0aa3ab2c758d8688468ff943e7638eabf8e1c4533",
+      "addedLines": 4,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-detached-graph/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-stable-bus-stage/tracktion_LatencyNode.h.patch",
+      "originalSha256": "5995eed35d46e1a7356c55a97d56628ef80e772dba7d40057bb2fabd4c908845",
+      "patchedSha256": "ff35a68a8e2bce9ff7b7a9eb0f0b7b91fe4489b3178a07c9cd63523b47df77cc",
+      "patchSha256": "8ec77690469688f0d3ed788e048e62c8e272da306d58ba6dfad8e4ba249a78aa",
+      "addedLines": 135,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp",
+      "patch": "patches/tracktion-stable-bus-stage/tracktion_LockFreeMultiThreadedNodePlayer.cpp.patch",
+      "originalSha256": "91cd670f4f62b0875bd0bb3f9898956329b95b9db82c21a2fbbfc21ca2bc69ae",
+      "patchedSha256": "f1acc3baaea6b216c3e48a419c69fe6545de9a74b689416c165537da4a7ccf45",
+      "patchSha256": "5f3e56d54a3e3e9387a53825afc59d7b461e147bc13472fc4adbd71cb18b38dd",
+      "addedLines": 3,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-ready-graph/manifest.json",
+        "patches/tracktion-context-ready/manifest.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+--- a/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h
++++ b/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h
+@@ -7,6 +7,8 @@
+ 
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
++
++namespace tracktion::inline graph { class SendGainState; }
+ 
+ namespace tracktion::inline engine {
+ 
+@@ -22,6 +24,14 @@
+     {
+         return volumeFaderPositionToGain (gain->getCurrentValue());
+     }
++
++    // CONTROL-only graph construction, never called by an audio callback.
++    // Default null preserves normal native behavior. An override may allocate
++    // a fresh private bank or throw; it must validate edge/configuration/epoch
++    // ownership before returning an existing bank. A retained detached shell
++    // must reject stale ownership, never silently renew a retired live bank.
++    virtual std::shared_ptr<graph::SendGainState> prepareSendGainStateForGraph() const
++    { return {}; }
+ 
+     void setGainDb (float newDb);
+     float getGainDb() const                 { return volumeFaderPositionToDB (gain->getCurrentValue()); }

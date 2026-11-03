@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "dependency": "JUCE",
+  "revision": "37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "sourceDirectory": "JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "archiveSha256": "f3da0cce79f1008b02ba1cddde8eba1087d07a4d6a775a0ba0d56a9d3cecd18a",
+  "license": "AGPL-3.0-only",
+  "defaultExceptionSafety": true,
+  "qualification": "Default numeric conversion exception propagation; C++ fault/default-format verification separate",
+  "vendorReadDependencies": [
+    {
+      "path": "modules/juce_core/text/juce_String.h",
+      "sha256": "d19d8d16dee7f20a8c97ea1c3b3f38e18f6e6213679ae30abb787a02c57fdc40",
+      "mode": "raw"
+    }
+  ],
+  "files": [
+    {
+      "path": "modules/juce_core/text/juce_String.cpp",
+      "patch": "patches/juce-number-safety/juce_String.cpp.patch",
+      "originalSha256": "707f850eeccaa85dbbd80e44e0ecce6202847431c93d533d701c03079c65da91",
+      "patchedSha256": "859e823bd6db75554664e705243a7ade8ba2b41c5ac3f29acec429feee8c5c64",
+      "patchSha256": "b6d6148ce7f8f333711642d3630f7b8545b40678e2cc896e065719af51fdaf1a"
+    }
+  ]
+}

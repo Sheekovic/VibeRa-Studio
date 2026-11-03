@@ -1,0 +1,158 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -12,6 +12,7 @@
+ #include "tracktion_CompensationHistory.h"
+ #include <atomic>
+ #include <stdexcept>
++#include <map>
+ 
+ namespace tracktion::inline graph {
+ 
+@@ -50,6 +51,119 @@
+     void prefetchBlock (juce::Range<int64_t> range) override
+     {
+         if (runtimeDelay.begin) runtimeDelay.begin (runtimeDelay.context, range);
++    }
++    enum class OutputStageStatus { shape, duplicate, fanout, missing, owner, configuration, cold, unsupportedInternal, predecessorPending };
++    class OutputStageError final : public std::invalid_argument
++    {
++    public:
++        OutputStageError (OutputStageStatus value, const char* text) : std::invalid_argument (text), status (value) {}
++        const OutputStageStatus status;
++    };
++    // CONTROL-only fixed-graph admission. Every explicit output stage must
++    // remain present and unique with the SAME delay/rate/channel configuration.
++    // Includes zero-delay stages so old delay->none cannot silently discard a
++    // queued tail. This is not variable-delay/route-wide PDC qualification.
++    static bool validateStableOutputStages (NodeGraph& candidate, NodeGraph* previous)
++    {
++        struct Stage
++        {
++            int channels = 0, exits = 0;
++            const void* origin = nullptr;
++            LatencyNode* delay = nullptr;
++        };
++        using Stages = std::map<const void*, Stage>;
++        const auto collect = [] (NodeGraph& graph)
++        {
++            Stages stages;
++            for (auto* node : graph.orderedNodes)
++            {
++                const auto props = node->getNodeProperties();
++                if (! props.audioCompensationStage) continue;
++                auto& stage = stages[props.audioCompensationStage];
++                if (!props.audioCompensationStageOrigin ||
++                    (stage.origin && stage.origin != props.audioCompensationStageOrigin))
++                    throw OutputStageError (OutputStageStatus::duplicate, "routing.pdcStageDuplicate: One exact producing Node per registered bus owner required");
++                stage.origin = props.audioCompensationStageOrigin;
++                if (props.numberOfChannels <= 0 || (stage.channels != 0 && stage.channels != props.numberOfChannels))
++                    throw OutputStageError (OutputStageStatus::shape, "routing.pdcStageShape: Explicit bus stage channel shape changed");
++                stage.channels = props.numberOfChannels;
++                if (auto* tap = dynamic_cast<LatencyNode*> (node))
++                {
++                    if (tap->historyEnabled || stage.delay)
++                        throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageAmbiguous: Separate explicit stage per compensation fanout required");
++                    stage.delay = tap;
++                }
++            }
++            // A stage may pass through wrappers but must enter ONE consumer
++            // boundary. A direct + delayed fanout may otherwise look like only
++            // one FIFO while ambiguously changing what its old queue means.
++            for (auto* node : graph.orderedNodes)
++            {
++                const auto owner = node->getNodeProperties().audioCompensationStage;
++                for (auto* inputNode : node->getDirectInputNodes())
++                {
++                    const auto inputOwner = inputNode->getNodeProperties().audioCompensationStage;
++                    if (inputOwner && inputOwner != owner) ++stages.at(inputOwner).exits;
++                }
++            }
++            if (const auto rootOwner = graph.rootNode->getNodeProperties().audioCompensationStage)
++                ++stages.at(rootOwner).exits;
++            for (const auto& [owner, stage] : stages)
++                if (stage.exits != 1)
++                    throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageFanout: Exact single output consumer required");
++            return stages;
++        };
++        const auto next = collect (candidate);
++        if (! previous) return ! next.empty(); // Genuine first cold graph has no queued history.
++        const auto old = collect (*previous);
++        if (next.empty() && old.empty()) return false;
++        if (next.size() != old.size())
++            throw OutputStageError (OutputStageStatus::missing, "routing.pdcStageMissing: Explicit bus output stages must remain present");
++        for (const auto& [identity, now] : next)
++        {
++            const auto found = old.find (identity);
++            if (found == old.end())
++                throw OutputStageError (OutputStageStatus::owner, "routing.pdcStageOwner: Exact graph-pinned bus owner must match");
++            if (now.channels != found->second.channels)
++                throw OutputStageError (OutputStageStatus::shape, "routing.pdcStageShape: Bus output channels changed");
++            const auto* before = found->second.delay;
++            if (bool (now.delay) != bool (before) ||
++                (now.delay && (!now.delay->latencyProcessor || !before->latencyProcessor ||
++                  !now.delay->latencyProcessor->hasSameConfigurationAs (*before->latencyProcessor))))
++                throw OutputStageError (OutputStageStatus::configuration, "routing.pdcStageConfiguration: Delay/rate/path change requires a qualified joint plan");
++            if (now.delay && now.delay->latencyProcessor != before->latencyProcessor)
++                throw OutputStageError (OutputStageStatus::cold, "routing.pdcStageCold: Candidate did not retain its exact prior bus queue");
++        }
++        // An unchanged root bus queue does not excuse a cold internal
++        // compensation stage. Preserve only exact existing legacy processor
++        // handles there; general changed-path compensation remains unqualified.
++        const auto collectUnregistered = [] (NodeGraph& graph)
++        {
++            std::map<size_t, LatencyNode*> queues;
++            for (auto* node : graph.orderedNodes)
++                if (auto* tap = dynamic_cast<LatencyNode*> (node); tap &&
++                    !tap->getNodeProperties().audioCompensationStage)
++                {
++                    const auto id = tap->getNodeProperties().nodeID;
++                    if (tap->historyEnabled || !id || !tap->latencyProcessor || !queues.emplace (id, tap).second)
++                        throw OutputStageError (OutputStageStatus::unsupportedInternal,
++                            "routing.pdcInternalScope: Unidentified/ambiguous/history-mode internal queue needs a joint plan");
++                }
++            return queues;
++        };
++        const auto nextInternal = collectUnregistered (candidate);
++        const auto oldInternal = collectUnregistered (*previous);
++        if (nextInternal.size() != oldInternal.size())
++            throw OutputStageError (OutputStageStatus::unsupportedInternal,
++                "routing.pdcInternalScope: Added/removed internal compensation queue needs a joint plan");
++        for (const auto& [id, tap] : nextInternal)
++        {
++            const auto found = oldInternal.find (id);
++            if (found == oldInternal.end() || tap->latencyProcessor != found->second->latencyProcessor)
++                throw OutputStageError (OutputStageStatus::unsupportedInternal,
++                    "routing.pdcInternalScope: Changed/cold internal compensation queue needs a joint plan");
++        }
++        return true;
+     }
+     struct RetainedAudioEdge
+     {
+@@ -448,6 +562,27 @@
+     void replaceLatencyProcessorIfPossible (NodeGraph* oldGraph)
+     {
+         if (!oldGraph) return;
++        const auto stage = input->getNodeProperties().audioCompensationStage;
++        if (stage)
++        {
++            LatencyNode* match = nullptr;
++            for (auto* node : oldGraph->orderedNodes)
++                if (auto* old = dynamic_cast<LatencyNode*> (node); old &&
++                    old->input->getNodeProperties().audioCompensationStage == stage)
++                {
++                    if (match)
++                        throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageAmbiguous: Prior bus queue is not unique");
++                    match = old;
++                }
++            // Only immutable configuration/owning handles are read on CONTROL.
++            // The old FIFO/cursor/MIDI queue are NEVER copied/reset/peeked here.
++            // Fixed-graph admission below refuses missing/incompatible stages.
++            // Ordinary device/configuration reprepare retains its normal lifecycle.
++            if (match && !match->historyEnabled &&
++                latencyProcessor->hasSameConfigurationAs (*match->latencyProcessor))
++                latencyProcessor = match->latencyProcessor;
++            return; // Never fall back to a lineage hash for an explicit stage.
++        }
+         const auto id = getNodeProperties().nodeID;
+         if (id == 0) return;
+         if (auto* old = findNodeWithID<LatencyNode> (*oldGraph, id); old && !old->historyEnabled &&

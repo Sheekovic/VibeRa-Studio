@@ -1,0 +1,62 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
+@@ -26,6 +26,18 @@
+     void removeInstanceForDevice (InputDevice&);
+ 
+     /** Note this doesn't check for device enablement */
++    // Only an explicit nonserialized closed Edit rejects native attachments.
++    bool refuseNativeIOAttachment() noexcept
++    {
++        if (edit.admitNativeCapability (Edit::NativeCapability::inputOutput) == Edit::NativeCapabilityStatus::allowed)
++            return false;
++        closedNativeIORefused.store (true, std::memory_order_release);
++        return true;
++    }
++    bool nativeIOAttachmentRefused() const noexcept { return closedNativeIORefused.load (std::memory_order_acquire); }
++    enum class InitialSourcePhase { unbound, awaitingSession, waitingFirstSerial, active, failed };
++    InitialSourcePhase initialSourcePhase() const noexcept { return sourceInitialPhase.load (std::memory_order_acquire); }
++    bool sourceLifecycleInvalidated() const noexcept { return localSourceLifecycleInvalidated.load (std::memory_order_acquire); }
+     void addWaveInputDeviceInstance (InputDevice&);
+     void addMidiInputDeviceInstance (InputDevice&);
+ 
+@@ -97,6 +109,7 @@
+ 
+     // Plays this context in sync with another context
+     void syncToContext (EditPlaybackContext* contextToSyncTo, TimePosition previousBarTime, TimeDuration syncInterval);
++    Edit::NativeCapabilityStatus trySyncToContext (EditPlaybackContext*, TimePosition previousBarTime, TimeDuration syncInterval);
+ 
+     tl::expected<Clip::Array, juce::String> stopRecording (InputDeviceInstance&, bool discardRecordings);
+     tl::expected<Clip::Array, juce::String> stopRecording (TimePosition unloopedEnd, bool discardRecordings);
+@@ -193,6 +206,9 @@
+     /** Returns the last reference sample position and the edit time and beat that it corresponded to. */
+     std::optional<SyncPoint> getSyncPoint() const;
+ 
++    // Checked conversion refuses LOCAL-CLOSED without changing output. Legacy
++    // LOCAL-CLOSED wrappers return a distinguishable NaN, never a valid zero/throw.
++    Edit::NativeCapabilityStatus tryGlobalStreamTimeToEditTime (double, bool unlooped, TimePosition& output) const noexcept;
+     TimePosition globalStreamTimeToEditTime (double) const;
+     TimePosition globalStreamTimeToEditTimeUnlooped (double) const;
+     void resyncToGlobalStreamTime (juce::Range<double>, double sampleRate);
+@@ -282,10 +298,20 @@
+     std::atomic<double> audiblePlaybackTime { 0.0 };
+     std::atomic<int> activelyRecordingInputDevices { 0 };
+ 
++    std::atomic<bool> closedNativeIORefused { false };
++    std::atomic<InitialSourcePhase> sourceInitialPhase {
++        edit.initialSourceGeneration ? InitialSourcePhase::awaitingSession : InitialSourcePhase::unbound };
++    static_assert (std::atomic<InitialSourcePhase>::is_always_lock_free);
++    SourceBurstSession::Decision sourceBurstDecision = edit.initialSourceGeneration
++        ? SourceBurstSession::Decision::pending : SourceBurstSession::Decision::process;
++    bool localReferenceInitialised = false; // CONTROL only; initial addContext resync happens before publication.
++    std::atomic<bool> localSourceLifecycleInvalidated { false };
++    bool sourceBurstShouldProcess() const noexcept { return sourceBurstDecision == SourceBurstSession::Decision::process; }
++
+     SourceBurstSession::Ptr sourceBurstSession; // CONTROL ownership, stable during existing contextLock.
+     SourceBurstSession::Status prepareSourceBurstResources (const SourceBurstSession::Configuration&, int channels) noexcept;
+-    bool preflightSourceBurst (int deviceFrames, int channels, int physicalOffset, bool offsetKnown,
+-                               juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int deviceBlock) noexcept;
++    SourceBurstSession::Decision preflightSourceBurst (int deviceFrames, int channels, int physicalOffset, bool offsetKnown,
++        juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int deviceBlock) noexcept;
+     bool beginSourceBurst() noexcept;
+     void abortSourceBurst (SourceBurstSession::Status) noexcept;
+     bool finishSourceBurst() noexcept;

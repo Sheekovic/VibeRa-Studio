@@ -1,0 +1,15 @@
+--- a/modules/tracktion_engine/plugins/tracktion_Plugin.h
++++ b/modules/tracktion_engine/plugins/tracktion_Plugin.h
+@@ -297,6 +297,12 @@
+         (e.g. synths, plugins with tails, or plugins driven by automation). */
+     virtual bool producesAudioWhenNoAudioInput()        { return isAutomationNeeded(); }
+ 
++    // ORIGINAL explicit output-stage opt-in, queried only during graph preparation.
++    // Default plugins MUST clear inherited stage identity. A non-null owner must
++    // be immutable/nonmoving and graph-pinned, uniquely identifying ONE final
++    // audio bus output. It is not a parameter, persisted ID or UI capability.
++    virtual const void* getPreparedAudioOutputStageIdentity() const noexcept { return nullptr; }
++
+     /** Returns true if the plugin has no tail (i.e. output is silent once input stops). */
+     virtual bool noTail()                               { return true; }
+ 

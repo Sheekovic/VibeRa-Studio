@@ -1,0 +1,353 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -8,106 +8,279 @@
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
+ 
+ #pragma once
++#include "tracktion_CompensationHistory.h"
++#include <atomic>
++#include <stdexcept>
+ 
+ namespace tracktion::inline graph {
+ 
+-//==============================================================================
+-//==============================================================================
+ class LatencyNode final : public Node
+ {
+ public:
+-    LatencyNode (std::unique_ptr<Node> inputNode, int numSamplesToDelay)
+-        : LatencyNode (inputNode.get(), numSamplesToDelay)
+-    {
+-        ownedInput = std::move (inputNode);
+-
+-        setOptimisations ({ tracktion::graph::ClearBuffers::no,
+-                            tracktion::graph::AllocateAudioBuffer::yes });
+-    }
+-
+-    LatencyNode (std::shared_ptr<Node> inputNode, int numSamplesToDelay)
+-        : LatencyNode (inputNode.get(), numSamplesToDelay)
+-    {
+-        sharedInput = std::move (inputNode);
+-
+-        setOptimisations ({ tracktion::graph::ClearBuffers::no,
+-                            tracktion::graph::AllocateAudioBuffer::yes });
+-    }
+-
+-    LatencyNode (Node* inputNode, int numSamplesToDelay)
+-        : input (inputNode)
+-    {
+-        latencyProcessor->setLatencyNumSamples (numSamplesToDelay);
+-
+-        setOptimisations ({ tracktion::graph::ClearBuffers::no,
+-                            tracktion::graph::AllocateAudioBuffer::yes });
++    struct RetainedAudioEdge
++    {
++        vibera::dsp::CompensationEdge key;
++        uint32_t maximumDelay = 0;
++        const Node* consumer = nullptr; // Preparation identity only, never persisted.
++        bool carryMidi = false;
++    };
++    struct HistoryDiagnostics
++    {
++        bool enabled = false, cold = false, midiQueueReset = false;
++        vibera::dsp::CompensationReuse reuse = vibera::dsp::CompensationReuse::noPreviousEdge;
++        uint64_t processed = 0, coldFrames = 0, capacityFrames = 0, shapeFrames = 0, discontinuities = 0;
++    };
++
++    LatencyNode (std::unique_ptr<Node> n, int delay) : LatencyNode (n.get(), delay) { ownedInput = std::move (n); }
++    LatencyNode (std::shared_ptr<Node> n, int delay) : LatencyNode (n.get(), delay) { sharedInput = std::move (n); }
++    LatencyNode (Node* n, int delay) : input (n), requestedDelay (delay), latencyProcessor (std::make_shared<LatencyProcessor>())
++    {
++        latencyProcessor->setLatencyNumSamples (delay);
++        setOptimisations ({ ClearBuffers::no, AllocateAudioBuffer::yes });
++    }
++    LatencyNode (std::unique_ptr<Node> n, int delay, RetainedAudioEdge edge) : LatencyNode (n.get(), delay, edge) { ownedInput = std::move (n); }
++    LatencyNode (std::shared_ptr<Node> n, int delay, RetainedAudioEdge edge) : LatencyNode (n.get(), delay, edge) { sharedInput = std::move (n); }
++    LatencyNode (Node* n, int delay, RetainedAudioEdge edge) : input (n), requestedDelay (delay), retained (edge), historyEnabled (true)
++    {
++        setOptimisations ({ ClearBuffers::no, AllocateAudioBuffer::yes });
++    }
++
++    bool belongsTo (const Node* consumer) const noexcept { return historyEnabled && retained.consumer == consumer; }
++    bool isCompensationFor (const Node* consumer) const noexcept { return retained.consumer == consumer; }
++    void updateLegacyCompensation (int delay, RetainedAudioEdge edge)
++    {
++        if (prepared || historyEnabled) throw std::logic_error ("Invalid legacy MIDI compensation update");
++        retained = edge;
++        requestedDelay = delay;
++        latencyProcessor->setLatencyNumSamples (delay);
++    }
++    Node* uncompensatedInput() const noexcept { return input; }
++    const RetainedAudioEdge& retainedEdge() const noexcept { return retained; }
++    bool usesHistory() const noexcept { return historyEnabled; }
++    int compensationSamples() const noexcept { return requestedDelay; }
++    // Preparation only. Never mutate a published node or its requested delay.
++    void updateRetainedRequest (int delay, RetainedAudioEdge edge)
++    {
++        if (prepared || !historyEnabled || edge.consumer != retained.consumer)
++            throw std::logic_error ("Cannot change published compensation configuration");
++        requestedDelay = delay;
++        retained = edge;
++    }
++    static Node* logicalInputFor (Node* node, const Node* consumer) noexcept
++    {
++        if (auto* delay = dynamic_cast<LatencyNode*> (node); delay && delay->isCompensationFor (consumer))
++            return delay->uncompensatedInput();
++        return node;
++    }
++    HistoryDiagnostics historyDiagnostics() const noexcept
++    {
++        return { historyEnabled, historyEnabled && reuse == vibera::dsp::CompensationReuse::noPreviousEdge, midiQueueReset,
++                 reuse, processed.load (std::memory_order_relaxed), coldFrames.load (std::memory_order_relaxed),
++                 capacityFrames.load (std::memory_order_relaxed), shapeFrames.load (std::memory_order_relaxed),
++                 discontinuities.load (std::memory_order_relaxed) };
+     }
+ 
+     NodeProperties getNodeProperties() override
+     {
+         auto props = input->getNodeProperties();
+-        props.latencyNumSamples += latencyProcessor->getLatencyNumSamples();
+-
+-        constexpr size_t latencyNodeMagicHash = size_t (0x95ab5e9dcc);
+-
+-        if (props.nodeID != 0)
+-            hash_combine (props.nodeID, latencyNodeMagicHash);
+-
++        if (historyEnabled)
++        {
++            const int64_t latency = int64_t (props.latencyNumSamples) + int64_t (requestedDelay);
++            if (latency < 0 || latency > std::numeric_limits<int>::max())
++                throw std::invalid_argument ("Retained compensation latency overflow");
++            props.latencyNumSamples = int (latency);
++        }
++        else
++            props.latencyNumSamples += latencyProcessor->getLatencyNumSamples();
++        if (historyEnabled)
++        {
++            // Include both endpoints + port. This tap's ID stays distinct from
++            // its producer, without depending on requested compensation count.
++            size_t id = size_t (0x7669627261686973ULL);
++            hash_combine (id, retained.key.producer);
++            hash_combine (id, retained.key.consumer);
++            hash_combine (id, retained.key.port);
++            props.nodeID = id;
++            props.hasMidi = retained.carryMidi;
++        }
++        else if (retained.consumer != nullptr && retained.key.valid())
++        {
++            size_t id = size_t (0x76696272616d6964ULL);
++            hash_combine (id, retained.key.producer);
++            hash_combine (id, retained.key.consumer);
++            hash_combine (id, retained.key.port);
++            props.nodeID = id;
++        }
++        else if (props.nodeID != 0)
++            hash_combine (props.nodeID, size_t (0x95ab5e9dcc));
+         return props;
+     }
+-
+-    std::vector<Node*> getDirectInputNodes() override
+-    {
+-        return { input };
+-    }
+-
+-    bool isReadyToProcess() override
+-    {
+-        return input->hasProcessed();
+-    }
++    std::vector<Node*> getDirectInputNodes() override { return { input }; }
++    bool isReadyToProcess() override { return input->hasProcessed(); }
+ 
+     void prepareToPlay (const PlaybackInitialisationInfo& info) override
+     {
+-        latencyProcessor->prepareToPlay (info.sampleRate, info.blockSize, getNodeProperties().numberOfChannels);
+-        replaceLatencyProcessorIfPossible (info.nodeGraphToReplace);
++        if (!historyEnabled)
++        {
++            latencyProcessor->prepareToPlay (info.sampleRate, info.blockSize, getNodeProperties().numberOfChannels);
++            replaceLatencyProcessorIfPossible (info.nodeGraphToReplace);
++        }
++        else
++            prepareHistory (info);
++        prepared = true;
+     }
+ 
+     void process (ProcessContext& pc) override
+     {
+-        auto inputBuffer = input->getProcessedOutput().audio;
+-        auto& inputMidi = input->getProcessedOutput().midi;
+-        auto numSamples = (int) pc.referenceSampleRange.getLength();
+-        jassert (pc.buffers.audio.getNumChannels() == 0 || numSamples == (int) pc.buffers.audio.getNumFrames());
+-
+-        latencyProcessor->writeAudio (inputBuffer);
+-        latencyProcessor->writeMIDI (inputMidi);
+-
++        auto source = input->getProcessedOutput();
++        const auto numSamples = (int) pc.referenceSampleRange.getLength();
++        if (!historyEnabled)
++        {
++            latencyProcessor->writeAudio (source.audio);
++            latencyProcessor->writeMIDI (source.midi);
++            pc.buffers.midi.clear();
++            latencyProcessor->readAudioOverwriting (pc.buffers.audio);
++            latencyProcessor->readMIDI (pc.buffers.midi, numSamples);
++            return;
++        }
++
++        const auto frames = pc.buffers.audio.getNumFrames();
++        const auto channels = pc.buffers.audio.getNumChannels();
++        if (!historyRaw || frames != source.audio.getNumFrames() || channels != source.audio.getNumChannels() ||
++            channels != frameInput.size() || pc.referenceSampleRange.getLength() != int64_t (frames) ||
++            (frames != 0 && pc.referenceSampleRange.getStart() > std::numeric_limits<int64_t>::max() - int64_t (frames - 1)))
++        {
++            shapeFrames.fetch_add (frames, std::memory_order_relaxed);
++            pc.buffers.audio.clear();
++        }
++        else
++        {
++            uint64_t coldCount = 0, capacityCount = 0, shapeCount = 0, gapCount = 0;
++            for (choc::buffer::FrameCount frame = 0; frame < frames; ++frame)
++            {
++                for (choc::buffer::ChannelCount channel = 0; channel < channels; ++channel)
++                    frameInput[channel] = source.audio.getSample (channel, frame);
++                const auto result = historyRaw->processFrame (frameInput, frameOutput, uint32_t (requestedDelay),
++                                                              pc.referenceSampleRange.getStart() + int64_t (frame));
++                coldCount += result.result == vibera::dsp::CompensationResult::insufficientHistory;
++                capacityCount += result.result == vibera::dsp::CompensationResult::capacityExceeded;
++                shapeCount += result.result == vibera::dsp::CompensationResult::invalidShape;
++                if (result.result == vibera::dsp::CompensationResult::invalidShape)
++                    std::fill (frameOutput.begin(), frameOutput.end(), 0.f);
++                gapCount += result.discontinuity;
++                for (choc::buffer::ChannelCount channel = 0; channel < channels; ++channel)
++                    pc.buffers.audio.getSample (channel, frame) = frameOutput[channel];
++            }
++            processed.fetch_add (frames, std::memory_order_relaxed);
++            coldFrames.fetch_add (coldCount, std::memory_order_relaxed);
++            capacityFrames.fetch_add (capacityCount, std::memory_order_relaxed);
++            shapeFrames.fetch_add (shapeCount, std::memory_order_relaxed);
++            discontinuities.fetch_add (gapCount, std::memory_order_relaxed);
++        }
+         pc.buffers.midi.clear();
+-        latencyProcessor->readAudioOverwriting (pc.buffers.audio);
+-        latencyProcessor->readMIDI (pc.buffers.midi, numSamples);
++        if (retained.carryMidi)
++        {
++            if (requestedDelay == 0)
++                pc.buffers.midi.mergeFrom (source.midi); // No added delay queue for a zero tap.
++            else
++            {
++                midiProcessor->writeMIDI (source.midi);
++                midiProcessor->readMIDI (pc.buffers.midi, numSamples);
++            }
++        }
++        // Genuine MIDI edges retain upstream MidiMessageArray semantics. That
++        // path is explicitly NOT an allocation-free MIDI qualification.
+     }
+ 
+ private:
+     std::unique_ptr<Node> ownedInput;
+     std::shared_ptr<Node> sharedInput;
+     Node* input = nullptr;
+-    std::shared_ptr<LatencyProcessor> latencyProcessor { std::make_shared<LatencyProcessor>() };
+-
+-    void replaceLatencyProcessorIfPossible (NodeGraph* nodeGraphToReplace)
+-    {
+-        if (nodeGraphToReplace == nullptr)
+-            return;
+-
+-        const auto nodeIDToLookFor = getNodeProperties().nodeID;
+-
+-        if (nodeIDToLookFor == 0)
+-            return;
+-
+-        if (auto oldNode = findNodeWithID<LatencyNode> (*nodeGraphToReplace, nodeIDToLookFor))
+-            if (latencyProcessor->hasSameConfigurationAs (*oldNode->latencyProcessor))
+-                latencyProcessor = oldNode->latencyProcessor;
++    int requestedDelay = 0;
++    RetainedAudioEdge retained;
++    bool historyEnabled = false, prepared = false, midiQueueReset = false;
++    std::shared_ptr<LatencyProcessor> latencyProcessor, midiProcessor;
++    std::shared_ptr<vibera::dsp::CompensationHistory> history;
++    vibera::dsp::CompensationHistory* historyRaw = nullptr; // Pinned by this node, never shared_ptr traffic in DSP.
++    std::vector<float> frameInput, frameOutput;
++    vibera::dsp::CompensationReuse reuse = vibera::dsp::CompensationReuse::noPreviousEdge;
++    static_assert (std::atomic<uint64_t>::is_always_lock_free, "History diagnostics require lock-free counters");
++    std::atomic<uint64_t> processed{0}, coldFrames{0}, capacityFrames{0}, shapeFrames{0}, discontinuities{0};
++
++    static size_t storageBytes (uint32_t maximumDelay, int channels, bool includeScratch)
++    {
++        if (channels <= 0)
++            throw std::invalid_argument ("Compensation audio edge has no channels");
++        const uint64_t frames = uint64_t (maximumDelay) + (includeScratch ? 3 : 1);
++        if (frames > std::numeric_limits<size_t>::max() / sizeof(float) / uint64_t (channels))
++            throw std::length_error ("Compensation history size overflow");
++        return size_t (frames * sizeof(float) * uint64_t (channels));
++    }
++    void prepareHistory (const PlaybackInitialisationInfo& info)
++    {
++        if (!retained.key.valid() || retained.maximumDelay == 0 || requestedDelay < 0 ||
++            uint32_t (requestedDelay) > retained.maximumDelay ||
++            info.nodeGraph.rootNode->getAudioCompensationHistoryMaximumDelay() != retained.maximumDelay)
++            throw std::invalid_argument ("Invalid/out-of-capacity prepared audio compensation edge");
++        std::vector<vibera::dsp::CompensationEdge> newEdges;
++        std::vector<std::shared_ptr<vibera::dsp::CompensationHistory>> oldBanks;
++        size_t total = 0;
++        const auto budget = info.nodeGraph.rootNode->getAudioCompensationHistoryBudget();
++        for (auto* node : info.nodeGraph.orderedNodes)
++            if (auto* tap = dynamic_cast<LatencyNode*> (node); tap && tap->historyEnabled)
++            {
++                newEdges.push_back (tap->retained.key);
++                const auto bytes = storageBytes (tap->retained.maximumDelay, tap->input->getNodeProperties().numberOfChannels, true);
++                if (total > budget || bytes > budget - total)
++                    throw std::length_error ("Candidate audio compensation histories exceed graph budget");
++                total += bytes;
++            }
++        LatencyNode* oldMatch = nullptr;
++        if (info.nodeGraphToReplace)
++            for (auto* node : info.nodeGraphToReplace->orderedNodes)
++                if (auto* tap = dynamic_cast<LatencyNode*> (node); tap && tap->historyEnabled && tap->history)
++                {
++                    oldBanks.push_back (tap->history); // Immutable config + handles ONLY. No cursor/PCM copy.
++                    if (tap->retained.key == retained.key)
++                    {
++                        if (oldMatch) throw std::invalid_argument ("Ambiguous old audio compensation edge");
++                        oldMatch = tap;
++                    }
++                }
++        const auto channels = input->getNodeProperties().numberOfChannels;
++        const vibera::dsp::CompensationConfiguration desired { retained.key, info.sampleRate, uint32_t (channels), retained.maximumDelay };
++        auto selected = vibera::dsp::selectCompensationHistory (desired, oldBanks, newEdges);
++        reuse = selected.result;
++        if (reuse == vibera::dsp::CompensationReuse::ambiguousEdge || reuse == vibera::dsp::CompensationReuse::incompatibleConfiguration)
++            throw std::invalid_argument ("Ambiguous or incompatible retained audio history; admission refused");
++        history = selected.bank ? std::move (selected.bank)
++                                : std::make_shared<vibera::dsp::CompensationHistory> (desired, storageBytes (retained.maximumDelay, channels, false));
++        historyRaw = history.get();
++        frameInput.resize (size_t (channels));
++        frameOutput.resize (size_t (channels));
++        if (retained.carryMidi && requestedDelay > 0)
++        {
++            midiProcessor = std::make_shared<LatencyProcessor>();
++            midiProcessor->setLatencyNumSamples (requestedDelay);
++            midiProcessor->prepareToPlay (info.sampleRate, info.blockSize, 0);
++            if (oldMatch && oldMatch->midiProcessor && midiProcessor->hasSameConfigurationAs (*oldMatch->midiProcessor))
++                midiProcessor = oldMatch->midiProcessor;
++            else
++                midiQueueReset = oldMatch != nullptr;
++        }
++        else if (retained.carryMidi && oldMatch && oldMatch->requestedDelay != requestedDelay)
++            midiQueueReset = true;
++    }
++    void replaceLatencyProcessorIfPossible (NodeGraph* oldGraph)
++    {
++        if (!oldGraph) return;
++        const auto id = getNodeProperties().nodeID;
++        if (id == 0) return;
++        if (auto* old = findNodeWithID<LatencyNode> (*oldGraph, id); old && !old->historyEnabled &&
++            latencyProcessor->hasSameConfigurationAs (*old->latencyProcessor))
++            latencyProcessor = old->latencyProcessor;
+     }
+ };
+ 
+ }

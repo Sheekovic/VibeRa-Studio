@@ -1,0 +1,25 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -2575,7 +2575,12 @@
+         if (typeid (node) == typeid (graph::SilentNode))
+         { decision = "native-silent-leaf"; return done (true); }
+         if (auto* delay = dynamic_cast<graph::LatencyNode*> (&node))
+-        { decision = "actual-final-queue-certificate"; return done (delay->hasStructuralZeroHistory()); } // Actual final queue, never current input alone.
++        {
++            decision = "actual-final-queue-audio-domain";
++            // A real prepared zero-channel legacy FIFO owns no audio samples.
++            // Its MIDI queue/processing remains fully present and unmodified.
++            return done (delay->hasStructuralZeroHistory() || delay->hasPreparedNoAudioOutput());
++        } // Actual final processor configuration, never advertised input alone.
+         if (auto* p = dynamic_cast<PluginNode*> (&node))
+         {
+             decision = "unadmitted-native-plugin";
+@@ -2628,7 +2633,7 @@
+             return done (*input ? self (self, **input, depth + 1) : 2);
+         if (typeid (node) == typeid (graph::SilentNode)) return done (0);
+         if (auto* delay = dynamic_cast<graph::LatencyNode*> (&node))
+-            return done (delay->hasStructuralZeroHistory() ? 0 : 2);
++            return done (delay->hasStructuralZeroHistory() || delay->hasPreparedNoAudioOutput() ? 0 : 2);
+         if (auto* p = dynamic_cast<PluginNode*> (&node))
+         {
+             if (! plugin || ! plugin (p->getPlugin())) return done (2);

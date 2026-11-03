@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original closed native whole-inventory two-stage zero exchange plus default-empty actual final-root/source audit hooks. Independently pinned native3 bundle; no production activation, general route authority or runtime qualification.",
+  "sourceProvenance": {
+    "draftFreezeSha256": "725fb0dd596589abb60da4f7cf79fba2487555cb58b11d9708b24baa01f0a529",
+    "draftPayloadSha256": "0a1c8b97330aeb27eacac570ba6fd22f4d652f2c9e09060896d2c0e509249db1",
+    "nativeCapabilityFreezeSha256": "5bca96fda36f28865c2ca1f37f7d2bd1d179e6d4a99251c13b033d1da2f5712a",
+    "nativeCapabilityPayloadSha256": "e45e663aecdf7cfb8c7f244e93f7bec01d06045c69651b1f2733e3340d25efbf",
+    "referenceImplementation": "Independent original extension around pinned Tracktion source; upstream license/notices retained"
+  },
+  "appliesAfter": "patches/tracktion-empty-arranger-proof/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h",
+      "patch": "patches/tracktion-whole-source-exchange/tracktion_EditNodeBuilder.h.patch",
+      "originalSha256": "87eb609979435cad79a9d332fa090abad826b0db6d4ca5a820517f364cb9f0e5",
+      "patchedSha256": "5321e4db3cac516a574bafe18dc89efaa3c93b196ac8a854feb022079c556d7d",
+      "patchSha256": "74bca5aeeab30e0b9f89bc77f72d0a4561a01c913faa661c7d006a0538195619",
+      "addedLines": 11,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-native-midi-ingress/manifest.json",
+        "patches/tracktion-plugin-final-output/manifest.json",
+        "patches/tracktion-app-source-port-bridge/manifest.json",
+        "patches/tracktion-prepared-audio-zero/manifest.json",
+        "patches/tracktion-context-memory-policy/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-whole-source-exchange/tracktion_EditNodeBuilder.cpp.patch",
+      "originalSha256": "a11e6a85c98aceea8f4ae548ae5574c569d1d3579c9943f9d6c2c5a0c8089ca0",
+      "patchedSha256": "8d484f24de269db24a84c66f1849f31094c90c86bfb287aac0b6811c6061c513",
+      "patchSha256": "a001df887061c4d9836d5766c4e91ca1c5d5f5d61a7ffb9cfc2942215311ae73",
+      "addedLines": 67,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-owned-metering/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-send-gain-block/manifest.json",
+        "patches/tracktion-native-midi-ingress/manifest.json",
+        "patches/tracktion-plugin-final-output/manifest.json",
+        "patches/tracktion-app-source-port-bridge/manifest.json",
+        "patches/tracktion-prepared-audio-zero/manifest.json",
+        "patches/tracktion-context-memory-policy/manifest.json",
+        "patches/tracktion-empty-arranger-proof/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-whole-source-exchange/tracktion_LatencyNode.h.patch",
+      "originalSha256": "f392c3ebc572497223d97c94888a5df36613e6f0bd9a857a771b98aa98f61179",
+      "patchedSha256": "cdf6e031594b50bc73bcfb7808ce70090a0c00ad50887b84094b222a5f1502a8",
+      "patchSha256": "943ff511a38c10d96d47afb332072511f731ed2af4716b2e96e9f1e888730a61",
+      "addedLines": 350,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json",
+        "patches/tracktion-forward-stage-drain/manifest.json",
+        "patches/tracktion-zero-history-creation/manifest.json",
+        "patches/tracktion-inverse-stage-residual/manifest.json",
+        "patches/tracktion-inverse-stage-seal/manifest.json",
+        "patches/tracktion-prepared-audio-zero/manifest.json"
+      ]
+    }
+  ]
+}

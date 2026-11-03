@@ -1,0 +1,12 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -448,7 +448,8 @@
+ 
+         setNumThreads (numThreads);
+         player.enablePooledMemoryAllocations (EditPlaybackContextInternal::getPooledMemoryFlag());
+-        player.enableNodeMemorySharing (EditPlaybackContextInternal::getNodeMemorySharingFlag());
++        player.enableNodeMemorySharing (epc.edit.shouldUseNodeMemorySharing (
++            EditPlaybackContextInternal::getNodeMemorySharingFlag()));
+     }
+ 
+     void setNumThreads (size_t numThreads)

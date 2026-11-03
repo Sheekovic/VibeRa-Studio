@@ -1,0 +1,33 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -1498,6 +1498,7 @@
+ }
+ bool EditPlaybackContext::fillNextNodeBlock (float* const* allChannels, int numChannels, int numSamples)
+ {
++    graph::NativePhaseCapture::ContextScope phaseScope (nativePhaseCapture, this, numSamples);
+     if (sourceBurstSession)
+     {
+         auto& state = *sourceBurstSession->impl;
+@@ -1548,6 +1549,7 @@
+         sourceBurstSession->impl->initialActivation = false;
+         sourceInitialPhase.store (InitialSourcePhase::active, std::memory_order_release);
+     }
++    phaseScope.completed();
+     return true;
+ }
+ 
+@@ -1675,6 +1677,14 @@
+ {
+     return tracktion::timeRangeFromSamples (nodePlaybackContext->playHead.getLoopRange(),
+                                             nodePlaybackContext->getSampleRate());
++}
++
++bool EditPlaybackContext::setNativePhaseCapture (graph::NativePhaseCapture* capture) noexcept
++{
++    if (!nodePlaybackContext) return false;
++    nativePhaseCapture = capture;
++    nodePlaybackContext->player.setNativePhaseCapture (capture);
++    return true;
+ }
+ 
+ EditPlaybackContext::GraphSelection EditPlaybackContext::getGraphSelection() const noexcept

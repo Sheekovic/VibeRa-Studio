@@ -1,0 +1,52 @@
+# Tests that scripts/fast-test.py runs alone, after the parallel pool.
+# Timing/deadline checks measure real callback budgets and must not compete
+# with other load. Add a test here when the runner reports it PARALLEL-SENSITIVE.
+# Prefix '!' to run strictly alone (not even in the light 2-way pool).
+callback_timing
+mixer_controls_audio
+audio_playlist_live
+midi_take_recovery_gui
+
+# Measured 2026-10-24: failed under 12-way parallel load, passed alone (native/deadline/provider checks).
+deferred_device_candidate_fault
+mixer_app_audio_port
+mixer_app_midi_ownership
+mixer_app_zero_history
+mixer_automation_native
+mixer_bounded_midi_ownership
+mixer_dynamic_instrument_latency
+mixer_dynamic_waveform
+mixer_effect_turnaround
+mixer_forward_stage_drain
+mixer_initial_app_active_fx_ports
+mixer_initial_app_audio_ports
+mixer_initial_app_source_controls
+mixer_initial_source_epoch_fence
+mixer_initial_source_joint_route
+!mixer_initial_stable_track_midi
+mixer_production_membership_sdk
+mixer_stereo_native
+mixer_stopped_effect_forward_sdk
+mixer_stopped_effect_inverse_sdk
+mixer_stopped_effect_ordinary_forward
+mixer_zero_stage_exchange
+plugin_dry_history_host
+plugin_state_admission
+!vibera_synth_host
+
+# Measured 2026-10-24: failed under 8-way parallel load, passed alone.
+controller_mapping_gui
+note_release_worker
+plugin_wrapper_gui
+studio_channel_routing_provider
+vibera_synth_processor
+
+# Measured 2026-10-25: failed under 12-way load (pool), passed alone.
+mixer_audio_port
+mixer_structural_graph_contracts
+
+# Measured 2026-11-02: failed twice under 8-way load, passed alone each time.
+plugin_parameters_gui
+
+# 2026-11-02: device-timed loopback recording with a writer thread; RUN_SERIAL in CMake.
+audio_take_gui

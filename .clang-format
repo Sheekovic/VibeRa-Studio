@@ -1,0 +1,9 @@
+BasedOnStyle: LLVM
+BreakBeforeBraces: Allman
+IndentWidth: 4
+ColumnLimit: 110
+SortIncludes: Never
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+NamespaceIndentation: None

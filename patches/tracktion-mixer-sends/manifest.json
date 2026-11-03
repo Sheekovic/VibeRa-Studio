@@ -1,0 +1,19 @@
+{
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h",
+      "patch": "patches/tracktion-mixer-sends/tracktion_AuxSend.h.patch",
+      "originalSha256": "0f162e59bb4b5924cb19889364823050564bae9b2cc0b839f8907842569eb812",
+      "patchedSha256": "ca1cc52666f8825fbfd45f013e658ad3e24ef00962c5ac698bd53e879a8b06e6"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp",
+      "patch": "patches/tracktion-mixer-sends/tracktion_AuxSendNode.cpp.patch",
+      "originalSha256": "58d79bb59e402f758244e9cba74e2ea49b10c293b830d5899f3842f9d2ed5919",
+      "patchedSha256": "2718742da2b235c92b3937eb0bb6fd3aef18f32016bf0572133d89332b1d139f"
+    }
+  ]
+}

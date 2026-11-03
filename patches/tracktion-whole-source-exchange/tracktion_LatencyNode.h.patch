@@ -1,0 +1,405 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -45,6 +45,135 @@
+     virtual ~StructuralAudioSilence() = default;
+     virtual Kind structuralAudioSilenceKind() const noexcept = 0;
+ };
++
++// ORIGINAL closed two-stage zero-history exchange. All interfaces below are
++// internal audited-producer contracts, never IDs supplied by a project/user.
++// Markers pin their actual Runtime/Host/scope owners through their graph Nodes.
++struct PreparedSharedSourceIdentity
++{
++    const void* runtime = nullptr;
++    size_t nativeOwner = 0;
++    uint64_t epoch = 0;
++    bool valid() const noexcept { return runtime && nativeOwner && epoch; }
++    bool operator== (const PreparedSharedSourceIdentity&) const = default;
++};
++class PreparedSharedSourceOutput
++{
++public:
++    virtual ~PreparedSharedSourceOutput() = default;
++    // CONTROL only. The actual typed source port must revalidate its owner.
++    virtual std::optional<PreparedSharedSourceIdentity> preparedSharedSourceIdentity() = 0;
++    // Audit the REAL source-to-stage audio lineage: exactly this source plus
++    // independently proved zero backgrounds and audited original controls.
++    // Unknown/unmarked sources, processors, tails and hidden inputs refuse.
++    virtual bool provesPreparedSharedSourceBoundary (Node& actualStageOrigin) = 0;
++};
++class ZeroStageExchange;
++class ZeroStageExchangeRoot
++{
++public:
++    virtual ~ZeroStageExchangeRoot() = default;
++    virtual uint64_t zeroStageExchangeGeneration() const noexcept = 0;
++    virtual const void* zeroStageExchangeContinuityIdentity() const noexcept = 0;
++    virtual ZeroStageExchange* preparedZeroStageExchange() const noexcept = 0;
++};
++class ZeroStageExchange final
++{
++public:
++    enum class State : uint32_t
++    {
++        prepared, admitted, active, notAdmitted, wrongRoot, wrongContinuity,
++        invalidReference, stalePredecessor, discontinuity, taintedHistory
++    };
++    ZeroStageExchange (const ZeroStageExchange&) = delete;
++    ZeroStageExchange& operator= (const ZeroStageExchange&) = delete;
++    State observation() const noexcept
++    { return static_cast<State> (observed.load (std::memory_order_acquire)); }
++    const void* removedQueueIdentity() const noexcept { return removedZero.get(); }
++    const void* addedQueueIdentity() const noexcept { return addedZero.get(); }
++    int exchangedDelaySamples() const noexcept { return delay; }
++    // Sole adopted DSP owner, called from the ACTUAL root's prefetch BEFORE
++    // child DSP. Witness scalars come ONLY from the baseline-installed shared
++    // DSP continuity owner, never CONTROL/readback or a free initial anchor.
++    // No queue read, owning-handle change, allocation, lock or wait.
++    State begin (const Node& actualRoot, const void* actualContinuity,
++                 const Node* actualPreviousRoot, uint64_t actualPreviousGeneration,
++                 int64_t actualPreviousEnd, juce::Range<int64_t> reference) noexcept
++    {
++        if (!admitted) return fail (State::notAdmitted);
++        if (failed) return failedState;
++        if (&actualRoot != bindingNode) return fail (State::wrongRoot);
++        if (actualContinuity != continuity) return fail (State::wrongContinuity);
++        if (reference.getStart() < 0 || reference.getEnd() <= reference.getStart())
++            return fail (State::invalidReference);
++        const auto count = reference.getEnd() - reference.getStart();
++        if (count > blockSize || reference.getStart() > std::numeric_limits<int64_t>::max() - count)
++            return fail (State::invalidReference);
++        if (!removedZero->hasStructuralZeroHistory() || !addedZero->hasStructuralZeroHistory())
++            return fail (State::taintedHistory);
++        if (!started)
++        {
++            if (actualPreviousRoot != previousRoot || actualPreviousGeneration != beforeGeneration ||
++                actualPreviousEnd != reference.getStart())
++                return fail (State::stalePredecessor);
++        }
++        else if (actualPreviousRoot != bindingNode || actualPreviousGeneration != afterGeneration ||
++                 actualPreviousEnd != reference.getStart() || expectedNext != reference.getStart())
++            return fail (State::discontinuity);
++        started = true;
++        expectedNext = reference.getEnd();
++        observed.store (uint32_t (State::active), std::memory_order_release);
++        return State::active;
++    }
++private:
++    friend class LatencyNode;
++    ZeroStageExchange (Node& binding, NodeGraph& candidate, NodeGraph& previous,
++                      const void* addOwner, const void* removeOwner,
++                      const void* oldAddOrigin, const void* newAddOrigin,
++                      const void* oldRemoveOrigin, const void* newRemoveOrigin,
++                      std::shared_ptr<LatencyProcessor> removed,
++                      std::shared_ptr<LatencyProcessor> added,
++                      PreparedSharedSourceIdentity source, const void* continuityOwner,
++                      uint64_t priorGeneration, uint64_t nextGeneration,
++                      double preparedRate, int block, int channelsToUse, int samples)
++        : bindingNode (&binding), candidateGraph (&candidate), previousGraph (&previous),
++          previousRoot (previous.rootNode.get()), addingOwner (addOwner), removingOwner (removeOwner),
++          beforeAddOrigin (oldAddOrigin), afterAddOrigin (newAddOrigin),
++          beforeRemoveOrigin (oldRemoveOrigin), afterRemoveOrigin (newRemoveOrigin),
++          removedZero (std::move (removed)), addedZero (std::move (added)), sourceIdentity (source),
++          continuity (continuityOwner), beforeGeneration (priorGeneration), afterGeneration (nextGeneration),
++          rate (preparedRate), blockSize (block), channels (channelsToUse), delay (samples)
++    {}
++    State fail (State state) noexcept
++    {
++        failed = true; failedState = state;
++        observed.store (uint32_t (state), std::memory_order_release);
++        return state;
++    }
++    Node* const bindingNode;
++    NodeGraph* const candidateGraph;
++    NodeGraph* const previousGraph;
++    Node* const previousRoot;
++    const void* const addingOwner;
++    const void* const removingOwner;
++    const void* const beforeAddOrigin;
++    const void* const afterAddOrigin;
++    const void* const beforeRemoveOrigin;
++    const void* const afterRemoveOrigin;
++    const std::shared_ptr<LatencyProcessor> removedZero, addedZero;
++    const PreparedSharedSourceIdentity sourceIdentity;
++    const void* const continuity;
++    const uint64_t beforeGeneration, afterGeneration;
++    const double rate;
++    const int blockSize, channels, delay;
++    bool admitted = false; // CONTROL once before release/publication.
++    bool started = false, failed = false; // Sole DSP writer after publication.
++    int64_t expectedNext = 0;
++    State failedState = State::prepared;
++    std::atomic<uint32_t> observed { uint32_t (State::prepared) };
++    static_assert (std::atomic<uint32_t>::is_always_lock_free);
++};
++
+ 
+ // ORIGINAL one-shot, graph-pinned capability for exactly one registered D->0
+ // output queue. Not a project ID, graph-generation receipt, MIDI bridge, or
+@@ -493,6 +622,204 @@
+                 throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageFanout: Exact single output consumer required");
+         return stages;
+     }
++    struct ZeroExchangeScope
++    {
++        Stage beforeA, afterA, beforeB, afterB;
++        PreparedSharedSourceIdentity source;
++        const void* continuity = nullptr;
++        uint64_t beforeGeneration = 0, afterGeneration = 0;
++        int delay = 0;
++    };
++    static std::vector<std::pair<PreparedSharedSourceOutput*, PreparedSharedSourceIdentity>>
++    sharedSources (Node& boundary)
++    {
++        std::vector<std::pair<PreparedSharedSourceOutput*, PreparedSharedSourceIdentity>> result;
++        std::set<Node*> visited;
++        std::vector<Node*> pending { &boundary };
++        while (!pending.empty())
++        {
++            auto* node = pending.back(); pending.pop_back();
++            if (!node || !visited.insert (node).second) continue;
++            if (visited.size() > 4096 || pending.size() > 4096)
++                throw OutputStageError (OutputStageStatus::configuration,
++                    "routing.pdcZeroSource: Bounded real source ancestry required");
++            if (auto* marker = dynamic_cast<PreparedSharedSourceOutput*> (node))
++                if (const auto identity = marker->preparedSharedSourceIdentity())
++                {
++                    if (!identity->valid())
++                        throw OutputStageError (OutputStageStatus::configuration,
++                            "routing.pdcZeroSource: Invalid actual typed source owner");
++                    result.emplace_back (marker, *identity);
++                }
++            for (auto* input : node->getDirectInputNodes()) pending.push_back (input);
++        }
++        return result;
++    }
++    static std::map<size_t, LatencyNode*> zeroExchangeInternalQueues (NodeGraph& graph)
++    {
++        std::map<size_t, LatencyNode*> result;
++        for (auto* node : graph.orderedNodes)
++            if (auto* tap = dynamic_cast<LatencyNode*> (node); tap &&
++                !tap->getNodeProperties().audioCompensationStage)
++            {
++                const auto id = tap->getNodeProperties().nodeID;
++                if (tap->historyEnabled || !id || !tap->latencyProcessor || !result.emplace (id, tap).second)
++                    throw OutputStageError (OutputStageStatus::unsupportedInternal,
++                        "routing.pdcZeroInternal: Exact legacy internal queue inventory required");
++            }
++        return result;
++    }
++    static ZeroExchangeScope requireZeroExchangeScope (NodeGraph& candidate, NodeGraph& previous,
++        const Stages& next, const Stages& old, const void* addingOwner, const void* removingOwner,
++        double rate, int block)
++    {
++        const auto reject = [] { throw OutputStageError (OutputStageStatus::configuration,
++            "routing.pdcZeroExchangeScope: Exact whole-graph two-stage zero-history exchange required"); };
++        if (!addingOwner || !removingOwner || addingOwner == removingOwner ||
++            !std::isfinite (rate) || rate <= 0 || block <= 0 || next.empty() || next.size() != old.size()) reject();
++        auto* afterRoot = dynamic_cast<ZeroStageExchangeRoot*> (candidate.rootNode.get());
++        auto* beforeRoot = dynamic_cast<ZeroStageExchangeRoot*> (previous.rootNode.get());
++        if (!afterRoot || !beforeRoot || !afterRoot->zeroStageExchangeContinuityIdentity() ||
++            afterRoot->zeroStageExchangeContinuityIdentity() != beforeRoot->zeroStageExchangeContinuityIdentity() ||
++            !beforeRoot->zeroStageExchangeGeneration() ||
++            afterRoot->zeroStageExchangeGeneration() <= beforeRoot->zeroStageExchangeGeneration() ||
++            afterRoot->zeroStageExchangeGeneration() == std::numeric_limits<uint64_t>::max()) reject();
++        const auto root = candidate.rootNode->getNodeProperties();
++        const auto oldRoot = previous.rootNode->getNodeProperties();
++        if (!root.hasAudio || !oldRoot.hasAudio || root.hasMidi || oldRoot.hasMidi ||
++            root.numberOfChannels != 2 || oldRoot.numberOfChannels != 2 ||
++            root.latencyNumSamples != oldRoot.latencyNumSamples) reject();
++        ZeroExchangeScope result;
++        result.continuity = afterRoot->zeroStageExchangeContinuityIdentity();
++        result.beforeGeneration = beforeRoot->zeroStageExchangeGeneration();
++        result.afterGeneration = afterRoot->zeroStageExchangeGeneration();
++        bool foundA = false, foundB = false;
++        for (const auto& [owner, now] : next)
++        {
++            const auto prior = old.find (owner);
++            if (prior == old.end()) reject();
++            const auto& before = prior->second;
++            if (!before.origin || !now.origin || before.channels != 2 || now.channels != 2 ||
++                before.exits != 1 || now.exits != 1 || before.hasMidi || now.hasMidi ||
++                before.forward || now.forward || before.inverse || now.inverse ||
++                !before.producerPathKnown || !now.producerPathKnown ||
++                !before.boundaryPathKnown || !now.boundaryPathKnown) reject();
++            if (owner == addingOwner)
++            {
++                foundA = true;
++                if (before.delay || !now.delay || now.delay->historyEnabled || !now.delay->latencyProcessor ||
++                    !now.delay->legacyQueueCreatedHere || now.delay->requestedDelay <= 0 ||
++                    !now.delay->latencyProcessor->hasStructuralZeroHistory() ||
++                    !now.delay->latencyProcessor->hasConfiguration (now.delay->requestedDelay, rate, 2)) reject();
++                result.beforeA = before; result.afterA = now; result.delay = now.delay->requestedDelay;
++            }
++            else if (owner == removingOwner)
++            {
++                foundB = true;
++                if (now.delay || !before.delay || before.delay->historyEnabled || !before.delay->latencyProcessor ||
++                    before.delay->requestedDelay <= 0 || !before.delay->latencyProcessor->hasStructuralZeroHistory() ||
++                    !before.delay->latencyProcessor->hasConfiguration (before.delay->requestedDelay, rate, 2)) reject();
++                result.beforeB = before; result.afterB = now;
++            }
++            else
++            {
++                if (bool (before.delay) != bool (now.delay) ||
++                    before.producerPathLatencySamples != now.producerPathLatencySamples ||
++                    before.boundaryPathLatencySamples != now.boundaryPathLatencySamples ||
++                    before.producerNodeId != now.producerNodeId || before.boundaryNodeId != now.boundaryNodeId ||
++                    (now.delay && (!now.delay->latencyProcessor || !before.delay->latencyProcessor ||
++                        now.delay->historyEnabled || before.delay->historyEnabled ||
++                        now.delay->requestedDelay != before.delay->requestedDelay ||
++                        now.delay->latencyProcessor != before.delay->latencyProcessor ||
++                        !now.delay->latencyProcessor->hasSameConfigurationAs (*before.delay->latencyProcessor)))) reject();
++            }
++        }
++        if (!foundA || !foundB || root.latencyNumSamples != result.delay ||
++            result.beforeB.delay->requestedDelay != result.delay ||
++            result.beforeA.producerPathLatencySamples != result.delay ||
++            result.afterA.producerPathLatencySamples != 0 ||
++            result.beforeB.producerPathLatencySamples != 0 ||
++            result.afterB.producerPathLatencySamples != result.delay ||
++            result.beforeA.boundaryPathLatencySamples != result.delay ||
++            result.afterA.boundaryPathLatencySamples != result.delay ||
++            result.beforeB.boundaryPathLatencySamples != result.delay ||
++            result.afterB.boundaryPathLatencySamples != result.delay) reject();
++        unsigned removedReferences = 0, addedReferences = 0;
++        for (auto* node : previous.orderedNodes)
++            if (auto* delay = dynamic_cast<LatencyNode*> (node); delay &&
++                delay->latencyProcessor == result.beforeB.delay->latencyProcessor) ++removedReferences;
++        for (auto* node : candidate.orderedNodes)
++            if (auto* delay = dynamic_cast<LatencyNode*> (node); delay &&
++                delay->latencyProcessor == result.afterA.delay->latencyProcessor) ++addedReferences;
++        if (removedReferences != 1 || addedReferences != 1 ||
++            result.beforeB.delay->latencyProcessor == result.afterA.delay->latencyProcessor) reject();
++        auto* oldA = stageOriginNode (previous, result.beforeA);
++        auto* newB = stageOriginNode (candidate, result.afterB);
++        auto* oldB = stageOriginNode (previous, result.beforeB);
++        auto* newA = stageOriginNode (candidate, result.afterA);
++        if (!oldA || !newB || !oldB || !newA) reject();
++        const auto oldSources = sharedSources (*oldA), newSources = sharedSources (*newB);
++        if (oldSources.size() != 1 || newSources.size() != 1 ||
++            oldSources.front().second != newSources.front().second ||
++            !oldSources.front().first->provesPreparedSharedSourceBoundary (*oldA) ||
++            !newSources.front().first->provesPreparedSharedSourceBoundary (*newB) ||
++            !sharedSources (*oldB).empty() || !sharedSources (*newA).empty()) reject();
++        result.source = oldSources.front().second;
++        const auto oldInternal = zeroExchangeInternalQueues (previous);
++        const auto nextInternal = zeroExchangeInternalQueues (candidate);
++        if (oldInternal.size() != nextInternal.size()) reject();
++        for (const auto& [id, now] : nextInternal)
++        {
++            const auto prior = oldInternal.find (id);
++            if (prior == oldInternal.end() || now->requestedDelay != prior->second->requestedDelay ||
++                now->latencyProcessor != prior->second->latencyProcessor ||
++                !now->latencyProcessor->hasSameConfigurationAs (*prior->second->latencyProcessor) ||
++                now->getNodeProperties().numberOfChannels != prior->second->getNodeProperties().numberOfChannels ||
++                now->getNodeProperties().hasMidi != prior->second->getNodeProperties().hasMidi) reject();
++        }
++        return result;
++    }
++public:
++    // Called only by the ACTUAL candidate root's CONTROL prepare, after children
++    // have completed final FIFO selection. No caller-provided queue or source
++    // ID substitutes for the actual graph inventory/typed lineage audit.
++    static std::unique_ptr<ZeroStageExchange> prepareZeroStageExchange (
++        Node& binding, const PlaybackInitialisationInfo& info,
++        const void* addingOwner, const void* removingOwner)
++    {
++        if (&binding != info.nodeGraph.rootNode.get() || !info.nodeGraphToReplace)
++            throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcZeroPreparation: Actual candidate and selected predecessor roots required");
++        const auto next = collectOutputStages (info.nodeGraph);
++        const auto old = collectOutputStages (*info.nodeGraphToReplace);
++        const auto scope = requireZeroExchangeScope (info.nodeGraph, *info.nodeGraphToReplace,
++            next, old, addingOwner, removingOwner, info.sampleRate, info.blockSize);
++        return std::unique_ptr<ZeroStageExchange> (new ZeroStageExchange (
++            binding, info.nodeGraph, *info.nodeGraphToReplace, addingOwner, removingOwner,
++            scope.beforeA.origin, scope.afterA.origin, scope.beforeB.origin, scope.afterB.origin,
++            scope.beforeB.delay->latencyProcessor, scope.afterA.delay->latencyProcessor,
++            scope.source, scope.continuity, scope.beforeGeneration, scope.afterGeneration,
++            info.sampleRate, info.blockSize, 2, scope.delay));
++    }
++private:
++    static void validateZeroStageExchange (ZeroStageExchange& proof, NodeGraph& candidate,
++        NodeGraph& previous, const Stages& next, const Stages& old)
++    {
++        const auto scope = requireZeroExchangeScope (candidate, previous, next, old,
++            proof.addingOwner, proof.removingOwner, proof.rate, proof.blockSize);
++        if (proof.observation() != ZeroStageExchange::State::prepared || proof.admitted ||
++            proof.bindingNode != candidate.rootNode.get() || proof.candidateGraph != &candidate ||
++            proof.previousGraph != &previous || proof.previousRoot != previous.rootNode.get() ||
++            proof.beforeAddOrigin != scope.beforeA.origin || proof.afterAddOrigin != scope.afterA.origin ||
++            proof.beforeRemoveOrigin != scope.beforeB.origin || proof.afterRemoveOrigin != scope.afterB.origin ||
++            proof.removedZero != scope.beforeB.delay->latencyProcessor ||
++            proof.addedZero != scope.afterA.delay->latencyProcessor || proof.sourceIdentity != scope.source ||
++            proof.continuity != scope.continuity || proof.beforeGeneration != scope.beforeGeneration ||
++            proof.afterGeneration != scope.afterGeneration || proof.delay != scope.delay || proof.channels != 2)
++            throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcZeroProof: Exact unconsumed root/inventory/final-queue capability required");
++    }
++
+     static void requireForwardScope (NodeGraph& candidate, NodeGraph& previous,
+                                      const Stages& next, const Stages& old, const void* target)
+     {
+@@ -663,9 +990,13 @@
+     // queued tail. This is not variable-delay/route-wide PDC qualification.
+     static bool validateStableOutputStages (NodeGraph& candidate, NodeGraph* previous)
+     {
++        auto* zeroRoot = dynamic_cast<ZeroStageExchangeRoot*> (candidate.rootNode.get());
++        auto* zeroToAdmit = zeroRoot ? zeroRoot->preparedZeroStageExchange() : nullptr;
+         const auto next = collectOutputStages (candidate);
+         if (! previous)
+         {
++            if (zeroToAdmit) throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcZeroCold: An exchange requires an actual predecessor graph");
+             for (const auto& [owner, stage] : next)
+                 if (stage.forward) throw OutputStageError (OutputStageStatus::configuration,
+                     "routing.pdcForwardPreparation: Cannot bridge a genuine first cold graph");
+@@ -675,7 +1006,12 @@
+             return ! next.empty(); // Genuine first cold graph has no queued history.
+         }
+         const auto old = collectOutputStages (*previous);
+-        if (next.empty() && old.empty()) return false;
++        if (next.empty() && old.empty())
++        {
++            if (zeroToAdmit) throw OutputStageError (OutputStageStatus::missing,
++                "routing.pdcZeroEmpty: Registered whole-graph stage inventory required");
++            return false;
++        }
+         if (next.size() != old.size())
+             throw OutputStageError (OutputStageStatus::missing, "routing.pdcStageMissing: Explicit bus output stages must remain present");
+         const auto describe = [] (const Stage& stage)
+@@ -715,6 +1051,7 @@
+             }
+             return receipt;
+         };
++        if (zeroToAdmit) validateZeroStageExchange (*zeroToAdmit, candidate, *previous, next, old);
+         ForwardOutputDrain* forwardToAdmit = nullptr;
+         InverseOutputResidual* inverseToAdmit = nullptr;
+         for (const auto& [identity, now] : next)
+@@ -773,6 +1110,11 @@
+                 inverseToAdmit = proof;
+                 continue;
+             }
++            // Only this ONE fully validated root capability may account for
++            // both changed entries. All other stages and internal queues below
++            // retain their unchanged ordinary validation.
++            if (zeroToAdmit && (identity == zeroToAdmit->addingOwner || identity == zeroToAdmit->removingOwner))
++                continue;
+             const auto* before = found->second.delay;
+             if (bool (now.delay) != bool (before) ||
+                 (now.delay && (!now.delay->latencyProcessor || !before->latencyProcessor ||
+@@ -811,6 +1153,13 @@
+             if (found == oldInternal.end() || tap->latencyProcessor != found->second->latencyProcessor)
+                 throw OutputStageError (OutputStageStatus::unsupportedInternal,
+                     "routing.pdcInternalScope: Changed/cold internal compensation queue needs a joint plan");
++        }
++        // Candidate-only scalar seal after EVERY stage/internal check. A
++        // later holder allocation failure/cancel never consumes old history.
++        if (zeroToAdmit)
++        {
++            zeroToAdmit->admitted = true;
++            zeroToAdmit->observed.store (uint32_t (ZeroStageExchange::State::admitted), std::memory_order_release);
+         }
+         if (forwardToAdmit)
+         {

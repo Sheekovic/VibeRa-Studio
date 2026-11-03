@@ -1,0 +1,57 @@
+{
+  "status": "draft_unbuilt_not_run",
+  "base": {
+    "path": "tests/PluginDynamicWaveformAcceptance.h",
+    "rawSha256": "16320c663996d3355958f3d61de2a3508989816fbafb8e7fcfc0b0d510145d38",
+    "contentSha256": "16320c663996d3355958f3d61de2a3508989816fbafb8e7fcfc0b0d510145d38"
+  },
+  "draft": [
+    {
+      "path": "tests/PluginDynamicWaveformAcceptance.h",
+      "sha256": "3075a178d1e36fa60f7a4ef700762c3f4ea2f6ffd24a00a45376c5aaa674db66"
+    },
+    {
+      "path": "tests/PluginRapidWaveformAcceptance.h",
+      "sha256": "46e8640cea4b375ae01e85f383afeb7b0666a36da48d1dcb04d847f0adc8179d"
+    }
+  ],
+  "patchSha256": "b460eaa7efd7d391fee4bfc41a7ba8bb625f171f7f33ca66c47ac48bdbd885d0",
+  "existingCasesUnchanged": true,
+  "existingCaseCount": 4,
+  "additionalScenarioCount": 2,
+  "burstsPerAdditionalScenario": 3,
+  "changesPerBurst": 4,
+  "additionalTransitionsPlanned": 24,
+  "plannedActualBoundaryChecks": 6,
+  "runtimeQualification": false,
+  "sourceDependencies": [
+    {
+      "path": "tests/PluginDynamicLatencyAcceptance.h",
+      "rawSha256": "eb66e66b8970fe90af74b2d38665fbdc416dc087bb20feabe3643e84a164f158"
+    },
+    {
+      "path": "tests/ClockWaveform.h",
+      "rawSha256": "c181713e6f73e69e9496282a8d69c8a841d05796799c9184ffe0cac334705089"
+    },
+    {
+      "path": "tests/ClockWaveformFixture.cpp",
+      "rawSha256": "95c0a8607f038b7b239b8d17514592b75b22685d36d2677db0707178092c6699"
+    },
+    {
+      "path": "tests/MixerLatencyFixture.cpp",
+      "rawSha256": "70b18d76fd0a5cbaffcac2afa0ff4464b5ba52fdd5bd8162fdc7c47f4dea4e64"
+    },
+    {
+      "path": "tests/SyntheticDevice.h",
+      "rawSha256": "f32ab87714587bd5a163139f224985061b5e1db0c0c25639bd0049bc85306a77"
+    },
+    {
+      "path": "src/AudioEngine.h",
+      "rawSha256": "361256f1cd3a9a2530d08bd7535991da9464741e2e4f6b0858a1c14c465e4555"
+    },
+    {
+      "path": "src/PluginHost.h",
+      "rawSha256": "1020b4ba8c994d76061a8b0168346fa2452a5df8326313a5ae804d8b3924fc1e"
+    }
+  ]
+}

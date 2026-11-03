@@ -1,0 +1,12 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -146,7 +146,8 @@
+     // and exact already-prepared output ports. Unknown nodes return false.
+     static bool hasPreparedAudioZeroOutput (graph::Node&,
+         const std::function<bool (Plugin&)>& admitZeroPreservingPlugin,
+-        const std::function<std::optional<graph::Node*> (graph::Node&)>& preparedOutputPort);
++        const std::function<std::optional<graph::Node*> (graph::Node&)>& preparedOutputPort,
++        const std::function<void (graph::Node&, const char*, bool)>& trace = {});
+ 
+ };
+ 

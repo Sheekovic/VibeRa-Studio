@@ -1,0 +1,15 @@
+--- a/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h
++++ b/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h
+@@ -17,6 +17,12 @@
+     ~AuxSendPlugin() override;
+ 
+     //==============================================================================
++    // Called during graph preparation and processing. Overrides must be realtime-safe.
++    virtual float getRealtimeSendGain() const noexcept
++    {
++        return volumeFaderPositionToGain (gain->getCurrentValue());
++    }
++
+     void setGainDb (float newDb);
+     float getGainDb() const                 { return volumeFaderPositionToDB (gain->getCurrentValue()); }
+ 

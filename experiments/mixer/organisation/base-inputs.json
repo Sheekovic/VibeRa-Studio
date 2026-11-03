@@ -1,0 +1,41 @@
+[
+  {
+    "path": "src/Project.h",
+    "baseRawSha256": "6754bc687b6ac8c17c877acbd4a2f5bd595d8a46d82ae37a29759ce014cbbfe6",
+    "liveBaseStillExact": true,
+    "draftRawSha256": "9346637c266a67a0632f5956eb5f9eb2b791d3973839a5d47510dc50a6c57155"
+  },
+  {
+    "path": "src/Project.cpp",
+    "baseRawSha256": "09c0c411b1e69f01c9fd7e8583e119920aa86bcca80a1dcd66aa78068587bc0e",
+    "liveBaseStillExact": true,
+    "draftRawSha256": "0ab2d64f92820a265ab0b8727a621a47ccb63d327d3c29d3b65e2612fe6be0d7"
+  },
+  {
+    "path": "src/Commands.cpp",
+    "baseRawSha256": "ebd9197346f83f56606210bf4f7bab4edc29376e186c5d5896d85efef4687f87",
+    "liveBaseStillExact": true,
+    "draftRawSha256": "84b24abe68d973a7834efe1c4a916115cd5d150c50bc2d30e2ba474925b5a1ee"
+  },
+  {
+    "path": "src/Commands.h",
+    "baseRawSha256": "3dafc67ba8e9cd081e522d6e8f3b1f2538479f3c9322924c5dad6ff8fa826d00",
+    "liveBaseStillExact": true,
+    "draftRawSha256": "b2c0b8f12aa9f33446b10be52ea307d2e786f50c06735f5efe9d3febc6999d34"
+  },
+  {
+    "path": "src/MixerOrganisation.h",
+    "newFile": true,
+    "draftRawSha256": "db31a7c30dbb5d076e63656d94a4b1e2d1c2bae040a5c17aa9691270114cca67"
+  },
+  {
+    "path": "src/MixerOrganisationContracts.h",
+    "newFile": true,
+    "draftRawSha256": "4209ebdf1afede87c6f3417705f7396cb63b0f6fdf26989a04b1588a9055be82"
+  },
+  {
+    "path": "tests/MixerOrganisationAcceptance.h",
+    "newFile": true,
+    "draftRawSha256": "0d38bb14835bb0682228eb727472bd65d06299dd0b6289714bd4414b86251ce8"
+  }
+]

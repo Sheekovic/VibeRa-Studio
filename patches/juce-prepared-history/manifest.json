@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "dependency": "JUCE",
+  "revision": "37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "sourceDirectory": "JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "archiveSha256": "f3da0cce79f1008b02ba1cddde8eba1087d07a4d6a775a0ba0d56a9d3cecd18a",
+  "license": "AGPL-3.0-only",
+  "appliesAfter": "patches/juce-history-preview/manifest.json",
+  "productionEnabled": false,
+  "qualification": "Closed actual-manager inverse replacement extension; source-only draft, C++/native integration pending",
+  "files": [
+    {
+      "path": "modules/juce_data_structures/undomanager/juce_UndoManager.h",
+      "patch": "patches/juce-prepared-history/juce_UndoManager.h.patch",
+      "originalSha256": "44e61c66b9ffed5eddb19232e6323ca0748b474b463d6efb9baf9570708e3a3e",
+      "patchedSha256": "06b051f0b2e931676e0a38368a1cf9dc4a79af402dfd43c4260d6f5b5b5cedaf",
+      "patchSha256": "9fb8ac45fa7710fe5b4b0918644364121699861379eaaf07117454f2fddddb62"
+    },
+    {
+      "path": "modules/juce_data_structures/undomanager/juce_UndoManager.cpp",
+      "patch": "patches/juce-prepared-history/juce_UndoManager.cpp.patch",
+      "originalSha256": "f5608a00535ee9897e6b69bf2bb4e84b7fb62cbe6ca1bffdd8a8de46843e8ed6",
+      "patchedSha256": "80ad7d9f71b6a01c4a794d453c1110b0af5c25dbdf27863fefd4ca62654088ae",
+      "patchSha256": "d7d0399982531040677c9c1020f24853843603e61ca002491a313ef5cadae9a4"
+    }
+  ]
+}

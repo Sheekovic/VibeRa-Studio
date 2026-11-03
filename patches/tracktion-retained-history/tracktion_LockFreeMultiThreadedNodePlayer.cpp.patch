@@ -1,0 +1,66 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
+@@ -8,8 +8,9 @@
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
+ 
+ #include <thread>
++#include <type_traits>
+ #if JUCE_INTEL
+  #include <emmintrin.h>
+ #endif
+ 
+@@ -171,8 +172,9 @@
+ 
+     rootNode = nullptr;
+     lastGraphPosted = nullptr;
+     lastAudioBufferPoolPosted = nullptr;
++    preparedLatencySamples = 0;
+     preparedNodeObject.clear();
+ 
+     createThreads();
+ }
+@@ -263,10 +265,8 @@
+                       {
+                           return n1->isReadyToProcess() && ! n2->isReadyToProcess();
+                       });
+ 
+-    rootNode = newGraph->rootNode.get();
+-
+     PreparedNode newPreparedNode;
+     newPreparedNode.graph = std::move (newGraph);
+     newPreparedNode.nodesReadyToBeProcessed = std::make_unique<LockFreeFifo<Node*>> ((int) newPreparedNode.graph->orderedNodes.size());
+     buildNodesOutputLists (newPreparedNode);
+@@ -281,12 +281,28 @@
+                                                    *newPreparedNode.audioBufferPool,
+                                                    numThreadsToUse, blockSize);
+     }
+ 
+-    lastGraphPosted = newPreparedNode.graph.get();
+-    lastAudioBufferPoolPosted = newPreparedNode.audioBufferPool.get();
+-
+-    if (auto retiredPreparedNode = preparedNodeObject.pushNonRealTime (std::move (newPreparedNode)))
++    // Pin the noexcept move premise used by LockFreeObject's allocation-before-publication.
++    static_assert (std::is_nothrow_move_constructible_v<PreparedNode>);
++    auto* nextRoot = newPreparedNode.graph->rootNode.get();
++    auto* nextGraph = newPreparedNode.graph.get();
++    auto* nextPool = newPreparedNode.audioBufferPool.get();
++    // Node properties may allocate (for example ReturnNode input enumeration).
++    // Resolve them before publication; callers read only this cached integer.
++    const auto nextLatency = nextRoot->getNodeProperties().latencyNumSamples;
++
++    // Allocate the publication holder before committing any raw caches. Keep
++    // the pool cache ready BEFORE audio can adopt the graph; pooled callbacks
++    // consult it from DSP. The following prepared publication cannot allocate.
++    auto storage = std::make_unique<PreparedNode> (std::move (newPreparedNode));
++    rootNode = nextRoot;
++    lastGraphPosted = nextGraph;
++    lastAudioBufferPoolPosted = nextPool;
++    preparedLatencySamples = nextLatency;
++    auto retiredPreparedNode = preparedNodeObject.pushPreparedNonRealTime (std::move (storage));
++
++    if (retiredPreparedNode)
+     {
+         // If an old PreparedNode was returned, it was either never swapped in
+         // on the audio thread (so no pool thread can have seen it), or it was
+         // retired by a swap, in which case the audio thread has since published

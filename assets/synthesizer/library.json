@@ -1,0 +1,4141 @@
+{
+  "schemaVersion": 1,
+  "id": "vibera-recorded-acoustic-starter",
+  "license": "CC0-1.0",
+  "pathBase": "assets/synthesizer",
+  "sources": [
+    {
+      "id": "vsco2ce",
+      "name": "VSCO-2-CE",
+      "url": "https://github.com/sgossner/VSCO-2-CE",
+      "revision": "6dd651d55dde97fd4028699be9d4481f26917891",
+      "license": "CC0-1.0",
+      "licensePath": "sources/VSCO-2-CE-LICENSE",
+      "licenseRevision": "6dd651d55dde97fd4028699be9d4481f26917891",
+      "licenseSha256": "36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673",
+      "credit": "Sam Gossner / Versilian Studios; Simon Dalzell / Ivy Audio; sample cutting Elan Hickler / Soundemote"
+    },
+    {
+      "id": "vcsl",
+      "name": "VCSL",
+      "url": "https://github.com/sgossner/VCSL",
+      "revision": "dfcf4a4918771eee884b96ad4493de82ef84daf6",
+      "license": "CC0-1.0",
+      "licensePath": "sources/VCSL-LICENSE",
+      "licenseRevision": "c1ea7bcc3c7309650ab0da9d15c9cd1fbc4a4c7e",
+      "licenseSha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "credit": "Sam Gossner / Versilian Studios and VCSL contributors"
+    },
+    {
+      "id": "freepats-guitar",
+      "name": "electric-guitar-FSBS-clean",
+      "url": "https://github.com/freepats/electric-guitar-FSBS-clean",
+      "revision": "192cf0d9bf2c4ba6ead8e3524ba3f78818e4fe91",
+      "license": "CC0-1.0",
+      "licensePath": "sources/electric-guitar-FSBS-clean-LICENSE.txt",
+      "licenseRevision": "192cf0d9bf2c4ba6ead8e3524ba3f78818e4fe91",
+      "licenseSha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "credit": "FreePats contributors; recorded FSBS electric guitar"
+    }
+  ],
+  "instruments": [
+    {
+      "id": "piano-upright",
+      "name": "Recorded Upright Piano",
+      "family": "keys",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/UprightPiano.sfz",
+      "sourceMappingSha256": "9c88ebcf6ea66d5694c377e4119fd38c1875c3c211bb2e61c2e41f96a8e4364a",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn1_rr1_008.wav",
+          "rootNote": 37,
+          "lowNote": 33,
+          "highNote": 43,
+          "lowVelocity": 0,
+          "highVelocity": 60,
+          "gainDb": 11.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn1_rr1_008.wav",
+          "sourceGitBlobSha1": "cb2e89a7749fc4b979512aa5da883059cd3f6ad7",
+          "sourceBytes": 5470924,
+          "sourceVelocityRange": [
+            0,
+            60
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 911698,
+          "bitsPerSample": 24,
+          "sha256": "3b4cdd096b01b23a81b2ad8ad880c409c8a78d69cd0306fe9bf66795cd62acca"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn2_rr1_008.wav",
+          "rootNote": 37,
+          "lowNote": 33,
+          "highNote": 43,
+          "lowVelocity": 61,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn2_rr1_008.wav",
+          "sourceGitBlobSha1": "ab13066d1f089f86fed417c7b887d6104e573574",
+          "sourceBytes": 6862312,
+          "sourceVelocityRange": [
+            61,
+            110
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 1143596,
+          "bitsPerSample": 24,
+          "sha256": "52be11ac2a57389f2d12cbd82df9b175da7b60e423d8a1154e1d7fc3340ecd6e"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn1_rr1_014.wav",
+          "rootNote": 49,
+          "lowNote": 44,
+          "highNote": 55,
+          "lowVelocity": 0,
+          "highVelocity": 60,
+          "gainDb": 11.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn1_rr1_014.wav",
+          "sourceGitBlobSha1": "30127aa63c8342a363b9a13b8052a3428d3bb046",
+          "sourceBytes": 2270980,
+          "sourceVelocityRange": [
+            0,
+            60
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 378374,
+          "bitsPerSample": 24,
+          "sha256": "f3d00b63bb178680fdd4d9ed7ea43d1df1cf29e00b567ccb022c2bd411a20607"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn2_rr1_014.wav",
+          "rootNote": 49,
+          "lowNote": 44,
+          "highNote": 55,
+          "lowVelocity": 61,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn2_rr1_014.wav",
+          "sourceGitBlobSha1": "2f341c6fca30ac8a6ae977cf97e93538f6c1e75b",
+          "sourceBytes": 6180628,
+          "sourceVelocityRange": [
+            61,
+            110
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 1029982,
+          "bitsPerSample": 24,
+          "sha256": "0bdf66b89c2cd8042118b2cf9898aab334820fff7538b8553655a3d11d2ba107"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn1_rr1_020.wav",
+          "rootNote": 61,
+          "lowNote": 56,
+          "highNote": 67,
+          "lowVelocity": 0,
+          "highVelocity": 60,
+          "gainDb": 11.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn1_rr1_020.wav",
+          "sourceGitBlobSha1": "084b3f131592beecd311b309e6c5f42190653f4f",
+          "sourceBytes": 3134164,
+          "sourceVelocityRange": [
+            0,
+            60
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 522238,
+          "bitsPerSample": 24,
+          "sha256": "08242e8d1c865c8cdc794cc7921d3d9663bedb5a12bfefe0de13aaa86fd23133"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn2_rr1_020.wav",
+          "rootNote": 61,
+          "lowNote": 56,
+          "highNote": 67,
+          "lowVelocity": 61,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn2_rr1_020.wav",
+          "sourceGitBlobSha1": "e6027651b23024f343a8eb7823f32b49742a35fe",
+          "sourceBytes": 4346848,
+          "sourceVelocityRange": [
+            61,
+            110
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 724352,
+          "bitsPerSample": 24,
+          "sha256": "dc314226819e7af0768cd7fc08933f5e5b550083145e05af630fd7556f4d3913"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn1_rr1_026.wav",
+          "rootNote": 73,
+          "lowNote": 68,
+          "highNote": 79,
+          "lowVelocity": 0,
+          "highVelocity": 60,
+          "gainDb": 11.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn1_rr1_026.wav",
+          "sourceGitBlobSha1": "9a6cd6b879752f747e136ee001e7f1b78b40dc9c",
+          "sourceBytes": 3558112,
+          "sourceVelocityRange": [
+            0,
+            60
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 592896,
+          "bitsPerSample": 24,
+          "sha256": "254be5d34270e5eb78bbda3f7425c3e82b9596845db2c065b13179f23c23196b"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn2_rr1_026.wav",
+          "rootNote": 73,
+          "lowNote": 68,
+          "highNote": 79,
+          "lowVelocity": 61,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn2_rr1_026.wav",
+          "sourceGitBlobSha1": "946de9950a88c228d6f764e6789efb7d0147cffa",
+          "sourceBytes": 2656870,
+          "sourceVelocityRange": [
+            61,
+            110
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 442689,
+          "bitsPerSample": 24,
+          "sha256": "4e668e75c3922c79ef06bd46806224dbf8dbfa0be1569847a1cd17e573a967ec"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn1_rr1_032.wav",
+          "rootNote": 85,
+          "lowNote": 80,
+          "highNote": 91,
+          "lowVelocity": 0,
+          "highVelocity": 60,
+          "gainDb": 11.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn1_rr1_032.wav",
+          "sourceGitBlobSha1": "8ac49b49803f59cf0a712261a9e06a54edd2e6eb",
+          "sourceBytes": 1746142,
+          "sourceVelocityRange": [
+            0,
+            60
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 290901,
+          "bitsPerSample": 24,
+          "sha256": "2a903396ee7130c42a75aa10497c6ee018445e0934dde135e7f168f07d3b8a07"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn2_rr1_032.wav",
+          "rootNote": 85,
+          "lowNote": 80,
+          "highNote": 91,
+          "lowVelocity": 61,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn2_rr1_032.wav",
+          "sourceGitBlobSha1": "e49d0ae70c0419e9e7dfa1a6ae94acd2731b4291",
+          "sourceBytes": 2888572,
+          "sourceVelocityRange": [
+            61,
+            110
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 481306,
+          "bitsPerSample": 24,
+          "sha256": "8a4b127b8420c276d8935495d13b4e493c3eaa8f8aaef75bbc4f74d6437160f2"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn1_rr1_038.wav",
+          "rootNote": 97,
+          "lowNote": 92,
+          "highNote": 101,
+          "lowVelocity": 0,
+          "highVelocity": 60,
+          "gainDb": 11.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn1_rr1_038.wav",
+          "sourceGitBlobSha1": "18a8573978f46906530206c2b54e35750d007b70",
+          "sourceBytes": 915352,
+          "sourceVelocityRange": [
+            0,
+            60
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 152436,
+          "bitsPerSample": 24,
+          "sha256": "3176c8eec715cccf5991efe99e1507d063f111060d97e91a74cf37ef1c111441"
+        },
+        {
+          "sample": "samples/vsco2ce/Keys/Upright Piano/Player_dyn2_rr1_038.wav",
+          "rootNote": 97,
+          "lowNote": 92,
+          "highNote": 101,
+          "lowVelocity": 61,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Keys/Upright Piano/Player_dyn2_rr1_038.wav",
+          "sourceGitBlobSha1": "8e410d3c45ec1dce8ff6d7ef1ffd4a2640b2a12f",
+          "sourceBytes": 1425370,
+          "sourceVelocityRange": [
+            61,
+            110
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 237439,
+          "bitsPerSample": 24,
+          "sha256": "ace4ec29aa6ae232566174c6b74ae861ce24e38e2cb3ab1d1ea5cf8e145ebdbd"
+        }
+      ]
+    },
+    {
+      "id": "violin-solo",
+      "name": "Recorded Solo Violin",
+      "family": "strings",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/SViolinVib.sfz",
+      "sourceMappingSha256": "a2ca3611463547ac9371aa9d13a693af9cd10804f9232d2c602d65937387a992",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G3_p.wav",
+          "rootNote": 55,
+          "lowNote": 51,
+          "highNote": 57,
+          "lowVelocity": 0,
+          "highVelocity": 62,
+          "gainDb": 9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G3_p.wav",
+          "sourceGitBlobSha1": "bc5f7d33610abbc3000f432562f36063f1d3d725",
+          "sourceBytes": 2788822,
+          "sourceVelocityRange": [
+            0,
+            62
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 697194,
+          "bitsPerSample": 16,
+          "sha256": "c52d8ef3e2882984c09da1b7c7ef40b82e997bc78cfdd380fe167bbcb94b03de"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G3_f.wav",
+          "rootNote": 55,
+          "lowNote": 51,
+          "highNote": 57,
+          "lowVelocity": 63,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G3_f.wav",
+          "sourceGitBlobSha1": "a09b038528097878ad6b12d30da4ac1a227d5a98",
+          "sourceBytes": 2936890,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 734211,
+          "bitsPerSample": 16,
+          "sha256": "80bae3776b0ccd3d4774f47429e829c7764f5fe6061ff844a8affc6ac68b7899"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C4_p.wav",
+          "rootNote": 60,
+          "lowNote": 58,
+          "highNote": 64,
+          "lowVelocity": 0,
+          "highVelocity": 62,
+          "gainDb": 9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": -20.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C4_p.wav",
+          "sourceGitBlobSha1": "9f876cafa572a8719e2e93fc994c5303992b8e62",
+          "sourceBytes": 3096650,
+          "sourceVelocityRange": [
+            0,
+            62
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 774151,
+          "bitsPerSample": 16,
+          "sha256": "592ebf4404ccafc7164c13cc543911ba9a2fe5f5e70dbb200807e2ae37b25035"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C4_f.wav",
+          "rootNote": 60,
+          "lowNote": 58,
+          "highNote": 64,
+          "lowVelocity": 63,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C4_f.wav",
+          "sourceGitBlobSha1": "8a700075b7ae2f19c1c56108738324dfba6959e8",
+          "sourceBytes": 2334170,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 583531,
+          "bitsPerSample": 16,
+          "sha256": "4169605b51a72454f11bc2c34efc66c1d9993fd2b7d5f097a025ef9d3a2dbdfa"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A4_p.wav",
+          "rootNote": 69,
+          "lowNote": 65,
+          "highNote": 72,
+          "lowVelocity": 0,
+          "highVelocity": 62,
+          "gainDb": 9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A4_p.wav",
+          "sourceGitBlobSha1": "e8667671328e1cfcd769a7624c26fac133ad7b0f",
+          "sourceBytes": 2612122,
+          "sourceVelocityRange": [
+            0,
+            62
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 653019,
+          "bitsPerSample": 16,
+          "sha256": "0d05607b46b78690893006d5aa7923ac304c7fb497df1e96536dc88ac5ac487f"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A4_f.wav",
+          "rootNote": 69,
+          "lowNote": 65,
+          "highNote": 72,
+          "lowVelocity": 63,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_A4_f.wav",
+          "sourceGitBlobSha1": "3155c72c1f9ea1518ddb6c1a20eb5c0a094bd537",
+          "sourceBytes": 2488526,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 622120,
+          "bitsPerSample": 16,
+          "sha256": "19e5374658351508a9e2c929e871a43caff41e62d5e3363ead6f88428a9ab863"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_E5_p.wav",
+          "rootNote": 76,
+          "lowNote": 73,
+          "highNote": 80,
+          "lowVelocity": 0,
+          "highVelocity": 62,
+          "gainDb": 9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_E5_p.wav",
+          "sourceGitBlobSha1": "670865e19772aceab538850ea7a0d1a86024d955",
+          "sourceBytes": 2517094,
+          "sourceVelocityRange": [
+            0,
+            62
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 629262,
+          "bitsPerSample": 16,
+          "sha256": "c60c3bcfc64ea00ebf8d97b16f2876c892393839a017a945c5e557359b6369a4"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_E5_f.wav",
+          "rootNote": 76,
+          "lowNote": 73,
+          "highNote": 80,
+          "lowVelocity": 63,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_E5_f.wav",
+          "sourceGitBlobSha1": "269658d510e82345227ac10d22f928cfae428c99",
+          "sourceBytes": 2365174,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 591282,
+          "bitsPerSample": 16,
+          "sha256": "5c278e263fd59650190fc58294945cd291906eb1abd8293f728a96a878d1d478"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C6_p.wav",
+          "rootNote": 84,
+          "lowNote": 81,
+          "highNote": 87,
+          "lowVelocity": 0,
+          "highVelocity": 62,
+          "gainDb": 9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C6_p.wav",
+          "sourceGitBlobSha1": "33bc7e87816637462d6e174da9949eb9b5e45ef4",
+          "sourceBytes": 2358906,
+          "sourceVelocityRange": [
+            0,
+            62
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 589715,
+          "bitsPerSample": 16,
+          "sha256": "48039f28964328d0b8235b8d61e39b06f8d22f836a6940fa036fe7004fc58e6c"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C6_f.wav",
+          "rootNote": 84,
+          "lowNote": 81,
+          "highNote": 87,
+          "lowVelocity": 63,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_C6_f.wav",
+          "sourceGitBlobSha1": "89f48f37313800df4c5901dc76b49b1c5c69e396",
+          "sourceBytes": 2162774,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 540682,
+          "bitsPerSample": 16,
+          "sha256": "7ec8e0c2dde75282a4aaacccc713c84faa3e84daa9cf43df45ffc0e209964d46"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G6_p.wav",
+          "rootNote": 91,
+          "lowNote": 88,
+          "highNote": 95,
+          "lowVelocity": 0,
+          "highVelocity": 62,
+          "gainDb": 9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G6_p.wav",
+          "sourceGitBlobSha1": "eca2508aa84cef89ee2002953d3b5f9867d53802",
+          "sourceBytes": 2417222,
+          "sourceVelocityRange": [
+            0,
+            62
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 604294,
+          "bitsPerSample": 16,
+          "sha256": "eb40e796d0e40ff4a729fd93dc9436ac08b30de308a8191e944351fee49aef9d"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G6_f.wav",
+          "rootNote": 91,
+          "lowNote": 88,
+          "highNote": 95,
+          "lowVelocity": 63,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Violin/Arco Vib/LLVln_ArcoVib_G6_f.wav",
+          "sourceGitBlobSha1": "9bd2b0d9d6e5505a0c0ce0722bd10db7913ee97d",
+          "sourceBytes": 2164026,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 540995,
+          "bitsPerSample": 16,
+          "sha256": "68c49e55565810ea822866e3d39e51c1a5ad53cfa1a67bc25836ca7feac3fe0c"
+        }
+      ]
+    },
+    {
+      "id": "contrabass-pizz",
+      "name": "Recorded Pizzicato Contrabass",
+      "family": "bass",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/ContrabassPizz.sfz",
+      "sourceMappingSha256": "8559b4a439420adc035cb6f78bc15c6d1a9ca8d25275496bfa8f4f9d8b93a314",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_A#0_v3_rr1.wav",
+          "rootNote": 34,
+          "lowNote": 30,
+          "highNote": 37,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_A#0_v3_rr1.wav",
+          "sourceGitBlobSha1": "b5525c15a77e1871feb42f70cc17a6650aee4355",
+          "sourceBytes": 417360,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 104314,
+          "bitsPerSample": 16,
+          "sha256": "ffdcf783332627d78bb09c348ce5bbf64e833d529a1cfd48e05362f27a857c0a"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_E1_v3_rr1.wav",
+          "rootNote": 40,
+          "lowNote": 38,
+          "highNote": 42,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_E1_v3_rr1.wav",
+          "sourceGitBlobSha1": "1cada4277b16b2eb8b240d4a6da4bbd3aca989a0",
+          "sourceBytes": 518876,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 129693,
+          "bitsPerSample": 16,
+          "sha256": "7628daebe4a9f8524d46e6d58eee811f437e73c77eb6c21396152af58a062506"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_A1_v1_rr1.wav",
+          "rootNote": 45,
+          "lowNote": 43,
+          "highNote": 47,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 3.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_A1_v1_rr1.wav",
+          "sourceGitBlobSha1": "311a5027a127715530f1e723a21f7927d280d493",
+          "sourceBytes": 623260,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 155789,
+          "bitsPerSample": 16,
+          "sha256": "c88e632ac4f716d4e85112d6ea5bbe2d27d67019296787c25d27178a9e5f18ac"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_C#2_v1_rr1.wav",
+          "rootNote": 49,
+          "lowNote": 48,
+          "highNote": 52,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 3.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_C#2_v1_rr1.wav",
+          "sourceGitBlobSha1": "16b7ca596182a49fe693b81ed925df8d2fc1be59",
+          "sourceBytes": 513824,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 128430,
+          "bitsPerSample": 16,
+          "sha256": "41804fc70cf82bd1c475611e315b14b1adf5effbd3369028302a681b54064b3f"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_G#2_v1_rr1.wav",
+          "rootNote": 56,
+          "lowNote": 53,
+          "highNote": 57,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 3.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_G#2_v1_rr1.wav",
+          "sourceGitBlobSha1": "b32004f92c141a30ba5e314dd0cc1d2687b92856",
+          "sourceBytes": 376048,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 93986,
+          "bitsPerSample": 16,
+          "sha256": "f5d495c2184e6dacec7783719fbe3f6c1254995abb95ccf307026ef3dd7d5439"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_B2_v1_rr1.wav",
+          "rootNote": 59,
+          "lowNote": 58,
+          "highNote": 63,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 3.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_B2_v1_rr1.wav",
+          "sourceGitBlobSha1": "c5bfef7aaa68a98928f172b8572711ea6ce8975d",
+          "sourceBytes": 417472,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 104342,
+          "bitsPerSample": 16,
+          "sha256": "58d70398829e87b9bd3b43fb3d384d9bc3e0aa9bfe70175ec2f4e7a914226c8b"
+        }
+      ]
+    },
+    {
+      "id": "cello-ensemble",
+      "name": "Recorded Cello Ensemble",
+      "family": "strings",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/CelloEnsSusVib.sfz",
+      "sourceMappingSha256": "276352639dda425dd12a4fdb3acdf545867fdb0ff4f89876319f4ec3cf12a19f",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Strings/Cello Section/susvib/susvib_C1_v3_1.wav",
+          "rootNote": 36,
+          "lowNote": 32,
+          "highNote": 39,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Cello Section/susvib/susvib_C1_v3_1.wav",
+          "sourceGitBlobSha1": "d3820a6d57daf9a202a000bff0fa082a3f77acf6",
+          "sourceBytes": 3335948,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 555984,
+          "bitsPerSample": 24,
+          "sha256": "19195ab85ab71626bd11e7100febdaeeba1c237ff5887b934fd0ffd8dfad82cb"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Cello Section/susvib/susvib_G1_v3_1.wav",
+          "rootNote": 43,
+          "lowNote": 40,
+          "highNote": 48,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Cello Section/susvib/susvib_G1_v3_1.wav",
+          "sourceGitBlobSha1": "35971538059e18b8f38cdc556630967777a0a0d5",
+          "sourceBytes": 3370496,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 561742,
+          "bitsPerSample": 24,
+          "sha256": "e4c61d4ab855ec20ddb69ff608a1c066ff8a779ddd08d1dfe1d534d3a4563ad0"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Cello Section/susvib/susvib_F2_v3_1.wav",
+          "rootNote": 53,
+          "lowNote": 49,
+          "highNote": 58,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Cello Section/susvib/susvib_F2_v3_1.wav",
+          "sourceGitBlobSha1": "a384e84a342ab9be12ca55b92c845a3c351b75bf",
+          "sourceBytes": 3062696,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 510442,
+          "bitsPerSample": 24,
+          "sha256": "d965197faf2e6ab8675f1d65505e5ba934a5ab769412d314bad94133e18f24d0"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Cello Section/susvib/susvib_E3_v3_1.wav",
+          "rootNote": 64,
+          "lowNote": 59,
+          "highNote": 68,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Cello Section/susvib/susvib_E3_v3_1.wav",
+          "sourceGitBlobSha1": "7711cb67795d692b0d732eb8fd234c41d5980f42",
+          "sourceBytes": 3278270,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 546371,
+          "bitsPerSample": 24,
+          "sha256": "24a7ffdc23087026c4ef2d421441253c71490df9cf0757e93ffb14b4e61481ef"
+        }
+      ]
+    },
+    {
+      "id": "harp",
+      "name": "Recorded Harp",
+      "family": "plucked",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/Harp.sfz",
+      "sourceMappingSha256": "25b553eb756a94f833b1cc1239fe3e6dced3ebc83335bac95d05c951589f7da9",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Strings/Harp/KSHarp_B1_mf.wav",
+          "rootNote": 35,
+          "lowNote": 31,
+          "highNote": 41,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Harp/KSHarp_B1_mf.wav",
+          "sourceGitBlobSha1": "bb26292fd8b4d4d7f95703c69667c8f2234eebc8",
+          "sourceBytes": 2284022,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 570994,
+          "bitsPerSample": 16,
+          "sha256": "284034807efbb429cb63f6fb744834b18e6281a4914e6460de0a5818b5d0d0e6"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Harp/KSHarp_C3_mf.wav",
+          "rootNote": 48,
+          "lowNote": 42,
+          "highNote": 53,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Harp/KSHarp_C3_mf.wav",
+          "sourceGitBlobSha1": "20e91e167e86132bb16601f682c90444779d8a23",
+          "sourceBytes": 1586172,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 395269,
+          "bitsPerSample": 16,
+          "sha256": "e5d232771704e140959819de8cf2a3e0ba49d021ca77354c42664ce4fce6d9f3"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Harp/KSHarp_B3_mf.wav",
+          "rootNote": 59,
+          "lowNote": 54,
+          "highNote": 65,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Harp/KSHarp_B3_mf.wav",
+          "sourceGitBlobSha1": "8d06cd55bc871d19f25a2bb1b56c7a567aabbc6b",
+          "sourceBytes": 1981130,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 495271,
+          "bitsPerSample": 16,
+          "sha256": "f6f71be8c640822ef48a448b245585659acdfcc7ed5774e10f37be2fc02fcab4"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Harp/KSHarp_C5_mf.wav",
+          "rootNote": 72,
+          "lowNote": 66,
+          "highNote": 77,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Harp/KSHarp_C5_mf.wav",
+          "sourceGitBlobSha1": "748b4b1366616972c2a22e81fc48a86178801c45",
+          "sourceBytes": 1237142,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 309274,
+          "bitsPerSample": 16,
+          "sha256": "7c8b862f6fd3f1442ed87537af976d84bda8c05a5b4900e8907d570b5202a517"
+        },
+        {
+          "sample": "samples/vsco2ce/Strings/Harp/KSHarp_B5_mf.wav",
+          "rootNote": 83,
+          "lowNote": 78,
+          "highNote": 87,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Strings/Harp/KSHarp_B5_mf.wav",
+          "sourceGitBlobSha1": "2d2689e8ca023cd685ed5a29161f3d641f109da9",
+          "sourceBytes": 779058,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 194753,
+          "bitsPerSample": 16,
+          "sha256": "f2757b674c6b7301bed52e17a1ae3e3d34d628b3f7edc5773ebb25798d2541f7"
+        }
+      ]
+    },
+    {
+      "id": "flute",
+      "name": "Recorded Flute",
+      "family": "woodwind",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/FluteSusNV.sfz",
+      "sourceMappingSha256": "0c3e15abe738778c38f93aa69e1d994e3b6e32b68ab7977b9138c4e079f99661",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Flute/susNV/LDFlute_susNV_C3_v3_1.wav",
+          "rootNote": 60,
+          "lowNote": 56,
+          "highNote": 64,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Flute/susNV/LDFlute_susNV_C3_v3_1.wav",
+          "sourceGitBlobSha1": "18b1fa490327f38057a2edbaca4f000cffbf633d",
+          "sourceBytes": 2729730,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 454846,
+          "bitsPerSample": 24,
+          "sha256": "8e0549fb44827c7379b74bba4d8402671c863e483cc1ea85a73407ce27ca3bd6"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Flute/susNV/LDFlute_susNV_A3_v3_1.wav",
+          "rootNote": 69,
+          "lowNote": 65,
+          "highNote": 72,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Flute/susNV/LDFlute_susNV_A3_v3_1.wav",
+          "sourceGitBlobSha1": "75a6dbb605779e3eaef2a265b6857142211a5837",
+          "sourceBytes": 2765718,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 460844,
+          "bitsPerSample": 24,
+          "sha256": "8a24758e25e1b6036fc8ca55cdff129d18d70b0719cdb63f6eb6dc756b41cfc7"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Flute/susNV/LDFlute_susNV_E4_v3_1.wav",
+          "rootNote": 76,
+          "lowNote": 73,
+          "highNote": 80,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Flute/susNV/LDFlute_susNV_E4_v3_1.wav",
+          "sourceGitBlobSha1": "67357c844a8c88034431d83438bd8ddea729e805",
+          "sourceBytes": 2449278,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 408104,
+          "bitsPerSample": 24,
+          "sha256": "670c72afcd4d437236f0a9f33a532c46fd56145615aad775eb7aab1c5ab6c24d"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Flute/susNV/LDFlute_susNV_C5_v2_1.wav",
+          "rootNote": 84,
+          "lowNote": 81,
+          "highNote": 88,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Flute/susNV/LDFlute_susNV_C5_v2_1.wav",
+          "sourceGitBlobSha1": "c781084689262db0267e3b888ac9a9244f32dbd7",
+          "sourceBytes": 2382720,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 397011,
+          "bitsPerSample": 24,
+          "sha256": "7c9414267bade75f432e38aa893edea9fb7146b5b1b3e0ae1f97a475fa89db0f"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Flute/susNV/LDFlute_susNV_A5_v3_1.wav",
+          "rootNote": 93,
+          "lowNote": 89,
+          "highNote": 97,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Flute/susNV/LDFlute_susNV_A5_v3_1.wav",
+          "sourceGitBlobSha1": "cbcfcd8aef190cf811e141bf9c602953a4c2d935",
+          "sourceBytes": 2100774,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 350020,
+          "bitsPerSample": 24,
+          "sha256": "36f09bd6d712c9c55d4e32e15bca12966f0dc96206973c8aa25088036f662513"
+        }
+      ]
+    },
+    {
+      "id": "clarinet",
+      "name": "Recorded Clarinet",
+      "family": "woodwind",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/ClarinetSus.sfz",
+      "sourceMappingSha256": "7e38b51122a750df7f2678f6f4ae39a41b35743e500577da1ca0f53662485ce5",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Clarinet/susLong/DCClar_susLong_D2_v3_rr1_sum.wav",
+          "rootNote": 50,
+          "lowNote": 46,
+          "highNote": 54,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Clarinet/susLong/DCClar_susLong_D2_v3_rr1_sum.wav",
+          "sourceGitBlobSha1": "3d40552dd6d2dead91c702fe68175869a988009d",
+          "sourceBytes": 1381704,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 345415,
+          "bitsPerSample": 16,
+          "sha256": "346775f54394b9cf5e9513a4ab8292274f20370f2ac4cd47cea6319c1fa494ff"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Clarinet/susLong/DCClar_susLong_A#2_v3_rr1_sum.wav",
+          "rootNote": 58,
+          "lowNote": 55,
+          "highNote": 61,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Clarinet/susLong/DCClar_susLong_A#2_v3_rr1_sum.wav",
+          "sourceGitBlobSha1": "d08b0b0242b1695b533f14c7774c4e5bd7f83646",
+          "sourceBytes": 2335540,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 583874,
+          "bitsPerSample": 16,
+          "sha256": "45db5a4eda1927cb627006145cd751d99bfd4449576730009d521191bfb8d746"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Clarinet/susLong/DCClar_susLong_F3_v3_rr1_sum.wav",
+          "rootNote": 65,
+          "lowNote": 62,
+          "highNote": 69,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Clarinet/susLong/DCClar_susLong_F3_v3_rr1_sum.wav",
+          "sourceGitBlobSha1": "fc79b6d0f5b3420f4e24b0392484b43a864a6d50",
+          "sourceBytes": 1743712,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 435917,
+          "bitsPerSample": 16,
+          "sha256": "6b434e88f724e46116dd71bdfe52dc82c9b1ec7cec5f512bf9719be51e646671"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Clarinet/susLong/DCClar_susLong_D4_v3_rr1_sum.wav",
+          "rootNote": 74,
+          "lowNote": 70,
+          "highNote": 78,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Clarinet/susLong/DCClar_susLong_D4_v3_rr1_sum.wav",
+          "sourceGitBlobSha1": "119bec0bc1ad924b04e416966239d6af3a67a764",
+          "sourceBytes": 2087348,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 521826,
+          "bitsPerSample": 16,
+          "sha256": "f913c749eb6b5a1c621e13548d5c30c8f67a6007a2992a6f85deb977c2d41b1f"
+        },
+        {
+          "sample": "samples/vsco2ce/Woodwinds/Clarinet/susLong/DCClar_susLong_A#4_v3_rr1_sum.wav",
+          "rootNote": 82,
+          "lowNote": 79,
+          "highNote": 86,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -9.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Woodwinds/Clarinet/susLong/DCClar_susLong_A#4_v3_rr1_sum.wav",
+          "sourceGitBlobSha1": "bc184323f783462fb1bbb3f49ad57ddaaac2cb11",
+          "sourceBytes": 1885948,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 471476,
+          "bitsPerSample": 16,
+          "sha256": "6867f47637a3a869504911814be53dbc5e01fa52c2705a87afee20d2b71fc5aa"
+        }
+      ]
+    },
+    {
+      "id": "trumpet-staccato",
+      "name": "Recorded Staccato Trumpet",
+      "family": "brass",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/TrumpetStac.sfz",
+      "sourceMappingSha256": "089cc0a6e26a8ed2ce7967d585858cb9fa8922d0815a80ea7ca3c5f15fb56153",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Brass/Trumpet/stac/Sum_SHTrumpet_stac_A2_v3_rr1.wav",
+          "rootNote": 57,
+          "lowNote": 53,
+          "highNote": 60,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Trumpet/stac/Sum_SHTrumpet_stac_A2_v3_rr1.wav",
+          "sourceGitBlobSha1": "3096788299a4fdbef104a517b885d0105b7cf9ac",
+          "sourceBytes": 266432,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 66597,
+          "bitsPerSample": 16,
+          "sha256": "cc991b1ef7e436ad472a118696dcb069127bae73733091c0bd358b5a99ddfe0f"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Trumpet/stac/Sum_SHTrumpet_stac_D#3_v3_rr1.wav",
+          "rootNote": 63,
+          "lowNote": 61,
+          "highNote": 65,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Trumpet/stac/Sum_SHTrumpet_stac_D#3_v3_rr1.wav",
+          "sourceGitBlobSha1": "77d17d832af6f646de8b2cb2e2793f87e939076f",
+          "sourceBytes": 258380,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 64584,
+          "bitsPerSample": 16,
+          "sha256": "04d9ce75dcb30cd9ff32cf6b6cd1b4dcf756e6c99acfe9e4dbe3cdead7a1ac0c"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Trumpet/stac/Sum_SHTrumpet_stac_G3_v3_rr1.wav",
+          "rootNote": 67,
+          "lowNote": 66,
+          "highNote": 68,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Trumpet/stac/Sum_SHTrumpet_stac_G3_v3_rr1.wav",
+          "sourceGitBlobSha1": "53ef5d48ac2c8263da2f6e70f73302e84e520227",
+          "sourceBytes": 226840,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 56699,
+          "bitsPerSample": 16,
+          "sha256": "fc88e87885839b5fb45e2fb63cc70afef0b3c0f13c129c7d0ee4aee3458f293d"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Trumpet/stac/Sum_SHTrumpet_stac_A#3_v3_rr1.wav",
+          "rootNote": 70,
+          "lowNote": 69,
+          "highNote": 73,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Trumpet/stac/Sum_SHTrumpet_stac_A#3_v3_rr1.wav",
+          "sourceGitBlobSha1": "b7f76652558f4b2bc8065424e9e8b119859deb8d",
+          "sourceBytes": 270432,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 67597,
+          "bitsPerSample": 16,
+          "sha256": "24860bfae8f7825130698c1ea73e129c63d8c817edf59c57c99a9116fe11f024"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Trumpet/stac/Sum_SHTrumpet_stac_F4_v3_rr1.wav",
+          "rootNote": 77,
+          "lowNote": 74,
+          "highNote": 79,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Trumpet/stac/Sum_SHTrumpet_stac_F4_v3_rr1.wav",
+          "sourceGitBlobSha1": "0c64406f6cfacac35e83670215fe84988eb2862d",
+          "sourceBytes": 270884,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 67710,
+          "bitsPerSample": 16,
+          "sha256": "437da7831e11cab33263eadefc015b8eea4cd3fad81ebcdea6597b50198d4520"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Trumpet/stac/Sum_SHTrumpet_stac_A4_v3_rr1.wav",
+          "rootNote": 81,
+          "lowNote": 80,
+          "highNote": 85,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Trumpet/stac/Sum_SHTrumpet_stac_A4_v3_rr1.wav",
+          "sourceGitBlobSha1": "756e786aeabfe7b27f1b66c212ce824d5608de4e",
+          "sourceBytes": 238432,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 59597,
+          "bitsPerSample": 16,
+          "sha256": "e73b02d4a76541915c2b4806659e6a5946bdba4a3ce2b43572cf4437aeb0d62e"
+        }
+      ]
+    },
+    {
+      "id": "horn",
+      "name": "Recorded French Horn",
+      "family": "brass",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/FHornSus.sfz",
+      "sourceMappingSha256": "52a8ccef8baaf0dbea4b3e528b8096c89ffb5c8aafba2b69c4c38af1d64587a5",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Brass/F Horn/sus/MOHorn_sus_D#1_v3_1.wav",
+          "rootNote": 39,
+          "lowNote": 35,
+          "highNote": 44,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/F Horn/sus/MOHorn_sus_D#1_v3_1.wav",
+          "sourceGitBlobSha1": "db97debcf24dfa898ce069d9b21b5bbea371e552",
+          "sourceBytes": 927292,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 231812,
+          "bitsPerSample": 16,
+          "sha256": "cab9954a651d0aa23becff6910f149442f6bc29c05a1843b2389445822f124f8"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/F Horn/sus/MOHorn_sus_D2_v3_1.wav",
+          "rootNote": 50,
+          "lowNote": 45,
+          "highNote": 55,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -4.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/F Horn/sus/MOHorn_sus_D2_v3_1.wav",
+          "sourceGitBlobSha1": "aec5cfdb8e2532338f69f6726c77c1d8e5044f0d",
+          "sourceBytes": 1746204,
+          "sourceVelocityRange": [
+            63,
+            94
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 436540,
+          "bitsPerSample": 16,
+          "sha256": "0ed065bfe87f9391c175850bb898132b7deb0e834ee10310819198382dacfd7b"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/F Horn/sus/MOHorn_sus_C3_v3_1.wav",
+          "rootNote": 60,
+          "lowNote": 56,
+          "highNote": 67,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -4.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/F Horn/sus/MOHorn_sus_C3_v3_1.wav",
+          "sourceGitBlobSha1": "69e3187ccc4d4338931d412a9f50978ca576db5c",
+          "sourceBytes": 2114316,
+          "sourceVelocityRange": [
+            63,
+            94
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 528568,
+          "bitsPerSample": 16,
+          "sha256": "75156ce041d9c60e4de0099b4c6d81cafffd34f45be7bca3e6fa7ebff0eadb80"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/F Horn/sus/MOHorn_sus_D4_v1_1.wav",
+          "rootNote": 74,
+          "lowNote": 68,
+          "highNote": 78,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -1.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/F Horn/sus/MOHorn_sus_D4_v1_1.wav",
+          "sourceGitBlobSha1": "0d13acd769ecdfc234c416fe859a4eda9aac2f22",
+          "sourceBytes": 1445100,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 361264,
+          "bitsPerSample": 16,
+          "sha256": "2866520e737f3826ee9f53693f148109a9cc2d2e54235db0b92f78b2c100b8f7"
+        }
+      ]
+    },
+    {
+      "id": "trombone",
+      "name": "Recorded Tenor Trombone",
+      "family": "brass",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/TromboneSus.sfz",
+      "sourceMappingSha256": "373f28cfaaeedcd2b21e404063fa80b3d40ee969abe0af74d4735ae10d5712bd",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Brass/Tenor Trombone/sus/tenortbn_sus_A#0_v2_1.wav",
+          "rootNote": 34,
+          "lowNote": 30,
+          "highNote": 40,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -4.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tenor Trombone/sus/tenortbn_sus_A#0_v2_1.wav",
+          "sourceGitBlobSha1": "e81b27ce12cc7921533136f7c822ad66bde17b48",
+          "sourceBytes": 735596,
+          "sourceVelocityRange": [
+            63,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 183888,
+          "bitsPerSample": 16,
+          "sha256": "c8192572a34ba0c410cb77a33fe200a5850b334e1763b2ebc91ab5292978a0d4"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Tenor Trombone/sus/tenortbn_sus_A#1_v3_1.wav",
+          "rootNote": 46,
+          "lowNote": 41,
+          "highNote": 53,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tenor Trombone/sus/tenortbn_sus_A#1_v3_1.wav",
+          "sourceGitBlobSha1": "52f58161c3944d30fb5598144697650b29224947",
+          "sourceBytes": 930872,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 232707,
+          "bitsPerSample": 16,
+          "sha256": "9385dcf9b1a1b32db2d29b696d051fe8fe00aac9bfbd81270ff3570c57970d39"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Tenor Trombone/sus/tenortbn_sus_C3_v3_1.wav",
+          "rootNote": 60,
+          "lowNote": 54,
+          "highNote": 62,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tenor Trombone/sus/tenortbn_sus_C3_v3_1.wav",
+          "sourceGitBlobSha1": "a91b32be153b69d65c46f5be1e38310c70353661",
+          "sourceBytes": 1351140,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 337774,
+          "bitsPerSample": 16,
+          "sha256": "ba3760e74edf6c25f96a0deb526bf87eba2bf74be94ba76bf31d0d6592efe687"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Tenor Trombone/sus/tenortbn_sus_F3_v3_1.wav",
+          "rootNote": 65,
+          "lowNote": 63,
+          "highNote": 69,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tenor Trombone/sus/tenortbn_sus_F3_v3_1.wav",
+          "sourceGitBlobSha1": "c6164474bad88e9d7718358a669ba076d825fff7",
+          "sourceBytes": 1299872,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 324957,
+          "bitsPerSample": 16,
+          "sha256": "6f27199604f9f14254ae2fca7368b08cb17039f7401402fa95b9d9e2b7943420"
+        }
+      ]
+    },
+    {
+      "id": "tuba",
+      "name": "Recorded Tuba",
+      "family": "brass",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/TubaSus.sfz",
+      "sourceMappingSha256": "19108d85bb4fbfa21e6b754f01ae1b578f8e33cd1c0ef7b41fee9bc16a6d6ef8",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Brass/Tuba/sus/Tuba3_sus_F0_v1_rr1_Mid.wav",
+          "rootNote": 29,
+          "lowNote": 25,
+          "highNote": 34,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 0.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tuba/sus/Tuba3_sus_F0_v1_rr1_Mid.wav",
+          "sourceGitBlobSha1": "37e4efffdbe853674f4e351c2b8bf74d1b11df42",
+          "sourceBytes": 701860,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 175454,
+          "bitsPerSample": 16,
+          "sha256": "cfcf1705f2e5ead3e0e5a95a046b29412c7037865c823583285ff72541286d2c"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Tuba/sus/Tuba3_sus_D#1_v3_rr1_Mid.wav",
+          "rootNote": 39,
+          "lowNote": 35,
+          "highNote": 42,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tuba/sus/Tuba3_sus_D#1_v3_rr1_Mid.wav",
+          "sourceGitBlobSha1": "d46fa53c16a3add22369c3c07cc965eaaf583d71",
+          "sourceBytes": 608532,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 152122,
+          "bitsPerSample": 16,
+          "sha256": "c267f4e366f2521b4a00b3e99de648441928fa84998f882d31aa80be30f4a360"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Tuba/sus/Tuba3_sus_A#1_v3_rr1_Mid.wav",
+          "rootNote": 46,
+          "lowNote": 43,
+          "highNote": 49,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tuba/sus/Tuba3_sus_A#1_v3_rr1_Mid.wav",
+          "sourceGitBlobSha1": "4ad920dc5600f8d5cafa85cc2ac20d000e8603c5",
+          "sourceBytes": 764660,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 191154,
+          "bitsPerSample": 16,
+          "sha256": "b69c9899debceb9f37ada54bc85f5fba9df5e7c8dc85356e5c01091383b77a0a"
+        },
+        {
+          "sample": "samples/vsco2ce/Brass/Tuba/sus/Tuba3_sus_F2_v3_rr1_Mid.wav",
+          "rootNote": 53,
+          "lowNote": 50,
+          "highNote": 57,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Brass/Tuba/sus/Tuba3_sus_F2_v3_rr1_Mid.wav",
+          "sourceGitBlobSha1": "81cf9852f41b351a49ab2831f7cbb73fd283de3b",
+          "sourceBytes": 639552,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 159877,
+          "bitsPerSample": 16,
+          "sha256": "0d60f5d3dd72d4a1b79d6f1366249a1b834e19f38a87b04645cad3bbf5982c0a"
+        }
+      ]
+    },
+    {
+      "id": "marimba",
+      "name": "Recorded Marimba",
+      "family": "mallets",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vsco2ce",
+      "sourceMapping": "sources/VSCO-2-CE/Marimba.sfz",
+      "sourceMappingSha256": "55eabdca01bd62b1da57471a3ae3da21d80c7b9197b4c4b661db61df30990bae",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vsco2ce/Percussion/Marimba/Marimba_hit_Outrigger_F1_loud_01.wav",
+          "rootNote": 41,
+          "lowNote": 37,
+          "highNote": 44,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Percussion/Marimba/Marimba_hit_Outrigger_F1_loud_01.wav",
+          "sourceGitBlobSha1": "cc5b73c4c0b50ca64a0c484f17d37e825957de50",
+          "sourceBytes": 972392,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 162058,
+          "bitsPerSample": 24,
+          "sha256": "c5cb5ce59540b0a23628a919e90153a6cee9bb35325b056e0710c12b64f0b193"
+        },
+        {
+          "sample": "samples/vsco2ce/Percussion/Marimba/Marimba_hit_Outrigger_C2_loud_01.wav",
+          "rootNote": 48,
+          "lowNote": 45,
+          "highNote": 53,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Percussion/Marimba/Marimba_hit_Outrigger_C2_loud_01.wav",
+          "sourceGitBlobSha1": "155e036d3aa04fba9d3389e2cdf3accec9842e01",
+          "sourceBytes": 2236004,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 372660,
+          "bitsPerSample": 24,
+          "sha256": "bfad3b0e57d04c31e6079aba11fb0a6c5c84627fd4bc46e4e0923663586c460c"
+        },
+        {
+          "sample": "samples/vsco2ce/Percussion/Marimba/Marimba_hit_Outrigger_B2_loud_01.wav",
+          "rootNote": 59,
+          "lowNote": 54,
+          "highNote": 62,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Percussion/Marimba/Marimba_hit_Outrigger_B2_loud_01.wav",
+          "sourceGitBlobSha1": "e3b63f301191c679cea1eaa61a99d3baa9c3fbfe",
+          "sourceBytes": 1585778,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 264289,
+          "bitsPerSample": 24,
+          "sha256": "a329138008daae1c03652822d7079c0e1e9941071b8c22195e1985f0c685fdeb"
+        },
+        {
+          "sample": "samples/vsco2ce/Percussion/Marimba/Marimba_hit_Outrigger_F3_loud_01.wav",
+          "rootNote": 65,
+          "lowNote": 63,
+          "highNote": 68,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Percussion/Marimba/Marimba_hit_Outrigger_F3_loud_01.wav",
+          "sourceGitBlobSha1": "646d1490ead56eaf0db10c96ac352c80d3275736",
+          "sourceBytes": 1589876,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 264972,
+          "bitsPerSample": 24,
+          "sha256": "379e749add43b12959fae06cc272f1871899cc05460faf41ead77b93e5d01843"
+        },
+        {
+          "sample": "samples/vsco2ce/Percussion/Marimba/Marimba_hit_Outrigger_C4_loud_01.wav",
+          "rootNote": 72,
+          "lowNote": 69,
+          "highNote": 77,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Percussion/Marimba/Marimba_hit_Outrigger_C4_loud_01.wav",
+          "sourceGitBlobSha1": "fe3ec22b99ed4afdd007d0107d925669e7e1d4c9",
+          "sourceBytes": 1016564,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 169420,
+          "bitsPerSample": 24,
+          "sha256": "4af539d47a452d7fad26e171b1c8adcca272cee97191f040d192680462c880b8"
+        },
+        {
+          "sample": "samples/vsco2ce/Percussion/Marimba/Marimba_hit_Outrigger_B4_loud_01.wav",
+          "rootNote": 83,
+          "lowNote": 78,
+          "highNote": 87,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -6.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vsco2ce",
+          "sourcePath": "Percussion/Marimba/Marimba_hit_Outrigger_B4_loud_01.wav",
+          "sourceGitBlobSha1": "cf36d9cae6614613c17069accbaa46594846c113",
+          "sourceBytes": 694454,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 115735,
+          "bitsPerSample": 24,
+          "sha256": "d04aed26222822d14435fa61b88cdcce95606a5e94bb5e7167d266875343a39c"
+        }
+      ]
+    },
+    {
+      "id": "strumstick",
+      "name": "Recorded Strumstick",
+      "family": "fretted",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vcsl",
+      "sourceMapping": "sources/VCSL/Chordophones/Composite Chordophones/Strumstick.sfz",
+      "sourceMappingSha256": "450e4ab1a58136191b51dadd2de5c3f0ddb01edacfbcb3fb28e8b619defd3a09",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vcsl/Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str1_Main_D2_vl2_rr1.wav",
+          "rootNote": 50,
+          "lowNote": 46,
+          "highNote": 52,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.073913,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str1_Main_D2_vl2_rr1.wav",
+          "sourceGitBlobSha1": "d9f4387ff90c1f38cc38c9be86657a836ff52977",
+          "sourceBytes": 3466544,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 577750,
+          "bitsPerSample": 24,
+          "sha256": "28488d220f9ef0868906dee44d45d5c60529757dd2b972f719542ecdcb84fbfa"
+        },
+        {
+          "sample": "samples/vcsl/Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str1_Main_G2_vl2_rr1.wav",
+          "rootNote": 55,
+          "lowNote": 53,
+          "highNote": 57,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.106877,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str1_Main_G2_vl2_rr1.wav",
+          "sourceGitBlobSha1": "bf08c9e35d0f6da2d1665d9dcf2772d71bf48404",
+          "sourceBytes": 1555622,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 259263,
+          "bitsPerSample": 24,
+          "sha256": "055c40c7e5ac0de43e3c6c726b9181308d2ca45d49e7e81fdd8779c9335f8f68"
+        },
+        {
+          "sample": "samples/vcsl/Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str2_Main_B2_vl2_rr1.wav",
+          "rootNote": 59,
+          "lowNote": 58,
+          "highNote": 61,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -7.11731,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str2_Main_B2_vl2_rr1.wav",
+          "sourceGitBlobSha1": "b0fac6692a5baed4fd663852f5d190e3ff83961b",
+          "sourceBytes": 1532882,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 255473,
+          "bitsPerSample": 24,
+          "sha256": "04b5e2167dadb7c8c4956af63ea5317cbcdc7869a6f103ea82cd541956723c4d"
+        },
+        {
+          "sample": "samples/vcsl/Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str3_Main_E3_vl2_rr1.wav",
+          "rootNote": 64,
+          "lowNote": 62,
+          "highNote": 66,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -9.592455000000001,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str3_Main_E3_vl2_rr1.wav",
+          "sourceGitBlobSha1": "0c05fad6a89e7fec1829da116f936b55872ed523",
+          "sourceBytes": 1592642,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 265433,
+          "bitsPerSample": 24,
+          "sha256": "4c6d5b7e8453de9edd7a38037deded02745ce440b6ce74bbd391e4fe8787de51"
+        },
+        {
+          "sample": "samples/vcsl/Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str3_Main_A3_vl2_rr1.wav",
+          "rootNote": 69,
+          "lowNote": 67,
+          "highNote": 72,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.285112999999999,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str3_Main_A3_vl2_rr1.wav",
+          "sourceGitBlobSha1": "048e6015df8f564b94e6d98f66ea4f89b308e963",
+          "sourceBytes": 2144744,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 357450,
+          "bitsPerSample": 24,
+          "sha256": "7099bf15310393098b5171b1442c8da130894c255c558061efbbb0cdf3c8703e"
+        },
+        {
+          "sample": "samples/vcsl/Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str3_Main_E4_vl2_rr1.wav",
+          "rootNote": 76,
+          "lowNote": 73,
+          "highNote": 80,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -15.330449999999999,
+          "pan": 0.0,
+          "sourceOffsetFrames": 16,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str3_Main_E4_vl2_rr1.wav",
+          "sourceGitBlobSha1": "80ccd412fb25630355d652d8b67fe30d981246d6",
+          "sourceBytes": 1591118,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 265179,
+          "bitsPerSample": 24,
+          "sha256": "e27ce04e41d65b31da5bab4354ed0723c225a6f211da5ffdb870cd982eb52c98"
+        }
+      ]
+    },
+    {
+      "id": "kalimba",
+      "name": "Recorded Tanzanian Kalimba",
+      "family": "world",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vcsl",
+      "sourceMapping": "sources/VCSL/Idiophones/Plucked Idiophones/Kalimba, Tanzania.sfz",
+      "sourceMappingSha256": "3baf7f72f4dcb0972fe90f2aaff8a00747955639336828d4b5c6e15f75cf3da9",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vcsl/Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_G1_k12_50_100_rr2.wav",
+          "rootNote": 43,
+          "lowNote": 39,
+          "highNote": 46,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -15.065671,
+          "pan": 0.0,
+          "sourceOffsetFrames": 3843,
+          "tuneCents": -9.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_G1_k12_50_100_rr2.wav",
+          "sourceGitBlobSha1": "25a2f3ecd4903a02ae0de586dab851fe3c65d2c1",
+          "sourceBytes": 1281556,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 48000,
+          "channels": 2,
+          "frames": 213585,
+          "bitsPerSample": 24,
+          "sha256": "6cfea58f2b7fc1112bdd05431822080b1c578a7a6637dd1f8af8384c0d0780d3"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_C#2_k10_50_100_rr2.wav",
+          "rootNote": 49,
+          "lowNote": 47,
+          "highNote": 53,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.519795,
+          "pan": 0.0,
+          "sourceOffsetFrames": 4561,
+          "tuneCents": 24.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_C#2_k10_50_100_rr2.wav",
+          "sourceGitBlobSha1": "3d3582a2ac15ad9e7386e3d6a079e92c93ae43a4",
+          "sourceBytes": 1720294,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 48000,
+          "channels": 2,
+          "frames": 286708,
+          "bitsPerSample": 24,
+          "sha256": "b83ae7fbeec7691e6b6dbfe3c753bca1e21dc79cc7b3379b2d3756e55846e400"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_A#2_k8_50_100_rr2.wav",
+          "rootNote": 58,
+          "lowNote": 54,
+          "highNote": 61,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -13.640063,
+          "pan": 0.0,
+          "sourceOffsetFrames": 4666,
+          "tuneCents": -54.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_A#2_k8_50_100_rr2.wav",
+          "sourceGitBlobSha1": "8b9b4129e30bb2d5dc5eb622141cbdf8c44548af",
+          "sourceBytes": 1519282,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 48000,
+          "channels": 2,
+          "frames": 253206,
+          "bitsPerSample": 24,
+          "sha256": "35df63d5f879097273978f00c4554d82e6c3126c0572077eebd8319d01640414"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_F3_k17_50_100_rr2.wav",
+          "rootNote": 65,
+          "lowNote": 62,
+          "highNote": 69,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -8.329311,
+          "pan": 0.0,
+          "sourceOffsetFrames": 4667,
+          "tuneCents": -39.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_F3_k17_50_100_rr2.wav",
+          "sourceGitBlobSha1": "2921df361d187efbfbac9fe19ef0bc57d9ddeef5",
+          "sourceBytes": 927430,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 48000,
+          "channels": 2,
+          "frames": 154564,
+          "bitsPerSample": 24,
+          "sha256": "1dd82312d3202a7cb8e28efe0cbe9e8c1bb3bc65b6a9916da709d169e2491b14"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_C#4_k5_50_100_rr2.wav",
+          "rootNote": 73,
+          "lowNote": 70,
+          "highNote": 76,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -6.216243,
+          "pan": 0.0,
+          "sourceOffsetFrames": 4393,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_C#4_k5_50_100_rr2.wav",
+          "sourceGitBlobSha1": "d5609bd3ca8d16fff82e4c380c189122a0d00484",
+          "sourceBytes": 716518,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 48000,
+          "channels": 2,
+          "frames": 119412,
+          "bitsPerSample": 24,
+          "sha256": "2d2be2152d784f8013ded81ff863f4d0c5775d546bc1d61723d0c04f25426e45"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_G4_k22_50_100_rr2.wav",
+          "rootNote": 79,
+          "lowNote": 77,
+          "highNote": 83,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -9.25684,
+          "pan": 0.0,
+          "sourceOffsetFrames": 4647,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Plucked Idiophones/Kalimba, Tanzania/MBira3_pluck_Main_G4_k22_50_100_rr2.wav",
+          "sourceGitBlobSha1": "d24779b58dcdb149b750dd82535087a0ab194248",
+          "sourceBytes": 554566,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 48000,
+          "channels": 2,
+          "frames": 92420,
+          "bitsPerSample": 24,
+          "sha256": "59fef12af5bf667cd7b3d12454e62377ac47f6893de416fc9f6e12f30043495b"
+        }
+      ]
+    },
+    {
+      "id": "balafon",
+      "name": "Recorded Balafon",
+      "family": "world",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vcsl",
+      "sourceMapping": "sources/VCSL/Idiophones/Struck Idiophones/Balafon - Traditional Mallet.sfz",
+      "sourceMappingSha256": "2e6e4b050494ab7eb65105736ee021c793ca1bf05731386cae75b8b874bbe8d3",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vcsl/Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_C#3_vl2_rr1_Mid.wav",
+          "rootNote": 61,
+          "lowNote": 57,
+          "highNote": 63,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 3.6562699999999992,
+          "pan": 0.0,
+          "sourceOffsetFrames": 208,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_C#3_vl2_rr1_Mid.wav",
+          "sourceGitBlobSha1": "6fcc0fcd8b5107e81e6de71f1aa600e4017ddc91",
+          "sourceBytes": 184820,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 46193,
+          "bitsPerSample": 16,
+          "sha256": "2ad3726362537a27dfa0670872d77dd70e8717f4b573a8360c685b1df5e457b4"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_F3_vl2_rr1_Mid.wav",
+          "rootNote": 65,
+          "lowNote": 64,
+          "highNote": 68,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 7.146550000000001,
+          "pan": 0.0,
+          "sourceOffsetFrames": 187,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_F3_vl2_rr1_Mid.wav",
+          "sourceGitBlobSha1": "f1938b4b319e75f13d9dfe5b1fcd141a423833b3",
+          "sourceBytes": 186680,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 46658,
+          "bitsPerSample": 16,
+          "sha256": "1614d9afbcae4157d05e3b54facbcdb0c1b703e29ecbc3ac0d90070709664d04"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_C4_vl2_rr1_Mid.wav",
+          "rootNote": 72,
+          "lowNote": 69,
+          "highNote": 74,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 7.702446999999999,
+          "pan": 0.0,
+          "sourceOffsetFrames": 184,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_C4_vl2_rr1_Mid.wav",
+          "sourceGitBlobSha1": "32f7e658f3e62ff845959343938ab3c69c7f9b80",
+          "sourceBytes": 160356,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 40077,
+          "bitsPerSample": 16,
+          "sha256": "57a9ad683fffce4c3f1deb5e03c75665176e7601ed5f629bf6f81a6f9eabf7c5"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_F4_vl2_rr1_Mid.wav",
+          "rootNote": 77,
+          "lowNote": 75,
+          "highNote": 80,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 4.336435000000002,
+          "pan": 0.0,
+          "sourceOffsetFrames": 193,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_F4_vl2_rr1_Mid.wav",
+          "sourceGitBlobSha1": "8f2bc8ef5bf923bdb226a8d770ca8078e7316cde",
+          "sourceBytes": 149236,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 37297,
+          "bitsPerSample": 16,
+          "sha256": "13f46593250052a14d72fb708cd855d8a2da67bbc417e4524e8f6e8afc5473f9"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_C5_vl2_rr1_Mid.wav",
+          "rootNote": 84,
+          "lowNote": 81,
+          "highNote": 86,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -4.9614,
+          "pan": 0.0,
+          "sourceOffsetFrames": 190,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_C5_vl2_rr1_Mid.wav",
+          "sourceGitBlobSha1": "b386b004ae030974f322f56bbb03231b33e523a9",
+          "sourceBytes": 137996,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 34487,
+          "bitsPerSample": 16,
+          "sha256": "ddd0ca9f4f3b43ebcc37932aa50fd7482643e6d98f55b45c78f441e8e0b18905"
+        },
+        {
+          "sample": "samples/vcsl/Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_F5_vl2_rr1_Mid.wav",
+          "rootNote": 89,
+          "lowNote": 87,
+          "highNote": 93,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.828328000000001,
+          "pan": 0.0,
+          "sourceOffsetFrames": 174,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Idiophones/Struck Idiophones/Balafon/Traditional Mallet/EthnicXylo_tradM_F5_vl2_rr1_Mid.wav",
+          "sourceGitBlobSha1": "b3ca98e6d6a8fc5dfe4f9dd4f30771a85d90e737",
+          "sourceBytes": 153092,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 38261,
+          "bitsPerSample": 16,
+          "sha256": "d8eb07a8bdaae429517de4141893c2780a324b67899c5405333d633f4901a9d4"
+        }
+      ]
+    },
+    {
+      "id": "conga",
+      "name": "Recorded Conga",
+      "family": "percussion",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vcsl",
+      "sourceMapping": "sources/VCSL/Membranophones/Struck Membranophones/Conga.sfz",
+      "sourceMappingSha256": "57b2084d40e10964bbe2eee886f9dda56da57bb0f7ee477671d34fd452f8f3cc",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vcsl/Membranophones/Struck Membranophones/Conga/Conga_HitFM_v2_rr1_Sum.wav",
+          "rootNote": 60,
+          "lowNote": 60,
+          "highNote": 60,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 2.562372,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Membranophones/Struck Membranophones/Conga/Conga_HitFM_v2_rr1_Sum.wav",
+          "sourceGitBlobSha1": "5ec13d7fb47bdaf66a908c5d896ce4f7bf96604b",
+          "sourceBytes": 159004,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 39725,
+          "bitsPerSample": 16,
+          "sha256": "1a24a11a7dae6fdc05405a706768a5b6d96ad534c95bee5d451aa49eedd84855"
+        },
+        {
+          "sample": "samples/vcsl/Membranophones/Struck Membranophones/Conga/Quinto_HitFM1_v2_rr1_Sum.wav",
+          "rootNote": 62,
+          "lowNote": 62,
+          "highNote": 62,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 3.127725999999999,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Membranophones/Struck Membranophones/Conga/Quinto_HitFM1_v2_rr1_Sum.wav",
+          "sourceGitBlobSha1": "88d0d8027df49bc23733f0dc48e2911ef0b6de77",
+          "sourceBytes": 156412,
+          "sourceVelocityRange": [
+            84,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 39077,
+          "bitsPerSample": 16,
+          "sha256": "92f9d0ea6694eadedd1ee55495a794fba5a3fe9b228c7d7d5c787f3c03690051"
+        },
+        {
+          "sample": "samples/vcsl/Membranophones/Struck Membranophones/Conga/Tumba_HitFM_v3_rr1_Sum.wav",
+          "rootNote": 64,
+          "lowNote": 64,
+          "highNote": 64,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 4.581491,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Membranophones/Struck Membranophones/Conga/Tumba_HitFM_v3_rr1_Sum.wav",
+          "sourceGitBlobSha1": "1a33e84262c6e8802c20d04a637cff48284cfe3e",
+          "sourceBytes": 92140,
+          "sourceVelocityRange": [
+            66,
+            99
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 23009,
+          "bitsPerSample": 16,
+          "sha256": "5573840d97955f2efb0115f48f57b2a12f5ac04e03aea8a69f27c3f9fd64a017"
+        }
+      ]
+    },
+    {
+      "id": "bass-drum",
+      "name": "Recorded Bass Drum",
+      "family": "percussion",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vcsl",
+      "sourceMapping": "sources/VCSL/Membranophones/Struck Membranophones/Bass Drum 1.sfz",
+      "sourceMappingSha256": "b612aa0afef74ce35ba390042a581c583a78f9328fba90c19ab64fbdb9c4802f",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vcsl/Membranophones/Struck Membranophones/Bass Drum 1/BDrumNew_hit_v5_rr1_Sum.wav",
+          "rootNote": 60,
+          "lowNote": 60,
+          "highNote": 60,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": 1.7548499999999994,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Membranophones/Struck Membranophones/Bass Drum 1/BDrumNew_hit_v5_rr1_Sum.wav",
+          "sourceGitBlobSha1": "6a3b5a0fdc56be45b6188c026b2221c31ba8ecb4",
+          "sourceBytes": 588092,
+          "sourceVelocityRange": [
+            84,
+            106
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 147012,
+          "bitsPerSample": 16,
+          "sha256": "642aaf3375eaff1307973f7de3ccbf74d18e71fb3cf9412e021b08fc3bf1981c"
+        }
+      ]
+    },
+    {
+      "id": "snare-drum",
+      "name": "Recorded Snare Drum",
+      "family": "percussion",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vcsl",
+      "sourceMapping": "sources/VCSL/Membranophones/Struck Membranophones/Snare Drum, Modern 1.sfz",
+      "sourceMappingSha256": "e731950940683b944bbae86307b3c1ad6693724818b8ea862ff83c032dc4316f",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vcsl/Membranophones/Struck Membranophones/Snare Drum, Modern 1/Snare2_HitNS_v5_rr1_Mid.wav",
+          "rootNote": 60,
+          "lowNote": 60,
+          "highNote": 60,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -4.123176,
+          "pan": 0.0,
+          "sourceOffsetFrames": 210,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Membranophones/Struck Membranophones/Snare Drum, Modern 1/Snare2_HitNS_v5_rr1_Mid.wav",
+          "sourceGitBlobSha1": "4acc7549dbd3e079cf2df0bdc7c5f8eb7b3320ea",
+          "sourceBytes": 168240,
+          "sourceVelocityRange": [
+            84,
+            106
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 42049,
+          "bitsPerSample": 16,
+          "sha256": "422855e723dea59d316bd71346397833340a20c538c648c1b4369e9a3617b61b"
+        },
+        {
+          "sample": "samples/vcsl/Membranophones/Struck Membranophones/Snare Drum, Modern 1/Snare2_rollNS_v4_rr1_Mid.wav",
+          "rootNote": 62,
+          "lowNote": 62,
+          "highNote": 62,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -3.200049999999999,
+          "pan": 0.0,
+          "sourceOffsetFrames": 195,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Membranophones/Struck Membranophones/Snare Drum, Modern 1/Snare2_rollNS_v4_rr1_Mid.wav",
+          "sourceGitBlobSha1": "0d6883c24941f9fc4b91b686a196afb13c122f3c",
+          "sourceBytes": 1265740,
+          "sourceVelocityRange": [
+            84,
+            106
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 316424,
+          "bitsPerSample": 16,
+          "sha256": "316a75640159777ca6c3d781ae4a59356731bae0fec3cafa06a1af73b2a0af85"
+        },
+        {
+          "sample": "samples/vcsl/Membranophones/Struck Membranophones/Snare Drum, Modern 1/Snare2_stick_v1_rr1_Mid.wav",
+          "rootNote": 64,
+          "lowNote": 64,
+          "highNote": 64,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -2.73194,
+          "pan": 0.0,
+          "sourceOffsetFrames": 189,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Membranophones/Struck Membranophones/Snare Drum, Modern 1/Snare2_stick_v1_rr1_Mid.wav",
+          "sourceGitBlobSha1": "9c4d6ddd95c68b9827701aea23609f4b88425e3c",
+          "sourceBytes": 132812,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 2,
+          "frames": 33192,
+          "bitsPerSample": 16,
+          "sha256": "98258bc22a11aca0a8eb1d50a2e0a82cbe6357d30e0b55116db0b188015ff648"
+        }
+      ]
+    },
+    {
+      "id": "electric-piano-fm",
+      "name": "Recorded FM Electric Piano",
+      "family": "electric-piano",
+      "sourceKind": "recorded-sample",
+      "sourceId": "vcsl",
+      "sourceMapping": "sources/VCSL/Electrophones/TX81Z - FM Piano.sfz",
+      "sourceMappingSha256": "67eabcd528859b18a20d1bb4e3e0bae6024f64d7d269dc8d60876514ab5024e5",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C1_vl1.wav",
+          "rootNote": 36,
+          "lowNote": 32,
+          "highNote": 42,
+          "lowVelocity": 0,
+          "highVelocity": 99,
+          "gainDb": 3.4784070000000007,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": -1.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C1_vl1.wav",
+          "sourceGitBlobSha1": "42cabc2bbb561b1b15ddf654a7a275e7bccddf34",
+          "sourceBytes": 1590859,
+          "sourceVelocityRange": [
+            0,
+            65
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 530237,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 36,
+          "embeddedLoopCount": 0,
+          "sha256": "fb4ecff016298c6674f714982004e9278f9bcea292d7c7078f91e831341eb790"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C1_vl3.wav",
+          "rootNote": 36,
+          "lowNote": 32,
+          "highNote": 42,
+          "lowVelocity": 100,
+          "highVelocity": 127,
+          "gainDb": -1.8577220000000008,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": -1.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C1_vl3.wav",
+          "sourceGitBlobSha1": "e70ef68e3c726239f9e5a95ebec3d7551618daad",
+          "sourceBytes": 1598971,
+          "sourceVelocityRange": [
+            100,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 532941,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 36,
+          "embeddedLoopCount": 0,
+          "sha256": "4e7bc316738cceb245512ba0b438c8a57ad3e7830319d6a4ea8b56a18b982481"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C2_vl1.wav",
+          "rootNote": 48,
+          "lowNote": 43,
+          "highNote": 54,
+          "lowVelocity": 0,
+          "highVelocity": 99,
+          "gainDb": 3.7910009999999996,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": -1.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C2_vl1.wav",
+          "sourceGitBlobSha1": "949e7e4f11fdaa536be9d12b304c434c5713cc9a",
+          "sourceBytes": 1499146,
+          "sourceVelocityRange": [
+            0,
+            65
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 499666,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 48,
+          "embeddedLoopCount": 0,
+          "sha256": "b20e6e55259f2f5cb208c8b012108c6268ed8c8f58f7e78586b7ae0854f4c582"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C2_vl3.wav",
+          "rootNote": 48,
+          "lowNote": 43,
+          "highNote": 54,
+          "lowVelocity": 100,
+          "highVelocity": 127,
+          "gainDb": -2.2293400000000005,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C2_vl3.wav",
+          "sourceGitBlobSha1": "449f0e557518c369737615ccba492a7b166f74e1",
+          "sourceBytes": 1596223,
+          "sourceVelocityRange": [
+            100,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 532025,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 48,
+          "embeddedLoopCount": 0,
+          "sha256": "e33943cf2bc1507c05fc7666aaaccc9617425b4fd94c3171b7415ddbc4eb4f03"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C3_vl1.wav",
+          "rootNote": 60,
+          "lowNote": 55,
+          "highNote": 66,
+          "lowVelocity": 0,
+          "highVelocity": 99,
+          "gainDb": 3.647831,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C3_vl1.wav",
+          "sourceGitBlobSha1": "f9d91bed8818e1327bed910423b82542ed344c63",
+          "sourceBytes": 1202527,
+          "sourceVelocityRange": [
+            0,
+            65
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 400793,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 60,
+          "embeddedLoopCount": 0,
+          "sha256": "9150e50ad0796c00e79038f4dd7ec8a4d01040e8572144f32e498f81cf429d08"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C3_vl3.wav",
+          "rootNote": 60,
+          "lowNote": 55,
+          "highNote": 66,
+          "lowVelocity": 100,
+          "highVelocity": 127,
+          "gainDb": -2.2154120000000006,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C3_vl3.wav",
+          "sourceGitBlobSha1": "0ba427c9ed2322dde1967b4cc7be643f629c609f",
+          "sourceBytes": 1340008,
+          "sourceVelocityRange": [
+            100,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 446620,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 60,
+          "embeddedLoopCount": 0,
+          "sha256": "4e7a7d75bf01af25bcd8b321853e61f159c14432360705b319154d7010ffb1fc"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C4_vl1.wav",
+          "rootNote": 72,
+          "lowNote": 67,
+          "highNote": 78,
+          "lowVelocity": 0,
+          "highVelocity": 99,
+          "gainDb": 3.3457430000000006,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C4_vl1.wav",
+          "sourceGitBlobSha1": "b3d755f581ee6c5fbb601dd94d8778b8670cd694",
+          "sourceBytes": 864409,
+          "sourceVelocityRange": [
+            0,
+            65
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 288087,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 72,
+          "embeddedLoopCount": 0,
+          "sha256": "416848bf8bf2e64135e61aca6f4cd07bdd3c705e9a7cb9eea4ceb1906b7f9a8c"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C4_vl3.wav",
+          "rootNote": 72,
+          "lowNote": 67,
+          "highNote": 78,
+          "lowVelocity": 100,
+          "highVelocity": 127,
+          "gainDb": -2.2024810000000006,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C4_vl3.wav",
+          "sourceGitBlobSha1": "b899a97dcea495f77dcddf28395938bb79b3aaed",
+          "sourceBytes": 981337,
+          "sourceVelocityRange": [
+            100,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 327063,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 72,
+          "embeddedLoopCount": 0,
+          "sha256": "c6c48556e88f4e153eb957efc999b7be4a7e8078f4869368b6164a65b6486d4e"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C5_vl1.wav",
+          "rootNote": 84,
+          "lowNote": 79,
+          "highNote": 90,
+          "lowVelocity": 0,
+          "highVelocity": 99,
+          "gainDb": 3.1076010000000007,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C5_vl1.wav",
+          "sourceGitBlobSha1": "de3a8aaa700d7a368bdad067c529413bff5fe28c",
+          "sourceBytes": 607390,
+          "sourceVelocityRange": [
+            0,
+            65
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 202414,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 84,
+          "embeddedLoopCount": 0,
+          "sha256": "53856231dd339780a422e2e6a27f0c45d3687c0279c228f2457633e7e8ef498f"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C5_vl3.wav",
+          "rootNote": 84,
+          "lowNote": 79,
+          "highNote": 90,
+          "lowVelocity": 100,
+          "highVelocity": 127,
+          "gainDb": -2.0835349999999995,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C5_vl3.wav",
+          "sourceGitBlobSha1": "209dea8f2d7d37f660e87593d074723923d2035e",
+          "sourceBytes": 701536,
+          "sourceVelocityRange": [
+            100,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 233796,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 84,
+          "embeddedLoopCount": 0,
+          "sha256": "2f87e9af276d12a21914f898e51c722f014b24f47c6c297e99a2b72da6a964d9"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C6_vl1.wav",
+          "rootNote": 96,
+          "lowNote": 91,
+          "highNote": 100,
+          "lowVelocity": 0,
+          "highVelocity": 99,
+          "gainDb": 2.842269999999999,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C6_vl1.wav",
+          "sourceGitBlobSha1": "b94ad210a180081a6d826f9e6fc6769f75f67262",
+          "sourceBytes": 430888,
+          "sourceVelocityRange": [
+            0,
+            65
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 143580,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 96,
+          "embeddedLoopCount": 0,
+          "sha256": "92f537fc442353ddfb5bec32c992fec3c2f0d52e7a553a6877978fd7a78df8a4"
+        },
+        {
+          "sample": "samples/vcsl/Electrophones/TX81Z/FM Piano/FMPiano_C6_vl3.wav",
+          "rootNote": 96,
+          "lowNote": 91,
+          "highNote": 100,
+          "lowVelocity": 100,
+          "highVelocity": 127,
+          "gainDb": -1.9843609999999998,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "vcsl",
+          "sourcePath": "Electrophones/TX81Z/FM Piano/FMPiano_C6_vl3.wav",
+          "sourceGitBlobSha1": "cbb90441d2634e931eb52e792b5990d4a330760c",
+          "sourceBytes": 499042,
+          "sourceVelocityRange": [
+            100,
+            127
+          ],
+          "format": "WAV",
+          "sampleRate": 44100,
+          "channels": 1,
+          "frames": 166298,
+          "bitsPerSample": 24,
+          "embeddedMidiUnityNote": 96,
+          "embeddedLoopCount": 0,
+          "sha256": "6dd8c60003989d345728b0a5223a8697f563bb85a2617753521da4fd62ee6c80"
+        }
+      ]
+    },
+    {
+      "id": "guitar-clean",
+      "name": "Recorded Clean Electric Guitar",
+      "family": "guitar",
+      "sourceKind": "recorded-sample",
+      "sourceId": "freepats-guitar",
+      "sourceMapping": "sources/electric-guitar-FSBS-clean/EGuitarFSBS-clean bridge small 20260807.sfz",
+      "sourceMappingSha256": "aa74229ecf4a7ea8dc5773bb0a943481e146c767304222d8210a3b5fc368f095",
+      "mappingPolicy": "Selected roots with nearest-root key zones; one recorded dynamic except two piano/violin/FM-keyboard layers; first round robin only; source tuning/offset/gain minus12dB headroom; only explicit authored source loops.",
+      "regions": [
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/C2_s1_01.flac",
+          "rootNote": 36,
+          "lowNote": 32,
+          "highNote": 38,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 657845,
+            "endFrame": 883504,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/C2_s1_01.flac",
+          "sourceGitBlobSha1": "3490b3d58324564fb783d23fda010e5613b3f8ed",
+          "sourceBytes": 470058,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 883519,
+          "sha256": "769cef1cb056680d05ad093baf01ee1a3fbca521371290fe9a81cb2706c615ce"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/F2_s1_01.flac",
+          "rootNote": 41,
+          "lowNote": 39,
+          "highNote": 43,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 701254,
+            "endFrame": 879472,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/F2_s1_01.flac",
+          "sourceGitBlobSha1": "3d2cfae321e0ef27e301e875f21489c70db476e8",
+          "sourceBytes": 487904,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 879487,
+          "sha256": "1ec869eb4cc3e2f1c1751f6e495c551a2f542122a9d1ef6cf064ad37c2a3a1b5"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/A2_s2_01.flac",
+          "rootNote": 45,
+          "lowNote": 44,
+          "highNote": 46,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 566379,
+            "endFrame": 677451,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/A2_s2_01.flac",
+          "sourceGitBlobSha1": "8df8feb764e5e3f242e51bcfc6205b9c865faca8",
+          "sourceBytes": 374814,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 677465,
+          "sha256": "c63270dbb8d4600600662abf55d94a63123a68ff26bc04f1f560ae209817c76e"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/C3_s2_02.flac",
+          "rootNote": 48,
+          "lowNote": 47,
+          "highNote": 50,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 488769,
+            "endFrame": 551880,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/C3_s2_02.flac",
+          "sourceGitBlobSha1": "8c5fea876397e8946499da746fdb9d65a4305e03",
+          "sourceBytes": 312770,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 551894,
+          "sha256": "4f6a0f6411e6ccf0cbde6bbe6148d916d8e513a16484237245be2095b00c3169"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/E3_s3_01.flac",
+          "rootNote": 52,
+          "lowNote": 51,
+          "highNote": 53,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 205029,
+            "endFrame": 314606,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/E3_s3_01.flac",
+          "sourceGitBlobSha1": "fa6d35453eebddb85242d3ea06c56177eaacd204",
+          "sourceBytes": 197228,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 314621,
+          "sha256": "80f77c9ba5845ac0e827187b8e3b3952b5fb8a818a1a1d2e65cd5d1d690a8213"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/G3_s4_01.flac",
+          "rootNote": 55,
+          "lowNote": 54,
+          "highNote": 57,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 329236,
+            "endFrame": 388721,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/G3_s4_01.flac",
+          "sourceGitBlobSha1": "b3081760b0e86b2489f20113e7e6096386ac9c71",
+          "sourceBytes": 249233,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 388734,
+          "sha256": "37cdcff86d3d666dde739d96fe25f64ec864adbbf8adb6d131e2f24ea13dd200"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/B3_s5_01.flac",
+          "rootNote": 59,
+          "lowNote": 58,
+          "highNote": 61,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 262912,
+            "endFrame": 370980,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/B3_s5_01.flac",
+          "sourceGitBlobSha1": "a95189aecf5822e714f0e8d51903100ca906f6d7",
+          "sourceBytes": 219449,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 370994,
+          "sha256": "3a02f89dcd9a2431ddd2f91391f2b9f1b39a4fa335a4db09bb387f0a5a8b8b24"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/E4_s6_01.flac",
+          "rootNote": 64,
+          "lowNote": 62,
+          "highNote": 65,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 216555,
+            "endFrame": 310778,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/E4_s6_01.flac",
+          "sourceGitBlobSha1": "01e4f62196759bcc1fc1338981b4b5fd82ae0f11",
+          "sourceBytes": 194029,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 310792,
+          "sha256": "d3797573c4eb28429484c923d3bf12157c7f409a64ad354601061134055d4f9f"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/G4_s6_01.flac",
+          "rootNote": 67,
+          "lowNote": 66,
+          "highNote": 69,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 208236,
+            "endFrame": 265523,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/G4_s6_01.flac",
+          "sourceGitBlobSha1": "1daed80bc3f15a4c1ff6ac67ec73d7326f22a9d1",
+          "sourceBytes": 166546,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 265537,
+          "sha256": "33366b0a25842dc439b3be5d1b31b31ba44674d3c39348fa6eff6e39d5bc6314"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/B4_s6_01.flac",
+          "rootNote": 71,
+          "lowNote": 70,
+          "highNote": 72,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "forward",
+            "startFrame": 201253,
+            "endFrame": 255852,
+            "provenance": "Explicit pinned source SFZ loop_start/loop_end; inclusive source end converted to exclusive."
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/B4_s6_01.flac",
+          "sourceGitBlobSha1": "fd236aa7792604705357a7a06d90f39c285b0b0c",
+          "sourceBytes": 155905,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 255865,
+          "sha256": "56823645bde6d2d4571d9827800c5e6002bb9729918f63eebbbaa10036a9f78d"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/D5_s6_01.flac",
+          "rootNote": 74,
+          "lowNote": 73,
+          "highNote": 77,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/D5_s6_01.flac",
+          "sourceGitBlobSha1": "6fab4181061caa9a94210cfc5685b54f28a71df9",
+          "sourceBytes": 101348,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 168088,
+          "sha256": "2c718b0225600266bec188dc9d520d26169338b52e336404ad61eaff49043cce"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/G#5_s6_03.flac",
+          "rootNote": 80,
+          "lowNote": 78,
+          "highNote": 82,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/G#5_s6_03.flac",
+          "sourceGitBlobSha1": "edb54f8fd4272fdbaa1b6f604f33007c801df544",
+          "sourceBytes": 131177,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 231905,
+          "sha256": "4027b0d7f6cab7df8398d161ed3f86a51cb621bf9a9e01f922455285bd91a4f6"
+        },
+        {
+          "sample": "samples/freepats-guitar/samples/bridge/small/C#6_s6_01.flac",
+          "rootNote": 85,
+          "lowNote": 83,
+          "highNote": 89,
+          "lowVelocity": 0,
+          "highVelocity": 127,
+          "gainDb": -12.0,
+          "pan": 0.0,
+          "sourceOffsetFrames": 0,
+          "tuneCents": 0.0,
+          "loop": {
+            "mode": "none",
+            "startFrame": 0,
+            "endFrame": 0
+          },
+          "sourceId": "freepats-guitar",
+          "sourcePath": "samples/bridge/small/C#6_s6_01.flac",
+          "sourceGitBlobSha1": "c9076cafdd5a73020d72dbaa21505c7ee9cb0ea4",
+          "sourceBytes": 81364,
+          "sourceVelocityRange": [
+            0,
+            127
+          ],
+          "format": "FLAC",
+          "sampleRate": 44100,
+          "channels": 1,
+          "bitsPerSample": 16,
+          "frames": 127342,
+          "sha256": "1c4ab2abeb962c8b4e96bc72b67bacdbc803d3c07649f08a88b0bf81500ec143"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Curated partial key and articulation coverage; not complete upstream libraries.",
+    "No invented loops; only guitar uses explicit source SFZ loops; other finite recordings may end during held notes.",
+    "No round-robin, release-trigger, pedal or SFZ modulation equivalence.",
+    "Source offsets/cents must be applied during offthread preparation; loop ends are exclusive.",
+    "Original WAV/FLAC bytes retained; map key spans/dynamic simplification/headroom are VibeRa curation.",
+    "FM electric piano is a recorded TX81Z FM-keyboard timbre, not a Rhodes or acoustic piano.",
+    "Listening and full engine/runtime qualification remain separate."
+  ],
+  "sampleCount": 123,
+  "sampleBytes": 178426339
+}

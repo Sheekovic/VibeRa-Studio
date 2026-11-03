@@ -1,0 +1,17 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
+@@ -383,6 +383,14 @@
+     void enablePreProcess (bool);
+ 
+ protected:
++    // CONTROL preparation only; reserves this Node's ordinary output array.
++    // No MIDI-history edge, queue or scheduling policy is enabled by reservation.
++    void reserveMidiOutputForPreparation (int maximumEvents)
++    {
++        if (maximumEvents < 0) throw std::invalid_argument ("Negative MIDI output reservation");
++        midiBuffer.reserve (maximumEvents);
++    }
++
+     /** Called once before playback begins for each node.
+         Use this to allocate buffers etc.
+         This step can be used to modify the topology of the graph (i.e. add/remove nodes).

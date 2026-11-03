@@ -1,0 +1,463 @@
+--- a/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/tracktion_Plugin.h
++++ b/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/tracktion_Plugin.h
+@@ -16,12 +16,14 @@
+ */
+ struct PluginCreationInfo
+ {
++    // Internal app-owned adapters only. Never inferred from persistent project state.
++    enum class Mode { normal, detachedGraph };
+     PluginCreationInfo (const PluginCreationInfo&) = default;
+     PluginCreationInfo (PluginCreationInfo&&) = default;
+     PluginCreationInfo& operator= (PluginCreationInfo&&) = delete;
+ 
+-    PluginCreationInfo (Edit& ed, const juce::ValueTree& s, bool isNew) noexcept
+-        : edit (ed), state (s), isNewPlugin (isNew) {}
++    PluginCreationInfo (Edit& ed, const juce::ValueTree& s, bool isNew, Mode modeToUse = Mode::normal) noexcept
++        : edit (ed), state (s), isNewPlugin (isNew), mode (modeToUse) {}
+ 
+     PluginCreationInfo() = delete;
+     PluginCreationInfo& operator= (const PluginCreationInfo&) = delete;
+@@ -29,6 +31,7 @@
+     Edit& edit;
+     juce::ValueTree state;
+     bool isNewPlugin = false;
++    Mode mode = Mode::normal;
+ };
+ 
+ //==============================================================================
+@@ -610,6 +613,7 @@
+     juce::ValueTree state;
+ 
+     juce::UndoManager* getUndoManager() const noexcept;
++    bool isDetachedGraph() const noexcept { return isDetachedGraphItem(); }
+ 
+     //==============================================================================
+     /** @internal */
+--- a/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.h
++++ b/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.h
+@@ -16,7 +16,8 @@
+ class AutomatableEditItem  : public EditItem
+ {
+ public:
+-    AutomatableEditItem (Edit&, const juce::ValueTree&);
++    AutomatableEditItem (Edit&, const juce::ValueTree&, bool detachedGraphItem = false);
++    bool isDetachedGraphItem() const noexcept { return detachedFromEdit; }
+     ~AutomatableEditItem() override;
+ 
+     //==============================================================================
+@@ -100,6 +101,7 @@
+     void restoreChangedParametersFromState();
+ 
+ private:
++    const bool detachedFromEdit;
+     RealTimeSpinLock activeParameterLock;
+     juce::ReferenceCountedArray<AutomatableParameter> automatableParams, activeParameters;
+     mutable AutomatableParameterTree parameterTree;
+--- a/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.cpp
++++ b/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.cpp
+@@ -10,19 +10,20 @@
+ 
+ namespace tracktion::inline engine {
+ 
+-AutomatableEditItem::AutomatableEditItem (Edit& ed, const juce::ValueTree& v)
++AutomatableEditItem::AutomatableEditItem (Edit& ed, const juce::ValueTree& v, bool detachedGraphItem)
+     : EditItem (ed, v),
+-      elementState (v)
+-{
+-    remapOnTempoChange.referTo (elementState, IDs::remapOnTempoChange, &edit.getUndoManager(), false);
+-
+-    if (itemID.isValid())
++      elementState (v), detachedFromEdit (detachedGraphItem)
++{
++    remapOnTempoChange.referTo (elementState, IDs::remapOnTempoChange,
++                               detachedFromEdit ? nullptr : &edit.getUndoManager(), false);
++
++    if (! detachedFromEdit && itemID.isValid())
+         edit.automatableEditItemCache.addItem (*this);
+ }
+ 
+ AutomatableEditItem::~AutomatableEditItem()
+ {
+-    if (itemID.isValid())
++    if (! detachedFromEdit && itemID.isValid())
+         edit.automatableEditItemCache.removeItem (*this);
+ }
+ 
+@@ -318,7 +319,7 @@
+     }
+ 
+     stream.flush();
+-    auto um = &edit.getUndoManager();
++    auto um = detachedFromEdit ? nullptr : &edit.getUndoManager();
+ 
+     if (stream.getDataSize() > 0)
+         elementState.setProperty (IDs::parameters, stream.getMemoryBlock(), um);
+--- a/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/tracktion_Plugin.cpp
++++ b/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/tracktion_Plugin.cpp
+@@ -7,6 +7,8 @@
+ 
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
++
++#include <stdexcept>
+ 
+ namespace tracktion::inline engine {
+ 
+@@ -77,8 +79,37 @@
+ Plugin::WindowState::WindowState (Plugin& p) : PluginWindowState (p.edit), plugin (p)  {}
+ 
+ //==============================================================================
++// Independent closed app-adapter contract. Validate BEFORE registration or
++// MacroParameterElement construction; no live tree/cache writes or ID allocation.
++static const juce::ValueTree& validateDetachedGraphPluginState (const PluginCreationInfo& info)
++{
++    if (info.mode == PluginCreationInfo::Mode::normal)
++        return info.state;
++    if (info.mode != PluginCreationInfo::Mode::detachedGraph)
++        throw std::invalid_argument ("Unknown plugin construction mode");
++    const auto type = info.state[IDs::type].toString();
++    if (! info.state.hasType (IDs::PLUGIN) || info.state.getParent().isValid() ||
++        ! EditItemID::fromID (info.state).isValid() || info.isNewPlugin ||
++        (type != "vibera_fixed_sampler" && type != "vibera_vst3_effect" && type != "vibera_sidechain_send") ||
++        EditItemID::fromVar (info.state[IDs::masterPluginID]).isValid() ||
++        info.state.hasProperty (IDs::parameters) || info.edit.getPluginCache().getPluginFor (info.state) != nullptr)
++        throw std::invalid_argument ("Detached graph adapter needs private state, reserved ID and supported app type");
++    for (const auto child : info.state)
++    {
++        if (child.hasType (IDs::MODIFIERASSIGNMENTS) && child.getNumChildren() == 0 && child.getNumProperties() == 0)
++            continue; // Empty container from a normal AuxSend copy is inert; no assignments instantiated.
++        if (! child.hasType (IDs::SIDECHAINCONNECTIONS))
++            throw std::invalid_argument ("Detached graph adapter does not support native macros/modifiers/automation");
++        for (const auto wire : child)
++            if (! wire.hasType (IDs::SIDECHAINCONNECTION) || wire.getNumChildren() != 0)
++                throw std::invalid_argument ("Detached graph adapter has invalid sidechain wire state");
++    }
++    return info.state;
++}
++
+ Plugin::Plugin (PluginCreationInfo info)
+-    : AutomatableEditItem (info.edit, info.state),
++    : AutomatableEditItem (info.edit, validateDetachedGraphPluginState (info),
++                           info.mode == PluginCreationInfo::Mode::detachedGraph),
+       MacroParameterElement (info.edit, info.state),
+       engine (info.edit.engine),
+       state (info.state)
+@@ -110,7 +141,7 @@
+     state.addListener (this);
+ 
+    #if TRACKTION_ENABLE_AUTOMAP && TRACKTION_ENABLE_CONTROL_SURFACES
+-    if (! edit.isLoading())
++    if (! isDetachedGraph() && ! edit.isLoading())
+     {
+         auto& e = engine;
+ 
+@@ -134,8 +165,9 @@
+     windowState->hideWindowForShutdown();
+ 
+    #if TRACKTION_ENABLE_AUTOMAP && TRACKTION_ENABLE_CONTROL_SURFACES
+-    if (auto na = engine.getExternalControllerManager().getAutomap())
+-        na->removePlugin (this);
++    if (! isDetachedGraph())
++        if (auto na = engine.getExternalControllerManager().getAutomap())
++            na->removePlugin (this);
+    #endif
+ }
+ 
+@@ -145,7 +177,10 @@
+     state.removeListener (this);
+ 
+     quickControlParameter = nullptr;
+-    deleteAutomatableParameters();
++    if (! isDetachedGraph())
++        deleteAutomatableParameters();
++    else
++        clearParameterList();
+ }
+ 
+ int Plugin::getNumOutputChannelsGivenInputs (int)
+@@ -354,7 +389,7 @@
+ 
+ juce::UndoManager* Plugin::getUndoManager() const noexcept
+ {
+-    return &edit.getUndoManager();
++    return isDetachedGraph() ? nullptr : &edit.getUndoManager();
+ }
+ 
+ void Plugin::playStartedOrStopped()
+@@ -441,6 +476,8 @@
+ //==============================================================================
+ void Plugin::changed()
+ {
++    if (isDetachedGraph())
++        return; // Private preparation must not notify live selection/mirror/controllers.
+     Selectable::changed();
+     jassert (Selectable::isSelectableValid (&edit));
+     edit.updateMirroredPlugin (*this);
+--- a/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.cpp
++++ b/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.cpp
+@@ -18,6 +18,11 @@
+     invertPhase.referTo (state, IDs::phase, um, false);
+     lastVolumeBeforeMute.referTo (state, IDs::lastVolumeBeforeMuteDb, um, 0.0f);
+ 
++    // Detector taps override fixed realtime gain; no native parameter, curve,
++    // modifier or recording registration belongs to a private candidate.
++    if (isDetachedGraph())
++        return;
++
+     gain = addParam ("send level", TRANS("Send level"), { 0.0f, 1.0f },
+                      [] (float value)             { return juce::Decibels::toString (volumeFaderPositionToDB (value)); },
+                      [] (const juce::String& s)   { return decibelsToVolumeFaderPosition (dbStringToDb (s)); });
+@@ -30,7 +35,8 @@
+ AuxSendPlugin::~AuxSendPlugin()
+ {
+     notifyListenersOfDeletion();
+-    gain->detachFromCurrentValue();
++    if (gain != nullptr)
++        gain->detachFromCurrentValue();
+ }
+ 
+ bool AuxSendPlugin::shouldProcess()
+@@ -81,6 +87,8 @@
+ 
+ void AuxSendPlugin::initialise (const PluginInitialisationInfo& info)
+ {
++    if (isDetachedGraph())
++        return;
+     lastGain = volumeFaderPositionToGain (gain->getCurrentValue());
+ 
+     initialiseWithoutStopping (info);
+@@ -88,6 +96,8 @@
+ 
+ void AuxSendPlugin::initialiseWithoutStopping (const PluginInitialisationInfo&)
+ {
++    if (isDetachedGraph())
++        return;
+     TRACKTION_ASSERT_MESSAGE_THREAD
+     auto newOwnerTrack = getOwnerTrack();
+ 
+--- a/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -33,6 +33,14 @@
+     bool implicitlyIncludeSubmixChildTracks = true;     /**< If true, child track in submixes will be included regardless of the allowedTracks param. Only relevent when forRendering is also true. */
+     juce::Array<EditItemID> tracksToProcessWhileMuted = {};  /**< Tracks whose contents keep processing while the track is muted, so they can feed sidechains, aux buses and racks without being heard. Used by stem renders. @see Renderer::Parameters::tracksToProcessWhileMuted */
+     bool allowClipSlots = true;                         /**< If true, track's clip slots will be included, set to false to disable these (which will use a slightly more efficient Node). */
++    /** Optional owning per-build overlay. Invoked once for each plugin-list build.
++        Return the same owners for unaffected DSP, a private target adapter/taps
++        for changed stages. Never mutate the Edit/list or process a preview graph.
++        Lifetime of returned plugins transfers to the ordinary native Nodes.
++        Empty/unset preserves the native list and factory behavior.
++    */
++    std::function<Plugin::Array (const PluginList&)> pluginListResolver = {};
++
+     bool readAheadTimeStretchNodes = false;             /**< TEMPORARY: If true, real-time time-stretch Nodes will use a larger buffer and background thread to reduce audio CPU use. */
+ 
+     /** If set, this will be called for each output device to give an opportunity to add an
+--- a/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1408,7 +1408,9 @@
+ std::unique_ptr<tracktion::graph::Node> createPluginNodeForList (PluginList& list, const TrackMuteState* trackMuteState, std::unique_ptr<Node> node,
+                                                                  tracktion::graph::PlayHeadState& playHeadState, const CreateNodeParams& params)
+ {
+-    for (auto p : list)
++    auto build = [&] (const auto& plugins) -> std::unique_ptr<Node>
++    {
++    for (auto p : plugins)
+     {
+         if (! params.forRendering && p->isFrozen())
+             continue;
+@@ -1452,7 +1454,20 @@
+         }
+     }
+ 
+-    return node;
++    return std::move (node);
++    };
++    if (! params.pluginListResolver)
++        return build (list); // Exact normal list path; no owning copy/overlay allocation.
++    auto resolved = params.pluginListResolver (list); // One resolution, owning result.
++    juce::Array<EditItemID> identities;
++    for (auto* plugin : resolved)
++    {
++        if (plugin == nullptr || &plugin->edit != &list.getEdit() || ! plugin->itemID.isValid() ||
++            identities.contains (plugin->itemID))
++            throw std::invalid_argument ("Private plugin-list resolver returned invalid/duplicate owner");
++        identities.add (plugin->itemID);
++    }
++    return build (resolved);
+ }
+ 
+ std::unique_ptr<tracktion::graph::Node> createModifierNodeForList (ModifierList* list,
+--- a/src/RemoteEffect.h
++++ b/src/RemoteEffect.h
+@@ -2,6 +2,7 @@
+ #pragma once
+ #include "PluginAutomationStream.h"
+ #include <tracktion_engine/tracktion_engine.h>
++#include <stdexcept>
+ #include <optional>
+ 
+ namespace vibera
+@@ -44,6 +45,14 @@
+         return "VST3 effect";
+     }
+     explicit RemoteEffect(tracktion::PluginCreationInfo info) : tracktion::Plugin(info) {}
++    // Internal preparation only: caller owns a private, already identified tree.
++    static tracktion::Plugin::Ptr createDetachedGraph(tracktion::Edit &edit, const juce::ValueTree &state)
++    {
++        if (state[tracktion::IDs::type].toString() != xmlTypeName)
++            throw std::invalid_argument("Detached adapter type mismatch");
++        return new RemoteEffect({edit, state, false, tracktion::PluginCreationInfo::Mode::detachedGraph});
++    }
++
+     ~RemoteEffect() override
+     {
+         notifyListenersOfDeletion();
+--- a/src/MixerRoutePlugins.h
++++ b/src/MixerRoutePlugins.h
+@@ -2,6 +2,7 @@
+ #pragma once
+ #include "LiveTimeline.h"
+ #include <tracktion_engine/tracktion_engine.h>
++#include <stdexcept>
+ namespace vibera
+ {
+ inline float preparedSendGain(const std::shared_ptr<LiveTimeline> &timeline, int source, int target,
+@@ -67,6 +68,14 @@
+     static constexpr const char *xmlTypeName = "vibera_sidechain_send";
+     static const char *getPluginName() { return "VibeRa Detector Tap"; }
+     explicit MixerSidechainSend(tracktion::PluginCreationInfo info) : AuxSendPlugin(info) {}
++    // Internal preparation only: caller owns a private, already identified tree.
++    static tracktion::Plugin::Ptr createDetachedGraph(tracktion::Edit &edit, const juce::ValueTree &state)
++    {
++        if (state[tracktion::IDs::type].toString() != xmlTypeName)
++            throw std::invalid_argument("Detached adapter type mismatch");
++        return new MixerSidechainSend({edit, state, false, tracktion::PluginCreationInfo::Mode::detachedGraph});
++    }
++
+     juce::String getPluginType() override { return xmlTypeName; }
+     void configure(int preparedBus) { busNumber = preparedBus; }
+     float getRealtimeSendGain() const noexcept override { return 1.f; }
+--- a/src/AudioEngine.cpp
++++ b/src/AudioEngine.cpp
+@@ -1,5 +1,6 @@
+ // SPDX-License-Identifier: AGPL-3.0-or-later
+ #include "AudioEngine.h"
++#include <stdexcept>
+ #include "Sampler.h"
+ #include "LiveMidi.h"
+ #include "MidiNoteOwners.h"
+@@ -110,6 +111,14 @@
+         return "VibeRa Sampler";
+     }
+     FixedSampler(te::PluginCreationInfo info) : te::Plugin(info) {}
++    // Internal preparation only: caller owns a private, already identified tree.
++    static tracktion::Plugin::Ptr createDetachedGraph(tracktion::Edit &edit, const juce::ValueTree &state)
++    {
++        if (state[tracktion::IDs::type].toString() != xmlTypeName)
++            throw std::invalid_argument("Detached adapter type mismatch");
++        return new FixedSampler({edit, state, false, tracktion::PluginCreationInfo::Mode::detachedGraph});
++    }
++
+     ~FixedSampler() override
+     {
+         notifyListenersOfDeletion();
+--- /dev/null
++++ b/tests/DetachedGraphPluginAcceptance.h
+@@ -0,0 +1,97 @@
++// SPDX-License-Identifier: AGPL-3.0-or-later
++// Original unbuilt fixture. Include after require(); root owns integration.
++#pragma once
++#include <tracktion_engine/tracktion_engine.h>
++#include <stdexcept>
++
++namespace vibera::draft
++{
++// Factory must call the ACTUAL adapter createDetachedGraph, not a fake base plugin.
++// Run once for normal registered RemoteEffect, MixerSidechainSend and FixedSampler.
++// FixedSampler is private to AudioEngine.cpp: call there through a narrow original
++// acceptance seam; do not expose private sampler construction as a product command.
++template <class Factory, class PrepareCandidateGraph>
++void detachedPluginConstructionTests(tracktion::Edit &edit, tracktion::Plugin::Ptr original,
++                                     Factory createCandidate, PrepareCandidateGraph prepareCandidateGraph)
++{
++    require(original && !original->isDetachedGraph() && &original->edit == &edit,
++            "Genuine registered live app adapter is required");
++    const auto cache = edit.getPluginCache().getPlugins(); // Pin baseline cache members.
++    require(cache.contains(original.get()) &&
++                edit.automatableEditItemCache.findItem(original->itemID) == original.get(),
++            "Original is present in both native caches before experiment");
++    const auto originalState = original->state.createCopy();
++    const auto editState = edit.state.createCopy();
++    auto &history = edit.getUndoManager();
++    const auto units = history.getNumberOfUnitsTakenUpByStoredCommands();
++    const auto actions = history.getNumActionsInCurrentTransaction();
++    const bool undo = history.canUndo(), redo = history.canRedo();
++    auto preserved = [&]
++    {
++        const auto after = edit.getPluginCache().getPlugins();
++        require(after.size() == cache.size(), "Detached candidate does not enter plugin cache");
++        for (int index = 0; index < cache.size(); ++index)
++            require(after[index] == cache[index], "Exact original cache ownership and order retained");
++        require(edit.automatableEditItemCache.findItem(original->itemID) == original.get(),
++                "Same-ID candidate never replaces or erases incumbent item registration");
++        require(original->state.isEquivalentTo(originalState) && edit.state.isEquivalentTo(editState),
++                "Candidate configuration/destruction leaves exact live ValueTrees unchanged");
++        require(history.getNumberOfUnitsTakenUpByStoredCommands() == units &&
++                    history.getNumActionsInCurrentTransaction() == actions &&
++                    history.canUndo() == undo && history.canRedo() == redo,
++                "Private defaults and connections do not consume live Undo/Redo storage");
++    };
++    for (const bool injectedFailure : {false, true})
++    {
++        bool sawFailure = false;
++        try
++        {
++            auto candidate = createCandidate(original->state.createCopy());
++            require(candidate && candidate.get() != original.get() && candidate->isDetachedGraph() &&
++                        candidate->itemID == original->itemID && candidate->getUndoManager() == nullptr &&
++                        candidate->getNumAutomatableParameters() == 0,
++                    "Actual detached adapter retains stable ID without native parameter registration");
++            candidate->state.setProperty("privateFixtureValue", 37, candidate->getUndoManager());
++            candidate->remapOnTempoChange = true;
++            candidate->makeConnection(0, 0, nullptr);
++            candidate->changed();
++            preserved();
++            // Driver must prepare the actual same-Edit candidate through the
++            // native factory/player preparation seam WITHOUT publishing or
++            // processing it. This required callback cannot be an empty mock.
++            auto graph = prepareCandidateGraph(candidate);
++            require(bool(graph), "Actual candidate graph preparation returns owning ready graph");
++            preserved();
++            if (injectedFailure)
++                throw std::runtime_error("Original private preparation failure before graph publication");
++        }
++        catch (const std::runtime_error &error)
++        {
++            if (!injectedFailure || juce::String(error.what()) !=
++                                        "Original private preparation failure before graph publication")
++                throw;
++            sawFailure = true;
++        }
++        require(sawFailure == injectedFailure, "Failure fixture actually reaches candidate destruction");
++        preserved();
++    }
++    for (const auto metadata : {tracktion::IDs::MACROPARAMETERS, tracktion::IDs::MODIFIERASSIGNMENTS})
++    {
++        auto state = original->state.createCopy();
++        auto container = state.getOrCreateChildWithName(metadata, nullptr);
++        container.addChild(juce::ValueTree("unsupportedFixtureAssignment"), -1, nullptr);
++        bool refused = false;
++        try { auto candidate = createCandidate(state); }
++        catch (const std::invalid_argument &) { refused = true; }
++        require(refused, "Unsupported native macro/modifier state refused before construction side effects");
++        preserved();
++    }
++    auto missingId = original->state.createCopy();
++    missingId.removeProperty(tracktion::IDs::id, nullptr);
++    bool refused = false;
++    try { auto candidate = createCandidate(missingId); }
++    catch (const std::invalid_argument &) { refused = true; }
++    require(refused, "Missing reserved ID refused instead of allocating an ID from live Edit");
++    preserved();
++}
++} // namespace vibera::draft

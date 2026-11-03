@@ -1,0 +1,40 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.h
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.h
+@@ -25,8 +25,11 @@
+         physicalBurstExceeded, sourceBurstExceeded, invalidConversion, invalidDeviceSlice,
+         sequenceMismatch, contextUnavailable, observerRefused, peerRefused, contextReleased, retired,
+         allocationFailed, preparationFailed, scopeInProgress, alreadyClaimed,
+-        conversionResourcesUnavailable, cpuOverload
++        conversionResourcesUnavailable, cpuOverload, pendingFirstSerial,
++        pendingPhysicalMetadata, pendingOffset, initialContextRequired, closedNativeIO,
++        localCapabilityViolated, localLifecycleInvalidated
+     };
++    enum class Decision { process, pending, fault };
+     struct Configuration
+     {
+         juce::uint64 deviceEpoch = 0, generation = 0;
+@@ -67,7 +70,7 @@
+     struct Impl;
+     explicit SourceBurstSession (std::unique_ptr<Impl>);
+     std::unique_ptr<Impl> impl;
+-    Status claim (juce::AudioDeviceManager&, EditPlaybackContext*) noexcept;
++    Status claim (juce::AudioDeviceManager&, EditPlaybackContext*, bool initial = false) noexcept;
+     bool scopeOpen() const noexcept;
+     void retire (Status) noexcept;
+ };
+@@ -116,6 +119,7 @@
+     // Candidate is prepared off-callback; open physical scopes refuse replacement.
+     // Retired observers/reader owners are destroyed after releasing contextLock.
+     SourceBurstSession::Status installSourceBurstSession (EditPlaybackContext&, SourceBurstSession::Ptr);
++    SourceBurstSession::Status installInitialSourceBurstSession (EditPlaybackContext&, SourceBurstSession::Ptr);
+     void closeDevices();
+     void saveSettings();
+ 
+@@ -356,6 +360,7 @@
+     juce::uint64 sourceBurstEpoch = 0, sourceBurstSerial = 0;
+     int sourceBurstReceived = 0, sourceBurstInnerOffset = 0;
+     bool sourceBurstOffsetKnown = false, sourceBurstResynchronising = false;
++    SourceBurstSession::Status installSourceBurstSessionInternal (EditPlaybackContext&, SourceBurstSession::Ptr, bool initial);
+     bool finishedInitialising = false;
+     bool sendMidiTimecode = false;
+ 

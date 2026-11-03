@@ -1,0 +1,58 @@
+{
+  "scope": "Scratch-only unbuilt draft. No live source/vendor changes.",
+  "files": {
+    "vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/tracktion_Plugin.h": {
+      "baseSha256": "8081f5b3533b387c7542909c4998ecc1b50df26108c65fc09340f6895fd44133",
+      "finalSha256": "ac1b4b7d56ba3b12cb68d48f0b97eed573eb6a0e63b2feabd7e3566b7353f5aa",
+      "baseContentSha256": "8081f5b3533b387c7542909c4998ecc1b50df26108c65fc09340f6895fd44133"
+    },
+    "vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.h": {
+      "baseSha256": "223efd98b60fb3c05fc87fc8302319cbaba6a4d21705bf4dd3e0e1d44e926629",
+      "finalSha256": "818cc7bfb999d68c773ef5e97ef4a4059bf4c4891cef8ca5587fdca6ac7c63fd",
+      "baseContentSha256": "223efd98b60fb3c05fc87fc8302319cbaba6a4d21705bf4dd3e0e1d44e926629"
+    },
+    "vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.cpp": {
+      "baseSha256": "3f39f3ac76fe9b43eb65d608035c589a6347d5bea540ee6fcbd2e1899913b161",
+      "finalSha256": "910154c037a3dc4e7086e6a41de73e5f76d13cc02f55e4d627fdae82a2eab54a",
+      "baseContentSha256": "3f39f3ac76fe9b43eb65d608035c589a6347d5bea540ee6fcbd2e1899913b161"
+    },
+    "vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/tracktion_Plugin.cpp": {
+      "baseSha256": "04208a38b9c066909fe8cd83ad516c67d480c3a43b3313844b4e15399f1e4a64",
+      "finalSha256": "7bd5de5e395d402439896fe8f1add2685db1ed6ab1e47476cfaf746bc956cd3e",
+      "baseContentSha256": "04208a38b9c066909fe8cd83ad516c67d480c3a43b3313844b4e15399f1e4a64"
+    },
+    "vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.cpp": {
+      "baseSha256": "9d343474d1f22add0a39d159e9ec5fc163b6856d9cf89648fda03c9e687ba9c8",
+      "finalSha256": "d196bbbee7b4ae6bb00ee2750aaaafc8f4bb7c69d2ec606bec4c9382d153365f",
+      "baseContentSha256": "9d343474d1f22add0a39d159e9ec5fc163b6856d9cf89648fda03c9e687ba9c8"
+    },
+    "vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h": {
+      "baseSha256": "fe8fd5fddcbfbabae72e5350571dc9377a4101ea915916f42e7ea88a2253806b",
+      "finalSha256": "82df812ed243e047f12538f09e9dcfe92538607beed9a8da565cb4b157f66e3d",
+      "baseContentSha256": "fe8fd5fddcbfbabae72e5350571dc9377a4101ea915916f42e7ea88a2253806b"
+    },
+    "vendor/source/tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp": {
+      "baseSha256": "0bec425cab622973213e30423007fbb556289e7d0e74ef565132b1c6f86b1bcd",
+      "finalSha256": "9e7d376fc7d7c40c8bd0139360e57ff04182fbe8b3ff6ac8a6b30a3b8c1a1c63",
+      "baseContentSha256": "0bec425cab622973213e30423007fbb556289e7d0e74ef565132b1c6f86b1bcd"
+    },
+    "src/RemoteEffect.h": {
+      "baseSha256": "79ab6bd27b48baff284f7a76c9954603fe6266ff6c96d09d03efd892c0884fa8",
+      "finalSha256": "0d38e6fe52336f23ca726f5dee22190489bc4cfc4dbb5fecde7b7528270ee6b5",
+      "baseContentSha256": "6b1896d01f135c5b9dc1a47c55a26609f3eb1422fe28a8378f9462072f97cd27"
+    },
+    "src/MixerRoutePlugins.h": {
+      "baseSha256": "9e34493d0491a80b3a3671ba4c1cd6124437e5614ccd385f882318c5d1e6d1ba",
+      "finalSha256": "e96f8b4d59b7ba0b310202658371ff518f36f50682e8cb0ce214210852e454b4",
+      "baseContentSha256": "00716594969786d3ef74318e477f33de09a903ece35a69c7aa3c5cf86bc122cc"
+    },
+    "src/AudioEngine.cpp": {
+      "baseSha256": "5cf379894fe01880d2073fc039e6405347eb98e95f21ebcc5bfc79a932811535",
+      "finalSha256": "8d23e17c0b3e2c2a42f2cbf5cd62a17fbe486b8fad4bbd199fbc7f8fc42e7555",
+      "baseContentSha256": "920a3e059d267bb682bf5cea04d4bef9b4424350876330ec892d1cbb72b7267b"
+    }
+  },
+  "newFiles": {
+    "tests/DetachedGraphPluginAcceptance.h": "54cd003210a2e35fc95d1724048cc5c1ab291830f6c2173dbf1ea7808dccc0ed"
+  }
+}

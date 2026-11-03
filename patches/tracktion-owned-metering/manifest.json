@@ -1,0 +1,15 @@
+{
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "appliesAfter": "patches/tracktion-sidechain-bus/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-owned-metering/tracktion_EditNodeBuilder.cpp.patch",
+      "patchSha256": "f6e45aab553b9a0b35e2e2d51491b32c32423f397fc14c5ab781b9f1ccc107b7",
+      "originalSha256": "e8720bd117ccc1d851ed6679b113cd73286cef6676cb7810c834d38e33d923ff",
+      "patchedSha256": "0bec425cab622973213e30423007fbb556289e7d0e74ef565132b1c6f86b1bcd"
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
+@@ -1320,6 +1320,36 @@
+     const ScopedSteadyLoad load (steadyLoadContext, numSamples);
+    #endif
+ 
++    // This runs BEFORE the suspension test. A resumed suffix is not offset0.
++    // CONTROL never resets this tracker; epoch/serial transitions are DSP-owned.
++    juce::AudioDeviceManager::PhysicalCallbackSnapshot physical;
++    const bool physicalKnown = sourceBurstReader.read (physical) && physical.ownerAlive &&
++        physical.active && !physical.writerConflict && !physical.countersExhausted &&
++        physical.callbackSerial != 0 && physical.outerFrames > 0;
++    if (!physicalKnown)
++    {
++        // A later successful read may be a suffix of the unknown callback.
++        // Discard that WHOLE observed serial before trusting a future boundary.
++        sourceBurstResynchronising = true;
++        sourceBurstOffsetKnown = false;
++    }
++    else if (sourceBurstResynchronising)
++    {
++        sourceBurstEpoch = physical.deviceEpoch; sourceBurstSerial = physical.callbackSerial;
++        sourceBurstReceived = 0; sourceBurstOffsetKnown = false;
++        sourceBurstResynchronising = false;
++    }
++    else if (physical.deviceEpoch != sourceBurstEpoch || physical.callbackSerial != sourceBurstSerial)
++    {
++        sourceBurstEpoch = physical.deviceEpoch; sourceBurstSerial = physical.callbackSerial;
++        sourceBurstReceived = 0; sourceBurstOffsetKnown = true;
++    }
++    sourceBurstInnerOffset = sourceBurstReceived;
++    sourceBurstOffsetKnown = sourceBurstOffsetKnown && physicalKnown && numSamples > 0 &&
++        sourceBurstReceived <= physical.outerFrames && numSamples <= physical.outerFrames - sourceBurstReceived;
++    if (sourceBurstOffsetKnown) sourceBurstReceived += numSamples;
++    const auto sourceBurstChunkOffset = sourceBurstInnerOffset;
++
+     if (isSuspended)
+     {
+         for (int i = 0; i < totalNumOutputChannels; ++i)
+@@ -1349,6 +1379,7 @@
+         for (int i = 0; i < totalNumOutputChannels; ++i)
+             outputChannelsScratch[i] = outputChannelData[i] + sampleStartIndex;
+ 
++        sourceBurstInnerOffset = sourceBurstOffsetKnown ? sourceBurstChunkOffset + sampleStartIndex : 0;
+         audioDeviceIOCallbackInternal (inputChannelsScratch, numInputChannels,
+                                        outputChannelsScratch, totalNumOutputChannels,
+                                        numThisTime);
+@@ -1366,15 +1397,43 @@
+                                                    int numSamples)
+ {
+     {
+-        engine.getAudioFileManager().cache.nextBlockStarted();
+-
+         if (clearStatsFlag.exchange (false))
+             performanceMeasurement.getStatisticsAndReset();
+ 
+         const ScopedPerformanceMeasurement spm (performanceMeasurement);
+ 
++        SCOPED_REALTIME_CHECK
++        const std::shared_lock sl (contextLock); // Existing lock, deliberately wider lifetime.
++
++        // Pass1 never opens Host scopes or changes source/MIDI/time.
++        // All contexts see the real JUCE physical serial, including later chunks.
++        bool sourceAdmitted = true;
++        for (auto c : activeContexts)
++            sourceAdmitted &= c->preflightSourceBurst (numSamples, totalNumOutputChannels, sourceBurstInnerOffset, sourceBurstOffsetKnown,
++                sourceBurstEpoch, sourceBurstSerial, currentSampleRate, maxBlockSize);
++        if (sourceAdmitted)
++            for (auto c : activeContexts)
++                if (!c->beginSourceBurst()) { sourceAdmitted = false; break; }
++        if (!sourceAdmitted)
++        {
++            for (auto c : activeContexts) c->abortSourceBurst (SourceBurstSession::Status::peerRefused);
++            for (int i = 0; i < totalNumOutputChannels; ++i)
++                if (auto* dest = outputChannelData[i]) juce::FloatVectorOperations::clear (dest, numSamples);
++            return; // Explicit failed opt-in callback; CONTROL recovery required, not normal playback.
++        }
++
+         if (currentCpuUsage > cpuLimitBeforeMuting)
+         {
++            bool anyBound = false;
++            for (auto c : activeContexts) anyBound |= bool (c->sourceBurstSession);
++            if (anyBound)
++            {
++                for (auto c : activeContexts) c->abortSourceBurst (SourceBurstSession::Status::cpuOverload);
++                for (int i = 0; i < totalNumOutputChannels; ++i)
++                    if (auto* dest = outputChannelData[i]) juce::FloatVectorOperations::clear (dest, numSamples);
++                return; // Bound CPU-skip is a fault, never successful scope/global-output processing.
++            }
++            engine.getAudioFileManager().cache.nextBlockStarted();
+             for (int i = 0; i < totalNumOutputChannels; ++i)
+                 if (auto dest = outputChannelData[i])
+                     juce::FloatVectorOperations::clear (dest, numSamples);
+@@ -1383,13 +1442,12 @@
+         }
+         else
+         {
+-            broadcastStreamTimeToMidiDevices (streamTime + outputLatencyTime);
+             juce::Range<double> blockStreamTime;
+ 
+             {
+-                SCOPED_REALTIME_CHECK
+-                const std::shared_lock sl (contextLock);
+-
++                engine.getAudioFileManager().cache.nextBlockStarted();
++                // Existing MIDI lock/order only; no new lock in admission helpers.
++                broadcastStreamTimeToMidiDevices (streamTime + outputLatencyTime);
+                 for (auto c : activeContexts)
+                     c->nextBlockStarted();
+ 
+@@ -1404,8 +1462,19 @@
+ 
+                 blockStreamTime = { streamTime, streamTime + blockLength };
+ 
++                bool sourceProcessed = true;
+                 for (auto c : activeContexts)
+-                    c->fillNextNodeBlock (outputChannelData, totalNumOutputChannels, numSamples);
++                    if (!c->fillNextNodeBlock (outputChannelData, totalNumOutputChannels, numSamples))
++                    { sourceProcessed = false; break; }
++                if (sourceProcessed)
++                    for (auto c : activeContexts) sourceProcessed &= c->finishSourceBurst();
++                if (!sourceProcessed)
++                {
++                    for (auto c : activeContexts) c->abortSourceBurst (SourceBurstSession::Status::peerRefused);
++                    for (int i = 0; i < totalNumOutputChannels; ++i)
++                        if (auto* dest = outputChannelData[i]) juce::FloatVectorOperations::clear (dest, numSamples);
++                    return; // Unexpected post-admission failure retains prefix diagnostics; no rollback claim.
++                }
+ 
+                 for (auto chan : activeOutputChannels)
+                     if (chan >= 0 && chan < totalNumOutputChannels)
+@@ -1671,10 +1740,42 @@
+     }
+ }
+ 
++SourceBurstSession::Status DeviceManager::installSourceBurstSession (EditPlaybackContext& context, SourceBurstSession::Ptr candidate)
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    SourceBurstSession::Ptr retired;
++    {
++        const std::unique_lock sl (contextLock); // CONTROL; the existing callback exclusion.
++        if (!activeContexts.contains (&context)) return SourceBurstSession::Status::contextUnavailable;
++        if (context.sourceBurstSession == candidate) return SourceBurstSession::Status::prepared;
++        if (context.sourceBurstSession && context.sourceBurstSession->scopeOpen()) return SourceBurstSession::Status::scopeInProgress;
++        if (candidate)
++        {
++            auto* device = deviceManager.getCurrentAudioDevice(); // CONTROL only.
++            if (!device) return SourceBurstSession::Status::deviceStopped;
++            const auto prepared = context.prepareSourceBurstResources (candidate->configuration(),
++                device->getActiveOutputChannels().countNumberOfSetBits());
++            if (prepared != SourceBurstSession::Status::prepared) return prepared;
++            const auto status = candidate->claim (deviceManager, &context);
++            if (status != SourceBurstSession::Status::prepared) return status;
++        }
++        retired = std::move (context.sourceBurstSession);
++        context.sourceBurstSession = std::move (candidate); // No owner destruction under the lock.
++    }
++    if (retired) retired->retire (SourceBurstSession::Status::retired);
++    return SourceBurstSession::Status::prepared;
++}
+ void DeviceManager::removeContext (EditPlaybackContext* c)
+ {
+-    const std::unique_lock sl (contextLock);
+-    activeContexts.removeAllInstancesOf (c);
++    SourceBurstSession::Ptr retired;
++    {
++        const std::unique_lock sl (contextLock);
++        activeContexts.removeAllInstancesOf (c);
++        retired = std::move (c->sourceBurstSession);
++    }
++    // Context cannot be processed after exclusion; close an interrupted scope
++    // and release callback/Host/reader owners only on this CONTROL thread.
++    if (retired) retired->retire (SourceBurstSession::Status::contextReleased);
+ }
+ 
+ void DeviceManager::clearAllContextDevices()

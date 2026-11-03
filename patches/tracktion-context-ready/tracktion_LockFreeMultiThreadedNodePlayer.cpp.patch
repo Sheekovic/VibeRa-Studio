@@ -1,0 +1,122 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
+@@ -90,6 +90,57 @@
+                                  disableLatencyComp), sampleRateToUse, blockSizeToUse);
+ }
+ 
++void LockFreeMultiThreadedNodePlayer::publishSelection (const PreparedNode& holder,
++                                                           juce::Range<int64_t> reference) noexcept
++{
++    const auto sequence = selectionSequence.load (std::memory_order_seq_cst);
++    if (selectionSequenceExhausted.load (std::memory_order_seq_cst)) return;
++    if (sequence >= std::numeric_limits<uint64_t>::max() - 2)
++    {
++        selectionSequenceExhausted.store (true, std::memory_order_seq_cst);
++        return; // Permanent explicit stale; never silently wrap receipt lineage.
++    }
++    selectionSequence.store (sequence + 1, std::memory_order_seq_cst);
++    selectedGraphSerial.store (holder.selectionSerial, std::memory_order_seq_cst);
++    selectedLatencySamples.store (holder.preparedLatencySamples, std::memory_order_seq_cst);
++    selectedReferenceStart.store (reference.getStart(), std::memory_order_seq_cst);
++    selectedReferenceEnd.store (reference.getEnd(), std::memory_order_seq_cst);
++    selectionSequence.store (sequence + 2, std::memory_order_seq_cst);
++}
++
++LockFreeMultiThreadedNodePlayer::GraphSelection LockFreeMultiThreadedNodePlayer::graphSelection() const noexcept
++{
++    GraphSelection result;
++    for (unsigned attempt = 0; attempt < 8; ++attempt)
++    {
++        const auto posted = postedSelectionSerial.load (std::memory_order_seq_cst);
++        const auto minimum = minimumSelectionSerial.load (std::memory_order_seq_cst);
++        if (selectionSequenceExhausted.load (std::memory_order_seq_cst))
++        { result = {}; result.state = GraphSelectionState::stale; return result; }
++        const auto before = selectionSequence.load (std::memory_order_seq_cst);
++        if ((before & 1) != 0) continue;
++        result.selectedSerial = selectedGraphSerial.load (std::memory_order_seq_cst);
++        result.latencySamples = selectedLatencySamples.load (std::memory_order_seq_cst);
++        result.referenceStart = selectedReferenceStart.load (std::memory_order_seq_cst);
++        result.referenceEnd = selectedReferenceEnd.load (std::memory_order_seq_cst);
++        const auto after = selectionSequence.load (std::memory_order_seq_cst);
++        if (before != after || (after & 1) != 0 || (posted != 0 && result.selectedSerial > posted) ||
++            posted != postedSelectionSerial.load (std::memory_order_seq_cst) ||
++            minimum != minimumSelectionSerial.load (std::memory_order_seq_cst)) continue;
++        result.postedSerial = posted;
++        if (posted == 0) { result = {}; return result; }
++        if (result.selectedSerial < minimum || result.selectedSerial == 0)
++        {
++            result = {}; result.state = GraphSelectionState::awaitingFirstSelection;
++            result.postedSerial = posted; return result;
++        }
++        result.state = GraphSelectionState::selected;
++        return result; // selectedSerial may intentionally differ from postedSerial.
++    }
++    result = {}; result.state = GraphSelectionState::stale;
++    return result; // Bounded refusal, never spin/wait for a callback writer.
++}
++
+ int LockFreeMultiThreadedNodePlayer::process (const Node::ProcessContext& pc)
+ {
+     const std::unique_lock<RealTimeSpinLock> l (processMutex, std::try_to_lock);
+@@ -109,6 +160,10 @@
+ 
+     if (! preparedNode->graph->rootNode)
+         return -1;
++
++    // Actual holder selection, before any Node DSP. Only scalar lock-free
++    // stores; never follow a control-side "latest posted" pointer here.
++    publishSelection (*preparedNode, pc.referenceSampleRange);
+ 
+     // Publish the current PreparedNode to the pool threads. This must happen in
+     // every process call that could have swapped a new PreparedNode in via
+@@ -182,6 +237,9 @@
+     lastGraphPosted = nullptr;
+     lastAudioBufferPoolPosted = nullptr;
+     preparedLatencySamples = 0;
++    // Invalidate old receipts without a second writer touching callback payload.
++    minimumSelectionSerial.store (nextSelectionSerial, std::memory_order_seq_cst);
++    postedSelectionSerial.store (0, std::memory_order_seq_cst);
+     preparedNodeObject.clear();
+ 
+     createThreads();
+@@ -306,7 +364,11 @@
+     // Allocate the publication holder before committing any raw caches. Keep
+     // the pool cache ready BEFORE audio can adopt the graph; pooled callbacks
+     // consult it from DSP. The following prepared publication cannot allocate.
+-    return std::make_unique<PreparedNode> (std::move (newPreparedNode));
++    auto holder = std::make_unique<PreparedNode> (std::move (newPreparedNode));
++    if (nextSelectionSerial == std::numeric_limits<uint64_t>::max())
++        throw std::overflow_error ("Graph selection serial exhausted");
++    holder->selectionSerial = nextSelectionSerial++;
++    return holder;
+ }
+ 
+ void LockFreeMultiThreadedNodePlayer::invalidateReadyGraphs() noexcept
+@@ -368,6 +430,7 @@
+                          result.configuration.rate, result.configuration.block,
+                          nullptr, nullptr, result.configuration.sharing, result.configuration.disableLatency);
+     result.storage = prepareGraphHolder(std::move(graph), false, result.configuration.threads, result.configuration.block);
++    result.reservedPublicationSerial = result.storage->selectionSerial;
+     if (result.generation != readyMutationGeneration || result.configuration != readyConfiguration() || readyGenerationExhausted)
+         throw std::logic_error("Player configuration changed while preparing a fixed graph");
+     return result;
+@@ -404,7 +467,9 @@
+     static_assert(std::is_nothrow_move_assignable_v<decltype(retired.storage)>);
+     // Slot is EMPTY and both identity pins stay where they are: no old owner or
+     // resource can be released as a side-effect of these unique-pointer moves.
++    const auto selectionSerial = candidate.storage->selectionSerial;
+     auto old = preparedNodeObject.pushPreparedNonRealTime(std::move(candidate.storage));
++    postedSelectionSerial.store (selectionSerial, std::memory_order_seq_cst);
+     retired.storage = std::move(old);
+     rootNode = nextRoot;
+     lastGraphPosted = nextGraph;
+@@ -469,7 +534,9 @@
+     lastAudioBufferPoolPosted = nextPool;
+     preparedLatencySamples = nextLatency;
+     invalidateReadyGraphs();
++    const auto selectionSerial = storage->selectionSerial;
+     auto retiredPreparedNode = preparedNodeObject.pushPreparedNonRealTime (std::move (storage));
++    postedSelectionSerial.store (selectionSerial, std::memory_order_seq_cst);
+ 
+     if (retiredPreparedNode)
+     {

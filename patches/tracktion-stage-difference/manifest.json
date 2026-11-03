@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "CONTROL-only first refused-stage difference; no new admission or DSP. Source-only; acceptance unrun.",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-stage-difference/tracktion_LatencyNode.h.patch",
+      "originalSha256": "ff35a68a8e2bce9ff7b7a9eb0f0b7b91fe4489b3178a07c9cd63523b47df77cc",
+      "patchedSha256": "5564f1cdc97a249f21fa26e48e25254d3c326bf032370fb14e2c477f33d65334",
+      "patchSha256": "358dcf5ef85620746bce9aa10b9d9e857a5d3af950b9000ec94c093c0766704b",
+      "addedLines": 96,
+      "deletedLines": 6,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json"
+      ]
+    }
+  ]
+}

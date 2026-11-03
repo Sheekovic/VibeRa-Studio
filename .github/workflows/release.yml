@@ -1,0 +1,93 @@
+# Builds VibeRa Studio on GitHub's Windows runners.
+# - Every push to a tag like v0.0.74 builds and publishes a GitHub Release
+#   (portable zip + per-user installer).
+# - "Run workflow" (manual) builds the same files and keeps them as workflow artifacts.
+name: Build release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # JUCE and Tracktion Engine are pinned in dependencies.lock.json; cache the downloads.
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: vendor-${{ hashFiles('dependencies.lock.json', 'patches/**') }}
+
+      - name: Fetch dependencies
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File scripts/fetch-dependencies.ps1
+
+      - name: Apply dependency patches
+        shell: pwsh
+        run: powershell -ExecutionPolicy Bypass -File scripts/apply-dependency-patches.ps1
+
+      - name: Configure
+        run: cmake --preset windows
+
+      - name: Build
+        run: cmake --build --preset release --target VibeRa VibeRaPluginWorker --parallel
+
+      - name: Assemble the app folder
+        shell: pwsh
+        run: |
+          $app = 'out/VibeRa Studio'
+          New-Item -ItemType Directory -Force -Path $app | Out-Null
+          Get-ChildItem 'build/windows/VibeRa_artefacts/Release' |
+            Where-Object { $_.Extension -ne '.pdb' } |
+            Copy-Item -Destination $app -Recurse -Force
+          Copy-Item LICENSE $app
+          Copy-Item licenses (Join-Path $app 'licenses') -Recurse
+          Copy-Item examples (Join-Path $app 'Examples') -Recurse
+          if (-not (Test-Path (Join-Path $app 'VibeRa Studio.exe'))) { throw 'The build produced no VibeRa Studio.exe' }
+          if (-not (Test-Path (Join-Path $app 'VibeRa Plugin Worker.exe'))) { throw 'The build produced no plugin worker' }
+
+      - name: Package
+        id: package
+        shell: pwsh
+        run: |
+          $version = (Get-Item 'out/VibeRa Studio/VibeRa Studio.exe').VersionInfo.ProductVersion
+          $name = "VibeRa-Studio-$version-win64"
+          Compress-Archive -Path 'out/VibeRa Studio' -DestinationPath "out/$name.zip"
+          powershell -ExecutionPolicy Bypass -File scripts/make-installer.ps1 -Source 'out/VibeRa Studio' -Output out/installer
+          Move-Item out/installer/VibeRa-Studio-Setup.exe "out/$name-Setup.exe"
+          "name=$name" >> $env:GITHUB_OUTPUT
+
+      - name: Keep the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.name }}
+          path: |
+            out/*.zip
+            out/*-Setup.exe
+
+      - name: Publish the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: VibeRa Studio ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: true
+          files: |
+            out/*.zip
+            out/*-Setup.exe

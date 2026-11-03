@@ -1,0 +1,1124 @@
+--- a/modules/juce_data_structures/undomanager/juce_UndoManager.cpp
++++ b/modules/juce_data_structures/undomanager/juce_UndoManager.cpp
+@@ -1,392 +1,729 @@
+-/*
+-  ==============================================================================
+-
+-   This file is part of the JUCE framework.
+-   Copyright (c) Raw Material Software Limited
+-
+-   JUCE is an open source framework subject to commercial or open source
+-   licensing.
+-
+-   By downloading, installing, or using the JUCE framework, or combining the
+-   JUCE framework with any other source code, object code, content or any other
+-   copyrightable work, you agree to the terms of the JUCE End User Licence
+-   Agreement, and all incorporated terms including the JUCE Privacy Policy and
+-   the JUCE Website Terms of Service, as applicable, which will bind you. If you
+-   do not agree to the terms of these agreements, we will not license the JUCE
+-   framework to you, and you must discontinue the installation or download
+-   process and cease use of the JUCE framework.
+-
+-   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
+-   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
+-   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
+-
+-   Or:
+-
+-   You may also use this code under the terms of the AGPLv3:
+-   https://www.gnu.org/licenses/agpl-3.0.en.html
+-
+-   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
+-   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
+-   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
+-
+-  ==============================================================================
+-*/
+-
+-namespace juce
+-{
+-
+-struct UndoManager::ActionSet
+-{
+-    ActionSet (const String& transactionName)  : name (transactionName)
+-    {}
+-
+-    bool perform() const
+-    {
+-        for (auto* a : actions)
+-            if (! a->perform())
+-                return false;
+-
+-        return true;
+-    }
+-
+-    bool undo() const
+-    {
+-        for (int i = actions.size(); --i >= 0;)
+-            if (! actions.getUnchecked (i)->undo())
+-                return false;
+-
+-        return true;
+-    }
+-
+-    int getTotalSize() const
+-    {
+-        int total = 0;
+-
+-        for (auto* a : actions)
+-            total += a->getSizeInUnits();
+-
+-        return total;
+-    }
+-
+-    OwnedArray<UndoableAction> actions;
+-    String name;
+-    Time time { Time::getCurrentTime() };
+-};
+-
+-//==============================================================================
+-UndoManager::UndoManager (int maxNumberOfUnitsToKeep, int minimumTransactions)
+-{
+-    setMaxNumberOfStoredUnits (maxNumberOfUnitsToKeep, minimumTransactions);
+-}
+-
+-UndoManager::~UndoManager()
+-{
+-}
+-
+-//==============================================================================
+-void UndoManager::clearUndoHistory()
+-{
+-    transactions.clear();
+-    totalUnitsStored = 0;
+-    nextIndex = 0;
+-    sendChangeMessage();
+-}
+-
+-int UndoManager::getNumberOfUnitsTakenUpByStoredCommands() const
+-{
+-    return totalUnitsStored;
+-}
+-
+-void UndoManager::setMaxNumberOfStoredUnits (int maxUnits, int minTransactions)
+-{
+-    maxNumUnitsToKeep          = jmax (1, maxUnits);
+-    minimumTransactionsToKeep  = jmax (1, minTransactions);
+-}
+-
+-//==============================================================================
+-bool UndoManager::perform (UndoableAction* newAction, const String& actionName)
+-{
+-    if (perform (newAction))
+-    {
+-        if (actionName.isNotEmpty())
+-            setCurrentTransactionName (actionName);
+-
+-        return true;
+-    }
+-
+-    return false;
+-}
+-
+-bool UndoManager::perform (UndoableAction* newAction)
+-{
+-    if (newAction != nullptr)
+-    {
+-        std::unique_ptr<UndoableAction> action (newAction);
+-
+-        if (isPerformingUndoRedo())
+-        {
+-            jassertfalse;  // Don't call perform() recursively from the UndoableAction::perform()
+-                           // or undo() methods, or else these actions will be discarded!
+-            return false;
+-        }
+-
+-        if (action->perform())
+-        {
+-            auto* actionSet = getCurrentSet();
+-
+-            if (actionSet != nullptr && ! newTransaction)
+-            {
+-                if (auto* lastAction = actionSet->actions.getLast())
+-                {
+-                    if (auto coalescedAction = lastAction->createCoalescedAction (action.get()))
+-                    {
+-                        action.reset (coalescedAction);
+-                        totalUnitsStored -= lastAction->getSizeInUnits();
+-                        actionSet->actions.removeLast();
+-                    }
+-                }
+-            }
+-            else
+-            {
+-                actionSet = new ActionSet (newTransactionName);
+-                transactions.insert (nextIndex, actionSet);
+-                ++nextIndex;
+-            }
+-
+-            totalUnitsStored += action->getSizeInUnits();
+-            actionSet->actions.add (std::move (action));
+-            newTransaction = false;
+-
+-            moveFutureTransactionsToStash();
+-            dropOldTransactionsIfTooLarge();
+-            sendChangeMessage();
+-            return true;
+-        }
+-    }
+-
+-    return false;
+-}
+-
+-void UndoManager::moveFutureTransactionsToStash()
+-{
+-    if (nextIndex < transactions.size())
+-    {
+-        stashedFutureTransactions.clear();
+-
+-        while (nextIndex < transactions.size())
+-        {
+-            auto* removed = transactions.removeAndReturn (nextIndex);
+-            stashedFutureTransactions.add (removed);
+-            totalUnitsStored -= removed->getTotalSize();
+-        }
+-    }
+-}
+-
+-void UndoManager::restoreStashedFutureTransactions()
+-{
+-    while (nextIndex < transactions.size())
+-    {
+-        totalUnitsStored -= transactions.getUnchecked (nextIndex)->getTotalSize();
+-        transactions.remove (nextIndex);
+-    }
+-
+-    for (auto* stashed : stashedFutureTransactions)
+-    {
+-        transactions.add (stashed);
+-        totalUnitsStored += stashed->getTotalSize();
+-    }
+-
+-    stashedFutureTransactions.clearQuick (false);
+-}
+-
+-void UndoManager::dropOldTransactionsIfTooLarge()
+-{
+-    while (nextIndex > 0
+-            && totalUnitsStored > maxNumUnitsToKeep
+-            && transactions.size() > minimumTransactionsToKeep)
+-    {
+-        totalUnitsStored -= transactions.getFirst()->getTotalSize();
+-        transactions.remove (0);
+-        --nextIndex;
+-
+-        // if this fails, then some actions may not be returning
+-        // consistent results from their getSizeInUnits() method
+-        jassert (totalUnitsStored >= 0);
+-    }
+-}
+-
+-void UndoManager::beginNewTransaction()
+-{
+-    beginNewTransaction ({});
+-}
+-
+-void UndoManager::beginNewTransaction (const String& actionName)
+-{
+-    newTransaction = true;
+-    newTransactionName = actionName;
+-}
+-
+-void UndoManager::setCurrentTransactionName (const String& newName)
+-{
+-    if (newTransaction)
+-        newTransactionName = newName;
+-    else if (auto* action = getCurrentSet())
+-        action->name = newName;
+-}
+-
+-String UndoManager::getCurrentTransactionName() const
+-{
+-    if (auto* action = getCurrentSet())
+-        return action->name;
+-
+-    return newTransactionName;
+-}
+-
+-//==============================================================================
+-UndoManager::ActionSet* UndoManager::getCurrentSet() const     { return transactions[nextIndex - 1]; }
+-UndoManager::ActionSet* UndoManager::getNextSet() const        { return transactions[nextIndex]; }
+-
+-bool UndoManager::isPerformingUndoRedo() const  { return isInsideUndoRedoCall; }
+-
+-bool UndoManager::canUndo() const      { return getCurrentSet() != nullptr; }
+-bool UndoManager::canRedo() const      { return getNextSet()    != nullptr; }
+-
+-bool UndoManager::undo()
+-{
+-    if (auto* s = getCurrentSet())
+-    {
+-        const ScopedValueSetter<bool> setter (isInsideUndoRedoCall, true);
+-
+-        if (s->undo())
+-            --nextIndex;
+-        else
+-            clearUndoHistory();
+-
+-        beginNewTransaction();
+-        sendChangeMessage();
+-        return true;
+-    }
+-
+-    return false;
+-}
+-
+-bool UndoManager::redo()
+-{
+-    if (auto* s = getNextSet())
+-    {
+-        const ScopedValueSetter<bool> setter (isInsideUndoRedoCall, true);
+-
+-        if (s->perform())
+-            ++nextIndex;
+-        else
+-            clearUndoHistory();
+-
+-        beginNewTransaction();
+-        sendChangeMessage();
+-        return true;
+-    }
+-
+-    return false;
+-}
+-
+-String UndoManager::getUndoDescription() const
+-{
+-    if (auto* s = getCurrentSet())
+-        return s->name;
+-
+-    return {};
+-}
+-
+-String UndoManager::getRedoDescription() const
+-{
+-    if (auto* s = getNextSet())
+-        return s->name;
+-
+-    return {};
+-}
+-
+-StringArray UndoManager::getUndoDescriptions() const
+-{
+-    StringArray descriptions;
+-
+-    for (int i = nextIndex;;)
+-    {
+-        if (auto* t = transactions[--i])
+-            descriptions.add (t->name);
+-        else
+-            return descriptions;
+-    }
+-}
+-
+-StringArray UndoManager::getRedoDescriptions() const
+-{
+-    StringArray descriptions;
+-
+-    for (int i = nextIndex;;)
+-    {
+-        if (auto* t = transactions[i++])
+-            descriptions.add (t->name);
+-        else
+-            return descriptions;
+-    }
+-}
+-
+-Time UndoManager::getTimeOfUndoTransaction() const
+-{
+-    if (auto* s = getCurrentSet())
+-        return s->time;
+-
+-    return {};
+-}
+-
+-Time UndoManager::getTimeOfRedoTransaction() const
+-{
+-    if (auto* s = getNextSet())
+-        return s->time;
+-
+-    return Time::getCurrentTime();
+-}
+-
+-bool UndoManager::undoCurrentTransactionOnly()
+-{
+-    if ((! newTransaction) && undo())
+-    {
+-        restoreStashedFutureTransactions();
+-        return true;
+-    }
+-
+-    return false;
+-}
+-
+-void UndoManager::getActionsInCurrentTransaction (Array<const UndoableAction*>& actionsFound) const
+-{
+-    if (! newTransaction)
+-        if (auto* s = getCurrentSet())
+-            for (auto* a : s->actions)
+-                actionsFound.add (a);
+-}
+-
+-void UndoManager::getActionsInUndoTransaction (Array<const UndoableAction*>& actionsFound) const
+-{
+-    if (auto* transaction = getCurrentSet())
+-        for (auto* action : transaction->actions)
+-            actionsFound.add (action);
+-}
+-
+-void UndoManager::getActionsInRedoTransaction (Array<const UndoableAction*>& actionsFound) const
+-{
+-    if (auto* transaction = getNextSet())
+-        for (auto* action : transaction->actions)
+-            actionsFound.add (action);
+-}
+-
+-int UndoManager::getNumActionsInCurrentTransaction() const
+-{
+-    if (! newTransaction)
+-        if (auto* s = getCurrentSet())
+-            return s->actions.size();
+-
+-    return 0;
+-}
+-
+-} // namespace juce
++/*
++  ==============================================================================
++
++   This file is part of the JUCE framework.
++   Copyright (c) Raw Material Software Limited
++
++   JUCE is an open source framework subject to commercial or open source
++   licensing.
++
++   By downloading, installing, or using the JUCE framework, or combining the
++   JUCE framework with any other source code, object code, content or any other
++   copyrightable work, you agree to the terms of the JUCE End User Licence
++   Agreement, and all incorporated terms including the JUCE Privacy Policy and
++   the JUCE Website Terms of Service, as applicable, which will bind you. If you
++   do not agree to the terms of these agreements, we will not license the JUCE
++   framework to you, and you must discontinue the installation or download
++   process and cease use of the JUCE framework.
++
++   JUCE End User Licence Agreement: https://juce.com/legal/juce-8-licence/
++   JUCE Privacy Policy: https://juce.com/juce-privacy-policy
++   JUCE Website Terms of Service: https://juce.com/juce-website-terms-of-service/
++
++   Or:
++
++   You may also use this code under the terms of the AGPLv3:
++   https://www.gnu.org/licenses/agpl-3.0.en.html
++
++   THE JUCE FRAMEWORK IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL
++   WARRANTIES, WHETHER EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF
++   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, ARE DISCLAIMED.
++
++  ==============================================================================
++*/
++
++#include <limits>
++#include <vector>
++
++namespace juce
++{
++
++struct UndoManager::ActionSet
++{
++    ActionSet (const String& transactionName)  : name (transactionName)
++    {}
++
++    bool perform() const
++    {
++        for (auto* a : actions)
++            if (! a->perform())
++                return false;
++
++        return true;
++    }
++
++    bool undo() const
++    {
++        for (int i = actions.size(); --i >= 0;)
++            if (! actions.getUnchecked (i)->undo())
++                return false;
++
++        return true;
++    }
++
++    int getTotalSize() const
++    {
++        int total = 0;
++
++        for (auto* a : actions)
++            total += a->getSizeInUnits();
++
++        return total;
++    }
++
++    OwnedArray<UndoableAction> actions;
++    String name;
++    Time time { Time::getCurrentTime() };
++};
++
++// Opt-in ticket freshness only. Does not alter generic action semantics.
++struct UndoManager::PreparedMutationScope
++{
++    UndoManager& owner;
++    explicit PreparedMutationScope (UndoManager& value) noexcept : owner (value)
++    {
++        ++owner.preparedMutationDepth;
++        owner.invalidatePreparedMutations();
++    }
++    ~PreparedMutationScope()
++    {
++        owner.invalidatePreparedMutations();
++        --owner.preparedMutationDepth;
++    }
++};
++void UndoManager::invalidatePreparedMutations() noexcept
++{
++    if (preparedMutationGeneration == std::numeric_limits<std::uint64_t>::max())
++        preparedMutationGenerationExhausted = true; // Never wrap into an ABA-valid token.
++    else
++        ++preparedMutationGeneration;
++}
++
++//==============================================================================
++UndoManager::UndoManager (int maxNumberOfUnitsToKeep, int minimumTransactions)
++{
++    setMaxNumberOfStoredUnits (maxNumberOfUnitsToKeep, minimumTransactions);
++}
++
++UndoManager::~UndoManager()
++{
++}
++
++//==============================================================================
++void UndoManager::clearUndoHistory()
++{
++    const PreparedMutationScope preparedScope (*this);
++    transactions.clear();
++    totalUnitsStored = 0;
++    nextIndex = 0;
++    sendChangeMessage();
++}
++
++int UndoManager::getNumberOfUnitsTakenUpByStoredCommands() const
++{
++    return totalUnitsStored;
++}
++
++void UndoManager::setMaxNumberOfStoredUnits (int maxUnits, int minTransactions)
++{
++    const PreparedMutationScope preparedScope (*this);
++    maxNumUnitsToKeep          = jmax (1, maxUnits);
++    minimumTransactionsToKeep  = jmax (1, minTransactions);
++}
++
++//==============================================================================
++bool UndoManager::perform (UndoableAction* newAction, const String& actionName)
++{
++    if (perform (newAction))
++    {
++        if (actionName.isNotEmpty())
++            setCurrentTransactionName (actionName);
++
++        return true;
++    }
++
++    return false;
++}
++
++bool UndoManager::perform (UndoableAction* newAction)
++{
++    const PreparedMutationScope preparedScope (*this);
++    if (newAction != nullptr)
++    {
++        std::unique_ptr<UndoableAction> action (newAction);
++
++        if (isPerformingUndoRedo())
++        {
++            jassertfalse;  // Don't call perform() recursively from the UndoableAction::perform()
++                           // or undo() methods, or else these actions will be discarded!
++            return false;
++        }
++
++        if (action->perform())
++        {
++            auto* actionSet = getCurrentSet();
++
++            if (actionSet != nullptr && ! newTransaction)
++            {
++                if (auto* lastAction = actionSet->actions.getLast())
++                {
++                    if (auto coalescedAction = lastAction->createCoalescedAction (action.get()))
++                    {
++                        action.reset (coalescedAction);
++                        totalUnitsStored -= lastAction->getSizeInUnits();
++                        actionSet->actions.removeLast();
++                    }
++                }
++            }
++            else
++            {
++                actionSet = new ActionSet (newTransactionName);
++                transactions.insert (nextIndex, actionSet);
++                ++nextIndex;
++            }
++
++            totalUnitsStored += action->getSizeInUnits();
++            actionSet->actions.add (std::move (action));
++            newTransaction = false;
++
++            moveFutureTransactionsToStash();
++            dropOldTransactionsIfTooLarge();
++            sendChangeMessage();
++            return true;
++        }
++    }
++
++    return false;
++}
++
++void UndoManager::moveFutureTransactionsToStash()
++{
++    const PreparedMutationScope preparedScope (*this);
++    if (nextIndex < transactions.size())
++    {
++        stashedFutureTransactions.clear();
++
++        while (nextIndex < transactions.size())
++        {
++            auto* removed = transactions.removeAndReturn (nextIndex);
++            stashedFutureTransactions.add (removed);
++            totalUnitsStored -= removed->getTotalSize();
++        }
++    }
++}
++
++void UndoManager::restoreStashedFutureTransactions()
++{
++    const PreparedMutationScope preparedScope (*this);
++    while (nextIndex < transactions.size())
++    {
++        totalUnitsStored -= transactions.getUnchecked (nextIndex)->getTotalSize();
++        transactions.remove (nextIndex);
++    }
++
++    for (auto* stashed : stashedFutureTransactions)
++    {
++        transactions.add (stashed);
++        totalUnitsStored += stashed->getTotalSize();
++    }
++
++    stashedFutureTransactions.clearQuick (false);
++}
++
++void UndoManager::dropOldTransactionsIfTooLarge()
++{
++    const PreparedMutationScope preparedScope (*this);
++    while (nextIndex > 0
++            && totalUnitsStored > maxNumUnitsToKeep
++            && transactions.size() > minimumTransactionsToKeep)
++    {
++        totalUnitsStored -= transactions.getFirst()->getTotalSize();
++        transactions.remove (0);
++        --nextIndex;
++
++        // if this fails, then some actions may not be returning
++        // consistent results from their getSizeInUnits() method
++        jassert (totalUnitsStored >= 0);
++    }
++}
++
++void UndoManager::beginNewTransaction()
++{
++    beginNewTransaction ({});
++}
++
++void UndoManager::beginNewTransaction (const String& actionName)
++{
++    const PreparedMutationScope preparedScope (*this);
++    newTransaction = true;
++    newTransactionName = actionName;
++}
++
++void UndoManager::setCurrentTransactionName (const String& newName)
++{
++    const PreparedMutationScope preparedScope (*this);
++    if (newTransaction)
++        newTransactionName = newName;
++    else if (auto* action = getCurrentSet())
++        action->name = newName;
++}
++
++String UndoManager::getCurrentTransactionName() const
++{
++    if (auto* action = getCurrentSet())
++        return action->name;
++
++    return newTransactionName;
++}
++
++//==============================================================================
++UndoManager::ActionSet* UndoManager::getCurrentSet() const     { return transactions[nextIndex - 1]; }
++UndoManager::ActionSet* UndoManager::getNextSet() const        { return transactions[nextIndex]; }
++
++bool UndoManager::isPerformingUndoRedo() const  { return isInsideUndoRedoCall; }
++
++bool UndoManager::canUndo() const      { return getCurrentSet() != nullptr; }
++bool UndoManager::canRedo() const      { return getNextSet()    != nullptr; }
++
++bool UndoManager::undo()
++{
++    const PreparedMutationScope preparedScope (*this);
++    if (auto* s = getCurrentSet())
++    {
++        const ScopedValueSetter<bool> setter (isInsideUndoRedoCall, true);
++
++        if (s->undo())
++            --nextIndex;
++        else
++            clearUndoHistory();
++
++        beginNewTransaction();
++        sendChangeMessage();
++        return true;
++    }
++
++    return false;
++}
++
++bool UndoManager::redo()
++{
++    const PreparedMutationScope preparedScope (*this);
++    if (auto* s = getNextSet())
++    {
++        const ScopedValueSetter<bool> setter (isInsideUndoRedoCall, true);
++
++        if (s->perform())
++            ++nextIndex;
++        else
++            clearUndoHistory();
++
++        beginNewTransaction();
++        sendChangeMessage();
++        return true;
++    }
++
++    return false;
++}
++
++String UndoManager::getUndoDescription() const
++{
++    if (auto* s = getCurrentSet())
++        return s->name;
++
++    return {};
++}
++
++String UndoManager::getRedoDescription() const
++{
++    if (auto* s = getNextSet())
++        return s->name;
++
++    return {};
++}
++
++StringArray UndoManager::getUndoDescriptions() const
++{
++    StringArray descriptions;
++
++    for (int i = nextIndex;;)
++    {
++        if (auto* t = transactions[--i])
++            descriptions.add (t->name);
++        else
++            return descriptions;
++    }
++}
++
++StringArray UndoManager::getRedoDescriptions() const
++{
++    StringArray descriptions;
++
++    for (int i = nextIndex;;)
++    {
++        if (auto* t = transactions[i++])
++            descriptions.add (t->name);
++        else
++            return descriptions;
++    }
++}
++
++Time UndoManager::getTimeOfUndoTransaction() const
++{
++    if (auto* s = getCurrentSet())
++        return s->time;
++
++    return {};
++}
++
++Time UndoManager::getTimeOfRedoTransaction() const
++{
++    if (auto* s = getNextSet())
++        return s->time;
++
++    return Time::getCurrentTime();
++}
++
++bool UndoManager::undoCurrentTransactionOnly()
++{
++    const PreparedMutationScope preparedScope (*this);
++    if ((! newTransaction) && undo())
++    {
++        restoreStashedFutureTransactions();
++        return true;
++    }
++
++    return false;
++}
++
++void UndoManager::getActionsInCurrentTransaction (Array<const UndoableAction*>& actionsFound) const
++{
++    if (! newTransaction)
++        if (auto* s = getCurrentSet())
++            for (auto* a : s->actions)
++                actionsFound.add (a);
++}
++
++void UndoManager::getActionsInUndoTransaction (Array<const UndoableAction*>& actionsFound) const
++{
++    if (auto* transaction = getCurrentSet())
++        for (auto* action : transaction->actions)
++            actionsFound.add (action);
++}
++
++void UndoManager::getActionsInRedoTransaction (Array<const UndoableAction*>& actionsFound) const
++{
++    if (auto* transaction = getNextSet())
++        for (auto* action : transaction->actions)
++            actionsFound.add (action);
++}
++
++int UndoManager::getNumActionsInCurrentTransaction() const
++{
++    if (! newTransaction)
++        if (auto* s = getCurrentSet())
++            return s->actions.size();
++
++    return 0;
++}
++
++
++//==============================================================================
++struct UndoManager::PreparedHistoryMutation::Impl
++{
++    enum class Kind { newTransaction, undo, redo };
++    UndoManager* owner = nullptr;
++    std::uint64_t generation = 0;
++    Kind kind = Kind::newTransaction;
++    ActionSet* cursorSet = nullptr;
++    bool ready = false, committed = false, notificationRequested = false;
++    bool replacesCursorSet = false;
++    int finalIndex = 0, finalUnits = 0;
++    bool finalNewTransaction = true;
++    String finalName; // Swapped with old metadata; destruction only after commit.
++    std::unique_ptr<ActionSet> newSet;
++    // Before commit these arrays BORROW old pointers. After atomic table swaps,
++    // retired owns only removed sets; swapped-out buffers contain no ownership.
++    OwnedArray<ActionSet> preparedTransactions, preparedStash, retired;
++
++    ~Impl()
++    {
++        preparedTransactions.clearQuick (false);
++        preparedStash.clearQuick (false);
++        if (! committed)
++            retired.clearQuick (false);
++        // committed retired + uncommitted newSet destruct on caller control only.
++    }
++    static void reserve (OwnedArray<ActionSet>& array, int count)
++    {
++        if (count < 0 || count > (std::numeric_limits<int>::max() - 8) / 3 * 2)
++            throw std::length_error ("Prepared history pointer-table capacity overflow");
++        if (count != 0)
++        {
++            array.ensureStorageAllocated (count);
++            // JUCE HeapBlock<...,false> does not throw for a null allocation.
++            // Fresh table only: verify storage BEFORE adding any borrowed owner.
++            if (array.begin() == nullptr)
++                throw std::bad_alloc();
++        }
++    }
++};
++
++UndoManager::PreparedHistoryMutation::PreparedHistoryMutation (std::unique_ptr<Impl> value)
++    : impl (std::move (value)) {}
++UndoManager::PreparedHistoryMutation::~PreparedHistoryMutation() = default;
++UndoManager::PreparedHistoryMutation::PreparedHistoryMutation (PreparedHistoryMutation&&) noexcept = default;
++UndoManager::PreparedHistoryMutation& UndoManager::PreparedHistoryMutation::operator= (PreparedHistoryMutation&&) noexcept = default;
++bool UndoManager::PreparedHistoryMutation::wasCommitted() const noexcept { return impl && impl->committed; }
++
++std::unique_ptr<UndoManager::PreparedHistoryMutation> UndoManager::prepareNewTransaction (
++    std::unique_ptr<UndoableAction> action, const String& name, int cachedNewUnits,
++    CachedActionUnits readUnits, void* readerContext)
++{
++    using Impl = PreparedHistoryMutation::Impl;
++    if (! action || ! readUnits || cachedNewUnits < 0 || preparedMutationDepth != 0 ||
++        isPerformingUndoRedo() || preparedMutationGenerationExhausted)
++        return {};
++    const auto expectedGeneration = preparedMutationGeneration;
++    int admittedNewUnits = -1;
++    if (! readUnits (*action, admittedNewUnits, readerContext) || admittedNewUnits < 0 ||
++        admittedNewUnits != cachedNewUnits || preparedMutationGeneration != expectedGeneration)
++        return {};
++    std::vector<int> costs;
++    costs.reserve (size_t (transactions.size()));
++    std::int64_t allUnits = 0;
++    auto costOf = [&] (const ActionSet& set, int& result)
++    {
++        std::int64_t total = 0;
++        for (auto* item : set.actions)
++        {
++            int units = -1;
++            if (! item || ! readUnits (*item, units, readerContext) || units < 0 ||
++                preparedMutationGeneration != expectedGeneration || preparedMutationDepth != 0)
++                return false;
++            total += units;
++            if (total > std::numeric_limits<int>::max())
++                return false;
++        }
++        result = int (total);
++        return true;
++    };
++    for (auto* set : transactions)
++    {
++        int units = 0;
++        if (! set || ! costOf (*set, units)) return {};
++        costs.push_back (units);
++        allUnits += units;
++        if (allUnits > std::numeric_limits<int>::max()) return {};
++    }
++    // Stashed actions are not in totalUnitsStored, but retire only caller-admitted
++    // action types; future normal stash restore retains its original exact owners.
++    for (auto* set : stashedFutureTransactions)
++    {
++        int ignored = 0;
++        if (! set || ! costOf (*set, ignored)) return {};
++    }
++    if (allUnits != totalUnitsStored || nextIndex < 0 || nextIndex > transactions.size())
++        return {};
++    auto ticket = std::make_unique<Impl>();
++    ticket->owner = this;
++    ticket->generation = expectedGeneration;
++    ticket->kind = Impl::Kind::newTransaction;
++    ticket->finalName = name;
++    ticket->finalNewTransaction = false;
++    ticket->newSet = std::make_unique<ActionSet> (name);
++    ticket->newSet->actions.ensureStorageAllocated (1);
++    if (ticket->newSet->actions.begin() == nullptr) throw std::bad_alloc();
++    ticket->newSet->actions.add (std::move (action)); // Reserved, ticket owns it.
++    ticket->cursorSet = ticket->newSet.get();
++    std::int64_t remaining = admittedNewUnits;
++    for (int index = 0; index < nextIndex; ++index) remaining += costs[size_t (index)];
++    if (remaining > std::numeric_limits<int>::max()) return {};
++    int prune = 0;
++    const int candidateCount = nextIndex + 1;
++    while (candidateCount - prune > 0 && remaining > maxNumUnitsToKeep &&
++           candidateCount - prune > minimumTransactionsToKeep)
++    {
++        if (prune >= nextIndex) return {}; // At least the new transaction survives.
++        remaining -= costs[size_t (prune++)];
++    }
++    Impl::reserve (ticket->preparedTransactions, candidateCount - prune);
++    const bool replacesFuture = nextIndex < transactions.size();
++    Impl::reserve (ticket->preparedStash, replacesFuture ? transactions.size() - nextIndex
++                                                        : stashedFutureTransactions.size());
++    if (stashedFutureTransactions.size() > std::numeric_limits<int>::max() - prune) return {};
++    Impl::reserve (ticket->retired, prune + (replacesFuture ? stashedFutureTransactions.size() : 0));
++    for (int index = 0; index < prune; ++index) ticket->retired.add (transactions[index]);
++    for (int index = prune; index < nextIndex; ++index) ticket->preparedTransactions.add (transactions[index]);
++    ticket->preparedTransactions.add (ticket->newSet.get());
++    if (replacesFuture)
++    {
++        for (int index = nextIndex; index < transactions.size(); ++index)
++            ticket->preparedStash.add (transactions[index]);
++        for (auto* set : stashedFutureTransactions) ticket->retired.add (set);
++    }
++    else
++        for (auto* set : stashedFutureTransactions) ticket->preparedStash.add (set);
++    ticket->finalIndex = ticket->preparedTransactions.size();
++    ticket->finalUnits = int (remaining);
++    if (preparedMutationGeneration != expectedGeneration || preparedMutationDepth != 0 ||
++        preparedMutationGenerationExhausted) return {};
++    ticket->ready = true;
++    return std::unique_ptr<PreparedHistoryMutation> (new PreparedHistoryMutation (std::move (ticket)));
++}
++
++std::unique_ptr<UndoManager::PreparedHistoryMutation> UndoManager::prepareUndoMutation()
++{
++    using Impl = PreparedHistoryMutation::Impl;
++    if (preparedMutationDepth != 0 || isPerformingUndoRedo() || preparedMutationGenerationExhausted || ! canUndo())
++        return {};
++    auto ticket = std::make_unique<Impl>();
++    ticket->owner = this;
++    ticket->generation = preparedMutationGeneration;
++    ticket->kind = Impl::Kind::undo;
++    ticket->cursorSet = getCurrentSet();
++    ticket->finalIndex = nextIndex - 1;
++    ticket->finalUnits = totalUnitsStored;
++    ticket->ready = true;
++    return std::unique_ptr<PreparedHistoryMutation> (new PreparedHistoryMutation (std::move (ticket)));
++}
++std::unique_ptr<UndoManager::PreparedHistoryMutation> UndoManager::prepareRedoMutation()
++{
++    using Impl = PreparedHistoryMutation::Impl;
++    if (preparedMutationDepth != 0 || isPerformingUndoRedo() || preparedMutationGenerationExhausted || ! canRedo())
++        return {};
++    auto ticket = std::make_unique<Impl>();
++    ticket->owner = this;
++    ticket->generation = preparedMutationGeneration;
++    ticket->kind = Impl::Kind::redo;
++    ticket->cursorSet = getNextSet();
++    ticket->finalIndex = nextIndex + 1;
++    ticket->finalUnits = totalUnitsStored;
++    ticket->ready = true;
++    return std::unique_ptr<PreparedHistoryMutation> (new PreparedHistoryMutation (std::move (ticket)));
++}
++
++std::unique_ptr<UndoManager::PreparedHistoryMutation> UndoManager::prepareHistoryReplacement (
++    bool undoing, std::unique_ptr<UndoableAction> replacement, int cachedNewUnits,
++    CachedActionUnits readUnits, void* readerContext)
++{
++    using Impl = PreparedHistoryMutation::Impl;
++    if (! replacement || ! readUnits || cachedNewUnits < 0) return {};
++    auto result = undoing ? prepareUndoMutation() : prepareRedoMutation();
++    if (! result) return {};
++    auto& ticket = *result->impl;
++    const auto expectedGeneration = ticket.generation;
++    const int selected = undoing ? nextIndex - 1 : nextIndex;
++    if (selected < 0 || selected >= transactions.size() ||
++        transactions[selected] != ticket.cursorSet || ticket.cursorSet->actions.size() != 1)
++        return {};
++    auto unitsOf = [&] (const ActionSet& set, int& answer)
++    {
++        std::int64_t total = 0;
++        for (auto* action : set.actions)
++        {
++            int units = -1;
++            if (! action || ! readUnits (*action, units, readerContext) || units < 0 ||
++                preparedMutationGeneration != expectedGeneration || preparedMutationDepth != 0)
++                return false;
++            total += units;
++            if (total > std::numeric_limits<int>::max()) return false;
++        }
++        answer = int (total); return true;
++    };
++    int admitted = -1;
++    if (! readUnits (*replacement, admitted, readerContext) || admitted != cachedNewUnits || admitted < 0 ||
++        ! isPreparedMutationCurrent (*result)) return {};
++    std::vector<int> costs;
++    costs.reserve (size_t (transactions.size()));
++    std::int64_t allUnits = 0;
++    for (auto* set : transactions)
++    {
++        int cost = 0;
++        if (! set || ! unitsOf (*set, cost)) return {};
++        costs.push_back (cost); allUnits += cost;
++        if (allUnits > std::numeric_limits<int>::max()) return {};
++    }
++    for (auto* set : stashedFutureTransactions)
++    {
++        int ignored = 0;
++        if (! set || ! unitsOf (*set, ignored)) return {};
++    }
++    if (allUnits != totalUnitsStored) return {};
++    std::int64_t remaining = allUnits - costs[size_t (selected)] + admitted;
++    int prune = 0;
++    while (remaining > maxNumUnitsToKeep && transactions.size() - prune > minimumTransactionsToKeep)
++    {
++        if (prune >= selected) return {}; // Never delete the replaced target/future.
++        remaining -= costs[size_t (prune++)];
++    }
++    if (remaining < 0 || remaining > std::numeric_limits<int>::max()) return {};
++    ticket.newSet = std::make_unique<ActionSet> (ticket.cursorSet->name);
++    ticket.newSet->time = ticket.cursorSet->time;
++    ticket.newSet->actions.ensureStorageAllocated (1);
++    if (ticket.newSet->actions.begin() == nullptr) throw std::bad_alloc();
++    ticket.newSet->actions.add (std::move (replacement));
++    Impl::reserve (ticket.preparedTransactions, transactions.size() - prune);
++    Impl::reserve (ticket.preparedStash, stashedFutureTransactions.size());
++    Impl::reserve (ticket.retired, prune + 1);
++    for (int index = 0; index < prune; ++index) ticket.retired.add (transactions[index]);
++    ticket.retired.add (ticket.cursorSet);
++    for (int index = prune; index < transactions.size(); ++index)
++        ticket.preparedTransactions.add (index == selected ? ticket.newSet.get() : transactions[index]);
++    for (auto* set : stashedFutureTransactions) ticket.preparedStash.add (set);
++    ticket.cursorSet = ticket.newSet.get();
++    ticket.replacesCursorSet = true;
++    ticket.finalIndex -= prune;
++    ticket.finalUnits = int (remaining);
++    if (! isPreparedMutationCurrent (*result)) return {};
++    return result;
++}
++
++bool UndoManager::isPreparedMutationCurrent (const PreparedHistoryMutation& value) const noexcept
++{
++    return value.impl && value.impl->owner == this && value.impl->ready && ! value.impl->committed &&
++           preparedMutationDepth == 0 && ! isPerformingUndoRedo() && ! preparedMutationGenerationExhausted &&
++           value.impl->generation == preparedMutationGeneration;
++}
++bool UndoManager::getPreparedMutationActions (const PreparedHistoryMutation& value,
++                                               Array<const UndoableAction*>& actions) const
++{
++    if (! isPreparedMutationCurrent (value)) return false;
++    for (auto* action : value.impl->cursorSet->actions) actions.add (action);
++    return true;
++}
++bool UndoManager::commitPreparedMutation (PreparedHistoryMutation& value,
++                                           PreparedCanonicalApply apply, void* context) noexcept
++{
++    using Impl = PreparedHistoryMutation::Impl;
++    if (! apply || ! isPreparedMutationCurrent (value)) return false;
++    const PreparedMutationScope mutationScope (*this);
++    auto& ticket = *value.impl;
++    apply (context); // Caller-admitted canonical aggregate swap, exactly once.
++    if (ticket.kind == Impl::Kind::newTransaction || ticket.replacesCursorSet)
++    {
++        ticket.newSet.release(); // New action ownership goes to the real manager table.
++        transactions.swapWith (ticket.preparedTransactions);
++        stashedFutureTransactions.swapWith (ticket.preparedStash);
++        // DO NOT use removeAndReturn: pinned OwnedArray may shrink/reallocate.
++        // Remove duplicate pointer ownership only; keep the old buffers until retirement.
++        ticket.preparedTransactions.clearQuick (false);
++        ticket.preparedStash.clearQuick (false);
++    }
++    newTransactionName.swapWith (ticket.finalName); // Old name retained in ticket.
++    nextIndex = ticket.finalIndex;
++    totalUnitsStored = ticket.finalUnits;
++    newTransaction = ticket.finalNewTransaction;
++    ticket.committed = true;
++    ticket.ready = false;
++    return true;
++}
++bool UndoManager::notifyPreparedMutation (PreparedHistoryMutation& value)
++{
++    if (! value.impl || value.impl->owner != this || ! value.impl->committed || value.impl->notificationRequested)
++        return false;
++    sendChangeMessage(); // Fallible and deliberately outside canonical commit.
++    value.impl->notificationRequested = true;
++    return true;
++}
++
++} // namespace juce

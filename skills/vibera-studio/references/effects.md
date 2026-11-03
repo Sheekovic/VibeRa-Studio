@@ -1,0 +1,56 @@
+# Native VibeRa effects
+
+Built-in effects are individually insertable Mixer processors. Each instance has
+one fixed effect type and only its relevant parameters. No installation or scan
+is required. Discover availability in the running app; the qualified distribution
+may predate this unreleased integration.
+
+1. Call `vibera_effects` with `action:list` for available types and native parameter
+   units/ranges/defaults. Request `action:descriptor` with the exact discovered
+   `type` for its opaque descriptor.
+2. Use canonical `plugin.effect.insert` with the descriptor in `text` and an
+   existing `mixer` index. Observe actual completion and worker readiness. Every
+   insertion creates an independent ordered slot; add more types separately.
+   UI: Mixer Add effect, choose the individual VibeRa effect.
+3. Use `vibera_plugin` list, refresh and parameters for the exact runtime ID,
+   instance and generation. Supported scalar edits take normalized values;
+   normalization can be skewed. Poll set/refresh jobs until terminal and explicitly
+   refresh for current readback. Admission alone is not applied state.
+4. Use shared slot bypass, wet mix, reorder, replacement, removal, Undo/Redo and
+   real project save/reopen/export. Editor controls and MCP use the same hosted
+   parameters. Cancellation/errors retain existing job semantics.
+
+External third-party VST3 discovery remains `vibera_catalogue`. Do not scan for
+built-ins or select an Effect mode parameter. Stereo is the native layout.
+Tails are transient, not saved audio. Peak Limiter is sample-peak/zero lookahead;
+nonlinear effects are not oversampled. Full85-reference scope, FL parity,
+listening, hardware and release qualification remain separate requirements.
+See docs/modules/VIBERA_EFFECTS.json for full scope and actual evidence.
+
+## Editor and measured output (development source)
+
+Native editors use vertical rotary drags, or individual band/output faders for
+Seven Band EQ. Readable values use the declared native units; double-click resets
+to the discovered default. Host automation updates the same controls. The
+stereo bars show actual latest processed-block sample peaks, without an invented
+EQ response, gain-reduction meter or physical-device freshness claim.
+
+`vibera_plugin action=list` exposes each row's typed `nativeOutputMeter`.
+`status=ready` supplies finite nonnegative leftPeak/rightPeak in linear sample
+peak units, before Host wet/dry/bypass. Zero is measured silence; unprocessed,
+invalid, unavailable or unsupported readings have available=false and null
+peaks. Stopped readings may retain the last processed block. CONTROL samples the
+two existing native peak atomics; this is not packet-coherent timing evidence.
+Third-party plugins report unsupported here; use their supported interfaces and
+keep insert/Master meters distinct from per-effect output. Discover capabilities
+from the running executable; current source is not a qualified distribution.
+
+VibeRa Tune (type `tune`): pitch correction. Parameters: key 0..11 (C..B), scale 0..14
+(Chromatic, Major, Minor, Harmonic minor, Minor pentatonic, Rast, Bayati, Saba, Sikah,
+Huzam, Hijaz, Nahawand, Kurd, Nawa Athar, Jiharkah; maqamat use quarter tones; Sikah/Huzam
+tonic is a half flat below the key), retune 0..400 ms, amount, mix. Monophonic sources
+only; adds about 10 ms of delay that is not reported for compensation.
+
+Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
+carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);
+`release` sets band decay, plus mix and output gain. There is no external carrier input.

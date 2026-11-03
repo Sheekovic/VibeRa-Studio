@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original one-shot closed native audio-only forward queue-drain experiment; no application/SDK/inverse qualification",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h",
+      "patch": "patches/tracktion-forward-stage-drain/tracktion_LatencyProcessor.h.patch",
+      "originalSha256": "a3513cbb323ac13a5295a4430a3f49c22e16d72044274b3154a3fc5c0df8e44a",
+      "patchedSha256": "b3c4c51a558977555807cbfc2e72d6aeaf059b29942086835a387b1d6f1a1ce2",
+      "patchSha256": "41ea5396ca808e1c5b5172e6febf9d900e0a83e93816087463651fb4169c578a",
+      "addedLines": 112,
+      "deletedLines": 2,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-forward-stage-drain/tracktion_LatencyNode.h.patch",
+      "originalSha256": "5564f1cdc97a249f21fa26e48e25254d3c326bf032370fb14e2c477f33d65334",
+      "patchedSha256": "8546eb26c6e86688c43cb267fdc27fdc487aaf4638f146d218c9c87cafa57c0f",
+      "patchSha256": "d53640df69978322cfc31ac0ff722ff8182c8bde288980f5504093f428d44252",
+      "addedLines": 309,
+      "deletedLines": 75,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json"
+      ]
+    }
+  ]
+}

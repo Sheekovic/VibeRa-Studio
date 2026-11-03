@@ -1,0 +1,15 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -95,6 +95,12 @@
+     // owners must be actual private detached adapters, not unprepared incumbents.
+     std::function<bool (const Plugin&)> fixedInitialisationAdmission = {};
+ 
++    // ORIGINAL explicit closed/local experiment only. Real ProcessState identity
++    // binds one retained native ingress queue per track/context. Caller must
++    // prepare bounded source/fan-in/sink MIDI reservation from the baseline;
++    // legacy/default graphs and incumbent policy migration are not enabled.
++    bool boundedNativeMidiIngress = false;
++
+     bool readAheadTimeStretchNodes = false;             /**< TEMPORARY: If true, real-time time-stretch Nodes will use a larger buffer and background thread to reduce audio CPU use. */
+ 
+     /** If set, this will be called for each output device to give an opportunity to add an

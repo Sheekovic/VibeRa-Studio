@@ -1,0 +1,29 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1868,6 +1868,9 @@
+         node = makeNode<LiveMidiInjectingNode> (at, std::move (node),
+                                                   params.boundedNativeMidiIngress ? &params.processState : nullptr);
+ 
++    if (params.prepareNativeTrackClipOutput)
++        node = params.prepareNativeTrackClipOutput (at, std::move (node));
++
+     if (node == nullptr && inputTracks.isEmpty() && liveInputNode == nullptr)
+     {
+         // If there are synths on the track, create a stub Node to feed them
+@@ -2571,6 +2574,16 @@
+                 !node.getInternalNodes().empty() || inputs.size() != 1 || !inputs.front())
+                 return done (false);
+             return done (self (self, *inputs.front(), depth + 1));
++        }
++        // Exact genuinely empty native selection; no hidden connections or
++        // MIDI consumer is inferred from arbitrary ConnectedNode metadata.
++        if (typeid (node) == typeid (graph::ConnectedNode))
++        {
++            decision = "native-empty-connected-selection";
++            const auto p = node.getNodeProperties();
++            return done (!p.hasAudio && !p.hasMidi && p.numberOfChannels == 0 &&
++                         p.latencyNumSamples == 0 && node.getDirectInputNodes().empty() &&
++                         node.getInternalNodes().empty());
+         }
+         if (typeid (node) == typeid (graph::SilentNode))
+         { decision = "native-silent-leaf"; return done (true); }

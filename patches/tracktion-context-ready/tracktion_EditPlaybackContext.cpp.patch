@@ -1,0 +1,224 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -171,6 +171,7 @@
+ //==============================================================================
+ struct EditPlaybackContext::NodePlaybackContext
+ {
++    friend class EditPlaybackContext; // Private bridge only; no public player/state exposure.
+     NodePlaybackContext (EditPlaybackContext& epc, size_t numThreads, size_t maxNumThreadsToUse)
+         : editPlaybackContext (epc),
+           player (processState,
+@@ -213,6 +214,7 @@
+         // player after successful publication. TracktionNodePlayer has no block getter.
+         preparedPlayerBlockSize = blockSize;
+         preparedDeviceBlockSize = deviceBlockSize;
++        preparedLatencyCompensationEnabled = editPlaybackContext.edit.isLatencyCompensationEnabled();
+ 
+         latencySamples = player.getPreparedLatencySamples();
+     }
+@@ -224,7 +226,7 @@
+ 
+     int getLatencySamples() const
+     {
+-        return latencySamples;
++        return latencySamples.load (std::memory_order_acquire);
+     }
+ 
+     void postPlay()
+@@ -453,9 +455,11 @@
+     TracktionNodePlayer player;
+     const size_t maxNumThreads;
+ 
+-    int latencySamples = 0;
++    std::atomic<int> latencySamples { 0 };
++    static_assert (std::atomic<int>::is_always_lock_free);
+     int preparedPlayerBlockSize = 0;
+     int preparedDeviceBlockSize = 0;
++    bool preparedLatencyCompensationEnabled = true;
+     choc::buffer::FrameCount numSamplesToProcess = 0;
+     juce::Range<double> referenceStreamRange;
+     std::atomic<double> pendingPosition { 0.0 }, pendingPositionJumpTime { 0.0 };
+@@ -486,6 +490,118 @@
+ };
+ 
+ //==============================================================================
++// ORIGINAL opt-in context bridge; native graph factory and real ready holder.
++struct EditPlaybackContext::PreparedGraphChange::Impl
++{
++    juce::WeakReference<EditPlaybackContext> owner;
++    NodePlaybackContext* nodeContext = nullptr; // Identity only until owner checked.
++    uint64_t generation = 0, publicationSerial = 0;
++    double sampleRate = 0;
++    int deviceBlockSize = 0, latency = 0;
++    bool published = false;
++    std::shared_ptr<const GraphOverlay> overlay;
++    TracktionNodePlayer::ReadyGraph graph;
++    TracktionNodePlayer::GraphRetirementSlot retired;
++};
++EditPlaybackContext::PreparedGraphChange::PreparedGraphChange() : impl (std::make_unique<Impl>()) {}
++EditPlaybackContext::PreparedGraphChange::~PreparedGraphChange() = default;
++int EditPlaybackContext::PreparedGraphChange::latencySamples() const noexcept { return impl->latency; }
++uint64_t EditPlaybackContext::PreparedGraphChange::publicationSerial() const noexcept
++{ return impl ? impl->publicationSerial : 0; }
++bool EditPlaybackContext::PreparedGraphChange::wasPublished() const noexcept { return impl->published; }
++
++std::unique_ptr<EditPlaybackContext::PreparedGraphChange> EditPlaybackContext::prepareGraphOnly (
++    std::shared_ptr<const GraphOverlay> overlay)
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    auto& dm = edit.engine.getDeviceManager();
++    const auto rate = dm.getSampleRate();
++    const auto block = dm.getBlockSize();
++    if (graphOverlayPreparationActive || graphOverlayGenerationExhausted || !isAllocated || !nodePlaybackContext ||
++        !std::isfinite(rate) || rate <= 0 || block <= 0 ||
++        !nodePlaybackContext->matchesDeviceConfiguration(rate, block) ||
++        edit.isLatencyCompensationEnabled() != nodePlaybackContext->preparedLatencyCompensationEnabled ||
++        nodePlaybackContext->player.fixedGraphPreparationReadiness() != TracktionNodePlayer::ReadyGraphStatus::ready)
++        throw std::invalid_argument("Private graph preparation requires unchanged supported live context configuration");
++    const juce::ScopedValueSetter<bool> preparing(graphOverlayPreparationActive, true);
++    auto result = std::unique_ptr<PreparedGraphChange>(new PreparedGraphChange());
++    auto& next = *result->impl;
++    next.owner = this;
++    next.nodeContext = nodePlaybackContext.get();
++    next.generation = graphOverlayGeneration;
++    next.sampleRate = rate;
++    next.deviceBlockSize = block;
++    next.overlay = std::move(overlay);
++    // Prepare the empty retirement owner before any native graph construction.
++    next.retired = nodePlaybackContext->player.makeGraphRetirementSlot();
++    CreateNodeParams cnp { nodePlaybackContext->processState };
++    cnp.sampleRate = rate;
++    cnp.blockSize = block;
++    auto& behaviour = edit.engine.getEngineBehaviour();
++    cnp.includeBypassedPlugins = !behaviour.shouldBypassedPluginsBeRemovedFromPlaybackGraph();
++    cnp.allowClipSlots = behaviour.areClipSlotsEnabled();
++    cnp.readAheadTimeStretchNodes = behaviour.enableReadAheadForTimeStretchNodes();
++    cnp.insertOptionalLastStageNodeForDevice = next.overlay && next.overlay->lastStage
++        ? next.overlay->lastStage : insertOptionalLastStageNodeForDeviceCallback;
++    if (next.overlay)
++    {
++        cnp.pluginListResolver = next.overlay->plugins;
++        cnp.outputRouting = next.overlay->outputRouting;
++        cnp.fixedInitialisationAdmission = next.overlay->fixedInitialisationAdmission;
++        if (cnp.fixedInitialisationAdmission && !edit.state.getProperty ("viberaOwnMetering", false))
++            throw std::invalid_argument ("Private fixed initialisation requires app-owned metering");
++    }
++    auto root = createNodeForEdit(*this, audiblePlaybackTime, cnp);
++    if (!root) throw std::runtime_error("Private graph factory returned no root");
++    next.graph = nodePlaybackContext->player.prepareFixedGraph(std::move(root));
++    next.latency = next.graph.latencySamples();
++    next.publicationSerial = next.graph.publicationSerial();
++    // Same control lease/no message pump; ordinary player mutation also refuses.
++    if (next.generation != graphOverlayGeneration || graphOverlayGenerationExhausted ||
++        next.nodeContext != nodePlaybackContext.get() ||
++        !nodePlaybackContext->matchesDeviceConfiguration(dm.getSampleRate(), dm.getBlockSize()) ||
++        nodePlaybackContext->player.validateReadyGraph(next.graph, next.retired) != TracktionNodePlayer::ReadyGraphStatus::ready)
++        throw std::logic_error("Context changed during private graph preparation");
++    return result;
++}
++EditPlaybackContext::ReadyGraphChangeStatus EditPlaybackContext::validatePreparedGraph (
++    const PreparedGraphChange& candidate) const noexcept
++{
++    if (!candidate.impl) return ReadyGraphChangeStatus::empty;
++    const auto& next = *candidate.impl;
++    if (next.owner.get() != this || next.nodeContext != nodePlaybackContext.get())
++        return ReadyGraphChangeStatus::foreignContext;
++    if (next.published) return ReadyGraphChangeStatus::published;
++    if (graphOverlayPreparationActive || graphOverlayGenerationExhausted || next.generation != graphOverlayGeneration)
++        return ReadyGraphChangeStatus::staleContext;
++    auto& dm = edit.engine.getDeviceManager();
++    if (!isAllocated || !nodePlaybackContext || next.sampleRate != dm.getSampleRate() ||
++        next.deviceBlockSize != dm.getBlockSize() ||
++        edit.isLatencyCompensationEnabled() != nodePlaybackContext->preparedLatencyCompensationEnabled ||
++        !nodePlaybackContext->matchesDeviceConfiguration(next.sampleRate, next.deviceBlockSize))
++        return ReadyGraphChangeStatus::configurationChanged;
++    return nodePlaybackContext->player.validateReadyGraph(next.graph, next.retired) == TracktionNodePlayer::ReadyGraphStatus::ready
++        ? ReadyGraphChangeStatus::ready : ReadyGraphChangeStatus::playerRefused;
++}
++EditPlaybackContext::ReadyGraphChangeStatus EditPlaybackContext::publishPreparedGraph (PreparedGraphChange& candidate) noexcept
++{
++    const auto admitted = validatePreparedGraph(candidate);
++    if (admitted != ReadyGraphChangeStatus::ready) return admitted;
++    auto& next = *candidate.impl;
++    if (nodePlaybackContext->player.publishReadyGraph(next.graph, next.retired) != TracktionNodePlayer::ReadyGraphStatus::ready)
++        return ReadyGraphChangeStatus::playerRefused; // No intervening pump/mutation: should be unreachable.
++    activeGraphOverlay.swap(next.overlay); // Retire old resolver owners with ticket on control.
++    nodePlaybackContext->latencySamples = next.latency;
++    next.published = true;
++    invalidateGraphOverlays();
++    return ReadyGraphChangeStatus::ready; // Published only; actual output must acknowledge adoption.
++}
++void EditPlaybackContext::invalidateGraphOverlays() noexcept
++{
++    if (graphOverlayGeneration == std::numeric_limits<uint64_t>::max()) graphOverlayGenerationExhausted = true;
++    else ++graphOverlayGeneration;
++}
++
+ EditPlaybackContext::ScopedDeviceListReleaser::ScopedDeviceListReleaser (EditPlaybackContext& e, bool reallocate)
+     : owner (e), shouldReallocate (reallocate)
+ {
+@@ -629,6 +745,7 @@
+ 
+ void EditPlaybackContext::clearNodes()
+ {
++    invalidateGraphOverlays();
+     CRASH_TRACER
+ 
+     for (auto mo : midiOutputs)
+@@ -666,6 +783,9 @@
+ 
+ void EditPlaybackContext::createNode (bool updateThreads)
+ {
++    if (graphOverlayPreparationActive)
++        throw std::logic_error("Cannot mutate active graph during private graph preparation");
++    invalidateGraphOverlays();
+     CRASH_TRACER
+     auto& dm = edit.engine.getDeviceManager();
+     const auto sampleRate = dm.getSampleRate();
+@@ -700,7 +820,14 @@
+     cnp.includeBypassedPlugins = ! engineBehaviour.shouldBypassedPluginsBeRemovedFromPlaybackGraph();
+     cnp.allowClipSlots = engineBehaviour.areClipSlotsEnabled();
+     cnp.readAheadTimeStretchNodes = engineBehaviour.enableReadAheadForTimeStretchNodes();
+-    cnp.insertOptionalLastStageNodeForDevice = insertOptionalLastStageNodeForDeviceCallback;
++    cnp.insertOptionalLastStageNodeForDevice = activeGraphOverlay && activeGraphOverlay->lastStage
++        ? activeGraphOverlay->lastStage : insertOptionalLastStageNodeForDeviceCallback;
++    if (activeGraphOverlay)
++    {
++        cnp.pluginListResolver = activeGraphOverlay->plugins;
++        cnp.outputRouting = activeGraphOverlay->outputRouting;
++        cnp.fixedInitialisationAdmission = activeGraphOverlay->fixedInitialisationAdmission;
++    }
+     auto editNode = createNodeForEdit (*this, audiblePlaybackTime, cnp);
+     if (! updateThreads && ! editNode)
+         throw std::runtime_error ("Graph-only rebuild produced no replacement graph");
+@@ -714,6 +841,7 @@
+                                                                                                                       const CreateNodeParams&,
+                                                                                                                       std::unique_ptr<graph::Node>)> callback)
+ {
++    invalidateGraphOverlays();
+     insertOptionalLastStageNodeForDeviceCallback = std::move (callback);
+ }
+ 
+@@ -1131,6 +1259,22 @@
+                                             nodePlaybackContext->getSampleRate());
+ }
+ 
++EditPlaybackContext::GraphSelection EditPlaybackContext::getGraphSelection() const noexcept
++{
++    // Same allocated-context lifetime requirement as existing EPC input APIs;
++    // this does not make nodePlaybackContext destruction concurrently safe.
++    return nodePlaybackContext ? nodePlaybackContext->player.graphSelection() : GraphSelection{};
++}
++
++bool EditPlaybackContext::tryGetSelectedGraphLatencySamples (int& samples) const noexcept
++{
++    const auto selected = getGraphSelection();
++    if (selected.state != graph::LockFreeMultiThreadedNodePlayer::GraphSelectionState::selected)
++        return false;
++    samples = selected.latencySamples;
++    return true;
++}
++
+ int EditPlaybackContext::getLatencySamples() const
+ {
+     return nodePlaybackContext ? nodePlaybackContext->getLatencySamples()

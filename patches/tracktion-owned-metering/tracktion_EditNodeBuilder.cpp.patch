@@ -1,0 +1,22 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1415,7 +1415,8 @@
+ 
+         if (auto meterPlugin = dynamic_cast<LevelMeterPlugin*> (p))
+         {
+-            node = makeNode<LevelMeasurerProcessingNode> (std::move (node), *meterPlugin);
++            if (! list.getEdit().state.getProperty ("viberaOwnMetering", false))
++                node = makeNode<LevelMeasurerProcessingNode> (std::move (node), *meterPlugin);
+         }
+         else if (auto sendPlugin = dynamic_cast<AuxSendPlugin*> (p))
+         {
+@@ -2111,7 +2112,8 @@
+                                                                                  ChannelMap::conversion (incomingChannels, deviceChannels));
+                 }
+ 
+-                node = makeNode<LevelMeasuringNode> (std::move (node), epc.masterLevels);
++                if (! edit.state.getProperty ("viberaOwnMetering", false))
++                    node = makeNode<LevelMeasuringNode> (std::move (node), epc.masterLevels);
+             }
+ 
+             node = createMasterFadeInOutNode (edit, std::move (node), params);

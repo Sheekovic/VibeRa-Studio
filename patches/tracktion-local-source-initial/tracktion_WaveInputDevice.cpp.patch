@@ -1,0 +1,34 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_WaveInputDevice.cpp
++++ b/modules/tracktion_engine/playback/devices/tracktion_WaveInputDevice.cpp
+@@ -169,6 +169,7 @@
+ 
+     void syncToEdit (Edit& edit, EditPlaybackContext& context, double streamTime, int numSamplesIn)
+     {
++        if (edit.admitNativeCapability (Edit::NativeCapability::globalTimestamp) != Edit::NativeCapabilityStatus::allowed) return;
+         const juce::SpinLock::ScopedLockType sl (editInfoLock);
+         auto& pei = editInfo[edit.getProjectItemRef()];
+ 
+@@ -1033,6 +1034,7 @@
+ 
+     juce::Array<Clip*> applyRetrospectiveRecord (bool armedOnly) override
+     {
++        if (context.refuseNativeIOAttachment()) return {};
+         juce::Array<Clip*> clips;
+ 
+         for (auto dstTrack : getTargetTracks (*this))
+@@ -1203,6 +1205,7 @@
+                             double streamTime, LevelMeasurer* measurerToUpdate,
+                             RetrospectiveRecordBuffer* retrospectiveBuffer, bool addToRetrospective)
+     {
++        if (context.refuseNativeIOAttachment()) return;
+         CRASH_TRACER
+         copyIncomingDataIntoBuffer (allChannels, numChannels, numSamples);
+ 
+@@ -1433,6 +1436,7 @@
+ 
+ InputDeviceInstance* WaveInputDevice::createInstance (EditPlaybackContext& ed)
+ {
++    if (ed.refuseNativeIOAttachment()) return nullptr;
+     if (! isTrackDevice() && retrospectiveBuffer == nullptr)
+         retrospectiveBuffer = std::make_unique<RetrospectiveRecordBuffer> (ed.edit.engine);
+ 

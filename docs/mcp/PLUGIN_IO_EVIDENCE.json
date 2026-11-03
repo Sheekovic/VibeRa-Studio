@@ -1,0 +1,392 @@
+{
+  "format": 1,
+  "feature": "plugin.io",
+  "passed": true,
+  "scope": "Compiled source/full184 and existing Mixer semantic outcomes remain unchanged. Only an external package catalogue verifier changed; independent current installed branch qualifies that caller correction. Exact stage/final still mandatory; inherited MCP remains incomplete.",
+  "sourceHashMode": "text-lf-v1",
+  "sourceInputs": {
+    "src/StudioPluginIo.inc": "ff3f53993520dcc21dc018ab35c826e4dc5d84e59473c0596fb076032eb9b4dc",
+    "src/Studio.cpp": "762ed743b9211d2546977d3835d49cc93ca126d03bb275c4da4343ce622558f2",
+    "src/Studio.h": "a0ea6205b6ff0aab8e63a9cb4c0d063bd47a907dd6e790a07df9bd30d916227f",
+    "src/StudioMcp.cpp": "8f54a1b4df7ead49b94df9a711e2fd1e9b829171a927ee8e0631fe071caf6669",
+    "src/StudioMixerChains.inc": "bf41ca7505b5fa9028f1a58f3cdd958b356fee947f77a38ede0cf356acfb0006",
+    "src/StudioRoutingCoordinator.inc": "8e0954d5acf698f4e2d88c1a9bf4f6468ef5fbd52187197222edbb6ca8f78529",
+    "src/PluginIoContracts.h": "4ac6273851e90eab44c28b4541d2d77c3546e617559cc4f9eab0d5f1881d63cc",
+    "src/McpContracts.h": "a63aea5214f892066067108fa160784943531bc1e0ba4fc5fc3f3ed512ca4f45",
+    "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
+    "src/Commands.h": "c300c988077d4e6f98cbbc88c1f2a0d13a3a75b31b30b9f06285bc8b63567066",
+    "src/Commands.cpp": "6120d8f6c60d944de9aaf2dfe2440de245279aa94018ff3d1ef83fb37628a75e",
+    "src/Project.h": "1c6112ca8f2ad2caa205ee9412e285b8f80e948f736797735748cbbc0819d522",
+    "src/Project.cpp": "8c17db0eecda3c95cee8402ed7e30a812ddc21fa29de1d7804477640fcd3122c",
+    "src/AudioEngine.h": "703fbe06e20e14287559374ecfdfdf17865e8815ebb9f5419455131b1800952e",
+    "src/AudioEngine.cpp": "374f020f3a24bfc9044069a8cc9b4572ec5e6de520effe4913ae463505a65ea3",
+    "src/ChannelRouting.inc": "4c82470c4d6a483df4bfa475fa1918f1b78c1ed684b3c1ed7fc10a85c6688097",
+    "src/ProductionPluginTransport.inc": "2b0179fbecc1d1549f1c407985abd156650794857f6a92d13664c2f35c19e76d",
+    "src/Customization.cpp": "8825bccfc527916808754cc77dac7c9e99ccc1dfffe63b9f777fe628b72d3121",
+    "src/PluginBuses.h": "59ac5e0e932b853734a4471908c652a20bf40c77d4eb21396dcd3ea7074ec29e",
+    "src/PluginProtocol.h": "1dc499488c9f9a50601f721f5adbd4749855ee8bcf827bb3b2a14b419c0b6967",
+    "src/PluginHost.h": "bd98efccf2a35cd395b325b0479eb9ffbaaae33647de06cb7058760ccba26e17",
+    "src/PluginHost.cpp": "3a04e4df18a95d7affcb67150f0f25600bfefe2c9647c9e30ebea5ac34b83a5c",
+    "src/PluginWorker.cpp": "cc3049eea25de37dee36beac728632a5d370461cfd8798f73dccf5e71c65c5bd",
+    "src/EffectChain.h": "b3e95bc178257428396d1daf392f518ab3c5d1908d320f5893a00a60124ba964",
+    "src/EffectChain.cpp": "539c267f067827f1b3ed18d017e90c7fb6c42005548f9cd51ace1002ed4eb4d4",
+    "src/MixerChainContracts.h": "8635efc9020854a0174f4f84c32890d234dc6fff44122b2b5f2deeec35d03c9c",
+    "src/StudioPluginIoAcceptance.inc": "ca9bf40b09f5e3c54e45c0b4ee1ade5129925f6c5f954a5669bd09be9f0698b2",
+    "tests/NativeBusChoiceFixture.cpp": "fadd85b100efd3ff0190289d0ff7c7916d12df47012ab90b4dd86d62409e26e1",
+    "tests/PluginBusChoiceAcceptance.h": "288d57cf1db091e1a4351a3809751f4c4b469f925788c95bc0b2dbdf4fa2c924",
+    "scripts/verify-plugin-io-mcp.py": "8ac7b13897b58b7a24d301bc569179916440063e593743fff06ace6168fd8b03",
+    "skills/vibera-studio/SKILL.md": "19cb431e3a9dfd76802723f0085d2f6399d36afbe74247a8276f342e38d89a68",
+    "skills/vibera-studio/references/plugin-audio-io.md": "b16c09aff13a7853587a7ee797fb111eafd6bf003c13924d3a1a410c5a7d8de4",
+    "skills/vibera-studio/references/effect-chains.md": "72deeabc1c96b295083c23a8bc9468072a491f397bf1535196e39540022e8aa0",
+    "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
+    "CMakeLists.txt": "1c76148687f8b2b609ad6ca82b2aa09fe88fe386d627e2149d04c75ce7002301",
+    "scripts/mcp-coverage.py": "cdfd9bc499e3bdbd6dad1113cc8fc04262a0e7506486c811d3de400f0d3d7277",
+    "scripts/module-gate.py": "a9dbf85c431dac3501b5751242e346011b6cf94e787cd1d18fb5ae751575406d",
+    "src/MixerChainWorkflowContracts.h": "ea72c524acf11085005ed0db2bb96e59dfcfe58bf46ff2018a7a993ed653438f"
+  },
+  "applicationSha256": "fc17a78daa85a9b5ebd9f69d34462222a2d31fddf9d7635cb37d4b79f27b903c",
+  "workerSha256": "6e02557aad3bf9e805b95167609d75db09d021ad329d91e7830ab6d1bf8fbfda",
+  "checks": [
+    "Actual instrument/effect Audio input/output contextual menu dispatch reaches canonical plugin.io; component dispatch, not native OS input.",
+    "Actual stdio discovery, exact plugin/instance bus catalogue and requested versus negotiated main bus readback.",
+    "One pending structural token, exact asynchronous completion, native state capture, one Undo/Redo edge, cancellation before commit.",
+    "Malformed/missing/nested-extra payload and stale revision preserve model/history; synchronous macro and batch refuse without partial execution.",
+    "Original SDK unsupported surround output refuses native preparation before commit, retaining incumbent runtime, state and history.",
+    "All four native bus/mapping fields survive actual Save/Open with fresh current native workers; immediate Open/export produces a nonzero 96000-frame stereo WAV."
+  ],
+  "dependencyHashes": [
+    {
+      "path": "src/StudioPluginIo.inc",
+      "mode": "exact",
+      "sha256": "ff3f53993520dcc21dc018ab35c826e4dc5d84e59473c0596fb076032eb9b4dc"
+    },
+    {
+      "path": "src/Studio.cpp",
+      "mode": "content",
+      "sha256": "762ed743b9211d2546977d3835d49cc93ca126d03bb275c4da4343ce622558f2"
+    },
+    {
+      "path": "src/Studio.h",
+      "mode": "content",
+      "sha256": "a0ea6205b6ff0aab8e63a9cb4c0d063bd47a907dd6e790a07df9bd30d916227f"
+    },
+    {
+      "path": "src/StudioMcp.cpp",
+      "mode": "content",
+      "sha256": "8f54a1b4df7ead49b94df9a711e2fd1e9b829171a927ee8e0631fe071caf6669"
+    },
+    {
+      "path": "src/StudioMixerChains.inc",
+      "mode": "exact",
+      "sha256": "bf41ca7505b5fa9028f1a58f3cdd958b356fee947f77a38ede0cf356acfb0006"
+    },
+    {
+      "path": "src/StudioRoutingCoordinator.inc",
+      "mode": "exact",
+      "sha256": "8e0954d5acf698f4e2d88c1a9bf4f6468ef5fbd52187197222edbb6ca8f78529"
+    },
+    {
+      "path": "src/PluginIoContracts.h",
+      "mode": "content",
+      "sha256": "4ac6273851e90eab44c28b4541d2d77c3546e617559cc4f9eab0d5f1881d63cc"
+    },
+    {
+      "path": "src/McpContracts.h",
+      "mode": "content",
+      "sha256": "a63aea5214f892066067108fa160784943531bc1e0ba4fc5fc3f3ed512ca4f45"
+    },
+    {
+      "path": "src/McpSchema.h",
+      "mode": "content",
+      "sha256": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa"
+    },
+    {
+      "path": "src/Commands.h",
+      "mode": "content",
+      "sha256": "c300c988077d4e6f98cbbc88c1f2a0d13a3a75b31b30b9f06285bc8b63567066"
+    },
+    {
+      "path": "src/Commands.cpp",
+      "mode": "content",
+      "sha256": "6120d8f6c60d944de9aaf2dfe2440de245279aa94018ff3d1ef83fb37628a75e"
+    },
+    {
+      "path": "src/Project.h",
+      "mode": "content",
+      "sha256": "1c6112ca8f2ad2caa205ee9412e285b8f80e948f736797735748cbbc0819d522"
+    },
+    {
+      "path": "src/Project.cpp",
+      "mode": "content",
+      "sha256": "8c17db0eecda3c95cee8402ed7e30a812ddc21fa29de1d7804477640fcd3122c"
+    },
+    {
+      "path": "src/AudioEngine.h",
+      "mode": "content",
+      "sha256": "703fbe06e20e14287559374ecfdfdf17865e8815ebb9f5419455131b1800952e"
+    },
+    {
+      "path": "src/AudioEngine.cpp",
+      "mode": "content",
+      "sha256": "374f020f3a24bfc9044069a8cc9b4572ec5e6de520effe4913ae463505a65ea3"
+    },
+    {
+      "path": "src/ChannelRouting.inc",
+      "mode": "exact",
+      "sha256": "4c82470c4d6a483df4bfa475fa1918f1b78c1ed684b3c1ed7fc10a85c6688097"
+    },
+    {
+      "path": "src/ProductionPluginTransport.inc",
+      "mode": "exact",
+      "sha256": "2b0179fbecc1d1549f1c407985abd156650794857f6a92d13664c2f35c19e76d"
+    },
+    {
+      "path": "src/Customization.cpp",
+      "mode": "content",
+      "sha256": "8825bccfc527916808754cc77dac7c9e99ccc1dfffe63b9f777fe628b72d3121"
+    },
+    {
+      "path": "src/PluginBuses.h",
+      "mode": "content",
+      "sha256": "59ac5e0e932b853734a4471908c652a20bf40c77d4eb21396dcd3ea7074ec29e"
+    },
+    {
+      "path": "src/PluginProtocol.h",
+      "mode": "content",
+      "sha256": "1dc499488c9f9a50601f721f5adbd4749855ee8bcf827bb3b2a14b419c0b6967"
+    },
+    {
+      "path": "src/PluginHost.h",
+      "mode": "content",
+      "sha256": "bd98efccf2a35cd395b325b0479eb9ffbaaae33647de06cb7058760ccba26e17"
+    },
+    {
+      "path": "src/PluginHost.cpp",
+      "mode": "content",
+      "sha256": "3a04e4df18a95d7affcb67150f0f25600bfefe2c9647c9e30ebea5ac34b83a5c"
+    },
+    {
+      "path": "src/PluginWorker.cpp",
+      "mode": "content",
+      "sha256": "cc3049eea25de37dee36beac728632a5d370461cfd8798f73dccf5e71c65c5bd"
+    },
+    {
+      "path": "src/EffectChain.h",
+      "mode": "content",
+      "sha256": "b3e95bc178257428396d1daf392f518ab3c5d1908d320f5893a00a60124ba964"
+    },
+    {
+      "path": "src/EffectChain.cpp",
+      "mode": "content",
+      "sha256": "539c267f067827f1b3ed18d017e90c7fb6c42005548f9cd51ace1002ed4eb4d4"
+    },
+    {
+      "path": "src/MixerChainContracts.h",
+      "mode": "content",
+      "sha256": "8635efc9020854a0174f4f84c32890d234dc6fff44122b2b5f2deeec35d03c9c"
+    },
+    {
+      "path": "src/StudioPluginIoAcceptance.inc",
+      "mode": "exact",
+      "sha256": "ca9bf40b09f5e3c54e45c0b4ee1ade5129925f6c5f954a5669bd09be9f0698b2"
+    },
+    {
+      "path": "tests/NativeBusChoiceFixture.cpp",
+      "mode": "content",
+      "sha256": "fadd85b100efd3ff0190289d0ff7c7916d12df47012ab90b4dd86d62409e26e1"
+    },
+    {
+      "path": "tests/PluginBusChoiceAcceptance.h",
+      "mode": "content",
+      "sha256": "288d57cf1db091e1a4351a3809751f4c4b469f925788c95bc0b2dbdf4fa2c924"
+    },
+    {
+      "path": "scripts/verify-plugin-io-mcp.py",
+      "mode": "content",
+      "sha256": "8ac7b13897b58b7a24d301bc569179916440063e593743fff06ace6168fd8b03"
+    },
+    {
+      "path": "skills/vibera-studio/SKILL.md",
+      "mode": "content",
+      "sha256": "19cb431e3a9dfd76802723f0085d2f6399d36afbe74247a8276f342e38d89a68"
+    },
+    {
+      "path": "skills/vibera-studio/references/plugin-audio-io.md",
+      "mode": "content",
+      "sha256": "b16c09aff13a7853587a7ee797fb111eafd6bf003c13924d3a1a410c5a7d8de4"
+    },
+    {
+      "path": "skills/vibera-studio/references/effect-chains.md",
+      "mode": "content",
+      "sha256": "72deeabc1c96b295083c23a8bc9468072a491f397bf1535196e39540022e8aa0"
+    },
+    {
+      "path": "skills/vibera-studio/scripts/stdio_client.py",
+      "mode": "content",
+      "sha256": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "mode": "content",
+      "sha256": "1c76148687f8b2b609ad6ca82b2aa09fe88fe386d627e2149d04c75ce7002301"
+    },
+    {
+      "path": "scripts/mcp-coverage.py",
+      "mode": "content",
+      "sha256": "cdfd9bc499e3bdbd6dad1113cc8fc04262a0e7506486c811d3de400f0d3d7277"
+    },
+    {
+      "path": "scripts/module-gate.py",
+      "mode": "content",
+      "sha256": "a9dbf85c431dac3501b5751242e346011b6cf94e787cd1d18fb5ae751575406d"
+    },
+    {
+      "path": "src/MixerChainWorkflowContracts.h",
+      "mode": "content",
+      "sha256": "ea72c524acf11085005ed0db2bb96e59dfcfe58bf46ff2018a7a993ed653438f"
+    }
+  ],
+  "candidateHashes": [
+    {
+      "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+      "sha256": "fc17a78daa85a9b5ebd9f69d34462222a2d31fddf9d7635cb37d4b79f27b903c"
+    },
+    {
+      "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+      "sha256": "6e02557aad3bf9e805b95167609d75db09d021ad329d91e7830ab6d1bf8fbfda"
+    }
+  ],
+  "runtimeArtifacts": [
+    {
+      "path": "build/dev/20261018-215530/verification.json",
+      "sha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/dev/20261018-215530/ctest.xml",
+      "sha256": "31cf584850cdb9de01a015bbf97aede8b5edd752e57c2537485ce87c94b020cf",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/plugin_io_mcp/attempt-20261018T185840.035234Z/verification.json",
+      "sha256": "3c54dbcf8fdd6a1b872862f05d42f82dc3f348dfc56571e89fa66859b1cc15e4",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/plugin_main_io_application/attempt-72166c545f85417ab8cee0edd81eb71f/plugin-io.json",
+      "sha256": "3d8aca9af94f7bf04d21a99d891d9510bb2c180a62e91b5e25a2b3f9a6d75957",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/plugin_main_io_application/attempt-72166c545f85417ab8cee0edd81eb71f/verification.json",
+      "sha256": "cbae7e426f25a0cd89d62d397e1a0a9cc2bfcfe412c0afd1de88e88149b4c0e4",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/mixer-catalogue-verifier-overlay-20261018/derived/index.json",
+      "sha256": "77ab66b981743f4a65d78775e0be8bbb1c63cbe59d74a069382c5cb80ba89aec",
+      "role": "Bounded current catalogue-verifier follow-up; compiled source/184 tests unaffected, not rerun"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "build/dev/20261018-215530/verification.json",
+      "sha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/dev/20261018-215530/ctest.xml",
+      "sha256": "31cf584850cdb9de01a015bbf97aede8b5edd752e57c2537485ce87c94b020cf",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/plugin_io_mcp/attempt-20261018T185840.035234Z/verification.json",
+      "sha256": "3c54dbcf8fdd6a1b872862f05d42f82dc3f348dfc56571e89fa66859b1cc15e4",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/plugin_main_io_application/attempt-72166c545f85417ab8cee0edd81eb71f/plugin-io.json",
+      "sha256": "3d8aca9af94f7bf04d21a99d891d9510bb2c180a62e91b5e25a2b3f9a6d75957",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/plugin_main_io_application/attempt-72166c545f85417ab8cee0edd81eb71f/verification.json",
+      "sha256": "cbae7e426f25a0cd89d62d397e1a0a9cc2bfcfe412c0afd1de88e88149b4c0e4",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/mixer-catalogue-verifier-overlay-20261018/derived/index.json",
+      "sha256": "77ab66b981743f4a65d78775e0be8bbb1c63cbe59d74a069382c5cb80ba89aec",
+      "role": "Bounded current catalogue-verifier follow-up; compiled source/184 tests unaffected, not rerun"
+    }
+  ],
+  "semanticFacts": {
+    "stdioPassed": true,
+    "stdioFinished": true,
+    "stdioGracefulClose": true,
+    "stdioResponseCount": 172,
+    "stdioInvalidCases": 6,
+    "componentPassed": true,
+    "componentStage": "actual-immediate-reopen-export-live-native-recovery",
+    "componentMenuAction": true,
+    "semanticMcp": true,
+    "actualNativeWorkers": true,
+    "offlineWavExported": true,
+    "nativeOsInput": false,
+    "hardware": false,
+    "listening": false,
+    "supportedScope": "Selected stereo output and mono/stereo main input; actual names/negotiated channels, Undo/Redo, owned cancel, unsupported surround precommit refusal, persistence and nonzero offline export."
+  },
+  "sourceProvenance": {
+    "sourceRun": "build/dev/20261018-215530/verification.json",
+    "sourceRunSha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a",
+    "baseline": "build/dev/20261018-215530/inputs.json",
+    "baselineSha256": "2994a22095d111f69b937a78ea48025f5601636aed5f2153f0062aa5bba21967",
+    "trackedCoverageInputCount": 38,
+    "componentAttribution": "Passed full-run CTest plus unique component/terminal files within exact CTest start-to-source-receipt mtime window; component itself has no embedded binary hash",
+    "full184PrecededPackageVerifierFollowup": true,
+    "full184RerunAfterPackageVerifierFollowup": false
+  },
+  "limits": [
+    "inventoryComplete remains false. This proof does not qualify other surface rows, legacy MCP coverage, full Mixer completion or packaging.",
+    "Original SDK provider only; no universal installed-provider bus capability claim.",
+    "One selected stereo native output, mono/stereo main input and independent optional auxiliary input; no simultaneous multi-output, surround, physical input, monitoring or recording.",
+    "No native OS-input plugin.io menu qualification, hardware, listening or live-audio claim. Component receipt validates nonzero offline WAV, not an independent waveform oracle.",
+    "Coverage inputs contain tracked text only in text-lf-v1 mode; .inc follows existing content_identity behavior. Historical runtime artifact paths are not archive inputs. Module candidate bindings remain exact and require genuine final rebinding before temporary cleanup."
+  ],
+  "testRun": {
+    "tests": 184,
+    "passed": 184,
+    "failed": 0,
+    "skipped": 0,
+    "disabled": 0,
+    "testSeconds": 1029.0,
+    "totalSeconds": 1067.6927504999985,
+    "sourceInputsStable": true,
+    "compiledInputsStable": true,
+    "allStepExitCodesZero": true
+  },
+  "previousEvidence": {
+    "commit": "15f7a9d",
+    "path": "docs/mcp/PLUGIN_IO_EVIDENCE.json",
+    "sha256": "9cbb0e83669328c8103a6b462b29acc28a8f563f04fd76b2cf55801e7a6d5514",
+    "scope": "Historical prior exact-binary qualification; preserved in Git, not reused for current binary identity"
+  },
+  "catalogueVerifierFollowup": {
+    "sourceSnapshot": "E:\\Projects\\VibeRa Studio\\build\\dev\\20261018-215530\\inputs.json",
+    "fullReceipt": {
+      "path": "build/dev/20261018-215530/verification.json",
+      "mode": "exact",
+      "sha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a"
+    },
+    "providerIdentity": {
+      "path": "build/windows/mixer-catalogue-observer-qualified-20261018/identity.json",
+      "mode": "exact",
+      "sha256": "292a38b588d9268b96173134327e169d346cc1e40fc380e212b3285e9916b850"
+    },
+    "full184PrecededVerifierDelta": true,
+    "full184RerunAfterVerifierDelta": false,
+    "onlyChangedVerifier": "scripts/verify-catalogue-mcp.py",
+    "unchangedObserverSeconds": 25
+  }
+}

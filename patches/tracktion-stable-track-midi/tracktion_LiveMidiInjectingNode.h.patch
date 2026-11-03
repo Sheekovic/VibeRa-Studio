@@ -1,0 +1,38 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
+@@ -29,6 +29,7 @@
+ class LiveMidiInjectingNode final   : public tracktion::graph::Node,
+                                       private AudioTrack::Listener
+ {
++    struct BoundedRuntime;
+ public:
+     // Null scope preserves the ordinary native implementation. The bounded
+     // internal mode requires a closed/local Edit and the actual ProcessState
+@@ -45,6 +46,19 @@
+         uint64_t accepted = 0, delivered = 0; // Independent atomics; not a concurrent coherent snapshot.
+     };
+     IngressObservation boundedIngressObservation() const noexcept;
++    // CONTROL-only owning view of the actual registered inbox Runtime, never
++    // a Node pin/latest-candidate pointer. No payload/cursor access or rearming.
++    class BoundedIngressRuntimeView final
++    {
++        friend class LiveMidiInjectingNode;
++        std::shared_ptr<BoundedRuntime> runtime;
++        explicit BoundedIngressRuntimeView(std::shared_ptr<BoundedRuntime> r) : runtime(std::move(r)) {}
++    public:
++        BoundedIngressRuntimeView() = default;
++        IngressObservation observation() const noexcept;
++        const AudioTrack* ownerTrackControl() const noexcept;
++    };
++    BoundedIngressRuntimeView boundedIngressRuntimeControl() const;
+     // CONTROL only; exact recorded-output no-op listener inventory, not global MIDI absence.
+     static bool hasOnlyBoundedNoopOutputListeners (AudioTrack&, const ProcessState&);
+     ~LiveMidiInjectingNode() override;
+@@ -61,7 +75,6 @@
+     AudioTrack::Ptr track;
+     std::unique_ptr<tracktion::graph::Node> input;
+ 
+-    struct BoundedRuntime;
+     const ProcessState* const ingressScope;
+     std::shared_ptr<BoundedRuntime> bounded;
+     uint32_t preparedMidiCapacity = 0;

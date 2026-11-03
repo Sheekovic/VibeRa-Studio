@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<VIBERA version="1" nextId="46" name="First Light" tempo="120.0" numerator="4"
+        denominator="4">
+  <CHANNELS>
+    <CHANNEL id="1" name="KICK" source="builtin:kick" mixer="1" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+    <CHANNEL id="2" name="SNARE" source="builtin:snare" mixer="2" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+    <CHANNEL id="3" name="HAT" source="builtin:hat" mixer="3" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+    <CHANNEL id="4" name="BASS" source="builtin:bass" mixer="4" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+  </CHANNELS>
+  <PATTERNS>
+    <PATTERN id="5" name="Pattern 1" length="8.0">
+      <NOTE id="6" channel="1" beat="0.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="7" channel="3" beat="0.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="8" channel="3" beat="0.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="9" channel="1" beat="1.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="10" channel="2" beat="1.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="11" channel="3" beat="1.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="12" channel="3" beat="1.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="13" channel="1" beat="2.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="14" channel="3" beat="2.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="15" channel="3" beat="2.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="16" channel="1" beat="3.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="17" channel="2" beat="3.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="18" channel="3" beat="3.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="19" channel="3" beat="3.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="20" channel="1" beat="4.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="21" channel="3" beat="4.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="22" channel="3" beat="4.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="23" channel="1" beat="5.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="24" channel="2" beat="5.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="25" channel="3" beat="5.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="26" channel="3" beat="5.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="27" channel="1" beat="6.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="28" channel="3" beat="6.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="29" channel="3" beat="6.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="30" channel="1" beat="7.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="31" channel="2" beat="7.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="32" channel="3" beat="7.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="33" channel="3" beat="7.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="34" channel="4" beat="0.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="35" channel="4" beat="1.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="36" channel="4" beat="2.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="37" channel="4" beat="3.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="38" channel="4" beat="4.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="39" channel="4" beat="5.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="40" channel="4" beat="6.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="41" channel="4" beat="7.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+    </PATTERN>
+  </PATTERNS>
+  <PLACEMENTS>
+    <PLACEMENT id="42" pattern="5" lane="0" beat="0.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="43" pattern="5" lane="0" beat="8.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="44" pattern="5" lane="0" beat="16.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="45" pattern="5" lane="0" beat="24.0" length="8.0" offset="0.0"/>
+  </PLACEMENTS>
+  <MIXER>
+    <INSERT index="0" name="Master" gain="0.800000011920929" pan="0.0" muted="0"/>
+    <INSERT index="1" name="Insert 1" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="2" name="Insert 2" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="3" name="Insert 3" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="4" name="Insert 4" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="5" name="Insert 5" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="6" name="Insert 6" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="7" name="Insert 7" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="8" name="Insert 8" gain="1.0" pan="0.0" muted="0"/>
+  </MIXER>
+</VIBERA>

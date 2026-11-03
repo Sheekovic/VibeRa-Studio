@@ -1,0 +1,59 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -528,9 +528,12 @@
+             if (stage.origin == static_cast<const void*> (node)) return node;
+         return nullptr;
+     }
++    // A node-local mint runs before later sibling nodes have initialised.
++    // Only the final graph seal may demand their exact retained FIFO handles.
++    enum class InverseScopePhase { mint, finalSeal };
+     static FiniteInverseResidualIdentity requireInverseScope (
+         NodeGraph& candidate, NodeGraph& previous, const Stages& next, const Stages& old,
+-        const void* identity, double rate, int block)
++        const void* identity, double rate, int block, InverseScopePhase phase)
+     {
+         const auto reject = [] { throw OutputStageError (OutputStageStatus::configuration,
+             "routing.pdcInverseScope: Explicit finite audio-only source/new-dry joint plan required"); };
+@@ -557,7 +560,8 @@
+                 if (now.inverse || bool (before.delay) != bool (now.delay) ||
+                     before.producerPathLatencySamples != now.producerPathLatencySamples ||
+                     (now.delay && (before.delay->requestedDelay != now.delay->requestedDelay ||
+-                     before.delay->latencyProcessor != now.delay->latencyProcessor))) reject();
++                     (phase == InverseScopePhase::finalSeal &&
++                      before.delay->latencyProcessor != now.delay->latencyProcessor)))) reject();
+                 continue;
+             }
+             auto* oldProducer = stageOriginNode (previous, before);
+@@ -567,9 +571,12 @@
+             auto* residual = now.inverse ? now.inverse->inverseResidualInputNode() : nullptr;
+             auto* provider = dynamic_cast<FiniteInverseResidualProvider*> (residual);
+             if (!oldProvider || !newSource || !provider || !residual || !residual->getDirectInputNodes().empty() ||
+-                before.delay || !now.delay || !now.delay->legacyQueueCreatedHere || !now.delay->latencyProcessor ||
+-                now.delay->latencyProcessor->unknownCreationMutation.load (std::memory_order_acquire))
++                before.delay || !now.delay || !now.delay->latencyProcessor)
+                 reject();
++            if (now.delay->latencyProcessor->unknownCreationMutation.load (std::memory_order_acquire))
++                throw OutputStageError (OutputStageStatus::configuration,
++                    "routing.pdcInverseTaintedNewDry: Candidate dry queue has a foreign mutation or repeated preparation");
++            if (!now.delay->legacyQueueCreatedHere) reject();
+             const auto described = oldProvider->finiteInverseResidualIdentity();
+             const auto retained = provider->finiteInverseResidualIdentity();
+             if (!described || !retained || *described != *retained) reject();
+@@ -598,7 +605,7 @@
+         const auto next = collectOutputStages (info.nodeGraph);
+         const auto old = collectOutputStages (*info.nodeGraphToReplace);
+         const auto id = requireInverseScope (info.nodeGraph, *info.nodeGraphToReplace, next, old,
+-                                             owner, info.sampleRate, info.blockSize);
++                                             owner, info.sampleRate, info.blockSize, InverseScopePhase::mint);
+         const auto& after = next.at (owner);
+         const auto& before = old.at (owner);
+         auto* residual = after.inverse ? after.inverse->inverseResidualInputNode() : nullptr;
+@@ -739,7 +746,7 @@
+                 if (!proof) throw OutputStageError (OutputStageStatus::configuration,
+                     "routing.pdcInverseProof: Prepared inverse capability required");
+                 const auto id = requireInverseScope (candidate, *previous, next, old, identity,
+-                                                     proof->identity.sampleRate, proof->identity.quantum);
++                                                     proof->identity.sampleRate, proof->identity.quantum, InverseScopePhase::finalSeal);
+                 if (proof->admitted || proof->started || proof->failed || proof->remaining != id.samples ||
+                     proof->bindingNode != now.inverseNode || proof->candidateGraph != &candidate ||
+                     proof->previousGraph != previous || proof->owner != identity ||

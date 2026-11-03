@@ -1,0 +1,47 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
+@@ -36,18 +36,22 @@
+                         const TrackMuteState* trackMuteStateToUse,
+                         ProcessState& processStateToUse,
+                         bool rendering, bool canBalanceLatency,
+-                        int maxNumChannelsToUse, bool fixedInitialisation)
++                        int maxNumChannelsToUse, bool fixedInitialisation,
++                        int shortMidiCapacity, bool movedOutputStage)
+     : TracktionEngineNode (processStateToUse),
+       input (std::move (inputNode)),
+       plugin (std::move (pluginToProcess)),
+       trackMuteState (trackMuteStateToUse),
+       playHeadState (processStateToUse.playHeadState),
+       isRendering (rendering),
++      preparedShortMidiCapacity (shortMidiCapacity), stageMovedToOutputPort (movedOutputStage),
+       maxNumChannels (maxNumChannelsToUse),
+       balanceLatency (canBalanceLatency)
+ {
+     jassert (input != nullptr);
+     jassert (plugin != nullptr);
++    if (preparedShortMidiCapacity < 0 || preparedShortMidiCapacity > 512)
++        throw std::invalid_argument ("pluginOutput.midiCapacity: Expected 0..512 prepared short events");
+     initialisePlugin (sampleRateToUse, blockSizeToUse, fixedInitialisation);
+ }
+ 
+@@ -66,7 +70,7 @@
+     auto props = input->getNodeProperties();
+     // Another processor is a different output stage; NEVER carry an upstream
+     // identity through effects. Only an explicitly registered final stage opts in.
+-    props.audioCompensationStage = plugin->getPreparedAudioOutputStageIdentity();
++    props.audioCompensationStage = stageMovedToOutputPort ? nullptr : plugin->getPreparedAudioOutputStageIdentity();
+     props.audioCompensationStageOrigin = props.audioCompensationStage ? this : nullptr;
+ 
+     // Use the actual input channel count — channel conversion (e.g. mono→stereo) is handled
+@@ -120,6 +124,11 @@
+     jassert (! isPrepared); // Is this being called multiple times?
+ 
+     auto props = getNodeProperties();
++    if (preparedShortMidiCapacity > 0)
++    {
++        midiMessageArray.reserve (preparedShortMidiCapacity);
++        reserveMidiOutputForPreparation (preparedShortMidiCapacity);
++    }
+ 
+     if (props.latencyNumSamples > 0)
+         automationAdjustmentTime = TimeDuration::fromSamples (-props.latencyNumSamples, sampleRate);

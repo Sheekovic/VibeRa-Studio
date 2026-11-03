@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "dependency": "JUCE",
+  "revision": "37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "sourceDirectory": "JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "license": "AGPL-3.0-only",
+  "files": [
+    {
+      "path": "modules/juce_audio_processors_headless/utilities/juce_AudioPluginExtensions.h",
+      "patch": "patches/juce-vst3-parameters/juce_AudioPluginExtensions.h.patch",
+      "originalSha256": "f981437e8ec0bbad405635f068b7d4e4e21899bba104524251931d247920f18d",
+      "patchedSha256": "54372a831e321d716d34f40bcfae9cace9c3e6a95cabc6c31870f096b65e3443"
+    },
+    {
+      "path": "modules/juce_audio_processors_headless/format_types/juce_VST3PluginFormatImpl.h",
+      "patch": "patches/juce-vst3-parameters/juce_VST3PluginFormatImpl.h.patch",
+      "originalSha256": "55766ebcffe577d4133eb0a7ec05c6feb142adb5cbbdb3ecb0ff2eb6e27bf406",
+      "patchedSha256": "ad530b9a1c00aab233a23df71156f0cef055bcda5dd865ba5e3825b7774c44d7"
+    }
+  ]
+}

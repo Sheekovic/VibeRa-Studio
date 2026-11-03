@@ -1,0 +1,13 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
+@@ -326,9 +326,9 @@
+     void createThreads();
+     void pause();
+ 
+     //==============================================================================
+-    void postNewGraph (std::unique_ptr<NodeGraph>);
++    void postNewGraph (std::unique_ptr<NodeGraph>, double sampleRateToUse, int blockSizeToUse);
+ 
+     //==============================================================================
+     static void buildNodesOutputLists (PreparedNode&);
+     void resetProcessQueue (PreparedNode&);

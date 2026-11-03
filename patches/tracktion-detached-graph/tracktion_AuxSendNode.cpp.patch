@@ -1,0 +1,37 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp
+@@ -9,13 +9,14 @@
+ */
+ 
+ #pragma once
++#include <stdexcept>
+ 
+ namespace tracktion::inline engine {
+ 
+ AuxSendNode::AuxSendNode (std::unique_ptr<Node> inputNode, int busIDToUse,
+                           SampleRateAndBlockSize info,
+                           AuxSendPlugin& sourceSendPlugin, tracktion::graph::PlayHeadState& phs,
+-                          const TrackMuteState* trackMuteState, bool processAuxSendsWhenTrackIsMuted)
++                          const TrackMuteState* trackMuteState, bool processAuxSendsWhenTrackIsMuted, bool fixedInitialisation)
+     : SendNode (std::move (inputNode), busIDToUse,
+                 [&sourceSendPlugin, trackMuteState, processAuxSendsWhenTrackIsMuted]
+                 {
+@@ -39,14 +40,16 @@
+                         gain *= -1.0f;
+ 
+                     return gain;
+-               }),
++               }, {}, sourceSendPlugin.prepareSendGainStateForGraph()),
+       playHeadState (phs),
+       pluginPtr (sourceSendPlugin),
+       sendPlugin (sourceSendPlugin)
+ {
+     jassert (pluginPtr != nullptr);
+ 
+-    sendPlugin.baseClassInitialise ({ TimePosition(), info.sampleRate, info.blockSize });
++    if (fixedInitialisation)
++        sendPlugin.attachFixedGraphInitialisation ({ TimePosition(), info.sampleRate, info.blockSize });
++    else sendPlugin.baseClassInitialise ({ TimePosition(), info.sampleRate, info.blockSize });
+     isInitialised = true;
+ }
+ 

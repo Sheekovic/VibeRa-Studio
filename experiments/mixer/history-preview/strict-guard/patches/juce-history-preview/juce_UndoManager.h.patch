@@ -1,0 +1,22 @@
+--- a/modules/juce_data_structures/undomanager/juce_UndoManager.h
++++ b/modules/juce_data_structures/undomanager/juce_UndoManager.h
+@@ -221,6 +221,19 @@
+     */
+     int getNumActionsInCurrentTransaction() const;
+ 
++    /** Appends the actions in the transaction that undo() would visit, even
++        after beginNewTransaction(). The first item is the earliest action.
++        This does not perform an action or move the history cursor. Pointers
++        remain owned by this manager and must not be retained across mutations.
++        Call on the same thread that owns the manager, outside perform/undo/redo.
++    */
++    void getActionsInUndoTransaction (Array<const UndoableAction*>& actionsFound) const;
++
++    /** Appends the actions in the transaction that redo() would visit.
++        Ordering, ownership and calling rules match getActionsInUndoTransaction().
++    */
++    void getActionsInRedoTransaction (Array<const UndoableAction*>& actionsFound) const;
++
+     //==============================================================================
+     /** Returns true if there's at least one action in the list to redo.
+         @see getRedoDescription, redo, canUndo

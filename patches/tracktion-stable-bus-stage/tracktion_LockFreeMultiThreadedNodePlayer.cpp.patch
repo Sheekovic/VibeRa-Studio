@@ -1,0 +1,12 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
+@@ -429,6 +429,9 @@
+     auto graph = node_player_utils::prepareToPlay(std::move(node), lastGraphPosted,
+                          result.configuration.rate, result.configuration.block,
+                          nullptr, nullptr, result.configuration.sharing, result.configuration.disableLatency);
++    const bool stableStages = LatencyNode::validateStableOutputStages(*graph, lastGraphPosted);
++    if (stableStages && adoptedGraph && adoptedGraph != lastGraphPosted)
++        throw LatencyNode::OutputStageError(LatencyNode::OutputStageStatus::predecessorPending, "routing.pdcStagePending: Stage history requires the actual selected predecessor, not a queued graph");
+     result.storage = prepareGraphHolder(std::move(graph), false, result.configuration.threads, result.configuration.block);
+     result.reservedPublicationSerial = result.storage->selectionSerial;
+     if (result.generation != readyMutationGeneration || result.configuration != readyConfiguration() || readyGenerationExhausted)

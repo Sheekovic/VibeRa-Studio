@@ -1,0 +1,233 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_TestNodes.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_TestNodes.h
+@@ -9,6 +9,10 @@
+ */
+ 
+ #pragma once
++#include <cmath>
++#include <cstdint>
++#include <limits>
++#include <stdexcept>
+ 
+ namespace tracktion::inline graph {
+ 
+@@ -372,9 +376,148 @@
+ 
+ //==============================================================================
+ //==============================================================================
++// Closed opt-in, preowned CONTROL object. One actual adopted graph writes
++// DSP; preparation/retirement never inspect or copy its mutable smoother.
++class SendGainState
++{
++    friend class GainNode;
++  public:
++    struct EdgeIdentity
++    {
++        uint64_t source = 0, destination = 0;
++        int bus = -1;
++        bool operator== (const EdgeIdentity&) const = default;
++    };
++    enum class Admission { ready, changedEdge, unprepared, retired, configurationChanged,
++                           epochChanged, exhausted };
++    // Zero preserves the original fixed-prepared-block probe policy. A positive
++    // immutable duration is converted on first CONTROL attach, never during DSP.
++    explicit SendGainState (EdgeIdentity value, double seconds = 0.0)
++        : edge (value), rampSeconds (seconds), smoother (0.0f)
++    {
++        if (edge.source == 0 || edge.destination == 0 || edge.bus < 0)
++            throw std::invalid_argument ("Prepared send gain needs an identified edge");
++        if (! std::isfinite (rampSeconds) || rampSeconds < 0.0)
++            throw std::invalid_argument ("Prepared send gain duration must be finite and nonnegative");
++    }
++    SendGainState (const SendGainState&) = delete;
++    SendGainState& operator= (const SendGainState&) = delete;
++    SendGainState (SendGainState&&) = delete;
++    SendGainState& operator= (SendGainState&&) = delete;
++    bool matchesEdge (EdgeIdentity expected) const noexcept { return edge == expected; }
++    int busID() const noexcept { return edge.bus; }
++    double rampSecondsControl() const noexcept { return rampSeconds; }
++    uint64_t epochControl() const noexcept { return epoch; }
++    uint32_t attachmentsControl() const noexcept { return attachments; }
++    // Sole CONTROL owner only. Reading immutable configuration/ownership
++    // metadata is safe; this method does NOT observe current gain/target.
++    Admission canRetainControl (EdgeIdentity expected, uint64_t expectedEpoch) const noexcept
++    {
++        if (! matchesEdge (expected)) return Admission::changedEdge;
++        if (expectedEpoch != epoch) return Admission::epochChanged;
++        if (! prepared) return Admission::unprepared;
++        if (attachments == 0) return Admission::retired;
++        if (attachments == std::numeric_limits<uint32_t>::max()) return Admission::exhausted;
++        return Admission::ready;
++    }
++  private:
++    const EdgeIdentity edge;
++    const double rampSeconds;
++    juce::SmoothedValue<float> smoother;
++    double preparedRate = 0;
++    int preparedBlock = 0;
++    uint64_t epoch = 1; // A bank is single-lifecycle; final retirement makes2.
++    uint32_t attachments = 0;
++    bool prepared = false;
++    void attachControl (double rate, int block)
++    {
++        if (! std::isfinite (rate) || rate <= 0 || block <= 0)
++            throw std::invalid_argument ("Prepared send gain needs finite fixed configuration");
++        if (attachments == std::numeric_limits<uint32_t>::max())
++            throw std::overflow_error ("Prepared send gain attachment count exhausted");
++        if (prepared)
++        {
++            if (attachments == 0)
++                throw std::invalid_argument ("Retired send gain state requires a fresh bank");
++            if (rate != preparedRate || block != preparedBlock)
++                throw std::invalid_argument ("Prepared send gain rate/block changed");
++        }
++        else
++        {
++            // Fresh private state only. Validate the duration before touching
++            // DSP/configuration metadata; an invalid first attach is retryable.
++            auto rampFrames = block;
++            if (rampSeconds > 0.0)
++            {
++                const auto frames = std::floor (rate * rampSeconds);
++                if (! std::isfinite (frames) || frames > double (std::numeric_limits<int>::max()))
++                    throw std::overflow_error ("Prepared send gain duration exceeds integer samples");
++                rampFrames = std::max (1, static_cast<int> (frames));
++            }
++            // Positive policy is rate-aware and independent of prepared block
++            // and callback partitions. First adopted target fades from0.
++            smoother.reset (rampFrames);
++            smoother.setCurrentAndTargetValue (0.0f);
++            preparedRate = rate; preparedBlock = block; prepared = true;
++        }
++        ++attachments;
++    }
++    void detachControl() noexcept
++    {
++        jassert (attachments > 0);
++        if (attachments > 0 && --attachments == 0) ++epoch;
++        // No DSP read/reset/destruction. Final caller must have quiesced its
++        // graph; an old prepared candidate must not reopen this bank.
++    }
++};
++
+ class GainNode final : public Node
+ {
+ public:
++    using GainState = SendGainState;
++
++    // This overload deliberately does NOT delegate to the ordinary constructor:
++    // that constructor invokes the gain getter on CONTROL.
++    GainNode (Node* inputNode, std::function<float()> gainFunc, size_t nodeHashToUse,
++              std::shared_ptr<GainState> state)
++        : input (inputNode), gainFunction (std::move (gainFunc)), sharedGainState (std::move (state)),
++          nodeHash (nodeHashToUse)
++    {
++        if (! input || ! gainFunction || ! sharedGainState)
++            throw std::invalid_argument ("Prepared gain node needs input, function and bank");
++    }
++
++    ~GainNode() override
++    {
++        if (gainStateAttached) sharedGainState->detachControl();
++    } // Node destruction/owner retirement is CONTROL-only after quiescence.
++
++    TransformResult transform (TransformOptions& options) override
++    {
++        if (! sharedGainState || gainStateRegistered) return TransformResult::none;
++        using Uses = std::vector<const GainState*>;
++        constexpr size_t key = size_t (0x7669627261476169ULL);
++        auto* uses = options.cache.getCachedProperty<Uses> (key);
++        if (! uses)
++        {
++            options.cache.cacheProperty (key, Uses{});
++            uses = options.cache.getCachedProperty<Uses> (key);
++        }
++        if (std::find (uses->begin(), uses->end(), sharedGainState.get()) != uses->end())
++            throw std::invalid_argument ("Prepared send gain has duplicate graph writers");
++        uses->push_back (sharedGainState.get());
++        gainStateRegistered = true;
++        return TransformResult::none;
++    }
++
++    void prepareToPlay (const PlaybackInitialisationInfo& info) override
++    {
++        if (! sharedGainState) return; // Exact ordinary native preparation behavior.
++        if (gainStateAttached) throw std::logic_error ("Prepared gain node already attached");
++        sharedGainState->attachControl (info.sampleRate, info.blockSize);
++        gainStateAttached = true;
++    }
++
+     /** Creates a GainNode that doesn't own its input. */
+     GainNode (Node* inputNode, std::function<float()> gainFunc, size_t nodeHashToUse = 0)
+         : input (inputNode), gainFunction (std::move (gainFunc)), nodeHash (nodeHashToUse)
+@@ -429,6 +572,19 @@
+         pc.buffers.midi.mergeFrom (input->getProcessedOutput().midi);
+ 
+         float gain = gainFunction();
++
++        if (sharedGainState)
++        {
++            // Only the adopted DSP owner accesses current/target/remaining.
++            // Unchanged targets preserve partial progress across graph changes.
++            auto& smoother = sharedGainState->smoother;
++            smoother.setTargetValue (gain);
++            if (smoother.isSmoothing())
++                applyGainPerFrame (pc.buffers.audio, [&] { return smoother.getNextValue(); });
++            else if (gain == 0.0f) pc.buffers.audio.clear();
++            else if (gain != 1.0f) applyGain (pc.buffers.audio, gain);
++            return;
++        }
+ 
+         if (gain == lastGain)
+         {
+@@ -453,6 +609,8 @@
+     Node* input = nullptr;
+     std::function<float()> gainFunction;
+     float lastGain = 0.0f;
++    std::shared_ptr<GainState> sharedGainState;
++    bool gainStateAttached = false, gainStateRegistered = false;
+     size_t nodeHash = 0;
+ };
+ 
+@@ -463,14 +621,20 @@
+ public:
+     SendNode (std::unique_ptr<Node> inputNode, int busIDToUse,
+               std::function<float()> getGainFunc = nullptr,
+-              std::optional<size_t> extraHashToUse_ = {})
++              std::optional<size_t> extraHashToUse_ = {},
++              std::shared_ptr<GainNode::GainState> preparedGainState_ = {})
+         : input (std::move (inputNode)), busID (busIDToUse),
+           gainFunction (std::move (getGainFunc)),
+-          extraHashToUse (extraHashToUse_)
+-    {
++          extraHashToUse (extraHashToUse_), preparedGainState (std::move (preparedGainState_))
++    {
++        if (preparedGainState && preparedGainState->busID() != busID)
++            throw std::invalid_argument ("Prepared send gain bus mismatch");
+         setOptimisations ({ ClearBuffers::no,
+                             AllocateAudioBuffer::no });
+     }
++
++    const std::shared_ptr<GainNode::GainState>& getGainStateForPreparation() const noexcept
++    { return preparedGainState; } // CONTROL only, never copy a bank during DSP.
+ 
+     int getBusID() const
+     {
+@@ -530,6 +694,7 @@
+     const int busID;
+     std::function<float()> gainFunction;
+     std::optional<size_t> extraHashToUse;
++    std::shared_ptr<GainNode::GainState> preparedGainState;
+ };
+ 
+ 
+@@ -727,6 +892,9 @@
+                 if (! gainFunction)
+                     continue;
+ 
++                if (auto state = sends[(size_t) i]->getGainStateForPreparation())
++                    ownedNodes.push_back (makeNode<GainNode> (sends[(size_t) i], std::move (gainFunction), returnNodeID, std::move (state)));
++                else
+                 ownedNodes.push_back (makeNode<GainNode> (std::move (sends[(size_t) i]), std::move (gainFunction), returnNodeID));
+ 				sends.erase (std::find (sends.begin(), sends.end(), sends[(size_t) i]));
+ 			}

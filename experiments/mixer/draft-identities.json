@@ -1,0 +1,78 @@
+{
+  "experiments/mixer/organisation/README.md": {
+    "mode": "content",
+    "sha256": "fd02f66363722c625225a29a694d9f27326e8f4a0a98b22f0abbe6b361ea38cb"
+  },
+  "experiments/mixer/organisation/integration.patch": {
+    "mode": "exact",
+    "sha256": "06bab28993fde4d0fc59674826e9f9cbd067a5a7a1c46e251907dc350956a40d"
+  },
+  "experiments/mixer/organisation/base-inputs.json": {
+    "mode": "content",
+    "sha256": "f3604f78f597c7a760850b530a2f8ba629da4fd16b4b8c92caea60e5e87fee99"
+  },
+  "experiments/mixer/history-preview/README.md": {
+    "mode": "content",
+    "sha256": "f43083ff25aac07e23f8a25fbccc29548b857f86b68e34a56f4611ecf5042c23"
+  },
+  "experiments/mixer/history-preview/history-destination.patch": {
+    "mode": "exact",
+    "sha256": "9a41fe13bf8f473655372f40d407836ca5681770b27ec787e26e6743691c3847"
+  },
+  "experiments/mixer/history-preview/manifest.json": {
+    "mode": "content",
+    "sha256": "f1abf1199f24ac950a72846c32046ac3cd5ce178d00ef80020780b60fd4aa75f"
+  },
+  "experiments/mixer/detached-graph/README.md": {
+    "mode": "content",
+    "sha256": "cf5978d0895799ad67fb2cd1f8adbdbb14f8eee118afa3bbe702f7cc2089e419"
+  },
+  "experiments/mixer/detached-graph/integration.patch": {
+    "mode": "exact",
+    "sha256": "37469112b021eec8ba2bb1cdef20b4d1b6538bd0665fcdfc2e7842d857c831be"
+  },
+  "experiments/mixer/detached-graph/provenance.json": {
+    "mode": "content",
+    "sha256": "f2c5c58e9c86927d787408a8cc43ab6d3f7044fb770a7e59826c47821ea60867"
+  },
+  "experiments/mixer/detached-graph/verification.json": {
+    "mode": "content",
+    "sha256": "eda4fd6b6144c3a14d34f4e21ce02cd44e58a17ff4a33efa4e00bbce12aa73a3"
+  },
+  "experiments/mixer/rapid-waveform/README.md": {
+    "mode": "content",
+    "sha256": "6258e1f031e754a480e4e3e923aa3be539122e56db209b76a03203e210f42c40"
+  },
+  "experiments/mixer/rapid-waveform/integration.patch": {
+    "mode": "exact",
+    "sha256": "b460eaa7efd7d391fee4bfc41a7ba8bb625f171f7f33ca66c47ac48bdbd885d0"
+  },
+  "experiments/mixer/rapid-waveform/provenance.json": {
+    "mode": "content",
+    "sha256": "489869dbaa1bd159c5c113c3713ee89acfdd71462fdaaa11f020848f5a08a132"
+  },
+  "experiments/mixer/history-preview/strict-guard/scripts/apply-history-preview-patch.ps1": {
+    "mode": "content",
+    "sha256": "bba5d090845f5d3c7fa6c2eedf2e644d313935ed783ff80232a33a06fdd7afb2"
+  },
+  "experiments/mixer/history-preview/strict-guard/patches/juce-history-preview/juce_UndoManager.cpp.patch": {
+    "mode": "exact",
+    "sha256": "13ed78763260e258843b5764be5cd9ac74aca482103e9472ef1005109b5fb371"
+  },
+  "experiments/mixer/history-preview/strict-guard/patches/juce-history-preview/juce_UndoManager.h.patch": {
+    "mode": "exact",
+    "sha256": "86c04bb6c0e39c0c47add934e7f4cd2e9baf14bb7379a6875e054067497bbec6"
+  },
+  "experiments/mixer/history-preview/strict-guard/patches/juce-history-preview/manifest.json": {
+    "mode": "content",
+    "sha256": "d582b2bccc00f8f15c53c75137e0e116927eb152c632b14c9d30f5f68e83383b"
+  },
+  "experiments/mixer/history-preview/guard-README.md": {
+    "mode": "content",
+    "sha256": "a3bf86951695ef5fe0f8eabb898235a0ad3032f11e2e06b0a0f53c49f6555dad"
+  },
+  "experiments/mixer/history-preview/guard-FINAL-VERIFICATION.json": {
+    "mode": "content",
+    "sha256": "7adb7d3cac24345ca9f39b1cdfeaa72dab3f675f60dc8d1b75b3fa83065ff2d5"
+  }
+}

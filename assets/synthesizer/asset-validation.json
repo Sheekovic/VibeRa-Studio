@@ -1,0 +1,205 @@
+{
+  "passed": true,
+  "errors": [],
+  "seconds": 1.6413879999890924,
+  "librarySha256": "83702db34ee50fc48211ad459afd0bdaa7e8a0b491ec0b716d1a5814ce58c724",
+  "sampleCount": 123,
+  "sampleBytes": 178426339,
+  "sourceFrames": 42516052,
+  "decodedStereoFloatBytesUpperBound": 340128416,
+  "authoredForwardLoopRegions": 10,
+  "maximumSingleRegionPeakAfterGain": 0.4036432706322157,
+  "instruments": [
+    {
+      "id": "piano-upright",
+      "regions": 12,
+      "lowNote": 33,
+      "highNote": 101,
+      "sourceFrames": 6907907,
+      "decodedStereoFloatBytesUpperBound": 55263256,
+      "largestSingleRegionPeakAfterGain": 0.2554179393247504
+    },
+    {
+      "id": "violin-solo",
+      "regions": 12,
+      "lowNote": 51,
+      "highNote": 95,
+      "sourceFrames": 7560456,
+      "decodedStereoFloatBytesUpperBound": 60483648,
+      "largestSingleRegionPeakAfterGain": 0.31875388010455524
+    },
+    {
+      "id": "contrabass-pizz",
+      "regions": 6,
+      "lowNote": 30,
+      "highNote": 63,
+      "sourceFrames": 716554,
+      "decodedStereoFloatBytesUpperBound": 5732432,
+      "largestSingleRegionPeakAfterGain": 0.11095799682186798
+    },
+    {
+      "id": "cello-ensemble",
+      "regions": 4,
+      "lowNote": 32,
+      "highNote": 68,
+      "sourceFrames": 2174539,
+      "decodedStereoFloatBytesUpperBound": 17396312,
+      "largestSingleRegionPeakAfterGain": 0.296072076384611
+    },
+    {
+      "id": "harp",
+      "regions": 5,
+      "lowNote": 31,
+      "highNote": 87,
+      "sourceFrames": 1965561,
+      "decodedStereoFloatBytesUpperBound": 15724488,
+      "largestSingleRegionPeakAfterGain": 0.11017522664861631
+    },
+    {
+      "id": "flute",
+      "regions": 5,
+      "lowNote": 56,
+      "highNote": 97,
+      "sourceFrames": 2070825,
+      "decodedStereoFloatBytesUpperBound": 16566600,
+      "largestSingleRegionPeakAfterGain": 0.1443558781950621
+    },
+    {
+      "id": "clarinet",
+      "regions": 5,
+      "lowNote": 46,
+      "highNote": 86,
+      "sourceFrames": 2358508,
+      "decodedStereoFloatBytesUpperBound": 18868064,
+      "largestSingleRegionPeakAfterGain": 0.092612271670983
+    },
+    {
+      "id": "trumpet-staccato",
+      "regions": 6,
+      "lowNote": 53,
+      "highNote": 85,
+      "sourceFrames": 382784,
+      "decodedStereoFloatBytesUpperBound": 3062272,
+      "largestSingleRegionPeakAfterGain": 0.15244331698682315
+    },
+    {
+      "id": "horn",
+      "regions": 4,
+      "lowNote": 35,
+      "highNote": 78,
+      "sourceFrames": 1558184,
+      "decodedStereoFloatBytesUpperBound": 12465472,
+      "largestSingleRegionPeakAfterGain": 0.33914208824431374
+    },
+    {
+      "id": "trombone",
+      "regions": 4,
+      "lowNote": 30,
+      "highNote": 69,
+      "sourceFrames": 1079326,
+      "decodedStereoFloatBytesUpperBound": 8634608,
+      "largestSingleRegionPeakAfterGain": 0.14738512167735693
+    },
+    {
+      "id": "tuba",
+      "regions": 4,
+      "lowNote": 25,
+      "highNote": 57,
+      "sourceFrames": 678607,
+      "decodedStereoFloatBytesUpperBound": 5428856,
+      "largestSingleRegionPeakAfterGain": 0.21077762762245553
+    },
+    {
+      "id": "marimba",
+      "regions": 6,
+      "lowNote": 37,
+      "highNote": 87,
+      "sourceFrames": 1349134,
+      "decodedStereoFloatBytesUpperBound": 10793072,
+      "largestSingleRegionPeakAfterGain": 0.09164328221732372
+    },
+    {
+      "id": "strumstick",
+      "regions": 6,
+      "lowNote": 46,
+      "highNote": 80,
+      "sourceFrames": 1980548,
+      "decodedStereoFloatBytesUpperBound": 15844384,
+      "largestSingleRegionPeakAfterGain": 0.05060839673036111
+    },
+    {
+      "id": "kalimba",
+      "regions": 6,
+      "lowNote": 39,
+      "highNote": 83,
+      "sourceFrames": 1119895,
+      "decodedStereoFloatBytesUpperBound": 8959160,
+      "largestSingleRegionPeakAfterGain": 0.38831816579916284
+    },
+    {
+      "id": "balafon",
+      "regions": 6,
+      "lowNote": 57,
+      "highNote": 93,
+      "sourceFrames": 242973,
+      "decodedStereoFloatBytesUpperBound": 1943784,
+      "largestSingleRegionPeakAfterGain": 0.15258431797853372
+    },
+    {
+      "id": "conga",
+      "regions": 3,
+      "lowNote": 60,
+      "highNote": 64,
+      "sourceFrames": 101811,
+      "decodedStereoFloatBytesUpperBound": 814488,
+      "largestSingleRegionPeakAfterGain": 0.3832893233759398
+    },
+    {
+      "id": "bass-drum",
+      "regions": 1,
+      "lowNote": 60,
+      "highNote": 60,
+      "sourceFrames": 147012,
+      "decodedStereoFloatBytesUpperBound": 1176096,
+      "largestSingleRegionPeakAfterGain": 0.4036432706322157
+    },
+    {
+      "id": "snare-drum",
+      "regions": 3,
+      "lowNote": 60,
+      "highNote": 64,
+      "sourceFrames": 391665,
+      "decodedStereoFloatBytesUpperBound": 3133320,
+      "largestSingleRegionPeakAfterGain": 0.3042590479330071
+    },
+    {
+      "id": "electric-piano-fm",
+      "regions": 12,
+      "lowNote": 32,
+      "highNote": 100,
+      "sourceFrames": 4303520,
+      "decodedStereoFloatBytesUpperBound": 34428160,
+      "largestSingleRegionPeakAfterGain": 0.17096667451937092
+    },
+    {
+      "id": "guitar-clean",
+      "regions": 13,
+      "lowNote": 32,
+      "highNote": 89,
+      "sourceFrames": 5426243,
+      "decodedStereoFloatBytesUpperBound": 43409944,
+      "largestSingleRegionPeakAfterGain": 0.251188643150958
+    }
+  ],
+  "checks": [
+    "Pinned SHA256/Git blob identities and byte sizes",
+    "Source mapping and license SHA256",
+    "Independent WAV headers/PCM and FLAC decoding/frame count",
+    "Source offset/loop bounds and explicit authored loop conversion",
+    "Nonoverlapping note/velocity zones and contiguous declared melodic ranges",
+    "No missing/unreferenced samples",
+    "Measured PCM peak after declared gain"
+  ],
+  "listeningPerformed": false,
+  "enginePlaybackQualified": false
+}

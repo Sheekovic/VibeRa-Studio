@@ -1,0 +1,78 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
+@@ -55,9 +55,9 @@
+     // The prepare and set the new Node, passing in the old graph
+     postNewGraph (prepareToPlay (std::move (newNode), lastGraphPosted,
+                                  sampleRateToUse, blockSizeToUse,
+                                  useMemoryPool,
+-                                 disableLatencyComp));
++                                 disableLatencyComp), sampleRateToUse, blockSizeToUse);
+ }
+ 
+ void LockFreeMultiThreadedNodePlayer::prepareToPlay (double sampleRateToUse, int blockSizeToUse)
+ {
+@@ -79,9 +79,9 @@
+     // Don't pass in the old graph here as we're stealing the root from it
+     postNewGraph (prepareToPlay (currentGraph != nullptr ? std::move (currentGraph->rootNode) : std::unique_ptr<Node>(), nullptr,
+                                  sampleRateToUse, blockSizeToUse,
+                                  useMemoryPool,
+-                                 disableLatencyComp));
++                                 disableLatencyComp), sampleRateToUse, blockSizeToUse);
+ }
+ 
+ int LockFreeMultiThreadedNodePlayer::process (const Node::ProcessContext& pc)
+ {
+@@ -205,11 +205,8 @@
+                                                                            bool useCurrentAudioBufferPool,
+                                                                            bool disableLatencyCompensation)
+ {
+     createThreads();
+-
+-    sampleRate.store (sampleRateToUse, std::memory_order_release);
+-    blockSize.store (blockSizeToUse, std::memory_order_release);;
+ 
+     if (! useCurrentAudioBufferPool)
+         return node_player_utils::prepareToPlay (std::move (node), oldGraph,
+                                                  sampleRateToUse, blockSizeToUse,
+@@ -251,13 +248,16 @@
+     tracktion::core::pause();
+ }
+ 
+ //==============================================================================
+-void LockFreeMultiThreadedNodePlayer::postNewGraph (std::unique_ptr<NodeGraph> newGraph)
++void LockFreeMultiThreadedNodePlayer::postNewGraph (std::unique_ptr<NodeGraph> newGraph,
++                                                       double sampleRateToUse, int blockSizeToUse)
+ {
+     if (! newGraph)
+     {
+         clearNode();
++        sampleRate.store (sampleRateToUse, std::memory_order_release);
++        blockSize.store (blockSizeToUse, std::memory_order_release);
+         return;
+     }
+ 
+     std::stable_sort (newGraph->orderedNodes.begin(), newGraph->orderedNodes.end(),
+@@ -278,9 +278,9 @@
+ 
+         node_player_utils::reserveAudioBufferPool (newPreparedNode.graph->rootNode.get(),
+                                                    newPreparedNode.graph->orderedNodes,
+                                                    *newPreparedNode.audioBufferPool,
+-                                                   numThreadsToUse, blockSize);
++                                                   numThreadsToUse, blockSizeToUse);
+     }
+ 
+     // Pin the noexcept move premise used by LockFreeObject's allocation-before-publication.
+     static_assert (std::is_nothrow_move_constructible_v<PreparedNode>);
+@@ -294,8 +294,12 @@
+     // Allocate the publication holder before committing any raw caches. Keep
+     // the pool cache ready BEFORE audio can adopt the graph; pooled callbacks
+     // consult it from DSP. The following prepared publication cannot allocate.
+     auto storage = std::make_unique<PreparedNode> (std::move (newPreparedNode));
++    // Commit accepted candidate configuration only after all fallible work.
++    // Refused preparation/publication must preserve old graph metadata too.
++    sampleRate.store (sampleRateToUse, std::memory_order_release);
++    blockSize.store (blockSizeToUse, std::memory_order_release);
+     rootNode = nextRoot;
+     lastGraphPosted = nextGraph;
+     lastAudioBufferPoolPosted = nextPool;
+     preparedLatencySamples = nextLatency;

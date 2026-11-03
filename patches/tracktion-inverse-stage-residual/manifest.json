@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original inverse-v2 closed finite SDK residual experiment; immutable first-creation proof and complete zero warm-up. No application, generic tails, MIDI or full Mixer qualification.",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-inverse-stage-residual/tracktion_LatencyNode.h.patch",
+      "originalSha256": "d87227a1272c9d0a1a35781bdc667accbf77c1d36977e4e8e73a1ff00b318517",
+      "patchedSha256": "9f2cc965396a6892bb8f329fbdfcad4e2048559a415e00e3d348ed0901e085ff",
+      "patchSha256": "a93a72c8fca961193114a124acf53ada681b3348e29480e5985e030d0e55999a",
+      "addedLines": 307,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json",
+        "patches/tracktion-forward-stage-drain/manifest.json",
+        "patches/tracktion-zero-history-creation/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h",
+      "patch": "patches/tracktion-inverse-stage-residual/tracktion_LatencyProcessor.h.patch",
+      "originalSha256": "7b53f5d0baff6ccca2ba667ddb8709c5b33784b6ca854acdc274c22592340d6d",
+      "patchedSha256": "af7c4228a9ea9ed7c3447567c23f947aae01cc0424fc4aa9535792a9a2213f13",
+      "patchSha256": "e904bbcac554ce6269c7adee1df1bae6d8dfdb9aae1b41159c8d16963c6fd03b",
+      "addedLines": 11,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-forward-stage-drain/manifest.json",
+        "patches/tracktion-zero-history-creation/manifest.json"
+      ]
+    }
+  ]
+}

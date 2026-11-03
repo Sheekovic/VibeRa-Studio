@@ -1,0 +1,26 @@
+--- a/modules/tracktion_engine/playback/tracktion_HostedAudioDevice.cpp
++++ b/modules/tracktion_engine/playback/tracktion_HostedAudioDevice.cpp
+@@ -171,6 +171,7 @@
+ 
+     InputDeviceInstance* createInstance (EditPlaybackContext& epc) override
+     {
++        if (epc.refuseNativeIOAttachment()) return nullptr;
+         return new HostedMidiInputDeviceInstance (*this, epc);
+     }
+ 
+@@ -228,6 +229,7 @@
+ 
+         void processBlock (juce::MidiBuffer& midi)
+         {
++            if (context.refuseNativeIOAttachment()) return;
+             const auto globalStreamTime = edit.engine.getDeviceManager().getCurrentStreamTime();
+ 
+             // N.B. This assumes that the number of samples processed per block is constant.
+@@ -269,6 +271,7 @@
+ 
+     MidiOutputDeviceInstance* createInstance (EditPlaybackContext& epc) override
+     {
++        if (epc.refuseNativeIOAttachment()) return nullptr;
+         return new HostedMidiOutputDeviceInstance (*this, epc);
+     }
+ 

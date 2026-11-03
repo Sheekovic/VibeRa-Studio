@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "controlPreparationFence": true,
+  "qualification": "Original optional CONTROL device preparation fence with exact-owner deferred recovery; runtime qualification separate",
+  "vendorReadDependencies": [],
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_DeviceManager.h",
+      "patch": "patches/tracktion-device-fence/tracktion_DeviceManager.h.patch",
+      "originalSha256": "7ab4590fa518e44b977617dc003597adf84ade0021e6ce01bcf4ebcb6937af50",
+      "patchedSha256": "9523c9c6573414912477776adf0ca941d0e807938362391e8ba3de2efc621476",
+      "patchSha256": "d657269c6e8da0085965161f8c3f0d7a58f82cd5ae3dcbaaf0390112a2027a1d"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_DeviceManager.cpp",
+      "patch": "patches/tracktion-device-fence/tracktion_DeviceManager.cpp.patch",
+      "originalSha256": "28f900c36a68f768706bad72ef7d65cac7ff2adc313f7aa0c2b047cab398696e",
+      "patchedSha256": "9211dfee775d080c11fda6460cacd78ea0a469c1a2e67dd9bb63397432af3f26",
+      "patchSha256": "fadbd9743a2d794a08a47c80a144d0a55bff4eef789c5f7250d93cc18d35c4df"
+    }
+  ]
+}

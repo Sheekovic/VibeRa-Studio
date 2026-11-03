@@ -1,0 +1,62 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -458,6 +458,19 @@
+     // Read-only metadata, NOT FIFO content or changed-stage admission.
+     bool hasStructuralZeroHistory() const noexcept
+     { return latencyProcessor && latencyProcessor->hasStructuralZeroHistory(); }
++    // CONTROL-only AUDIO-domain metadata of the ACTUAL final prepared
++    // legacy processor. Zero channels own/emit no PCM, irrespective of MIDI.
++    // This is NOT a structural-history certificate or changed-stage permit.
++    // Immutable graph/configuration ownership is required while inspecting it.
++    bool hasPreparedNoAudioOutput() const
++    {
++        if (!prepared || historyEnabled || !legacyNoAudioPrepared || !input || !latencyProcessor ||
++            requestedDelay < 0 || !std::isfinite (legacyPreparedRate) || legacyPreparedRate <= 0)
++            return false;
++        const auto current = input->getNodeProperties();
++        return !current.hasAudio && current.numberOfChannels == 0 &&
++            latencyProcessor->hasConfiguration (requestedDelay, legacyPreparedRate, 0);
++    }
+     const void* structuralZeroHistoryRuntimeToken() const noexcept
+     { return latencyProcessor.get(); } // Nonpersistent; caller pins actual graph.
+ 
+@@ -1282,6 +1295,8 @@
+ 
+     void prepareToPlay (const PlaybackInitialisationInfo& info) override
+     {
++        legacyNoAudioPrepared = false; // A failed/repeated preparation cannot reuse this fact.
++        bool candidateNoAudio = false;
+         if (!historyEnabled)
+         {
+             auto* outputProof = preparedAudioZeroOutput (*input);
+@@ -1290,7 +1305,9 @@
+             const auto* created = latencyProcessor.get();
+             const bool firstPrepare = !latencyProcessor->creationDecisionMade &&
+                 !latencyProcessor->unknownCreationMutation.load (std::memory_order_acquire);
+-            latencyProcessor->prepareToPlay (info.sampleRate, info.blockSize, getNodeProperties().numberOfChannels);
++            const auto preparedInput = input->getNodeProperties();
++            candidateNoAudio = !preparedInput.hasAudio && preparedInput.numberOfChannels == 0;
++            latencyProcessor->prepareToPlay (info.sampleRate, info.blockSize, preparedInput.numberOfChannels);
+             latencyProcessor->sealStructuralZeroCreation (zeroInput);
+             replaceLatencyProcessorIfPossible (info.nodeGraphToReplace);
+             // FINAL possibly inherited processor: never copy the temporary
+@@ -1304,6 +1321,10 @@
+         else
+             prepareHistory (info);
+         prepareBoundedMidi (info);
++        // Publish this node-local CONTROL fact only after ALL preparation and
++        // actual processor replacement succeeds. Never mint/restore zero history.
++        legacyPreparedRate = info.sampleRate;
++        legacyNoAudioPrepared = candidateNoAudio;
+         prepared = true;
+     }
+ 
+@@ -1402,6 +1423,8 @@
+     RetainedAudioEdge retained;
+     bool historyEnabled = false, prepared = false, midiQueueReset = false;
+     bool legacyQueueCreatedHere = false; // CONTROL creation fact, not zero history.
++    bool legacyNoAudioPrepared = false; // Immutable after this native preparation.
++    double legacyPreparedRate = 0; // CONTROL metadata; no DSP read/write.
+     std::shared_ptr<LatencyProcessor> latencyProcessor, midiProcessor;
+     std::shared_ptr<vibera::dsp::MidiCompensationHistory> midiHistory;
+     vibera::dsp::MidiCompensationHistory* midiHistoryRaw = nullptr;

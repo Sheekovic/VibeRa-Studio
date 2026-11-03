@@ -1,0 +1,112 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
+@@ -1497,15 +1497,104 @@
+     prepareToStartCaller->triggerAsyncUpdate();
+ }
+ 
++bool DeviceManager::installPreparationFence (void* owner, PreparationFence callback) noexcept
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    const auto* messageManager = juce::MessageManager::getInstanceWithoutCreating();
++    if (!messageManager || !messageManager->isThisTheMessageThread())
++        return false;
++    if (owner == nullptr || callback == nullptr || preparationFenceActive)
++        return false;
++    if (preparationFenceOwner != nullptr)
++        return preparationFenceOwner == owner && preparationFence == callback;
++    preparationFenceOwner = owner;
++    preparationFence = callback;
++    return true;
++}
++
++bool DeviceManager::removePreparationFence (void* owner) noexcept
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    const auto* messageManager = juce::MessageManager::getInstanceWithoutCreating();
++    if (!messageManager || !messageManager->isThisTheMessageThread())
++        return false;
++    if (owner == nullptr || owner != preparationFenceOwner || preparationFenceActive)
++        return false;
++    preparationFence = nullptr;
++    preparationFenceOwner = nullptr;
++    return true;
++}
++
++bool DeviceManager::retryPreparationFence (void* owner)
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    const auto* messageManager = juce::MessageManager::getInstanceWithoutCreating();
++    if (! messageManager || ! messageManager->isThisTheMessageThread() ||
++        owner == nullptr || owner != preparationFenceOwner || preparationFence == nullptr ||
++        preparationFenceActive || preparationFenceStatus != PreparationFenceStatus::refused ||
++        ! isSuspended.load() || deviceManager.getCurrentAudioDevice() == nullptr ||
++        prepareToStartCaller->isUpdatePending())
++        return false;
++    prepareToStartCaller->triggerAsyncUpdate();
++    return true;
++}
++
++bool DeviceManager::runPreparationFence() noexcept
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    const auto* messageManager = juce::MessageManager::getInstanceWithoutCreating();
++    if (!messageManager || !messageManager->isThisTheMessageThread())
++        return false;
++    if (preparationFenceActive)
++    {
++        preparationFenceReentered = true;
++        preparationFenceStatus = PreparationFenceStatus::reentrant;
++        return false;
++    }
++    if (preparationFence == nullptr)
++    {
++        preparationFenceStatus = PreparationFenceStatus::none;
++        return true;
++    }
++    const juce::ScopedValueSetter<bool> active (preparationFenceActive, true);
++    preparationFenceReentered = false;
++    const bool accepted = preparationFence (preparationFenceOwner);
++    if (preparationFenceReentered)
++    {
++        preparationFenceStatus = PreparationFenceStatus::reentrant;
++        return false;
++    }
++    preparationFenceStatus = accepted ? PreparationFenceStatus::passed : PreparationFenceStatus::refused;
++    return accepted;
++}
++
+ void DeviceManager::prepareToStart()
+ {
+     if (auto device = deviceManager.getCurrentAudioDevice())
+     {
+-        maxBlockSize = device->getCurrentBufferSizeSamples();
+-        currentSampleRate = device->getCurrentSampleRate();
+-        jassert (currentSampleRate > 0.0);
+-        currentLatencyMs  = static_cast<double> (maxBlockSize) * 1000.0 / currentSampleRate;
+-        outputLatencyTime = device->getOutputLatencyInSamples() / currentSampleRate;
++        // Publish validated actual-device scalars on CONTROL while callbacks
++        // are suspended, BEFORE the fence. Explicit full restoration may add a
++        // context while refused; addContext must resync at the NEW rate.
++        const auto rate = device->getCurrentSampleRate();
++        const auto block = device->getCurrentBufferSizeSamples();
++        if (! std::isfinite (rate) || rate <= 0.0 || block <= 0)
++        {
++            isSuspended = true;
++            preparationFenceStatus = PreparationFenceStatus::refused;
++            return;
++        }
++        maxBlockSize = block;
++        currentSampleRate = rate;
++        currentLatencyMs = static_cast<double> (block) * 1000.0 / rate;
++        outputLatencyTime = device->getOutputLatencyInSamples() / rate;
++        // AsyncUpdater/message-thread boundary. Failure stays explicitly
++        // suspended; never continue into graph reprepare with unowned resources.
++        // The owner must resolve the refusal before a later explicit retry.
++        if (! runPreparationFence())
++        {
++            isSuspended = true;
++            return;
++        }
+         defaultWaveOutID = engine.getPropertyStorage().getPropertyItem (SettingID::defaultWaveOutDevice, device->getTypeName(), defaultWaveOutID);
+         defaultWaveInID  = engine.getPropertyStorage().getPropertyItem (SettingID::defaultWaveInDevice, device->getTypeName(), defaultWaveInID);
+ 

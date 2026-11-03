@@ -1,0 +1,42 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
+@@ -35,6 +35,8 @@
+         return true;
+     }
+     bool nativeIOAttachmentRefused() const noexcept { return closedNativeIORefused.load (std::memory_order_acquire); }
++    enum class SourceSessionGatePhase { unrequired, awaitingSession, staged, waitingFirstSerial, active, failed };
++    SourceSessionGatePhase sourceSessionGatePhase() const noexcept { return sourceGatePhase.load (std::memory_order_acquire); }
+     enum class InitialSourcePhase { unbound, awaitingSession, waitingFirstSerial, active, failed };
+     InitialSourcePhase initialSourcePhase() const noexcept { return sourceInitialPhase.load (std::memory_order_acquire); }
+     bool sourceLifecycleInvalidated() const noexcept { return localSourceLifecycleInvalidated.load (std::memory_order_acquire); }
+@@ -302,20 +304,28 @@
+     std::atomic<double> audiblePlaybackTime { 0.0 };
+     std::atomic<int> activelyRecordingInputDevices { 0 };
+ 
++    // Constructed before ctor addContext publishes this pointer. No staged
++    // candidate can process a Host until explicit CONTROL arm + later full serial.
++    std::atomic<SourceSessionGatePhase> sourceGatePhase { edit.requireSourceBurstSession
++        ? SourceSessionGatePhase::awaitingSession : SourceSessionGatePhase::unrequired };
++    static_assert (std::atomic<SourceSessionGatePhase>::is_always_lock_free);
++    bool sourceGateReferenceBound = false; // Sole DSP writer, cold-only, never reset/rearmed.
+     std::atomic<bool> closedNativeIORefused { false };
+     std::atomic<InitialSourcePhase> sourceInitialPhase {
+         edit.initialSourceGeneration ? InitialSourcePhase::awaitingSession : InitialSourcePhase::unbound };
+     static_assert (std::atomic<InitialSourcePhase>::is_always_lock_free);
+     SourceBurstSession::Decision sourceBurstDecision = edit.initialSourceGeneration
+-        ? SourceBurstSession::Decision::pending : SourceBurstSession::Decision::process;
++        || edit.requireSourceBurstSession ? SourceBurstSession::Decision::pending : SourceBurstSession::Decision::process;
+     bool localReferenceInitialised = false; // CONTROL only; initial addContext resync happens before publication.
+     std::atomic<bool> localSourceLifecycleInvalidated { false };
+     bool sourceBurstShouldProcess() const noexcept { return sourceBurstDecision == SourceBurstSession::Decision::process; }
+ 
+     SourceBurstSession::Ptr sourceBurstSession; // CONTROL ownership, stable during existing contextLock.
+     SourceBurstSession::Status prepareSourceBurstResources (const SourceBurstSession::Configuration&, int channels) noexcept;
++    SourceBurstSession::Status validateSourceBurstStage (const SourceBurstSession::Configuration&, int channels) const noexcept;
++    bool hasImmediateSourceGatePosition() const noexcept;
+     SourceBurstSession::Decision preflightSourceBurst (int deviceFrames, int channels, int physicalOffset, bool offsetKnown,
+-        juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int deviceBlock) noexcept;
++        juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int deviceBlock, double actualGlobalStreamTime) noexcept;
+     bool beginSourceBurst() noexcept;
+     void abortSourceBurst (SourceBurstSession::Status) noexcept;
+     bool finishSourceBurst() noexcept;

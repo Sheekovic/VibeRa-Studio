@@ -1,0 +1,23 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
+@@ -248,6 +248,12 @@
+         return rootNode;
+     }
+ 
++    /** Control-thread readback for the latest successfully published graph.
++        Captured after transformation/preparation and before publication; unlike
++        querying virtual node properties this getter cannot allocate or throw.
++    */
++    int getPreparedLatencySamples() const noexcept { return preparedLatencySamples; }
++
+     /** Process a block of the Node. */
+     int process (const Node::ProcessContext&);
+ 
+@@ -299,6 +305,7 @@
+     Node* rootNode = nullptr;
+     NodeGraph* lastGraphPosted = nullptr;
+     AudioBufferPool* lastAudioBufferPoolPosted = nullptr;
++    int preparedLatencySamples = 0;
+ 
+     std::atomic<size_t> numNodesQueued { 0 };
+ 

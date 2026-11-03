@@ -1,0 +1,20 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_PluginNode.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_PluginNode.h
+@@ -40,7 +40,7 @@
+                 const TrackMuteState*,
+                 ProcessState&,
+                 bool rendering, bool balanceLatency,
+-                int maxNumChannelsToUse);
++                int maxNumChannelsToUse, bool fixedInitialisation = false);
+ 
+     /** Destructor. */
+     ~PluginNode() override;
+@@ -78,7 +78,7 @@
+     bool isPrepared = false, canUseSourceBuffers = false;
+ 
+     //==============================================================================
+-    void initialisePlugin (double sampleRateToUse, int blockSizeToUse);
++    void initialisePlugin (double sampleRateToUse, int blockSizeToUse, bool fixedInitialisation);
+     PluginRenderContext getPluginRenderContext (TimeRange, juce::AudioBuffer<float>&);
+     void replaceLatencyProcessorIfPossible (NodeGraph*);
+ };

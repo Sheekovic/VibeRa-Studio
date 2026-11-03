@@ -1,0 +1,18 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
+@@ -605,7 +605,14 @@
+ 
+     if (nodeOptimisations.clear == ClearBuffers::yes)
+     {
+-        audioBuffer.clear();
++        // Only the current prefix is exposed by ProcessContext/getProcessedOutput.
++        // Keep borrowed views and MIDI semantics unchanged; a later larger call
++        // clears its entire newly exposed prefix before any processor reads it.
++        if (audioBuffer.getNumFrames() != 0)
++        {
++            jassert (numSamples <= audioBuffer.getNumFrames());
++            audioBuffer.getView().getStart (numSamples).clear();
++        }
+         midiBuffer.clear();
+     }
+ 

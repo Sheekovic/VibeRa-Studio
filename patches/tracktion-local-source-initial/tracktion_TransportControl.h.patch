@@ -1,0 +1,10 @@
+--- a/modules/tracktion_engine/playback/tracktion_TransportControl.h
++++ b/modules/tracktion_engine/playback/tracktion_TransportControl.h
+@@ -121,6 +121,7 @@
+                                         loop length, if false, it will be one bar
+     */
+     void syncToEdit (Edit* editToSyncTo, bool syncToTargetLoopLength);
++    Edit::NativeCapabilityStatus trySyncToEdit (Edit*, bool syncToTargetLoopLength);
+ 
+     //==============================================================================
+     /** Returns true if the transport is playing. (This is also true during recording). */

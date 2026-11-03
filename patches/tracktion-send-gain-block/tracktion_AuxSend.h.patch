@@ -1,0 +1,25 @@
+--- a/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h
++++ b/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h
+@@ -7,6 +7,8 @@
+ 
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
++
++#include <tracktion_graph/tracktion_graph/tracktion_SendGainBlock.h>
+ 
+ namespace tracktion::inline graph { class SendGainState; }
+ 
+@@ -32,6 +34,13 @@
+     // must reject stale ownership, never silently renew a retired live bank.
+     virtual std::shared_ptr<graph::SendGainState> prepareSendGainStateForGraph() const
+     { return {}; }
++
++    // Immutable capability/configuration queried on CONTROL. Default false
++    // leaves every existing scalar/native send path unchanged.
++    virtual bool hasRealtimeSendGainBlock() const noexcept { return false; }
++    virtual graph::SendGainBlockResult getRealtimeSendGainBlock (
++        const graph::SendGainBlockContext&, std::span<float>) const noexcept
++    { return {}; } // Must not be called unless capability was admitted.
+ 
+     void setGainDb (float newDb);
+     float getGainDb() const                 { return volumeFaderPositionToDB (gain->getCurrentValue()); }

@@ -1,0 +1,12 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1866,7 +1866,8 @@
+ 
+     if (node)
+         node = makeNode<LiveMidiInjectingNode> (at, std::move (node),
+-                                                  params.boundedNativeMidiIngress ? &params.processState : nullptr);
++                                                  params.boundedNativeMidiIngress ? &params.processState : nullptr,
++                                                  params.boundedNativeMidiIngress ? nullptr : &params.processState);
+ 
+     if (params.prepareNativeTrackClipOutput)
+         node = params.prepareNativeTrackClipOutput (at, std::move (node));

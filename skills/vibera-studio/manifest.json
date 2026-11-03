@@ -1,0 +1,15 @@
+{
+  "name": "vibera-studio",
+  "version": "0.25.0",
+  "contractVersion": 1,
+  "minimumApplicationVersion": "0.0.66",
+  "readiness": "partial",
+  "transport": "stdio",
+  "providerNeutral": true,
+  "entrypoint": "SKILL.md",
+  "license": "AGPL-3.0-or-later",
+  "completeFunctionalCoverage": false,
+  "testedClients": [
+    "repository Python JSON-RPC acceptance client; exact current verification required"
+  ]
+}

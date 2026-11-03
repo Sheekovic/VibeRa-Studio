@@ -1,0 +1,28 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
+@@ -30,11 +30,14 @@
+                                       private AudioTrack::Listener
+ {
+     struct BoundedRuntime;
++    struct LegacyRuntime;
+ public:
+-    // Null scope preserves the ordinary native implementation. The bounded
++    // Both scopes null preserve direct-caller compatibility. Builder supplies
++    // the actual legacy context for ordinary graphs; the bounded
+     // internal mode requires a closed/local Edit and the actual ProcessState
+     // identity of ONE native context/player; separate contexts get separate queues.
+-    LiveMidiInjectingNode (AudioTrack&, std::unique_ptr<tracktion::graph::Node>, const ProcessState* boundedScope = nullptr);
++    LiveMidiInjectingNode (AudioTrack&, std::unique_ptr<tracktion::graph::Node>, const ProcessState* boundedScope = nullptr,
++                           const ProcessState* legacyScope = nullptr);
+     enum class IngressFault : uint32_t { none, wrongProducer, unsupportedMessage, queueFull,
+                                        sourceQuota, sourceMessage, counterExhausted };
+     struct IngressObservation
+@@ -77,6 +80,8 @@
+ 
+     const ProcessState* const ingressScope;
+     std::shared_ptr<BoundedRuntime> bounded;
++    const ProcessState* const legacyScope;
++    std::shared_ptr<LegacyRuntime> legacy; // CONTROL prepare/retire only; DSP never copies/releases.
+     uint32_t preparedMidiCapacity = 0;
+     double preparedRate = 0;
+     int preparedBlock = 0;

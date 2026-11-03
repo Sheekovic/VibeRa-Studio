@@ -1,0 +1,20 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
+@@ -7,6 +7,8 @@
+ 
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
++
++#pragma once
+ 
+ #include <array>
+ #include <cstdint>
+@@ -43,6 +45,8 @@
+         uint64_t accepted = 0, delivered = 0; // Independent atomics; not a concurrent coherent snapshot.
+     };
+     IngressObservation boundedIngressObservation() const noexcept;
++    // CONTROL only; exact recorded-output no-op listener inventory, not global MIDI absence.
++    static bool hasOnlyBoundedNoopOutputListeners (AudioTrack&, const ProcessState&);
+     ~LiveMidiInjectingNode() override;
+ 
+     //==============================================================================

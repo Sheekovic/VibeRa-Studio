@@ -1,0 +1,141 @@
+--- a/modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h
++++ b/modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h
+@@ -10,6 +10,7 @@
+ 
+ #pragma once
+ #include <cstdint>
++#include <atomic>
+ #include <limits>
+ 
+ namespace tracktion::inline graph {
+@@ -22,6 +23,12 @@
+ {
+     LatencyProcessor() = default;
+ 
++    // Read-only metadata, NOT a FIFO/MIDI snapshot or admission capability.
++    // True can be minted only once for this actual processor, on first prepare.
++    bool hasStructuralZeroHistory() const noexcept
++    { return structuralZero.load (std::memory_order_acquire) &&
++             !unknownCreationMutation.load (std::memory_order_acquire); }
++
+     /** Returns ture if the the sample rate, channels etc. are the same between the two objects. */
+     bool hasSameConfigurationAs (const LatencyProcessor& o) const
+     {
+@@ -45,13 +52,15 @@
+ 
+     void setLatencyNumSamples (int numLatencySamples)
+     {
+-        assert (numLatencySamples < (196'000 * 60) && "Invalid latency size");
+-        invalidateAudioReference();
+-        latencyNumSamples = numLatencySamples;
+-    }
+-
++        taintStructuralZeroCreation();
++        setInitialLatencyNumSamples (numLatencySamples);
++    }
+     void prepareToPlay (double sampleRateToUse, int blockSize, int numChannels)
+     {
++        creationDecisionEligible = !creationDecisionMade &&
++                                   !unknownCreationMutation.load (std::memory_order_acquire);
++        creationDecisionMade = true;
++        invalidateStructuralZero();
+         invalidateAudioReference();
+         terminalReader = nullptr;
+         sampleRate = sampleRateToUse;
+@@ -64,19 +73,14 @@
+ 
+     void writeAudio (choc::buffer::ChannelArrayView<float> src)
+     {
+-        invalidateAudioReference();
+-        lastWriteRevision = audioMutationRevision;
+-        lastWriteSucceeded = false;
+-        if (fifo.getNumChannels() == 0)
+-            return;
+-
+-        jassert (fifo.getNumChannels() >= src.getNumChannels());
+-        lastWriteSucceeded = fifo.write (src);
+-    }
+-
++        // An unclassified/foreign writer cannot preserve creation provenance.
++        taintStructuralZeroCreation();
++        writePreparedAudio (src);
++    }
+     void writeMIDI (const tracktion_engine::MidiMessageArray& src)
+     {
+-        midi.mergeFromWithOffset (src, latencyTimeSeconds);
++        taintStructuralZeroCreation();
++        writePreparedMIDI (src);
+     }
+ 
+     void readAudioAdding (choc::buffer::ChannelArrayView<float> dst)
+@@ -173,12 +177,14 @@
+ 
+     void clearAudio (int numSamples)
+     {
++        taintStructuralZeroCreation();
+         invalidateAudioReference();
+         fifo.removeSamples (numSamples);
+     }
+ 
+     void clearMIDI (int numSamples)
+     {
++        taintStructuralZeroCreation();
+         // And read out any delayed items
+         const double blockTimeSeconds = sampleToTime (numSamples, sampleRate);
+ 
+@@ -200,6 +206,55 @@
+ 
+ private:
+     friend class LatencyNode;
++    std::atomic<bool> structuralZero { false };
++    // Permanent provenance taint; public fallback writers can run on DSP while
++    // CONTROL prepares another graph. Never write plain creation flags there.
++    std::atomic<bool> unknownCreationMutation { false };
++    bool creationDecisionMade = false, creationDecisionEligible = false; // CONTROL only.
++    static_assert (std::atomic<bool>::is_always_lock_free);
++    void invalidateStructuralZero() noexcept
++    { structuralZero.store (false, std::memory_order_release); }
++    void taintStructuralZeroCreation() noexcept
++    {
++        unknownCreationMutation.store (true, std::memory_order_release);
++        invalidateStructuralZero();
++    }
++    // Only the constructor's known fresh configuration bypasses PUBLIC taint.
++    void setInitialLatencyNumSamples (int numLatencySamples)
++    {
++        invalidateStructuralZero();
++        assert (numLatencySamples < (196'000 * 60) && "Invalid latency size");
++        invalidateAudioReference();
++        latencyNumSamples = numLatencySamples;
++    }
++
++    void sealStructuralZeroCreation (bool finalInputAlwaysZero) noexcept
++    {
++        if (creationDecisionEligible)
++        {
++            structuralZero.store (finalInputAlwaysZero &&
++                !unknownCreationMutation.load (std::memory_order_acquire), std::memory_order_release);
++            creationDecisionEligible = false;
++        }
++    }
++    // These two paths are used ONLY by an immutable, prepared LatencyNode.
++    // Its CONTROL preparation has already invalidated any reused certificate
++    // when final input provenance is unknown. No extra per-frame/RT atomics.
++    void writePreparedAudio (choc::buffer::ChannelArrayView<float> src)
++    {
++        invalidateAudioReference();
++        lastWriteRevision = audioMutationRevision;
++        lastWriteSucceeded = false;
++        if (fifo.getNumChannels() == 0)
++            return;
++
++        jassert (fifo.getNumChannels() >= src.getNumChannels());
++        lastWriteSucceeded = fifo.write (src);
++    }
++
++    void writePreparedMIDI (const tracktion_engine::MidiMessageArray& src)
++    { midi.mergeFromWithOffset (src, latencyTimeSeconds); }
++
+     // DSP-only plain scalars. Never read from CONTROL. Actual fixed Player
+     // publication establishes single processing ownership across graph adoption.
+     struct ReferenceBeforeAudio

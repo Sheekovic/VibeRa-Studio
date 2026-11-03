@@ -1,0 +1,47 @@
+* text=auto
+src/** text eol=lf
+tests/** text eol=lf
+patches/**/*.patch text eol=lf
+patches/juce-vst3-editor/*.patch -text
+experiments/mixer/**/*.patch -text
+patches/**/manifest.json text eol=lf
+scripts/coproducer/*.cjs text eol=lf
+scripts/coproducer/*.mjs text eol=lf
+scripts/coproducer/*.json text eol=lf
+scripts/coproducer/*.py text eol=lf
+*.ps1 text eol=crlf
+licenses/** -text -whitespace
+LICENSE text eol=lf
+patches/juce-history-preview/*.patch -text
+patches/juce-prepared-history/*.patch -text
+patches/juce-number-safety/*.patch -text
+patches/tracktion-detached-graph/*.patch -text
+patches/tracktion-context-ready/*.patch -text
+patches/tracktion-device-fence/*.patch -text
+patches/juce-physical-callback/*.patch -text
+patches/tracktion-stable-bus-stage/*.patch -text -whitespace
+patches/tracktion-source-admission/*.patch -text -whitespace
+patches/tracktion-local-source-initial/*.patch -text -whitespace
+patches/tracktion-summing-properties-reuse/*.patch -text -whitespace
+patches/tracktion-stage-difference/*.patch -text -whitespace
+patches/tracktion-native-phase-probe/*.patch -text -whitespace
+patches/tracktion-forward-stage-drain/*.patch -text -whitespace
+patches/tracktion-send-gain-block/*.patch -text -whitespace
+patches/tracktion-node-prefix-clear/*.patch -text -whitespace
+patches/tracktion-plugin-final-output/*.patch -text -whitespace
+patches/tracktion-app-source-port-bridge/*.patch -text -whitespace
+patches/tracktion-prepared-audio-zero/*.patch -text -whitespace
+patches/tracktion-context-memory-policy/*.patch -text -whitespace
+patches/tracktion-empty-arranger-proof/*.patch -text -whitespace
+patches/tracktion-whole-source-exchange/*.patch -text -whitespace
+patches/tracktion-zero-channel-delay/*.patch -text -whitespace
+patches/tracktion-stable-track-midi/*.patch -text -whitespace
+patches/tracktion-source-render-time/*.patch -text -whitespace
+patches/tracktion-legacy-midi-runtime/*.patch -text -whitespace
+patches/tracktion-production-source-gate/*.patch -text -whitespace
+patches/tracktion-render-worker-policy/*.patch -text -whitespace
+
+# Recorded source bytes, notices, mappings and their manifest keep pinned hashes.
+assets/synthesizer/samples/** -text -whitespace
+assets/synthesizer/sources/** -text -whitespace
+assets/synthesizer/library.json -text -whitespace

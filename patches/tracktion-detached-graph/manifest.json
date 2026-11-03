@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Bounded original fixed-owner routing/control/send gain with immutable duration experiments; production OFF",
+  "requiredContractSha256": {
+    "patches/tracktion-sidechain-bus/manifest.json": "d6a1fe013963829e95a0bd85cfa357c3230d393b27b9be281122ddbc550bf00d",
+    "patches/tracktion-owned-metering/manifest.json": "946ff789a5309ef822e325cac9be651b5c3fd620f41a4705916e2430590f0e29",
+    "patches/tracktion-retained-history/manifest.json": "014cf6d41aba1aad06306b82d24644eeaaac551e240e718471560b2b818877ee",
+    "patches/tracktion-ready-graph/manifest.json": "e7cd15403b7e737a7395c30a92607d3f7e8e5021ad11f052bc010791b0366404",
+    "patches/tracktion-mixer-sends/manifest.json": "014d134fae30e454eb0480080279d6c18c0f2b223a382ce984a11ecdb3cfd964",
+    "patches/tracktion-retained-midi/manifest.json": "2079647e53ee9c44a3769b08709dc4402cecfa46e69e4156df386a646c153b92"
+  },
+  "files": [
+    {
+      "path": "modules/tracktion_engine/plugins/tracktion_Plugin.h",
+      "patch": "patches/tracktion-detached-graph/tracktion_Plugin.h.patch",
+      "originalSha256": "8081f5b3533b387c7542909c4998ecc1b50df26108c65fc09340f6895fd44133",
+      "patchedSha256": "c10314cd075e1ace0959147caa8410325ef38dc9c74ad7d277836d261e18569c",
+      "patchSha256": "63451947443b73c301d85a901909e387139691a5323bb1c315d6a1f1069ef45d",
+      "addedLines": 21,
+      "deletedLines": 2,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.h",
+      "patch": "patches/tracktion-detached-graph/tracktion_AutomatableEditItem.h.patch",
+      "originalSha256": "223efd98b60fb3c05fc87fc8302319cbaba6a4d21705bf4dd3e0e1d44e926629",
+      "patchedSha256": "818cc7bfb999d68c773ef5e97ef4a4059bf4c4891cef8ca5587fdca6ac7c63fd",
+      "patchSha256": "2371245100e6e209e318476f1af8ac5b1078174429f96588a4f6c7608df5a8d0",
+      "addedLines": 3,
+      "deletedLines": 1,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.cpp",
+      "patch": "patches/tracktion-detached-graph/tracktion_AutomatableEditItem.cpp.patch",
+      "originalSha256": "3f39f3ac76fe9b43eb65d608035c589a6347d5bea540ee6fcbd2e1899913b161",
+      "patchedSha256": "910154c037a3dc4e7086e6a41de73e5f76d13cc02f55e4d627fdae82a2eab54a",
+      "patchSha256": "45ae6f2c626bc46f4d60a945ea009b4b96bbf11c7d75643b26694bfa483db061",
+      "addedLines": 9,
+      "deletedLines": 8,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/plugins/tracktion_Plugin.cpp",
+      "patch": "patches/tracktion-detached-graph/tracktion_Plugin.cpp.patch",
+      "originalSha256": "04208a38b9c066909fe8cd83ad516c67d480c3a43b3313844b4e15399f1e4a64",
+      "patchedSha256": "2a006da4a0a8e2c69f6060e54f19fbc8169b45c62709ca1ec4916541f56fa6dd",
+      "patchSha256": "3218730c82c5715e1ba358af79bf3a2d65446974b320c34878b933c7ad8ac5a9",
+      "addedLines": 92,
+      "deletedLines": 6,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/plugins/internal/tracktion_AuxSend.cpp",
+      "patch": "patches/tracktion-detached-graph/tracktion_AuxSend.cpp.patch",
+      "originalSha256": "9d343474d1f22add0a39d159e9ec5fc163b6856d9cf89648fda03c9e687ba9c8",
+      "patchedSha256": "d196bbbee7b4ae6bb00ee2750aaaafc8f4bb7c69d2ec606bec4c9382d153365f",
+      "patchSha256": "e3eb1c6858883eeba2b3290e0900e5683495cb3558ea108851d417e9517c502a",
+      "addedLines": 11,
+      "deletedLines": 1,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h",
+      "patch": "patches/tracktion-detached-graph/tracktion_EditNodeBuilder.h.patch",
+      "originalSha256": "fe8fd5fddcbfbabae72e5350571dc9377a4101ea915916f42e7ea88a2253806b",
+      "patchedSha256": "bc0e47f34c3ed634b31d6e1d934e10ab9bd8f264f57dbfdfb9af0a6c1d11b704",
+      "patchSha256": "a0701b92cf13864f75cfb3df21d22fddfbcf3bf4078330486a6bb2229eeb1652",
+      "addedLines": 62,
+      "deletedLines": 0,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-detached-graph/tracktion_EditNodeBuilder.cpp.patch",
+      "originalSha256": "0bec425cab622973213e30423007fbb556289e7d0e74ef565132b1c6f86b1bcd",
+      "patchedSha256": "7469964244e0e60c01ef290a978205e574e532ee4758ca9a777a0d193f335dfa",
+      "patchSha256": "4a0c5e1006423ea428951d8be7d1782e8762cb40d18f0de3cc7c7c19a833dd94",
+      "addedLines": 281,
+      "deletedLines": 11,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-owned-metering/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_PluginNode.h",
+      "patch": "patches/tracktion-detached-graph/tracktion_PluginNode.h.patch",
+      "originalSha256": "11adef8404e732120a2cb8a243e001c258641848cf8cf8f62b5865e63747b340",
+      "patchedSha256": "eb9f0c461a44fa8ae4f3807c81e633f07b579f0f0c14168fff5eb89b0962438f",
+      "patchSha256": "040b0a672813f66b40508c22e6eedc2b1f22d4809bac3e54a267958899303103",
+      "addedLines": 2,
+      "deletedLines": 2,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp",
+      "patch": "patches/tracktion-detached-graph/tracktion_PluginNode.cpp.patch",
+      "originalSha256": "059d94099dfb96b38e3a651f479994671e33083e6baf0d3f23e48981592f64b2",
+      "patchedSha256": "bd4046a43af0b9b3bc7d41e8d2fbd139ee50f9143a4018addfcc369bdab33a46",
+      "patchSha256": "a2013dfb7af814878c0d03d5b0cbff699e43f35c905ea8d9e198107fadfe20cc",
+      "addedLines": 36,
+      "deletedLines": 9,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.h",
+      "patch": "patches/tracktion-detached-graph/tracktion_AuxSendNode.h.patch",
+      "originalSha256": "ab79c4b912f984cbc759c1156699ff76a98b2242f225df56b7d3fbfba4237d33",
+      "patchedSha256": "07c47736bbf1768d52b35f8049b395be01d22cd2eb5367b180ace6d2948eadbd",
+      "patchSha256": "20f7f6150c658ad953983b48f8c02fd54e05e781bca648b60e918fe67f08ab5c",
+      "addedLines": 1,
+      "deletedLines": 1,
+      "lineage": []
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp",
+      "patch": "patches/tracktion-detached-graph/tracktion_AuxSendNode.cpp.patch",
+      "originalSha256": "2718742da2b235c92b3937eb0bb6fd3aef18f32016bf0572133d89332b1d139f",
+      "patchedSha256": "9721b4262fc34beed8a56467e02c5801738eba40e786bea8f84bf819d38fcbdd",
+      "patchSha256": "49e13fccdc090b154fbbceffa58195c305b9e9891eeca807b8cce2cb18ad2c40",
+      "addedLines": 6,
+      "deletedLines": 3,
+      "lineage": [
+        "patches/tracktion-mixer-sends/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h",
+      "patch": "patches/tracktion-detached-graph/tracktion_AuxSend.h.patch",
+      "originalSha256": "ca1cc52666f8825fbfd45f013e658ad3e24ef00962c5ac698bd53e879a8b06e6",
+      "lineage": [
+        "patches/tracktion-mixer-sends/manifest.json"
+      ],
+      "patchedSha256": "5c1a2cc996b613971d8fd73ed9e145f506068835d8787a9596c9153eb9e5c8a5",
+      "patchSha256": "b2a8c9729eace4939eea5eeae00767148e0d365968941899ffd672d192574d41",
+      "addedLines": 10,
+      "deletedLines": 0
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_TestNodes.h",
+      "patch": "patches/tracktion-detached-graph/tracktion_TestNodes.h.patch",
+      "originalSha256": "b961588f6edc0e2cf9888f379cd7cd34485bba5a7137cf239a49562d4abe48e6",
+      "lineage": [],
+      "patchedSha256": "2910e595880ced386ed2f7814e9ebf9d883e5441bedfd616c4e1150130b29d20",
+      "patchSha256": "20f47300f8f49a5369d0119ca63d6b8051471321c6bf971f63bd7a8e42cc4b43",
+      "addedLines": 171,
+      "deletedLines": 3
+    }
+  ],
+  "requiresFamilies": [
+    "patches/tracktion-sidechain-bus/manifest.json",
+    "patches/tracktion-owned-metering/manifest.json"
+  ]
+}

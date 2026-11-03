@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later AND AGPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Optional original exact per-frame send-gain provider; default capability false; native clock prototype only, no canonical send target/application export/retained adoption qualification",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp",
+      "patch": "patches/tracktion-send-gain-block/tracktion_AuxSendNode.cpp.patch",
+      "originalSha256": "9721b4262fc34beed8a56467e02c5801738eba40e786bea8f84bf819d38fcbdd",
+      "patchedSha256": "9f801a8438e91882c40686d613bfe06a267c181361474099abd3a3694810acd8",
+      "patchSha256": "cb89846d61ecdc15e87330ae0e00cb6b9bf0649e2a10860acd483854dda9685f",
+      "addedLines": 41,
+      "deletedLines": 3,
+      "lineage": [
+        "patches/tracktion-mixer-sends/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.h",
+      "patch": "patches/tracktion-send-gain-block/tracktion_AuxSendNode.h.patch",
+      "originalSha256": "07c47736bbf1768d52b35f8049b395be01d22cd2eb5367b180ace6d2948eadbd",
+      "patchedSha256": "591e2856da17a629c2e086baf637479e694591ef4d1aa0db32cb53c78e75ffe2",
+      "patchSha256": "2e7f22a1c59f921dcb6643c6cb151bd0dcad7fa9b0566fc1c123d04236ea4def",
+      "addedLines": 6,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-detached-graph/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-send-gain-block/tracktion_EditNodeBuilder.cpp.patch",
+      "originalSha256": "7469964244e0e60c01ef290a978205e574e532ee4758ca9a777a0d193f335dfa",
+      "patchedSha256": "5470b9b2a04459a5fc3a657405d318b96109a596769b70c84c0e2eb032d53a85",
+      "patchSha256": "d4014a2cc262bbbb6a1023eba7ed25004d220f3e3bd42c82405419d88128fde3",
+      "addedLines": 2,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-owned-metering/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/plugins/internal/tracktion_AuxSend.h",
+      "patch": "patches/tracktion-send-gain-block/tracktion_AuxSend.h.patch",
+      "originalSha256": "5c1a2cc996b613971d8fd73ed9e145f506068835d8787a9596c9153eb9e5c8a5",
+      "patchedSha256": "e37b44b094c85e370881c5ecf3ce4de10db3aea8be01581eca44dea497f38ba9",
+      "patchSha256": "6642201888a14935b7e9a685e125dbdd21b5ab590e9e68762bf88091cc924cfc",
+      "addedLines": 9,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-mixer-sends/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_SendGainBlock.h",
+      "patch": "patches/tracktion-send-gain-block/tracktion_SendGainBlock.h.patch",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "patchedSha256": "331fe9a919888dc5e094b1a9ddb4870aea28ab0511dac8a3b3e9437bbbb5b06c",
+      "patchSha256": "b9a4b42b3b706c92f32f52e8c5de1b8dcf49aea0ea0578ddc0d8e80677392add",
+      "addedLines": 27,
+      "deletedLines": 0,
+      "lineage": [],
+      "originalAbsent": true
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_TestNodes.h",
+      "patch": "patches/tracktion-send-gain-block/tracktion_TestNodes.h.patch",
+      "originalSha256": "2910e595880ced386ed2f7814e9ebf9d883e5441bedfd616c4e1150130b29d20",
+      "patchedSha256": "bb1f84bdc82912e3a89c262850890ae97f80c96772aa1d88a7320c4a160c57b7",
+      "patchSha256": "e30099c4733663bab500167725fd041238fd7fae49b0f355ed63390fa05e1afe",
+      "addedLines": 59,
+      "deletedLines": 7,
+      "lineage": [
+        "patches/tracktion-detached-graph/manifest.json"
+      ]
+    }
+  ]
+}

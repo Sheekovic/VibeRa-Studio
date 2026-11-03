@@ -1,0 +1,11 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp
+@@ -34,7 +34,7 @@
+                            return 0.0f;
+                     }
+ 
+-                    auto gain = volumeFaderPositionToGain (sourceSendPlugin.gain->getCurrentValue());
++                    auto gain = sourceSendPlugin.getRealtimeSendGain();
+                     if (sourceSendPlugin.invertPhase)
+                         gain *= -1.0f;
+ 

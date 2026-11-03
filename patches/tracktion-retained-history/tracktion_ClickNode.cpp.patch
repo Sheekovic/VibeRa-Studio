@@ -1,0 +1,20 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp
+@@ -271,8 +271,17 @@
+     props.hasMidi = generateMidi;
+     props.numberOfChannels = numChannels;
+     auto pid = edit.getProjectItemRef().getProjectItemID();
+     props.nodeID = pid ? (size_t) pid->getRawID() : size_t (0);
++    // A fileless independent Edit has no ProjectManager item. Give its click
++    // source a deterministic role identity instead of an absent producer ID.
++    // Consumer/port keys still distinguish output edges; no pointer reuse keys.
++    if (props.nodeID == 0)
++    {
++        props.nodeID = size_t (0x7669627261636c6bULL);
++        hash_combine (props.nodeID, generateMidi);
++        hash_combine (props.nodeID, numChannels);
++    }
+ 
+     return props;
+ }
+ 

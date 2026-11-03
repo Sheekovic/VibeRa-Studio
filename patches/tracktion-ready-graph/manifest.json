@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "appliesAfter": "patches/tracktion-retained-midi/manifest.json",
+  "productionEnabled": false,
+  "qualification": "Original fixed-configuration non-pooled prepared graph experiment; production disabled; runtime/adoption acceptance separate",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h",
+      "patch": "patches/tracktion-ready-graph/tracktion_LockFreeMultiThreadedNodePlayer.h.patch",
+      "originalSha256": "1c350ac885f71910ff70d39eba7f63afac911348a77f869fcfc018533d4c4ec0",
+      "patchedSha256": "74eae99b17e870566fdfaab5777fe8c4b43aae7a3ce6222ec2e8baae4bc2e03a",
+      "patchSha256": "109cd9c87aa83a4aa1748cee5356b78909cc1ec7f7466a38f5d4f6621db7d410"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp",
+      "patch": "patches/tracktion-ready-graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp.patch",
+      "originalSha256": "ba2191de6a79281c61ac6c34dec5f81331ce6e1afcfb8c8c89cc542b90550eab",
+      "patchedSha256": "c00934716646155c4f891e0210f4276d4ae8a6c3a9177401ef8b77fb57ae2cc8",
+      "patchSha256": "236168fa5e2bc710dfc842a1f784d3fee93f516d03c43f0482d7450575881f41"
+    }
+  ]
+}

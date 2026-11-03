@@ -1,0 +1,13 @@
+{
+  "scope": "Scratch-only original implementation draft; exact vendor/LF-normalized original-source patch reproduction. C++ uncompiled; runtime unexecuted.",
+  "patchReproductionPassed": true,
+  "seconds": 0.0662721999688074,
+  "noLiveFilesChanged": true,
+  "retainedFixtureFailure": "initial-patch-fixture-failure.json",
+  "applicationExecuted": false,
+  "buildExecuted": false,
+  "nativeInputExecuted": false,
+  "finalTestHeaderFollowup": "Added required real graph-preparation callback; source-only check, not rerun git apply while parent timing-sensitive suite active.",
+  "patchReproductionScope": "Previous exact reproduction covers unchanged10 existing files; new test header follow-up unbuilt and not rerun in fixture.",
+  "finalIntegrationPatchSha256": "37469112b021eec8ba2bb1cdef20b4d1b6538bd0665fcdfc2e7842d857c831be"
+}

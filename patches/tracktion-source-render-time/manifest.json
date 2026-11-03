@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original default-false CONTROL-preparation source-render-time virtual and exact PluginNode branch. Ordinary native plugins retain compensated automation time; an explicit source adapter override changes its score clock. Source guard evidence only; actual source/PCM/native regressions and product admission remain separate.",
+  "sourceProvenance": {
+    "draftFreezeSha256": "39d50e4642d5144214491f3de8d88f2bfb3e76c7caec8e7775e4be59e3e72488",
+    "referenceImplementation": "Independent original extension around pinned Tracktion source; upstream license/notices retained"
+  },
+  "appliesAfter": "patches/tracktion-stable-track-midi/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/plugins/tracktion_Plugin.h",
+      "patch": "patches/tracktion-source-render-time/tracktion_Plugin.h.patch",
+      "originalSha256": "f3f8b11ca783f77b4233c1430590d54deabcf6aad0a47a17c9eb8a842d3ba90c",
+      "patchedSha256": "057cca2e7b865042238ec8aa6cb3fcb4b6a8977aec8bd50ae9ae12c121648486",
+      "patchSha256": "413ea04dbb769ca5086035dfde4b38407e12beac4cf1075e10c2a69bd0524b2b",
+      "addedLines": 5,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp",
+      "patch": "patches/tracktion-source-render-time/tracktion_PluginNode.cpp.patch",
+      "originalSha256": "9eeb53e6cbac68973cfeed4eef811666b205e6dbd1d8b7a9d80b6c53224aed79",
+      "patchedSha256": "772b62f41f96eb447556d20e0595bac445acfe0092a99f51440980df53851299",
+      "patchSha256": "e995169f32a809ead227e759544ec82c76faca8c3b9563c03535633bf85aeebf",
+      "addedLines": 3,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-plugin-final-output/manifest.json"
+      ]
+    }
+  ]
+}

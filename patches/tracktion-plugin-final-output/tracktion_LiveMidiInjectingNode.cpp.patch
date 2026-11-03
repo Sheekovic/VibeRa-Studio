@@ -1,0 +1,41 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
+@@ -58,6 +58,8 @@
+         if (size < 1 || size > 3 || bytes[0] < 0x80 || bytes[0] == 0xf0 || bytes[0] == 0xf7 ||
+             juce::MidiMessage::getMessageLengthFromFirstByte (bytes[0]) != size)
+         { fail (IngressFault::unsupportedMessage); return; }
++        for (int i = 1; i < size; ++i)
++            if (bytes[i] >= 0x80) { fail (IngressFault::unsupportedMessage); return; }
+         const auto head = written.load (std::memory_order_relaxed);
+         const auto tail = read.load (std::memory_order_acquire);
+         if (head == std::numeric_limits<uint64_t>::max())
+@@ -87,6 +89,8 @@
+             if (size < 1 || size > 3 || bytes[0] < 0x80 || bytes[0] == 0xf0 || bytes[0] == 0xf7 ||
+                 juce::MidiMessage::getMessageLengthFromFirstByte (bytes[0]) != size)
+             { fail (IngressFault::sourceMessage); return false; }
++            for (int i = 1; i < size; ++i)
++                if (bytes[i] >= 0x80) { fail (IngressFault::sourceMessage); return false; }
+         }
+         destination.copyFrom (source); // Existing output array reserved CONTROL.
+         for (uint64_t n = 0; n < available; ++n)
+@@ -102,6 +106,20 @@
+         return true;
+     }
+ };
++
++bool LiveMidiInjectingNode::hasOnlyBoundedNoopOutputListeners (AudioTrack& track, const ProcessState& scope)
++{
++    auto* messages = juce::MessageManager::getInstanceWithoutCreating();
++    if (!messages || !messages->isThisTheMessageThread())
++        throw std::invalid_argument ("pluginOutput.controlOwner: Message-thread listener inventory required");
++    for (auto* listener : track.getListeners().getListeners())
++    {
++        auto* runtime = dynamic_cast<BoundedRuntime*> (listener);
++        if (!runtime || runtime->track.get() != &track || runtime->scope != &scope || !runtime->registered)
++            return false;
++    }
++    return true;
++}
+ 
+ LiveMidiInjectingNode::IngressObservation LiveMidiInjectingNode::boundedIngressObservation() const noexcept
+ {

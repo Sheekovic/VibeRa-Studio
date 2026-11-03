@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "dependency": "JUCE",
+  "revision": "37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "sourceDirectory": "JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "archiveSha256": "f3da0cce79f1008b02ba1cddde8eba1087d07a4d6a775a0ba0d56a9d3cecd18a",
+  "license": "AGPL-3.0-only",
+  "physicalCallbackTelemetry": true,
+  "hostTransportSelection": false,
+  "qualification": "Original pre-enforcer scalar telemetry, retained owner-safe reader and exact Windows factory provenance; source guard does not qualify runtime or select Host transport policy.",
+  "vendorReadDependencies": [
+    {
+      "path": "modules/juce_audio_devices/native/juce_ASIO_windows.cpp",
+      "mode": "raw",
+      "sha256": "eac95f405676c35945164b2c4f8a278099ae51143b68579fefb1902450b54489"
+    },
+    {
+      "path": "modules/juce_audio_devices/native/juce_WASAPI_windows.cpp",
+      "mode": "raw",
+      "sha256": "a7eb67c4d738706565325855ec3fa835a45d9bf8db40c56c96501a06e52eadc9"
+    },
+    {
+      "path": "modules/juce_audio_devices/native/juce_DirectSound_windows.cpp",
+      "mode": "raw",
+      "sha256": "f651edb764085690e90a71830bd9e738ce19a6ce3e391069d6a8f72b84e97638"
+    }
+  ],
+  "files": [
+    {
+      "path": "modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.h",
+      "patch": "patches/juce-physical-callback/juce_AudioDeviceManager.h.patch",
+      "originalSha256": "75cabf1ac9731d0bf591a4bf871693bfdf9a607355d4525a20a09ea378ef3148",
+      "patchedSha256": "31f77bb0fdd9727450308e3604b14efb43b0790b32943210e6d6f56fd97bede0",
+      "patchSha256": "1219fb0040ebd31fde54b997b2d14b71b3ea74cd9dfdeb702b0a7ea765bd24c0"
+    },
+    {
+      "path": "modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.cpp",
+      "patch": "patches/juce-physical-callback/juce_AudioDeviceManager.cpp.patch",
+      "originalSha256": "e82d3e9c3f52d4701f89a13e4f84d915560c5c9189d82d31268eb177e47036ea",
+      "patchedSha256": "fed6e7ed924bc764d775076be98000c0c853ad53ce21ed31e472d3b9fa1b543c",
+      "patchSha256": "3569877c4b7f5d65839a0b4f444eed10d3e00f2fa9f4da159495e49491f4fe7c"
+    }
+  ],
+  "archive": "juce.zip"
+}

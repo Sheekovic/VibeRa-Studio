@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original opt-in CONTROL prepared AUDIO-domain zero-output proof. Default unknown; no changed-stage/joint routing authorization or runtime qualification. Existing ordinary graph behavior is unchanged without the independently audited proof provider.",
+  "sourceProvenance": {
+    "draftFreezeSha256": "1bf7e5ada654663889cd8e1f20900ddd87fa884da5ad94ba59886442ead5b3ce",
+    "draftPayloadSha256": "a561c379753609996921da61bd5c6f2227b9772953c17cf59c80e6b9edcd8cce",
+    "referenceImplementation": "Independent original opt-in extension around pinned Tracktion source; upstream license/notices retained"
+  },
+  "appliesAfter": "patches/tracktion-app-source-port-bridge/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-prepared-audio-zero/tracktion_LatencyNode.h.patch",
+      "originalSha256": "4e23469446500c47bfe2c229eccaaeb9e808249084e25c4766ddef38b24365b9",
+      "patchedSha256": "f392c3ebc572497223d97c94888a5df36613e6f0bd9a857a771b98aa98f61179",
+      "patchSha256": "a43391d3136c06cf600516c5ff60bbb0bbbfb7fd3351e6ab60734828eb2e8a24",
+      "addedLines": 41,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json",
+        "patches/tracktion-forward-stage-drain/manifest.json",
+        "patches/tracktion-zero-history-creation/manifest.json",
+        "patches/tracktion-inverse-stage-residual/manifest.json",
+        "patches/tracktion-inverse-stage-seal/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h",
+      "patch": "patches/tracktion-prepared-audio-zero/tracktion_EditNodeBuilder.h.patch",
+      "originalSha256": "25c50861d17496d2a536b6d0040f684c4265c2e288b96da55f90fc1a5c03adaa",
+      "patchedSha256": "6cbb9ba4c32735379ab4ff703dc312632a1907fd0b0cf317ee91f42d200de34b",
+      "patchSha256": "da5b4153b3965ee28014e8dee231e7a4a3eeed8b46f5029ea3ea2807223e3923",
+      "addedLines": 8,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-native-midi-ingress/manifest.json",
+        "patches/tracktion-plugin-final-output/manifest.json",
+        "patches/tracktion-app-source-port-bridge/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-prepared-audio-zero/tracktion_EditNodeBuilder.cpp.patch",
+      "originalSha256": "c2cf53738165ce6fdb5741417c5a6165cae972e78e6672a564f57f5888ae23a5",
+      "patchedSha256": "b39f92bce779101bba324c64f712df72938e3924a908866a04fc42f9137c36ed",
+      "patchSha256": "ed5c749c32487215596d2bbbec3406eb28bda54f130832261cde197d6553f803",
+      "addedLines": 51,
+      "deletedLines": 0,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-owned-metering/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-send-gain-block/manifest.json",
+        "patches/tracktion-native-midi-ingress/manifest.json",
+        "patches/tracktion-plugin-final-output/manifest.json",
+        "patches/tracktion-app-source-port-bridge/manifest.json"
+      ]
+    }
+  ]
+}

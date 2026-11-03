@@ -1,0 +1,57 @@
+--- a/modules/tracktion_engine/plugins/tracktion_Plugin.h
++++ b/modules/tracktion_engine/plugins/tracktion_Plugin.h
+@@ -16,12 +16,14 @@
+ */
+ struct PluginCreationInfo
+ {
++    // Internal app-owned adapters only. Never inferred from persistent project state.
++    enum class Mode { normal, detachedGraph };
+     PluginCreationInfo (const PluginCreationInfo&) = default;
+     PluginCreationInfo (PluginCreationInfo&&) = default;
+     PluginCreationInfo& operator= (PluginCreationInfo&&) = delete;
+ 
+-    PluginCreationInfo (Edit& ed, const juce::ValueTree& s, bool isNew) noexcept
+-        : edit (ed), state (s), isNewPlugin (isNew) {}
++    PluginCreationInfo (Edit& ed, const juce::ValueTree& s, bool isNew, Mode modeToUse = Mode::normal) noexcept
++        : edit (ed), state (s), isNewPlugin (isNew), mode (modeToUse) {}
+ 
+     PluginCreationInfo() = delete;
+     PluginCreationInfo& operator= (const PluginCreationInfo&) = delete;
+@@ -29,6 +31,7 @@
+     Edit& edit;
+     juce::ValueTree state;
+     bool isNewPlugin = false;
++    Mode mode = Mode::normal;
+ };
+ 
+ //==============================================================================
+@@ -550,6 +553,21 @@
+     /** Returns true if baseClassInitialise() has not yet been called (or has been fully deinitialised). */
+     bool baseClassNeedsInitialising() const noexcept        { return initialiseCount == 0; }
+ 
++    /** Internal sole-control-owner attachment for an already initialized exact
++        plugin owner at unchanged finite rate/block. Only a bounded atomic count
++        increment: no lifecycle virtuals, plain configuration/statistic writes,
++        automation resets, allocation or locks. Never resurrects zero/exhausted
++        count. Caller must prove actual owner/type/configuration/reader lifetime.
++        This is NOT a generic provider thread-safety guarantee or callback API. */
++    bool retainFixedInitialisation (double fixedRate, int fixedBlock) noexcept;
++    /** Internal fixed-admission path: retain a positive initialized exact owner,
++        or failure-safely first-initialize an actual private detached shell.
++        Caller proves closed type, sole control ownership and no reentry.
++        On first-init failure, balance only our acquired0-to1 count and clear
++        the initialization flag. Private deinitialise must be nonthrowing and
++        safe after partial initialization; arbitrary providers are unsupported. */
++    void attachFixedGraphInitialisation (const PluginInitialisationInfo&);
++
+     /** Prepares the plugin for playback. Calls initialise() and increments the internal init count. */
+     void baseClassInitialise (const PluginInitialisationInfo&);
+ 
+@@ -610,6 +628,7 @@
+     juce::ValueTree state;
+ 
+     juce::UndoManager* getUndoManager() const noexcept;
++    bool isDetachedGraph() const noexcept { return isDetachedGraphItem(); }
+ 
+     //==============================================================================
+     /** @internal */

@@ -1,0 +1,127 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
+@@ -9,6 +9,9 @@
+ */
+ 
+ #pragma once
++#include <cstdint>
++#include <limits>
++#include <memory>
+ 
+ #ifdef _MSC_VER
+  #pragma warning (push)
+@@ -71,6 +74,17 @@
+         std::vector<std::unique_ptr<PlaybackNode>> playbackNodes;
+         std::unique_ptr<LockFreeFifo<Node*>> nodesReadyToBeProcessed;
+         std::unique_ptr<AudioBufferPool> audioBufferPool;
++        int preparedLatencySamples = 0;
++    };
++
++    struct ReadyOwnerIdentity { LockFreeMultiThreadedNodePlayer* player = nullptr; };
++    struct ReadyConfiguration
++    {
++        double rate = 0;
++        int block = 0;
++        size_t threads = 0;
++        bool pooled = false, sharing = false, disableLatency = false;
++        bool operator==(const ReadyConfiguration&) const = default;
+     };
+ 
+ public:
+@@ -207,6 +221,13 @@
+         LockFreeMultiThreadedNodePlayer& player;
+ 
+     private:
++        friend class LockFreeMultiThreadedNodePlayer;
++        // CONTROL-only snapshot; caller owns publication/retirement, so no
++        // holder can be destroyed until that caller next posts/retires.
++        PreparedNode* getCurrentNodeForPreparation() const noexcept
++        {
++            return currentPreparedNode.load (std::memory_order_acquire);
++        }
+         std::atomic<bool> threadsShouldExit { false };
+         std::atomic<int> numActiveProcessCalls { 0 };
+         std::atomic<LockFreeMultiThreadedNodePlayer::PreparedNode*> currentPreparedNode { nullptr };
+@@ -241,6 +262,64 @@
+         Calling this will cause a drop in the output stream as the Node is re-prepared.
+     */
+     void prepareToPlay (double sampleRateToUse, int blockSizeToUse);
++
++    // Internal opt-in, sole CONTROL owner. Never call these APIs in process().
++    // Initial supported scope explicitly excludes pooled allocations: incumbent
++    // default pool callbacks capture player caches, not a graph-owned pool.
++    enum class ReadyGraphStatus
++    {
++        ready, emptyCandidate, foreignOwner, staleGeneration, configurationChanged,
++        retirementSlotNotEmpty, foreignRetirementSlot, preparationBusy,
++        noCurrentGraph, pooledMemoryUnsupported, generationExhausted
++    };
++    class ReadyGraph
++    {
++      public:
++        ReadyGraph() = default;
++        ReadyGraph(ReadyGraph&&) noexcept = default;
++        ReadyGraph& operator= (ReadyGraph&&) noexcept = default;
++        ReadyGraph(const ReadyGraph&) = delete;
++        ReadyGraph& operator= (const ReadyGraph&) = delete;
++        ~ReadyGraph() = default; // Candidate destruction belongs to control.
++        bool empty() const noexcept { return storage == nullptr; }
++        int latencySamples() const noexcept { return storage ? storage->preparedLatencySamples : 0; }
++      private:
++        friend class LockFreeMultiThreadedNodePlayer;
++        std::shared_ptr<ReadyOwnerIdentity> owner;
++        ReadyConfiguration configuration;
++        uint64_t generation = 0;
++        std::unique_ptr<PreparedNode> storage;
++    };
++    class GraphRetirementSlot
++    {
++      public:
++        GraphRetirementSlot() = default;
++        GraphRetirementSlot(GraphRetirementSlot&&) noexcept;
++        GraphRetirementSlot& operator= (GraphRetirementSlot&&) noexcept;
++        GraphRetirementSlot(const GraphRetirementSlot&) = delete;
++        GraphRetirementSlot& operator= (const GraphRetirementSlot&) = delete;
++        ~GraphRetirementSlot() noexcept; // Control-only RAII retirement fallback.
++        bool empty() const noexcept { return storage == nullptr; }
++      private:
++        friend class LockFreeMultiThreadedNodePlayer;
++        explicit GraphRetirementSlot(std::shared_ptr<ReadyOwnerIdentity> value) : owner(std::move(value)) {}
++        void releaseOnControlThread() noexcept;
++        std::shared_ptr<ReadyOwnerIdentity> owner;
++        std::unique_ptr<PreparedNode> storage;
++    };
++    ReadyGraphStatus fixedGraphPreparationReadiness() const noexcept;
++    // Fallible preparation of the complete publication holder; throws on an
++    // unsupported scope or stale/reentrant configuration. No threads/process
++    // mutex, active cache mutation, publication, processing or observer delivery.
++    ReadyGraph prepareFixedGraph(std::unique_ptr<Node>);
++    GraphRetirementSlot makeGraphRetirementSlot(); // May allocate owner stamp.
++    ReadyGraphStatus validateReadyGraph(const ReadyGraph&, const GraphRetirementSlot&) const noexcept;
++    // Only validated moves/raw stores and existing non-RT mailbox publication.
++    // No quiesce, holder/node destruction or allocation here. It may contend on
++    // the existing mailbox lock; this is NOT a real-time callback API.
++    ReadyGraphStatus publishReadyGraph(ReadyGraph&, GraphRetirementSlot&) noexcept;
++    // After commit, CONTROL only: quiesce pool readers, then release retired owner.
++    bool retireReadyGraph(GraphRetirementSlot&) noexcept;
+ 
+     /** Returns the current Node. */
+     Node* getNode()
+@@ -306,6 +385,17 @@
+     NodeGraph* lastGraphPosted = nullptr;
+     AudioBufferPool* lastAudioBufferPoolPosted = nullptr;
+     int preparedLatencySamples = 0;
++    // Sole control owner; not touched by process(). Identity is lazy so normal
++    // default players do not acquire an additional allocation until this opt-in.
++    std::shared_ptr<ReadyOwnerIdentity> readyOwnerIdentity;
++    uint64_t readyMutationGeneration = 0;
++    bool fixedPreparationActive = false, readyGenerationExhausted = false;
++    void invalidateReadyGraphs() noexcept;
++    void requireNoFixedPreparation() const;
++    void ensureReadyOwner();
++    ReadyConfiguration readyConfiguration() const noexcept;
++    std::unique_ptr<PreparedNode> prepareGraphHolder(std::unique_ptr<NodeGraph>, bool pooled,
++                                                           size_t threads, int block);
+ 
+     std::atomic<size_t> numNodesQueued { 0 };
+ 

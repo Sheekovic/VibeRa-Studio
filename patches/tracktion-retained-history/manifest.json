@@ -1,0 +1,86 @@
+{
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "appliesAfter": "patches/tracktion-sidechain-bus/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_Node.h",
+      "patch": "patches/tracktion-retained-history/tracktion_Node.h.patch",
+      "originalSha256": "711b8041bef75c939d818b6599512b34be38b49678f982fb227fdde5cd509418",
+      "patchedSha256": "ab6214b3f35471d5b3c54c799c6ee0bc8a45bbf4a28e5f8e13d2a7e53836e845"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-retained-history/tracktion_LatencyNode.h.patch",
+      "originalSha256": "622556bfc9914a720eacfc672d3c4175ce58c09f3de38ea892fe1eac7d502564",
+      "patchedSha256": "8535ed646a176a5955b2d73f658651bfe0da9ffd71d86b92224a84407cb308f0"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h",
+      "patch": "patches/tracktion-retained-history/tracktion_SummingNode.h.patch",
+      "originalSha256": "ed03be0be7a3b3143fba3b631410374c075b1a8b8a71f7a421b5c425cb2c04e1",
+      "patchedSha256": "189b67d3645650aa322ea15cfff95dfb114db4cab9bab9b454907ba582295182"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_ConnectedNode.h",
+      "patch": "patches/tracktion-retained-history/tracktion_ConnectedNode.h.patch",
+      "originalSha256": "0674e89b76c472f4da21db7478531577a225ef3fb522b26b6146b2eae00f05e2",
+      "patchedSha256": "7ed6d41a8d6535694d20aac87adaad50df56f7f50508e60939bdc9824dc51b93"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_CompensationHistory.h",
+      "patch": "patches/tracktion-retained-history/tracktion_CompensationHistory.h.patch",
+      "originalSha256": null,
+      "originalAbsent": true,
+      "patchedSha256": "335b125ed070e07032a1c33df81efd655a8fb404854eff82061bee5b18fef2cb"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_ClickNode.cpp",
+      "patch": "patches/tracktion-retained-history/tracktion_ClickNode.cpp.patch",
+      "originalSha256": "487e4ef7c67ab8ee3dd5d6dcd27266087306bd4c5adf735b74cceab3e08a7921",
+      "patchedSha256": "3cdb3c2880a5f58c71ae7f4420ef0d3044634b0dd01705860257e7a7b3c6ccce"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h",
+      "patch": "patches/tracktion-retained-history/tracktion_EditPlaybackContext.h.patch",
+      "originalSha256": "d172d8de5ee35392557d3e0e363893283de2d9d0392d7e58114b3c8c3ee09b4b",
+      "patchedSha256": "2b25cbcaab36e3f24cf099a27071188b0795aa7ab310b0ced81858fde54eded8"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp",
+      "patch": "patches/tracktion-retained-history/tracktion_LockFreeMultiThreadedNodePlayer.cpp.patch",
+      "originalSha256": "ec1852a8ecab7de82b186ddf73df148d1e11c7978521bc7e7b78482edef824aa",
+      "patchedSha256": "8ae4bfeb92af8e297b269bd3c8665a7637e3115b880f615d82069e949c733f9f"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h",
+      "patch": "patches/tracktion-retained-history/tracktion_LockFreeMultiThreadedNodePlayer.h.patch",
+      "originalSha256": "e8828d08f1266237e5d1529ad6fcc6a5e0f7d16605115258a1f1d9de4f789d7a",
+      "patchedSha256": "883dcac4ccf5297f9d7c675fe7607e9a950bacd4df00ac53ee783e21dcbca0bf"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_TracktionNodePlayer.h",
+      "patch": "patches/tracktion-retained-history/tracktion_TracktionNodePlayer.h.patch",
+      "originalSha256": "15abe7ebfdf98a39b4a5d6edb4078df22c998266e9d09d47b57ffd838eb35714",
+      "patchedSha256": "0d87c59b910ba02e273eac8df6d07b0424e1f8711d78c1d23fc5835ed865622c"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp",
+      "patch": "patches/tracktion-retained-history/tracktion_EditPlaybackContext.cpp.patch",
+      "originalSha256": "b366dcf760f7eb2729dc63d979d8a7a4aea1e92d23bdb50373d90a11c8827013",
+      "patchedSha256": "250e3b51d1e5692b5553e76d3b9e844539e299285cb8d4af7e32822a5e12c55c"
+    },
+    {
+      "path": "modules/tracktion_graph/utilities/tracktion_LockFreeObject.h",
+      "patch": "patches/tracktion-retained-history/tracktion_LockFreeObject.h.patch",
+      "originalSha256": "37e0cf837754026b9791e07fe85b382a3d8f29b68666b51a3244da9faf454217",
+      "patchedSha256": "bd69751ec958888a40fdebff43c71127c1f73e14dc529f8e9b52ec032cdc1b60"
+    }
+  ],
+  "sourceDependency": {
+    "path": "src/CompensationHistory.h",
+    "sha256": "1eada5697d7ab096cee410b02299723a386c624aceb2e5d120ed6053e7b95a75",
+    "mode": "content"
+  }
+}

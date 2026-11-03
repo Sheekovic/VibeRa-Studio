@@ -1,0 +1,100 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -18,6 +18,39 @@
+ class LatencyNode final : public Node
+ {
+ public:
++    enum class RuntimeAudioDelayStatus : uint32_t { ready, invalidReceipt, capacityExceeded };
++    struct RuntimeAudioDelay { RuntimeAudioDelayStatus status = RuntimeAudioDelayStatus::invalidReceipt; uint32_t samples = 0; };
++    struct RuntimeAudioDelayBinding
++    {
++        Node* dependency = nullptr; // Scheduling only; its audio is never mixed here.
++        void* context = nullptr; // Control-owned and graph-pinned.
++        void (*begin) (void*, juce::Range<int64_t>) noexcept = nullptr;
++        RuntimeAudioDelay (*read) (void*, juce::Range<int64_t>, uint32_t) noexcept = nullptr;
++    };
++    // Preparation-only internal opt-in. No published requestedDelay mutation.
++    bool bindRuntimeAudioDelay (RuntimeAudioDelayBinding value)
++    {
++        if (prepared || !historyEnabled || !value.dependency || !value.context || !value.begin || !value.read)
++            throw std::invalid_argument ("Invalid prepared runtime audio delay binding");
++        if (runtimeDelay.dependency)
++        {
++            if (runtimeDelay.dependency != value.dependency || runtimeDelay.context != value.context ||
++                runtimeDelay.begin != value.begin || runtimeDelay.read != value.read)
++                throw std::invalid_argument ("Conflicting runtime audio delay binding");
++            return false;
++        }
++        bool cycle = value.dependency == this;
++        visitNodes (*value.dependency, [this, &cycle] (Node& node) { cycle = cycle || &node == this; }, false);
++        if (cycle) throw std::invalid_argument ("Runtime audio delay dependency cycle");
++        runtimeDelay = value;
++        return true;
++    }
++    uint64_t runtimeAudioDelayFailures() const noexcept { return runtimeDelayFailures.load (std::memory_order_relaxed); }
++    RuntimeAudioDelayStatus runtimeAudioDelayLastFailure() const noexcept { return runtimeDelayLastFailure.load (std::memory_order_relaxed); }
++    void prefetchBlock (juce::Range<int64_t> range) override
++    {
++        if (runtimeDelay.begin) runtimeDelay.begin (runtimeDelay.context, range);
++    }
+     struct RetainedAudioEdge
+     {
+         vibera::dsp::CompensationEdge key;
+@@ -116,8 +149,14 @@
+             hash_combine (props.nodeID, size_t (0x95ab5e9dcc));
+         return props;
+     }
+-    std::vector<Node*> getDirectInputNodes() override { return { input }; }
+-    bool isReadyToProcess() override { return input->hasProcessed(); }
++    std::vector<Node*> getDirectInputNodes() override
++    {
++        return runtimeDelay.dependency ? std::vector<Node*> { input, runtimeDelay.dependency } : std::vector<Node*> { input };
++    }
++    bool isReadyToProcess() override
++    {
++        return input->hasProcessed() && (!runtimeDelay.dependency || runtimeDelay.dependency->hasProcessed());
++    }
+ 
+     void prepareToPlay (const PlaybackInitialisationInfo& info) override
+     {
+@@ -148,6 +187,20 @@
+         }
+ 
+         const auto frames = pc.buffers.audio.getNumFrames();
++        auto audioDelay = uint32_t (requestedDelay);
++        if (runtimeDelay.read)
++        {
++            const auto value = runtimeDelay.read (runtimeDelay.context, pc.referenceSampleRange, uint32_t (frames));
++            if (value.status == RuntimeAudioDelayStatus::ready && value.samples <= retained.maximumDelay) audioDelay = value.samples;
++            else
++            {
++                runtimeDelayFailures.fetch_add (1, std::memory_order_relaxed);
++                runtimeDelayLastFailure.store (value.status == RuntimeAudioDelayStatus::ready ?
++                    RuntimeAudioDelayStatus::capacityExceeded : value.status, std::memory_order_relaxed);
++            }
++            // A failed receipt is explicitly unhealthy. Preserve existing static
++            // processing instead of manufacturing a passing silent/skipped block.
++        }
+         const auto channels = pc.buffers.audio.getNumChannels();
+         if (!historyRaw || frames != source.audio.getNumFrames() || channels != source.audio.getNumChannels() ||
+             channels != frameInput.size() || pc.referenceSampleRange.getLength() != int64_t (frames) ||
+@@ -163,7 +216,7 @@
+             {
+                 for (choc::buffer::ChannelCount channel = 0; channel < channels; ++channel)
+                     frameInput[channel] = source.audio.getSample (channel, frame);
+-                const auto result = historyRaw->processFrame (frameInput, frameOutput, uint32_t (requestedDelay),
++                const auto result = historyRaw->processFrame (frameInput, frameOutput, audioDelay,
+                                                               pc.referenceSampleRange.getStart() + int64_t (frame));
+                 coldCount += result.result == vibera::dsp::CompensationResult::insufficientHistory;
+                 capacityCount += result.result == vibera::dsp::CompensationResult::capacityExceeded;
+@@ -202,6 +255,10 @@
+     std::shared_ptr<Node> sharedInput;
+     Node* input = nullptr;
+     int requestedDelay = 0;
++    RuntimeAudioDelayBinding runtimeDelay;
++    std::atomic<uint64_t> runtimeDelayFailures{0};
++    std::atomic<RuntimeAudioDelayStatus> runtimeDelayLastFailure{RuntimeAudioDelayStatus::ready};
++    static_assert (std::atomic<RuntimeAudioDelayStatus>::is_always_lock_free);
+     RetainedAudioEdge retained;
+     bool historyEnabled = false, prepared = false, midiQueueReset = false;
+     std::shared_ptr<LatencyProcessor> latencyProcessor, midiProcessor;

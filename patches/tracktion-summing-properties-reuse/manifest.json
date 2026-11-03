@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "appliesAfter": "patches/tracktion-retained-history/manifest.json",
+  "productionEnabled": false,
+  "purpose": "Reuse already computed identical logical-input node properties; no graph/source-scope activation",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h",
+      "patch": "patches/tracktion-summing-properties-reuse/tracktion_SummingNode.h.patch",
+      "originalSha256": "189b67d3645650aa322ea15cfff95dfb114db4cab9bab9b454907ba582295182",
+      "patchedSha256": "4ae7b9a7d780b593bca696bb426b00fc4219bc557ce2d2f1336e0f6497caa198",
+      "patchSha256": "22553007616e7a4b9636bec92a7b4a641634828cf6f9e220da1100f7ac95d278",
+      "addedLines": 2,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-retained-history/manifest.json"
+      ]
+    }
+  ]
+}

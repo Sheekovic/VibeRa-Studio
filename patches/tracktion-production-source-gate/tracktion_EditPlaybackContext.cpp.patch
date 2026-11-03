@@ -1,0 +1,160 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -241,7 +241,7 @@
+ static_assert (std::atomic<juce::uint64>::is_always_lock_free && std::atomic<double>::is_always_lock_free,
+                "Prepared source admission requires lock-free scalar atomics");
+ 
+-SourceBurstSession::Status SourceBurstSession::claim (juce::AudioDeviceManager& manager, EditPlaybackContext* context, bool initial) noexcept
++SourceBurstSession::Status SourceBurstSession::claim (juce::AudioDeviceManager& manager, EditPlaybackContext* context, bool initial, bool staged) noexcept
+ {
+     if (impl->managerIdentity != &manager || !context) return Status::invalidConfiguration;
+     if (impl->contextIdentity) return Status::alreadyClaimed;
+@@ -258,13 +258,53 @@
+     // Capture at INSTALL, not just preparation: preparing may precede an
+     // in-flight physical callback by many serials. Never admit its suffix.
+     impl->initialActivation = initial;
+-    impl->current.status = initial ? Status::pendingFirstSerial : Status::prepared;
++    impl->current.status = staged ? Status::staged : initial ? Status::pendingFirstSerial : Status::prepared;
+     impl->current.activationAfterSerial = now.callbackSerial;
+     impl->lastClosedSerial = now.callbackSerial;
+     impl->contextIdentity = context;
+     impl->publish();
+     return Status::prepared;
+ }
++SourceBurstSession::Status SourceBurstSession::validateStaged (juce::AudioDeviceManager& manager,
++    EditPlaybackContext* context, double rate, int block, juce::uint64* serial) const noexcept
++{
++    if (impl->managerIdentity != &manager || !context || impl->contextIdentity != context)
++        return Status::invalidConfiguration;
++    if (impl->current.retired) return Status::retired;
++    if (impl->current.failed) return impl->current.status;
++    if (impl->current.status != Status::staged || impl->current.scopeOpen) return Status::alreadyClaimed;
++    juce::AudioDeviceManager::PhysicalCallbackSnapshot now;
++    if (!impl->reader.read (now)) return Status::telemetryUnavailable;
++    if (!now.ownerAlive) return Status::managerReleased;
++    if (now.writerConflict) return Status::writerConflict;
++    if (now.countersExhausted || now.callbackSerial == std::numeric_limits<juce::uint64>::max()) return Status::counterExhausted;
++    if (!now.active) return Status::deviceStopped;
++    if (now.deviceEpoch != impl->config.deviceEpoch || now.configuredFrames != impl->config.deviceFrames || block != impl->config.deviceFrames)
++        return Status::deviceChanged;
++    if (rate != impl->config.sampleRate) return Status::rateChanged;
++    if (now.maximumOuterFrames > impl->config.maximumPhysicalFrames) return Status::physicalBurstExceeded;
++    if (serial) *serial = now.callbackSerial;
++    return Status::staged;
++}
++SourceBurstSession::Status SourceBurstSession::armStaged (juce::AudioDeviceManager& manager,
++    EditPlaybackContext* context, double rate, int block) noexcept
++{
++    juce::uint64 serial = 0;
++    const auto valid = validateStaged (manager, context, rate, block, &serial);
++    if (valid != Status::staged)
++    {
++        impl->fail (valid); // Native late failure, never fabricated completed activation.
++        return valid;
++    }
++    impl->initialActivation = true; // Same strict later-serial/offset0 admission as cold activation.
++    impl->lastClosedSerial = serial;
++    impl->current.activationAfterSerial = serial;
++    impl->current.status = Status::pendingFirstSerial;
++    impl->publish();
++    return Status::pendingFirstSerial;
++}
++
++void SourceBurstSession::failActivation (Status status) noexcept { impl->fail (status); }
+ bool SourceBurstSession::scopeOpen() const noexcept { return impl->current.scopeOpen; }
+ void SourceBurstSession::retire (Status status) noexcept { impl->retire (status); }
+ 
+@@ -1429,10 +1469,32 @@
+     return nodePlaybackContext ? nodePlaybackContext->prepareSourceBurstResources (c, channels)
+                                : SourceBurstSession::Status::contextUnavailable;
+ }
++bool EditPlaybackContext::hasImmediateSourceGatePosition() const noexcept
++{
++    return nodePlaybackContext && nodePlaybackContext->positionUpdatePending.load (std::memory_order_acquire) &&
++        !nodePlaybackContext->pendingPositionJumpTimeValid.load (std::memory_order_acquire) &&
++        !nodePlaybackContext->pendingRollInToLoop.load (std::memory_order_acquire) &&
++        std::isfinite (nodePlaybackContext->pendingPosition.load (std::memory_order_acquire));
++}
++SourceBurstSession::Status EditPlaybackContext::validateSourceBurstStage (
++    const SourceBurstSession::Configuration& config, int channels) const noexcept
++{
++    if (!isAllocated || !nodePlaybackContext || nodePlaybackContext->getSampleRate() != config.sampleRate ||
++        nodePlaybackContext->preparedDeviceBlockSize.load (std::memory_order_acquire) != config.deviceFrames)
++        return SourceBurstSession::Status::deviceChanged;
++    const auto frames = sourceBurstUpper (config.deviceFrames, config.deviceFrames, config.maximumSourceScalePpm);
++    if (frames <= 0 || frames > std::numeric_limits<int>::max() ||
++        !nodePlaybackContext->sourceBurstResourcesFit (channels, int (frames)))
++        return SourceBurstSession::Status::conversionResourcesUnavailable;
++    return SourceBurstSession::Status::staged;
++}
+ SourceBurstSession::Decision EditPlaybackContext::preflightSourceBurst (int frames, int channels, int physicalOffset, bool offsetKnown,
+-    juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int block) noexcept
++    juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int block, double actualGlobalStreamTime) noexcept
+ {
+     using Decision = SourceBurstSession::Decision;
++    const auto gate = sourceSessionGatePhase();
++    if (edit.requireSourceBurstSession && gate != SourceSessionGatePhase::waitingFirstSerial && gate != SourceSessionGatePhase::active)
++        return sourceBurstDecision = Decision::pending; // Before ANY observer/input/head/graph work.
+     const auto initial = sourceInitialPhase.load (std::memory_order_acquire);
+     const bool notStarted = initial != InitialSourcePhase::unbound && initial != InitialSourcePhase::active;
+     sourceBurstDecision = Decision::process;
+@@ -1459,7 +1521,35 @@
+     if (!nodePlaybackContext) state.fail (SourceBurstSession::Status::contextUnavailable);
+     if (valid && !nodePlaybackContext->sourceBurstResourcesFit (channels, state.current.sliceSourceFrames))
+         valid = state.fail (SourceBurstSession::Status::conversionResourcesUnavailable);
++    if (valid && edit.requireSourceBurstSession && !sourceGateReferenceBound)
++    {
++        const auto reference = actualGlobalStreamTime * rate;
++        if (!hasImmediateSourceGatePosition()) valid = state.fail (SourceBurstSession::Status::sourcePositionRequired);
++        else if (!std::isfinite (reference) || reference < 0 ||
++                 reference >= double (std::numeric_limits<juce::int64>::max()) - double (state.current.sliceSourceFrames) - 1024.)
++            valid = state.fail (SourceBurstSession::Status::invalidConversion);
++        else
++        {
++            // DM supplies its ACTUAL current streamTime under the existing lock.
++            // Cold context only: scalar DSP-owned range, no PlayHead/read/retry,
++            // no resync/setPosition/seqlock or invented serial/frame anchor.
++            // Normal fill updates reference, then process consumes the caller's
++            // mandatory pending immediate seek against that NEW real range.
++            nodePlaybackContext->referenceStreamRange = { reference, reference };
++            sourceGateReferenceBound = true;
++        }
++    }
+     if (valid) return sourceBurstDecision;
++    if (edit.requireSourceBurstSession)
++    {
++        if (state.current.failed)
++        {
++            state.abort (state.current.status); // Close a prior chunk's opened observer before fault return.
++            sourceGatePhase.store (SourceSessionGatePhase::failed, std::memory_order_release);
++        }
++        else if (gate == SourceSessionGatePhase::waitingFirstSerial)
++            return sourceBurstDecision = Decision::pending; // Same physical serial/suffix: no peer fault.
++    }
+     if (notStarted)
+     {
+         if (state.current.failed)
+@@ -1488,6 +1578,7 @@
+ {
+     if (!sourceBurstShouldProcess()) return;
+     if (sourceBurstSession) sourceBurstSession->impl->abort (reason);
++    if (edit.requireSourceBurstSession) sourceGatePhase.store (SourceSessionGatePhase::failed, std::memory_order_release);
+     if (sourceInitialPhase.load (std::memory_order_acquire) == InitialSourcePhase::waitingFirstSerial)
+         sourceInitialPhase.store (InitialSourcePhase::failed, std::memory_order_release);
+ }
+@@ -1497,6 +1588,15 @@
+     auto& state = *sourceBurstSession->impl;
+     if (state.current.failed) return false;
+     state.finish();
++    if (edit.requireSourceBurstSession)
++    {
++        if (state.current.failed) sourceGatePhase.store (SourceSessionGatePhase::failed, std::memory_order_release);
++        else if (!state.current.scopeOpen)
++        {
++            state.initialActivation = false;
++            sourceGatePhase.store (SourceSessionGatePhase::active, std::memory_order_release);
++        }
++    }
+     return !state.current.failed;
+ }
+ bool EditPlaybackContext::fillNextNodeBlock (float* const* allChannels, int numChannels, int numSamples)

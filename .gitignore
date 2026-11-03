@@ -1,0 +1,42 @@
+# Build output and fetched dependencies (recreated by scripts/fetch-dependencies.ps1 and the build)
+/vendor/
+/build/
+/artifacts/
+/dist/
+/out/
+
+# User compositions are private input, not distributable application source.
+/projects/
+
+# Local research, evidence and machine-specific folders (never published)
+/Reference/
+/evidance/
+/evidence/
+/--browser-search-check/
+/NVIDIA Corporation/
+/experiments/local/
+
+# Editors, tools and caches
+/.vs/
+/.vscode/
+/.idea/
+/.claude/
+/.codex/
+*.user
+*.suo
+*.pdb
+*.ilk
+*.obj
+*.log
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets and local configuration
+.env
+.env.*
+*.key
+*.pem

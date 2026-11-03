@@ -1,0 +1,18 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -853,6 +853,7 @@
+         if (cnp.fixedInitialisationAdmission && !edit.state.getProperty ("viberaOwnMetering", false))
+             throw std::invalid_argument ("Private fixed initialisation requires app-owned metering");
+     }
++    edit.configureNodeGraphForPreparation (cnp);
+     auto root = createNodeForEdit(*this, audiblePlaybackTime, cnp);
+     if (!root) throw std::runtime_error("Private graph factory returned no root");
+     next.graph = nodePlaybackContext->player.prepareFixedGraph(std::move(root));
+@@ -1138,6 +1139,7 @@
+         cnp.outputRouting = activeGraphOverlay->outputRouting;
+         cnp.fixedInitialisationAdmission = activeGraphOverlay->fixedInitialisationAdmission;
+     }
++    edit.configureNodeGraphForPreparation (cnp);
+     auto editNode = createNodeForEdit (*this, audiblePlaybackTime, cnp);
+     if (! updateThreads && ! editNode)
+         throw std::runtime_error ("Graph-only rebuild produced no replacement graph");

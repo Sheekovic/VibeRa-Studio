@@ -1,0 +1,14 @@
+--- a/modules/tracktion_engine/plugins/tracktion_Plugin.h
++++ b/modules/tracktion_engine/plugins/tracktion_Plugin.h
+@@ -366,6 +366,11 @@
+     /** Returns the plugin's processing latency in seconds. */
+     virtual double getLatencySeconds()                  { return 0.0; }
+ 
++    /** Source generators scheduling their own events use the unadjusted source
++        timeline. Incoming effects retain the ordinary compensated automation time.
++        Queried on CONTROL during graph preparation; default behavior is unchanged. */
++    virtual bool usesUnadjustedSourceRenderTime() const noexcept { return false; }
++
+     /** Returns the length of the plugin's tail in seconds (e.g. reverb decay). */
+     virtual double getTailLength() const                { return 0.0; }
+ 

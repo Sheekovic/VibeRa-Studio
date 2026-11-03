@@ -1,0 +1,64 @@
+--- a/modules/tracktion_engine/playback/tracktion_TransportControl.cpp
++++ b/modules/tracktion_engine/playback/tracktion_TransportControl.cpp
+@@ -894,6 +894,11 @@
+ 
+ void TransportControl::record (bool justSendMMCIfEnabled, bool allowRecordingIfNoInputsArmed)
+ {
++    if (edit.closedNativeIO)
++    {
++        if (auto* context = getCurrentPlaybackContext()) context->refuseNativeIOAttachment();
++        return; // Explicit capability is closed; never enter a false native recording state.
++    }
+     transportState->record (justSendMMCIfEnabled, allowRecordingIfNoInputsArmed);
+ }
+ 
+@@ -923,6 +928,8 @@
+ 
+ juce::Result TransportControl::applyRetrospectiveRecord (bool armedOnly)
+ {
++    if (edit.closedNativeIO)
++        return juce::Result::fail ("Native retrospective recording is unavailable in this closed app projection");
+     if (static_cast<int> (engine.getPropertyStorage().getProperty (SettingID::retrospectiveRecord, 30)) == 0)
+         return juce::Result::fail (TRANS("Retrospective record is currently disabled"));
+ 
+@@ -993,7 +1000,16 @@
+ }
+ 
+ void TransportControl::syncToEdit (Edit* editToSyncTo, bool isPreview)
+-{
++{ (void) trySyncToEdit (editToSyncTo, isPreview); }
++Edit::NativeCapabilityStatus TransportControl::trySyncToEdit (Edit* editToSyncTo, bool isPreview)
++{
++    if (editToSyncTo)
++    {
++        const auto own = edit.admitNativeCapability (Edit::NativeCapability::contextSync);
++        const auto other = editToSyncTo->admitNativeCapability (Edit::NativeCapability::contextSync);
++        if (own != Edit::NativeCapabilityStatus::allowed) return own;
++        if (other != Edit::NativeCapabilityStatus::allowed) return other;
++    }
+     CRASH_TRACER
+ 
+     if (playbackContext && editToSyncTo != nullptr)
+@@ -1013,9 +1029,10 @@
+             auto syncInterval = isPreview ? targetContext->getLoopTimes().getLength()
+                                           : TimeDuration::fromSeconds ((60.0 / tempo.getBpm() * timeSig.numerator));
+ 
+-            playbackContext->syncToContext (targetContext, previousBarTime, syncInterval);
+-        }
+-    }
++            return playbackContext->trySyncToContext (targetContext, previousBarTime, syncInterval);
++        }
++    }
++    return Edit::NativeCapabilityStatus::allowed;
+ }
+ 
+ bool TransportControl::isPlaying() const                { return transportState->playing; }
+@@ -1287,6 +1304,8 @@
+ 
+ void TransportControl::sendMMC (const juce::MidiMessage& mmc)
+ {
++    if (edit.admitNativeCapability (Edit::NativeCapability::externalClock) != Edit::NativeCapabilityStatus::allowed)
++        return;
+     CRASH_TRACER
+     auto& dm = engine.getDeviceManager();
+ 

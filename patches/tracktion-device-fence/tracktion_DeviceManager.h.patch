@@ -1,0 +1,38 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.h
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.h
+@@ -33,6 +33,23 @@
+ 
+     void initialise (int defaultNumInputChannelsToOpen  = defaultNumChannelsToOpen,
+                      int defaultNumOutputChannelsToOpen = defaultNumChannelsToOpen);
++    // ORIGINAL optional CONTROL-only fence, invoked from message-thread
++    // prepareToStart BEFORE any context/device-list lock or graph reprepare.
++    // Owner must unregister before destruction. No callback is run from device
++    // I/O/about-to-start/stopped entry points. Empty preserves default behavior.
++    using PreparationFence = bool (*) (void*) noexcept;
++    enum class PreparationFenceStatus { none, passed, refused, reentrant };
++    bool installPreparationFence (void* owner, PreparationFence) noexcept;
++    bool removePreparationFence (void* owner) noexcept;
++    PreparationFenceStatus getPreparationFenceStatus() const noexcept { return preparationFenceStatus; }
++    // CONTROL-only: validated device scalars staged before the owner fence.
++    // A refused fence keeps DSP suspended; this is configuration, not completion.
++    struct PreparationDeviceConfiguration { double sampleRate = 0; int blockSize = 0; };
++    PreparationDeviceConfiguration getPreparationDeviceConfiguration() const noexcept
++    { return { currentSampleRate, maxBlockSize }; }
++    // Exact owner may schedule one retry AFTER explicit graph restoration.
++    // This may post an OS message; never call from DSP. Success means pending.
++    bool retryPreparationFence (void* owner);
+     void closeDevices();
+     void saveSettings();
+ 
+@@ -326,6 +343,11 @@
+                                            const juce::AudioIODeviceCallbackContext&) override;
+     void audioDeviceAboutToStart (juce::AudioIODevice*) override;
+     void audioDeviceStopped() override;
++    void* preparationFenceOwner = nullptr;
++    PreparationFence preparationFence = nullptr;
++    PreparationFenceStatus preparationFenceStatus = PreparationFenceStatus::none;
++    bool preparationFenceActive = false, preparationFenceReentered = false;
++    bool runPreparationFence() noexcept;
+     void prepareToStart();
+ 
+     void audioDeviceIOCallbackInternal (const float* const* inputChannelData, int numInputChannels,

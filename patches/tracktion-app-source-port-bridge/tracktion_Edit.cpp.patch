@@ -1,0 +1,26 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
+@@ -581,6 +581,15 @@
+ }
+ 
+ //==============================================================================
++void Edit::configureNodeGraphForPreparation (CreateNodeParams& params)
++{
++    if (! nodeGraphPreparation) return; // No thread-policy change for default Edits.
++    const auto* manager = juce::MessageManager::getInstanceWithoutCreating();
++    if (! manager || ! manager->isThisTheMessageThread())
++        throw std::invalid_argument ("edit.graphPreparation.control: Message-thread preparation required");
++    nodeGraphPreparation (*this, params);
++}
++
+ Edit::Edit (Options options)
+     : engine (options.engine),
+       initialSourceGeneration ([&options]
+@@ -590,6 +599,7 @@
+           return options.initialSourceGeneration;
+       }()),
+       closedNativeIO (options.closedNativeIO),
++      nodeGraphPreparation (std::move (options.configureNodeGraphForPreparation)),
+       tempoSequence (*this),
+       state (options.editState),
+       instanceId (getNextInstanceId()),

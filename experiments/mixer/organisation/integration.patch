@@ -1,0 +1,841 @@
+--- a/src/Project.h
++++ b/src/Project.h
+@@ -82,6 +82,13 @@
+         : index(i), name(std::move(n)), gain(g), pan(p), muted(m), effects(std::move(fx))
+     { if (i != 0) routes.push_back({0, 1}); }
+ };
++struct MixerGroup
++{
++    Id id = 0;
++    juce::String name;
++    juce::uint32 colour = 0;
++    std::vector<int> members; // Display grouping; no implicit routing. Master excluded.
++};
+ struct AudioPlacement
+ {
+     Id id = 0, channel = 0;
+@@ -91,9 +98,12 @@
+ };
+ struct Project
+ {
+-    static constexpr int currentVersion = 19;
++    static constexpr int currentVersion = 20;
+     int version = currentVersion;
+     Id nextId = 1;
++    std::int64_t nextMixerIndex = 18; // Separate allocator; INT_MAX+1 exhausted sentinel.
++    std::vector<int> mixerOrder; // Master first; permutation of active stable indices.
++    std::vector<MixerGroup> mixerGroups;
+     juce::String name = "Untitled";
+     double tempo = 120;
+     double swing = 0; // Normalized 0..1, all score Patterns/Channels.
+--- a/src/Project.cpp
++++ b/src/Project.cpp
+@@ -4,6 +4,7 @@
+ #include "ClipGroups.h"
+ #include "MixerRouting.h"
+ #include "MixerControls.h"
++#include "MixerOrganisation.h"
+ #include "AutomationState.h"
+ #include "PluginStateEncoding.h"
+ #include <juce_cryptography/juce_cryptography.h>
+@@ -108,6 +109,7 @@
+     for (int i = 0; i < 18; ++i)
+         p.mixer.push_back(
+             {i, i == 0 ? "Master" : "Insert " + juce::String(i), i == 0 ? .8f : 1.f, 0.f, false});
++    for (const auto &insert : p.mixer) p.mixerOrder.push_back(insert.index);
+     for (auto name : {"kick", "snare", "hat", "bass"})
+     {
+         auto id = p.allocate();
+@@ -178,6 +180,7 @@
+     auto set = [](juce::ValueTree &t, const char *k, auto v) { t.setProperty(k, v, nullptr); };
+     set(root, "version", version);
+     set(root, "nextId", juce::int64(nextId));
++    appendMixerOrganisationState(root, *this);
+     set(root, "name", name);
+     set(root, "tempo", tempo);
+     set(root, "swing", swing);
+@@ -723,16 +726,23 @@
+                 p.mixerSolo->mutedBefore.push_back(int(mutedIndex));
+             }
+         }
++    if (auto organisation = parseMixerOrganisation(t, int(fileVersion), p); organisation.failed())
++        return organisation;
+     auto valid = p.validate();
+     if (valid.failed())
+         return valid;
+     // Extend the old default rack in memory; never rewrite the user's file on load.
+-    if (p.mixer.size() == 9 &&
++    if (fileVersion < 20 && p.mixer.size() == 9 &&
+         std::all_of(p.mixer.begin(), p.mixer.end(),
+                     [index = 0](const auto &insert) mutable { return insert.index == index++; }))
+         for (int index = 9; index < 18; ++index)
++        {
+             p.mixer.push_back({index, "Insert " + juce::String(index), 1.f, 0.f, false});
++            p.mixerOrder.push_back(index);
++            p.nextMixerIndex = std::max(p.nextMixerIndex, std::int64_t(index) + 1);
++        }
+     reconcileMixerSolo(p); // Newly extended legacy inserts obey an active mask.
++    if (auto final = p.validate(); final.failed()) return final;
+     result = std::move(p);
+     return juce::Result::ok();
+ }
+@@ -748,7 +758,7 @@
+         return fail("Invalid tempo or meter");
+     if (channels.size() > 128 || channelGroups.size() > 256 || patterns.empty() || patterns.size() > 1024 ||
+         placements.size() + audioPlacements.size() + automation.placements.size() > 100000 || mixer.empty() ||
+-        mixer.size() > 129)
++        mixer.size() > maximumMixerActive)
+         return fail("Project limits exceeded or missing required data");
+     std::set<Id> ids;
+     Id maxId = 0;
+@@ -775,6 +785,9 @@
+             return fail("Invalid mixer state");
+     if (!inserts.count(0))
+         return fail("Missing Master insert");
++    if (auto organisation = validateMixerOrganisation(*this); organisation.failed()) return organisation;
++    for (const auto &group : mixerGroups)
++        if (!unique(group.id)) return fail("Duplicated Mixer group identity");
+     if (mixerSolo)
+     {
+         if (mixerSolo->insert == 0 || !inserts.count(mixerSolo->insert))
+--- a/src/Commands.cpp
++++ b/src/Commands.cpp
+@@ -2,6 +2,7 @@
+ #include "Commands.h"
+ #include "MixerRouting.h"
+ #include "MixerControls.h"
++#include "MixerOrganisation.h"
+ #include "ClipGroups.h"
+ #include "AutomationCommands.h"
+ #include "StepSequence.h"
+@@ -337,6 +338,14 @@
+         {"clip.slip", "Slip source content", Scope::playlist, true, true, "command"},
+         {"clip.mute", "Mute clips", Scope::playlist, true, true, "command"},
+         {"mixer.gain", "Mixer volume", Scope::mixer, true, true, "command"},
++        {"mixer.create", "Create Mixer insert", Scope::mixer, true, true, "command"},
++        {"mixer.delete", "Delete Mixer inserts", Scope::mixer, true, true, "vibera_mixer"},
++        {"mixer.reorder", "Reorder Mixer view", Scope::mixer, true, true, "command"},
++        {"mixer.group.create", "Create Mixer display group", Scope::mixer, true, true, "command"},
++        {"mixer.group.members", "Set Mixer group members", Scope::mixer, true, true, "command"},
++        {"mixer.group.rename", "Rename Mixer group", Scope::mixer, true, true, "command"},
++        {"mixer.group.colour", "Colour Mixer group", Scope::mixer, true, true, "command"},
++        {"mixer.group.remove", "Remove Mixer display group", Scope::mixer, true, true, "command"},
+         {"mixer.route", "Enable Mixer send", Scope::mixer, true, true, "command"},
+         {"mixer.routeOnly", "Route to this insert only", Scope::mixer, true, true, "command"},
+         {"mixer.send", "Mixer send level", Scope::mixer, true, true, "command"},
+@@ -1767,6 +1776,12 @@
+         it->pattern = copy.id;
+         next.patterns.push_back(std::move(copy));
+     }
++    else if (id == "mixer.create" || id == "mixer.delete" || id == "mixer.reorder" || id.startsWith("mixer.group."))
++    {
++        auto request = mixerOrganisationArgs(id, a.ids, a.target, a.text, a.value, a.rerouteMixerToMaster.value_or(false));
++        if (auto applied = applyMixerOrganisation(next, id, request); !applied.completed())
++            return juce::Result::fail(applied.code + ": " + applied.message);
++    }
+     else if(id=="mixer.route" || id=="mixer.routeOnly" || id=="mixer.send")
+     {
+         if(a.target<0 || a.target>std::numeric_limits<int>::max())return juce::Result::fail("Invalid Mixer destination index");
+--- a/src/Commands.h
++++ b/src/Commands.h
+@@ -52,6 +52,7 @@
+     std::optional<NoteSliceLine> slice;
+     std::optional<bool>
+         grouping; // Omitted follows runtime grouping; false explicitly edits members independently.
++    std::optional<bool> rerouteMixerToMaster; // Explicit structural deletion policy; never implicit.
+     std::optional<bool> restore; // Solo exit: omitted uses the application preference (core default true).
+     // Internal control-thread capture; never accepted from MCP/profile JSON.
+     // Clone/delete Undo baselines retain the selected instruments' fresh state.
+--- /dev/null
++++ b/src/MixerOrganisation.h
+@@ -0,0 +1,400 @@
++// SPDX-License-Identifier: AGPL-3.0-or-later
++// Isolated original draft: requires the companion Project20 model. Not live code.
++#pragma once
++#include "Project.h"
++#include "MixerControls.h"
++#include "ClipGroups.h"
++#include <limits>
++#include <set>
++
++namespace vibera
++{
++inline constexpr int maximumMixerNonMaster = 128;
++inline constexpr int maximumMixerActive = maximumMixerNonMaster + 1;
++inline bool mixerOrganisationName(const juce::String &name)
++{
++    return name.isNotEmpty() && name == name.trim() && name.length() <= 64 &&
++           !name.containsAnyOf("\r\n\t");
++}
++inline bool mixerOrganisationColour(std::uint64_t colour)
++{
++    return colour == 0 || (colour >= 0xff000000ULL && colour <= 0xffffffffULL);
++}
++inline juce::Result validateMixerOrganisation(const Project &p)
++{
++    auto fail = [](const char *message) { return juce::Result::fail(message); };
++    if (p.mixer.empty() || p.mixer.size() > maximumMixerActive || p.mixerOrder.size() != p.mixer.size() ||
++        p.mixerOrder.empty() || p.mixerOrder.front() != 0)
++        return fail("Mixer order must contain every active insert with Master first; maximum128 non-Master plus Master");
++    std::set<int> active, ordered, members;
++    std::int64_t largest = 0;
++    for (const auto &insert : p.mixer)
++    {
++        if (insert.index < 0 || !active.insert(insert.index).second)
++            return fail("Invalid or duplicate Mixer identity");
++        largest = std::max(largest, std::int64_t(insert.index));
++    }
++    for (int index : p.mixerOrder)
++        if (!active.contains(index) || !ordered.insert(index).second)
++            return fail("Mixer order must be a permutation of stable active indices");
++    if (p.nextMixerIndex <= largest || p.nextMixerIndex < 1 ||
++        p.nextMixerIndex > std::int64_t(std::numeric_limits<int>::max()) + 1)
++        return fail("Invalid separate Mixer identity allocator");
++    if (p.mixerGroups.size() > maximumMixerNonMaster)
++        return fail("Mixer group limit exceeded");
++    std::set<Id> groupIds;
++    juce::StringArray names;
++    for (const auto &group : p.mixerGroups)
++    {
++        if (group.id < 1 || group.id > 1000000000 || !groupIds.insert(group.id).second ||
++            !mixerOrganisationName(group.name) || names.contains(group.name, true) ||
++            !mixerOrganisationColour(group.colour) || group.members.empty() || group.members.size() > maximumMixerNonMaster)
++            return fail("Invalid Mixer group identity/name/colour/size");
++        names.add(group.name);
++        for (int member : group.members)
++            if (member == 0 || !active.contains(member) || !members.insert(member).second)
++                return fail("Mixer group members must be unique existing non-Master inserts across groups");
++    }
++    return juce::Result::ok();
++}
++inline void appendMixerOrganisationState(juce::ValueTree &root, const Project &p)
++{
++    root.setProperty("nextMixerIndex", juce::int64(p.nextMixerIndex), nullptr);
++    juce::ValueTree order("MIXER_ORDER"), groups("MIXER_GROUPS");
++    for (int index : p.mixerOrder)
++    {
++        juce::ValueTree item("MEMBER");
++        item.setProperty("insert", index, nullptr);
++        order.appendChild(item, nullptr);
++    }
++    for (const auto &group : p.mixerGroups)
++    {
++        juce::ValueTree item("GROUP");
++        item.setProperty("id", juce::int64(group.id), nullptr);
++        item.setProperty("name", group.name, nullptr);
++        item.setProperty("colour", juce::int64(group.colour), nullptr);
++        for (int index : group.members)
++        {
++            juce::ValueTree member("MEMBER");
++            member.setProperty("insert", index, nullptr);
++            item.appendChild(member, nullptr);
++        }
++        groups.appendChild(item, nullptr);
++    }
++    root.appendChild(order, nullptr);
++    root.appendChild(groups, nullptr);
++}
++inline bool exactMixerNumber(const juce::var &value, std::int64_t low, std::int64_t high,
++                             std::int64_t &result)
++{
++    // ValueTree XML stores attributes as strings; permit only canonical integer
++    // text or actual numeric values, never booleans, coercion or fractional IDs.
++    if (value.isBool() || value.isVoid() || value.isUndefined()) return false;
++    if (value.isString())
++    {
++        const auto text = value.toString();
++        if (text.isEmpty() || text.length() > 12 || text != text.trim() ||
++            !text.containsOnly("0123456789") || (text.length() > 1 && text.startsWithChar('0')))
++            return false;
++        result = text.getLargeIntValue();
++    }
++    else if (value.isInt() || value.isInt64() || value.isDouble())
++    {
++        const double number = double(value);
++        if (!std::isfinite(number) || number != std::floor(number) || number < low || number > high)
++            return false;
++        result = std::int64_t(number);
++    }
++    else return false;
++    return result >= low && result <= high;
++}
++inline juce::Result parseMixerOrganisation(const juce::ValueTree &root, int fileVersion, Project &p)
++{
++    int orderCount = 0, groupCount = 0;
++    for (const auto &child : root)
++    {
++        orderCount += child.hasType("MIXER_ORDER");
++        groupCount += child.hasType("MIXER_GROUPS");
++    }
++    if (fileVersion < 20)
++    {
++        if (root.hasProperty("nextMixerIndex") || orderCount || groupCount)
++            return juce::Result::fail("Mixer organisation data requires project version20");
++        // Genuine19 and older: preserve physical topology and existing IDs.
++        p.nextMixerIndex = 1;
++        p.mixerOrder = {0};
++        for (const auto &insert : p.mixer)
++        {
++            p.nextMixerIndex = std::max(p.nextMixerIndex, std::int64_t(insert.index) + 1);
++            if (insert.index != 0) p.mixerOrder.push_back(insert.index);
++        }
++        return validateMixerOrganisation(p);
++    }
++    if (fileVersion != 20 || orderCount != 1 || groupCount != 1 ||
++        !exactMixerNumber(root["nextMixerIndex"], 1,
++                          std::int64_t(std::numeric_limits<int>::max()) + 1, p.nextMixerIndex))
++        return juce::Result::fail("Missing/duplicate/invalid Mixer organisation schema20 data");
++    const auto order = root.getChildWithName("MIXER_ORDER");
++    const auto groups = root.getChildWithName("MIXER_GROUPS");
++    if (order.getNumChildren() > maximumMixerActive || groups.getNumChildren() > maximumMixerNonMaster)
++        return juce::Result::fail("Mixer organisation encoding exceeds limits");
++    auto member = [](const juce::ValueTree &item, int &index)
++    {
++        std::int64_t value = 0;
++        if (!item.hasType("MEMBER") || item.getNumChildren() != 0 ||
++            !exactMixerNumber(item["insert"], 0, std::numeric_limits<int>::max(), value)) return false;
++        index = int(value);
++        return true;
++    };
++    for (const auto &item : order)
++    {
++        int index = 0;
++        if (!member(item, index)) return juce::Result::fail("Invalid Mixer order member");
++        p.mixerOrder.push_back(index);
++    }
++    for (const auto &item : groups)
++    {
++        std::int64_t id = 0, colour = 0;
++        if (!item.hasType("GROUP") || !item["name"].isString() ||
++            !exactMixerNumber(item["id"], 1, 1000000000, id) ||
++            !exactMixerNumber(item["colour"], 0, 0xffffffffULL, colour) ||
++            item.getNumChildren() < 1 || item.getNumChildren() > maximumMixerNonMaster)
++            return juce::Result::fail("Invalid Mixer group encoding");
++        MixerGroup group{id, item["name"].toString(), juce::uint32(colour), {}};
++        for (const auto &child : item)
++        {
++            int index = 0;
++            if (!member(child, index)) return juce::Result::fail("Invalid Mixer group member encoding");
++            group.members.push_back(index);
++        }
++        p.mixerGroups.push_back(std::move(group));
++    }
++    return validateMixerOrganisation(p);
++}
++
++struct MixerOrganisationArgs
++{
++    std::vector<int> inserts;
++    int beforeInsert = -1; // -1 append, otherwise existing non-Master view target.
++    Id group = 0;
++    juce::String name;
++    double colour = 0;
++    bool rerouteChannelsToMaster = false; // Explicit opt-in when deleting assigned inserts.
++    bool valid = true;
++};
++inline MixerOrganisationArgs mixerOrganisationArgs(const juce::String &command,
++    const std::vector<Id> &ids, Id target, const juce::String &name, double colour,
++    bool rerouteToMaster = false)
++{
++    MixerOrganisationArgs result;
++    result.name = name;
++    result.colour = colour;
++    result.rerouteChannelsToMaster = rerouteToMaster;
++    for (Id id : ids)
++    {
++        if (id < 0 || id > std::numeric_limits<int>::max()) result.valid = false;
++        else result.inserts.push_back(int(id));
++    }
++    if (command.startsWith("mixer.group.")) result.group = target;
++    else if (target == 0) result.beforeInsert = -1;
++    else if (target < 1 || target > std::numeric_limits<int>::max()) result.valid = false;
++    else result.beforeInsert = int(target);
++    return result;
++}
++struct MixerOrganisationResult
++{
++    juce::String code, message;
++    int createdInsert = -1;
++    Id createdGroup = 0;
++    bool completed() const noexcept { return code.isEmpty(); }
++};
++inline MixerOrganisationResult applyMixerOrganisation(Project &project, const juce::String &command,
++                                                        const MixerOrganisationArgs &args)
++{
++    auto fail = [](const char *code, const juce::String &message)
++    { return MixerOrganisationResult{code, message}; };
++    if (!args.valid) return fail("invalid_arguments", "Mixer index must be an exact supported integer");
++    if (auto valid = project.validate(); valid.failed()) return fail("invalid_project", valid.getErrorMessage());
++    Project next = project; // Control thread only; validation failure is atomic.
++    MixerOrganisationResult result;
++    std::set<int> selected;
++    for (int index : args.inserts)
++        if (index == 0 || !mixerInsert(next, index) || !selected.insert(index).second)
++            return fail("unavailable_target", "Select unique existing non-Master inserts");
++    auto namedGroup = [&]() -> MixerGroup *
++    {
++        for (auto &group : next.mixerGroups) if (group.id == args.group) return &group;
++        return nullptr;
++    };
++    auto hasPlugins = [&]
++    {
++        for (const auto &channel : next.channels) if (channel.instrument) return true;
++        for (const auto &insert : next.mixer) if (!insert.effects.empty()) return true;
++        return false;
++    };
++    if (command == "mixer.create")
++    {
++        if (!selected.empty()) return fail("invalid_arguments", "Creation does not accept existing insert IDs");
++        if (next.mixer.size() >= maximumMixerActive || next.nextMixerIndex > std::numeric_limits<int>::max())
++            return fail("limit_exceeded", "Mixer capacity or stable index allocator exhausted");
++        const auto name = args.name.trim();
++        if (name.isNotEmpty() && !mixerOrganisationName(name)) return fail("invalid_arguments", "Invalid Mixer name");
++        auto before = args.beforeInsert == -1 ? next.mixerOrder.end()
++                                             : std::find(next.mixerOrder.begin(), next.mixerOrder.end(), args.beforeInsert);
++        if (args.beforeInsert == 0 || (args.beforeInsert != -1 && before == next.mixerOrder.end()))
++            return fail("unavailable_target", "Insert before an existing non-Master or append");
++        if (hasPlugins()) return fail("requiresPreparedProjection", "Structural change requires prepared transaction; current live/native states retained");
++        result.createdInsert = int(next.nextMixerIndex++);
++        next.mixer.push_back({result.createdInsert, name.isEmpty() ? "Insert " + juce::String(result.createdInsert) : name, 1.f});
++        next.mixerOrder.insert(before, result.createdInsert);
++    }
++    else if (command == "mixer.reorder")
++    {
++        if (selected.empty()) return fail("invalid_arguments", "Choose inserts to reorder");
++        if (args.beforeInsert == 0 || selected.contains(args.beforeInsert) ||
++            (args.beforeInsert != -1 && !mixerInsert(next, args.beforeInsert)))
++            return fail("invalid_arguments", "Reorder target is append or an unselected non-Master insert");
++        std::vector<int> moving;
++        for (int index : next.mixerOrder) if (selected.contains(index)) moving.push_back(index);
++        std::erase_if(next.mixerOrder, [&](int index) { return selected.contains(index); });
++        auto before = args.beforeInsert == -1 ? next.mixerOrder.end()
++                                             : std::find(next.mixerOrder.begin(), next.mixerOrder.end(), args.beforeInsert);
++        next.mixerOrder.insert(before, moving.begin(), moving.end());
++    }
++    else if (command == "mixer.delete")
++    {
++        if (selected.empty()) return fail("invalid_arguments", "Choose inserts to delete");
++        for (const auto &channel : next.channels)
++            if (selected.contains(channel.mixer) && !args.rerouteChannelsToMaster)
++                return fail("reroute_required", "Explicitly reroute assigned Channels to Master before deleting these inserts");
++        if (hasPlugins()) return fail("requiresPreparedProjection", "Capture native states and prepare complete replacement before committing plugin-bearing structural edits");
++        // Restore the original mask if its solo owner is removed; otherwise
++        // preserve the solo owner and recompute its graph mask after pruning.
++        if (next.mixerSolo)
++        {
++            std::erase_if(next.mixerSolo->mutedBefore, [&](int index) { return selected.contains(index); });
++            if (selected.contains(next.mixerSolo->insert))
++            {
++                for (auto &insert : next.mixer)
++                    insert.muted = std::find(next.mixerSolo->mutedBefore.begin(), next.mixerSolo->mutedBefore.end(), insert.index) != next.mixerSolo->mutedBefore.end();
++                next.mixerSolo.reset();
++            }
++        }
++        for (auto &channel : next.channels) if (selected.contains(channel.mixer)) channel.mixer = 0;
++        for (auto &insert : next.mixer)
++            std::erase_if(insert.routes, [&](const auto &route) { return selected.contains(route.target); });
++        std::erase_if(next.mixer, [&](const auto &insert) { return selected.contains(insert.index); });
++        std::erase_if(next.mixerOrder, [&](int index) { return selected.contains(index); });
++        for (auto &group : next.mixerGroups)
++            std::erase_if(group.members, [&](int index) { return selected.contains(index); });
++        std::erase_if(next.mixerGroups, [](const auto &group) { return group.members.empty(); });
++        auto deletedKey = [&](AutomationKey key)
++        { return (key.kind == AutomationParameter::mixerGain || key.kind == AutomationParameter::mixerPan) && selected.contains(int(key.owner)); };
++        for (auto &source : next.automation.sources)
++            std::erase_if(source.links, [&](const auto &link) { return deletedKey(link.key); });
++        std::set<Id> removedSources;
++        for (const auto &source : next.automation.sources) if (source.links.empty()) removedSources.insert(source.id);
++        std::erase_if(next.automation.sources, [&](const auto &source) { return removedSources.contains(source.id); });
++        std::erase_if(next.automation.placements, [&](const auto &placement) { return removedSources.contains(placement.source); });
++        std::erase_if(next.automation.initialValues, [&](const auto &value) { return deletedKey(value.key); });
++        pruneClipGroups(next);
++    }
++    else if (command == "mixer.group.create" || command == "mixer.group.members")
++    {
++        if (selected.empty()) return fail("invalid_arguments", "Mixer group needs at least one member");
++        Id owner = args.group;
++        if (command == "mixer.group.create")
++        {
++            if (args.group != 0 || next.mixerGroups.size() >= maximumMixerNonMaster || next.nextId > 1000000000)
++                return fail("limit_exceeded", "Mixer group capacity/identity exhausted or create has existing target");
++            if (!mixerOrganisationName(args.name.trim())) return fail("invalid_arguments", "Invalid Mixer group name");
++            owner = next.allocate();
++            result.createdGroup = owner;
++            next.mixerGroups.push_back({owner, args.name.trim(), 0, {}});
++        }
++        else if (!namedGroup()) return fail("unavailable_target", "Mixer group is unavailable");
++        for (auto &group : next.mixerGroups)
++        {
++            if (group.id == owner)
++            {
++                group.members.clear();
++                for (int index : next.mixerOrder) if (selected.contains(index)) group.members.push_back(index);
++            }
++            else std::erase_if(group.members, [&](int index) { return selected.contains(index); });
++        }
++        std::erase_if(next.mixerGroups, [](const auto &group) { return group.members.empty(); });
++    }
++    else if (command == "mixer.group.rename" || command == "mixer.group.colour" || command == "mixer.group.remove")
++    {
++        auto *group = namedGroup();
++        if (!group) return fail("unavailable_target", "Mixer group is unavailable");
++        if (!selected.empty()) return fail("invalid_arguments", "This group operation does not accept member IDs");
++        if (command == "mixer.group.rename") group->name = args.name.trim();
++        else if (command == "mixer.group.colour")
++        {
++            if (!std::isfinite(args.colour) || args.colour != std::floor(args.colour) || args.colour < 0 ||
++                args.colour > 0xffffffffULL || !mixerOrganisationColour(std::uint64_t(args.colour)))
++                return fail("invalid_arguments", "Group colour must be0 or opaque ARGB");
++            group->colour = juce::uint32(args.colour);
++        }
++        else std::erase_if(next.mixerGroups, [&](const auto &entry) { return entry.id == args.group; });
++    }
++    else return fail("unsupported_operation", "Unknown Mixer organisation command");
++    reconcileMixerSolo(next);
++    if (auto valid = next.validate(); valid.failed()) return fail("invalid_arguments", valid.getErrorMessage());
++    project = std::move(next);
++    return result;
++}
++
++// Runtime workspace selection. UI and MCP call this same control-thread service;
++// selection is not persisted or inserted into musical Undo.
++struct MixerSelection
++{
++    std::vector<int> inserts{0};
++    int focus = 0, anchor = 0;
++    void reconcile(const Project &p)
++    {
++        std::erase_if(inserts, [&](int index) { return !mixerInsert(p, index); });
++        if (!mixerInsert(p, focus)) focus = inserts.empty() ? 0 : inserts.front();
++        if (inserts.empty()) inserts.push_back(focus);
++        if (!mixerInsert(p, anchor)) anchor = focus;
++    }
++    juce::Result apply(const Project &p, const juce::String &action, const std::vector<int> &targets,
++                       bool expandGroups = false)
++    {
++        if (auto valid = p.validate(); valid.failed()) return valid;
++        MixerSelection next = *this;
++        next.reconcile(p);
++        std::set<int> chosen;
++        for (int index : targets)
++            if (!mixerInsert(p, index) || !chosen.insert(index).second)
++                return juce::Result::fail("Select unique existing Mixer indices");
++        if (action == "range")
++        {
++            if (targets.size() != 1) return juce::Result::fail("Range selection requires one destination");
++            const auto from = std::find(p.mixerOrder.begin(), p.mixerOrder.end(), next.anchor);
++            const auto to = std::find(p.mixerOrder.begin(), p.mixerOrder.end(), targets.front());
++            chosen.clear();
++            for (auto i = std::min(from, to); i != std::max(from, to) + 1; ++i) chosen.insert(*i);
++        }
++        if (expandGroups)
++            for (const auto &group : p.mixerGroups)
++                if (std::any_of(group.members.begin(), group.members.end(), [&](int index) { return chosen.contains(index); }))
++                    chosen.insert(group.members.begin(), group.members.end());
++        std::set<int> result(next.inserts.begin(), next.inserts.end());
++        if (action == "replace" || action == "range") result = chosen;
++        else if (action == "add") result.insert(chosen.begin(), chosen.end());
++        else if (action == "toggle")
++            for (int index : chosen) { if (result.contains(index)) result.erase(index); else result.insert(index); }
++        else return juce::Result::fail("Unsupported Mixer selection action");
++        if (result.empty()) return juce::Result::fail("Mixer selection must retain one focused insert");
++        next.inserts.clear();
++        for (int index : p.mixerOrder) if (result.contains(index)) next.inserts.push_back(index);
++        if (!targets.empty() && result.contains(targets.back())) next.focus = targets.back();
++        else if (!result.contains(next.focus)) next.focus = next.inserts.front();
++        if (action != "range") next.anchor = next.focus;
++        *this = std::move(next);
++        return juce::Result::ok();
++    }
++};
++} // namespace vibera
+--- /dev/null
++++ b/src/MixerOrganisationContracts.h
+@@ -0,0 +1,76 @@
++// SPDX-License-Identifier: AGPL-3.0-or-later
++// Unregistered isolated semantic draft. Root integration must register/qualify it.
++#pragma once
++#include "MixerOrganisation.h"
++
++namespace vibera
++{
++inline juce::var mixerOrganisationArgumentSchema(const juce::String &command)
++{
++    auto schema = juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{}})");
++    auto *fields = schema["properties"].getDynamicObject();
++    juce::Array<juce::var> required;
++    const bool members = command == "mixer.delete" || command == "mixer.reorder" ||
++                         command == "mixer.group.create" || command == "mixer.group.members";
++    if (members)
++    {
++        fields->setProperty("ids", juce::JSON::parse(R"({"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"integer","minimum":1,"maximum":2147483647},"description":"Stable existing non-Master Mixer indices, never view ordinals or global project IDs."})"));
++        fields->getProperty("ids").getDynamicObject()->setProperty("maxItems", maximumMixerNonMaster);
++        required.add("ids");
++    }
++    if (command == "mixer.create" || command == "mixer.reorder")
++        fields->setProperty("target", juce::JSON::parse(R"({"type":"integer","minimum":0,"maximum":2147483647,"default":0,"description":"Existing unselected non-Master insert to place before;0 means append, never before Master. View order only for reorder; physical DSP order is unchanged."})"));
++    else if (command.startsWith("mixer.group.") && command != "mixer.group.create")
++    {
++        fields->setProperty("target", juce::JSON::parse(R"({"type":"integer","minimum":1,"maximum":1000000000,"description":"Stable global Mixer group ID; unrelated to insert indices."})"));
++        required.add("target");
++    }
++    if (command == "mixer.create" || command == "mixer.group.create" || command == "mixer.group.rename")
++    {
++        fields->setProperty("text", juce::JSON::parse(R"({"type":"string","maxLength":64,"description":"Trimmed display name, no CR/LF/tab. Empty create-insert name defaults to Insert plus allocated index. Group name required/nonempty and unique case-insensitively."})"));
++        if (command != "mixer.create") required.add("text");
++    }
++    if (command == "mixer.group.colour")
++    {
++        fields->setProperty("value", juce::JSON::parse(R"({"type":"integer","minimum":0,"maximum":4294967295,"description":"0 follows theme; otherwise opaque ARGB0xff000000..0xffffffff. Partial alpha rejected by canonical validation."})"));
++        required.add("value");
++    }
++    if (command == "mixer.delete")
++    {
++        fields->setProperty("rerouteMixerToMaster", juce::JSON::parse(R"({"type":"boolean","description":"Explicit removal policy. True reroutes assigned Channels to Master; false refuses any assigned insert. Incoming routes and targets in automation are pruned; Undo restores exact musical state. Plugin-bearing structure requires native-state capture and prepared projection, never direct bypass of admission."})"));
++        required.add("rerouteMixerToMaster");
++    }
++    schema.getDynamicObject()->setProperty("required", required);
++    return schema;
++}
++inline juce::var mixerOrganisationSelectionSchema()
++{
++    auto schema = juce::JSON::parse(R"({"type":"object","additionalProperties":false,"required":["action","inserts"],"properties":{"action":{"type":"string","enum":["replace","add","toggle","range"]},"inserts":{"type":"array","minItems":1,"uniqueItems":true,"items":{"type":"integer","minimum":0,"maximum":2147483647},"description":"Stable Mixer indices. Range requires one destination and uses current view order and selection anchor."},"expandGroups":{"type":"boolean","default":false,"description":"Select the union of display-group members. No routing, project, history or audible controls are changed."}}})");
++    schema["properties"]["inserts"].getDynamicObject()->setProperty("maxItems", maximumMixerActive);
++    return schema;
++}
++inline juce::var mixerOrganisationState(const Project &p, const MixerSelection &selection)
++{
++    auto *state = new juce::DynamicObject;
++    juce::Array<juce::var> order, selected, groups;
++    for (int index : p.mixerOrder) order.add(index);
++    for (int index : selection.inserts) selected.add(index);
++    for (const auto &group : p.mixerGroups)
++    {
++        auto *row = new juce::DynamicObject;
++        row->setProperty("id", juce::int64(group.id)); row->setProperty("name", group.name);
++        row->setProperty("colour", juce::int64(group.colour));
++        juce::Array<juce::var> members;
++        for (int index : group.members) members.add(index);
++        row->setProperty("members", members); groups.add(juce::var(row));
++    }
++    state->setProperty("order", order); state->setProperty("groups", groups);
++    state->setProperty("selectedInserts", selected); state->setProperty("focusedInsert", selection.focus);
++    state->setProperty("selectionAnchor", selection.anchor);
++    state->setProperty("nextMixerIndex", juce::int64(p.nextMixerIndex));
++    state->setProperty("activeCount", int(p.mixer.size())); state->setProperty("maximumActive", maximumMixerActive);
++    state->setProperty("maximumNonMaster", maximumMixerNonMaster);
++    state->setProperty("structuralPluginsRequirePreparedProjection", true);
++    return juce::var(state);
++}
++} // namespace vibera
+--- /dev/null
++++ b/tests/MixerOrganisationAcceptance.h
+@@ -0,0 +1,208 @@
++// SPDX-License-Identifier: AGPL-3.0-or-later
++// Original isolated draft. Parent supplies current acceptance require() helper.
++#pragma once
++#include "MixerOrganisation.h"
++#include "MixerOrganisationContracts.h"
++#include "Commands.h"
++
++static void mixerOrganisationAcceptance()
++{
++    using namespace vibera;
++    Project p = Project::empty();
++    const auto original = p.state();
++    require(p.version == 20 && p.mixerOrder.size() == 18 && p.nextMixerIndex == 18,
++            "Existing18 stable indices retained with separate allocator/order");
++    MixerOrganisationArgs a;
++    a.name = "Return";
++    auto created = applyMixerOrganisation(p, "mixer.create", a);
++    require(created.completed() && created.createdInsert == 18 && p.nextMixerIndex == 19 &&
++                mixerRoute(p, 18, 0) && p.mixer.back().index == 18 && p.mixerOrder.back() == 18,
++            "New stable insert defaults unity send to Master without global ID allocation");
++    const auto globalIds = p.nextId;
++    a = {}; a.inserts = {18, 3}; a.beforeInsert = 1;
++    const auto physical = p.mixer;
++    const auto routedChannel = p.channels.front().mixer;
++    require(applyMixerOrganisation(p, "mixer.reorder", a).completed() &&
++                p.mixerOrder[0] == 0 && p.mixerOrder[1] == 3 && p.mixerOrder[2] == 18 &&
++                p.channels.front().mixer == routedChannel && p.nextId == globalIds,
++            "Reorder preserves relative view order, fixed Master and stable routing");
++    for (size_t i = 0; i < physical.size(); ++i)
++        require(p.mixer[i].index == physical[i].index && p.mixer[i].routes == physical[i].routes,
++                "View reorder never permutes physical DSP insert vector or native buses");
++    auto refused = [&](const juce::String &command, const MixerOrganisationArgs &args)
++    {
++        const auto before = p.state();
++        require(!applyMixerOrganisation(p, command, args).completed() && p.state().isEquivalentTo(before),
++                "Invalid organisation request leaves complete model/allocators atomic");
++    };
++    a = {}; a.inserts = {0}; refused("mixer.delete", a); refused("mixer.reorder", a);
++    a.inserts = {3, 3}; refused("mixer.reorder", a);
++    a.inserts = {999}; refused("mixer.delete", a);
++    a = {}; a.inserts = {3, 18}; a.name = "Drum returns";
++    const auto grouped = applyMixerOrganisation(p, "mixer.group.create", a);
++    require(grouped.completed() && grouped.createdGroup == globalIds && p.nextId == globalIds + 1 &&
++                p.mixerGroups.front().members == std::vector<int>({3, 18}),
++            "Display group uses global identity and stable Mixer member identities");
++    const auto group = grouped.createdGroup;
++    a = {}; a.group = group; a.colour = 0xff337799;
++    require(applyMixerOrganisation(p, "mixer.group.colour", a).completed() &&
++                p.mixerGroups.front().colour == 0xff337799,
++            "Group colour has actual validated model readback");
++    a.colour = 0x80337799; refused("mixer.group.colour", a);
++    a = {}; a.inserts = {2}; a.name = "drum RETURNS"; refused("mixer.group.create", a);
++    a.name = "Bass";
++    require(applyMixerOrganisation(p, "mixer.group.create", a).completed(), "Second group created");
++    const auto bassGroup = p.mixerGroups.back().id;
++    a = {}; a.group = bassGroup; a.inserts = {2, 18};
++    require(applyMixerOrganisation(p, "mixer.group.members", a).completed() &&
++                p.mixerGroups.front().members == std::vector<int>({3}),
++            "Explicit reassignment removes old membership without changing routing");
++    MixerSelection selection;
++    const auto beforeSelection = p.state();
++    require(selection.apply(p, "replace", {18}, true).wasOk() &&
++                selection.inserts == std::vector<int>({18, 2}),
++            "Group selection expands exact stable member union in current view order");
++    require(selection.apply(p, "replace", {3}).wasOk() &&
++                selection.apply(p, "range", {2}).wasOk() &&
++                selection.inserts == std::vector<int>({3, 18, 1, 2}),
++            "Range selection uses display order rather than index arithmetic");
++    const auto previousSelection = selection.inserts;
++    require(selection.apply(p, "replace", {999}).failed() && selection.inserts == previousSelection &&
++                p.state().isEquivalentTo(beforeSelection),
++            "Invalid selection is atomic and never changes project/history data");
++    const auto semantic = mixerOrganisationState(p, selection);
++    require(int(semantic["focusedInsert"]) == selection.focus &&
++                semantic["selectedInserts"].getArray()->size() == int(selection.inserts.size()) &&
++                int(semantic["maximumActive"]) == maximumMixerActive &&
++                mixerOrganisationArgumentSchema("mixer.delete")["properties"]["rerouteMixerToMaster"]["type"].toString() == "boolean",
++            "Proposed semantic state/typed explicit reroute contract reflects authoritative model");
++
++    p.channels.front().mixer = 3;
++    require(setMixerRoute(p, 2, 3, true).wasOk(), "Create incoming bus edge before delete");
++    AutomationSource onlyDeleted{p.allocate(), 4, {{p.allocate(), 0, .5f}, {p.allocate(), 4, .5f}},
++                                 {{{AutomationParameter::mixerGain, 3, 0}, 0, 2}}, "Deleted target"};
++    AutomationSource shared{p.allocate(), 4, {{p.allocate(), 0, .5f}, {p.allocate(), 4, .5f}},
++                           {{{AutomationParameter::mixerGain, 3, 0}, 0, 2},
++                            {{AutomationParameter::mixerGain, 2, 0}, 0, 2}}, "Shared target"};
++    const auto removedSource = onlyDeleted.id, keptSource = shared.id;
++    p.automation.sources = {onlyDeleted, shared};
++    p.automation.placements = {{p.allocate(), removedSource, 0, 4}, {p.allocate(), keptSource, 4, 4}};
++    p.automation.initialValues.push_back({{AutomationParameter::mixerGain, 3, 0}, .75f});
++    require(p.validate().wasOk(), "Genuine routed/linked automation delete fixture validates");
++    const auto beforeDelete = p;
++    a = {}; a.inserts = {3}; refused("mixer.delete", a);
++    a.rerouteChannelsToMaster = true;
++    require(applyMixerOrganisation(p, "mixer.delete", a).completed() && !mixerInsert(p, 3) &&
++                p.channels.front().mixer == 0 && !mixerRoute(p, 2, 3) && p.mixerGroups.size() == 1 &&
++                p.automation.sources.size() == 1 && p.automation.sources.front().id == keptSource &&
++                p.automation.sources.front().links.size() == 1 && p.automation.placements.size() == 1 &&
++                p.automation.initialValues.empty(),
++            "Explicit delete prunes only deleted routes/membership/automation and reroutes assigned Channels");
++    selection.reconcile(p);
++    require(std::find(selection.inserts.begin(), selection.inserts.end(), 3) == selection.inserts.end(),
++            "Runtime selection reconciles deleted stable target");
++    a = {}; a.name = "New bus";
++    const auto next = applyMixerOrganisation(p, "mixer.create", a);
++    require(next.completed() && next.createdInsert == 19 && !mixerInsert(p, 3),
++            "Normal deletion never recycles a deleted insert index");
++    Project roundtrip;
++    require(Project::parse(p.state(), roundtrip).wasOk() && roundtrip.state().isEquivalentTo(p.state()),
++            "Schema20 exact state round trip retains order/groups/watermark and unrelated fields");
++    auto xml = juce::ValueTree::fromXml(*p.state().createXml());
++    require(Project::parse(xml, roundtrip).wasOk() && roundtrip.state().isEquivalentTo(p.state()),
++            "Actual XML attribute string encoding round trip is valid");
++    auto legacy = Project::empty().state();
++    legacy.setProperty("version", 19, nullptr);
++    legacy.removeProperty("nextMixerIndex", nullptr);
++    legacy.removeChild(legacy.getChildWithName("MIXER_ORDER"), nullptr);
++    legacy.removeChild(legacy.getChildWithName("MIXER_GROUPS"), nullptr);
++    require(Project::parse(legacy, roundtrip).wasOk() && roundtrip.nextMixerIndex == 18 &&
++                roundtrip.mixerOrder.front() == 0 && roundtrip.mixerOrder.back() == 17,
++            "Genuine19 migration derives view/allocator without rewriting original file");
++    legacy.setProperty("nextMixerIndex", 18, nullptr);
++    require(Project::parse(legacy, roundtrip).failed(), "New organisation under old schema refused");
++    for (const char *field : {"nextMixerIndex", "version"})
++    {
++        auto malformed = p.state(); malformed.setProperty(field, 20.25, nullptr);
++        require(Project::parse(malformed, roundtrip).failed(), "Fractional organisation/schema integers refused");
++    }
++    auto orderMissing = p.state();
++    orderMissing.removeChild(orderMissing.getChildWithName("MIXER_ORDER"), nullptr);
++    require(Project::parse(orderMissing, roundtrip).failed(), "Missing required20 view data refused");
++    auto duplicates = p.state();
++    auto orderTree = duplicates.getChildWithName("MIXER_ORDER");
++    orderTree.getChild(1).setProperty("insert", 0, nullptr);
++    require(Project::parse(duplicates, roundtrip).failed(), "Duplicated Master/order target refused");
++    auto exhausted = Project::empty();
++    exhausted.nextMixerIndex = std::int64_t(std::numeric_limits<int>::max()) + 1;
++    const auto exhaustedState = exhausted.state();
++    require(!applyMixerOrganisation(exhausted, "mixer.create", {}).completed() &&
++                exhausted.state().isEquivalentTo(exhaustedState), "Exhausted index sentinel refuses atomically");
++    auto lastIndex = Project::empty();
++    lastIndex.nextMixerIndex = std::numeric_limits<int>::max();
++    require(applyMixerOrganisation(lastIndex, "mixer.create", {}).completed() &&
++                lastIndex.mixerOrder.back() == std::numeric_limits<int>::max() &&
++                lastIndex.nextMixerIndex == std::int64_t(std::numeric_limits<int>::max()) + 1 &&
++                Project::parse(lastIndex.state(), roundtrip).wasOk(),
++            "Last valid sparse Mixer index round trips without overflow or global ID consumption");
++    auto nine = Project::empty();
++    a = {}; for (int index = 9; index < 18; ++index) a.inserts.push_back(index);
++    require(applyMixerOrganisation(nine, "mixer.delete", a).completed() && nine.mixer.size() == 9 &&
++                Project::parse(nine.state(), roundtrip).wasOk() && roundtrip.mixer.size() == 9,
++            "A genuine20 intentional nine-insert project is never expanded by legacy migration");
++    auto oldNine = nine.state();
++    oldNine.setProperty("version", 19, nullptr); oldNine.removeProperty("nextMixerIndex", nullptr);
++    oldNine.removeChild(oldNine.getChildWithName("MIXER_ORDER"), nullptr);
++    oldNine.removeChild(oldNine.getChildWithName("MIXER_GROUPS"), nullptr);
++    require(Project::parse(oldNine, roundtrip).wasOk() && roundtrip.mixer.size() == 18 &&
++                roundtrip.mixerOrder.size() == 18 && roundtrip.nextMixerIndex == 18,
++            "Genuine old default-nine migration extends view and allocator consistently");
++    auto capacity = Project::empty();
++    while (capacity.mixer.size() < maximumMixerActive)
++        require(applyMixerOrganisation(capacity, "mixer.create", {}).completed(), "Create within bounded active capacity");
++    require(capacity.mixer.size() == 129, "Historical129-total capacity preserved");
++    auto legacyFull = capacity.state();
++    legacyFull.setProperty("version", 19, nullptr); legacyFull.removeProperty("nextMixerIndex", nullptr);
++    legacyFull.removeChild(legacyFull.getChildWithName("MIXER_ORDER"), nullptr);
++    legacyFull.removeChild(legacyFull.getChildWithName("MIXER_GROUPS"), nullptr);
++    require(Project::parse(legacyFull, roundtrip).wasOk() && roundtrip.mixer.size() == 129,
++            "Genuine19 maximum129-total project migrates without truncation or rejection");
++    const auto full = capacity.state();
++    require(!applyMixerOrganisation(capacity, "mixer.create", {}).completed() &&
++                capacity.state().isEquivalentTo(full), "128 non-Master plus Master is an atomic compatible hard limit");
++    auto hosted = Project::empty();
++    juce::PluginDescription type;
++    type.name = "Original missing-provider state guard";
++    type.pluginFormatName = "VST3"; type.fileOrIdentifier = "C:/owned-fixture/not-installed.vst3";
++    type.uniqueId = 1; type.numInputChannels = 2; type.numOutputChannels = 2;
++    hosted.mixer[1].effects.push_back({hosted.allocate(), type.name, type.createXml()->toString(), {}, false, false});
++    require(hosted.validate().wasOk(), "Valid original missing-provider descriptor exercises model admission only");
++    const auto hostedBefore = hosted.state();
++    a = {}; a.inserts = {1};
++    require(applyMixerOrganisation(hosted, "mixer.delete", a).code == "requiresPreparedProjection" &&
++                hosted.state().isEquivalentTo(hostedBefore) &&
++                applyMixerOrganisation(hosted, "mixer.create", {}).code == "requiresPreparedProjection",
++            "Plugin-bearing structure cannot silently discard current native state through direct Controller path");
++    a = {}; a.inserts = {1}; a.beforeInsert = 2;
++    require(applyMixerOrganisation(hosted, "mixer.reorder", a).completed(),
++            "Plugin-bearing view reorder remains metadata without topology replacement prerequisite");
++    // Controller adapter uses existing StateAction snapshots, not a parallel Undo engine.
++    Controller controller;
++    controller.replace(beforeDelete);
++    CommandArgs command; command.ids = {3}; command.rerouteMixerToMaster = true;
++    require(controller.execute("mixer.delete", command).wasOk(), "Canonical Controller delete owns one Undo");
++    const auto deleted = controller.project.state();
++    controller.undoEdit();
++    require(controller.project.state().isEquivalentTo(beforeDelete.state()), "Delete Undo exactly restores routed score/automation/groups");
++    controller.redoEdit();
++    require(controller.project.state().isEquivalentTo(deleted), "Delete Redo exactly restores admitted candidate");
++    controller.undoEdit();
++    command = {}; command.ids = {18}; command.target = 2;
++    require(controller.execute("mixer.reorder", command).wasOk(), "Canonical view reorder shares existing history");
++    const auto reordered = controller.project.state();
++    controller.undoEdit();
++    require(controller.project.state().isEquivalentTo(beforeDelete.state()), "View reorder Undo preserves whole musical model");
++    controller.redoEdit();
++    require(controller.project.state().isEquivalentTo(reordered), "View reorder exact Redo");
++    require(!original.isEquivalentTo(p.state()), "Scenario made genuine model changes");
++}

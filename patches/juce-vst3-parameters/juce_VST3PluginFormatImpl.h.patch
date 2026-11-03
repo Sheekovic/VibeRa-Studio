@@ -1,0 +1,230 @@
+--- a/modules/juce_audio_processors_headless/format_types/juce_VST3PluginFormatImpl.h
++++ b/modules/juce_audio_processors_headless/format_types/juce_VST3PluginFormatImpl.h
+@@ -136,7 +136,11 @@
+             return;
+ 
+         if (MessageManager::getInstance()->isThisTheMessageThread())
++        {
++            // VibeRa: a pending older processor echo must not overwrite a newer manual/restore write.
++            cache.set (index, value);
+             controller->setParamNormalized (cache.getParamID (index), value);
++        }
+         else
+             cache.set (index, value);
+     }
+@@ -1754,13 +1758,45 @@
+ 
+     void append (Item item)
+     {
+-        // The host *must* add points in sample-offset order
+-        jassert (list.empty() || std::prev (list.end())->second.offset <= item.offset);
+-
++        // VibeRa: merge cached/UI, mapped MIDI and explicit sample-time points in timestamp order.
++        // Reuse prepared nodes; a later writer at the same offset replaces that point.
++        if (list.empty() || list.rbegin()->second.offset < item.offset)
++        {
++            auto node = getNodeFromStorage();
++            node.key() = (Steinberg::int32) list.size();
++            node.mapped() = item;
++            list.insert (list.end(), std::move (node));
++            return;
++        }
++        if (list.rbegin()->second.offset == item.offset)
++        {
++            list.rbegin()->second = item;
++            return;
++        }
++        Steinberg::int32 low = 0, high = (Steinberg::int32) list.size();
++        while (low < high)
++        {
++            const auto middle = low + (high - low) / 2;
++            if (list.find (middle)->second.offset < item.offset) low = middle + 1;
++            else high = middle;
++        }
++        auto first = list.lower_bound (low);
++        if (first != list.end() && first->second.offset == item.offset)
++        {
++            first->second = item;
++            return;
++        }
+         auto node = getNodeFromStorage();
+         node.key() = (Steinberg::int32) list.size();
++        for (auto it = first; it != list.end(); ++it) std::swap (item, it->second);
+         node.mapped() = item;
+         list.insert (std::move (node));
++    }
++
++    std::optional<float> getValue() const
++    {
++        if (list.empty()) return {};
++        return (float) list.rbegin()->second.value;
+     }
+ 
+     void clear()
+@@ -1949,6 +1985,12 @@
+             queue->append ({ offset, value });
+     }
+ 
++    std::optional<float> getFinalValue (Vst::ParamID id) const
++    {
++        const auto entry = map.find (id);
++        return entry != map.end() ? entry->second.ptr->getValue() : std::optional<float>{};
++    }
++
+     void clear()
+     {
+         for (auto* item : queues)
+@@ -2113,7 +2155,11 @@
+         void updateCachedInfo()
+         {
+             cachedInfo = fetchParameterInfo();
+-        }
++            eventFlags.store (cachedInfo.id == originalID ? (uint32) cachedInfo.flags
++                                                         : (uint32) (Vst::ParameterInfo::kIsReadOnly | Vst::ParameterInfo::kIsHidden));
++        }
++
++        uint32 getEventFlags() const noexcept { return eventFlags.load(); }
+ 
+         Vst::ParameterInfo getParameterInfo() const
+         {
+@@ -2135,6 +2181,8 @@
+         VST3PluginInstanceHeadless& pluginInstance;
+         const Steinberg::int32 vstParamIndex;
+         Vst::ParameterInfo cachedInfo = fetchParameterInfo();
++        const Vst::ParamID originalID = cachedInfo.id;
++        std::atomic<uint32> eventFlags { (uint32) cachedInfo.flags };
+     };
+ 
+     //==============================================================================
+@@ -2231,6 +2279,71 @@
+ 
+           AudioPluginExtensions::VST3Client* getVST3Client()       override { return this; }
+     const AudioPluginExtensions::VST3Client* getVST3Client() const override { return this; }
++    // VibeRa local host adapter. Native metadata comes from JUCE's cached SDK descriptor, never names.
++    bool getNativeParameterInfo (uint32 id, AudioPluginExtensions::VST3Client::ParameterInfo& out) const override
++    {
++        const auto* parameter = getParameterForID (id);
++        if (parameter == nullptr) return false;
++        const auto info = parameter->getParameterInfo();
++        if (info.id != id) return false; // Never redirect an ID after a provider changes its schema.
++        out = { info.id, (uint32) info.flags, info.stepCount, info.unitId, (float) info.defaultNormalizedValue };
++        return true;
++    }
++
++    bool getNativeParameterValue (uint32 id, float& out) const override
++    {
++        JUCE_ASSERT_MESSAGE_THREAD
++        auto* parameter = getParameterForID (id);
++        if (parameter == nullptr || parameter->getParamID() != id || editController == nullptr) return false;
++        const auto value = editController->getParamNormalized (id);
++        if (! std::isfinite (value) || value < 0 || value > 1) return false;
++        out = (float) value;
++        return true;
++    }
++
++    bool flushPendingParametersOnDSP() noexcept
++    {
++        if (processor == nullptr) return false;
++        inputParameterChanges->clear();
++        outputParameterChanges->clear();
++        cachedParamValues.ifSet ([&] (Steinberg::int32 index, float value)
++        {
++            inputParameterChanges->set (cachedParamValues.getParamID (index), value, 0);
++        });
++        if (inputParameterChanges->getParameterCount() == 0) return true;
++        // SDK parameter-only flush: no audio/events or advancement of the transport cursor.
++        Vst::ProcessData data{};
++        data.processMode = Vst::kRealtime;
++        data.symbolicSampleSize = Vst::kSample32;
++        data.inputParameterChanges = inputParameterChanges.get();
++        data.outputParameterChanges = outputParameterChanges.get();
++        const auto result = processor->process (data);
++        outputParameterChanges->forEach ([&] (Steinberg::int32 index, Vst::ParamID, float value)
++        {
++            parameterDispatcher.push (index, value);
++        });
++        return result == kResultOk;
++    }
++    bool setParameterEventsForNextBlock (Span<const AudioPluginExtensions::VST3Client::ParameterEvent> events,
++                                         int frameCount) override
++    {
++        timedParameterCount = 0;
++        if (frameCount <= 0 || events.size() > timedParameters.size()) return false;
++        int previous = -1;
++        for (const auto& event : events)
++        {
++            const auto* parameter = getParameterForID (event.id);
++            if (parameter == nullptr || event.sampleOffset < previous || event.sampleOffset < 0 ||
++                event.sampleOffset >= frameCount || !std::isfinite (event.value) || event.value < 0 || event.value > 1 ||
++                (parameter->getEventFlags() & (Vst::ParameterInfo::kIsReadOnly | Vst::ParameterInfo::kIsHidden | Vst::ParameterInfo::kIsProgramChange)) != 0 ||
++                (parameter->getEventFlags() & Vst::ParameterInfo::kCanAutomate) == 0)
++                return false;
++            previous = event.sampleOffset;
++        }
++        std::copy (events.begin(), events.end(), timedParameters.begin());
++        timedParameterCount = (int) events.size();
++        return true;
++    }
+ 
+     Steinberg::Vst::IComponent* getIComponentPtr() const noexcept override
+     {
+@@ -2481,8 +2594,22 @@
+ 
+         cachedParamValues.ifSet ([&] (Steinberg::int32 index, float value)
+         {
+-            inputParameterChanges->set (cachedParamValues.getParamID (index), value, 0);
++            const auto id = cachedParamValues.getParamID (index);
++            inputParameterChanges->set (id, value, 0);
+         });
++
++        for (int i = 0; i < timedParameterCount; ++i)
++        {
++            const auto& event = timedParameters[(size_t) i];
++            inputParameterChanges->set (event.id, event.value, event.sampleOffset);
++        }
++        // Echo the final merged value, including mapped MIDI. No listener locks on this new DSP path.
++        if (timedParameterCount > 0)
++            inputParameterChanges->forEach ([&] (Steinberg::int32 index, Vst::ParamID, float value)
++            {
++                parameterDispatcher.push (index, value);
++            });
++        timedParameterCount = 0;
+ 
+         processor->process (data);
+ 
+@@ -3043,6 +3170,9 @@
+     }
+ 
+     CachedParamValues cachedParamValues;
++    std::array<AudioPluginExtensions::VST3Client::ParameterEvent,
++               AudioPluginExtensions::VST3Client::maximumParameterEvents> timedParameters{};
++    int timedParameterCount = 0;
+     VSTComSmartPtr<ParameterChanges<HostToClientParamQueue>> inputParameterChanges
+     {
+         new ParameterChanges<HostToClientParamQueue>,
+@@ -3100,7 +3230,8 @@
+         }
+ 
+         {
+-            hostToClientParamQueueStorage = HostToClientParamQueue::makeStorage (1 << 13);
++            // Cached changes + bounded MIDI mapping + all timed host points, prepared off DSP.
++            hostToClientParamQueueStorage = HostToClientParamQueue::makeStorage ((size_t) jmax (1 << 13, editController->getParameterCount() + 2048 + AudioPluginExtensions::VST3Client::maximumParameterEvents));
+ 
+             auto allIds = getAllParamIDs (*editController);
+             inputParameterChanges ->initialise (allIds, hostToClientParamQueueStorage);
+@@ -3644,6 +3775,15 @@
+     callback (nullptr, TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3"));
+ }
+ 
++#if ! JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
++bool viberaFlushVST3Parameters (AudioPluginInstance& instance) noexcept
++{
++    if (auto* vst = dynamic_cast<VST3PluginInstanceHeadless*> (&instance))
++        return vst->flushPendingParametersOnDSP();
++    return false;
++}
++#endif
++
+ JUCE_END_NO_SANITIZE
+ 
+ } // namespace juce

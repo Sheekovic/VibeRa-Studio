@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<VIBERA version="1" nextId="124" name="Midnight Session" tempo="120.0"
+        numerator="4" denominator="4">
+  <CHANNELS>
+    <CHANNEL id="1" name="KICK" source="builtin:kick" mixer="1" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+    <CHANNEL id="2" name="SNARE" source="builtin:snare" mixer="2" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+    <CHANNEL id="3" name="HAT" source="builtin:hat" mixer="3" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+    <CHANNEL id="4" name="BASS" source="builtin:bass" mixer="4" gain="0.699999988079071"
+             pan="0.0" muted="0"/>
+  </CHANNELS>
+  <PATTERNS>
+    <PATTERN id="5" name="Beat + bass" length="8.0">
+      <NOTE id="6" channel="1" beat="0.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="7" channel="3" beat="0.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="8" channel="3" beat="0.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="9" channel="1" beat="1.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="10" channel="2" beat="1.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="11" channel="3" beat="1.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="12" channel="3" beat="1.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="13" channel="1" beat="2.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="14" channel="3" beat="2.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="15" channel="3" beat="2.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="16" channel="1" beat="3.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="17" channel="2" beat="3.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="18" channel="3" beat="3.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="19" channel="3" beat="3.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="20" channel="1" beat="4.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="21" channel="3" beat="4.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="22" channel="3" beat="4.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="23" channel="1" beat="5.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="24" channel="2" beat="5.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="25" channel="3" beat="5.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="26" channel="3" beat="5.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="27" channel="1" beat="6.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="28" channel="3" beat="6.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="29" channel="3" beat="6.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="30" channel="1" beat="7.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="31" channel="2" beat="7.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="32" channel="3" beat="7.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="33" channel="3" beat="7.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="34" channel="4" beat="0.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="35" channel="4" beat="1.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="36" channel="4" beat="2.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="37" channel="4" beat="3.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="38" channel="4" beat="4.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="39" channel="4" beat="5.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="40" channel="4" beat="6.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="41" channel="4" beat="7.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+    </PATTERN>
+    <PATTERN id="48" name="Drum groove" length="8.0">
+      <NOTE id="49" channel="1" beat="0.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="50" channel="3" beat="0.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="51" channel="3" beat="0.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="52" channel="1" beat="1.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="53" channel="2" beat="1.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="54" channel="3" beat="1.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="55" channel="3" beat="1.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="56" channel="1" beat="2.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="57" channel="3" beat="2.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="58" channel="3" beat="2.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="59" channel="1" beat="3.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="60" channel="2" beat="3.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="61" channel="3" beat="3.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="62" channel="3" beat="3.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="63" channel="1" beat="4.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="64" channel="3" beat="4.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="65" channel="3" beat="4.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="66" channel="1" beat="5.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="67" channel="2" beat="5.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="68" channel="3" beat="5.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="69" channel="3" beat="5.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="70" channel="1" beat="6.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="71" channel="3" beat="6.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="72" channel="3" beat="6.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="73" channel="1" beat="7.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="74" channel="2" beat="7.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="75" channel="3" beat="7.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="76" channel="3" beat="7.5" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+    </PATTERN>
+    <PATTERN id="79" name="Bass phrase" length="8.0">
+      <NOTE id="80" channel="4" beat="0.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="81" channel="4" beat="1.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="82" channel="4" beat="2.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="83" channel="4" beat="3.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="84" channel="4" beat="4.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="85" channel="4" beat="5.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="86" channel="4" beat="6.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="87" channel="4" beat="7.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+    </PATTERN>
+    <PATTERN id="90" name="Half-time" length="8.0">
+      <NOTE id="91" channel="1" beat="0.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="92" channel="3" beat="0.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="93" channel="1" beat="1.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="94" channel="2" beat="1.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="95" channel="3" beat="1.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="96" channel="1" beat="2.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="97" channel="3" beat="2.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="98" channel="1" beat="3.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="99" channel="2" beat="3.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="100" channel="3" beat="3.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="101" channel="1" beat="4.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="102" channel="3" beat="4.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="103" channel="1" beat="5.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="104" channel="2" beat="5.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="105" channel="3" beat="5.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="106" channel="1" beat="6.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="107" channel="3" beat="6.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+      <NOTE id="108" channel="1" beat="7.0" length="0.25" pitch="60" velocity="0.8500000238418579"
+            step="1"/>
+      <NOTE id="109" channel="2" beat="7.0" length="0.25" pitch="60" velocity="0.75"
+            step="1"/>
+      <NOTE id="110" channel="3" beat="7.0" length="0.25" pitch="60" velocity="0.4000000059604645"
+            step="1"/>
+    </PATTERN>
+    <PATTERN id="113" name="Bass variation" length="8.0">
+      <NOTE id="114" channel="4" beat="0.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="115" channel="4" beat="1.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="116" channel="4" beat="2.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="117" channel="4" beat="3.0" length="0.75" pitch="62" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="118" channel="4" beat="4.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="119" channel="4" beat="5.0" length="0.75" pitch="48" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="120" channel="4" beat="6.0" length="0.75" pitch="62" velocity="0.6499999761581421"
+            step="0"/>
+      <NOTE id="121" channel="4" beat="7.0" length="0.75" pitch="55" velocity="0.6499999761581421"
+            step="0"/>
+    </PATTERN>
+  </PATTERNS>
+  <PLACEMENTS>
+    <PLACEMENT id="46" pattern="5" lane="0" beat="0.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="47" pattern="5" lane="0" beat="8.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="77" pattern="48" lane="1" beat="16.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="78" pattern="48" lane="1" beat="24.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="88" pattern="79" lane="2" beat="16.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="89" pattern="79" lane="2" beat="24.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="111" pattern="90" lane="1" beat="32.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="112" pattern="90" lane="1" beat="40.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="122" pattern="113" lane="2" beat="32.0" length="8.0" offset="0.0"/>
+    <PLACEMENT id="123" pattern="113" lane="2" beat="40.0" length="8.0" offset="0.0"/>
+  </PLACEMENTS>
+  <MIXER>
+    <INSERT index="0" name="Master" gain="0.800000011920929" pan="0.0" muted="0"/>
+    <INSERT index="1" name="Insert 1" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="2" name="Insert 2" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="3" name="Insert 3" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="4" name="Insert 4" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="5" name="Insert 5" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="6" name="Insert 6" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="7" name="Insert 7" gain="1.0" pan="0.0" muted="0"/>
+    <INSERT index="8" name="Insert 8" gain="1.0" pan="0.0" muted="0"/>
+  </MIXER>
+</VIBERA>

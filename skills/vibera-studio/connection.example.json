@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "vibera-studio": {
+      "command": "E:\\Projects\\VibeRa Studio\\dist\\VibeRa Studio\\VibeRa Studio.exe",
+      "args": ["--mcp"]
+    }
+  }
+}

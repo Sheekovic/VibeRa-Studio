@@ -1,0 +1,274 @@
+--- a/modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.cpp
++++ b/modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.cpp
+@@ -89,8 +89,8 @@
+ class CallbackMaxSizeEnforcer  : public AudioIODeviceCallback
+ {
+ public:
+-    explicit CallbackMaxSizeEnforcer (AudioIODeviceCallback& callbackIn)
+-        : inner (callbackIn) {}
++    CallbackMaxSizeEnforcer (AudioIODeviceCallback& callbackIn, AudioDeviceManager& managerIn)
++        : inner (callbackIn), manager (managerIn) {}
+ 
+     void audioDeviceAboutToStart (AudioIODevice* device) override
+     {
+@@ -98,6 +98,7 @@
+         storedInputChannels .resize ((size_t) device->getActiveInputChannels() .countNumberOfSetBits());
+         storedOutputChannels.resize ((size_t) device->getActiveOutputChannels().countNumberOfSetBits());
+ 
++        manager.physicalDeviceStarting (maximumSize);
+         inner.audioDeviceAboutToStart (device);
+     }
+ 
+@@ -111,6 +112,8 @@
+         jassert ((int) storedInputChannels.size()  == numInputChannels);
+         jassert ((int) storedOutputChannels.size() == numOutputChannels);
+ 
++        // Preserve the REAL physical burst before the first chunk is rendered.
++        manager.physicalCallbackStarting (numSamples);
+         int position = 0;
+ 
+         while (position < numSamples)
+@@ -134,6 +137,7 @@
+ 
+     void audioDeviceStopped() override
+     {
++        manager.physicalDeviceStopped();
+         inner.audioDeviceStopped();
+     }
+ 
+@@ -141,6 +145,7 @@
+     std::vector<const float*> storedInputChannels;
+     std::vector<float*> storedOutputChannels;
+     AudioIODeviceCallback& inner;
++    AudioDeviceManager& manager;
+     int maximumSize = 0;
+ };
+ 
+@@ -193,7 +198,7 @@
+     }
+ 
+     AudioDeviceManager& owner;
+-    CallbackMaxSizeEnforcer enforcer { *this };
++    CallbackMaxSizeEnforcer enforcer { *this, owner };
+ 
+     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CallbackHandler)
+ };
+@@ -206,8 +211,115 @@
+ 
+ AudioDeviceManager::~AudioDeviceManager()
+ {
+-    currentAudioDevice.reset();
++    currentAudioDevice.reset(); // Native shutdown/join precedes metadata retirement.
+     defaultMidiOutput.reset();
++    physicalCallbackCounters->ownerAlive.store (false, std::memory_order_seq_cst);
++}
++
++// ORIGINAL bounded telemetry. Pinned native lifecycle serializes start/I/O/stop;
++// publication CAS refuses conflicting writers. Default audio splitting is unchanged.
++bool AudioDeviceManager::beginPhysicalPublication() noexcept
++{
++    auto& c = *physicalCallbackCounters;
++    auto revision = c.revision.load (std::memory_order_seq_cst);
++    if (revision >= std::numeric_limits<uint64>::max() - 2)
++    {
++        c.exhausted.store (true, std::memory_order_seq_cst);
++        return false;
++    }
++    // One bounded ownership attempt. A conflicting writer never touches payload.
++    // Sticky conflict requires explicit quiesced manager recovery, not expiry.
++    if ((revision & 1u) != 0 || ! c.revision.compare_exchange_strong (revision, revision + 1,
++                                                                    std::memory_order_seq_cst))
++    {
++        c.writerConflict.store (true, std::memory_order_seq_cst);
++        return false;
++    }
++    return true;
++}
++void AudioDeviceManager::endPhysicalPublication() noexcept
++{
++    auto& value = physicalCallbackCounters->revision;
++    value.store (value.load (std::memory_order_seq_cst) + 1, std::memory_order_seq_cst);
++}
++void AudioDeviceManager::physicalDeviceStarting (int configuredFrames) noexcept
++{
++    auto& c = *physicalCallbackCounters;
++    if (! beginPhysicalPublication())
++        return;
++    const auto previous = c.epoch.load (std::memory_order_seq_cst);
++    if (previous == std::numeric_limits<uint64>::max())
++        c.exhausted.store (true, std::memory_order_seq_cst);
++    else
++        c.epoch.store (previous + 1, std::memory_order_seq_cst);
++    c.configured.store (configuredFrames, std::memory_order_seq_cst);
++    c.frames.store (0, std::memory_order_seq_cst);
++    c.maximum.store (0, std::memory_order_seq_cst);
++    c.active.store (configuredFrames > 0, std::memory_order_seq_cst);
++    endPhysicalPublication();
++}
++void AudioDeviceManager::physicalCallbackStarting (int originalFrames) noexcept
++{
++    auto& c = *physicalCallbackCounters;
++    if (! beginPhysicalPublication())
++        return;
++    const auto serial = c.serial.load (std::memory_order_seq_cst);
++    if (serial == std::numeric_limits<uint64>::max())
++        c.exhausted.store (true, std::memory_order_seq_cst);
++    else
++        c.serial.store (serial + 1, std::memory_order_seq_cst);
++    c.frames.store (originalFrames, std::memory_order_seq_cst);
++    c.maximum.store (jmax (originalFrames, c.maximum.load (std::memory_order_seq_cst)), std::memory_order_seq_cst);
++    endPhysicalPublication();
++}
++void AudioDeviceManager::physicalDeviceStopped() noexcept
++{
++    if (! beginPhysicalPublication())
++        return;
++    physicalCallbackCounters->active.store (false, std::memory_order_seq_cst);
++    endPhysicalPublication();
++}
++AudioDeviceManager::PhysicalCallbackReader AudioDeviceManager::getPhysicalCallbackReader() const
++{
++    return PhysicalCallbackReader { physicalCallbackCounters };
++}
++bool AudioDeviceManager::PhysicalCallbackReader::read (PhysicalCallbackSnapshot& out) const noexcept
++{
++    return state != nullptr && AudioDeviceManager::readPhysicalCounters (*state, out);
++}
++bool AudioDeviceManager::readPhysicalCallbackSnapshot (PhysicalCallbackSnapshot& out) const noexcept
++{
++    return readPhysicalCounters (*physicalCallbackCounters, out);
++}
++bool AudioDeviceManager::readPhysicalCounters (const PhysicalCallbackCounters& c,
++                                               PhysicalCallbackSnapshot& out) noexcept
++{
++    for (int attempt = 0; attempt < 3; ++attempt)
++    {
++        const auto before = c.revision.load (std::memory_order_seq_cst);
++        if ((before & 1u) != 0)
++            continue;
++        PhysicalCallbackSnapshot value;
++        value.deviceEpoch = c.epoch.load (std::memory_order_seq_cst);
++        value.callbackSerial = c.serial.load (std::memory_order_seq_cst);
++        value.configuredFrames = c.configured.load (std::memory_order_seq_cst);
++        value.outerFrames = c.frames.load (std::memory_order_seq_cst);
++        value.maximumOuterFrames = c.maximum.load (std::memory_order_seq_cst);
++        value.ownerAlive = c.ownerAlive.load (std::memory_order_seq_cst);
++        value.active = value.ownerAlive && c.active.load (std::memory_order_seq_cst);
++        value.countersExhausted = c.exhausted.load (std::memory_order_seq_cst);
++        value.writerConflict = c.writerConflict.load (std::memory_order_seq_cst);
++        if (c.revision.load (std::memory_order_seq_cst) == before)
++        {
++            out = value;
++            return true;
++        }
++    }
++    return false;
++}
++AudioDeviceManager::PhysicalCallbackBound AudioDeviceManager::getCurrentPhysicalCallbackBound() const
++{
++    return currentPhysicalBound.load (std::memory_order_acquire);
+ }
+ 
+ //==============================================================================
+@@ -324,18 +436,38 @@
+ 
+ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray<AudioIODeviceType>& list)
+ {
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_WASAPI (WASAPIDeviceMode::shared));
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_WASAPI (WASAPIDeviceMode::exclusive));
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_WASAPI (WASAPIDeviceMode::sharedLowLatency));
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_DirectSound());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ASIO());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_CoreAudio());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_iOSAudio());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ALSA());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_JACK());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Oboe());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_OpenSLES());
+-    addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Android());
++    knownWindowsPhysicalBoundTypes.clear();
++    const auto addKnownWindows = [&] (AudioIODeviceType* type)
++    {
++        std::unique_ptr<AudioIODeviceType> owned (type);
++        if (owned == nullptr)
++            return;
++        list.add (owned.get());
++        owned.release(); // list owns it, including a following marker allocation failure.
++        knownWindowsPhysicalBoundTypes.add (type);
++    };
++    try
++    {
++        addKnownWindows (AudioIODeviceType::createAudioIODeviceType_WASAPI (WASAPIDeviceMode::shared));
++        addKnownWindows (AudioIODeviceType::createAudioIODeviceType_WASAPI (WASAPIDeviceMode::exclusive));
++        addKnownWindows (AudioIODeviceType::createAudioIODeviceType_WASAPI (WASAPIDeviceMode::sharedLowLatency));
++        addKnownWindows (AudioIODeviceType::createAudioIODeviceType_DirectSound());
++        addKnownWindows (AudioIODeviceType::createAudioIODeviceType_ASIO());
++        addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_CoreAudio());
++        addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_iOSAudio());
++        addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_ALSA());
++        addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_JACK());
++        addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Oboe());
++        addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_OpenSLES());
++        addIfNotNull (list, AudioIODeviceType::createAudioIODeviceType_Android());
++    }
++    catch (...)
++    {
++        // A failed factory list must never leave a dangling marker that can be
++        // mistaken for a later unrelated allocation at the same address.
++        knownWindowsPhysicalBoundTypes.clear();
++        throw;
++    }
+ }
+ 
+ void AudioDeviceManager::addAudioDeviceType (std::unique_ptr<AudioIODeviceType> newDeviceType)
+@@ -353,6 +485,12 @@
+ 
+ void AudioDeviceManager::removeAudioDeviceType (AudioIODeviceType* deviceTypeToRemove)
+ {
++    if (currentPhysicalFactory == deviceTypeToRemove)
++    {
++        currentPhysicalFactory = nullptr;
++        currentPhysicalBound.store (PhysicalCallbackBound::unknown, std::memory_order_release);
++    }
++    knownWindowsPhysicalBoundTypes.removeFirstMatchingValue (deviceTypeToRemove);
+     if (deviceTypeToRemove != nullptr)
+     {
+         jassert (lastDeviceTypeConfigs.size() == availableDeviceTypes.size());
+@@ -742,6 +880,8 @@
+ 
+ void AudioDeviceManager::deleteCurrentDevice()
+ {
++    currentPhysicalFactory = nullptr;
++    currentPhysicalBound.store (PhysicalCallbackBound::unknown, std::memory_order_release);
+     currentAudioDevice.reset();
+     currentSetup.inputDeviceName.clear();
+     currentSetup.outputDeviceName.clear();
+@@ -852,6 +992,7 @@
+         }
+ 
+         currentAudioDevice.reset (type->createDevice (newSetup.outputDeviceName, newSetup.inputDeviceName));
++        currentPhysicalFactory = currentAudioDevice != nullptr ? type : nullptr;
+ 
+         if (currentAudioDevice == nullptr)
+             error = "Can't open the audio device!\n\n"
+@@ -894,6 +1035,11 @@
+     {
+         currentDeviceType = currentAudioDevice->getTypeName();
+ 
++        // Stage capability from the exact factory on CONTROL before native start.
++        // DSP/readback only sees the atomic scalar, never the mutable pointer list.
++        currentPhysicalBound.store (knownWindowsPhysicalBoundTypes.contains (currentPhysicalFactory)
++                                        ? PhysicalCallbackBound::currentBufferSize : PhysicalCallbackBound::unknown,
++                                    std::memory_order_release);
+         currentAudioDevice->start (callbackHandler->getAudioIODeviceCallback());
+ 
+         error = currentAudioDevice->getLastError();
+@@ -969,6 +1115,8 @@
+ void AudioDeviceManager::closeAudioDevice()
+ {
+     stopDevice();
++    currentPhysicalFactory = nullptr;
++    currentPhysicalBound.store (PhysicalCallbackBound::unknown, std::memory_order_release);
+     currentAudioDevice.reset();
+     loadMeasurer.reset();
+ }

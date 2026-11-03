@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "appliesAfter": "patches/tracktion-retained-history/manifest.json",
+  "productionEnabled": false,
+  "qualification": "Original bounded experiment; production disabled; runtime/module acceptance separate",
+  "sourceDependencies": [
+    {
+      "path": "src/MidiCompensationHistory.h",
+      "sha256": "e220e5f93a5ee756e3b07d42347e94fdd095b0551f336e84a75c1c3a83a9b68a",
+      "mode": "content"
+    }
+  ],
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_Node.h",
+      "patch": "patches/tracktion-retained-midi/tracktion_Node.h.patch",
+      "originalSha256": "ab6214b3f35471d5b3c54c799c6ee0bc8a45bbf4a28e5f8e13d2a7e53836e845",
+      "patchedSha256": "50d2778280604e460431b3dc67150c5827bbffbbe39b3990f3e47b74b9974f6a",
+      "patchSha256": "2b655484e059303d1188536f57cd96558fe0cd5eb3edde03c4ea1192d552e97b"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-retained-midi/tracktion_LatencyNode.h.patch",
+      "originalSha256": "8535ed646a176a5955b2d73f658651bfe0da9ffd71d86b92224a84407cb308f0",
+      "patchedSha256": "6f5923dd8568a16947c2e62004c37c0b8d0cfc89a6f9c2f466f9fdb7e0920658",
+      "patchSha256": "9db386de3aee0359a69c814ef0c91307c8fde2ad106d6b337a014c776117be50"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp",
+      "patch": "patches/tracktion-retained-midi/tracktion_LockFreeMultiThreadedNodePlayer.cpp.patch",
+      "originalSha256": "8ae4bfeb92af8e297b269bd3c8665a7637e3115b880f615d82069e949c733f9f",
+      "patchedSha256": "ba2191de6a79281c61ac6c34dec5f81331ce6e1afcfb8c8c89cc542b90550eab",
+      "patchSha256": "df882d1b773889071a743dd05f1eac0b700e56ce0c7b84541cd55eeb615bc9e8"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h",
+      "patch": "patches/tracktion-retained-midi/tracktion_LockFreeMultiThreadedNodePlayer.h.patch",
+      "originalSha256": "883dcac4ccf5297f9d7c675fe7607e9a950bacd4df00ac53ee783e21dcbca0bf",
+      "patchedSha256": "1c350ac885f71910ff70d39eba7f63afac911348a77f869fcfc018533d4c4ec0",
+      "patchSha256": "469e0f76acc46e0f227b675bc97f5d84e96a5e6766e6905dcdc41ba290cabb08"
+    }
+  ]
+}

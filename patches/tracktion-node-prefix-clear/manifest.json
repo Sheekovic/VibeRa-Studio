@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original native owned-current-prefix clear correction; universally active where compiled, not a runtime opt-in; topology/deadlines unchanged; metadata flag does not disable arithmetic change; runtime and comparable timing remain unqualified",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/tracktion_Node.h",
+      "patch": "patches/tracktion-node-prefix-clear/tracktion_Node.h.patch",
+      "originalSha256": "90b50daea67f5bc310e8d04c4d86577a48b1629bc5d0bbba1dd2e76d1a0cb623",
+      "patchedSha256": "484b39777a7ef9d48eb54a6577843941cf51046d1e010befcddec3e44c5ab1d4",
+      "patchSha256": "642c64edf91e5a580cac38ece4210747f8e43b37f6bb8a486d2415b456051e2d",
+      "addedLines": 8,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json"
+      ]
+    }
+  ]
+}

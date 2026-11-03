@@ -1,0 +1,22 @@
+{
+  "revision": "1d95888bec3ae0a17c0c4af791810d5a63f6bc35",
+  "license": "GPL-2.0-or-later",
+  "path": "src/common/Allocators.h",
+  "originalSha256": "9e88ae99ba6fdc9121bc9478c168d3c31111f6893b928274c5b3e54e36abbbb7",
+  "preparedSha256": "1b71a486cf723bc5e34bfaff2673a7b175184e6933c21a994e3488cd2ddc6018",
+  "edits": [
+    {
+      "old": "namespace RubberBand {",
+      "new": "#ifdef VIBERA_TUNE_RESOURCE_AUDIT\r\nextern \"C\" void vibera_tune_resource_event(int, std::size_t) noexcept;\r\n#endif\r\n\r\nnamespace RubberBand {"
+    },
+    {
+      "old": "T *allocate(size_t count)\r\n{\r\n    void *ptr = 0;",
+      "new": "T *allocate(size_t count)\r\n{\r\n#ifdef VIBERA_TUNE_RESOURCE_AUDIT\r\n    vibera_tune_resource_event(1, count * sizeof(T));\r\n#endif\r\n    void *ptr = 0;"
+    },
+    {
+      "old": "void deallocate(T *ptr)\r\n{\r\n    if (!ptr) return;",
+      "new": "void deallocate(T *ptr)\r\n{\r\n    if (!ptr) return;\r\n#ifdef VIBERA_TUNE_RESOURCE_AUDIT\r\n    vibera_tune_resource_event(2, 0);\r\n#endif"
+    }
+  ],
+  "scope": "Optional observation of Rubber Band allocator entrypoints, not all CRT or backend allocation. No production enablement."
+}

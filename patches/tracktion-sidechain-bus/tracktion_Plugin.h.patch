@@ -1,0 +1,17 @@
+--- a/modules/tracktion_engine/plugins/tracktion_Plugin.h
++++ b/modules/tracktion_engine/plugins/tracktion_Plugin.h
+@@ -380,8 +380,14 @@
+ 
+     /** Returns the names of this plugin's input channels (convenience wrapper around getChannelNames). */
+     juce::StringArray getInputChannelNames();
+ 
++    /** Overrides only the graph bus used to receive sidechain audio.
++        Return no value to retain the source-track-derived bus. A valid
++        sidechain source ID and explicit channel wiring are still required.
++        This is queried while preparing the graph, never from its callback. */
++    virtual std::optional<int> getSidechainBusIDOverride() const { return {}; }
++
+     /** Returns the names of available sidechain sources for this plugin.
+         If allowNone is true, includes a "none" entry. */
+     juce::StringArray getSidechainSourceNames (bool allowNone);
+ 

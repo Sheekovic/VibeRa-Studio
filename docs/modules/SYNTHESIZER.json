@@ -1,0 +1,768 @@
+{
+  "format": 1,
+  "id": "synthesizer",
+  "name": "VibeRa Synthesizer - bundled genre-first recorded and synthesized instrument",
+  "state": "software_released_human_acceptance_pending",
+  "checklist": "docs/modules/SYNTHESIZER.md",
+  "userDirectionDate": "2026-10-20",
+  "qualifiedDistributionVersion": "0.0.65",
+  "releaseBoundary": {
+    "separateFrom": "rack-pattern-sampler",
+    "preserveLedger": "docs/modules/RACK-PATTERN-SAMPLER.json",
+    "preserveChecklist": "docs/modules/RACK-PATTERN-SAMPLER.md",
+    "policy": "Separate requested Synthesizer release gate; no RPS requirement/status/test/gate is reduced or implicitly qualified. Shared-infrastructure regressions remain mandatory."
+  },
+  "implementationSnapshot": {
+    "qualification": "Source/content declaration only; no whole-module pass",
+    "factoryPatches": 56,
+    "parameterKeys": 46,
+    "sourceKinds": {
+      "recordedSample": 20,
+      "recordedAndSynthesis": 1,
+      "synthesis": 35
+    },
+    "recordedInstrumentMaps": 20,
+    "recordedFiles": 123,
+    "recordedBytes": 178426339,
+    "library": "assets/synthesizer/library.json",
+    "librarySha256": "83702db34ee50fc48211ad459afd0bdaa7e8a0b491ec0b716d1a5814ce58c724",
+    "runtimeContent": "<executable-directory>/Content/Synthesizer",
+    "writableUserContent": "%APPDATA%/VibeRa Studio/Synthesizer",
+    "licenseProvenance": "docs/SYNTHESIZER_SOUND_SOURCES.md"
+  },
+  "requirements": [
+    {
+      "id": "SYN-A",
+      "name": "First-class native instrument and complete host lifecycle",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Use the bundled native registry, instrument host/worker, Channel creation/replacement and acknowledged editor lifecycle without external VST scanning, installation, accounts, network, sample-path setup or another instrument.",
+      "acceptance": [
+        "Create from the native plugin browser, open/reuse from the Rack Channel name, keep Piano Roll access separate, and retain stable Channel/plugin identities.",
+        "Exercise close/reopen, mute/delete/replace, stop and history recovery without leaked workers, stuck MIDI or permanently silent routes.",
+        "Preserve existing instrument/effect registrations and canonical automation/state/package services; an optional separately exported VST3 wrapper is not delivered or required."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthRegistry.h",
+        "src/synth/SynthPlugin.cpp",
+        "src/PluginWorker.cpp",
+        "src/Commands.cpp",
+        "src/StudioChannels.cpp"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth descriptor/create/openEditor/closeEditor/status",
+        "plugin.instrument.create and existing replacement commands",
+        "vibera_plugin job/editorState"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "existing instrument lifecycle and native editor regressions"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-B",
+      "name": "Original native reference-based interface and usable geometry",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Independently drawn interactive JUCE graphite/violet interface matching the supplied genre-first reference: branding/sidebar/search/family/favourites/preset display, macros, envelope/filter/FX areas and keyboard/pitch/mod controls.",
+      "acceptance": [
+        "Inspect fresh native screenshots and actual interaction at 100% and 150% DPI, ordinary and small windows; verify resize/scrolling, focus, tooltips, readable labels and no obscured required controls.",
+        "All apparent controls operate actual instrument/browser state; preserve navigation, accessibility/contextual bindings and the active search caret.",
+        "Component renders and programmatic component checks remain distinct from scoped OS-native input; do not equate a screenshot or an instantiated editor with interactive qualification."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthEditor.cpp",
+        "src/synth/SynthEditor.h",
+        "src/PluginWorker.cpp"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth browser/filter/favorite/set/openEditor/closeEditor",
+        "shared hosted-parameter gestures and editor service"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "actual Synthesizer native UI/DPI acceptance TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-C",
+      "name": "Composable genre, instrument and preset browser",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Genre -> Instrument -> Preset workflow for Pop, Jazz, Funk, Hip-Hop, R&B, Electronic, Rock, Cinematic and Arabic, plus All/Favorites, search, family filtering, meaningful empty states and previous/next.",
+      "acceptance": [
+        "Compose search, family, multi-genre tags and favourites consistently in native UI and MCP; use stable IDs, not list positions or display-name guesses.",
+        "Loading a filtered row, Enter, previous/next or a semantic preset request selects the same complete patch; starring does not load a sound.",
+        "Persist browser preferences/favourites independently from project Undo; reopening UI and semantic changes converge, with explicit malformed/unwritable preference failures."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthBrowser.h",
+        "src/synth/SynthEditor.cpp",
+        "src/synth/SynthMcp.h",
+        "src/StudioSynth.inc"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth list/browser/filter/favorite/loadPreset"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "native browser keyboard/filter/favourite interaction TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-D",
+      "name": "Stable factory preset and parameter contracts",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Versioned metadata covers stable preset IDs, display names, thirteen instrument families, multiple genre/descriptive tags, sample/synthesis/hybrid source, engine/effects settings and meaningful per-preset macro mappings.",
+      "acceptance": [
+        "Audit all 56 declared factory patches and 46 parameter IDs/keys/ranges/units/defaults against actual registry-derived UI/MCP discovery; source presence is not execution evidence.",
+        "Preserve preset/parameter IDs and schema compatibility through save/reopen and user presets; full preset load differs explicitly from changing the raw sound-source identity scalar.",
+        "Every recorded-source claim resolves to a real bundled map; genre tags do not claim cultural origin, alternate tuning or an acoustic instrument absent from the recordings."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthPresets.h",
+        "src/synth/SynthPresets.cpp",
+        "src/synth/SynthMcp.h",
+        "assets/synthesizer/library.json"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth list/parameters/loadPreset/set"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-E",
+      "name": "Redistributable recorded content and movable installation",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Retain the actual 20 instrument maps/123 original WAV/FLAC files with per-file provenance, licenses and credits; resolve Content/Synthesizer relative to the executable, with writable user data separate.",
+      "acceptance": [
+        "Verify all sample/map/license hashes, 10 explicit authored guitar loops and source offset/tuning conversion; preserve acquisition failures and original source notices.",
+        "Move the complete built/staged/final folder and run offline without checkout access, custom sample paths, network or accounts; missing/corrupt content produces a truthful recoverable failure.",
+        "Audit all three licensePath entries, attributions and installation-relative notice links in actual packaged Content/Synthesizer/sources; asset-only changes must refresh target content."
+      ],
+      "implementationPaths": [
+        "assets/synthesizer/library.json",
+        "assets/synthesizer/validate_library.py",
+        "docs/SYNTHESIZER_SOUND_SOURCES.md",
+        "src/synth/SynthPlugin.cpp",
+        "scripts/distribution.py",
+        "CMakeLists.txt"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth list/status and canonical instrument preparation errors"
+      ],
+      "requiredChecks": [
+        "vibera_synth_content",
+        "vibera_synth_processor",
+        "moved staged/final distribution acceptance TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-F",
+      "name": "Recorded sample engine, layers and explicit mapping behavior",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Actual recorded sample playback uses validated key/velocity zones, MIDI roots, tuning, offsets, interpolation, per-voice ADSR/filtering and source-authored smooth loop behavior.",
+      "acceptance": [
+        "Measure recorded PCM identity/variation, transposition/pitch, duration, velocity boundaries, interpolation and loop boundaries over relevant keys/rates/buffers; no substitute generated acoustic tones.",
+        "Keep layered velocity, articulation and relevant round-robin metadata/selection requirements visible; a first-round-robin-only curated subset is not proof of full round-robin or articulation support.",
+        "Do not invent loops or sustain unavailable finite recordings, label unsupported mappings explicitly, and preserve immutable sample ownership until all dependent voices finish."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthEngine.h",
+        "src/synth/SynthEngine.cpp",
+        "src/synth/SynthPlugin.cpp",
+        "assets/synthesizer/library.json"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth list/loadPreset/previewOn/previewOff",
+        "shared score/playback/export operations"
+      ],
+      "requiredChecks": [
+        "vibera_synth_engine",
+        "vibera_synth_processor",
+        "vibera_synth_mcp"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-G",
+      "name": "Independent anti-aliased synthesis and real hybrid layering",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Deliver bounded anti-aliased oscillator synthesis and an actual recorded/synthesis layer, with truthful sample/synthesis/hybrid identity and editable source/oscillator controls.",
+      "acceptance": [
+        "Measure oscillator pitch, waveform/range/detune/pulse-width behavior and high-frequency alias suppression across supported notes/sample rates.",
+        "Verify both components of the declared hybrid patch contribute actual PCM, with source/blend/sample-level/filter-envelope controls producing independent expected changes.",
+        "Never describe oscillator approximations as sampled acoustic instruments or a hardware FM-keyboard recording as an electromechanical electric piano."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthEngine.cpp",
+        "src/synth/SynthPresets.cpp",
+        "src/synth/SynthPlugin.cpp"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth loadPreset/set/parameters",
+        "shared plugin automation and export"
+      ],
+      "requiredChecks": [
+        "vibera_synth_engine",
+        "vibera_synth_processor",
+        "vibera_synth_mcp"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-H",
+      "name": "Polyphony, sustain, expression and guaranteed note release",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Bounded voice allocation/stealing, sustain pedal, pitch bend/range, modulation/vibrato, note-off/all-off/panic and repeat-note behavior work with actual editor, score and live MIDI ownership.",
+      "acceptance": [
+        "Measure velocity, sustain/release, overlapping/repeated notes, exhausted polyphony and voice stealing; prevent stuck notes and persistent silence.",
+        "Release held editor notes and centre pitch/end gestures on mouse-capture loss, focus loss, hide/close, transport stop, Channel mute/delete/replace and relevant Undo.",
+        "Distinguish preview-lane panic from transport/global panic; validate queue limits, rapid input and stale ownership without callback locks or allocation."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthEngine.cpp",
+        "src/synth/SynthPlugin.cpp",
+        "src/synth/SynthEditor.cpp",
+        "src/PluginWorker.cpp"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth previewOn/previewOff/panic/set",
+        "canonical transport, Channel and MIDI/controller operations"
+      ],
+      "requiredChecks": [
+        "vibera_synth_engine",
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "actual native keyboard/focus acceptance TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-I",
+      "name": "Four meaningful macros, envelopes and filters",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Tone, Warmth, Space and Motion have per-preset sonic mappings; ADSR, filter type/cutoff/resonance, modulation and source/performance controls operate actual DSP.",
+      "acceptance": [
+        "Test each macro and mapping at relevant endpoints and intermediate values, with parameter readback, independent PCM consequences and appropriate smoothing.",
+        "Verify ADSR timing/sustain/release, per-voice filter behavior and expressive control interaction; UI/MCP share native units, ranges, defaults and interval validation.",
+        "Warmth's actual low-EQ/output-trim behavior is labelled accurately; enabled controls cannot be decorative or silently unrelated to the sound."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthPresets.cpp",
+        "src/synth/SynthPlugin.cpp",
+        "src/synth/SynthEngine.cpp",
+        "src/synth/SynthEditor.cpp"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth set/parameters/loadPreset",
+        "shared hosted-parameter gestures/automation"
+      ],
+      "requiredChecks": [
+        "vibera_synth_engine",
+        "vibera_synth_processor",
+        "vibera_synth_mcp"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-J",
+      "name": "Single owned effects chain, metering and output headroom",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Functional independent EQ, compressor, chorus, delay and reverb enable/settings, with actual signal order, master level, output/activity metering and honest tail behavior.",
+      "acceptance": [
+        "Exercise each enable/disable and settings page through UI/MCP with independent PCM or signal oracles, safe levels, stable state/history and sample-rate/buffer changes.",
+        "Measure headroom/overload behavior, decay/delay/feedback and supported tails; retain the existing project/export cut-tail contract instead of inventing an arbitrary-tail guarantee.",
+        "Use one owned native chain; do not create hidden external effect instances or silently double-apply the instrument effects."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthPlugin.cpp",
+        "src/synth/SynthEditor.cpp",
+        "src/effects/dsp/Dynamics.cpp",
+        "src/effects/dsp/TimeEffects.cpp"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth set/parameters/status",
+        "shared automation/current-state export"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "actual effects/settings interaction TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-K",
+      "name": "Shared manual, timed automation and exact parameter history",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "All sound controls use canonical hosted/native parameter IDs, gestures, real current readback, validation and appropriate Undo/Redo, with supported sample-timed automation.",
+      "acceptance": [
+        "Verify manual and UI edits, discrete changes, automation/controller playback and simultaneous sound controls with exact values and independent PCM expectations.",
+        "Confirm instance/catalogue-generation guards and atomic no-op/refusal behavior; invalidate stale automation identities and never claim a cached catalogue value is instantaneous DSP.",
+        "Complete patch loads and scalar edits produce the intended history edges; cancellation/refusal leaves exact prior musical/native state."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthPlugin.cpp",
+        "src/StudioPluginParameters.cpp",
+        "src/PluginWorker.cpp",
+        "src/StudioSynth.inc"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth set/loadPreset/parameters",
+        "vibera_plugin refresh/job/cancel",
+        "canonical automation and edit.undo/edit.redo"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "affected native scalar/automation/history regressions"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-L",
+      "name": "Writable user presets and immutable factory sounds",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Versioned user presets save/load current native sound safely in AppData while factory definitions and recordings stay immutable; browser preferences remain distinct from musical document history.",
+      "acceptance": [
+        "Use asynchronous native file pickers and semantic save/load with actual terminal success/failure/cancellation; overwrite/atomic replacement preserves a prior valid file on failure.",
+        "Round-trip every relevant scalar, preset source identity, engine/effects/macros and schema; reject malformed/oversized/unsupported files and unsafe names/paths.",
+        "Verify actual user-directory isolation, immutable factory hashes, fresh load/readback and appropriate one-step Undo/Redo; never write test data into user presets or factory content."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthUserPresets.h",
+        "src/synth/SynthPlugin.cpp",
+        "src/synth/SynthEditor.cpp",
+        "src/StudioSynth.inc"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth saveUserPreset/loadUserPreset",
+        "vibera_plugin job/cancel",
+        "native file-picker gestures"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "native picker cancel/overwrite/failure acceptance TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-M",
+      "name": "Realtime safety and bounded preset/resource publication",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "No file I/O/decoding, allocation, blocking locks/waits, UI calls or object destruction in DSP; prepare immutable resources offthread and publish/retire them with proven lifetime safety.",
+      "acceptance": [
+        "Instrument actual callbacks for heap/destruction/lock violations and outer-device deadlines across supported rates/buffers, voices, effects and source changes.",
+        "Exercise rapid repeated/cancelled preset operations and safe publication; define held-voice and accepted bounded structural interruption/recovery policies explicitly.",
+        "Preserve recording integrity, exact state/history and automatic recovery during supported structural operations; no worker cleanup or resource destruction in the callback."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthEngine.cpp",
+        "src/synth/SynthPlugin.cpp",
+        "src/PluginWorker.cpp",
+        "src/PluginHost.cpp"
+      ],
+      "semanticEntryPoints": [
+        "shared plugin/native-patch jobs, cancellation and diagnostics"
+      ],
+      "requiredChecks": [
+        "vibera_synth_engine",
+        "vibera_synth_processor",
+        "callback_timing",
+        "musical_acceptance",
+        "affected worker/preset publication regressions"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-N",
+      "name": "Complete Rack, Piano Roll, Pattern and Song musical integration",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Compose with the native synth in a real multi-instrument/multi-Pattern project: Rack and Piano Roll editing, live MIDI, Pattern/Song transport, mute/solo, Mixer routing and automation.",
+      "acceptance": [
+        "Exercise held notes, repeated transport changes, linked Pattern placements, musical edits and multiple native instances without lost notes, data loss or shared-state contamination.",
+        "Verify actual channel/master routing and effects, muting/solo restoration and recovery around instrument replacement/deletion/history.",
+        "Use audible-signal/PCM, state, identity and history oracles from the complete musical workflow; preserve every existing RPS checklist item and active correctness regression."
+      ],
+      "implementationPaths": [
+        "src/Commands.cpp",
+        "src/StudioChannels.cpp",
+        "src/StudioSynth.inc",
+        "src/Project.cpp",
+        "src/AudioEngine.cpp"
+      ],
+      "semanticEntryPoints": [
+        "canonical Rack/Piano/Pattern/Song/Mixer commands",
+        "vibera_synth create/loadPreset",
+        "existing MIDI/recording and project tools"
+      ],
+      "requiredChecks": [
+        "vibera_synth_mcp",
+        "musical_acceptance",
+        "gui_workflow",
+        "affected Rack/Piano/Pattern/Song/live-MIDI regressions"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-O",
+      "name": "Project persistence, migration, Undo and offline sound",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Current native sample/synthesis/hybrid settings, effects, automation and supported instrument identity survive save/reopen, migration, Undo/Redo and offline export.",
+      "acceptance": [
+        "Capture actual current native state before project save/export rather than stale serialized defaults; verify exact recalled scalars and deterministic signal where applicable.",
+        "Compare actual recorded/synthesis/hybrid WAV output before/after save/reopen and history, including duration, channels/rate/format, headroom and the declared tail contract.",
+        "Retain missing/corrupt content placeholders/errors, stable IDs/routing/links, and untouched user work on failed/cancelled saves or history operations."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthPlugin.cpp",
+        "src/Project.cpp",
+        "src/PluginWorker.cpp",
+        "src/StudioSynth.inc"
+      ],
+      "semanticEntryPoints": [
+        "vibera_project save/open/export",
+        "vibera_synth loadPreset/set",
+        "canonical edit.undo/edit.redo"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "musical_acceptance",
+        "affected save/export/recovery regressions"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-P",
+      "name": "Truthful errors, cancellation and recovery",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Typed failures and real async outcomes cover missing/corrupt content, wrong schema/source IDs, stale instances/generations, invalid ranges, busy/capacity/recording refusals and I/O failures.",
+      "acceptance": [
+        "No unsupported operation, silent acoustic fallback, queued admission or file-exists check becomes a successful completed instrument operation.",
+        "Prove late ACK/error/cancel ordering, exact cancellation/history behavior and bounded retry/recovery with current instance/project identity.",
+        "Close only owned task/runtime workers, preserve factory/user data and prior state, and retain diagnostic failure receipts; internal unfinished work is not an external blocker."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthPlugin.cpp",
+        "src/synth/SynthUserPresets.h",
+        "src/StudioSynth.inc",
+        "src/PluginWorker.cpp",
+        "scripts/verify-synthesizer-mcp.py"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth actions and structured errors",
+        "vibera_plugin job/cancel and canonical command outcomes"
+      ],
+      "requiredChecks": [
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "missing/corrupt/malformed/cancel/recovery scenarios TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-Q",
+      "name": "Complete changed-feature semantic MCP equivalence",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Every functional Synthesizer UI operation has discoverable typed semantic equivalence through the shared registry/canonical services: browser, sound controls, preset/user files, preview, lifecycle and history.",
+      "acceptance": [
+        "Audit native component IDs/handlers and all 46 controls against actual executable discovery, units/ranges/defaults/prerequisites and current readback.",
+        "Exercise UI/MCP equivalence for filters/favourites/preset navigation, complete patch load, macros/envelopes/filters/FX/source/performance, keyboard/pitch/mod, user-file operations and editor lifecycle.",
+        "Cover queue/error/no-op/cancel/history and real completion; generic setters or screen-only input alone do not qualify missing domain operations."
+      ],
+      "implementationPaths": [
+        "src/synth/SynthMcp.h",
+        "src/StudioSynth.inc",
+        "src/StudioMcp.cpp",
+        "src/synth/SynthEditor.cpp",
+        "src/McpContracts.h"
+      ],
+      "semanticEntryPoints": [
+        "vibera_synth",
+        "shared vibera_plugin/vibera_command/vibera_project and automation tools"
+      ],
+      "requiredChecks": [
+        "vibera_synth_mcp",
+        "native UI/MCP equivalence matrix TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-R",
+      "name": "Inventory, coverage evidence and provider-neutral skill",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Synchronize the reusable skill and authoritative registry-derived capabilities; enumerate every new command/control/custom surface and bind meaningful current UI/MCP review receipts.",
+      "acceptance": [
+        "Update SURFACE_INVENTORY, REVIEWED_SURFACES and changed-feature coverage records from actual handlers/registry; source or an unbound review is not coverage evidence.",
+        "Audit user-facing previous/next, octave controls, file pickers/overwrite/cancel, sustain/panic scope, effect panels and dynamic parameter surfaces for explicit supported equivalence or an unresolved gap.",
+        "Keep unrelated inherited full-MCP consolidation honestly failing/deferred; qualify every new/changed feature without deleting inherited inventory/tests or claiming full product coverage."
+      ],
+      "implementationPaths": [
+        "docs/mcp/SURFACE_INVENTORY.json",
+        "docs/mcp/REVIEWED_SURFACES.json",
+        "docs/mcp/COVERAGE.json",
+        "scripts/mcp-coverage.py",
+        "skills/vibera-studio/references/synthesizer.md"
+      ],
+      "semanticEntryPoints": [
+        "registry-derived discovery and synchronized skill workflows"
+      ],
+      "requiredChecks": [
+        "vibera_synth_mcp",
+        "mcp-coverage changed-feature audit TODO",
+        "module-bound executable reference regeneration TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-S",
+      "name": "Complete current-source software qualification",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "All preceding software workflows require actual current affected tests, source regressions and evidence-bound native UI/MCP/musical acceptance; no scoped test pass defines module completion.",
+      "acceptance": [
+        "Run recorded and synthesized PCM, pitch/duration/velocity/sustain/steal/stuck-note, source-switch-during-playback, effects/tails, history/save/export and error/cancel scenarios.",
+        "Inspect fresh native captures and actual scoped input at 100%/150% DPI, test small-screen/focus/scroll/keyboard behavior, and distinguish those from component-only renders.",
+        "Retain original failed attempts; bind passed receipts to all exercised dependencies/assets and exact candidate app/worker bytes. Rerun affected cases after input changes and broader regressions after shared-infrastructure changes."
+      ],
+      "implementationPaths": [
+        "CMakeLists.txt",
+        "tests/SynthEngineTests.cpp",
+        "tests/SynthPluginTests.cpp",
+        "scripts/verify-synthesizer-mcp.py",
+        "assets/synthesizer/validate_library.py",
+        "scripts/dev.py"
+      ],
+      "semanticEntryPoints": [
+        "actual discovered UI/MCP/native/musical paths"
+      ],
+      "requiredChecks": [
+        "vibera_synth_engine",
+        "vibera_synth_processor",
+        "vibera_synth_mcp",
+        "vibera_synth_content",
+        "complete affected/source/native qualification"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-candidate.json",
+          "sha256": "720cf09bf3cb67b86267e18a1ed8a7d0db5618b938ef6971eaa97eee93bbd93f"
+        }
+      ]
+    },
+    {
+      "id": "SYN-T",
+      "name": "Exact staged/final package and separate Synthesizer release boundary",
+      "status": "verified",
+      "releaseRequired": true,
+      "phase": "release",
+      "scope": "After complete module software acceptance, qualify exact committed source, staged and final installation-relative content/license/skill/binary identities before updating the sole permanent distribution.",
+      "acceptance": [
+        "Pass the full Synthesizer candidate ledger, exact source gate, complete required staging/final package checks, moved-folder playback and integrity/provenance audits.",
+        "Preserve the qualified distribution until its replacement passes; no separate permanent preview, hidden download/install step, optional wrapper claim or partial release shortcut.",
+        "The user-requested Synthesizer release boundary is separate from RPS; do not edit, reduce, waive or mark complete any Rack/Pattern/sampler requirement. Shared-source regressions and truthful disclosure of included RPS work remain mandatory."
+      ],
+      "implementationPaths": [
+        "scripts/module-gate.py",
+        "scripts/build.ps1",
+        "scripts/package.ps1",
+        "scripts/distribution.py",
+        "scripts/audit-distribution.py",
+        "docs/modules/RACK-PATTERN-SAMPLER.json"
+      ],
+      "semanticEntryPoints": [
+        "qualified executable discovery and installed source/content behavior"
+      ],
+      "requiredChecks": [
+        "complete Synthesizer source/staging/final transaction TODO"
+      ],
+      "evidence": [
+        {
+          "path": "build/windows/synthesizer-development/module-release.json",
+          "sha256": "eb6ad13bbf701cffabb0a164a584a09db81653f64f2eac51ea660836b700c20f"
+        }
+      ]
+    }
+  ],
+  "externalAcceptance": [
+    {
+      "name": "Human listening, musical timbre/quality and mix suitability",
+      "status": "pending",
+      "releaseRequired": false,
+      "evidence": []
+    },
+    {
+      "name": "Physical audio/MIDI devices and mixed-monitor/DPI hardware",
+      "status": "pending",
+      "releaseRequired": false,
+      "evidence": []
+    },
+    {
+      "name": "Human familiarity with the supplied reference and musical workflow",
+      "status": "pending",
+      "releaseRequired": false,
+      "evidence": []
+    }
+  ],
+  "developmentEvidence": [
+    {
+      "scope": "Root reports the affected pure-engine check passed in0.84s; processor compilation and remaining integration/native/MCP/source/package acceptance are pending at ledger creation.",
+      "qualification": false,
+      "receipt": null,
+      "note": "Attach actual current receipt and identities before using any result as requirement evidence. Asset validation is separately scoped content evidence, not instrument/module qualification."
+    },
+    {
+      "scope": "Source208/208; native132/194; six musical workflows; MCP491; moved655; staging84 resumed with unchanged passed inputs; final117; cleanup/audit passed.",
+      "qualification": true,
+      "receipt": "build/windows/synthesizer-development/module-release.json"
+    }
+  ],
+  "semanticInventory": {
+    "state": "verified_changed_feature",
+    "toolDefinition": "src/synth/SynthMcp.h",
+    "dispatch": "src/StudioSynth.inc",
+    "editorHandlers": "src/synth/SynthEditor.cpp",
+    "parameterAuthority": "src/synth/SynthPresets.h",
+    "coverageTargets": [
+      "docs/mcp/SURFACE_INVENTORY.json",
+      "docs/mcp/REVIEWED_SURFACES.json",
+      "docs/mcp/COVERAGE.json"
+    ],
+    "plannedEvidence": "docs/mcp/SYNTHESIZER_EVIDENCE.json",
+    "note": "18 current callbacks/76 explicit operations; inherited full-product gate remains false. All actual source/native/package outcomes retained.",
+    "evidence": "docs/mcp/SYNTHESIZER_EVIDENCE.json"
+  },
+  "evidencePolicy": {
+    "requiredReceiptKeys": [
+      "passed",
+      "dependencyHashes",
+      "candidateHashes"
+    ],
+    "candidateIdentity": "Exact current app/worker runtime bytes; no source-only or cached-binary acceptance.",
+    "dependencyIdentity": "Bind all actual exercised source/tests/registry/content files and notices. A manifest hash alone does not bind later-mutated sample bytes.",
+    "completion": "Every releaseRequired software row must be verified with sufficient current passed evidence. Release-phase row is additionally mandatory at complete/staging/final release.",
+    "historicalFailures": "Retain failed, cancelled, stale and environment-blocked receipts. No retry or reduced subset relabels an original failure."
+  },
+  "blockers": [],
+  "nextAction": "Native Synthesizer software delivery qualified. Retain sound-content/listening/hardware/familiarity gaps; resume the separate incomplete Rack/Pattern/sampler roadmap.",
+  "releaseVersion": "0.0.65"
+}

@@ -1,0 +1,59 @@
+--- a/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp
++++ b/modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp
+@@ -259,8 +259,11 @@
+ 
+         setResizable (view->canResize() == kResultTrue, false);
+     }
+ 
++    // VibeRa control-thread metadata only; no arbitrary native widget interface.
++    int getVibeRaNativeAttachmentState() const noexcept { return viberaNativeAttachmentState; }
++
+     ~VST3PluginWindow() override
+     {
+         if (scaleInterface != nullptr)
+             scaleInterface->release();
+@@ -475,14 +478,16 @@
+             #endif
+ 
+             if (pluginHandle == HandleFormat{})
+             {
++                viberaNativeAttachmentState = 3;
+                 jassertfalse;
+                 return;
+             }
+ 
+             [[maybe_unused]] const auto attachedResult = view->attached ((void*) pluginHandle, defaultVST3WindowType);
+             [[maybe_unused]] const auto warning = warnOnFailure (attachedResult);
++            viberaNativeAttachmentState = attachedResult == kResultOk ? 2 : 3;
+ 
+             if (attachedResult == kResultOk)
+                 attachedCalled = true;
+ 
+@@ -573,8 +578,9 @@
+    #endif
+ 
+     HandleFormat pluginHandle = {};
+     bool recursiveResize = false, isInOnSize = false, attachedCalled = false;
++    int viberaNativeAttachmentState = 1; //1 pending,2 SDK attached,3 SDK/handle failure.
+ 
+     IPlugViewContentScaleSupport* scaleInterface = nullptr;
+     float nativeScaleFactor = 1.0f;
+     float userScaleFactor = 1.0f;
+@@ -607,8 +613,17 @@
+ 
+     //==============================================================================
+     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3PluginWindow)
+ };
++
++// Internal statically paired VibeRa bridge, message/control thread only.
++//0 is an unsupported editor wrapper; it never means native attachment succeeded.
++int viberaVST3NativeEditorAttachment (const AudioProcessorEditor& editor) noexcept
++{
++    if (const auto* window = dynamic_cast<const VST3PluginWindow*> (&editor))
++        return window->getVibeRaNativeAttachmentState();
++    return 0;
++}
+ 
+ class VST3PluginInstance final : public VST3PluginInstanceHeadless
+ {
+ public:

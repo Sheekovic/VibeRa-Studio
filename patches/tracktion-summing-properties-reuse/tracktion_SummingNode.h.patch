@@ -1,0 +1,12 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h
+@@ -86,7 +86,8 @@
+             props.latencyNumSamples = std::max (props.latencyNumSamples, nodeProps.latencyNumSamples);
+ 
+             // Stage identity ignores only this consumer's PDC wrappers.
+-            const auto identity = LatencyNode::logicalInputFor (node, this)->getNodeProperties().nodeID;
++            auto* logicalInput = LatencyNode::logicalInputFor (node, this);
++            const auto identity = logicalInput == node ? nodeProps.nodeID : logicalInput->getNodeProperties().nodeID;
+             if (props.nodeID != 0 || identity != 0)
+                 hash_combine (props.nodeID, identity);
+         }

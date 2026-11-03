@@ -1,0 +1,95 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.h
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.h
+@@ -11,6 +11,68 @@
+ namespace tracktion::inline engine {
+ 
+ class HostedAudioDeviceInterface;
++class EditPlaybackContext;
++
++// ORIGINAL opt-in whole-physical source admission. CONTROL creates/owns handles;
++// DSP only dereferences stable ownership and publishes bounded scalar outcomes.
++class SourceBurstSession final
++{
++public:
++    enum class Status
++    {
++        prepared, ready, invalidConfiguration, telemetryUnavailable, managerReleased,
++        deviceStopped, counterExhausted, writerConflict, deviceChanged, rateChanged,
++        physicalBurstExceeded, sourceBurstExceeded, invalidConversion, invalidDeviceSlice,
++        sequenceMismatch, contextUnavailable, observerRefused, peerRefused, contextReleased, retired,
++        allocationFailed, preparationFailed, scopeInProgress, alreadyClaimed,
++        conversionResourcesUnavailable, cpuOverload
++    };
++    struct Configuration
++    {
++        juce::uint64 deviceEpoch = 0, generation = 0;
++        double sampleRate = 0;
++        int deviceFrames = 0, maximumPhysicalFrames = 0, maximumSourceFrames = 0;
++        int maximumSourceScalePpm = 1100000;
++    };
++    struct Outcome
++    {
++        Status status = Status::prepared;
++        juce::uint64 generation = 0, deviceEpoch = 0, physicalSerial = 0;
++        juce::uint64 activationAfterSerial = 0, observedEpoch = 0, observedSerial = 0;
++        int physicalFrames = 0, sourceQuota = 0, deviceOffset = 0;
++        int sourceProcessed = 0, sliceDeviceFrames = 0, sliceSourceFrames = 0;
++        int observedPhysicalFrames = 0, observedOffset = 0;
++        bool metadataKnown = false, offsetKnown = false, scopeOpen = false, failed = false, retired = false;
++    };
++    struct Observer
++    {
++        virtual ~Observer() = default; // CONTROL only, after all processing users quiesce.
++        // Nonblocking callbacks; never allocate, wait, destroy owners or execute DSP.
++        // begin(false) is ALWAYS followed by abort, including partially opened Host scopes.
++        virtual bool begin (const Outcome&) noexcept = 0;
++        virtual bool end (const Outcome&) noexcept = 0;
++        virtual void abort (const Outcome&) noexcept = 0;
++    };
++    using Ptr = std::shared_ptr<SourceBurstSession>;
++    static Status prepare (juce::AudioDeviceManager&, const Configuration&,
++                           std::shared_ptr<Observer>, Ptr& output) noexcept;
++    ~SourceBurstSession(); // CONTROL only. Never release an owning Ptr from DSP.
++    SourceBurstSession (const SourceBurstSession&) = delete;
++    SourceBurstSession& operator= (const SourceBurstSession&) = delete;
++    const Configuration& configuration() const noexcept;
++    bool read (Outcome&) const noexcept; // Three bounded coherent attempts; false preserves output.
++private:
++    friend class DeviceManager;
++    friend class EditPlaybackContext;
++    struct Impl;
++    explicit SourceBurstSession (std::unique_ptr<Impl>);
++    std::unique_ptr<Impl> impl;
++    Status claim (juce::AudioDeviceManager&, EditPlaybackContext*) noexcept;
++    bool scopeOpen() const noexcept;
++    void retire (Status) noexcept;
++};
++
++
+ 
+ 
+ //==============================================================================
+@@ -50,6 +112,10 @@
+     // Exact owner may schedule one retry AFTER explicit graph restoration.
+     // This may post an OS message; never call from DSP. Success means pending.
+     bool retryPreparationFence (void* owner);
++    // CONTROL only; reuse the existing context exclusion, no new DSP lock.
++    // Candidate is prepared off-callback; open physical scopes refuse replacement.
++    // Retired observers/reader owners are destroyed after releasing contextLock.
++    SourceBurstSession::Status installSourceBurstSession (EditPlaybackContext&, SourceBurstSession::Ptr);
+     void closeDevices();
+     void saveSettings();
+ 
+@@ -284,6 +350,12 @@
+ 
+ private:
+     //==============================================================================
++    // Sole native audio-callback writer. Counts EVERY received JUCE chunk,
++    // including suspended/CPU-refused chunks. Never read these fields on CONTROL.
++    const juce::AudioDeviceManager::PhysicalCallbackReader sourceBurstReader { deviceManager.getPhysicalCallbackReader() };
++    juce::uint64 sourceBurstEpoch = 0, sourceBurstSerial = 0;
++    int sourceBurstReceived = 0, sourceBurstInnerOffset = 0;
++    bool sourceBurstOffsetKnown = false, sourceBurstResynchronising = false;
+     bool finishedInitialising = false;
+     bool sendMidiTimecode = false;
+ 

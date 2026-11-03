@@ -1,0 +1,66 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1500,6 +1500,11 @@
+     if (! plugin.isEnabled() && ! params.includeBypassedPlugins)
+         return node;
+ 
++    const auto outputPlan = params.preparePluginFinalOutput ? params.preparePluginFinalOutput (plugin)
++                                                            : std::optional<CreateNodeParams::PluginFinalOutputPlan>{};
++    if (outputPlan && (outputPlan->shortMidiCapacity < 0 || outputPlan->shortMidiCapacity > 512 ||
++        (outputPlan->moveAudioCompensationStage && (!outputPlan->wrap || !plugin.getPreparedAudioOutputStageIdentity()))))
++        throw std::invalid_argument ("pluginOutput.plan: Incomplete output-stage/capacity contract");
+     // Query the incoming channel count from the input node
+     const int incomingChannels = node->getNodeProperties().numberOfChannels;
+ 
+@@ -1546,15 +1551,18 @@
+                                                               params.sampleRate, params.blockSize,
+                                                               trackMuteState, params.processState,
+                                                               params.forRendering, params.includeBypassedPlugins,
+-                                                              maxNumChannels, useFixedGraphInitialisation (plugin, params));
+-
++                                                              maxNumChannels, useFixedGraphInitialisation (plugin, params),
++                                                              outputPlan ? outputPlan->shortMidiCapacity : 0,
++                                                              outputPlan && outputPlan->moveAudioCompensationStage);
++
++    std::unique_ptr<Node> finalOutput = std::move (pluginNode);
+     // If input has more channels than the plugin handles, wrap output in passthrough mode
+     // so extra channels pass through unprocessed
+     if (incomingChannels > effectivePluginChannels
+         && incomingChannels > 0
+         && effectivePluginChannels > 0)
+     {
+-        return tracktion::graph::makeNode<ChannelRemappingNode> (std::move (pluginNode),
++        finalOutput = tracktion::graph::makeNode<ChannelRemappingNode> (std::move (finalOutput),
+                                                                  ChannelConfiguration::discreteChannels (incomingChannels),
+                                                                  mainInputBus);
+     }
+@@ -1562,11 +1570,16 @@
+     // When a sidechain is connected, the plugin processes a wider buffer that
+     // includes the sidechain channels as inputs. Trim those off the output so
+     // only the main-bus channels propagate to downstream nodes.
+-    if (usesSidechain && effectivePluginChannels > 0)
+-        return tracktion::graph::makeNode<ChannelRemappingNode> (std::move (pluginNode),
++    else if (usesSidechain && effectivePluginChannels > 0)
++        finalOutput = tracktion::graph::makeNode<ChannelRemappingNode> (std::move (finalOutput),
+                                                                  ChannelMap::identity (effectivePluginChannels));
+ 
+-    return pluginNode;
++    if (outputPlan && outputPlan->wrap)
++    {
++        finalOutput = outputPlan->wrap (std::move (finalOutput));
++        if (!finalOutput) throw std::invalid_argument ("pluginOutput.null: Output-port factory returned no owner");
++    }
++    return finalOutput;
+ }
+ 
+ std::unique_ptr<tracktion::graph::Node> createNodeForRackInstance (RackInstance& rackInstance, std::unique_ptr<Node> node,
+@@ -1847,7 +1860,8 @@
+ 
+     auto liveInputNode = createLiveInputsNode (at, playHeadState, params);
+ 
+-    if (node && ! at.getListeners().isEmpty())
++    const bool omitAccountedObserver = params.omitAccountedNoopMidiObserver && params.omitAccountedNoopMidiObserver (at);
++    if (node && ! at.getListeners().isEmpty() && !omitAccountedObserver)
+         node = makeNode<LiveMidiOutputNode> (at, std::move (node));
+ 
+     if (node)

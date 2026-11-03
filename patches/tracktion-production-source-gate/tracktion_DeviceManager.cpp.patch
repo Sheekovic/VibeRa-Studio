@@ -1,0 +1,117 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
+@@ -1410,7 +1410,7 @@
+         bool sourceAdmitted = true;
+         for (auto c : activeContexts)
+             sourceAdmitted &= c->preflightSourceBurst (numSamples, totalNumOutputChannels, sourceBurstInnerOffset, sourceBurstOffsetKnown,
+-                sourceBurstEpoch, sourceBurstSerial, currentSampleRate, maxBlockSize)
++                sourceBurstEpoch, sourceBurstSerial, currentSampleRate, maxBlockSize, streamTime)
+                     != SourceBurstSession::Decision::fault;
+         if (sourceAdmitted)
+             for (auto c : activeContexts)
+@@ -1745,6 +1745,97 @@
+ { return installSourceBurstSessionInternal (context, std::move (candidate), false); }
+ SourceBurstSession::Status DeviceManager::installInitialSourceBurstSession (EditPlaybackContext& context, SourceBurstSession::Ptr candidate)
+ { return installSourceBurstSessionInternal (context, std::move (candidate), true); }
++SourceBurstSession::Status DeviceManager::stageSourceBurstSession (EditPlaybackContext& context, SourceBurstSession::Ptr candidate)
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    const auto* messages = juce::MessageManager::getInstanceWithoutCreating();
++    if (!messages || !messages->isThisTheMessageThread()) return SourceBurstSession::Status::invalidConfiguration;
++    const std::unique_lock sl (contextLock);
++    using Phase = EditPlaybackContext::SourceSessionGatePhase;
++    if (!activeContexts.contains (&context)) return SourceBurstSession::Status::contextUnavailable;
++    if (!context.edit.requireSourceBurstSession || context.edit.initialSourceGeneration || !candidate)
++        return SourceBurstSession::Status::stagedSessionRequired;
++    if (context.sourceBurstSession == candidate && context.sourceSessionGatePhase() == Phase::staged)
++        return validateStagedSourceBurstSessionInternal (context, candidate);
++    if (context.sourceBurstSession || context.sourceSessionGatePhase() != Phase::awaitingSession)
++        return SourceBurstSession::Status::alreadyClaimed;
++    auto* device = deviceManager.getCurrentAudioDevice();
++    if (!device) return SourceBurstSession::Status::deviceStopped;
++    if (!context.isPlaybackGraphAllocated() || context.getSampleRate() != candidate->configuration().sampleRate)
++        return SourceBurstSession::Status::contextUnavailable;
++    const auto prepared = context.prepareSourceBurstResources (candidate->configuration(), device->getActiveOutputChannels().countNumberOfSetBits());
++    if (prepared != SourceBurstSession::Status::prepared) return prepared;
++    const auto ready = context.validateSourceBurstStage (candidate->configuration(), device->getActiveOutputChannels().countNumberOfSetBits());
++    if (ready != SourceBurstSession::Status::staged) return ready;
++    const auto claimed = candidate->claim (deviceManager, &context, false, true);
++    if (claimed != SourceBurstSession::Status::prepared) return claimed;
++    context.sourceBurstSession = std::move (candidate); // Previous owner is empty; CONTROL only.
++    context.sourceGatePhase.store (Phase::staged, std::memory_order_release);
++    return SourceBurstSession::Status::staged; // No observer begin/graph/Host work or arming.
++}
++SourceBurstSession::Status DeviceManager::validateStagedSourceBurstSessionInternal (
++    EditPlaybackContext& context, const SourceBurstSession::Ptr& candidate) noexcept
++{
++    using Phase = EditPlaybackContext::SourceSessionGatePhase;
++    if (!activeContexts.contains (&context)) return SourceBurstSession::Status::contextUnavailable;
++    if (!context.edit.requireSourceBurstSession || context.edit.initialSourceGeneration || !candidate ||
++        context.sourceBurstSession != candidate || context.sourceSessionGatePhase() != Phase::staged)
++        return SourceBurstSession::Status::stagedSessionRequired;
++    auto* device = deviceManager.getCurrentAudioDevice();
++    if (!device) return SourceBurstSession::Status::deviceStopped;
++    const auto ready = context.validateSourceBurstStage (candidate->configuration(), device->getActiveOutputChannels().countNumberOfSetBits());
++    if (ready != SourceBurstSession::Status::staged) return ready;
++    return candidate->validateStaged (deviceManager, &context, device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
++}
++SourceBurstSession::Status DeviceManager::validateStagedSourceBurstSession (
++    EditPlaybackContext& context, const SourceBurstSession::Ptr& candidate) noexcept
++{
++    const auto* messages = juce::MessageManager::getInstanceWithoutCreating();
++    if (!messages || !messages->isThisTheMessageThread()) return SourceBurstSession::Status::invalidConfiguration;
++    try
++    {
++        const std::unique_lock sl (contextLock);
++        return validateStagedSourceBurstSessionInternal (context, candidate);
++    }
++    catch (...) { return SourceBurstSession::Status::preparationFailed; }
++}
++SourceBurstSession::Status DeviceManager::armStagedSourceBurstSession (
++    EditPlaybackContext& context, const SourceBurstSession::Ptr& candidate) noexcept
++{
++    const auto* messages = juce::MessageManager::getInstanceWithoutCreating();
++    if (!messages || !messages->isThisTheMessageThread()) return SourceBurstSession::Status::invalidConfiguration;
++    try
++    {
++        const std::unique_lock sl (contextLock);
++        using Phase = EditPlaybackContext::SourceSessionGatePhase;
++        // Wrong/stale token cannot poison a different staged or active owner.
++        if (!activeContexts.contains (&context) || !candidate || context.sourceBurstSession != candidate ||
++            context.sourceSessionGatePhase() != Phase::staged)
++            return SourceBurstSession::Status::stagedSessionRequired;
++        const auto valid = validateStagedSourceBurstSessionInternal (context, candidate);
++        const auto admission = valid == SourceBurstSession::Status::staged && !context.hasImmediateSourceGatePosition()
++            ? SourceBurstSession::Status::sourcePositionRequired : valid;
++        if (admission != SourceBurstSession::Status::staged)
++        {
++            candidate->failActivation (admission); // Keep observer pinned until CONTROL removeContext, outside lock.
++            context.sourceGatePhase.store (Phase::failed, std::memory_order_release);
++            return admission;
++        }
++        auto* device = deviceManager.getCurrentAudioDevice();
++        const auto status = candidate->armStaged (deviceManager, &context, device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
++        context.sourceGatePhase.store (status == SourceBurstSession::Status::pendingFirstSerial ? Phase::waitingFirstSerial : Phase::failed,
++                                       std::memory_order_release);
++        return status; // Caller commits no false ready/native completion.
++    }
++    catch (...)
++    {
++        auto phase = EditPlaybackContext::SourceSessionGatePhase::staged;
++        context.sourceGatePhase.compare_exchange_strong (phase, EditPlaybackContext::SourceSessionGatePhase::failed,
++                                                         std::memory_order_acq_rel);
++        return SourceBurstSession::Status::preparationFailed;
++    }
++}
++
+ SourceBurstSession::Status DeviceManager::installSourceBurstSessionInternal (EditPlaybackContext& context, SourceBurstSession::Ptr candidate, bool initial)
+ {
+     TRACKTION_ASSERT_MESSAGE_THREAD
+@@ -1752,6 +1843,7 @@
+     {
+         const std::unique_lock sl (contextLock); // CONTROL; the existing callback exclusion.
+         if (!activeContexts.contains (&context)) return SourceBurstSession::Status::contextUnavailable;
++        if (context.edit.requireSourceBurstSession) return SourceBurstSession::Status::stagedSessionRequired;
+         if (initial)
+         {
+             if (context.localSourceLifecycleInvalidated.load (std::memory_order_acquire))

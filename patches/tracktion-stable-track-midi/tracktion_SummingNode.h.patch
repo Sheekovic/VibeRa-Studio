@@ -1,0 +1,24 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h
+@@ -294,6 +294,10 @@
+             auto*& node = nodes[port];
+             auto* logical = LatencyNode::logicalInputFor (node, this);
+             const auto props = logical->getNodeProperties();
++            // Same true bufferless boundary as ordinary mode; no queue is
++            // created or removed for any audio/MIDI-bearing native edge.
++            if (!props.hasAudio && !props.hasMidi && props.numberOfChannels == 0)
++                continue;
+             const int64_t difference = int64_t (maximum) - int64_t (props.latencyNumSamples);
+             if (difference < 0 || difference > std::numeric_limits<int>::max())
+                 throw std::invalid_argument ("Summing compensation delay overflow");
+@@ -350,6 +354,10 @@
+             auto props = node->getNodeProperties();
+             const int nodeLatency = props.latencyNumSamples;
+             const int latencyToAdd = subtractNoWrap (maxLatency, nodeLatency);
++            // No buffers exist to compensate. Keep the dependency and its real
++            // consumers scheduled; never skip a MIDI-bearing or audio input.
++            if (!props.hasAudio && !props.hasMidi && props.numberOfChannels == 0)
++                continue;
+ 
+             if (latencyToAdd <= 0)
+                 continue;

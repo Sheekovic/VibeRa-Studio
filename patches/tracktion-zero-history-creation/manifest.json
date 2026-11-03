@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original certificate-v2 zero-history creation experiment; bounded unknown-writer taint and first-creation proof. No production, SDK, inverse or complete Mixer qualification.",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-zero-history-creation/tracktion_LatencyNode.h.patch",
+      "originalSha256": "8546eb26c6e86688c43cb267fdc27fdc487aaf4638f146d218c9c87cafa57c0f",
+      "patchedSha256": "d87227a1272c9d0a1a35781bdc667accbf77c1d36977e4e8e73a1ff00b318517",
+      "patchSha256": "01fc7b877a733d90f9e5f15f30008a5dc43bb0403f24243f77c21a33086dea84",
+      "addedLines": 57,
+      "deletedLines": 3,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json",
+        "patches/tracktion-forward-stage-drain/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h",
+      "patch": "patches/tracktion-zero-history-creation/tracktion_LatencyProcessor.h.patch",
+      "originalSha256": "b3c4c51a558977555807cbfc2e72d6aeaf059b29942086835a387b1d6f1a1ce2",
+      "patchedSha256": "7b53f5d0baff6ccca2ba667ddb8709c5b33784b6ca854acdc274c22592340d6d",
+      "patchSha256": "07213e2c872f911f89049c79d8aaa2021a1ccbc85e65a7bb016b8055e1d6c950",
+      "addedLines": 71,
+      "deletedLines": 16,
+      "lineage": [
+        "patches/tracktion-forward-stage-drain/manifest.json"
+      ]
+    }
+  ]
+}

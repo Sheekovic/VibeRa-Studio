@@ -1,0 +1,15 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
+@@ -600,6 +600,12 @@
+       }()),
+       closedNativeIO (options.closedNativeIO),
+       disableNodeMemorySharing (options.disableNodeMemorySharing),
++      requireSourceBurstSession ([&options]
++      {
++          if (options.requireSourceBurstSession && options.initialSourceGeneration)
++              throw std::invalid_argument ("Ordinary staged source gate and LOCAL initial policy are distinct");
++          return options.requireSourceBurstSession;
++      }()),
+       nodeGraphPreparation (std::move (options.configureNodeGraphForPreparation)),
+       tempoSequence (*this),
+       state (options.editState),

@@ -1,0 +1,75 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
+@@ -9,6 +9,9 @@
+ */
+ 
+ #pragma once
++#include <cmath>
++#include <limits>
++#include <stdexcept>
+ 
+ namespace tracktion::inline engine {
+ 
+@@ -33,7 +36,7 @@
+                         const TrackMuteState* trackMuteStateToUse,
+                         ProcessState& processStateToUse,
+                         bool rendering, bool canBalanceLatency,
+-                        int maxNumChannelsToUse)
++                        int maxNumChannelsToUse, bool fixedInitialisation)
+     : TracktionEngineNode (processStateToUse),
+       input (std::move (inputNode)),
+       plugin (std::move (pluginToProcess)),
+@@ -45,7 +48,7 @@
+ {
+     jassert (input != nullptr);
+     jassert (plugin != nullptr);
+-    initialisePlugin (sampleRateToUse, blockSizeToUse);
++    initialisePlugin (sampleRateToUse, blockSizeToUse, fixedInitialisation);
+ }
+ 
+ PluginNode::~PluginNode()
+@@ -299,13 +302,37 @@
+ }
+ 
+ //==============================================================================
+-void PluginNode::initialisePlugin (double sampleRateToUse, int blockSizeToUse)
+-{
+-    plugin->baseClassInitialise ({ 0_tp, sampleRateToUse, blockSizeToUse });
+-    isInitialised = true;
+-
+-    sampleRate = sampleRateToUse;
+-    latencyNumSamples = juce::roundToInt (plugin->getLatencySeconds() * sampleRate);
++void PluginNode::initialisePlugin (double sampleRateToUse, int blockSizeToUse, bool fixedInitialisation)
++{
++    if (! fixedInitialisation)
++    {
++        plugin->baseClassInitialise ({ 0_tp, sampleRateToUse, blockSizeToUse });
++        isInitialised = true;
++        sampleRate = sampleRateToUse;
++        latencyNumSamples = juce::roundToInt (plugin->getLatencySeconds() * sampleRate);
++        return;
++    }
++    // First private initialization failures are balanced by attach itself;
++    // subsequent latency failures below own exactly one successful attachment.
++    plugin->attachFixedGraphInitialisation ({ 0_tp, sampleRateToUse, blockSizeToUse });
++    try
++    {
++        sampleRate = sampleRateToUse; // Fresh NODE bookkeeping, never Plugin fields.
++        const auto latency = plugin->getLatencySeconds() * sampleRate;
++        if (! std::isfinite (latency) || latency < 0.0 || latency > double (std::numeric_limits<int>::max()))
++            throw std::invalid_argument ("Retained plugin latency is invalid");
++        latencyNumSamples = juce::roundToInt (latency);
++        isInitialised = true;
++    }
++    catch (...)
++    {
++        // The complete Node destructor is NOT called if construction throws.
++        // Release exactly our successful attachment. For a fresh private shell
++        // this is final private cleanup; for a retained owner it cannot tear
++        // down the still-pinned incumbent DSP. Closed cleanup is nonthrowing.
++        plugin->baseClassDeinitialise();
++        throw;
++    }
+ }
+ 
+ PluginRenderContext PluginNode::getPluginRenderContext (TimeRange editTime, juce::AudioBuffer<float>& destBuffer)

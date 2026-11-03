@@ -1,0 +1,70 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
+@@ -8,8 +8,9 @@
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
+ 
+ #pragma once
++#include <stdexcept>
+ 
+ //==============================================================================
+ //==============================================================================
+ /**
+@@ -225,8 +226,22 @@
+ public:
+     Node() = default;
+     virtual ~Node() = default;
+ 
++    // Original opt-in adapter. Configure ONLY the final root before transform.
++    // Zero keeps the upstream graph behavior. Budget is PCM ring + frame scratch
++    // for the entire candidate; transition peak memory still needs caller admission.
++    void setAudioCompensationHistory (uint32_t maximumDelay, size_t graphStorageBudget)
++    {
++        if (maximumDelay != 0 && graphStorageBudget == 0)
++            throw std::invalid_argument ("Audio compensation history needs an explicit graph budget");
++        audioCompensationHistoryMaximumDelay = maximumDelay;
++        audioCompensationHistoryBudget = graphStorageBudget;
++    }
++    uint32_t getAudioCompensationHistoryMaximumDelay() const noexcept { return audioCompensationHistoryMaximumDelay; }
++    size_t getAudioCompensationHistoryBudget() const noexcept { return audioCompensationHistoryBudget; }
++
++
+     //==============================================================================
+     /** Call once after the graph has been constructed to initialise buffers etc. */
+     void initialise (const PlaybackInitialisationInfo&);
+ 
+@@ -391,8 +406,10 @@
+     */
+     void setAudioOutput (Node* sourceNode, const choc::buffer::ChannelArrayView<float>&);
+ 
+ private:
++    uint32_t audioCompensationHistoryMaximumDelay = 0;
++    size_t audioCompensationHistoryBudget = 0;
+     std::atomic<bool> hasBeenProcessed { false };
+     choc::buffer::Size audioBufferSize;
+     choc::buffer::ChannelArrayBuffer<float> audioBuffer;
+     choc::buffer::ChannelArrayView<float> audioView, allocatedView;
+@@ -797,8 +814,23 @@
+ inline std::unique_ptr<NodeGraph> createNodeGraph (std::unique_ptr<Node> rootNode,
+                                                    bool disableLatencyCompensation)
+ {
+     assert (rootNode != nullptr);
++    // A device's final-node callback may mark a subtree before later engine
++    // wrappers are added. Resolve its immutable policy onto the actual root.
++    uint32_t maximumHistory = 0;
++    size_t historyBudget = 0;
++    for (auto* node : getNodes (*rootNode, VertexOrdering::postordering))
++        if (const auto maximum = node->getAudioCompensationHistoryMaximumDelay())
++        {
++            const auto budget = node->getAudioCompensationHistoryBudget();
++            if (budget == 0 || (maximumHistory != 0 && (maximum != maximumHistory || budget != historyBudget)))
++                throw std::invalid_argument ("Conflicting audio compensation history scopes");
++            maximumHistory = maximum;
++            historyBudget = budget;
++        }
++    if (maximumHistory != 0)
++        rootNode->setAudioCompensationHistory (maximumHistory, historyBudget);
+     auto orderedNodes = transformNodes (*rootNode, disableLatencyCompensation);
+     auto sortedNodes = createNodeMap (orderedNodes);
+ 
+     // Iterate all nodes, for each input, increment the dest Node output count

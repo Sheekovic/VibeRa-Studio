@@ -1,0 +1,80 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
+@@ -32,6 +32,17 @@
+     This means the player can be real-time safe as long as your provided ThreadPool
+     doesn't do any non-real-time operations in the wait/signal methods.
+ */
++// Scalar receipt is standalone so EPC can forward-declare it without the
++// heavyweight graph player definition or an engine/graph include cycle.
++enum class GraphSelectionState { none, awaitingFirstSelection, selected, stale };
++struct GraphSelection
++{
++    GraphSelectionState state = GraphSelectionState::none;
++    uint64_t postedSerial = 0, selectedSerial = 0;
++    int latencySamples = 0;
++    int64_t referenceStart = 0, referenceEnd = 0;
++};
++
+ class LockFreeMultiThreadedNodePlayer
+ {
+ private:
+@@ -75,6 +86,7 @@
+         std::unique_ptr<LockFreeFifo<Node*>> nodesReadyToBeProcessed;
+         std::unique_ptr<AudioBufferPool> audioBufferPool;
+         int preparedLatencySamples = 0;
++        uint64_t selectionSerial = 0; // Reserved on CONTROL after all fallible holder work.
+     };
+ 
+     struct ReadyOwnerIdentity { LockFreeMultiThreadedNodePlayer* player = nullptr; };
+@@ -283,11 +295,14 @@
+         ~ReadyGraph() = default; // Candidate destruction belongs to control.
+         bool empty() const noexcept { return storage == nullptr; }
+         int latencySamples() const noexcept { return storage ? storage->preparedLatencySamples : 0; }
++        // CONTROL-only request identity, retained after post/consume. Default/moved-from0. It is
++        // scoped to this player and is NOT acceptance or DSP adoption evidence.
++        uint64_t publicationSerial() const noexcept { return owner ? reservedPublicationSerial : 0; }
+       private:
+         friend class LockFreeMultiThreadedNodePlayer;
+         std::shared_ptr<ReadyOwnerIdentity> owner;
+         ReadyConfiguration configuration;
+-        uint64_t generation = 0;
++        uint64_t generation = 0, reservedPublicationSerial = 0;
+         std::unique_ptr<PreparedNode> storage;
+     };
+     class GraphRetirementSlot
+@@ -333,6 +348,13 @@
+     */
+     int getPreparedLatencySamples() const noexcept { return preparedLatencySamples; }
+ 
++    // Read-only cross-thread scalar receipt. Selected means the holder was
++    // chosen at the beginning of an actual process call, NOT completed output,
++    // physical-device playback, or the phase of an earlier captured MIDI event.
++    using GraphSelectionState = graph::GraphSelectionState;
++    using GraphSelection = graph::GraphSelection;
++    GraphSelection graphSelection() const noexcept;
++
+     /** Process a block of the Node. */
+     int process (const Node::ProcessContext&);
+ 
+@@ -385,6 +407,21 @@
+     NodeGraph* lastGraphPosted = nullptr;
+     AudioBufferPool* lastAudioBufferPoolPosted = nullptr;
+     int preparedLatencySamples = 0;
++    // CONTROL reserves monotonic identities; gaps from discarded candidates are
++    // intentional. Exhaustion refuses preparation before any graph publication.
++    uint64_t nextSelectionSerial = 1;
++    std::atomic<uint64_t> postedSelectionSerial { 0 }, minimumSelectionSerial { 1 };
++    // One process owner writes, arbitrary readers take at most eight attempts.
++    // Control never resets/writes this sequence or its protected payload.
++    std::atomic<uint64_t> selectionSequence { 0 }, selectedGraphSerial { 0 };
++    std::atomic<int> selectedLatencySamples { 0 };
++    std::atomic<int64_t> selectedReferenceStart { 0 }, selectedReferenceEnd { 0 };
++    std::atomic<bool> selectionSequenceExhausted { false };
++    static_assert (std::atomic<uint64_t>::is_always_lock_free);
++    static_assert (std::atomic<int64_t>::is_always_lock_free);
++    static_assert (std::atomic<int>::is_always_lock_free);
++    static_assert (std::atomic<bool>::is_always_lock_free);
++    void publishSelection (const PreparedNode&, juce::Range<int64_t>) noexcept;
+     // Sole control owner; not touched by process(). Identity is lazy so normal
+     // default players do not acquire an additional allocation until this opt-in.
+     std::shared_ptr<ReadyOwnerIdentity> readyOwnerIdentity;

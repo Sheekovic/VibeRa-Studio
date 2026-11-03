@@ -1,0 +1,39 @@
+--- a/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.cpp
++++ b/modules/tracktion_engine/model/automation/tracktion_AutomatableEditItem.cpp
+@@ -10,19 +10,20 @@
+ 
+ namespace tracktion::inline engine {
+ 
+-AutomatableEditItem::AutomatableEditItem (Edit& ed, const juce::ValueTree& v)
++AutomatableEditItem::AutomatableEditItem (Edit& ed, const juce::ValueTree& v, bool detachedGraphItem)
+     : EditItem (ed, v),
+-      elementState (v)
+-{
+-    remapOnTempoChange.referTo (elementState, IDs::remapOnTempoChange, &edit.getUndoManager(), false);
+-
+-    if (itemID.isValid())
++      elementState (v), detachedFromEdit (detachedGraphItem)
++{
++    remapOnTempoChange.referTo (elementState, IDs::remapOnTempoChange,
++                               detachedFromEdit ? nullptr : &edit.getUndoManager(), false);
++
++    if (! detachedFromEdit && itemID.isValid())
+         edit.automatableEditItemCache.addItem (*this);
+ }
+ 
+ AutomatableEditItem::~AutomatableEditItem()
+ {
+-    if (itemID.isValid())
++    if (! detachedFromEdit && itemID.isValid())
+         edit.automatableEditItemCache.removeItem (*this);
+ }
+ 
+@@ -318,7 +319,7 @@
+     }
+ 
+     stream.flush();
+-    auto um = &edit.getUndoManager();
++    auto um = detachedFromEdit ? nullptr : &edit.getUndoManager();
+ 
+     if (stream.getDataSize() > 0)
+         elementState.setProperty (IDs::parameters, stream.getMemoryBlock(), um);

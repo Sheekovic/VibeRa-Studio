@@ -1,0 +1,19 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.cpp
+@@ -1733,12 +1733,11 @@
+         activeContexts.addIfNotAlreadyThere (c);
+     }
+ 
+-    for (int i = 200; --i >= 0;)
+-    {
++    const auto waitStarted = juce::Time::getMillisecondCounterHiRes();
++
++    while (lastStreamTime == streamTime
++           && juce::Time::getMillisecondCounterHiRes() - waitStarted < 200.0)
+         juce::Thread::sleep (1);
+-        if (lastStreamTime != streamTime)
+-            break;
+-    }
+ }
+ 
+ SourceBurstSession::Status DeviceManager::installSourceBurstSession (EditPlaybackContext& context, SourceBurstSession::Ptr candidate)

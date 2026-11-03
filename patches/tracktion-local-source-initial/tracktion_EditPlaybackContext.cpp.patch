@@ -1,0 +1,333 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -45,7 +45,7 @@
+     Outcome current;
+     double speed = 0, referenceScale = 1;
+     juce::uint64 lastClosedSerial = 0;
+-    bool preflighted = false, started = false;
++    bool preflighted = false, started = false, initialActivation = false;
+     std::atomic<juce::uint64> publication { 0 };
+     std::array<std::atomic<juce::uint64>, 17> fields {};
+     Impl (const Configuration& c, juce::AudioDeviceManager& m,
+@@ -72,6 +72,13 @@
+         publish();
+         return false;
+     }
++    bool wait (Status reason) noexcept
++    {
++        current.status = reason;
++        current.sliceDeviceFrames = current.sliceSourceFrames = 0;
++        publish();
++        return false; // Pending only: no first fault, Host scope, clock or graph work.
++    }
+     bool preflight (int frames, int physicalOffset, bool offsetKnown, juce::uint64 physicalEpoch, juce::uint64 physicalSerial,
+                     double rate, int block, double graphRate, int graphBlock,
+                     double requestedSpeed, double requestedReferenceScale) noexcept
+@@ -82,7 +89,8 @@
+         current.metadataKnown = reader.read (physical);
+         current.offsetKnown = offsetKnown;
+         current.observedOffset = offsetKnown ? physicalOffset : 0;
+-        if (!current.metadataKnown) return fail (Status::telemetryUnavailable);
++        if (!current.metadataKnown)
++            return initialActivation ? wait (Status::pendingPhysicalMetadata) : fail (Status::telemetryUnavailable);
+         current.observedEpoch = physical.deviceEpoch;
+         current.observedSerial = physical.callbackSerial;
+         current.observedPhysicalFrames = physical.outerFrames;
+@@ -95,11 +103,14 @@
+         if (rate != config.sampleRate || graphRate != config.sampleRate) return fail (Status::rateChanged);
+         if (!physical.callbackSerial || physical.outerFrames <= 0) return fail (Status::invalidDeviceSlice);
+         if (physical.outerFrames > config.maximumPhysicalFrames) return fail (Status::physicalBurstExceeded);
+-        if (!offsetKnown || physicalOffset < 0) return fail (Status::invalidDeviceSlice);
++        if (!offsetKnown || physicalOffset < 0)
++            return initialActivation ? wait (Status::pendingOffset) : fail (Status::invalidDeviceSlice);
+         if (physical.deviceEpoch != physicalEpoch || physical.callbackSerial != physicalSerial)
+             return fail (Status::sequenceMismatch);
+         if (!current.scopeOpen)
+         {
++            if (initialActivation && (physical.callbackSerial <= lastClosedSerial || physicalOffset != 0))
++                return wait (Status::pendingFirstSerial);
+             if (physical.callbackSerial <= lastClosedSerial || physicalOffset != 0)
+                 return fail (Status::sequenceMismatch);
+             current.physicalSerial = physical.callbackSerial;
+@@ -230,7 +241,7 @@
+ static_assert (std::atomic<juce::uint64>::is_always_lock_free && std::atomic<double>::is_always_lock_free,
+                "Prepared source admission requires lock-free scalar atomics");
+ 
+-SourceBurstSession::Status SourceBurstSession::claim (juce::AudioDeviceManager& manager, EditPlaybackContext* context) noexcept
++SourceBurstSession::Status SourceBurstSession::claim (juce::AudioDeviceManager& manager, EditPlaybackContext* context, bool initial) noexcept
+ {
+     if (impl->managerIdentity != &manager || !context) return Status::invalidConfiguration;
+     if (impl->contextIdentity) return Status::alreadyClaimed;
+@@ -246,6 +257,8 @@
+         return Status::deviceChanged;
+     // Capture at INSTALL, not just preparation: preparing may precede an
+     // in-flight physical callback by many serials. Never admit its suffix.
++    impl->initialActivation = initial;
++    impl->current.status = initial ? Status::pendingFirstSerial : Status::prepared;
+     impl->current.activationAfterSerial = now.callbackSerial;
+     impl->lastClosedSerial = now.callbackSerial;
+     impl->contextIdentity = context;
+@@ -968,29 +981,35 @@
+ 
+     auto& dm = edit.engine.getDeviceManager();
+ 
+-    for (auto mo : dm.midiOutputs)
+-        if (mo->isEnabled())
+-            midiOutputs.add (mo->createInstance (*this));
+-
+-    for (auto mi : dm.midiInputs)
+-        if (mi->isEnabled() && mi->isAvailableToEdit())
+-            midiInputs.add (mi->createInstance (*this));
++    if (!edit.closedNativeIO)
++    {
++        for (auto mo : dm.midiOutputs)
++            if (mo->isEnabled())
++                midiOutputs.add (mo->createInstance (*this));
++    
++        for (auto mi : dm.midiInputs)
++            if (mi->isEnabled() && mi->isAvailableToEdit())
++                midiInputs.add (mi->createInstance (*this));
++    }
+ 
+     for (auto wo : dm.waveOutputs)
+         if (wo->isEnabled())
+             waveOutputs.add (wo->createInstance (*this));
+ 
+-    for (auto wi : dm.waveInputs)
+-        if (wi->isEnabled() && wi->isAvailableToEdit())
+-            waveInputs.add (wi->createInstance (*this));
+-
+-    for (auto* at : getAudioTracks (edit))
+-    {
+-        auto& twid = at->getWaveInputDevice();
+-        auto& tmid = at->getMidiInputDevice();
+-
+-        if (twid.isEnabled())  waveInputs.add (twid.createInstance (*this));
+-        if (tmid.isEnabled())  midiInputs.add (tmid.createInstance (*this));
++    if (!edit.closedNativeIO)
++    {
++        for (auto wi : dm.waveInputs)
++            if (wi->isEnabled() && wi->isAvailableToEdit())
++                waveInputs.add (wi->createInstance (*this));
++    
++        for (auto* at : getAudioTracks (edit))
++        {
++            auto& twid = at->getWaveInputDevice();
++            auto& tmid = at->getMidiInputDevice();
++    
++            if (twid.isEnabled())  waveInputs.add (twid.createInstance (*this));
++            if (tmid.isEnabled())  midiInputs.add (tmid.createInstance (*this));
++        }
+     }
+ 
+     midiDispatcher.setMidiDeviceList (midiOutputs);
+@@ -1018,6 +1037,7 @@
+ 
+ void EditPlaybackContext::addWaveInputDeviceInstance (InputDevice& device)
+ {
++    if (refuseNativeIOAttachment()) return;
+     jassert (getInputFor (&device) == nullptr);
+ 
+     if (waveInputs.add (device.createInstance (*this)) != nullptr && isAllocated)
+@@ -1026,6 +1046,7 @@
+ 
+ void EditPlaybackContext::addMidiInputDeviceInstance (InputDevice& device)
+ {
++    if (refuseNativeIOAttachment()) return;
+     jassert (getInputFor (&device) == nullptr);
+ 
+     if (midiInputs.add (device.createInstance (*this)) != nullptr && isAllocated)
+@@ -1170,6 +1191,8 @@
+ 
+ juce::Result EditPlaybackContext::startRecording (TimePosition start, TimePosition punchIn)
+ {
++    if (edit.closedNativeIO)
++        return juce::Result::fail ("Native recording is unavailable in this explicitly closed app projection");
+     struct InputAndContext
+     {
+         InputDeviceInstance* input = nullptr;
+@@ -1403,28 +1426,71 @@
+     return nodePlaybackContext ? nodePlaybackContext->prepareSourceBurstResources (c, channels)
+                                : SourceBurstSession::Status::contextUnavailable;
+ }
+-bool EditPlaybackContext::preflightSourceBurst (int frames, int channels, int physicalOffset, bool offsetKnown,
++SourceBurstSession::Decision EditPlaybackContext::preflightSourceBurst (int frames, int channels, int physicalOffset, bool offsetKnown,
+     juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int block) noexcept
+ {
+-    if (!sourceBurstSession) return true;
++    using Decision = SourceBurstSession::Decision;
++    const auto initial = sourceInitialPhase.load (std::memory_order_acquire);
++    const bool notStarted = initial != InitialSourcePhase::unbound && initial != InitialSourcePhase::active;
++    sourceBurstDecision = Decision::process;
++    if (notStarted && (!sourceBurstSession || initial == InitialSourcePhase::failed))
++        return sourceBurstDecision = Decision::pending;
++    if (!sourceBurstSession) return sourceBurstDecision;
+     auto& state = *sourceBurstSession->impl;
+-    if (!nodePlaybackContext) return state.fail (SourceBurstSession::Status::contextUnavailable);
+-    if (!state.preflight (frames, physicalOffset, offsetKnown, physicalEpoch, physicalSerial,
++    // Persistent immutable capability policy, not a one-time installation scan.
++    // All built-in writers refuse before mutation; these lists are excluded by
++    // the existing manager context lock during normal native attachment work.
++    bool localValid = true;
++    if (edit.initialSourceGeneration)
++    {
++        if (localSourceLifecycleInvalidated.load (std::memory_order_acquire))
++            localValid = state.fail (SourceBurstSession::Status::localLifecycleInvalidated);
++        else if (nodeContextToSyncTo || contextToSyncTo || !waveInputs.isEmpty() || !midiInputs.isEmpty() || !midiOutputs.isEmpty())
++            localValid = state.fail (SourceBurstSession::Status::localCapabilityViolated);
++    }
++    bool valid = localValid && nodePlaybackContext && state.preflight (frames, physicalOffset, offsetKnown, physicalEpoch, physicalSerial,
+         rate, block, nodePlaybackContext->getSampleRate(),
+         nodePlaybackContext->preparedDeviceBlockSize.load (std::memory_order_acquire),
+         nodePlaybackContext->speedCompensation.load (std::memory_order_acquire),
+-        nodePlaybackContext->blockLengthScaleFactor.load (std::memory_order_acquire))) return false;
+-    if (!nodePlaybackContext->sourceBurstResourcesFit (channels, state.current.sliceSourceFrames))
+-        return state.fail (SourceBurstSession::Status::conversionResourcesUnavailable);
+-    return true;
++        nodePlaybackContext->blockLengthScaleFactor.load (std::memory_order_acquire));
++    if (!nodePlaybackContext) state.fail (SourceBurstSession::Status::contextUnavailable);
++    if (valid && !nodePlaybackContext->sourceBurstResourcesFit (channels, state.current.sliceSourceFrames))
++        valid = state.fail (SourceBurstSession::Status::conversionResourcesUnavailable);
++    if (valid) return sourceBurstDecision;
++    if (notStarted)
++    {
++        if (state.current.failed)
++        {
++            state.abort (state.current.status);
++            sourceInitialPhase.store (InitialSourcePhase::failed, std::memory_order_release);
++        }
++        return sourceBurstDecision = Decision::pending; // Local never-started refusal, unrelated playback continues.
++    }
++    return sourceBurstDecision = Decision::fault;
+ }
+ bool EditPlaybackContext::beginSourceBurst() noexcept
+-{ return !sourceBurstSession || sourceBurstSession->impl->begin(); }
++{
++    if (!sourceBurstShouldProcess() || !sourceBurstSession) return true;
++    if (sourceBurstSession->impl->begin()) return true;
++    if (sourceInitialPhase.load (std::memory_order_acquire) == InitialSourcePhase::waitingFirstSerial)
++    {
++        sourceBurstSession->impl->abort (sourceBurstSession->impl->current.status);
++        sourceInitialPhase.store (InitialSourcePhase::failed, std::memory_order_release);
++        sourceBurstDecision = SourceBurstSession::Decision::pending;
++        return true; // Observer already aborted; no successful graph/worker outcome.
++    }
++    return false;
++}
+ void EditPlaybackContext::abortSourceBurst (SourceBurstSession::Status reason) noexcept
+-{ if (sourceBurstSession) sourceBurstSession->impl->abort (reason); }
++{
++    if (!sourceBurstShouldProcess()) return;
++    if (sourceBurstSession) sourceBurstSession->impl->abort (reason);
++    if (sourceInitialPhase.load (std::memory_order_acquire) == InitialSourcePhase::waitingFirstSerial)
++        sourceInitialPhase.store (InitialSourcePhase::failed, std::memory_order_release);
++}
+ bool EditPlaybackContext::finishSourceBurst() noexcept
+ {
+-    if (!sourceBurstSession) return true;
++    if (!sourceBurstShouldProcess() || !sourceBurstSession) return true;
+     auto& state = *sourceBurstSession->impl;
+     if (state.current.failed) return false;
+     state.finish();
+@@ -1477,6 +1543,11 @@
+     // Dispatch any MIDI messages that have been injected in to the MidiOutputDeviceInstances by the Node
+     auto editTime = nodePlaybackContext->processState.getSyncRange().start.time;
+     midiDispatcher.dispatchPendingMessagesForDevices (editTime);
++    if (sourceInitialPhase.load (std::memory_order_acquire) == InitialSourcePhase::waitingFirstSerial)
++    {
++        sourceBurstSession->impl->initialActivation = false;
++        sourceInitialPhase.store (InitialSourcePhase::active, std::memory_order_release);
++    }
+     return true;
+ }
+ 
+@@ -1510,9 +1581,23 @@
+     return {};
+ }
+ 
+-void EditPlaybackContext::syncToContext (EditPlaybackContext* newContextToSyncTo,
++void EditPlaybackContext::syncToContext (EditPlaybackContext* other,
++                                         TimePosition bar, TimeDuration interval)
++{ (void) trySyncToContext (other, bar, interval); }
++Edit::NativeCapabilityStatus EditPlaybackContext::trySyncToContext (EditPlaybackContext* newContextToSyncTo,
+                                          TimePosition newPreviousBarTime, TimeDuration newSyncInterval)
+ {
++    // LOCAL-CLOSED is permanently unsynchronised. A null request is already
++    // satisfied: do not write DSP-read sync fields, even on CONTROL.
++    if (edit.initialSourceGeneration && newContextToSyncTo == nullptr)
++        return Edit::NativeCapabilityStatus::allowed;
++    if (newContextToSyncTo)
++    {
++        const auto own = edit.admitNativeCapability (Edit::NativeCapability::contextSync);
++        const auto other = newContextToSyncTo->edit.admitNativeCapability (Edit::NativeCapability::contextSync);
++        if (own != Edit::NativeCapabilityStatus::allowed) return own;
++        if (other != Edit::NativeCapabilityStatus::allowed) return other;
++    }
+     contextToSyncTo = newContextToSyncTo;
+     previousBarTime = newPreviousBarTime;
+     syncInterval    = newSyncInterval;
+@@ -1523,6 +1608,7 @@
+         nodeContextToSyncTo = newContextToSyncTo;
+         contextSyncroniser->reset (previousBarTime, syncInterval);
+     }
++    return Edit::NativeCapabilityStatus::allowed;
+ }
+ 
+ //==============================================================================
+@@ -1696,8 +1782,29 @@
+     return {};
+ }
+ 
++Edit::NativeCapabilityStatus EditPlaybackContext::tryGlobalStreamTimeToEditTime (double time, bool unlooped, TimePosition& output) const noexcept
++{
++    const auto status = edit.admitNativeCapability (Edit::NativeCapability::globalTimestamp);
++    if (status != Edit::NativeCapabilityStatus::allowed) return status;
++    if (!nodePlaybackContext) return Edit::NativeCapabilityStatus::contextUnavailable;
++    if (!std::isfinite (time)) return Edit::NativeCapabilityStatus::invalidTimestamp;
++    const auto rate = getSampleRate();
++    if (!std::isfinite (rate) || rate <= 0) return Edit::NativeCapabilityStatus::contextUnavailable;
++    const auto position = time * rate;
++    if (!std::isfinite (position) || position <= double (std::numeric_limits<juce::int64>::min()) ||
++        position >= double (std::numeric_limits<juce::int64>::max())) return Edit::NativeCapabilityStatus::invalidTimestamp;
++    const auto sample = tracktion::graph::timeToSample (time, rate);
++    const auto timeline = unlooped
++        ? nodePlaybackContext->playHead.referenceSamplePositionToTimelinePositionUnlooped (sample)
++        : nodePlaybackContext->playHead.referenceSamplePositionToTimelinePosition (sample);
++    output = TimePosition::fromSamples (timeline, rate);
++    return Edit::NativeCapabilityStatus::allowed;
++}
++
+ TimePosition EditPlaybackContext::globalStreamTimeToEditTime (double globalStreamTime) const
+ {
++    if (edit.admitNativeCapability (Edit::NativeCapability::globalTimestamp) != Edit::NativeCapabilityStatus::allowed)
++        return TimePosition::fromSeconds (std::numeric_limits<double>::quiet_NaN());
+     if (! nodePlaybackContext)
+         return TimePosition();
+ 
+@@ -1710,6 +1817,8 @@
+ 
+ TimePosition EditPlaybackContext::globalStreamTimeToEditTimeUnlooped (double globalStreamTime) const
+ {
++    if (edit.admitNativeCapability (Edit::NativeCapability::globalTimestamp) != Edit::NativeCapabilityStatus::allowed)
++        return TimePosition::fromSeconds (std::numeric_limits<double>::quiet_NaN());
+     if (! nodePlaybackContext)
+         return TimePosition();
+ 
+@@ -1722,6 +1831,17 @@
+ 
+ void EditPlaybackContext::resyncToGlobalStreamTime (juce::Range<double> globalStreamTime, double sampleRate)
+ {
++    if (edit.initialSourceGeneration)
++    {
++        if (localReferenceInitialised)
++        {
++            // CONTROL signals an actual device/context lifecycle boundary. Do
++            // not race DSP-owned session payload or reset the live local clock.
++            localSourceLifecycleInvalidated.store (true, std::memory_order_release);
++            return;
++        }
++        localReferenceInitialised = true; // Only addContext before publication may establish its initial origin.
++    }
+     if (! nodePlaybackContext)
+         return;
+ 

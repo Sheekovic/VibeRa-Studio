@@ -1,0 +1,12 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1662,7 +1662,8 @@
+                                               *sendPlugin,
+                                               playHeadState, trackMuteState,
+                                               list.getEdit().engine.getEngineBehaviour().shouldProcessAuxSendWhenTrackIsMuted (*sendPlugin),
+-                                              useFixedGraphInitialisation (*sendPlugin, params));
++                                              useFixedGraphInitialisation (*sendPlugin, params),
++                                              &params.processState, params.forRendering);
+         }
+         else if (auto returnPlugin = dynamic_cast<AuxReturnPlugin*> (p))
+         {

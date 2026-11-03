@@ -1,0 +1,23 @@
+--- a/modules/juce_data_structures/undomanager/juce_UndoManager.cpp
++++ b/modules/juce_data_structures/undomanager/juce_UndoManager.cpp
+@@ -366,6 +366,20 @@
+                 actionsFound.add (a);
+ }
+ 
++void UndoManager::getActionsInUndoTransaction (Array<const UndoableAction*>& actionsFound) const
++{
++    if (auto* transaction = getCurrentSet())
++        for (auto* action : transaction->actions)
++            actionsFound.add (action);
++}
++
++void UndoManager::getActionsInRedoTransaction (Array<const UndoableAction*>& actionsFound) const
++{
++    if (auto* transaction = getNextSet())
++        for (auto* action : transaction->actions)
++            actionsFound.add (action);
++}
++
+ int UndoManager::getNumActionsInCurrentTransaction() const
+ {
+     if (! newTransaction)

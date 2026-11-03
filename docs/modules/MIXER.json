@@ -1,0 +1,2082 @@
+{
+  "format": 1,
+  "id": "mixer",
+  "name": "Mixer module - mix and recall a complete song",
+  "state": "software_released_human_acceptance_pending",
+  "checklist": "docs/modules/MIXER.md",
+  "qualifiedDistributionVersion": "0.0.64",
+  "releaseVersion": "0.0.64",
+  "requirements": [
+    {
+      "id": "MX-A",
+      "name": "Insert and group organisation",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-B",
+      "name": "Complete direct and stereo controls",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-C",
+      "name": "Actual meters and overload policy",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-D",
+      "name": "Routing, sidechain and supported bus layouts",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-E",
+      "name": "Practical complete effect chain workflow",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-F",
+      "name": "Route-wide compensation and latency transitions",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-G",
+      "name": "Mixer automation/controller/manual-state integration",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-H",
+      "name": "Persistence and failure recovery",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-I",
+      "name": "Workspace and actual native interaction",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-J",
+      "name": "Changed-feature semantic workflows and provider-neutral skill",
+      "status": "verified",
+      "releaseRequired": true,
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-current/verification.json",
+          "sha256": "aeabd4b45d611d1ae48de757d736739cf13408546bb4e4c0bc127fd6c36fec49"
+        }
+      ]
+    },
+    {
+      "id": "MX-K",
+      "name": "Exact module source and packaged candidate",
+      "status": "verified",
+      "releaseRequired": true,
+      "phase": "release",
+      "evidence": [
+        {
+          "path": "build/module-qualification/mixer-ipc19-release/verification.json",
+          "sha256": "11356e9edcab039e8a44cdef03c8e22136accd9f64231bed179198ba16569bf7"
+        }
+      ]
+    }
+  ],
+  "externalAcceptance": [
+    {
+      "name": "Listening",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "name": "Physical audio/MIDI and mixed-monitor hardware",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "name": "Human no-tutorial FL familiarity",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "nextAction": "Mixer software release is qualified. Human listening/hardware/mixed-monitor/familiarity remain pending. Continue the full roadmap through the next coherent approved module, retaining inherited MCP consolidation.",
+  "developmentEvidence": [
+    {
+      "scope": "Current complete Mixer functional checklist69/69,13.840s incremental compile/524.117s tests, compiled and verifier inputs stable; actual installed before-after exact app/worker/provider scalar4040callbacks/0overruns/max.4752ms40.418s; current guarded native33.56s. Candidate workflow rowsA..J qualify; full source/staging/finalK pending. Historical failures retained, no human/hardware/listening claim.",
+      "receipt": "build/dev/20261018-195151/verification.json",
+      "related": "build/windows/mixer-candidate-installed-identity-20261018/verification.json"
+    },
+    {
+      "scope": "Interim exact compile315.958s; focused3/4 in16.82s. Model/CopySave/actualStudio emptyPaste+occupiedunequal2slot LoadApply+UIUndo/MCPRedo+playable activation PASS. Stdio reaches new document operations then fails race assertion on actual decoded-failed cancellation receipt; fixture corrected, rerun pending. Later Replace/watchdog source not qualified.",
+      "receipt": "build/dev/owned/20261018-124100-c103ca29c50c/verification.json"
+    },
+    {
+      "scope": "Targeted exact captured-state reuse/startup resume repair: actual installed MVibratoMB insert/Undo/fresh Redo/remove477callbacks,0.4695ms max/5.333ms, background processed295/missed0/drop0, startup capture serial1 unchanged throughout; actual original SDK/cache/editor/application/native history4/4PASS60.79s. Saves stay fresh. No playing transport/native input/listening/full module claim.",
+      "receipt": "build/dev/owned/20261018-115711-1402647aa2a3/verification.json",
+      "related": "build/dev/owned/20261018-115728-0f8cb93a7c30/verification.json"
+    },
+    {
+      "scope": "Actual app/model4/4PASS6.82s includes UI/MCP stopped insertion/removal/Undo/fresh Redo, real cancellation/failure and save/reopen. Installed MVibratoMB transaction terminal PASS but continuity FAIL:4 background missed packets, one per capture; no callback overruns. Later capture fix unqualified. No playing transport/native OS input/listening/module/package claim.",
+      "receipt": "build/dev/owned/20261018-110802-e5f21fd628c8/verification.json",
+      "related": "build/dev/owned/20261018-113556-3d7e01def08b/verification.json"
+    },
+    {
+      "scope": "Original SDK/native stopped held-input append/removal/Undo/fresh Redo and cached-baseline removal2/2PASS25.81s, separate signed799 musical oracle, actual worker/Host expiry while Edit alive; shared hosting/recovery12/12PASS71.88s. Studio UI/MCP integration, playing transport, installed transitions, broader source/module/package/human qualification remain incomplete.",
+      "receipt": "build/dev/owned/20261018-102949-bbbe7ef72e2e/verification.json",
+      "related": "build/dev/owned/20261018-103101-b817b9d2eb5e/verification.json"
+    },
+    {
+      "scope": "Exact a6d1675 broader165/169PASS: original6default+additive4 and original6bounded pass, no new failures versus021511. Compile64.007s/tests850.572s,169unique/no skipped, compiled/verifier stable. Musical108.80s/GUI37.41s/Browserlive21.08s/chainstdio8.85s/finite17.61s/135engineering12.87s pass. Four routing/packet/timing/stoppedFX failures remain; no module/package/human qualification. Fresh1080/4K150 component PNGs opened; qualified dist app+worker exact hashes unchanged.",
+      "receipt": "build/dev/20261018-034519/verification.json"
+    },
+    {
+      "scope": "Direct ordinary native MIDI inbox repair: original6default+6bounded pass at033405; additive4 and original6default pass0343024.43s. Native37/104 exact frozen postimages, no queue transfer on prepare/cancel. Full135 engineering13.22s/15; source/verifier stable. Retained additive fixture failure and two unit timeouts diagnosed. Broader source, RT lock debt, routing/PDC and full module qualification remain open.",
+      "receipt": "build/dev/20261018-034302/verification.json",
+      "related": "build/dev/20261018-033405/verification.json"
+    },
+    {
+      "scope": "Fixed declared latency, actual worker bypass/state and unequal parallel WAV compensation; not live transitions/sidechains",
+      "receipt": "build/dev/20261016-170738/verification.json",
+      "measurements": "build/windows/mixer_latency_risk/mixer-risk-measurements.txt"
+    },
+    {
+      "scope": "Earlier corrected control regressions12/12 and installed Analog Lab V1619 assertions",
+      "receipt": "build/mixer-module-affected-regression.log",
+      "provider": "build/mixer-module-installed-provider.log"
+    },
+    {
+      "scope": "Original worker auxiliary transport,5ms bypass and fixed unequal-chain WAV probes; not complete sidechain UI or live latency transitions",
+      "receipt": "build/dev/20261016-174753/verification.json"
+    },
+    {
+      "scope": "Native F2/fine pan/solo/history/save after product focus fix; predatesIPC9",
+      "receipt": "build/mixer-module-native-controls-focused-dialog/process.json"
+    },
+    {
+      "scope": "Actual installed Analog Lab V and MVibratoMB withIPC9 under host execution; sandbox loader failure retained separately",
+      "receipt": "build/mixer-module-provider-ipc9-host/verification.json"
+    },
+    {
+      "scope": "Full source48/48 before subsequent bus/span safety fixes; compile211.161s/tests355.786s, not full module acceptance",
+      "receipt": "build/dev/20261016-175541/verification.json"
+    },
+    {
+      "scope": "Native postprepare layout mutation refused before DSP; malformed main spans preserve memory/cursor, real automation/aux PCM error0;16/16 affected musical/UI/MCP passes. Not graph/live/complete module qualification.",
+      "receipt": "build/dev/20261016-181122/verification.json"
+    },
+    {
+      "scope": "Actual installed Analog Lab V1619 and MVibratoMB4197 checks after native postprepare SDK layout validation; host execution48.885s",
+      "receipt": "build/mixer-module-provider-native-buses-host/verification.json"
+    },
+    {
+      "scope": "Retained active graph-PDC failure:6 tap/control cases PCM error0, unequal detector chain287samples late/error.09375.3/4 probe tests passed; graph suite FAIL, not accepted.",
+      "receipt": "build/dev/20261016-181857/verification.json",
+      "failure": "build/dev/20261016-181857/graph-failure/sidechain-graph-measurements.txt"
+    },
+    {
+      "scope": "Corrected4/4 actual native risk probes:22 graph WAVs, stereo/mono/pre-Master/RouteOnly/fader/mute/unequal/both-delayed, wholePCM error0 and independent total latency. Not live or application connection qualification.",
+      "receipt": "build/dev/20261016-184548/verification.json",
+      "measurements": "build/windows/mixer_sidechain_graph/sidechain-graph-measurements.txt"
+    },
+    {
+      "scope": "Full source49/49 including fixed graph and headless scanner ownership/parent-crash containment; compile473.454s/tests373.153s. Not complete module acceptance.",
+      "receipt": "build/dev/20261016-184802/verification.json"
+    },
+    {
+      "scope": "Actual installed Analog Lab V and MVibratoMB after fixed graph/cache/adapter snapshot;48.912s combined, exact runner/worker/provider identities. No native editor/listening/hardware evidence.",
+      "receipt": "build/mixer-module-provider-fixed-graph-host/verification.json"
+    },
+    {
+      "scope": "Active LIVE latency failure: direct baseline clean; Pattern/Song2367bad/max1280sample gap, zero overruns/heap/misses/resets and retained held MIDI/resources. Not accepted; requires history fix.",
+      "receipt": "build/dev/20261016-190450/verification.json",
+      "failure": "build/dev/20261016-190450/live-failure/dynamic-native-latency-live.txt"
+    },
+    {
+      "scope": "IPC10 packet-bound native latency/generation/consumption tags;4/5 fixed probes pass, same LIVE2367/max1280 gap remains active. Compile81.507s/tests31.972s.",
+      "receipt": "build/dev/20261016-191101/verification.json",
+      "failure": "build/dev/20261016-191101/live-failure/dynamic-native-latency-live.txt"
+    },
+    {
+      "scope": "Actual installed Analog Lab V/MVibratoMB with IPC10 packet latency;48.975s functional provider qualification, no listening/native-input/hardware claim.",
+      "receipt": "build/mixer-module-provider-packet-latency-host/verification.json"
+    },
+    {
+      "scope": "Original retained audio-history primitive independent sample-time/lifetime/heap oracles pass; not integrated graph continuity. Compile5.089s/test0.837s.",
+      "receipt": "build/dev/20261016-191620/verification.json"
+    },
+    {
+      "scope": "IPC10 app/MCP3/3 including actual plugin latency readback, history, persistence, invalid input and real async save failure; stopped-app semantics only.",
+      "receipt": "build/dev/20261016-192555/verification.json"
+    },
+    {
+      "scope": "Retained history first compile;5/6 risk probes, LIVE refused fileless ClickNode ID0 before playback. Active internal failure, not accepted.",
+      "receipt": "build/dev/20261016-194603/verification.json"
+    },
+    {
+      "scope": "25/25 isolated guarded patch/source content cases; sixth click-source target not yet included.",
+      "receipt": "build/retained-hook-check/run-20261016-194626-28b1a2/verification.json"
+    },
+    {
+      "scope": "7/7 actual graph/aux/bypass/history/publication probes; LIVE Pattern/Song PCM0, max callbacks.4749/.4974ms zero heap/overrun/miss/reset.13 control allocation faults preserve old graph/cache/PCM and next publication. Experimental/off, no full module or human qualification.",
+      "receipt": "build/dev/20261016-201113/verification.json"
+    },
+    {
+      "scope": "Broader source53/53 passes exact graph/packet/publication/musical/UI/MCP/recovery snapshot;456.509s compile/388.886s tests. Subsequent native-pan-lock/pre-pan-meter source defect remains active; no complete module/package/human acceptance.",
+      "receipt": "build/dev/20261016-201529/verification.json"
+    },
+    {
+      "scope": "Actual red own-insert/Master post-pan meter regression; current PCM silence right versus pre-pan meter. Retained before correction, not accepted.",
+      "receipt": "build/dev/20261016-203341/verification.json"
+    },
+    {
+      "scope": "Prepared channel/Mixer/Master balance, current-control reactivation and app-only native meter omission; source53/53, compile50.459s/tests395.297s. Pattern/Song1500callbacks each maxima.4197/.4067ms no overrun/heap/destruction/replacement. Not full module/human acceptance.",
+      "receipt": "build/dev/20261016-205605/verification.json"
+    },
+    {
+      "scope": "Native guarded Windows gain click/drag/history/Escape/no-history cancel/below-fader select, pan/fine, name/solo/save.16.498s; initial foreign-window refusal retained separately. Main/dialog captures opened; menu uninformative.",
+      "receipt": "build/mixer-module-native-pan-meter-fader-raised/process.json"
+    },
+    {
+      "scope": "Actual installed Analog Lab V and MVibratoMB branches49.526s after prepared balance, native-meter omission and graph safety. Exact runner/worker/provider identities; no listening/hardware/native plugin-editor qualification.",
+      "receipt": "build/mixer-module-provider-graph-publication-host/verification.json"
+    },
+    {
+      "scope": "Focused5/5 overload shared UI/MCP/discovery/actual PCM/history/fence, genuine concurrent clear, original variable-waveform direct baselines and Pattern/Song parallel graph error0. compile8.650s/tests26.712s; native reset/full-source/module gates pending. Production history OFF. Initial schema/fixture setup failures retained.",
+      "receipt": "build/dev/20261016-213326/verification.json"
+    },
+    {
+      "scope": "IPC12 editor/state/MCP focused9/9, compile225.801s/tests39.033s; actual original native attachment/lifecycle/fast repeat/deadline cases. Old timer observed-4ms failure retained; QPC strict5000ms unchanged. No current installed/editor/native-input/listening/module acceptance; later boundary/exception changes pending.",
+      "receipt": "build/dev/20261016-221456/verification.json"
+    },
+    {
+      "scope": "Latest acknowledged editors/state/MCP focused9/9,47.281s compile/49.155s tests.220 actual preparation allocation faults retain old owners and permit retry; matched control-reclaimer test cost43.62 to12.82s with exact same worker/fixture and assertions. Not full module/release.",
+      "receipt": "build/dev/20261016-224249/verification.json"
+    },
+    {
+      "scope": "Installed Analog Lab/MVibrato full native editor/API/virtual PCM/state/export step passed175.260s, actual captures inspected. MVibrato expired demo noise limitation. Later opening failure retained; original cause unrecorded, known busy-intent loss fixed separately.",
+      "receipt": "build/mixer-module-editor-providers-ipc12/verification.json"
+    },
+    {
+      "scope": "Actual Analog Lab, builtin and original external WAV Channel-name opening, real snapshot contention, pending MCP readback and stale-instance guards, Pattern/Song virtual callbacks/no lifecycle/document change. No OS pointer/listening/hardware.",
+      "receipt": "build/mixer-module-opening-busy-intent/verification.json"
+    },
+    {
+      "scope": "Guarded native focused meter click/clear-fence/continuing virtual playback and exact prior Undo/Redo PASS3.607s; captures inspected. Full controls suite NOT performed; earlier guard pauses retained. No listening/hardware/timing qualification.",
+      "receipt": "build/mixer-module-native-overload-focused/process.json"
+    },
+    {
+      "scope": "All original20 generic MIDI and4 half-open actual-player cases executed;14+2failures, with independent audioPCM pass. Production history OFF; bank successor unbuilt. Not accepted/expected pass.",
+      "receipt": "build/mixer-module-retained-midi-first/verification.json"
+    },
+    {
+      "scope": "Broader source60/61: musical_acceptance TIMEOUT120, completed stages117.554s before render; all other60 including genuine native attachment crash/minimise/manual-close passed. No full-source pass or release.",
+      "receipt": "build/dev/20261016-225119/verification.json",
+      "failure": "build/dev/20261016-225119/musical-timeout-evidence"
+    },
+    {
+      "scope": "Same exact test binary isolated render-only PASS6.033s, unchanged render assertions; diagnostic supports cumulative suite cost, does not replace failed full gate.",
+      "receipt": "build/mixer-render-timeout-diagnostic/verification.json"
+    },
+    {
+      "scope": "Pinned four-file bounded MIDI successor26/26 disposable guards23.812s; source/content/payload/predecessor/postimage/reparse/unknown preservation. No runtime claim from guard.",
+      "receipt": "build/mixer-midi-guard-tests/guard-verification.json"
+    },
+    {
+      "scope": "First successor compile FAILED ambiguous unique_ptr<Derived> fixture constructor; failed source retained, explicit unique_ptr<Node> corrected without oracle changes.",
+      "receipt": "build/dev/20261016-231449/verification.json"
+    },
+    {
+      "scope": "Focused3/3 PASS32.732s compile105.442s tests: original24 MIDI+14 admission+two closed callback cases, typed inversion safety,14 allocation failures/old configuration retention, complete musical under unchanged120s. Offline SDK workers reaped12-14ms. No arbitrary producer/CRT or production history qualification; full source next.",
+      "receipt": "build/dev/20261016-231733/verification.json"
+    },
+    {
+      "scope": "Broader61/62,386.738s compile450.727s tests; musical104.79s PASS under120. Active original Pattern waveform256bad samples/max.107364655: wet gen3/native1024 consumed before graph4 adopted (old3), nextcallbackPCM0. Directchain/Songpass, no observedheap/overrun/miss/resources. ProductionOFF; no fullsource/module qualification.",
+      "receipt": "build/dev/20261016-232046/verification.json",
+      "failure": "build/dev/20261016-232046/waveform-failure"
+    },
+    {
+      "scope": "Focused4/4 consumed-phase/MIDI/history/publication PASS compile129.463s/tests15.828s; four-callback old-root Pattern/Song PCM0. Closed stereo pair only, productionOFF.",
+      "receipt": "build/dev/20261016-235352/verification.json"
+    },
+    {
+      "scope": "Additive rapid-loop actual-worker Pattern/Song PASS compile23.866s/tests21.706s:24 consumed transitions/six actual callback-aligned loops, exactPCM0/no observed C++heap/overrun/miss/resources. All six inherited cases preserved. Broader source pending.",
+      "receipt": "build/dev/20261016-235717/verification.json"
+    },
+    {
+      "scope": "Broader62/62 PASS compile332.998s/tests451.896s; musical106.047 unchanged120s, all eight exactPCM waveform cases, SDK/state/MIDI/GUI/MCP/recovery. FreshMixercomponent opened; no newnative/listening/hardware. Distribution rehashed unchanged. ClosedPDC experiment productionOFF; module rowsnotcomplete.",
+      "receipt": "build/dev/20261016-235915/verification.json"
+    },
+    {
+      "scope": "Broader67/67 PASS compile73.013s/tests470.265s; real prepared history/Controller/macros, ready graph, serialization faults and original music/plugin/MIDI/UI/MCP. Component capture inspected; no new OS input/listening/hardware. Whole module incomplete; production PDC OFF. Prior fixture/compile failures retained.",
+      "receipt": "build/dev/20261017-010913/verification.json"
+    },
+    {
+      "scope": "Focused8/8 retained actual MIDI Pattern/Song/refusal/retry/history/save/open +12 checked UI completion/file-boundary cases, discovery/MCP and original Mixer/GUI regressions. compile90.269s/tests68.914s; no OS input/hardware/listening; broader70 pending.",
+      "receipt": "build/dev/20261017-013145/verification.json"
+    },
+    {
+      "scope": "Broader69/70 retained sampler fixture false ownership; corrected actual drag +new foreign-owner refusal4/4, preserving original live PCM/Channel/history/device oracles. Fresh sampler/Mixer images opened. Not full70/module/human acceptance.",
+      "receipt": "build/dev/20261017-014457/verification.json",
+      "failure": "build/dev/20261017-013444/sampler-failure"
+    },
+    {
+      "scope": "Actual installed Analog Lab V32.917s/MVibratoMB17.704s APIs and synthetic PCM/state, exact runner/worker/provider identities and unchanged valid input Project. Demo-quality limit retained; no OS input/hardware/listening.",
+      "receipt": "build/windows/mixer_installed_recovery/attempt-75f50db77e1244d29048b02267e6c3a4/verification.json"
+    },
+    {
+      "scope": "Actual strict structural guard subprocess matrix23/23 PASS3.426s; normal dependency chain idempotent6.573s, ten exact hashes/mtimes unchanged. Integrated exact source/vendor guards; no native/runtime qualification from guard results. First fake-workspace inherited-owner refusal retained and fixture environment corrected without guard bypass.",
+      "receipt": "build/structural-guard-check/attempt-5753f67f0ec74b37bbd9d63754a01450/verification.json",
+      "failure": "build/structural-guard-check/attempt-c01d776d343448a19dc6854ead609f95/in-progress.json"
+    },
+    {
+      "scope": "Actual context bridge compiles after narrow friend fix; corrected guard6/6 PASS0.700s. Private timeline PASS0.02s.020514 actual detached adapters3types PASS construction/discard/refusals, prepublication exactPCM/head/cadence. Adopted fresh sampler held0 and PCMmax0.105194092 FAIL; cache timer retirement diagnosed separately. No callback observed C++heap/miss/overrun. ProductionOFF; no module completion.",
+      "receipt": "build/dev/20261017-020514/verification.json",
+      "failure": "build/dev/20261017-020514/retained-context-failure"
+    },
+    {
+      "scope": "Actual stable sample Runtime+fixed native attach2/2 PASS compile13.218s/tests1.588s.64verified Pattern/live-held callbacks exactPCM0/+256head/one source+workerpacket/sameworker/device/max0.3346ms/noobserved C++heap/miss/drop/overrun. Private prepare/discard/latefailure/adoption/rebuild/stale cases pass; rawclone negative retained. Serialized original fixture only; no human/listening/general transaction claim.",
+      "receipt": "build/dev/20261017-021930/verification.json",
+      "failure": "build/dev/20261017-020514/retained-context-failure"
+    },
+    {
+      "scope": "Focused3/3 PASS compile24.659s/tests1.808s: original actual PluginNode/AuxSendNode first-init throw/samepointer retry/latency failure/retained+final teardown/default path; retained actual sample+SDK64callbacks PCM0/max0.3585ms and timeline. Current exact14target guard36/36 PASS15.442s; selector/runner29/29 PASS. Earlier header-dependency compile failures retained; no threshold change. Broader source pending.",
+      "receipt": "build/dev/20261017-022811/verification.json",
+      "failure": "build/dev/20261017-022409/DIAGNOSIS.md"
+    },
+    {
+      "scope": "Broader69/73 retained4SEGFAULT; owned unchanged-binary debugger proves stackoverflow at plugin-state entry (__chkstk), combined main571696+fixture561312 > unchanged1MiB. Exact lifecycle body isolated noninline; focused6 regression pending after25.819s compile. No module/release proof.",
+      "receipt": "build/dev/20261017-022919/verification.json",
+      "failure": "build/mixer-crash-diagnostic/attempt-d096b53de8334c73885ce1b4a50bc53e/debug.json"
+    },
+    {
+      "scope": "Narrow exact-body lifecycle extraction fixes all4 former stack failures: focused6/6 PASS25.819s compile/182.683s tests, musical104.56 under120. ActualinstalledAnalog33.963s/MVibrato17.786s pass; demo limit/nohardware/nativeinput/listening. Current full73/module not qualified; production PDC OFF.",
+      "receipt": "build/dev/20261017-024643/verification.json",
+      "providers": "build/windows/mixer_installed_recovery/attempt-af5febc31b2b471197649c0a8d929e85/verification.json"
+    },
+    {
+      "scope": "7/7 focused actual concurrent61callback graph4overlaps/allPCM0/noobservedheap/miss/overrun; effect12 actual SDK partial-packet48k/44.1k mono/stereo detector PCM+exact nativeeventcounts; canonical realController routing history/noop/refusal. compile25.923s/tests10.966s.31 selector tests PASS. No changed-document/application/installed-provider/nativeinput/listening/fullmodule claim.",
+      "receipt": "build/dev/20261017-025816/verification.json",
+      "failure": "build/dev/20261017-025608/DIAGNOSIS.md"
+    },
+    {
+      "scope": "Actual original SDK instrument component/offline Runtime, four cases at48k/44.1k; no native graph adoption/listening claim",
+      "receipt": "build/dev/20261017-030542/verification.json"
+    },
+    {
+      "scope": "Actual installed Analog Lab V31.697s/MVibratoMB17.674s; precedes newest vendor/control integration; MV demo noise limitation",
+      "receipt": "build/windows/mixer_installed_recovery/attempt-5515a273a69043b1adaeee5a07c2ac51"
+    },
+    {
+      "scope": "Strict16-target routing/selection guard source replay19 and38/38 disposable cases26.913s; not C++/runtime qualification",
+      "receipt": "build/rsg/a3baecc9/verification.json"
+    },
+    {
+      "scope": "Active C++ integration failure61.606s: EPC header nested graph type before definition; no tests ran; successor required",
+      "receipt": "build/dev/20261017-031804/verification.json"
+    },
+    {
+      "scope": "Actual routing PCM threecases, selected-delay37, Guide8/control11 and original native instrument Pattern/Song28callbacks each;15/15 focused, not full module",
+      "receipt": "build/dev/20261017-034836/verification.json"
+    },
+    {
+      "scope": "Installed Analog Lab V same-Edit graph Pattern/Song finite/nonzero/ownership compatibility;18.970s; serialized/native history batch, no exact DSP/native input/listening",
+      "receipt": "build/windows/mixer_installed_instrument_context/attempt-8e7fcd9dbb2b44e99c497a9abfcf1dd0/verification.json"
+    },
+    {
+      "scope": "45 actual workflow unit tests and real runner129complete/stable verification identities; no compiled-input/selection policy change or automatic reuse",
+      "receipt": "build/dev/20261017-034836/verification.json"
+    },
+    {
+      "scope": "Frozen send-gain18-target successor26source/37guard cases33.408s; C++/runtime/app connection still unrun",
+      "receipt": "build/mixer-send-gain-draft/guard/FREEZE.json"
+    },
+    {
+      "scope": "Actual18-target immutable-time send successor37source/40guard PASS28.784s, obsolete18 endpoints refused; integrated native/application PCM qualified separately below.",
+      "receipt": "build/mixer-send-gain-time-draft/guard-hook/FREEZE.json"
+    },
+    {
+      "scope": "Actual native send allocation-fault/lifecycle, fixed-time240/220samples bit-identical max64/256/512; six application AuxSendNode cases36callbacks each allPCM0; not full routing transaction/concurrency/export/hardware/listening.",
+      "receipt": "build/dev/20261017-040609/verification.json"
+    },
+    {
+      "scope": "Actual Song WaveNodeRealTime20callbacks3457samples everyPCM0/max0.2571ms/noobservedCPPheap, route/adopt/rebuild/stale/back; first missing internal-decoder traversal retained. Serialized/native history batch, no private app transaction/concurrency/hardware/listening.",
+      "receipt": "build/dev/20261017-041120/verification.json",
+      "failure": "build/dev/20261017-040944/verification.json"
+    },
+    {
+      "scope": "Current10/10 focused+musical PASS compile3.937s/tests121.196s musical106.19under120; stable verifier identities.45 workflow unit checks/source selector82 registrations. No full82/module/release pass.",
+      "receipt": "build/dev/20261017-041251/verification.json"
+    },
+    {
+      "scope": "Actual421.272s incremental compile;3/4 checks PASS: native publication identity, real Wave canonical route/Undo/Redo/back28callbacks4481samples0error, direct FX component. Instrument canonical route fails at cursor255->64: missed packet1 and silent first held PCM; preserve raw PCM/CSV. No production release.",
+      "receipt": "build/dev/20261017-043315/verification.json"
+    },
+    {
+      "scope": "Direct FX rows shared browse/scroll typed MCP + missing-plugin bypass/history/real persistence/invalid input/gesture refusal:4/4 PASS6.353s, cache compile4.273s, stable inputs.8 helper units PASS0.023s and46workflow units. Component1080p/4K150 captures actually opened; no real-provider/native-input/audio/listening qualification.",
+      "receipt": "build/dev/20261017-044328/verification.json"
+    },
+    {
+      "scope": "6/6 focused PASS243.141s compile/20.960s tests; exact inputs stable. Actual native lifetime/missing placeholder Pattern+Song/device refusal/full restore/owned async retry pass after retained fatal. Independent explicit2Q original instrument and four effects live/offline512/543PCM+bypass/aux/state/heap pass; default1Q production dropout still open. No full module/PDC/physical deadline/provider/listening claim.48 workflow units pass.",
+      "receipt": "build/dev/20261017-051030/verification.json",
+      "failure": "build/dev/20261017-045832/verification.json"
+    },
+    {
+      "scope": "Direct FX ordering/component/MCP434checks/SDK native editor+no-editor subset6/6 PASS13.173s compile/13.105s tests; fresh1080p/4K150 captures opened. Actual installedMVibratoMB name-click opening/reuse plus semanticclose/Controls Pattern+Song215callbacks finite/nonzero0overrun/pacing/max0.4751ms; installed componentmenu unqualified/demo+volatile state limits.50 workflow units pass, direct owned log/timing/failure receipts implemented. Not whole module/native OS input/hardware/listening.",
+      "receipt": "build/dev/20261017-052635/verification.json",
+      "providers": "build/windows/mixer_installed_effect_opening_host/attempt-1ae8fa94b7c144dfb7c8cbece6c7b4a6/verification.json"
+    },
+    {
+      "scope": "Schema20 wet/chain canonical history/XML/pure ramp and four actualSDK offline wet cases PASS; original sidechain/bypass/history/device lifetime regressions PASS.0532329of10 then0536444of5: cold coordinator cursor3.25->0diagnosed/fixed, but native selected2/newqueued3 is falsely stale; actualsuccessorroute ownership stillunderreview. No UI/MCP/coordinator enablement or fullmodule claim.",
+      "receipt": "build/dev/20261017-053644/verification.json",
+      "failure": "build/windows/mixer_routing_coordinator/attempt-25be948cbddf477a9a245ebeb127a311/verification.json"
+    },
+    {
+      "scope": "5/6 focused PASS; exact native selected witness survives newer queued graph; cold cursor3.25 retained and actual successor3 routes held sampler only to destination2, four callbacks PCM/nonzero and no observed callback heap. Wave first256 silence retained, actual cache readiness diagnostics follow. Internal coordinator not yet Studio-enabled.",
+      "receipt": "build/dev/20261017-054420/verification.json"
+    },
+    {
+      "scope": "8/8 focused PASS compile245.371s/tests58.847s stable inputs. Functional wet/chain UI and scoped recording-armed semantic gesture/history/persistence, SDK native editor and no-editor pass. Fresh1080p/4K150/chain-bypass component renders actually opened; strip typography still open. Actual capture/retained-take and musical WAV follow-on pending; no module/native OS input/listening qualification.",
+      "receipt": "build/dev/20261017-054800/verification.json"
+    },
+    {
+      "scope": "4/6 PASS, compile67.946s/tests14.143s. Scoped wet/chain stdio readback/schema, native Wave exact startup/cache diagnostics, chain model and workflow units PASS. New retained-take fixture mistook asynchronous VST preparation for terminal failure; musical Pattern/Song both51callbacks/13056frames passed but fixture compared portable sample path literally. Failures retained; no product oracle relaxed.",
+      "receipt": "build/dev/20261017-055723/verification.json"
+    },
+    {
+      "scope": "Actual MIDI capture+failed retained-take wet/chain UI/MCP six added Pattern/Song cases PASS, including cancellation/foreign target/exact-once retry/UndoRedo. New export preflight caught fixture CRLF identity comparison, actual live PCM still passed. 2/3 tests PASS, compile47.559s/tests10.615s; no export result yet.",
+      "receipt": "build/dev/20261017-060031/verification.json"
+    },
+    {
+      "scope": "Actual Pattern/Song live wet/chain plus portable-media exact-content/state roundtrip PASS. Separate export preflight refuses descriptor comparison because fresh scan timestamps differ; exact binary identity and all stable descriptor fields required in successor. Compile27.649s/tests5.173s,1/2 tests PASS. Source review retracts suspected renderer shortening: ctor extends duration by dropped latency at65 before177. No renderer change.",
+      "receipt": "build/dev/20261017-060200/verification.json"
+    },
+    {
+      "scope": "Full source93/95PASS; only retained1Q instrument route and unchanged-graph partial-packet cases fail miss+1/PCM errors with no observed callbackheap/deadline violation. Compile189.943s/tests527.394s; exact438source/binaries stable, all other musical/GUI/MCP/history/SDK cases pass. Actual current installedMVibratoMB Pattern/Song224callbacks finite/nonzero/max0.4494ms/0overrun/pacing; component name/reuse +semanticclose/Controls only, demo/volatile-state limits. Not full module/native OS input/listening.",
+      "receipt": "build/dev/20261017-061049/verification.json",
+      "identity": "build/dev/20261017-061049/post-run-identity.json",
+      "provider": "build/windows/mixer_installed_effect_opening_current/attempt-5bac5aeea0834232a391c3c63634977b/verification.json"
+    },
+    {
+      "scope": "Retained physical callback reader/epoch/budget actual framework leaf2/2PASS (compile10.019s/tests2.298s); strict guard19/19PASS21.581s and exactlive transition. Actual JUCE manager/enforcer to original SDK2Q instrument and mono/stereo auxiliary native31 effects passes3/3 (compile272.428s/tests8.398s), full startup/partial/bypass/automation/tail PCM and0miss/drop/overrun/observed callback C++heap. Production1Q/source expansion/pregraph admission/genericK/recovery/PDC stillopen.67workflowunits plus actualrunner2/2PASS reject source/binary/verifier drift; no release/nativeOS/hardware/listening claim.",
+      "receipt": "build/dev/20261017-064251/verification.json",
+      "leaf": "build/dev/20261017-064218/verification.json",
+      "guard": "build/mixer-physical-reader-guard-draft/matrix/attempt-20acaca396c545da91da026ba8c30ac9/receipt.json",
+      "sourceContract": "build/mixer-source-burst-contract-review/source-evidence.json"
+    },
+    {
+      "scope": "Studio shared routing/capture-history integration0650458of10; controlUndo interruptedMIDItake corrected0700263of4, originalMidiRecoveryPASS. Realoriginaleffect onunusedinsert1 exposes 1Q Masterhole aftereachroute/history despite retainedowners/meters and0packetmiss/drop;070313CSV/fullPCM failurekept with diagnostic-only extra callbacks. Sparse128/typedregistry/samplerPatternSong0710003of3PASS; actualstdiojob/cancel/history/invalid/save/WAV and71workflowunits0711472of2PASS, exactwrappedapp/workerbindingsstable. EntireMX-D/F/H/J/K notcomplete; no nativeOS/provider/hardware/listening or releaseclaim.",
+      "receipt": "build/dev/20261017-071147/verification.json",
+      "component": "build/dev/20261017-071000/verification.json",
+      "failure": "build/dev/20261017-070313/verification.json",
+      "pcm": "build/windows/studio_channel_routing_provider/attempt-0c7668341fb745e8b25d943faf872794/native-callbacks.csv"
+    },
+    {
+      "scope": "Compatible same-bus native FIFO retention, automatic native capture and real Save/history; not general PDC or installed/hardware/listening qualification",
+      "receipt": "build/dev/20261017-074729",
+      "result": "8/8 PASS; compilation34.222s/tests20.299s; exact input identities stable",
+      "retainedFailures": [
+        "build/dev/20261017-073209",
+        "build/dev/20261017-074150",
+        "build/dev/20261017-074444",
+        "build/dev/20261017-061049"
+      ]
+    },
+    {
+      "scope": "Opt-in prepared K3 worker/physical-scope experiment; production1Q unchanged; no native conversion/whole-graph/PDC qualification",
+      "receipt": "build/dev/20261017-075230/verification.json",
+      "result": "7/7 PASS; compilation92.515s/tests12.030s; exact input stability; original SDK literal799 PCM and11 scope/lifetime cases"
+    },
+    {
+      "scope": "Real SDK Save/close red-to-green and adjacent accepted Controls/import preservation; no OS input/audio/listening claim",
+      "receipt": "build/dev/20261017-084322/verification.json",
+      "result": "4/4PASS; compile217.360s/tests10.882s; actual disk.25/current.75, queued.625 acknowledgement, terminal outcomes; source/output clarification needs broader rerun",
+      "retainedFailures": [
+        "build/dev/20261017-083457",
+        "build/dev/20261017-061049"
+      ]
+    },
+    {
+      "scope": "Full source105/109; critical production1Q/native1-frame failures persist, dormant sample GUI refusal diagnosed; exact inputs stable. No module qualification.",
+      "receipt": "build/dev/20261017-084907/verification.json",
+      "result": "compile233.939s/tests524.909s"
+    },
+    {
+      "scope": "Dormant sample ownership/epoch/immutable binding correction and actual native selection-aware GUI fixtures;9 sampler cases exact PCM48k/44.1k plus instrument/SDK routing/GUI allpass. Not full graph/PDC/native OS/hardware/listening acceptance.",
+      "receipt": "build/dev/20261017-092253/verification.json",
+      "result": "5/5PASS; compile260.471s/tests46.587s; both identity gates stable",
+      "retainedFailures": [
+        "build/dev/20261017-091016",
+        "build/dev/20261017-091634",
+        "build/dev/20261017-091809",
+        "build/dev/20261017-091912"
+      ]
+    },
+    {
+      "scope": "Guarded LOCAL-CLOSED initial/native/SDK experiment; productionOFF; actual suffix offset7936/8192 plus next-serial musical0/literal799 PCM and device restart invalidation. No full concurrency/production/recovery/PDC/hardware/listening qualification.",
+      "receipt": "build/dev/20261017-094218/verification.json",
+      "result": "1/1PASS compile29.448s/tests8.136s; exact inputs stable",
+      "retainedFailures": [
+        "build/dev/20261017-093340",
+        "build/dev/20261017-093930"
+      ],
+      "guard": "build/mixer-local-source-guard-draft/checks/attempt-3ca73c0300374af1a2ee87625e323bd6/verification.json"
+    },
+    {
+      "scope": "Fixed-universe native Mixer identities, retained sampler/SDK Pattern/Song reorder/history, and broader shared-native regression. No CRUD/UI/route-wide PDC/module qualification.",
+      "receipt": "build/dev/20261017-095235/verification.json",
+      "result": "109/112PASS; compile489.849s/tests562.174s; both input identities stable",
+      "retainedFailures": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission"
+      ],
+      "focusedReceipt": "build/dev/20261017-094832/verification.json"
+    },
+    {
+      "scope": "Canonical Mixer order/UI/MCP/profile/skill and actual SDK output receipts; sparse native-ID offline/live continuity. Actual129 graph and first native Undo failure remain unresolved; no module qualification.",
+      "receipt": "build/dev/20261017-102409/verification.json",
+      "result": "7/8PASS; compile37.706s/tests81.500s; both identities stable",
+      "focusedReceipt": "build/dev/20261017-103123/verification.json",
+      "focusedResult": "2/2PASS compile37.089s/tests4.012s; both identities stable",
+      "nativeDiagnostic": "build/mixer-native-order-20261017-1037/process.json",
+      "retainedFailures": [
+        "build/dev/20261017-101655",
+        "build/dev/20261017-102409",
+        "build/mixer-native-order-20261017-1033"
+      ],
+      "limits": "Native diagnostic pass does not repair unexplained prior Undo failure; exact output receipts do not prove path provenance/PDC/production K/hardware/listening."
+    },
+    {
+      "scope": "Bounded Summing property-query reuse RED-to-GREEN and actual129 serial native bus Pattern/Song; no general PDC or production prepared-source qualification.",
+      "receipt": "build/dev/20261017-104429/verification.json",
+      "result": "8/9PASS; compile195.747s/tests19.422s; only LOCAL guard fixture last-family assumption fails; both identities stable",
+      "retainedRed": "build/dev/20261017-104001",
+      "guardReview": "build/mixer-summing-reuse-review/FINDINGS.md",
+      "actual129Seconds": {
+        "pattern": 1.1,
+        "song": 1.16
+      }
+    },
+    {
+      "scope": "Readability shared geometry, exact8focused checks and reproducible integrated strict source matrix; compact tick/terminal probe fixes await next broad source run.",
+      "receipt": "build/dev/20261017-105131/verification.json",
+      "result": "8/8PASS compile285.231s/tests16.163s, bothidentitiesstable; actual1080p/4K150componentPNGs opened",
+      "guardMatrix": "build/mixer-summing-integrated-matrix-direct/attempt-c903f37ea5714f429f871d219b9b8fec/receipt.json",
+      "guardCases": 17,
+      "retainedHarnessFailure": "build/dev/owned/20261017-105813-87502b5aacba/verification.json",
+      "limits": "Component images not nativeWindows/hardware/listening; new arbitrary effect API probe not yet executed."
+    },
+    {
+      "scope": "Exact broad shared-source regression; complete Mixer remains incomplete",
+      "receipt": "build/dev/20261017-105944/verification.json",
+      "result": "118/121PASS; compile349.243s/tests584.457s; input identities stable",
+      "retainedFailures": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission"
+      ]
+    },
+    {
+      "scope": "Initial two actual SDK Host membership, prepared source transport and88 workflow units; no production activation/live membership/global reservation",
+      "receipt": "build/dev/20261017-112921/verification.json",
+      "result": "6/6PASS; compile37.031s/tests25.956s; identities stable"
+    },
+    {
+      "scope": "Installed-effect bus/API readiness, not arbitrary DSP/PDC/listening",
+      "receipts": [
+        "build/windows/mixer-installed-bus-mv-host-20261017-1121",
+        "build/windows/mixer-installed-bus-ozone-host-20261017-1122"
+      ],
+      "result": "MV6/6READY; Ozone main live/offline784 native samples, four truthful aux refusals"
+    },
+    {
+      "scope": "Owned populated native capture opened; global input safely refused by user editor coverage",
+      "receipt": "build/mixer-owned-window-capture-20261017-1129",
+      "retainedFailure": "build/mixer-native-full-20261017-1123/process.json",
+      "result": "Actual2400x1410 DPI144 capture/save; no native input or listening claim"
+    },
+    {
+      "scope": "Unchanged strict callback timing diagnostic; not qualification",
+      "receipt": "build/windows/mixer-source-overhead-20261017-1131/attempt-081a49deab164bd89266b98648846ec4",
+      "result": "FAIL95.3us/20.833us; first preRemote89%, wrapper3us; no causal attribution"
+    },
+    {
+      "scope": "Stopped-effect private graph/worker and canonical snapshot planner, not public chain feature",
+      "receipt": "build/dev/20261017-114207/verification.json",
+      "result": "5/5PASS compile60.673s/tests21.206s; exact identities stable",
+      "nativeReceipt": "build/dev/20261017-114722/verification.json",
+      "nativeResult": "2/3PASS; actual effect append refused pdcStageConfiguration after57 assertions; joint PDC plan required",
+      "limits": "No graph-transition PCM, dirty native inverse Undo, public async/UI/MCP/skill completion or package qualification"
+    },
+    {
+      "scope": "Same-node original Signal diagnostic; corrected stopped fixture compilation, not transition qualification",
+      "receipt": "build/dev/20261017-115227/verification.json",
+      "result": "3/3PASS compile40.769s/tests9.432s, stable inputs",
+      "diagnostic": "build/windows/mixer-source-signal-20261017-1154/attempt-7df6ea21abd64008b85a669b3e04177f",
+      "diagnosticResult": "FAIL unchanged one-frame deadline; first130.2us with117.2us beforeSignal; exact PCM/pairing remain pass"
+    },
+    {
+      "checkpoint": "20261017-122535",
+      "requirements": [
+        "MX-B",
+        "MX-E",
+        "MX-F",
+        "MX-J"
+      ],
+      "result": "partial; complete module open",
+      "receipt": "build/dev/20261017-122535/verification.json",
+      "passed": [
+        "stereo canonical MCP/history/gesture/persistence/WAV/async failure",
+        "model/stereo DSP",
+        "immutable refused-stage native FIFO diagnostic",
+        "development workflow"
+      ],
+      "failed": [
+        "new native stereo fixture pending source replacement, correcting initial setup"
+      ],
+      "scope": "No native OS input/hardware/listening; no qualified joint PDC; no release",
+      "next": "Correct initial fixture; run added native/UI captures/batch/controller tests; bounded single-control joint compensation transition"
+    },
+    {
+      "checkpoint": "20261017-123612",
+      "requirements": [
+        "MX-B",
+        "MX-H",
+        "MX-I",
+        "MX-J"
+      ],
+      "result": "focused stereo workflow passes; module incomplete",
+      "receipt": "build/dev/20261017-123612/verification.json",
+      "nativeAudioReceipt": "build/windows/mixer_stereo_native/attempt-0971233d8e0b42ca9a163350d1ed2fcc/verification.json",
+      "componentReceipt": "build/windows/mixer_stereo_gui/attempt-ad24080eb4314c74a34bbddee46ee95b/mixer-stereo-ui.json",
+      "nativeCapture": "build/mixer-stereo-owned-window-20261017-1238b/verification.json",
+      "scope": "Independent stereo matrix/native attack release/history/semantics; five component captures and actual owned native window opened. No native OS input/hardware/listening; macro replay and automation integration pending",
+      "next": "Broader source regression, native callback phase and exact joint PDC transition. Keep all module requirements open."
+    },
+    {
+      "checkpoint": "20261017-123920",
+      "sourceCheckpoint": "b36dbaa",
+      "result": "127/131PASS, complete source run failed honestly",
+      "receipt": "build/dev/20261017-123920/verification.json",
+      "compileSeconds": 263.505,
+      "testSeconds": 633.392,
+      "inputIdentitiesStable": true,
+      "retainedFailures": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission",
+        "mixer_stopped_effect_native"
+      ],
+      "scope": "No packaging/release/hardware/listening; whole module remains open",
+      "next": "Actual macro and held-take stereo acceptance; bounded queued-PCM bridge and native callback cause"
+    },
+    {
+      "checkpoint": "20261017-125804",
+      "requirements": [
+        "MX-B",
+        "MX-H",
+        "MX-I",
+        "MX-J"
+      ],
+      "result": "6/6PASS focused actual stereo macro/held take; whole module incomplete",
+      "receipt": "build/dev/20261017-125804/verification.json",
+      "componentReceipt": "build/windows/mixer_stereo_gui/attempt-fda9765d68d34f6099d2c2988fc6d119/mixer-stereo-ui.json",
+      "actualHeldTakeReceipt": "build/windows/midi_take_recovery_gui/attempt-873a0c142baf428cbff42d87104e9c82/midi-take-studio-verification.json",
+      "scope": "Actual Studio macros and actual Pattern/Song capture UI/MCP stereo with independent note history; no OS input/hardware/listening. Exact identical component PNG inspection reused",
+      "next": "Independently review then native-qualify closed forward queue drain; actual app MIDI/inverse/general joint PDC remain required."
+    },
+    {
+      "date": "2026-10-17",
+      "requirements": [
+        "MX-G",
+        "MX-H",
+        "MX-J"
+      ],
+      "result": "6/6PASS bounded typed pan/separation automation backend; subsequent native fixture3/4FAIL retained",
+      "receipt": "build/dev/20261017-131610/verification.json",
+      "retainedFailure": "build/dev/20261017-132407/verification.json",
+      "review": "build/mixer-native-automation-clock-review/FINDINGS.md",
+      "scope": "Actual per-frame adapter/render/MCP model/history/async persistence, prior manual stereo native; new typed UI unbuilt, corrected loop fixture pending. Not module/native OS input/hardware/listening qualification.",
+      "next": "Qualify integrated UI and corrected actual native loop fixture, then joint forward-drain/phase native guard contracts; sends and touch recording remain required."
+    },
+    {
+      "checkpoint": "20261017-141544",
+      "requirements": [
+        "MX-G",
+        "MX-H",
+        "MX-I",
+        "MX-J"
+      ],
+      "result": "9/10PASS; corrected actual native automation and24case take recovery pass; workflow15s timeout retained",
+      "receipt": "build/dev/20261017-141544/verification.json",
+      "sourceCheckpoint": "bd73bb7",
+      "scope": "Pan/separation UI/MCP/history/persistence/PCM and genuine held takes; no native OS input/listening/hardware/module completion"
+    },
+    {
+      "checkpoint": "20261017-142310",
+      "requirements": [
+        "MX-F"
+      ],
+      "result": "3/3PASS bounded initial-only actual App K2/K3 original SDK experiment",
+      "receipt": "build/dev/20261017-142310/verification.json",
+      "scope": "No production1Q default change, installed-provider/recovery/export/general-membership qualification"
+    },
+    {
+      "checkpoint": "20261017-143651",
+      "requirements": [
+        "MX-K"
+      ],
+      "result": "116units actual development workflow12.30s within unchanged15s CTest",
+      "receipt": "build/dev/20261017-143651/verification.json",
+      "retainedFailure": "build/dev/20261017-143525/verification.json",
+      "scope": "Independent balanced two-process test execution with complete exact coverage; not full source/module/release qualification"
+    },
+    {
+      "checkpoint": "20261017-150555",
+      "requirements": [
+        "MX-B",
+        "MX-F",
+        "MX-G",
+        "MX-H",
+        "MX-K"
+      ],
+      "result": "3/3PASS exact initial-only source controls; full module incomplete",
+      "receipt": "build/dev/20261017-150555/verification.json",
+      "sendReceipt": "build/dev/20261017-145501/verification.json",
+      "retainedFailures": [
+        "build/dev/20261017-143844/verification.json",
+        "build/dev/20261017-150327/verification.json"
+      ],
+      "scope": "Original native VST3 PCM/history and workflow116units; no production initial-policy activation/default1Q fix, public send automation, native OS input/listening/hardware/release",
+      "next": "Broader source regression, diagnose retained failures; complete Mixer organisation and compensation dependencies"
+    },
+    {
+      "checkpoint": "20261017-150911",
+      "requirements": [
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-150911/verification.json",
+      "result": "134/139PASS compile179.973s/tests660.330s; both identities stable",
+      "failed": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission",
+        "mixer_stopped_effect_native",
+        "plugin_parameters_gui"
+      ],
+      "scope": "Four known failures reproduced; new GUI legacy editor fixture diagnosed next; no full module/release qualification"
+    },
+    {
+      "checkpoint": "20261017-154344",
+      "requirements": [
+        "MX-A",
+        "MX-B",
+        "MX-H",
+        "MX-I",
+        "MX-J"
+      ],
+      "receipt": "build/dev/20261017-154344/verification.json",
+      "result": "11/11PASS, source/verifier stable; module remains incomplete",
+      "scope": "Organisation/macros/group native controls and actual populated component captures; insert allocation/deletion, OS input/listening/hardware remain unqualified"
+    },
+    {
+      "checkpoint": "20261017-155737",
+      "requirements": [
+        "MX-A",
+        "MX-B",
+        "MX-H",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-155737/verification.json",
+      "result": "85/90PASS;26 genuine Studio take scenarios pass",
+      "failed": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission",
+        "mixer_stopped_effect_native",
+        "musical_acceptance"
+      ],
+      "scope": "Four audio/PDC failures retained plus malformed historical fixture; correction runtime pending. No module/release qualification."
+    },
+    {
+      "checkpoint": "20261017-160803",
+      "requirements": [
+        "MX-A",
+        "MX-B",
+        "MX-F",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-160803/verification.json",
+      "result": "140/144PASS; compile262.933s/tests673.825s; source/verifier stable",
+      "failed": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission",
+        "mixer_stopped_effect_native"
+      ],
+      "scope": "Corrected historical fixture/full musical,120workflow,26genuine takes, actual UI/MCP/macros and inspected fresh renders; modeled warm relocation guard diagnostic only, not adoption or full module",
+      "imageInspection": "build/mixer-organisation-render-inspection-20261017-1618.json"
+    },
+    {
+      "checkpoint": "1823a06",
+      "requirements": [
+        "MX-I"
+      ],
+      "result": "Native reorder REFUSED before musical input; not passed",
+      "receipt": "build/mixer-native-reorder-1823a06-20261017-1640/process.json",
+      "scope": "Actual interactive idle/desktop preflight, caption occluded by Chrome; protected unrelated app, graceful owned cleanup"
+    },
+    {
+      "checkpoint": "20261017-164320",
+      "requirements": [
+        "MX-I",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-164320/verification.json",
+      "result": "2/2PASS;122workflow11.11s+modulepolicy; source/verifier stable",
+      "scope": "Correct full Colour fixture/source preflight and permanent pure negatives; guards unchanged, actual native full-suite still unperformed due Chrome occlusion"
+    },
+    {
+      "checkpoint": "20261017-170050",
+      "requirements": [
+        "MX-F",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-170050/verification.json",
+      "result": "5/5PASS; compile125.677s/tests16.417s; source/verifier stable",
+      "scope": "Reviewed v2 exact successor,144 real native callbacks and4 pre-first MIDI cases,123 workflow cases; no production declarations or joint adoption"
+    },
+    {
+      "checkpoint": "20261017-170741",
+      "requirements": [
+        "MX-D",
+        "MX-F"
+      ],
+      "receipt": "build/dev/20261017-170741/verification.json",
+      "result": "3/3PASS; compile7.243s/tests11.938s; source/verifier stable",
+      "scope": "Actual original SDK forward287 insertion, all4608framePCM, private cancellation, native wet packet and selected/finished/ownership; fullQ only, not app/inverse/nativeMIDI/defaultpartial1Q",
+      "sourceMatrix": "build/zero-history-forward-guard-20261017-1710/attempt-21e8ecdc85e24e93a1b13f4438fdd449/receipt.json"
+    },
+    {
+      "checkpoint": "20261017-171100",
+      "requirements": [
+        "MX-F",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-171100/verification.json",
+      "result": "142/146PASS; compile185.365s/tests663.077s; source/verifier stable",
+      "failed": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission",
+        "mixer_stopped_effect_native"
+      ],
+      "scope": "Broader native successor plus SDK forward regression; exact same4 failures retained, no module/release pass"
+    },
+    {
+      "checkpoint": "20261017-173538",
+      "requirements": [
+        "MX-F",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-173538/verification.json",
+      "result": "14/14PASS; initial symbol-preserving compile249.745s/tests234.290s; source/verifier stable",
+      "scope": "Core owns12Tracktion implementations; consumer usage/JUCE/startup preserved; original app Release symbols retained; representative all-five-consumer source/audio/plugin/MIDI/render/UI checks only, full gate remains due",
+      "benchmark": "30.635s/five vs17.025s/one for same exact five-target graph.cpp edit workload; no general speedup claim",
+      "benchmarkRoot": "build/compile-module-reuse-review"
+    },
+    {
+      "checkpoint": "20261017-181056",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-181056/verification.json",
+      "result": "7/8PASS; compile40.106s/tests56.129s; source/verifier stable; inverse aggregate FAILED",
+      "scope": "Actual audio/MIDI port primitive passed, not application policy. Seven inverse cases ran independently: positive/post-seal refused scope, four preprepare negative passes are nonqualifying generic refusals. Original thresholds/buffers preserved; diagnose ordering and exact mutation witnesses.",
+      "retainedInitialFailure": "build/dev/20261017-180845/verification.json"
+    },
+    {
+      "checkpoint": "20261017-182034",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-182034/verification.json",
+      "result": "8/9PASS; compile118.055s/tests58.520s; source/verifier stable",
+      "scope": "All7 actual SDK inverse cases now pass with precise executed mutation checks; real port primitive passes. Actual factory MIDI ownership4/5 only: overlap NoteOn replay after adoption; no observed cancel loss, no production activation or module qualification.",
+      "previousFailure": "build/dev/20261017-181056/verification.json"
+    },
+    {
+      "checkpoint": "20261017-182602",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-182602/verification.json",
+      "result": "143/149PASS; compile14.490s/tests700.239s; source/verifier stable; six named failures retained"
+    },
+    {
+      "checkpoint": "20261017-183912",
+      "requirements": [
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-183912/verification.json",
+      "result": "2/3PASS; reproduced exact native-history-boundary delta only; no fields/oracles removed"
+    },
+    {
+      "checkpoint": "20261017-184328",
+      "requirements": [
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-184328/verification.json",
+      "result": "3/3PASS; compile41.494s/tests13.532s; source/verifier stable; original retained history/PCM checks and128workflow units pass",
+      "scope": "Existing native transaction batch prevents unrelated idle boundary closure; exact snapshots retained. Also Stage/tag selector correction and four new classification regressions. Not a full source/module/release pass."
+    },
+    {
+      "checkpoint": "20261017-190008",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-190008/verification.json",
+      "result": "10/11PASS; compile118.766s/tests63.764s; source/verifier stable; bounded6factory+6direct cases pass, legacy gate still FAIL",
+      "scope": "Explicit default-disabled retained short-MIDI Runtime; real PS isolation and local noheap/unchanged deadline/fault cases. Native guard37/69. Downstream/app audio-port/control containment not qualified; all module requirements remain open."
+    },
+    {
+      "checkpoint": "20261017-190859",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-190859/verification.json",
+      "result": "146/151PASS; compile15.627s/tests728.200s; compiled/verifier inputs stable; five retained failures",
+      "scope": "All130 workflow cases PASS14.95s under unchanged15s, bounded6factory+6direct cases and retained-context correction pass broadly. Musical106.44s/GUI36.63s. No default ingress activation, downstream/app port admission, native OS input, hardware, listening or release qualification.",
+      "failures": [
+        "mixer_instrument_context",
+        "mixer_instrument_packet_boundary",
+        "mixer_native_source_admission",
+        "mixer_app_midi_ownership",
+        "mixer_stopped_effect_native"
+      ],
+      "sourceReview": "build/mixer-app-activation-review/FINDINGS.md"
+    },
+    {
+      "checkpoint": "20261017-195624",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-195624/verification.json",
+      "result": "9/9PASS; compile43.441s/tests64.135s; source/verifier stable; whole135workflow14.06s under15",
+      "scope": "Actual7factory+2raw terminal negatives,10direct ingress,6bounded ownership,7SDKinverse and forward pass. Pure chain support passes only; actual FixedSampler/app/18insert, route-wide PDC, chain UI/MCP/native history and full module remain unqualified.",
+      "retainedFailures": [
+        "build/dev/20261017-194123/verification.json",
+        "build/dev/20261017-195503/verification.json"
+      ],
+      "toolingOverBudget": "build/development-workflow/attempt-9bdb1efc016d444899c8cdadad6f79bf/verification.json"
+    },
+    {
+      "checkpoint": "20261017-200217",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-200217/verification.json",
+      "result": "146/153PASS; compile12.983s/tests725.759s; source/verifier stable; five retained failures plus workflow15s timeout and Playlist17callback overruns",
+      "scope": "Failed broad result retained. No full source/module/package claim. Original Playlist PCM retained build/dev/retained/20261017-200217-audio-playlist-live."
+    },
+    {
+      "checkpoint": "20261017-201657",
+      "requirements": [
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-201657/verification.json",
+      "result": "1/1PASS; compile16.132s/tests12.273s; stable inputs;189live actions/no silence/zero overrun/max0.4375ms",
+      "scope": "Only additive per-block elapsed/CONTROL-phase diagnostics; original failure unexplained, not a product repair."
+    },
+    {
+      "checkpoint": "20261017-202113",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-202113/verification.json",
+      "result": "10/10PASS; compile60.075s/tests47.160s; source/verifier stable",
+      "scope": "Unused original adapter native CPU telemetry removed; overall health retained. Sampler/control/Guide/instrument/effect/bounded MIDI/ports/prepared membership/Playlist pass. Separate predeclared paired ordinary/instrumented comparison preserves PCM/heap/packets but all strict1frame gates still fail; no universal speedup."
+    },
+    {
+      "checkpoint": "20261017-202606",
+      "requirements": [
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-202606/verification.json",
+      "result": "2/2PASS; all135workflow13.76s under unchanged15s; module policy pass; source/verifier stable",
+      "scope": "Measured module partition across same two isolated workers, no tests omitted/added/retried; permanent case/module receipt timings. Outside-CTest baseline15.121s profile is not qualification. No full Mixer pass."
+    },
+    {
+      "checkpoint": "20261017-203903",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-203903/verification.json",
+      "result": "8/9PASS; compile92.306s/tests85.880s; source/verifier stable",
+      "scope": "Actual6sample/SDK Pattern/Song K2/K3 app-port cases6.61s and old initial/controls/MIDI/ports/SDK fwd+inverse pass. Only135workflow15s timeout. Default disabled; active FX/send/sidechain/joint histories/recovery unqualified."
+    },
+    {
+      "checkpoint": "20261017-204719",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-204719/verification.json",
+      "result": "5/5PASS; compile57.866s/tests24.735s; source/verifier stable",
+      "scope": "Corrected status-first short MIDI and O(messages) ledger;15independent componentcases+7nativefactory/two raw negatives9.45s,6actual app cases6.53s, bounded ownership/ingress/chain pass. Original9files formatted, native37/80 raw hashes unchanged. No audio speedup or production activation claim."
+    },
+    {
+      "checkpoint": "20261017-205507",
+      "requirements": [
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-205507/verification.json",
+      "result": "2/2PASS; complete135workflow11.33s under unchanged15s; module policy pass; source/verifier stable",
+      "scope": "Fixed3isolated light unittest processes; all original outcome/coverage checks plus third-worker cases. Sequential identical135case diagnostic17.001s/two vs11.187s/three; one workload only. Heavy builds/audio/providers/native remain serialized; broad source/package still open."
+    },
+    {
+      "checkpoint": "20261017-210120",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-210120/verification.json",
+      "result": "5/5PASS; compile46.734s/tests38.716s; source/verifier stable; active4cases6.37s plus prior source/controls/ports/full135workflow11.28s",
+      "scope": "Actual original SDK source+active affine effect Pattern/Song K2/K3; exact.125PCM,1024/1536delay, full release+Q, both Host phases/ownership/history/private cancel+adopt/heap/deadlines/refusal. Preflight corrected unsupported count read and insufficient K3 tail; no native/Host/gate relaxation. General plugin/tail/sidechain/joint histories and production remain open."
+    },
+    {
+      "checkpoint": "20261017-210841",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-210841/verification.json",
+      "result": "150/155PASS; compile263.378s/tests742.234s; exact43de2f9 source/verifier stable",
+      "scope": "Full155 native app relink and all exact cases completed. Same five retained Mixer audio dependencies fail; full135workflow11.19s/15, musical105.22, GUI37.70 and Playlist189actions/zero overrun/max0.4723ms pass. Earlier Playlist cause remains unknown. No package/native input/hardware/listening claim."
+    },
+    {
+      "checkpoint": "20261017-213300",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-213300/verification.json",
+      "result": "5/6PASS; compile71.903s/tests28.141s; source/verifier stable",
+      "scope": "Native37/83 strict replay; actual ports6.97, activeFX6.20, zeroCreation.16, full135workflow12.78, policy pass. NEW actual Pattern/Song unusedB final-queue certificate refuses (1.88s). Default global sharing is false, so missing perEdit exclusion is NOT established cause. CONTROL lineage diagnostic and explicit perEdit policy pending. Original five broader failures remain. No release."
+    },
+    {
+      "checkpoint": "20261017-214846",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-214846/verification.json",
+      "result": "5/6PASS; compile130.419s/tests28.510s; source/verifier stable",
+      "scope": "Actual sharing0 and unknown ArrangerLauncherSwitchingNode established before B certificate refusal. Other five groups pass; full135workflow11.98s/15. PerEdit policy source/instance checks pass, not claimed cause. Narrow zero-channel empty native correction and genuine populated/hidden-input negatives compile; runtime pending; no whole route or module release."
+    },
+    {
+      "checkpoint": "20261017-221137",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-221137/verification.json",
+      "result": "6/6PASS; tests32.504s; exact221005 compile19.249s reused after identity checks; source/verifier stable",
+      "scope": "Actual Pattern/Song FINAL zero-queue birth/reuse/cancel/adopt, held physical+typing, malformed control refusal/first PCM pass;33callbacks/5890frames each, PCM error0, C++new/delete0, worker miss/drop0, max.3284/.3805ms. Real native empty/populated/hidden-input negatives and old ports/activeFX/full135workflow13.73s/15 pass. Strict37/89, exact disabled native Volume predicate under app-owned immutable lineage. Earlier220051/220530 diagnostic failures retained. Whole routing/default activation and five broad failures remain open."
+    },
+    {
+      "checkpoint": "20261017-222651-223518",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-222651/verification.json",
+      "result": "5/7PASS compile69.834s/tests46.737s; native8PASS; actual joint route refuses; full135 timeout subsequently fixed by measured repartition22351813.69s/15",
+      "scope": "Exact37/92 official successor, original actual Player exchange8cases and prior app4audio groups pass. Same native source identity but actual empty-clip zero-channel internal delay blocks app source ancestry. Diagnostic223028/223235 failures retained. Exact final zero-channel predicate/MIDI negatives pending. All11module rows remain open; no release/desktop/listening claim."
+    },
+    {
+      "checkpoint": "20261017-225348",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-225348/verification.json",
+      "result": "4/6PASS compile5.370s/tests52.603s; source/verifierstable; native5zero-channel1.85s/native8exchange12.42s/appzero4.89s/full13513.84s PASS",
+      "scope": "Strict37/94, real delayed MIDI0channel queue survives cancel/adoption/retirement without audio-history certificate; warm stereo/config negatives pass. Actual joint A/B source proof now passes but native internal MIDIowner relocation refuses beforepost. Original dynamic SDK instrument4 realworker cases reach heldcapture then fixtureJUCEstate-envelope parserfails; exactstateparser correction pending. No release/listening/nativeinput claim."
+    },
+    {
+      "checkpoint": "20261017-225925",
+      "requirements": [
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-225925/verification.json",
+      "result": "Original dynamic INSTRUMENT4/4 actualHost PASS; compile41.868s/tests48.975s; source/verifierstable",
+      "scope": "Sameworker0/31/257/0 native stamps/generations, exact PCM/held+score MIDI, actualheldmode257nativecapture and newworkerrestore allpass K1/K2live/offline. Only JUCEstateenvelope testparser corrected; native24byte/version/mode/gain oracle unchanged. DirectHost/SDK notappPDC/race/physical/listening; partialdefault1Q retainedfailure notqualified. Wholemoduleopen."
+    },
+    {
+      "checkpoint": "20261017-230236",
+      "sourceCheckpoint": "9a0500a",
+      "result": "154/160 PASS; six active failures retained; no release",
+      "receipt": "build/dev/20261017-230236/verification.json",
+      "compileSeconds": 245.8124303999939,
+      "testSeconds": 778.872,
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "next": "Integrate reviewed stream PCM capture and stable per-Track MIDI source drafts, then affected actual SDK/native tests; keep complete MX-A..K checklist."
+    },
+    {
+      "checkpoint": "20261017-232510",
+      "requirements": [
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-232510/verification.json",
+      "result": "6/6 PASS; actual optional stream PCM five SDK cases; source/verifier stable",
+      "scope": "Live2Q and offline1Q fast/automation exact PCM/receipt equivalence; pending instrument refusals preserve actual queues/native result. Live21calls/2496frames each, C++new/delete0, max0.0096ms; existing receipt/dynamic-instrument/bypass/activeFX/full135 workflow pass. Not source fence/dynamicPDC/physical/listening/module release."
+    },
+    {
+      "checkpoint": "20261017-235642",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261017-235642/verification.json",
+      "result": "9/10 PASS, all9 product/audio checks; complete135 workflow TIMEOUT15.06s at37/101 retained",
+      "scope": "Actual Pattern/Song each54callbacks11517frames exactPCM, sameworker/device/capture, realnativeinbox/cancel/adopt/UndoRedo/hiddenLauncher refusal. Warm native paired untouched/refused branch exact512/576 passes; latechildfault blockscompletion. Sourceclock duplicate512 correction preservesliteral score oracle. Max0.3738/0.4277ms C++new/delete0. Nativeordinary source/default context and broadsource regressions pending. Not fullMixer/release/listening.",
+      "next": "Qualify native context fixture and source epoch fence; measured fresh ancestor/path guard-cost fix, full135/15s then broader source regressions."
+    },
+    {
+      "checkpoint": "20261018-002508",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-002508/verification.json",
+      "result": "3/3 PASS; four source/default context cases, four actual source-fence SDK cases, full135 unchanged15s",
+      "scope": "Initial-only fence: Pattern/Song19callbacks3839frames and pending20/4095 exactPCM new/delete0 max0.3127ms; known257/gen2 beforeinput refusal retains worker/dirtyheldstate and no completion. Actual mixed0/31 segments reject1; pending consumedrace unobserved. Pure lexical fresh-inspection cost and DSP-history/waveform selector corrections verified; failures001727/001856/002404/001355 retained. No production activation/release/listening.",
+      "next": "Checkpoint then exactfull165 source regression; retain/resolve failures, continue all MX-A..K."
+    },
+    {
+      "checkpoint": "20261018-003007",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-I",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-003007/verification.json",
+      "result": "160/165 PASS; five retained failures, no new regression; source/verifier stable",
+      "scope": "Exactb1e17c3, compile259.473/tests820.998; musical104.51/gui37.25/livePlaylist and new source/fence/MIDI pass. Initial joint route fixed; ordinarymixedPDC/default1Q/1frame/legacyMIDI/stoppedFX stillFAIL. Fresh1080p/4K150 component PNGs opened; no OS/hardware/listening.",
+      "next": "Continue exact active audio dependencies and practical chain workflow; no subset packaging."
+    },
+    {
+      "checkpoint": "20261018-005246",
+      "requirements": [
+        "MX-E",
+        "MX-H",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-005246/verification.json",
+      "result": "3/3PASS; actual filejobs0.70s +chain_data/full13513.40s; source/verifier stable",
+      "scope": "Real atomicoverwrite/renamefailure/roundtrip/errors/capacity/32actualcancels/directory/forget/drain. Filetest005019 append-buffer fixture failure retained; corrected onlyfive independentreads. No nativecapture/UI/MCP/Paste/audio qualification.",
+      "next": "Integrate reviewed sharedStudioUI/MCP source and actualSDK acceptance, preserve open fullMX-E/native replacement/PDC requirements."
+    },
+    {
+      "checkpoint": "20261018-installed-host-current",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-K"
+      ],
+      "receipt": "build/windows/mixer-installed-bus-mv-host-20261018-current/process.json; build/windows/mixer-installed-bus-ozone-host-20261018-current/process.json",
+      "result": "Actual semantic readinessPASS:MV6/6; Ozone2mainPASS+4explicitauxrefusals",
+      "scope": "SuitableDefaultdesktop preflight, actualVST3/worker/state/catalogue/finitePCM/bypass readiness; exactinputs stable. MV21.632s/native0;Ozone9.529s/native784. Not detectorfidelity/routePDC/tails/restore/realtime/nativeinput/listening/hardware.",
+      "next": "Qualify shared Studio/UI/MCP chain workflow; keep five fullsource audiofailures active and allMX rows open."
+    },
+    {
+      "checkpoint": "20261018-010217",
+      "requirements": [
+        "MX-E",
+        "MX-H",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-010217/verification.json",
+      "result": "8/8PASS; source/verifier stable; compile299.798s/tests24.295s",
+      "scope": "Integrated shared Copy/Save/loadClipboard/directory/job/cancel UI/MCP. Original SDK actual state/files/cancel/stale/history/no reset component2.48s; slots GUI+externalMCP and full135 pass. Not externalstdio chain/native input/playback PCM/Paste/module release.",
+      "next": "External stdio chain acceptance then continue active audio dependencies and complete MX-A..K."
+    },
+    {
+      "checkpoint": "20261018-011847",
+      "requirements": [
+        "MX-E",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-011847/verification.json",
+      "result": "13/15PASS; compile14.044s/tests183.010s; exact source/verifier stable",
+      "scope": "Musical/GUI/history/slots/SDK chain pass; retained old25toolcount and raw48 envelope verifier defects. Actual1920/3840 componentPNG opened; stale capturestatus corrected awaitingrerun. 011758 compilefailure retained. Not native input/audio/listening/Paste/module release.",
+      "next": "Correct bounded envelope parser then focused actual externalstdio/status acceptance; continue finite sample baseline and allMXrequirements."
+    },
+    {
+      "checkpoint": "20261018-012947",
+      "requirements": [
+        "MX-E",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-012947/verification.json",
+      "result": "8/8PASS; source/verifier stable; compile97.619s/tests35.798s",
+      "scope": "Actual SDKseed+externalstdio5.27s: realnativeCopy/presetfiles/negativeasync/acceptedcancel/Redo/projectreopen/retainedjobs. ActualPNG opened visiblyfixedterminalstatus. Exactstrict canonical+wire errors. Not PCM/nativeinput/installedchain/Paste/fullmodule.",
+      "next": "Finalexplicitobject-rootmetadata rerun, then finitebaselineactualPCM/ownership and completeMX-E/F."
+    },
+    {
+      "checkpoint": "20261018-013943",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-013943/verification.json",
+      "result": "16/17PASS; compile311.485s/tests103.373s; source/verifier stable",
+      "scope": "Finalobject-root+actualSDKstdio/UI/presets andexisting source/fence/MIDI/joint/activeFX/forwardinverseSDK pass. Newfinite Pattern/Song BEFOREgraphFAILnativeMidi.closedScope. ManagerGlobal bypassrejected byfullcallbacksourceaudit; genuineLOCALsampleNativeSession next. Noaudio/no-lock/module qualification ofnewexperiment.",
+      "next": "Review/integrategenuineLOCALsampleauthority, actualallPCM/ownership/lifecycle tests, then broadersource and actualfinite FXappend/inverse."
+    },
+    {
+      "checkpoint": "20261018-020715-and-021312",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-020715/verification.json",
+      "result": "15/16PASS; actual finite eight cases PASS17.87s; retained workflow timeout; corrected partition0213122/2PASS full13514.75s",
+      "scope": "Genuine real sample-owned LOCAL session, exactallPCM/cancel/adopt/MIDI/fullQ1-257refusal/endfailure/devicefence; private defaultOFF, no append/inverse/upstream-lock/listening qualification. Existing session/source/chainstdio pass. No release.",
+      "next": "Broader169source exact checkpoint; implement reviewed finite owner/finished-stage handoffs and fix all retained actual audio defects."
+    },
+    {
+      "checkpoint": "20261018-021511",
+      "requirements": [
+        "MX-A",
+        "MX-B",
+        "MX-C",
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-G",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-021511/verification.json",
+      "result": "164/169PASS source25a2577; compile11.900s/tests854.568s; exact inputs stable",
+      "scope": "All added sourcefinite/chain workflows pass; broader original five audio integration/timing failures reproduce, no additional failure. Fresh populated1080/4K150 component images actually opened. No desktop/hardware/listening/module release claim.",
+      "next": "Finish reviewed native finite continuation prerequisite, focused compile/actualoracles, then actual app permit/Runtime handoff/UndoRedo and retained MIDI/default-route/packet/timing failures."
+    },
+    {
+      "checkpoint": "20261018-051525-production-source-recovery",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-H",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-051525/verification.json",
+      "result": "3/3PASS; compile54.765s/tests11.359s; exact compiled/verifier inputs stable",
+      "scope": "Ordinary3Q managerGlobal staged production transport: actual Pattern/Song packet PCM0/no observed heap/miss/drop; actual same-format epoch/newest .375 capture; actual postcommit CONTROL throw then same-worker warm .8125/native callback recovery without device reset; actual original SDK timeout/crash and source-active/nonzero-output. Source-only backend, not full UI/MCP/native input/hardware/listening/general route-PDC/module qualification. 050112 receipt-folder and050637 strict engineering timeout;051216 async fixture and051359 busy-retirement failures retained.",
+      "next": "Checkpoint ordinary prepared3Q source/session and actual dirty-device/worker/postcommit recovery integration; run exact broader shared-infrastructure full source regression. Then production baseline output/track-MIDI/root provenance and canonical route/UndoRedo whole-inventory queue handoff; close strict physical deadline/stoppedFX transition and all MX-A..K before one module release. No validator bypass, fixed-state privilege, buffer/deadline/oracle relaxation or subset release."
+    },
+    {
+      "checkpoint": "20261018-051834",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-051834/verification.json",
+      "result": "157/170PASS sourcec05b4d5; compile280.007s/tests833.492s; exact inputs stable/no skips",
+      "scope": "13 failures retained, including undeclared synthetic-provider fixtures before projection, deliberate1Q phase-pair gap and real fresh no-device-worker/editor retention regression; route/PDC/strict deadline still fail. Packet/device/postcommit/worker recovery, musical/GUI/Browser/current MCP readback/full135 pass in scope. Not module/source/package qualification.",
+      "next": "Correct exposed provider fixture bounds; explicitly extend prepared3Q phase-pair admission and preserve a fresh never-processed native worker/editor on first same-format device startup. Run original PCM/held/history/recovery cases and broader shared-source regression. Then finish production route/PDC, strict deadline/stoppedFX and all MX-A..K. Full051834157/170 retained, not qualified; no subset release."
+    },
+    {
+      "checkpoint": "20261018-054630",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-054630/verification.json",
+      "result": "16/16PASS; preflight7.138s/compile336.817s/tests141.243s; exact compiled/verifier inputs stable, no skips",
+      "scope": "Actual original-SDK same-format fresh worker/editor reuse; explicit prepared3Q phase-pair latency/waveform with literal768 app oracle and unchanged legacy1Q; opening, source/worker/device recovery, lifetime, save, live/export, MCP and parameter UI pass. Full13511.66s/15. No native OS input/installed-provider/hardware/listening/module/package qualification.",
+      "next": "Checkpoint focused05463016/16 startup/prepared3Q/fixture integration; run broader shared-source regression. Then finish production ordinary route/PDC provenance and joint handoff, strict physical deadline/stopped-FX transitions and all MX-A..K before one module release. Dist0.0.63 remains unchanged; no subset release."
+    },
+    {
+      "checkpoint": "20261018-055548",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-055548/verification.json",
+      "result": "166/170PASS source3a3f926; compile30.181s/tests846.250s; exact inputs stable/no skips",
+      "scope": "Four retained failures: instrument route continuity, strict physical deadline, stopped-FX baseline setup and different-format device prep. Startup regression traced to optional promotion refusing owned async replacement on later poll; minimal correction pending qualification. Musical/Browser/GUI/dynamic/startup/source/device/worker/chain/MCP/parameter cases pass in scope. Not module/package/hardware/listening qualification.",
+      "next": "Verify minimal optional-promotion polling correction with actual different/same-format device preparation, capture/fault/recovery/readbacks. Then finish ordinary route/PDC, strict physical deadline, stopped-FX and all MX-A..K. Full055548166/170 retained, not qualified; no subset release."
+    },
+    {
+      "checkpoint": "20261018-061200",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-I",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-061200/verification.json",
+      "result": "13/14PASS; compile42.272s/tests72.455s; exact inputs stable",
+      "scope": "Different-format replacement polling correction passes actual capture/callback exception/retry/readback and same-format editor retention, recovery/save/MCP/live-export. Dynamic-latency Song timing failed4 callbacks max10.0385ms/5.333ms despite PCM0/heap0/miss-drop0/resources-held-head preserved; cause unresolved. All9CSV/text traces copied to build/mixer-dynamic-latency-failure-061200. No full/source/module/package/hardware/listening qualification.",
+      "next": "Attribute retained061200 four Song callback overruns (5.333ms deadline,10.0385ms max) before changed timing experiment; do not infer environment or retry unchanged to green. Ordinary route/PDC and stopped-FX baseline remain unfinished; complete all MX-A..K and full source/package gates. Different-format startup fixed and original same-format/editor/recovery/readbacks pass13/14 focused. Dist0.0.63 unchanged."
+    },
+    {
+      "scope": "Internal canonical source membership + corrected native-reader quiescence, real four-case SDK cancellation, actual provider continuity fixture repair, ordinary observing ports and render policy-first construction. Full070732166/171 retained; owned073932 musical110.483sPASS but3startupFAIL; corrected0745002/3PASS reaches original799PDC refusal.17source guard casesPASS; no module/PDC/listening/hardware/native-input/package qualification. All MX-A..K required/open.",
+      "receipt": "build/dev/owned/20261018-074500-a0a4c03e8d90/verification.json",
+      "fullSourceReceipt": "build/dev/20261018-070732/verification.json",
+      "renderComparison": "build/mixer-render-worker-runtime-20261018/comparison.json"
+    },
+    {
+      "checkpoint": "20261018-081641-forward-group-internal",
+      "requirements": [
+        "MX-A",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-I",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-081641-46c6529a069e/verification.json",
+      "result": "6/6PASS37.58s; focused model/component/stdio and original SDK/native forward/inverse fixtures",
+      "scope": "Shared group member stored-colour/theme0 action, exact selection/marker/routes/history/cancel/macros/project roundtrip. Fresh component1080/4K150 images opened. Actual ordinary forward reaches217assertions then inverse preparation refuses pdcForwardOneShot in owned081153; no graph PCM or whole Undo/Redo claim. Native host check refused obscured caption before input, app exited0; retained under build/mixer-group-colour-native-acceptance-20261018. All MX-A..K remain open; sole qualified dist0.0.63 preserved.",
+      "next": "Finish actual ordinary forward PCM and inverse/fresh Redo, then retained routing/deadline/timing defects and full module requirements; no miniature release."
+    },
+    {
+      "checkpoint": "20261018-082711-ordinary-forward-independent-pcm",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-082711-47767f0f317b/verification.json",
+      "semanticReceipt": "build/windows/mixer_stopped_effect_ordinary_forward/attempt-41bc7283c86442049e8f5e16498d6a85/verification.json",
+      "result": "New actual original SDK ordinary forward oracle PASS9.05s; compile66.358s;31selector testsPASS",
+      "scope": "Stopped held-sample Pattern/Song projection22callbacks/5632frames each; signed source(t-799) error0 across discard/cancel/append/drain/finalbankACK, observed C++new-delete/overruns/missing/dropped0; maxima.3657/.3498ms at unchanged5.333333ms. Root health now checked after actualclose/admission. Prior0820527/8PASS retains inverse217failure. Wrong String review caused082316compileC2228; reverted against authoritative constchar* and corrected review retained. No arbitraryFX/inverse/Redo/playing-transport/nativeinput/listening/fullmodule/package qualification.",
+      "next": "Complete generic effect removal from actual Host dry history/bypass fade and native finished-forward continuation; no finite-only definition of public Undo. Preserve all required MX-A..K and sole qualified dist."
+    },
+    {
+      "checkpoint": "20261018-100838-actual-removal-undo",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-H",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-100838-63c95829910b/verification.json",
+      "result": "7/8PASS74.47s, no skips; incremental compile71.931s; exact source guard17casesPASS",
+      "scope": "Actual ordinary signed799 stopped held-sample Pattern/Song append/Undo/removal/dry/finalbank/workerexit passes; original fullnative now passes Host expiry and fails261 on fresh Redo. Original SDK/provider fixtures only, not installed-provider/playing/nativeinput/hardware/listening/fullsource/module/package qualification.",
+      "next": "Implement actual same-D dry-to-fresh Redo join, retaining old dry during genuine fresh worker startup; then unchanged full history/independent PCM/failure checks. Complete all MX-A..K and retained defects before one module release."
+    },
+    {
+      "checkpoint": "20261018-structural-chain-lifecycle-reopen",
+      "requirements": [
+        "MX-A",
+        "MX-E",
+        "MX-H",
+        "MX-J",
+        "MX-K"
+      ],
+      "receipt": "build/dev/20261018-133013/verification.json",
+      "result": "Full170/175,23.763s incremental compile/975.322s tests; compiled/verifier identities stable. Focused actual native lifecycle+stdio2/2,29.23s; other focused organisation/model/CopySave5pass.",
+      "scope": "Actual playing Create/route/Delete/UIUndo/MCPRedo, strict reference refusal; initial-no-device reopen old-Host cleanup; copied/occupied multi-slot chain/Replace/history, deliberate10s activationTimeout and returning-callback recovery. Five full failures retained; no module/package/nativeinput/listening/hardware qualification."
+    },
+    {
+      "checkpoint": "2026-10-18 integrated detector and controller focused batch",
+      "requirements": [
+        "MX-A",
+        "MX-D",
+        "MX-E",
+        "MX-G",
+        "MX-H",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-142403-577751f975e4/verification.json",
+      "result": "5/6 in89.28s; actual detector stages pass, later direct-MCP device-loss exception FAIL retained",
+      "scope": "Mono/stereo/clear/realSDK/history/unsupportedbus/refusal/save/aux-onlyWAV; independentgraph/transport andchainMCP. No exactmodule/package/nativeOS/listening/hardware qualification."
+    },
+    {
+      "checkpoint": "2026-10-18 default-path latency and public send workflow",
+      "requirements": [
+        "MX-D",
+        "MX-F",
+        "MX-G",
+        "MX-H",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-150915-9298ce1dfa60/verification.json",
+      "result": "6/11 in105.46s; all actual default latency live stages pass, later portable save fixture fails; actual automation stdio passes",
+      "scope": "Exact production automatic native0/1024/31/257/0 and held/bypass steady PCM, normal deadlines/heap. First evidence retained. No whole module/package qualification."
+    },
+    {
+      "checkpoint": "2026-10-18 current-state structural recovery and ordinary send lifetime repair",
+      "requirements": [
+        "MX-D",
+        "MX-E",
+        "MX-F",
+        "MX-G",
+        "MX-H",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-155119-be76c4c189be/verification.json",
+      "result": "PASS3/3 in61.49s; SDK all16 application stages; original bounded slot lifetime regression",
+      "scope": "Installed probe155247 additionally PASS6204callbacks; older ordinary timing failure retained, no attribution claim. No full source/module/package/nativeOS/listening qualification."
+    },
+    {
+      "checkpoint": "2026-10-18 pending native timer routing handoff and inspected Windows full acceptance",
+      "requirements": [
+        "MX-A",
+        "MX-B",
+        "MX-C",
+        "MX-D",
+        "MX-H",
+        "MX-I",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-160659-1119d350d0d0/verification.json",
+      "result": "Full guarded native controls/group/reorder/overload PASS33.08s; named and active-playback captures opened",
+      "scope": "Exact pre-touch/scalar dev application; current new B integration still unqualified. No listening/hardware/human familiarity proof."
+    },
+    {
+      "checkpoint": "2026-10-18 practical native scalar and recording recovery qualification",
+      "requirements": [
+        "MX-B",
+        "MX-E",
+        "MX-G",
+        "MX-H",
+        "MX-J"
+      ],
+      "receipt": "build/dev/owned/20261018-170600-8e14610ce991/verification.json",
+      "result": "ActualAnalogLabPASS3536callbacks0overruns,max.5021ms; actualnativeendpoints and Save/reopen; earlierSDK+heldMIDI+MCP165602PASS3/3,21.97s",
+      "scope": "Fixed8fill/64steady perUndo/Redo/reopen:0additionalmiss/drop/MIDIoverflow/parameterrejection, currenttransporthealthy. No listening/hardware/nativeOS-input or exactmodule/package claim. Historical failures preserved."
+    },
+    {
+      "path": "build/dev/owned/20261018-174303-d02d3392fad5/verification.json",
+      "result": "focused6/9passed; remaining native-control-only gap and later GUI predecessor admission; notfullqualification",
+      "scope": "Two original MIDI ownership cases pass at original30s limits8.09/26.15sec; historic timeouts retained/unattributed. Production send ProcessState, actual app port timeline and native modal menu tests pass."
+    },
+    {
+      "scope": "Focused4 PASS GUI workflow, latency/editor MCP and real no-device?device candidate lifecycle; no installed/full module/package claim.",
+      "receipt": "build/dev/owned/20261018-182518-b935f066baad/verification.json"
+    },
+    {
+      "scope": "Current full nativeWindowsPASS33.56s includes original overloadreset after genuinecurrentSampler callback witness; exactapp38e38828.., unchangedOSactivity/PID/deadlineguards. Freshscreenshotsinspected; nothuman/hardware/listening.",
+      "receipt": "build/mixer-ipc14-native-source-ready-20261018/process.json"
+    },
+    {
+      "scope": "User-requested selected-strip highlight, canonical editor-close second insertion, native Master two slots and actual attenuated rendered PCM: currentIPC16 affected13/13 PASS117.70s; stopped-path fallback9.62s. Native Windows fullPASS34.33s with guards; installedAnalogLabV+MVibratoMB wrapper same-instance views/close/state/exportPASS39.83s. Inspected1080p/4K150 and six actual native-effect renders. Not full-source/module/package/listening/hardware qualification.",
+      "receipt": "build/mixer-native-workflow-20261019/current-focused-verification.json",
+      "sha256": "cedf523533bd912020068eb8b70cf93779c186aac085ff96d4e60bcb832fbf22"
+    },
+    {
+      "scope": "Exact final source and installed-provider workflow qualification; native OS input refused, module/package not qualified",
+      "receipt": "build/mixer-native-workflow-20261019/final/verification.json",
+      "sha256": "24145036aaa977da7814d2735cfe51ffbdbd944dd9c6625d073e3682acd0bf48"
+    },
+    {
+      "scope": "Global Last tweaked canonical UI/MCP jobs, newer native gesture refusal, same-wrapper selection and held MIDI/graph/device retention; focused11/11 groups and exact installed Analog Lab V/MVibratoMB pass. Native F2 attempt fixture-layout failure retained, no module/package/human qualification.",
+      "receipt": "build/wrapper-completion-20261019/verification.json"
+    },
+    {
+      "scope": "Full actual native Mixer passes34.29s with exact app7315c1d0, unchanged OS/PID/cursor/deadline guards and literal Latin rename/history oracle. Corrected fixture-only Unicode SendInput under active Arabic layout; prior4.27s failure retained. Fresh native screenshot inspected; no listening/hardware/module release claim.",
+      "receipt": "build/windows/wrapper-global-desktop-unicode-20261019/process.json"
+    },
+    {
+      "scope": "Current complete source190/190 PASS; zero skips; compiled and verification inputs stable.27.036s incremental compile,1080.015s tests.164 development cases11.80s under unchanged15s. Exact app7315c1d0/worker0f75199a match current installed41.63s and full native34.29s passes. Inspected fresh1080p and4K150 component renders. No full module/package/listening/hardware qualification.",
+      "receipt": "build/dev/20261019-142931/verification.json"
+    },
+    {
+      "id": "wrapper-native-main-io-20261019",
+      "scope": "Typed worker Settings native input/output/mapping, durable canonical UI/MCP parent/child, exact worker closure/replacement/history/no-op/errors/cancellation. Focused11/11 PASS121.24s; actual installed MVibratoMB mono/stereo Undo and nonzero WAV PASS61.88s; input identities stable. DPI-aware843x768 real worker client render opened. No native global input/listening/hardware/current full-source/module/package qualification. Retained compatibility/no-op/peer/capture failures.",
+      "receipt": "build/wrapper-settings-20261019/verification.json"
+    },
+    {
+      "id": "wrapper-containing-chain-20261019",
+      "scope": "Focused12/12 current, exact installed chain/state/WAV PASS76.33s, actual native Mixer PASS34.30s and inspected real charcoal wrapper client; new Copy/directory Cancel exercised in native/editorless Pattern/Song. No full-source/module/package/listening/hardware claim.",
+      "receipt": "build/wrapper-chain-20261019/verification.json"
+    },
+    {
+      "id": "wrapper-ipc19-full-failure-20261019",
+      "receipt": "build/dev/20261019-163404/verification.json",
+      "scope": "189/190 source; only actual native wrapper wet/dry fails. Stable compiled/verifier inputs, unchanged deadlines; failure retained and source repair under qualification. Not a module/package pass."
+    }
+  ],
+  "acceptancePolicy": {
+    "userDirection": "2026-10-18",
+    "scope": "Existing Mixer workflows frozen; no unrelated additions",
+    "ordinaryPlayback": "Smooth supported playback edits/history/UI required",
+    "structuralOperations": "Brief bounded interruption accepted with automatic recovery, correct state/routing/PDC/history, recording integrity and truthful outcomes",
+    "timing": "Actual outer callback deadlines; retain literal synthetic stress timing, never reinterpret as internal or apply a time floor",
+    "classification": "A correctness/ordinary playback and B missing required workflow block release; C accepted structural limitations/deferred optimization do not"
+  },
+  "remainingWork": [
+    {
+      "id": "A-provider-monitoring-admission",
+      "category": "A",
+      "status": "verified",
+      "work": "Genuine fixed-provider bounds and async structural Undo fixture completion corrected. Actual full installed plugin-check and18 affected provider branches pass; current exact full184 source, native and installed scalar recovery pass. Original failed final package and transient editor timeout retained.",
+      "evidence": "build/module-qualification/mixer-provider-affected-20261018.json"
+    },
+    {
+      "id": "A-current-source-regressions",
+      "category": "A",
+      "status": "verified_source",
+      "work": "Current191-case composite qualification, fresh changed-app and exact unchanged other-executable case origins plus current native/provider evidence pass. Exact staging/final remain separately required.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "id": "B-exact-release",
+      "category": "B",
+      "status": "verified_release",
+      "work": "Exact source/provenance/staging/final/native and one-folder software gates passed. Human checks remain separate.",
+      "evidence": "build/module-qualification/mixer-ipc19-release/verification.json"
+    },
+    {
+      "id": "A-native-master-insertion",
+      "category": "A",
+      "status": "verified_source",
+      "work": "Native graphs and Master explicitly choose supported full structural replacement before claiming fast-path workers. Exact native descriptor/spoof/cancel/fallback ownership checks pass9.62s. Actual MCP two-slot Master insertion, scalar history, save/reopen and PCM attenuation pass. Native stopped fast-path PDC remains an accepted unsupported optimization, not a seamless fix.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "id": "B-multiple-effects-open-editor",
+      "category": "B",
+      "status": "verified_source",
+      "work": "Canonical plugin.effect.insert closes and drains exact owned idle editor ACKs before current-state capture and publication. Actual first-editor-open second-slot insertion passes, preserving order/state/history/save/reopen and strict scalar-owner refusal. Up to16 slots remain supported; other structural actions retain their stated editor prerequisites.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "id": "B-mixer-effects-visuals",
+      "category": "B",
+      "status": "verified_source",
+      "work": "Clear teal active-strip fill/outline, original responsive native rotary cards/EQ faders/real output meters implemented. Fresh current Mixer/EQ/Balance component captures actually opened; current musical/model/MCP checks pass. Earlier1080p/4K150 and guarded desktop evidence remains retained; exact-current native desktop/scaling remains unqualified. Meters report notProcessed/unsupported honestly.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "id": "B-unified-wrapper-completion",
+      "category": "B",
+      "status": "verified_source",
+      "work": "Current191-case composite qualification, fresh changed-app and exact unchanged other-executable case origins plus current native/provider evidence pass. Exact staging/final remain separately required.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "id": "A-wrapper-independent-ack",
+      "category": "A",
+      "status": "verified_source",
+      "work": "Current191-case composite qualification, fresh changed-app and exact unchanged other-executable case origins plus current native/provider evidence pass. Exact staging/final remain separately required.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "id": "A-installed-native-control-startup",
+      "status": "verified_source",
+      "classification": "A",
+      "work": "Current191-case composite qualification, fresh changed-app and exact unchanged other-executable case origins plus current native/provider evidence pass. Exact staging/final remain separately required.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "id": "A-full-structural-note-reset",
+      "category": "A",
+      "status": "verified_source",
+      "work": "Current191-case composite qualification, fresh changed-app and exact unchanged other-executable case origins plus current native/provider evidence pass. Exact staging/final remain separately required.",
+      "evidence": "build/module-qualification/mixer-ipc19-current/verification.json"
+    }
+  ],
+  "acceptedLimitations": [
+    {
+      "id": "C-transitions",
+      "category": "C",
+      "status": "accepted",
+      "limitation": "Brief bounded audio interruption for plugin/state/preset/chain/history/device/routing/latency structural changes; universal unrelated-route continuity, perfect crossfades and arbitrary tail preservation across replacement are not required. Not technically fixed; correct resumed output/history and safety still required. Current all-worker native state capture can briefly interrupt structural operations; it remains an accepted optimization opportunity. Save/export always require current native state, never stale cached restoration."
+    },
+    {
+      "id": "C-one-frame-stress",
+      "category": "C",
+      "status": "deferred_qualification",
+      "limitation": "Retained actual synthetic OUTER1 at configured256/unadvertised1 misses20.833us stress deadline. Keep exact PCM/heap/scopes/packets and literal rows; all other physical-shape deadlines remain strict. No backend size removed or global minimum invented; genuine supported1-frame hardware cadence remains unqualified.",
+      "evidence": "build/mixer-one-frame-classification-20261018/FINDINGS.md"
+    }
+  ],
+  "historicalBlockers": [
+    {
+      "requirement": "MX-F",
+      "kind": "internal_required_work",
+      "reason": "A/B required work: retained ordinary256 Song timing overruns, general structural recovery and missing chain Apply/Replace/organisation/routing/automation workflows. Analog Lab initial projection refusal was fixed fixture bound omission, not plugin incompatibility. Universal seamless structural transitions and unadvertised synthetic outer1 stress timing are C, not blockers.",
+      "evidence": "build/dev/owned/20261018-115915-3484bebb8511/verification.json; build/mixer-one-frame-classification-20261018/FINDINGS.md; build/mixer-product-workflow-assessment-20261018/FINDINGS.md",
+      "next": "A: diagnose actual installed Analog Lab projection refusal and verify revised physical-cadence test without losing historical failure. B: implement owned canonical destination chain Paste/preset Apply/single-slot Replace through existing safe full-projection path with bounded recovery, real async outcomes, current state/history and recording safeguards. Preserve completed optimized paths; no seamless-certificate expansion. Full source/staging/final at stabilized module candidate."
+    },
+    {
+      "requirement": "MX-I",
+      "kind": "external_native_environment",
+      "reason": "Guarded actual host rerun163732: ChromePID12156 occludes owned caption; no musical input, app exited normally.",
+      "evidence": "build/mixer-native-reorder-1823a06-20261017-1640/process.json",
+      "next": "Full-verifier menu fixture is corrected and source-checked. Rerun native input only when owned app can activate under unchanged safeguards; continue independent engineering."
+    }
+  ],
+  "candidateVersion": "0.0.64",
+  "verificationFollowup": {
+    "sourceSnapshot": "E:\\Projects\\VibeRa Studio\\build\\dev\\20261018-215530\\inputs.json",
+    "fullReceipt": {
+      "path": "build/dev/20261018-215530/verification.json",
+      "mode": "exact",
+      "sha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a"
+    },
+    "providerIdentity": {
+      "path": "build/windows/mixer-catalogue-observer-qualified-20261018/identity.json",
+      "mode": "exact",
+      "sha256": "292a38b588d9268b96173134327e169d346cc1e40fc380e212b3285e9916b850"
+    },
+    "full184PrecededVerifierDelta": true,
+    "full184RerunAfterVerifierDelta": false,
+    "onlyChangedVerifier": "scripts/verify-catalogue-mcp.py",
+    "unchangedObserverSeconds": 25,
+    "historical": true,
+    "wrapperMainIo": {
+      "receipt": "build/wrapper-settings-20261019/verification.json",
+      "focusedPassed": 11,
+      "focusedTotal": 11,
+      "installedPassed": true,
+      "currentFullSourceQualified": false,
+      "releaseQualified": false
+    },
+    "supersededBy": "build/module-qualification/mixer-ipc19-release/verification.json"
+  },
+  "currentSourceQualification": {
+    "receipt": "build/dev/20261019-close-ack-composite/verification.json",
+    "junit": "build/dev/20261019-close-ack-composite/ctest.xml",
+    "passed": 191,
+    "total": 191,
+    "skips": 0,
+    "compiledInputsStable": true,
+    "verificationInputsStable": true,
+    "validForCurrentSource": true,
+    "scope": "Composite191-case source qualification (70 fresh app/tool tests;121 exact unchanged other executables) with identical relocated canonical binaries; exact staged/final release additionally bound by MX-K.",
+    "candidateHashes": [
+      {
+        "path": "dist/VibeRa Studio/VibeRa Studio.exe",
+        "sha256": "981994aba08bacc93008aafe8f8744ff544f7a5c2dc9ed8c29f694f1ff4bb488"
+      },
+      {
+        "path": "dist/VibeRa Studio/VibeRa Plugin Worker.exe",
+        "sha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6"
+      },
+      {
+        "path": "dist/VibeRa Studio/VibeRaTests.exe",
+        "sha256": "97859ca44ad0d07c8fd8b907abd3c00ac2b86388170f2d91c6292f4149ace8fb"
+      }
+    ],
+    "summary": "build/module-qualification/mixer-ipc19-current/verification.json"
+  },
+  "historicalSourceQualifications": [
+    {
+      "receipt": "build/dev/20261019-121302/verification.json",
+      "sha256": "345690b23c0f666b8931548ca98e100229542c93849e3af62c95101010f036b9",
+      "junit": "build/dev/20261019-121302/ctest.xml",
+      "junitSha256": "f75ab062637c256281631468d7a2de3f2e50098f14629d88556e6d3135a53c55",
+      "passed": 189,
+      "total": 189,
+      "skips": 0,
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "compileSeconds": 432.0,
+      "testSeconds": 1005.762,
+      "sourceCheckpoint": "4814e414b23e6755f74f0993e7eec99ae6f2e327",
+      "validForCurrentSource": false,
+      "scope": "Source suite only; native OS input/module/staging/final package remain unqualified",
+      "candidateHashes": [
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+          "sha256": "36b62e4a110c3f09b6174e895cc737475de08ec1cf21ca5d60213b22e2cc5a6a"
+        },
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+          "sha256": "fb59e055af7ceabfe985ce060c88ff7310d381a84da97be52083f3c8b88f447a"
+        }
+      ],
+      "invalidationReason": "Superseded by IPC17 source; retained historical189/189 checkpoint."
+    },
+    {
+      "validForCurrentSource": false,
+      "invalidationReason": "CurrentIPC16/native source requires the running189-case broader regression and exact final binary-bound acceptance; earlier a827e6d historical receipts remain.",
+      "sourceCheckpoint": "a827e6d",
+      "fullReceipt": {
+        "path": "build/dev/20261019-093009/verification.json",
+        "sha256": "67f4c4be4a165f39b0e0a64e71164f2f0214de32374a8854066831cd7f3cee26"
+      },
+      "passedTests": 184,
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "installedState": {
+        "path": "build/windows/mixer-final-installed-identity-20261019/verification.json",
+        "sha256": "21b45b16845cf412342c1e7d0adb250db0b10ef9397051565c2d9f04de4d2b21"
+      },
+      "installedCatalogue": {
+        "path": "build/windows/mixer-final-catalogue-identity-20261019/identity.json",
+        "sha256": "47ee8a3ef76e02670d7a17f6e081b0eb2567b029a101808ad00054f5e395af58"
+      },
+      "nativeInputPassed": false,
+      "releaseQualified": false
+    },
+    {
+      "receipt": "build/dev/20261019-133255/verification.json",
+      "junit": "build/dev/20261019-133255/ctest.xml",
+      "passed": 189,
+      "total": 190,
+      "skips": 0,
+      "failed": [
+        "development_workflow"
+      ],
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "compileSeconds": 75.267,
+      "testSeconds": 1104.907,
+      "validForCurrentSource": false,
+      "scope": "Failed broad run retained. Only test_dev_forward_guard.py changed afterward; all C++ inputs and actual binaries unchanged. No single190/190 or module/package pass.",
+      "focusedSupplement": {
+        "path": "build/wrapper-followup-20261019/development-final-ctest.xml",
+        "runs": 2,
+        "casesEach": 149,
+        "seconds": [
+          12.09,
+          14.8
+        ],
+        "deadlineSeconds": 15
+      },
+      "installed": {
+        "path": "build/windows/wrapper-ipc17-exact-final-20261019/identity.json",
+        "passed": true,
+        "inputsStable": true,
+        "seconds": 43.81
+      },
+      "summary": "build/wrapper-followup-20261019/verification.json",
+      "candidateHashes": [
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+          "sha256": "34e32775fa1feb028060cac4d4c43eca86c2f565eb76df1f83cac1c5e59926df"
+        },
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+          "sha256": "0f75199a335e4054e4a5818cbacfef7dfc3d73aa2049d3b74c43b8e951582af1"
+        }
+      ],
+      "invalidationReason": "Superseded by global Last tweaked shared application changes; focused and installed evidence recorded, fresh broader source qualification required."
+    },
+    {
+      "receipt": "build/dev/20261019-142931/verification.json",
+      "receiptSha256": "1589b640fe3a1213b27500b11aa392cc58c23458955eec5d5bfc5bb4e8ed8f38",
+      "junit": "build/dev/20261019-142931/ctest.xml",
+      "junitSha256": "acedc509e307a197d7f442af47007551b90a7fc64ecb2c4fa6a4a5a459c73846",
+      "passed": 190,
+      "total": 190,
+      "skips": 0,
+      "failed": [],
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "compileSeconds": 27.035851699998602,
+      "testSeconds": 1080.0145791999967,
+      "sourceCheckpoint": "bcf4a00",
+      "validForCurrentSource": false,
+      "scope": "Full source suite only; module completion and staging/final packaging remain open. Native/installed evidence separate.",
+      "summary": "build/wrapper-completion-20261019/verification.json",
+      "candidateHashes": [
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+          "sha256": "7315c1d04aa39ec7ebe0b9dea8e6e3003e21545b77c5ee56cd4181d97964c360"
+        },
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+          "sha256": "0f75199a335e4054e4a5818cbacfef7dfc3d73aa2049d3b74c43b8e951582af1"
+        }
+      ],
+      "installed": {
+        "path": "build/windows/wrapper-global-installed-20261019/identity.json",
+        "passed": true,
+        "inputsStable": true,
+        "seconds": 41.63
+      },
+      "nativeDesktop": {
+        "path": "build/windows/wrapper-global-desktop-unicode-20261019/process.json",
+        "passed": true,
+        "seconds": 34.29
+      },
+      "invalidationReason": "Superseded by IPC18 typed wrapper routing and shared canonical no-op correction; retained historical190/190 source evidence."
+    },
+    {
+      "receipt": "build/dev/20261019-171256/verification.json",
+      "junit": "build/dev/20261019-171256/ctest.xml",
+      "passed": 190,
+      "total": 190,
+      "skips": 0,
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "validForCurrentSource": false,
+      "scope": "Whole source software only; exact module staging/final acceptance still open.",
+      "candidateHashes": [
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+          "sha256": "0f2fab3397e391c634650a398811d3571ad11caa769ea2a8de0c431dc1cb3a91"
+        },
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+          "sha256": "81be008f88f1aa56f1cf4353662ce27bc065a910ea293f572679af05070db1da"
+        },
+        {
+          "path": "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe",
+          "sha256": "2ce48af4c4b9135cf86e80f785f0550d1426526b40925b60bf28794ee7b50091"
+        }
+      ],
+      "summary": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "receipt": "build/dev/20261019-mixer-final-composite2/verification.json",
+      "junit": "build/dev/20261019-mixer-final-composite2/ctest.xml",
+      "passed": 191,
+      "total": 191,
+      "skips": 0,
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "validForCurrentSource": false,
+      "scope": "191-case source qualification: explicit189-result scoped reuse plus two fresh affected suites; exact case origins and identity deltas retained. Exact staging/final remain open.",
+      "candidateHashes": [
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+          "sha256": "0f2fab3397e391c634650a398811d3571ad11caa769ea2a8de0c431dc1cb3a91"
+        },
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+          "sha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6"
+        },
+        {
+          "path": "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe",
+          "sha256": "97859ca44ad0d07c8fd8b907abd3c00ac2b86388170f2d91c6292f4149ace8fb"
+        }
+      ],
+      "summary": "build/module-qualification/mixer-ipc19-current/verification.json"
+    },
+    {
+      "receipt": "build/dev/20261019-mixer-projection-qualified/verification.json",
+      "junit": "build/dev/20261019-mixer-projection-qualified/ctest.xml",
+      "passed": 191,
+      "total": 191,
+      "skips": 0,
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "validForCurrentSource": false,
+      "scope": "191-case source qualification with explicit scoped reuse, current changed-verifier CTest and retained real origins; exact staging/final remain open.",
+      "candidateHashes": [
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+          "sha256": "0f2fab3397e391c634650a398811d3571ad11caa769ea2a8de0c431dc1cb3a91"
+        },
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+          "sha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6"
+        },
+        {
+          "path": "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe",
+          "sha256": "97859ca44ad0d07c8fd8b907abd3c00ac2b86388170f2d91c6292f4149ace8fb"
+        }
+      ],
+      "summary": "build/module-qualification/mixer-ipc19-current/verification.json",
+      "invalidation": "Focused full-structural reset validation and deterministic SDK/instrument regressions changed source after05fca7b package rollback."
+    },
+    {
+      "receipt": "build/dev/20261019-211921/verification.json",
+      "junit": "build/dev/20261019-211921/ctest.xml",
+      "passed": 191,
+      "total": 191,
+      "skips": 0,
+      "compiledInputsStable": true,
+      "verificationInputsStable": true,
+      "validForCurrentSource": false,
+      "scope": "Fresh complete191-case source regression on the corrected structural-history candidate; exact staging/final remain open.",
+      "candidateHashes": [
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+          "sha256": "c86e340ed87a7fbffcb1ff1c3b2ceb20931699875f62efaed9dd00ae99faf2d3"
+        },
+        {
+          "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+          "sha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6"
+        },
+        {
+          "path": "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe",
+          "sha256": "97859ca44ad0d07c8fd8b907abd3c00ac2b86388170f2d91c6292f4149ace8fb"
+        }
+      ],
+      "summary": "build/module-qualification/mixer-ipc19-current/verification.json",
+      "invalidation": "Acceptance-only native window close wait now observes actual ACK; current70/121 composite qualification awaits refreshed evidence binding."
+    }
+  ],
+  "currentReleaseQualification": {
+    "receipt": "build/module-qualification/mixer-ipc19-release/verification.json",
+    "version": "0.0.64",
+    "sourceCommit": "c71bb42b9dd92cdd4227f8963e1e88a1a8caa6e5",
+    "soleExecutable": "dist/VibeRa Studio/VibeRa Studio.exe"
+  }
+}

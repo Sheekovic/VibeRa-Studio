@@ -1,0 +1,19 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.h
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.h
+@@ -135,6 +135,8 @@
+         // Nonserialized construction policy. Appended to preserve old aggregate
+         // initializers. Default keeps global policy; exclusion is per Edit only.
+         bool disableNodeMemorySharing = false;
++        // Ordinary managerGlobal startup gate; no LOCAL/closed-IO privilege.
++        bool requireSourceBurstSession = false;
+     };
+ 
+     /** Creates an Edit from a set of Options.
+@@ -154,6 +156,7 @@
+     const juce::uint64 initialSourceGeneration;
+     const bool closedNativeIO; // Immutable construction policy, never read from project ValueTree.
+     const bool disableNodeMemorySharing;
++    const bool requireSourceBurstSession; // Immutable before any context publication.
+     bool shouldUseNodeMemorySharing (bool defaultEnabled) const noexcept
+     { return defaultEnabled && !disableNodeMemorySharing; }
+     // Invoked after effective overlay fields, before baseline/private factory.

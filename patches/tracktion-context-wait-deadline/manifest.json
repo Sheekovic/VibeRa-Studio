@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": true,
+  "qualification": "CONTROL-only elapsed-time bound for existing addContext wait. Registration, resync, lock scope and callback code unchanged. Source-only; compile and real manual-device acceptance unrun. A final sleep/scheduling delay may exceed the 200 ms polling deadline.",
+  "appliesAfter": "patches/tracktion-finished-forward-continuation/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/playback/tracktion_DeviceManager.cpp",
+      "patch": "patches/tracktion-context-wait-deadline/tracktion_DeviceManager.cpp.patch",
+      "originalSha256": "66fb39c7a9e7c62375064865ddce5c0d463c820201105da157f8c97ab0bfbfb4",
+      "patchedSha256": "3f78ac18c46630ed58f1351658c21285eb267519d66cfa44a47d23d103165036",
+      "patchSha256": "2f338bb5b9d4744918260de280aaa2bb50897c05c08d392856bfb4547d616fe6",
+      "addedLines": 4,
+      "deletedLines": 5,
+      "lineage": [
+        "patches/tracktion-device-fence/manifest.json",
+        "patches/tracktion-source-admission/manifest.json",
+        "patches/tracktion-local-source-initial/manifest.json",
+        "patches/tracktion-production-source-gate/manifest.json"
+      ]
+    }
+  ]
+}

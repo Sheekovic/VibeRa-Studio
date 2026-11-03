@@ -1,0 +1,16 @@
+{
+  "version": 6,
+  "configurePresets": [{
+    "name": "windows", "generator": "Visual Studio 17 2022",
+    "architecture": "x64", "binaryDir": "${sourceDir}/build/windows",
+    "cacheVariables": { "CMAKE_CONFIGURATION_TYPES": "Debug;Release" }
+  }],
+  "buildPresets": [
+    {"name":"release", "configurePreset":"windows", "configuration":"Release", "jobs":4},
+    {"name":"debug", "configurePreset":"windows", "configuration":"Debug", "jobs":4}
+  ],
+  "testPresets": [
+    {"name":"release", "configurePreset":"windows", "configuration":"Release", "output":{"outputOnFailure":true}},
+    {"name":"debug", "configurePreset":"windows", "configuration":"Debug", "output":{"outputOnFailure":true}}
+  ]
+}

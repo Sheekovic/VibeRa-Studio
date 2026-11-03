@@ -1,0 +1,109 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
+@@ -7,6 +7,8 @@
+ 
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
++
++#include <stdexcept>
+ 
+ namespace tracktion::inline engine
+ {
+@@ -581,6 +583,13 @@
+ //==============================================================================
+ Edit::Edit (Options options)
+     : engine (options.engine),
++      initialSourceGeneration ([&options]
++      {
++          if (options.initialSourceGeneration && !options.closedNativeIO)
++              throw std::invalid_argument ("Initial source activation requires explicit closed native IO");
++          return options.initialSourceGeneration;
++      }()),
++      closedNativeIO (options.closedNativeIO),
+       tempoSequence (*this),
+       state (options.editState),
+       instanceId (getNextInstanceId()),
+@@ -1525,6 +1534,7 @@
+ //==============================================================================
+ std::shared_ptr<MidiInputDevice> Edit::getCurrentMidiTimecodeSource() const
+ {
++    if (initialSourceGeneration) return {}; // LOCAL-CLOSED never supplies a native external clock/device.
+     auto& dm = engine.getDeviceManager();
+ 
+     if (auto min = dm.findMidiInputDeviceForID (midiTimecodeSourceDevice))
+@@ -1535,6 +1545,8 @@
+ 
+ void Edit::setCurrentMidiTimecodeSource (std::shared_ptr<MidiInputDevice> newDevice)
+ {
++    if (admitNativeCapability (NativeCapability::externalClock) != NativeCapabilityStatus::allowed)
++        return; // Refuse before native settings/device changes or restartPlayback.
+     if (newDevice == nullptr)
+         midiTimecodeSourceDevice.resetToDefault();
+     else
+@@ -1546,6 +1558,8 @@
+ 
+ void Edit::enableTimecodeSync (bool b)
+ {
++    if (admitNativeCapability (NativeCapability::externalClock) != NativeCapabilityStatus::allowed)
++        return;
+     if (b != midiTimecodeSourceDeviceEnabled)
+     {
+         midiTimecodeSourceDeviceEnabled = b;
+@@ -1568,6 +1582,8 @@
+ 
+ void Edit::setTimecodeOffset (TimeDuration newOffset)
+ {
++    if (admitNativeCapability (NativeCapability::externalClock) != NativeCapabilityStatus::allowed)
++        return;
+     if (timecodeOffset != newOffset)
+     {
+         timecodeOffset = newOffset;
+@@ -1579,11 +1595,14 @@
+ 
+ std::shared_ptr<MidiInputDevice> Edit::getCurrentMidiMachineControlSource() const
+ {
++    if (initialSourceGeneration) return {}; // LOCAL-CLOSED never supplies a native external clock/device.
+     return engine.getDeviceManager().findMidiInputDeviceForID (midiMachineControlSourceDevice);
+ }
+ 
+ void Edit::setCurrentMidiMachineControlSource (std::shared_ptr<MidiInputDevice> newDevice)
+ {
++    if (admitNativeCapability (NativeCapability::externalClock) != NativeCapabilityStatus::allowed)
++        return; // Refuse before native settings/device changes or restartPlayback.
+     if (newDevice == nullptr)
+         midiMachineControlSourceDevice.resetToDefault();
+     else
+@@ -1595,6 +1614,7 @@
+ 
+ MidiOutputDevice* Edit::getCurrentMidiMachineControlDest() const
+ {
++    if (initialSourceGeneration) return {}; // LOCAL-CLOSED never supplies a native external clock/device.
+     auto& dm = engine.getDeviceManager();
+ 
+     for (int i = dm.getNumMidiOutDevices(); --i >= 0;)
+@@ -1607,6 +1627,8 @@
+ 
+ void Edit::setCurrentMidiMachineControlDest (MidiOutputDevice* newDevice)
+ {
++    if (admitNativeCapability (NativeCapability::externalClock) != NativeCapabilityStatus::allowed)
++        return; // Refuse before native settings/device changes or restartPlayback.
+     if (newDevice == nullptr)
+         midiMachineControlDestDevice.resetToDefault();
+     else
+@@ -1618,6 +1640,8 @@
+ 
+ void Edit::setMidiTimecodeIgnoringHours (bool b)
+ {
++    if (admitNativeCapability (NativeCapability::externalClock) != NativeCapabilityStatus::allowed)
++        return;
+     midiTimecodeIgnoringHours = b;
+     updateMidiTimecodeDevices();
+     restartPlayback();
+@@ -1625,6 +1649,7 @@
+ 
+ void Edit::updateMidiTimecodeDevices()
+ {
++    if (initialSourceGeneration) return; // Never alter other Edits' global native device flags.
+     auto& dm = engine.getDeviceManager();
+ 
+     for (auto d : dm.getMidiInDevices())

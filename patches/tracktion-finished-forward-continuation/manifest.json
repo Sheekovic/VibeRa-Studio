@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Opt-in exact finished forward to same-latency retained dry owner. No queue reset, finite tail or general route authority. Actual application first-use, source/provider and native whole-inventory evidence remain mandatory; runtime qualification separate.",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-finished-forward-continuation/tracktion_LatencyNode.h.patch",
+      "originalSha256": "08377d8b098ccd1cc92024fa08b673bde57c99466f2c8037058606d398b7d849",
+      "patchedSha256": "6928c85405ae2a9962da3ed45700ecb382e35103af40f99024cabfc733093054",
+      "patchSha256": "dbd46c7ed64c1fb054bf4b30f859a775951c30ca8b6135ce4314556eacae8bc8",
+      "addedLines": 288,
+      "deletedLines": 2,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json",
+        "patches/tracktion-forward-stage-drain/manifest.json",
+        "patches/tracktion-zero-history-creation/manifest.json",
+        "patches/tracktion-inverse-stage-residual/manifest.json",
+        "patches/tracktion-inverse-stage-seal/manifest.json",
+        "patches/tracktion-prepared-audio-zero/manifest.json",
+        "patches/tracktion-whole-source-exchange/manifest.json",
+        "patches/tracktion-zero-channel-delay/manifest.json"
+      ]
+    }
+  ]
+}

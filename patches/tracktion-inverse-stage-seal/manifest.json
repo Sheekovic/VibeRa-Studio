@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original inverse stage mint/final-seal ordering correction and precise fresh dry-queue taint rejection; no production or complete inverse musical qualification.",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-inverse-stage-seal/tracktion_LatencyNode.h.patch",
+      "originalSha256": "9f2cc965396a6892bb8f329fbdfcad4e2048559a415e00e3d348ed0901e085ff",
+      "patchedSha256": "4e23469446500c47bfe2c229eccaaeb9e808249084e25c4766ddef38b24365b9",
+      "patchSha256": "58b94cec39d63a4e9cf3bb70bd202d8efe002abd5d920b7f3eb3a8d9715db58f",
+      "addedLines": 13,
+      "deletedLines": 6,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json",
+        "patches/tracktion-forward-stage-drain/manifest.json",
+        "patches/tracktion-zero-history-creation/manifest.json",
+        "patches/tracktion-inverse-stage-residual/manifest.json"
+      ]
+    }
+  ]
+}

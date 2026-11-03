@@ -1,0 +1,88 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -2431,6 +2431,11 @@
+     finalNode = createRackNode (std::move (finalNode), edit.getRackList(), params);
+     finalNode = makeNode<PlayHeadPositionNode> (params.processState, std::move (finalNode), audibleTimeToUpdate);
+ 
++    if (params.prepareWholeGraphOutput)
++    {
++        finalNode = params.prepareWholeGraphOutput (std::move (finalNode));
++        if (! finalNode) throw std::invalid_argument ("graph.finalOutput: Empty prepared root");
++    }
+     return finalNode;
+ }
+ 
+@@ -2478,7 +2483,11 @@
+     node = createMasterPluginsNode (edit, playHeadState, std::move (node), params);
+     node = createMasterFadeInOutNode (edit, std::move (node), params);
+     node = createRackNode (std::move (node), edit.getRackList(), params);
+-
++    if (params.prepareWholeGraphOutput)
++    {
++        node = params.prepareWholeGraphOutput (std::move (node));
++        if (! node) throw std::invalid_argument ("graph.finalOutput: Empty prepared root");
++    }
+     return node;
+ }
+ 
+@@ -2596,3 +2605,60 @@
+     return visit (visit, root, 0);
+ }
+ } // namespace tracktion::inline engine
++
++
++namespace tracktion::inline engine {
++bool EditNodeBuilder::hasPreparedSingleAudioSourceOutput (graph::Node& root,
++    const graph::Node& source, const std::function<bool (Plugin&)>& plugin,
++    const std::function<std::optional<graph::Node*> (graph::Node&)>& port)
++{
++    // 0 = proved zero, 1 = this exact source once, 2 = unknown/multiple.
++    // Memoising nodes bounds work. Summation is PER EDGE, not unique source ID.
++    std::map<graph::Node*, unsigned> completed;
++    std::set<graph::Node*> visiting;
++    const auto visit = [&] (auto&& self, graph::Node& node, size_t depth) -> unsigned
++    {
++        if (&node == &source) return 1;
++        if (const auto it = completed.find (&node); it != completed.end()) return it->second;
++        if (depth > 256 || completed.size() + visiting.size() >= 4096 ||
++            ! visiting.insert (&node).second) return 2;
++        const auto done = [&] (unsigned value)
++        { visiting.erase (&node); completed.emplace (&node, value); return value; };
++        if (port) if (const auto input = port (node))
++            return done (*input ? self (self, **input, depth + 1) : 2);
++        if (typeid (node) == typeid (graph::SilentNode)) return done (0);
++        if (auto* delay = dynamic_cast<graph::LatencyNode*> (&node))
++            return done (delay->hasStructuralZeroHistory() ? 0 : 2);
++        if (auto* p = dynamic_cast<PluginNode*> (&node))
++        {
++            if (! plugin || ! plugin (p->getPlugin())) return done (2);
++            const auto inputs = p->getDirectInputNodes();
++            if (inputs.size() != 1 || ! inputs.front() ||
++                node.getNodeProperties().latencyNumSamples != inputs.front()->getNodeProperties().latencyNumSamples)
++                return done (2);
++            return done (self (self, *inputs.front(), depth + 1));
++        }
++        const bool returnNode = typeid (node) == typeid (graph::ReturnNode);
++        const bool sum = typeid (node) == typeid (graph::SummingNode);
++        const bool one = typeid (node) == typeid (TrackMutingNode) || typeid (node) == typeid (LiveMidiInjectingNode);
++        if (! returnNode && ! sum && ! one)
++        {
++            // Reuse the authoritative zero classifier for supported empty
++            // wrappers. This does NOT classify a nonzero source as zero.
++            return done (hasPreparedAudioZeroOutput (node, plugin, port) ? 0 : 2);
++        }
++        const auto inputs = node.getDirectInputNodes();
++        if (one && inputs.size() != 1) return done (2);
++        unsigned count = 0;
++        for (auto* input : inputs)
++        {
++            if (! input) return done (2);
++            const auto branch = self (self, *input, depth + 1);
++            if (branch > 1 || count + branch > 1) return done (2);
++            count += branch;
++        }
++        return done (count);
++    };
++    return visit (visit, root, 0) == 1;
++}
++} // namespace tracktion::inline engine

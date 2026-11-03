@@ -1,0 +1,44 @@
+--- a/modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h
++++ b/modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h
+@@ -15,6 +15,7 @@
+ 
+ namespace tracktion::inline graph {
+ class LatencyNode;
++class InverseOutputResidual;
+ 
+ 
+ //==============================================================================
+@@ -57,11 +58,16 @@
+     }
+     void prepareToPlay (double sampleRateToUse, int blockSize, int numChannels)
+     {
++        // CONTROL-only preparation. A repeat resets real queue contents and
++        // must permanently disqualify creation provenance, even for nonzero input.
++        const bool firstPreparation = !creationDecisionMade;
++        if (!firstPreparation) taintStructuralZeroCreation();
+         creationDecisionEligible = !creationDecisionMade &&
+                                    !unknownCreationMutation.load (std::memory_order_acquire);
+         creationDecisionMade = true;
+         invalidateStructuralZero();
+         invalidateAudioReference();
++        if (firstPreparation) firstPreparedAudioRevision = audioMutationRevision;
+         terminalReader = nullptr;
+         sampleRate = sampleRateToUse;
+         latencyTimeSeconds = sampleToTime (latencyNumSamples, sampleRate);
+@@ -206,11 +212,16 @@
+ 
+ private:
+     friend class LatencyNode;
++    friend class InverseOutputResidual;
+     std::atomic<bool> structuralZero { false };
+     // Permanent provenance taint; public fallback writers can run on DSP while
+     // CONTROL prepares another graph. Never write plain creation flags there.
+     std::atomic<bool> unknownCreationMutation { false };
+     bool creationDecisionMade = false, creationDecisionEligible = false; // CONTROL only.
++    // Written ONCE on first CONTROL preparation, before graph publication.
++    // Inverse first-use DSP checks the existing canonical write/read witness;
++    // no new per-block counter or CONTROL reading of DSP state is needed.
++    uint64_t firstPreparedAudioRevision = 0;
+     static_assert (std::atomic<bool>::is_always_lock_free);
+     void invalidateStructuralZero() noexcept
+     { structuralZero.store (false, std::memory_order_release); }

@@ -1,0 +1,30 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.h
+@@ -13,6 +13,7 @@
+ namespace tracktion::inline engine {
+ 
+ class TrackMuteState;
++struct ProcessState;
+ 
+ /**
+     Node for an aux send.
+@@ -26,7 +27,8 @@
+     AuxSendNode (std::unique_ptr<Node> inputNode, int busIDToUse,
+                  SampleRateAndBlockSize,
+                  AuxSendPlugin&, tracktion::graph::PlayHeadState&, const TrackMuteState*,
+-                 bool processAuxSendsWhenTrackIsMuted, bool fixedInitialisation = false);
++                 bool processAuxSendsWhenTrackIsMuted, bool fixedInitialisation = false,
++                 ProcessState* exactGainProcessState = nullptr, bool forRendering = false);
+     ~AuxSendNode() override;
+ 
+     //==============================================================================
+@@ -47,6 +49,9 @@
+     std::optional<NodeProperties> cachedNodeProperties;
+     bool isPrepared = false;
+     bool isInitialised = false;
++    ProcessState* gainProcessState = nullptr; // Graph-owned lifetime, no ownership on callback.
++    graph::SendGainBlockContext gainBlock;
++    bool blockGainEnabled = false, gainBlockReady = false, gainForRendering = false;
+ };
+ 
+ } // namespace tracktion::inline engine

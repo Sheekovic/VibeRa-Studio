@@ -1,0 +1,140 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -6,8 +6,12 @@
+     `---' `--'   `--`--'`---'`--'`--' `---' `--' `---' `--''--'    www.tracktion.com
+ 
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
++
++#include <cmath>
++#include <limits>
++#include <stdexcept>
+ 
+ namespace tracktion::inline engine {
+ 
+ //==============================================================================
+@@ -200,14 +204,18 @@
+     void setNode (std::unique_ptr<Node> node, double sampleRate, int blockSize)
+     {
+         jassert (sampleRate > 0.0);
+         jassert (blockSize > 0);
++        const auto deviceBlockSize = blockSize;
+         blockSize = juce::roundToInt (blockSize * (1.0 + (10.0 * 0.01))); // max speed comp
+         player.setLatencyCompensationEnabled (editPlaybackContext.edit.isLatencyCompensationEnabled());
+         player.setNode (std::move (node), sampleRate, blockSize);
+-
+-        if (auto currentNode = player.getNode())
+-            latencySamples = currentNode->getNodeProperties().latencyNumSamples;
++        // Single setter: mirror only the exact padded capacity accepted by the
++        // player after successful publication. TracktionNodePlayer has no block getter.
++        preparedPlayerBlockSize = blockSize;
++        preparedDeviceBlockSize = deviceBlockSize;
++
++        latencySamples = player.getPreparedLatencySamples();
+     }
+ 
+     void clearNode()
+     {
+@@ -417,8 +425,18 @@
+     {
+         return player.getSampleRate();
+     }
+ 
++    bool matchesDeviceConfiguration (double sampleRate, int deviceBlockSize) const
++    {
++        const auto padded = deviceBlockSize * (1.0 + (10.0 * 0.01));
++        if (deviceBlockSize <= 0 || padded > double (std::numeric_limits<int>::max()))
++            return false;
++        const auto paddedBlockSize = juce::roundToInt (padded);
++        return sampleRate == player.getSampleRate() && deviceBlockSize == preparedDeviceBlockSize &&
++               paddedBlockSize == preparedPlayerBlockSize;
++    }
++
+     SyncPoint getSyncPoint() const
+     {
+         return processState.getSyncPoint();
+     }
+@@ -435,8 +453,10 @@
+     TracktionNodePlayer player;
+     const size_t maxNumThreads;
+ 
+     int latencySamples = 0;
++    int preparedPlayerBlockSize = 0;
++    int preparedDeviceBlockSize = 0;
+     choc::buffer::FrameCount numSamplesToProcess = 0;
+     juce::Range<double> referenceStreamRange;
+     std::atomic<double> pendingPosition { 0.0 }, pendingPositionJumpTime { 0.0 };
+     std::atomic<bool> positionUpdatePending { false }, pendingRollInToLoop { false }, pendingPositionJumpTimeValid { false }, playPending { false };
+@@ -643,20 +663,33 @@
+         nodePlaybackContext->setNumThreads (0);
+     }
+ }
+ 
+-void EditPlaybackContext::createNode()
++void EditPlaybackContext::createNode (bool updateThreads)
+ {
+     CRASH_TRACER
+-    // Reset this until it's updated by the play graph
+-    audiblePlaybackTime = transport.getPosition().inSeconds();
+-
+-    isAllocated = true;
+-
+     auto& dm = edit.engine.getDeviceManager();
++    const auto sampleRate = dm.getSampleRate();
++    const auto deviceBlockSize = dm.getBlockSize();
++
++    // Graph-only changes cannot fall back to clearNodes or reconfigure devices.
++    // Validate before touching allocation/time bookkeeping or the active graph.
++    if (! updateThreads && (! isAllocated || ! nodePlaybackContext ||
++                            ! std::isfinite (sampleRate) || sampleRate <= 0.0 || deviceBlockSize <= 0 ||
++                            ! nodePlaybackContext->matchesDeviceConfiguration (sampleRate, deviceBlockSize)))
++        throw std::invalid_argument ("Graph-only rebuild requires an allocated graph with unchanged valid device configuration");
++
++    const auto graphStartTime = transport.getPosition().inSeconds();
++    if (updateThreads)
++    {
++        // Original default path resets this until updated by the playback graph.
++        audiblePlaybackTime = graphStartTime;
++        isAllocated = true;
++    }
++
+     CreateNodeParams cnp { nodePlaybackContext->processState };
+-    cnp.sampleRate = dm.getSampleRate();
+-    cnp.blockSize = dm.getBlockSize();
++    cnp.sampleRate = sampleRate;
++    cnp.blockSize = deviceBlockSize;
+ 
+     if (cnp.sampleRate <= 0.0 || cnp.blockSize <= 0)
+     {
+         clearNodes();
+@@ -668,11 +701,14 @@
+     cnp.allowClipSlots = engineBehaviour.areClipSlotsEnabled();
+     cnp.readAheadTimeStretchNodes = engineBehaviour.enableReadAheadForTimeStretchNodes();
+     cnp.insertOptionalLastStageNodeForDevice = insertOptionalLastStageNodeForDeviceCallback;
+     auto editNode = createNodeForEdit (*this, audiblePlaybackTime, cnp);
++    if (! updateThreads && ! editNode)
++        throw std::runtime_error ("Graph-only rebuild produced no replacement graph");
+ 
+     nodePlaybackContext->setNode (std::move (editNode), cnp.sampleRate, cnp.blockSize);
+-    updateNumCPUs();
++    if (updateThreads)
++        updateNumCPUs();
+ }
+ 
+ void EditPlaybackContext::setInsertOptionalLastStageNodeForDeviceCallback (std::function<std::unique_ptr<graph::Node> (OutputDevice&,
+                                                                                                                       const CreateNodeParams&,
+@@ -695,8 +731,14 @@
+ 
+ void EditPlaybackContext::reallocate()
+ {
+     createPlayAudioNodes (getPosition());
++}
++
++void EditPlaybackContext::reallocateGraphOnly()
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    createNode (false);
+ }
+ 
+ void EditPlaybackContext::startPlaying (TimePosition start)
+ {

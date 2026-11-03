@@ -1,0 +1,12 @@
+{
+  "completed": false,
+  "failure": "TimeoutError: The read operation timed out",
+  "retainedVerifiedSamples": 96,
+  "retainedSampleBytes": 156522914,
+  "missingSamples": [
+    "vsco2ce/Woodwinds/Flute/susNV/LDFlute_susNV_C5_v2_1.wav",
+    "vcsl/Chordophones/Composite Chordophones/Strumstick/Finger/Strumstick_Finger_Str1_Main_D2_vl2_rr1.wav"
+  ],
+  "partialFilesWritten": false,
+  "nextAction": "Recheck retained files against pinned identities and fetch only the two absent WAVs; then write the complete manifest."
+}

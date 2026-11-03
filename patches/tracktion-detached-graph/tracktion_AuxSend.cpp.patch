@@ -1,0 +1,42 @@
+--- a/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.cpp
++++ b/modules/tracktion_engine/plugins/internal/tracktion_AuxSend.cpp
+@@ -18,6 +18,11 @@
+     invertPhase.referTo (state, IDs::phase, um, false);
+     lastVolumeBeforeMute.referTo (state, IDs::lastVolumeBeforeMuteDb, um, 0.0f);
+ 
++    // Detector taps override fixed realtime gain; no native parameter, curve,
++    // modifier or recording registration belongs to a private candidate.
++    if (isDetachedGraph())
++        return;
++
+     gain = addParam ("send level", TRANS("Send level"), { 0.0f, 1.0f },
+                      [] (float value)             { return juce::Decibels::toString (volumeFaderPositionToDB (value)); },
+                      [] (const juce::String& s)   { return decibelsToVolumeFaderPosition (dbStringToDb (s)); });
+@@ -30,7 +35,8 @@
+ AuxSendPlugin::~AuxSendPlugin()
+ {
+     notifyListenersOfDeletion();
+-    gain->detachFromCurrentValue();
++    if (gain != nullptr)
++        gain->detachFromCurrentValue();
+ }
+ 
+ bool AuxSendPlugin::shouldProcess()
+@@ -81,6 +87,8 @@
+ 
+ void AuxSendPlugin::initialise (const PluginInitialisationInfo& info)
+ {
++    if (isDetachedGraph())
++        return;
+     lastGain = volumeFaderPositionToGain (gain->getCurrentValue());
+ 
+     initialiseWithoutStopping (info);
+@@ -88,6 +96,8 @@
+ 
+ void AuxSendPlugin::initialiseWithoutStopping (const PluginInitialisationInfo&)
+ {
++    if (isDetachedGraph())
++        return;
+     TRACKTION_ASSERT_MESSAGE_THREAD
+     auto newOwnerTrack = getOwnerTrack();
+ 

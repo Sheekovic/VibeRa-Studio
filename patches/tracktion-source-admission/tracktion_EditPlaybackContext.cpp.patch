@@ -1,0 +1,420 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.cpp
+@@ -13,6 +13,248 @@
+ #include <stdexcept>
+ 
+ namespace tracktion::inline engine {
++
++namespace
++{
++bool sourceBurstConvertedFrames (int frames, double speed, int& result) noexcept
++{
++    if (frames <= 0 || !std::isfinite (speed) || speed < -10.0 || speed > 10.0)
++        return false;
++    const auto value = frames * (1.0 + speed * .01);
++    if (!std::isfinite (value) || value <= 0 || value > double (std::numeric_limits<int>::max()) - .5)
++        return false;
++    const auto converted = juce::roundToInt (value);
++    if (converted <= 0) return false;
++    result = converted;
++    return true;
++}
++juce::int64 sourceBurstUpper (int frames, int block, int scale) noexcept
++{
++    if (frames <= 0 || block <= 0 || scale < 900000 || scale > 1100000) return -1;
++    const auto ceiling = [scale] (int n) noexcept { return (juce::int64 (n) * scale + 999999) / 1000000; };
++    return juce::int64 (frames / block) * ceiling (block) + (frames % block ? ceiling (frames % block) : 0);
++}
++}
++struct SourceBurstSession::Impl
++{
++    const Configuration config;
++    const juce::AudioDeviceManager* const managerIdentity; // CONTROL identity only, never dereferenced by DSP.
++    const juce::AudioDeviceManager::PhysicalCallbackReader reader;
++    std::shared_ptr<Observer> observer; // CONTROL retirement only, never copied by a callback.
++    EditPlaybackContext* contextIdentity = nullptr; // CONTROL bind-once identity, not a DSP dereference.
++    Outcome current;
++    double speed = 0, referenceScale = 1;
++    juce::uint64 lastClosedSerial = 0;
++    bool preflighted = false, started = false;
++    std::atomic<juce::uint64> publication { 0 };
++    std::array<std::atomic<juce::uint64>, 17> fields {};
++    Impl (const Configuration& c, juce::AudioDeviceManager& m,
++          juce::AudioDeviceManager::PhysicalCallbackReader r, std::shared_ptr<Observer> o)
++        : config (c), managerIdentity (&m), reader (std::move (r)), observer (std::move (o))
++    { current.generation = c.generation; current.deviceEpoch = c.deviceEpoch; publish(); }
++    void publish() noexcept
++    {
++        publication.fetch_add (1, std::memory_order_seq_cst);
++        const juce::uint64 values[] { juce::uint64 (current.status), current.generation, current.deviceEpoch,
++            current.physicalSerial, juce::uint64 (current.physicalFrames), juce::uint64 (current.sourceQuota),
++            juce::uint64 (current.deviceOffset), juce::uint64 (current.sourceProcessed), juce::uint64 (current.sliceDeviceFrames),
++            juce::uint64 (current.sliceSourceFrames), juce::uint64 (current.metadataKnown) | (juce::uint64 (current.scopeOpen) << 1)
++                | (juce::uint64 (current.failed) << 2) | (juce::uint64 (current.retired) << 3)
++                | (juce::uint64 (current.offsetKnown) << 4), current.activationAfterSerial,
++            current.observedEpoch, current.observedSerial, juce::uint64 (current.observedPhysicalFrames),
++            juce::uint64 (current.observedOffset), 0 };
++        for (size_t i = 0; i < fields.size(); ++i) fields[i].store (values[i], std::memory_order_seq_cst);
++        publication.fetch_add (1, std::memory_order_seq_cst);
++    }
++    bool fail (Status status) noexcept
++    {
++        if (!current.failed) { current.status = status; current.failed = true; }
++        publish();
++        return false;
++    }
++    bool preflight (int frames, int physicalOffset, bool offsetKnown, juce::uint64 physicalEpoch, juce::uint64 physicalSerial,
++                    double rate, int block, double graphRate, int graphBlock,
++                    double requestedSpeed, double requestedReferenceScale) noexcept
++    {
++        preflighted = false;
++        if (current.failed || current.retired) return false; // Sticky: no DSP reset/retry.
++        juce::AudioDeviceManager::PhysicalCallbackSnapshot physical;
++        current.metadataKnown = reader.read (physical);
++        current.offsetKnown = offsetKnown;
++        current.observedOffset = offsetKnown ? physicalOffset : 0;
++        if (!current.metadataKnown) return fail (Status::telemetryUnavailable);
++        current.observedEpoch = physical.deviceEpoch;
++        current.observedSerial = physical.callbackSerial;
++        current.observedPhysicalFrames = physical.outerFrames;
++        if (!physical.ownerAlive) return fail (Status::managerReleased);
++        if (physical.writerConflict) return fail (Status::writerConflict);
++        if (physical.countersExhausted) return fail (Status::counterExhausted);
++        if (!physical.active) return fail (Status::deviceStopped);
++        if (physical.deviceEpoch != config.deviceEpoch || physical.configuredFrames != config.deviceFrames || block != config.deviceFrames || graphBlock != config.deviceFrames)
++            return fail (Status::deviceChanged);
++        if (rate != config.sampleRate || graphRate != config.sampleRate) return fail (Status::rateChanged);
++        if (!physical.callbackSerial || physical.outerFrames <= 0) return fail (Status::invalidDeviceSlice);
++        if (physical.outerFrames > config.maximumPhysicalFrames) return fail (Status::physicalBurstExceeded);
++        if (!offsetKnown || physicalOffset < 0) return fail (Status::invalidDeviceSlice);
++        if (physical.deviceEpoch != physicalEpoch || physical.callbackSerial != physicalSerial)
++            return fail (Status::sequenceMismatch);
++        if (!current.scopeOpen)
++        {
++            if (physical.callbackSerial <= lastClosedSerial || physicalOffset != 0)
++                return fail (Status::sequenceMismatch);
++            current.physicalSerial = physical.callbackSerial;
++            current.physicalFrames = physical.outerFrames;
++            current.deviceOffset = current.sourceProcessed = 0;
++            const auto quota = sourceBurstUpper (physical.outerFrames, config.deviceFrames, config.maximumSourceScalePpm);
++            if (quota <= 0 || quota > config.maximumSourceFrames) return fail (Status::sourceBurstExceeded);
++            if (!std::isfinite (requestedSpeed) || requestedSpeed < -10.0 || requestedSpeed > 10.0 ||
++                requestedSpeed * 10000.0 > config.maximumSourceScalePpm - 1000000 ||
++                !std::isfinite (requestedReferenceScale) || requestedReferenceScale < .5 || requestedReferenceScale > 1.5)
++                return fail (Status::invalidConversion);
++            speed = requestedSpeed; referenceScale = requestedReferenceScale;
++            current.sourceQuota = int (quota);
++        }
++        else if (physical.callbackSerial != current.physicalSerial || physical.outerFrames != current.physicalFrames)
++            return fail (Status::sequenceMismatch);
++        if (physicalOffset != current.deviceOffset || frames <= 0 ||
++            frames != std::min (config.deviceFrames, current.physicalFrames - current.deviceOffset))
++            return fail (Status::invalidDeviceSlice);
++        int source = 0;
++        if (!sourceBurstConvertedFrames (frames, speed, source)) return fail (Status::invalidConversion);
++        if (source > current.sourceQuota - current.sourceProcessed) return fail (Status::sourceBurstExceeded);
++        current.sliceDeviceFrames = frames; current.sliceSourceFrames = source;
++        current.status = Status::ready;
++        preflighted = true;
++        publish();
++        return true;
++    }
++    bool begin() noexcept
++    {
++        if (!preflighted || current.failed || current.retired) return false;
++        if (current.scopeOpen) return true;
++        current.scopeOpen = true; // False admission still owns deterministic abort notification.
++        publish();
++        if (!observer || !observer->begin (current)) return fail (Status::observerRefused);
++        started = true;
++        return true;
++    }
++    void abort (Status reason) noexcept
++    {
++        fail (reason);
++        if (current.scopeOpen && observer) observer->abort (current);
++        current.scopeOpen = false; started = false; preflighted = false;
++        publish();
++    }
++    void finish() noexcept
++    {
++        if (!preflighted || !started || !current.scopeOpen || current.failed) return;
++        current.deviceOffset += current.sliceDeviceFrames;
++        current.sourceProcessed += current.sliceSourceFrames;
++        preflighted = false;
++        if (current.deviceOffset == current.physicalFrames)
++        {
++            if (!observer || !observer->end (current)) { fail (Status::observerRefused); return; }
++            lastClosedSerial = current.physicalSerial;
++            current.scopeOpen = false; started = false;
++        }
++        publish();
++    }
++    void retire (Status reason) noexcept
++    {
++        if (current.scopeOpen) abort (reason);
++        else if (!current.failed) current.status = reason;
++        current.retired = true;
++        publish();
++        observer.reset(); // CONTROL, after context exclusion. No graph/Host ownership release in DSP.
++    }
++};
++SourceBurstSession::SourceBurstSession (std::unique_ptr<Impl> value) : impl (std::move (value)) {}
++SourceBurstSession::~SourceBurstSession() = default;
++const SourceBurstSession::Configuration& SourceBurstSession::configuration() const noexcept { return impl->config; }
++SourceBurstSession::Status SourceBurstSession::prepare (juce::AudioDeviceManager& manager,
++    const Configuration& config, std::shared_ptr<Observer> observer, Ptr& output) noexcept
++{
++    try
++    {
++        if (!observer || !config.generation || !config.deviceEpoch || !std::isfinite (config.sampleRate) ||
++            config.sampleRate < 8000 || config.sampleRate > 192000 || config.deviceFrames <= 0 ||
++            config.maximumPhysicalFrames <= 0 || config.maximumSourceFrames <= 0 ||
++            config.maximumSourceScalePpm < 900000 || config.maximumSourceScalePpm > 1100000)
++            return Status::invalidConfiguration;
++        const auto upper = sourceBurstUpper (config.maximumPhysicalFrames, config.deviceFrames, config.maximumSourceScalePpm);
++        if (upper <= 0 || upper > config.maximumSourceFrames) return Status::sourceBurstExceeded;
++        auto* device = manager.getCurrentAudioDevice(); // CONTROL only.
++        auto reader = manager.getPhysicalCallbackReader();
++        juce::AudioDeviceManager::PhysicalCallbackSnapshot state;
++        if (!reader.read (state)) return Status::telemetryUnavailable;
++        if (!state.ownerAlive) return Status::managerReleased;
++        if (state.writerConflict) return Status::writerConflict;
++        if (state.countersExhausted) return Status::counterExhausted;
++        if (!state.active || !device) return Status::deviceStopped;
++        if (state.deviceEpoch != config.deviceEpoch || state.configuredFrames != config.deviceFrames || device->getCurrentBufferSizeSamples() != config.deviceFrames)
++            return Status::deviceChanged;
++        if (device->getCurrentSampleRate() != config.sampleRate) return Status::rateChanged;
++        if (state.maximumOuterFrames > config.maximumPhysicalFrames) return Status::physicalBurstExceeded;
++        Ptr prepared (new SourceBurstSession (std::make_unique<Impl> (config, manager, std::move (reader), std::move (observer))));
++        output = std::move (prepared);
++        return Status::prepared;
++    }
++    catch (const std::bad_alloc&) { return Status::allocationFailed; }
++    catch (...) { return Status::preparationFailed; } // No fabricated ready result or output replacement.
++}
++bool SourceBurstSession::read (Outcome& out) const noexcept
++{
++    const auto& state = *impl;
++    for (int attempt = 0; attempt < 3; ++attempt)
++    {
++        const auto before = state.publication.load (std::memory_order_seq_cst);
++        if (before & 1) continue;
++        std::array<juce::uint64, 17> values {};
++        for (size_t i = 0; i < values.size(); ++i) values[i] = state.fields[i].load (std::memory_order_seq_cst);
++        if (state.publication.load (std::memory_order_seq_cst) != before) continue;
++        Outcome result;
++        result.status = Status (values[0]); result.generation = values[1]; result.deviceEpoch = values[2];
++        result.physicalSerial = values[3]; result.physicalFrames = int (values[4]); result.sourceQuota = int (values[5]);
++        result.deviceOffset = int (values[6]); result.sourceProcessed = int (values[7]);
++        result.sliceDeviceFrames = int (values[8]); result.sliceSourceFrames = int (values[9]);
++        result.metadataKnown = (values[10] & 1) != 0; result.scopeOpen = (values[10] & 2) != 0;
++        result.failed = (values[10] & 4) != 0; result.retired = (values[10] & 8) != 0;
++        result.offsetKnown = (values[10] & 16) != 0;
++        result.activationAfterSerial = values[11]; result.observedEpoch = values[12];
++        result.observedSerial = values[13]; result.observedPhysicalFrames = int (values[14]);
++        result.observedOffset = int (values[15]);
++        out = result; return true;
++    }
++    return false;
++}
++static_assert (std::atomic<juce::uint64>::is_always_lock_free && std::atomic<double>::is_always_lock_free,
++               "Prepared source admission requires lock-free scalar atomics");
++
++SourceBurstSession::Status SourceBurstSession::claim (juce::AudioDeviceManager& manager, EditPlaybackContext* context) noexcept
++{
++    if (impl->managerIdentity != &manager || !context) return Status::invalidConfiguration;
++    if (impl->contextIdentity) return Status::alreadyClaimed;
++    if (impl->current.retired) return Status::retired;
++    if (impl->current.failed) return impl->current.status;
++    juce::AudioDeviceManager::PhysicalCallbackSnapshot now;
++    if (!impl->reader.read (now)) return Status::telemetryUnavailable;
++    if (!now.ownerAlive) return Status::managerReleased;
++    if (now.writerConflict) return Status::writerConflict;
++    if (now.countersExhausted) return Status::counterExhausted;
++    if (!now.active) return Status::deviceStopped;
++    if (now.deviceEpoch != impl->config.deviceEpoch || now.configuredFrames != impl->config.deviceFrames)
++        return Status::deviceChanged;
++    // Capture at INSTALL, not just preparation: preparing may precede an
++    // in-flight physical callback by many serials. Never admit its suffix.
++    impl->current.activationAfterSerial = now.callbackSerial;
++    impl->lastClosedSerial = now.callbackSerial;
++    impl->contextIdentity = context;
++    impl->publish();
++    return Status::prepared;
++}
++bool SourceBurstSession::scopeOpen() const noexcept { return impl->current.scopeOpen; }
++void SourceBurstSession::retire (Status status) noexcept { impl->retire (status); }
++
+ 
+ //==============================================================================
+ //==============================================================================
+@@ -272,14 +514,47 @@
+         positionUpdatePending = true;
+     }
+ 
++    SourceBurstSession::Status prepareSourceBurstResources (const SourceBurstSession::Configuration& c, int channels) noexcept
++    {
++        if (channels <= 0 || channels > int (DeviceManager::maxNumChannelsPerDevice))
++            return SourceBurstSession::Status::invalidConfiguration;
++        const auto capacity = sourceBurstUpper (c.deviceFrames, c.deviceFrames, c.maximumSourceScalePpm);
++        if (capacity <= 0 || capacity > std::numeric_limits<int>::max())
++            return SourceBurstSession::Status::sourceBurstExceeded;
++        if (sourceBurstPreparedChannels >= channels && sourceBurstPreparedFrames >= capacity &&
++            interpolators.size() >= size_t (channels))
++            return SourceBurstSession::Status::prepared;
++        try
++        {
++            // A separate allocation avoids corrupting the old AudioBuffer on
++            // failed growth; its temporary contents carry no DSP state.
++            juce::AudioBuffer<float> prepared (channels, int (capacity));
++            ensureNumInterpolators (channels); // Retains all existing interpolator histories.
++            scratchAudioBuffer = std::move (prepared); // Pinned JUCE move assignment is noexcept; CONTROL frees old storage.
++            sourceBurstPreparedChannels = channels;
++            sourceBurstPreparedFrames = int (capacity);
++            return SourceBurstSession::Status::prepared;
++        }
++        catch (const std::bad_alloc&) { return SourceBurstSession::Status::allocationFailed; }
++        catch (...) { return SourceBurstSession::Status::preparationFailed; }
++    }
++    bool sourceBurstResourcesFit (int channels, int sourceFrames) const noexcept
++    {
++        return channels > 0 && channels <= sourceBurstPreparedChannels &&
++            sourceFrames > 0 && sourceFrames <= sourceBurstPreparedFrames &&
++            interpolators.size() >= size_t (channels);
++    }
+     void setSpeedCompensation (double plusOrMinus)
+     {
+-        speedCompensation = juce::jlimit (-10.0, 10.0, plusOrMinus);
++        // MIDI/CONTROL requests are atomic; only DSP owns its latched conversion.
++        if (std::isfinite (plusOrMinus))
++            speedCompensation.store (juce::jlimit (-10.0, 10.0, plusOrMinus), std::memory_order_release);
+     }
+ 
+     void setTempoAdjustment (double plusOrMinusProportion)
+     {
+-        blockLengthScaleFactor = 1.0 + std::clamp (plusOrMinusProportion, -0.5, 0.5);
++        if (std::isfinite (plusOrMinusProportion))
++            blockLengthScaleFactor.store (1.0 + std::clamp (plusOrMinusProportion, -0.5, 0.5), std::memory_order_release);
+     }
+ 
+     void checkForTempoSequenceChanges()
+@@ -303,18 +578,30 @@
+ 
+     void updateReferenceSampleRange (int numSamples)
+     {
+-        if (speedCompensation != 0.0)
+-            numSamples = juce::roundToInt (numSamples * (1.0 + (speedCompensation * 0.01)));
+-
++        const auto speed = speedCompensation.load (std::memory_order_acquire);
++        if (speed != 0.0)
++            numSamples = juce::roundToInt (numSamples * (1.0 + (speed * 0.01)));
++        updateConvertedReferenceSampleRange (numSamples, blockLengthScaleFactor.load (std::memory_order_acquire));
++    }
++    bool updateReferenceSampleRange (int deviceFrames, int expectedSourceFrames, double speed, double scale)
++    {
++        int source = 0;
++        if (!sourceBurstConvertedFrames (deviceFrames, speed, source) || source != expectedSourceFrames ||
++            !std::isfinite (scale) || scale < .5 || scale > 1.5)
++            return false; // Before stream/playhead/processState mutation.
++        updateConvertedReferenceSampleRange (source, scale);
++        return true;
++    }
++    void updateConvertedReferenceSampleRange (int numSamples, double referenceScale)
++    {
+         double sampleDuration = static_cast<double> (numSamples);
+-
+-        if (blockLengthScaleFactor != 1.0)
+-            sampleDuration *= blockLengthScaleFactor;
++        if (referenceScale != 1.0)
++            sampleDuration *= referenceScale;
+ 
+         referenceStreamRange = juce::Range<double>::withStartAndLength (referenceStreamRange.getEnd(), sampleDuration);
+         playHead.setReferenceSampleRange (getReferenceSampleRange());
+         numSamplesToProcess = static_cast<choc::buffer::FrameCount> (numSamples);
+-        processState.setPlaybackSpeedRatio (blockLengthScaleFactor);
++        processState.setPlaybackSpeedRatio (referenceScale);
+ 
+         // This needs to be called after the playhead reference range has been set above
+         checkForTempoSequenceChanges();
+@@ -458,13 +745,15 @@
+     std::atomic<int> latencySamples { 0 };
+     static_assert (std::atomic<int>::is_always_lock_free);
+     int preparedPlayerBlockSize = 0;
+-    int preparedDeviceBlockSize = 0;
++    std::atomic<int> preparedDeviceBlockSize { 0 };
++    // CONTROL activation and DSP use are excluded by existing contextLock.
++    int sourceBurstPreparedChannels = 0, sourceBurstPreparedFrames = 0;
+     bool preparedLatencyCompensationEnabled = true;
+     choc::buffer::FrameCount numSamplesToProcess = 0;
+     juce::Range<double> referenceStreamRange;
+     std::atomic<double> pendingPosition { 0.0 }, pendingPositionJumpTime { 0.0 };
+     std::atomic<bool> positionUpdatePending { false }, pendingRollInToLoop { false }, pendingPositionJumpTimeValid { false }, playPending { false };
+-    double speedCompensation = 0.0, blockLengthScaleFactor = 1.0;
++    std::atomic<double> speedCompensation { 0.0 }, blockLengthScaleFactor { 1.0 };
+     std::vector<std::unique_ptr<juce::LagrangeInterpolator>> interpolators;
+     bool isUsingInterpolator = false;
+ 
+@@ -1109,9 +1398,51 @@
+     nodePlaybackContext->nextBlockStarted();
+ }
+ 
+-void EditPlaybackContext::fillNextNodeBlock (float* const* allChannels, int numChannels, int numSamples)
+-{
+-    nodePlaybackContext->updateReferenceSampleRange (numSamples);
++SourceBurstSession::Status EditPlaybackContext::prepareSourceBurstResources (const SourceBurstSession::Configuration& c, int channels) noexcept
++{
++    return nodePlaybackContext ? nodePlaybackContext->prepareSourceBurstResources (c, channels)
++                               : SourceBurstSession::Status::contextUnavailable;
++}
++bool EditPlaybackContext::preflightSourceBurst (int frames, int channels, int physicalOffset, bool offsetKnown,
++    juce::uint64 physicalEpoch, juce::uint64 physicalSerial, double rate, int block) noexcept
++{
++    if (!sourceBurstSession) return true;
++    auto& state = *sourceBurstSession->impl;
++    if (!nodePlaybackContext) return state.fail (SourceBurstSession::Status::contextUnavailable);
++    if (!state.preflight (frames, physicalOffset, offsetKnown, physicalEpoch, physicalSerial,
++        rate, block, nodePlaybackContext->getSampleRate(),
++        nodePlaybackContext->preparedDeviceBlockSize.load (std::memory_order_acquire),
++        nodePlaybackContext->speedCompensation.load (std::memory_order_acquire),
++        nodePlaybackContext->blockLengthScaleFactor.load (std::memory_order_acquire))) return false;
++    if (!nodePlaybackContext->sourceBurstResourcesFit (channels, state.current.sliceSourceFrames))
++        return state.fail (SourceBurstSession::Status::conversionResourcesUnavailable);
++    return true;
++}
++bool EditPlaybackContext::beginSourceBurst() noexcept
++{ return !sourceBurstSession || sourceBurstSession->impl->begin(); }
++void EditPlaybackContext::abortSourceBurst (SourceBurstSession::Status reason) noexcept
++{ if (sourceBurstSession) sourceBurstSession->impl->abort (reason); }
++bool EditPlaybackContext::finishSourceBurst() noexcept
++{
++    if (!sourceBurstSession) return true;
++    auto& state = *sourceBurstSession->impl;
++    if (state.current.failed) return false;
++    state.finish();
++    return !state.current.failed;
++}
++bool EditPlaybackContext::fillNextNodeBlock (float* const* allChannels, int numChannels, int numSamples)
++{
++    if (sourceBurstSession)
++    {
++        auto& state = *sourceBurstSession->impl;
++        if (!state.preflighted || !state.started || state.current.failed ||
++            nodePlaybackContext->getSampleRate() != state.config.sampleRate ||
++            !nodePlaybackContext->updateReferenceSampleRange (numSamples, state.current.sliceSourceFrames,
++                                                            state.speed, state.referenceScale))
++            return state.fail (SourceBurstSession::Status::invalidConversion);
++    }
++    else
++        nodePlaybackContext->updateReferenceSampleRange (numSamples);
+ 
+     // Sync this playback context with a master context
+     if (nodeContextToSyncTo && nodePlaybackContext->playHead.isPlaying() && nodeContextToSyncTo->getNodePlayHead() != nullptr)
+@@ -1146,6 +1477,7 @@
+     // Dispatch any MIDI messages that have been injected in to the MidiOutputDeviceInstances by the Node
+     auto editTime = nodePlaybackContext->processState.getSyncRange().start.time;
+     midiDispatcher.dispatchPendingMessagesForDevices (editTime);
++    return true;
+ }
+ 
+ InputDeviceInstance* EditPlaybackContext::getInputFor (InputDevice* d) const

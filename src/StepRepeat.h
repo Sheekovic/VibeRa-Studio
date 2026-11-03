@@ -1,0 +1,98 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+#pragma once
+#include "StepVelocity.h"
+#include "NoteRepeat.h"
+
+namespace vibera
+{
+struct StepRepeatInfo
+{
+    const char *id, *command, *field, *units;
+    double minimum, maximum, defaultValue;
+};
+inline const StepRepeatInfo *stepRepeatInfo() noexcept
+{
+    static constexpr StepRepeatInfo info{"repeat", "steps.repeat", "repeatMode", "rate index", 0, 14, 0};
+    return &info;
+}
+// CONTROL-only. Gesture previews use their immutable opening Project; all
+// validation precedes writes, including when the caller aliases next/baseline.
+inline juce::Result applyStepRepeat(Project &next, const Project &baseline, const CommandArgs &args)
+{
+    auto *pattern = next.pattern(args.pattern);
+    const auto *channel = next.channel(args.channel);
+    const auto *original = baseline.pattern(args.pattern);
+    if (!pattern || !channel || channel->audioClip || !original)
+        return juce::Result::fail("Choose a current playable Channel and Pattern");
+    const auto mode = args.text.isEmpty() ? juce::String("set") : args.text;
+    if (mode != "set" && mode != "reset" && mode != "ramp" && mode != "scale")
+        return juce::Result::fail("Repeat mode must be set, reset, ramp or scale");
+    const auto validMode = [](double value)
+    { return std::isfinite(value) && value >= 0 && value <= 14 && value == std::round(value); };
+    if (mode != "reset" && !validMode(args.value))
+        return juce::Result::fail("Repeat must be an integral rate index 0-14");
+    if (mode == "ramp" && (!validMode(args.offset) || !std::isfinite(args.beat) ||
+                           !std::isfinite(args.length) || args.beat < 0 || args.beat >= pattern->length ||
+                           args.beat + args.length < 0 || args.beat + args.length >= pattern->length ||
+                           std::abs(args.beat * 4 - std::round(args.beat * 4)) > .00001 ||
+                           std::abs(args.length * 4 - std::round(args.length * 4)) > .00001))
+        return juce::Result::fail(
+            "Ramp endpoints must be in-loop sixteenth-note beats with Repeat rate indices 0-14");
+    if (args.ids.size() > 100000)
+        return juce::Result::fail("Too many Repeat targets");
+    std::map<Id, Note *> current;
+    // Store values, not pointers into baseline: even direct in-place calls
+    // transpose every note from the same pre-edit anchor and Repeat index snapshot.
+    std::map<Id, std::pair<double, int>> before;
+    for (auto &note : pattern->notes)
+        if (graphStep(note, channel->id, pattern->length))
+            current.emplace(note.id, &note);
+    for (const auto &note : original->notes)
+        if (graphStep(note, channel->id, original->length))
+            before.emplace(note.id, std::pair{note.beat, note.repeatMode});
+    std::set<Id> targets;
+    if (args.ids.empty())
+        for (const auto &[id, note] : current)
+            targets.insert(id);
+    else
+        for (auto id : args.ids)
+            if (!current.contains(id) || !targets.insert(id).second)
+                return juce::Result::fail(
+                    "Repeat targets must be unique current active step-note IDs in this Channel");
+    if (targets.empty())
+        return juce::Result::fail("This Channel has no active step events in the current Pattern");
+    for (auto id : targets)
+        if (!noteRepeatRate(current.at(id)->repeatMode))
+            return juce::Result::fail("Invalid source Repeat index");
+    if (mode == "scale" || mode == "ramp")
+        for (auto id : targets)
+            if (!before.contains(id) || before.at(id).first != current.at(id)->beat ||
+                !noteRepeatRate(before.at(id).second))
+                return juce::Result::fail(
+                    "Step targets changed since gesture start; finish or cancel and rediscover");
+    if (mode == "scale" && (!targets.contains(args.target) || !before.contains(args.target)))
+        return juce::Result::fail("Scale anchor must be one of the targeted active step-note IDs");
+    for (auto id : targets)
+    {
+        auto &note = *current.at(id);
+        if (mode == "set" || mode == "reset")
+            note.repeatMode = mode == "reset" ? 0 : int(args.value);
+        else if (mode == "scale")
+            note.repeatMode =
+                juce::jlimit(0, 14, before.at(id).second + int(args.value) - before.at(args.target).second);
+        else
+        {
+            note.repeatMode = before.at(id).second;
+            const auto low = std::min(args.beat, args.beat + args.length);
+            const auto high = std::max(args.beat, args.beat + args.length);
+            if (note.beat >= low - 1.e-8 && note.beat <= high + 1.e-8)
+            {
+                const auto amount = args.length == 0 ? 1. : (note.beat - args.beat) / args.length;
+                note.repeatMode =
+                    juce::jlimit(0, 14, int(std::round(args.value + amount * (args.offset - args.value))));
+            }
+        }
+    }
+    return juce::Result::ok();
+}
+} // namespace vibera

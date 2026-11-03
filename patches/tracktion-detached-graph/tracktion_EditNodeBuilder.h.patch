@@ -1,0 +1,83 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -9,11 +9,59 @@
+ */
+ 
+ #pragma once
++#include <stdexcept>
+ 
+ namespace tracktion::inline engine
+ {
+ 
+ class TrackMuteState;
++
++// ORIGINAL opt-in immutable routing specification. CONTROL preparation/build
++// only, never queried by DSP. It does not mutate TrackOutput or own an Edit.
++class GraphOutputRouting final
++{
++public:
++    enum class Target { defaultWaveDevice, destinationTrack, disconnected };
++    struct Route
++    {
++        EditItemID source;
++        Target target = Target::defaultWaveDevice;
++        EditItemID destination; // Valid ONLY for destinationTrack; native stable ID, not list index.
++    };
++    enum class Status
++    {
++        foreignEdit, changedUniverse, unsupportedTrack, unsupportedNativeOutput,
++        invalidSource, duplicateSource, incompleteMap, invalidDestination,
++        invalidTarget, cycle, changedNativeOutput, changedDefaultDevice
++    };
++    class Error final : public std::invalid_argument
++    {
++    public:
++        Error (Status value, const char* message) : std::invalid_argument (message), status (value) {}
++        const Status status;
++    };
++    struct Resolved
++    {
++        Target target;
++        AudioTrack* destination = nullptr;
++        OutputDevice* device = nullptr;
++    };
++    // Complete map for EVERY existing AudioTrack, exact fixed track universe.
++    // A named/MIDI-device route or submix/freeze needs a future explicit contract.
++    static std::shared_ptr<const GraphOutputRouting> prepare (Edit&, std::vector<Route>);
++    ~GraphOutputRouting(); // CONTROL only; no last-owner retirement on callback.
++    GraphOutputRouting (const GraphOutputRouting&) = delete;
++    GraphOutputRouting& operator= (const GraphOutputRouting&) = delete;
++    void validateForBuild (Edit&, bool needsLiveDevice) const; // May allocate/throw before native Nodes.
++    Resolved resolve (const Track&) const;                    // Only within validated sole-control build lease.
++    const std::vector<Route>& getRoutes() const noexcept;
++private:
++    struct Impl;
++    explicit GraphOutputRouting (std::unique_ptr<Impl>);
++    std::unique_ptr<Impl> impl;
++};
++
++
+ 
+ //==============================================================================
+ /**
+@@ -33,6 +81,20 @@
+     bool implicitlyIncludeSubmixChildTracks = true;     /**< If true, child track in submixes will be included regardless of the allowedTracks param. Only relevent when forRendering is also true. */
+     juce::Array<EditItemID> tracksToProcessWhileMuted = {};  /**< Tracks whose contents keep processing while the track is muted, so they can feed sidechains, aux buses and racks without being heard. Used by stem renders. @see Renderer::Parameters::tracksToProcessWhileMuted */
+     bool allowClipSlots = true;                         /**< If true, track's clip slots will be included, set to false to disable these (which will use a slightly more efficient Node). */
++    /** Optional owning per-build overlay. Invoked once for each plugin-list build.
++        Return the same owners for unaffected DSP, a private target adapter/taps
++        for changed stages. Never mutate the Edit/list or process a preview graph.
++        Lifetime of returned plugins transfers to the ordinary native Nodes.
++        Empty/unset preserves the native list and factory behavior.
++    */
++    std::function<Plugin::Array (const PluginList&)> pluginListResolver = {};
++    std::shared_ptr<const GraphOutputRouting> outputRouting = {}; // Complete immutable fixed-universe map.
++    // Internal opt-in only. Predicate must admit EVERY exact encountered owner
++    // and supported fixed type, not IDs alone. Empty preserves normal behavior.
++    // Positive-count owners attach without live bookkeeping writes. Zero-count
++    // owners must be actual private detached adapters, not unprepared incumbents.
++    std::function<bool (const Plugin&)> fixedInitialisationAdmission = {};
++
+     bool readAheadTimeStretchNodes = false;             /**< TEMPORARY: If true, real-time time-stretch Nodes will use a larger buffer and background thread to reduce audio CPU use. */
+ 
+     /** If set, this will be called for each output device to give an opportunity to add an

@@ -1,0 +1,98 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
+@@ -9,8 +9,9 @@
+ */
+ 
+ #pragma once
+ #include <stdexcept>
++#include <MidiCompensationHistory.h>
+ 
+ //==============================================================================
+ //==============================================================================
+ /**
+@@ -238,8 +239,22 @@
+         audioCompensationHistoryBudget = graphStorageBudget;
+     }
+     uint32_t getAudioCompensationHistoryMaximumDelay() const noexcept { return audioCompensationHistoryMaximumDelay; }
+     size_t getAudioCompensationHistoryBudget() const noexcept { return audioCompensationHistoryBudget; }
++    // Separate bounded original MIDI experiment. Default OFF; preparation only.
++    void setMidiCompensationHistory (vibera::dsp::MidiHistoryLimits limits)
++    {
++        if (limits.enabled() && vibera::dsp::MidiCompensationHistory::storageBytes (limits) > limits.graphBytes)
++            throw std::length_error ("Bounded MIDI history needs an explicit graph budget");
++        midiCompensationHistoryLimits = limits;
++    }
++    const vibera::dsp::MidiHistoryLimits& getMidiCompensationHistoryLimits() const noexcept
++    {
++        return midiCompensationHistoryLimits;
++    }
++    // Immutable preparation identity only; no queue/gate inspection.
++    virtual std::optional<vibera::dsp::CompensationEdge> getBoundedMidiHistoryEdge() const noexcept { return {}; }
++
+ 
+ 
+     //==============================================================================
+     /** Call once after the graph has been constructed to initialise buffers etc. */
+@@ -408,8 +423,9 @@
+ 
+ private:
+     uint32_t audioCompensationHistoryMaximumDelay = 0;
+     size_t audioCompensationHistoryBudget = 0;
++    vibera::dsp::MidiHistoryLimits midiCompensationHistoryLimits;
+     std::atomic<bool> hasBeenProcessed { false };
+     choc::buffer::Size audioBufferSize;
+     choc::buffer::ChannelArrayBuffer<float> audioBuffer;
+     choc::buffer::ChannelArrayView<float> audioView, allocatedView;
+@@ -500,9 +516,32 @@
+ //==============================================================================
+ //==============================================================================
+ inline void Node::initialise (const PlaybackInitialisationInfo& info)
+ {
++    // Never enable a new queue policy over unidentified live legacy queues.
++    // A stopped transport alone does not prove pending releases reconciled.
++    // Explicit clearNode/release before rebuilding leaves no old graph here.
++    if (info.nodeGraph.rootNode->getMidiCompensationHistoryLimits().enabled() &&
++        info.nodeGraphToReplace && info.nodeGraphToReplace->rootNode &&
++        !info.nodeGraphToReplace->rootNode->getMidiCompensationHistoryLimits().enabled())
++        throw std::invalid_argument ("Cannot enable bounded MIDI while replacing an unmarked legacy graph");
++    // Reserve every Node's own source/intermediate/output array outside DSP.
++    // This bounded experiment still requires declared source/fan-in quotas and
++    // a separately preallocated caller-owned player sink. Arbitrary plugin
++    // swap-with-temporary containers are not qualified by this reservation.
++    if (const auto& midi = info.nodeGraph.rootNode->getMidiCompensationHistoryLimits(); midi.enabled())
++        midiBuffer.reserve (int (midi.outputEvents));
+     prepareToPlay (info);
++    if (this == info.nodeGraph.rootNode.get() && info.nodeGraphToReplace)
++        for (auto* old : info.nodeGraphToReplace->orderedNodes)
++            if (const auto oldEdge = old->getBoundedMidiHistoryEdge())
++            {
++                size_t matches = 0;
++                for (auto* candidate : info.nodeGraph.orderedNodes)
++                    if (candidate->getBoundedMidiHistoryEdge() == oldEdge) ++matches;
++                if (matches != 1)
++                    throw std::invalid_argument ("Cannot remove an unreconciled bounded MIDI edge");
++            }
+ 
+     auto props = getNodeProperties();
+     audioBufferSize = choc::buffer::Size::create ((choc::buffer::ChannelCount) props.numberOfChannels,
+                                                   (choc::buffer::FrameCount) info.blockSize);
+@@ -829,8 +868,19 @@
+             historyBudget = budget;
+         }
+     if (maximumHistory != 0)
+         rootNode->setAudioCompensationHistory (maximumHistory, historyBudget);
++    vibera::dsp::MidiHistoryLimits midiLimits;
++    for (auto* node : getNodes (*rootNode, VertexOrdering::postordering))
++        if (const auto& limits = node->getMidiCompensationHistoryLimits(); limits.enabled())
++        {
++            if (midiLimits.enabled() && midiLimits != limits)
++                throw std::invalid_argument ("Conflicting bounded MIDI history scopes");
++            midiLimits = limits;
++        }
++    if (midiLimits.enabled())
++        rootNode->setMidiCompensationHistory (midiLimits);
++
+     auto orderedNodes = transformNodes (*rootNode, disableLatencyCompensation);
+     auto sortedNodes = createNodeMap (orderedNodes);
+ 
+     // Iterate all nodes, for each input, increment the dest Node output count

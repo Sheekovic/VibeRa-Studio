@@ -1,0 +1,180 @@
+--- a/modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h
++++ b/modules/tracktion_graph/utilities/tracktion_LatencyProcessor.h
+@@ -9,8 +9,12 @@
+ */
+ 
+ #pragma once
++#include <cstdint>
++#include <limits>
+ 
+ namespace tracktion::inline graph {
++class LatencyNode;
++
+ 
+ //==============================================================================
+ //==============================================================================
+@@ -42,11 +46,14 @@
+     void setLatencyNumSamples (int numLatencySamples)
+     {
+         assert (numLatencySamples < (196'000 * 60) && "Invalid latency size");
++        invalidateAudioReference();
+         latencyNumSamples = numLatencySamples;
+     }
+ 
+     void prepareToPlay (double sampleRateToUse, int blockSize, int numChannels)
+     {
++        invalidateAudioReference();
++        terminalReader = nullptr;
+         sampleRate = sampleRateToUse;
+         latencyTimeSeconds = sampleToTime (latencyNumSamples, sampleRate);
+ 
+@@ -57,11 +64,14 @@
+ 
+     void writeAudio (choc::buffer::ChannelArrayView<float> src)
+     {
++        invalidateAudioReference();
++        lastWriteRevision = audioMutationRevision;
++        lastWriteSucceeded = false;
+         if (fifo.getNumChannels() == 0)
+             return;
+ 
+         jassert (fifo.getNumChannels() >= src.getNumChannels());
+-        fifo.write (src);
++        lastWriteSucceeded = fifo.write (src);
+     }
+ 
+     void writeMIDI (const tracktion_engine::MidiMessageArray& src)
+@@ -71,6 +81,7 @@
+ 
+     void readAudioAdding (choc::buffer::ChannelArrayView<float> dst)
+     {
++        invalidateAudioReference();
+         if (fifo.getNumChannels() == 0)
+             return;
+ 
+@@ -80,11 +91,56 @@
+ 
+     void readAudioOverwriting (choc::buffer::ChannelArrayView<float> dst)
+     {
++        invalidateAudioReference();
++        lastReadRevision = audioMutationRevision;
++        lastReadSucceeded = false;
+         if (fifo.getNumChannels() == 0)
+             return;
+ 
+         jassert (fifo.getNumReady() >= (int) dst.getNumFrames());
+-        fifo.readOverwriting (dst);
++        lastReadSucceeded = fifo.readOverwriting (dst);
++    }
++
++    // ORIGINAL opt-in, processing-owner-only terminal audio drain. No writer
++    // may use this processor after adoption. CONTROL must NEVER call this or
++    // inspect its FIFO/MIDI. Validate all conditions before advancing any queue.
++    enum class TerminalDrainStatus { ready, shape, queueSize, nativeMidi, unavailable,
++                                     unknownReference, incompleteHistory, discontinuity, writerChanged, configuration };
++    TerminalDrainStatus drainTerminalAudioPrefix (choc::buffer::ChannelArrayView<float> dst,
++                                                  int expectedRemaining, const void* expectedWriter,
++                                                  const void* reader, int expectedDelay, double expectedRate,
++                                                  int64_t firstReferenceStart,
++                                                  bool firstCall) noexcept
++    {
++        if (expectedRemaining <= 0 || dst.getNumFrames() == 0 ||
++            dst.getNumFrames() > static_cast<choc::buffer::FrameCount> (expectedRemaining) ||
++            dst.getNumChannels() == 0 || dst.getNumChannels() != fifo.getNumChannels() || !reader || !expectedWriter)
++            return TerminalDrainStatus::shape;
++        if (!hasConfiguration (expectedDelay, expectedRate, int (dst.getNumChannels())))
++            return TerminalDrainStatus::configuration;
++        // Same serialized processing owner only. A continued incumbent/foreign
++        // audio write, read, clear or reprepare invalidates the claimed revision.
++        if (terminalReader && (terminalReader != reader || terminalRevision != audioMutationRevision))
++            return TerminalDrainStatus::writerChanged;
++        if (firstCall)
++        {
++            if (terminalReader) return TerminalDrainStatus::writerChanged;
++            if (!referenceKnown || mutationExhausted) return TerminalDrainStatus::unknownReference;
++            if (referenceWriter != expectedWriter) return TerminalDrainStatus::writerChanged;
++            if (referenceEnd != firstReferenceStart) return TerminalDrainStatus::discontinuity;
++            // lastEnd alone is insufficient: a prior gap + one256 old callback
++            // leaves31 pre-gap samples whenD287. Only fully replaced history qualifies.
++            if (contiguousKnownFrames < latencyNumSamples) return TerminalDrainStatus::incompleteHistory;
++        }
++        else if (terminalReader != reader) return TerminalDrainStatus::writerChanged;
++        if (fifo.getNumReady() != expectedRemaining)
++            return TerminalDrainStatus::queueSize;
++        if (! midi.isEmpty() || midi.isAllNotesOff)
++            return TerminalDrainStatus::nativeMidi;
++        // Claim only after all validation, before the first successful drain.
++        // No CONTROL witness/FIFO reads; no owning pointer changes or CAS loops.
++        if (firstCall) { terminalReader = reader; terminalRevision = audioMutationRevision; }
++        return fifo.readOverwriting (dst) ? TerminalDrainStatus::ready : TerminalDrainStatus::unavailable;
+     }
+ 
+     void readMIDI (tracktion_engine::MidiMessageArray& dst, int numSamples)
+@@ -117,6 +173,7 @@
+ 
+     void clearAudio (int numSamples)
+     {
++        invalidateAudioReference();
+         fifo.removeSamples (numSamples);
+     }
+ 
+@@ -142,6 +199,59 @@
+     }
+ 
+ private:
++    friend class LatencyNode;
++    // DSP-only plain scalars. Never read from CONTROL. Actual fixed Player
++    // publication establishes single processing ownership across graph adoption.
++    struct ReferenceBeforeAudio
++    {
++        bool known;
++        int64_t end;
++        int coverage;
++        const void* writer;
++        uint64_t revision;
++    };
++    ReferenceBeforeAudio referenceBeforeAudio() const noexcept
++    {
++        return { referenceKnown, referenceEnd, contiguousKnownFrames, referenceWriter, audioMutationRevision };
++    }
++    void invalidateAudioReference() noexcept
++    {
++        referenceKnown = false;
++        contiguousKnownFrames = 0;
++        if (audioMutationRevision == std::numeric_limits<uint64_t>::max()) mutationExhausted = true;
++        else ++audioMutationRevision;
++    }
++    void completeAudioReference (ReferenceBeforeAudio before, const void* writer,
++                                 juce::Range<int64_t> range, uint32_t inputFrames, uint32_t outputFrames,
++                                 uint32_t inputChannels, uint32_t outputChannels) noexcept
++    {
++        // Only the exact ordinary write->overwrite pair just completed can
++        // certify PCM provenance. Unknown/gap/shape resets coverage; ordinary
++        // audio processing/output semantics remain unchanged.
++        if (!writer || mutationExhausted || before.revision > std::numeric_limits<uint64_t>::max() - 2 ||
++            audioMutationRevision != before.revision + 2 || lastWriteRevision != before.revision + 1 ||
++            lastReadRevision != before.revision + 2 || !lastWriteSucceeded || !lastReadSucceeded ||
++            !inputFrames || inputFrames != outputFrames || inputChannels != fifo.getNumChannels() ||
++            outputChannels != fifo.getNumChannels() || range.getStart() < 0 ||
++            range.getStart() > std::numeric_limits<int64_t>::max() - int64_t (outputFrames) ||
++            range.getEnd() != range.getStart() + int64_t (outputFrames) || fifo.getNumReady() != latencyNumSamples)
++            return; // Existing mutators already invalidated the witness.
++        const bool follows = before.known && before.writer == writer && before.end == range.getStart();
++        const auto coverage = int64_t (follows ? before.coverage : 0) + int64_t (outputFrames);
++        contiguousKnownFrames = int (std::min (int64_t (latencyNumSamples), coverage));
++        referenceWriter = writer;
++        referenceEnd = range.getEnd();
++        referenceKnown = true;
++    }
++    bool referenceKnown = false, mutationExhausted = false;
++    bool lastWriteSucceeded = false, lastReadSucceeded = false;
++    int64_t referenceEnd = 0;
++    int contiguousKnownFrames = 0;
++    const void* referenceWriter = nullptr;
++    uint64_t audioMutationRevision = 0, lastWriteRevision = 0, lastReadRevision = 0;
++    const void* terminalReader = nullptr;
++    uint64_t terminalRevision = 0;
++
+     int latencyNumSamples = 0;
+     double sampleRate = 44100.0;
+     double latencyTimeSeconds = 0.0;

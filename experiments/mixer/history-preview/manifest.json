@@ -1,0 +1,44 @@
+{
+  "scope": "isolated source draft only; no builds or runtime qualification",
+  "base": {
+    "src/Commands.h": {
+      "sha256": "3dafc67ba8e9cd081e522d6e8f3b1f2538479f3c9322924c5dad6ff8fa826d00",
+      "lfSha256": "0f26a6babc8de019240529eebfffc92832509fd331f92b34b62c1d2480e5a33b"
+    },
+    "src/Commands.cpp": {
+      "sha256": "ebd9197346f83f56606210bf4f7bab4edc29376e186c5d5896d85efef4687f87",
+      "lfSha256": "49b97c9b521ec7db4e9c1d4ed33fd531752052e9bf6e2f35819b77e7c57bc8fb"
+    },
+    "vendor/source/JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576/modules/juce_data_structures/undomanager/juce_UndoManager.h": {
+      "sha256": "c5fe50604433ac74631eacce30d2f5ddeec4d6d6ea692df93d397a0aab9dfbf0",
+      "lfSha256": "5cfeed3304008e74a7c761c4eed37518e7c44db59da071d59366d71c22b50fe1"
+    },
+    "vendor/source/JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576/modules/juce_data_structures/undomanager/juce_UndoManager.cpp": {
+      "sha256": "3c671050294238a8900d53a49db10d1c15c06a03e1dcfae34ab02ff0371b968f",
+      "lfSha256": "5f53653d66eb9e5be0143b37a1f0149f12d005d647136a8f47021c9a9834c0cc"
+    }
+  },
+  "final": {
+    "src/Commands.h": {
+      "sha256": "5a6e3b3fcd6851abf1fdb9581045dc67aef6c414544203b926378da00e6e4e60",
+      "lfSha256": "5a6e3b3fcd6851abf1fdb9581045dc67aef6c414544203b926378da00e6e4e60"
+    },
+    "src/Commands.cpp": {
+      "sha256": "65b1ae5438e68a859626b0e26b3b2aa2f30744074ee28db5ff743e41dc8eb82c",
+      "lfSha256": "65b1ae5438e68a859626b0e26b3b2aa2f30744074ee28db5ff743e41dc8eb82c"
+    },
+    "vendor/source/JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576/modules/juce_data_structures/undomanager/juce_UndoManager.h": {
+      "sha256": "21a4e9952394700f0960b270f45ede72c2374449033f25265085e3271dc2e357",
+      "lfSha256": "21a4e9952394700f0960b270f45ede72c2374449033f25265085e3271dc2e357"
+    },
+    "vendor/source/JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576/modules/juce_data_structures/undomanager/juce_UndoManager.cpp": {
+      "sha256": "650f94532509c85bf54cb31946da459d8f2ec9a11fec7fffb94c62b31f978731",
+      "lfSha256": "650f94532509c85bf54cb31946da459d8f2ec9a11fec7fffb94c62b31f978731"
+    },
+    "tests/HistoryDestinationAcceptance.h": {
+      "sha256": "b090b3d4f41c4e388963aff5e8cbd0ed69a4611e551377f0d8377bf81ceec3ef",
+      "lfSha256": "b090b3d4f41c4e388963aff5e8cbd0ed69a4611e551377f0d8377bf81ceec3ef"
+    }
+  },
+  "patchSha256": "9a41fe13bf8f473655372f40d407836ca5681770b27ec787e26e6743691c3847"
+}

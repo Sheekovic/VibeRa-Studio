@@ -1,0 +1,15 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_Node.h
+@@ -157,6 +157,12 @@
+     int numberOfChannels = 0;
+     int latencyNumSamples = 0;
+     size_t nodeID = 0;
++    // ORIGINAL opt-in exact bus-output stream identity, independent of input
++    // topology/nodeID. Non-owning: the producing Plugin/Node MUST pin its
++    // nonmoving control-prepared owner for both old and replacement graph lives.
++    // Null preserves legacy behavior. Never persisted/hashed or acquired by DSP.
++    const void* audioCompensationStage = nullptr;
++    const void* audioCompensationStageOrigin = nullptr; // One exact producing Node within this graph only.
+ };
+ 
+ //==============================================================================

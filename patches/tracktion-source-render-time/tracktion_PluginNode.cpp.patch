@@ -1,0 +1,13 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
+@@ -130,7 +130,9 @@
+         reserveMidiOutputForPreparation (preparedShortMidiCapacity);
+     }
+ 
+-    if (props.latencyNumSamples > 0)
++    if (plugin->usesUnadjustedSourceRenderTime())
++        automationAdjustmentTime = {};
++    else if (props.latencyNumSamples > 0)
+         automationAdjustmentTime = TimeDuration::fromSamples (-props.latencyNumSamples, sampleRate);
+ 
+     if (shouldUseFineGrainAutomation (*plugin))

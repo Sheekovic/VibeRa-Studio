@@ -1,0 +1,12 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_TracktionNodePlayer.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_TracktionNodePlayer.h
+@@ -66,6 +66,9 @@
+     int getPreparedLatencySamples() const noexcept { return nodePlayer.getPreparedLatencySamples(); }
+     using GraphSelection = tracktion::graph::LockFreeMultiThreadedNodePlayer::GraphSelection;
+     GraphSelection graphSelection() const noexcept { return nodePlayer.graphSelection(); }
++    // Diagnostic only, CONTROL/quiescent lifetime contract inherited from player.
++    void setNativePhaseCapture (graph::NativePhaseCapture* capture) noexcept
++    { nodePlayer.setNativePhaseCapture (capture); }
+ 
+ 
+     void setNode (std::unique_ptr<tracktion::graph::Node> newNode)

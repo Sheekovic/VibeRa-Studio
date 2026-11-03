@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "dependencies": [
+    {
+      "name": "tracktion_engine",
+      "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+      "url": "https://codeload.github.com/Tracktion/tracktion_engine/zip/4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+      "archive": "tracktion.zip",
+      "sha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+      "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+      "license": "GPL-3.0-or-later"
+    },
+    {
+      "name": "JUCE",
+      "revision": "37c894f83d379179b2070d437ccd0f1cd9af9576",
+      "url": "https://codeload.github.com/juce-framework/JUCE/zip/37c894f83d379179b2070d437ccd0f1cd9af9576",
+      "archive": "juce.zip",
+      "sha256": "f3da0cce79f1008b02ba1cddde8eba1087d07a4d6a775a0ba0d56a9d3cecd18a",
+      "sourceDirectory": "JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576",
+      "license": "AGPL-3.0-only"
+    }
+  ]
+}

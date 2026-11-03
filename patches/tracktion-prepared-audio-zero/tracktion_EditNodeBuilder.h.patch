@@ -1,0 +1,17 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -140,6 +140,14 @@
+     static std::function<std::unique_ptr<graph::Node> (std::unique_ptr<tracktion::graph::Node>)> insertOptionalLastStageNode;
+     // CONTROL-only audit. Does not replace/suppress an arbitrary global producer.
+     static bool usesDefaultLastStageNode() noexcept;
++    // ORIGINAL CONTROL-only AUDIO-domain proof. No MIDI suppression or queue
++    // inference: exact known native transforms recurse over ALL audio inputs;
++    // caller admits only its independently audited zero-preserving processors
++    // and exact already-prepared output ports. Unknown nodes return false.
++    static bool hasPreparedAudioZeroOutput (graph::Node&,
++        const std::function<bool (Plugin&)>& admitZeroPreservingPlugin,
++        const std::function<std::optional<graph::Node*> (graph::Node&)>& preparedOutputPort);
++
+ };
+ 
+ //==============================================================================

@@ -1,0 +1,27 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
+@@ -31,6 +31,15 @@
+     void createPlayAudioNodesIfNeeded (TimePosition startTime);
+     void reallocate();
+ 
++    /** Rebuilds only an existing graph on the message/control thread.
++        Requires an allocated graph and the same valid device sample rate and
++        buffer size. Does not prepare output devices, start MIDI devices, change
++        worker thread counts, or restart the playhead. Throws before publication
++        for invalid/missing device configuration or a null replacement graph.
++        This does not promise rollback of arbitrary exceptions after publication.
++    */
++    void reallocateGraphOnly();
++
+     /** Sets a callback used to add an additional final Node to each output device's chain
+         when the playback graph is (re)built. See CreateNodeParams::insertOptionalLastStageNodeForDevice.
+         The callback is applied on the next graph build, so call reallocate()/Edit::restartPlayback()
+@@ -221,7 +230,7 @@
+     std::atomic<double> audiblePlaybackTime { 0.0 };
+     std::atomic<int> activelyRecordingInputDevices { 0 };
+ 
+-    void createNode();
++    void createNode (bool updateThreads = true);
+     void nextBlockStarted();
+     void fillNextNodeBlock (float* const* allChannels, int numChannels, int numSamples);
+ 

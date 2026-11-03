@@ -1,0 +1,8 @@
+{
+  "completed": false,
+  "failure": "HTTP404 for VCSL LICENSE at the pinned sfz branch",
+  "retainedVerifiedSamples": 98,
+  "retainedSampleBytes": 162372178,
+  "missingSamples": [],
+  "nextAction": "The sfz README declares CC0; retain the full legal text from the same publisher repository's separately pinned master revision and record licenseRevision explicitly."
+}

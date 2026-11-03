@@ -1,0 +1,27 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -129,6 +129,11 @@
+     std::function<std::unique_ptr<graph::Node> (OutputDevice&,
+                                                 const CreateNodeParams&,
+                                                 std::unique_ptr<graph::Node>)> insertOptionalLastStageNodeForDevice = {};
++
++    // ORIGINAL CONTROL-only, once for the ACTUAL whole factory root after
++    // device assembly/remapping/PlayHeadPosition. Empty preserves legacy output.
++    // The callback may throw during private preparation, never run in DSP.
++    std::function<std::unique_ptr<graph::Node> (std::unique_ptr<graph::Node>)> prepareWholeGraphOutput = {};
+ };
+ 
+ //==============================================================================
+@@ -149,6 +154,12 @@
+         const std::function<std::optional<graph::Node*> (graph::Node&)>& preparedOutputPort,
+         const std::function<void (graph::Node&, const char*, bool)>& trace = {});
+ 
++    // CONTROL audio-domain multiplicity proof. Exactly ONE edge-path from the
++    // actual admitted source is required. Other inputs must independently be
++    // structurally zero; shared DAG edges count twice, unknowns always refuse.
++    static bool hasPreparedSingleAudioSourceOutput (graph::Node&, const graph::Node& source,
++        const std::function<bool (Plugin&)>& admitZeroPreservingPlugin,
++        const std::function<std::optional<graph::Node*> (graph::Node&)>& preparedOutputPort);
+ };
+ 
+ //==============================================================================

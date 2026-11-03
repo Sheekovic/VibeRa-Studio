@@ -1,0 +1,21 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_PluginNode.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_PluginNode.h
+@@ -40,7 +40,8 @@
+                 const TrackMuteState*,
+                 ProcessState&,
+                 bool rendering, bool balanceLatency,
+-                int maxNumChannelsToUse, bool fixedInitialisation = false);
++                int maxNumChannelsToUse, bool fixedInitialisation = false,
++                int preparedShortMidiCapacity = 0, bool stageMovedToOutputPort = false);
+ 
+     /** Destructor. */
+     ~PluginNode() override;
+@@ -64,6 +65,8 @@
+     const TrackMuteState* trackMuteState = nullptr;
+     tracktion::graph::PlayHeadState& playHeadState;
+     bool isRendering = false;
++    const int preparedShortMidiCapacity;
++    const bool stageMovedToOutputPort;
+ 
+     bool isInitialised = false;
+     double sampleRate = 44100.0;

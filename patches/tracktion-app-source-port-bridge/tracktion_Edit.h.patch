@@ -1,0 +1,42 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.h
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.h
+@@ -12,6 +12,7 @@
+ {
+ 
+ class ClipEffect;
++struct CreateNodeParams;
+ 
+ //==============================================================================
+ /**
+@@ -102,6 +103,10 @@
+     using EditFileRetriever = std::function<juce::File()>;
+     using FilePathResolver = std::function<juce::File(const juce::String&)>;
+ 
++    // ORIGINAL immutable, nonserialized CONTROL preparation hook. Empty preserves
++    // legacy preparation/thread behavior. Never invoked by audio processing.
++    using NodeGraphPreparation = std::function<void (Edit&, CreateNodeParams&)>;
++
+     //==============================================================================
+     /// Determines how the Edit will be created
+     struct Options
+@@ -126,6 +131,7 @@
+         // Its reference origin stays local: native global timestamps/sync are forbidden.
+         juce::uint64 initialSourceGeneration = 0;
+         bool closedNativeIO = false; // Native wave/MIDI inputs and MIDI outputs are not supported in this Edit.
++        NodeGraphPreparation configureNodeGraphForPreparation = {};
+     };
+ 
+     /** Creates an Edit from a set of Options.
+@@ -144,6 +150,12 @@
+     Engine& engine;
+     const juce::uint64 initialSourceGeneration;
+     const bool closedNativeIO; // Immutable construction policy, never read from project ValueTree.
++    // Invoked after effective overlay fields, before baseline/private factory.
++    // Ownership is fixed at construction; exceptions refuse preparation before publication.
++    void configureNodeGraphForPreparation (CreateNodeParams&);
++private:
++    const NodeGraphPreparation nodeGraphPreparation;
++public:
+     enum class SourceReferenceDomain { managerGlobal, localClosed };
+     enum class NativeCapability { inputOutput, contextSync, globalTimestamp, externalClock };
+     enum class NativeCapabilityStatus { allowed, nativeIOForbidden, contextSyncForbidden,

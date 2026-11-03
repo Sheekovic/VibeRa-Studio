@@ -1,0 +1,19 @@
+--- a/modules/juce_core/text/juce_String.cpp
++++ b/modules/juce_core/text/juce_String.cpp
+@@ -482,6 +482,7 @@
+         {
+             {
+                 std::ostream o (this);
++                o.exceptions (std::ios_base::badbit | std::ios_base::failbit);
+ 
+                 if (numDecPlaces > 0)
+                 {
+@@ -496,7 +497,7 @@
+         }
+     };
+ 
+-    static char* doubleToString (char* buffer, double n, int numDecPlaces, bool useScientificNotation, size_t& len) noexcept
++    static char* doubleToString (char* buffer, double n, int numDecPlaces, bool useScientificNotation, size_t& len)
+     {
+         StackArrayStream strm (buffer);
+         len = strm.writeDouble (n, numDecPlaces, useScientificNotation);

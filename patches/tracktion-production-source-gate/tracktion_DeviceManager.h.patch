@@ -1,0 +1,45 @@
+--- a/modules/tracktion_engine/playback/tracktion_DeviceManager.h
++++ b/modules/tracktion_engine/playback/tracktion_DeviceManager.h
+@@ -27,7 +27,7 @@
+         allocationFailed, preparationFailed, scopeInProgress, alreadyClaimed,
+         conversionResourcesUnavailable, cpuOverload, pendingFirstSerial,
+         pendingPhysicalMetadata, pendingOffset, initialContextRequired, closedNativeIO,
+-        localCapabilityViolated, localLifecycleInvalidated
++        localCapabilityViolated, localLifecycleInvalidated, staged, stagedSessionRequired, sourcePositionRequired
+     };
+     enum class Decision { process, pending, fault };
+     struct Configuration
+@@ -70,7 +70,10 @@
+     struct Impl;
+     explicit SourceBurstSession (std::unique_ptr<Impl>);
+     std::unique_ptr<Impl> impl;
+-    Status claim (juce::AudioDeviceManager&, EditPlaybackContext*, bool initial = false) noexcept;
++    Status claim (juce::AudioDeviceManager&, EditPlaybackContext*, bool initial = false, bool staged = false) noexcept;
++    Status validateStaged (juce::AudioDeviceManager&, EditPlaybackContext*, double, int, juce::uint64* serial = nullptr) const noexcept;
++    Status armStaged (juce::AudioDeviceManager&, EditPlaybackContext*, double, int) noexcept;
++    void failActivation (Status) noexcept;
+     bool scopeOpen() const noexcept;
+     void retire (Status) noexcept;
+ };
+@@ -120,6 +123,13 @@
+     // Retired observers/reader owners are destroyed after releasing contextLock.
+     SourceBurstSession::Status installSourceBurstSession (EditPlaybackContext&, SourceBurstSession::Ptr);
+     SourceBurstSession::Status installInitialSourceBurstSession (EditPlaybackContext&, SourceBurstSession::Ptr);
++    // Ordinary opt-in contexts are dormant BEFORE addContext. Stage prepares/claims
++    // but NEVER arms or opens observer scopes. Validate before retiring incumbent;
++    // arm LAST after actual old-context retirement, bind/seek/resume and immediate
++    // context.postPosition. Read phase + Session outcome; pending is not completion.
++    SourceBurstSession::Status stageSourceBurstSession (EditPlaybackContext&, SourceBurstSession::Ptr);
++    SourceBurstSession::Status validateStagedSourceBurstSession (EditPlaybackContext&, const SourceBurstSession::Ptr&) noexcept;
++    SourceBurstSession::Status armStagedSourceBurstSession (EditPlaybackContext&, const SourceBurstSession::Ptr&) noexcept;
+     void closeDevices();
+     void saveSettings();
+ 
+@@ -360,6 +370,7 @@
+     juce::uint64 sourceBurstEpoch = 0, sourceBurstSerial = 0;
+     int sourceBurstReceived = 0, sourceBurstInnerOffset = 0;
+     bool sourceBurstOffsetKnown = false, sourceBurstResynchronising = false;
++    SourceBurstSession::Status validateStagedSourceBurstSessionInternal (EditPlaybackContext&, const SourceBurstSession::Ptr&) noexcept;
+     SourceBurstSession::Status installSourceBurstSessionInternal (EditPlaybackContext&, SourceBurstSession::Ptr, bool initial);
+     bool finishedInitialising = false;
+     bool sendMidiTimecode = false;

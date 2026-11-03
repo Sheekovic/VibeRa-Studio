@@ -1,0 +1,8 @@
+{
+  "completed": false,
+  "failure": "ConnectionResetError WinError10054 during source notice refresh after the recorded FM-keyboard/guitar extension completed",
+  "retainedVerifiedSamples": 123,
+  "retainedSampleBytes": 178426339,
+  "missingSamples": [],
+  "nextAction": "Revalidate all123 audio files and notices against pinned byte identities, reusing exact retained source notice bytes; finalize the20-instrument manifest."
+}

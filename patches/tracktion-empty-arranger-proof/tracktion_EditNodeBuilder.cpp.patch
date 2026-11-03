@@ -1,0 +1,31 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -2541,6 +2541,28 @@
+         }
+         // Re-audit actual audio inputs even for a prepared port. A cached true
+         // must NEVER resurrect an upstream queue's permanently invalidated proof.
++        if (auto* combiner = dynamic_cast<CombiningNode*> (&node))
++        {
++            decision = "native-empty-clip-combiner";
++            const auto p = combiner->getNodeProperties();
++            // Direct inputs are empty even for POPULATED timed combiners.
++            // Admit only the actual immutable zero-input, zero-audio case.
++            return done (combiner->getNumInputs() == 0 && combiner->getInternalNodes().empty() &&
++                         !p.hasAudio && p.numberOfChannels == 0 && p.latencyNumSamples == 0);
++        }
++        if (typeid (node) == typeid (ArrangerLauncherSwitchingNode))
++        {
++            decision = "native-empty-arranger-launcher";
++            const auto p = node.getNodeProperties();
++            const auto inputs = node.getDirectInputNodes();
++            // Hidden launcher inputs and nonzero-channel shared SampleFader
++            // histories remain UNKNOWN. Exact native prepare reuses a fader
++            // only with the same channel count: zero channels own no samples.
++            if (p.hasAudio || p.numberOfChannels != 0 || p.latencyNumSamples != 0 ||
++                !node.getInternalNodes().empty() || inputs.size() != 1 || !inputs.front())
++                return done (false);
++            return done (self (self, *inputs.front(), depth + 1));
++        }
+         if (typeid (node) == typeid (graph::SilentNode))
+         { decision = "native-silent-leaf"; return done (true); }
+         if (auto* delay = dynamic_cast<graph::LatencyNode*> (&node))

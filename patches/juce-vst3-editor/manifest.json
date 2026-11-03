@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "dependency": "JUCE",
+  "revision": "37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "sourceDirectory": "JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576",
+  "archiveSha256": "f3da0cce79f1008b02ba1cddde8eba1087d07a4d6a775a0ba0d56a9d3cecd18a",
+  "license": "AGPL-3.0-only",
+  "files": [
+    {
+      "path": "modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp",
+      "patch": "patches/juce-vst3-editor/juce_VST3PluginFormat.cpp.patch",
+      "originalSha256": "7e6c198710850f9a92e179dddbc984731a6dd685dce569dcb0380dd626334993",
+      "patchedSha256": "241607bd8028945aed85f1deb8f78658ea1b470e2b9926cd9d833e999b6ffcfe",
+      "patchSha256": "afd32e8e78410c8af8fb99a32e00639d047189fcf2daf19df7ed15b8b563643f"
+    }
+  ]
+}

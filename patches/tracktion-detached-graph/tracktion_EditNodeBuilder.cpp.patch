@@ -1,0 +1,446 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -13,10 +13,207 @@
+ // - Only works with audio clips
+ // - Only works with WaveAudioClips which have setUsesProxy (false) on them
+ #define USE_DYNAMIC_OFFSET_CONTAINER_CLIP 1
++#include <stdexcept>
++#include <set>
+ 
+ 
+ namespace tracktion::inline engine
+ {
++
++// ORIGINAL routing owner. Native routing remains untouched when no map is supplied.
++struct GraphOutputRouting::Impl
++{
++    struct NativeOutput
++    {
++        Target target;
++        SafeSelectable<AudioTrack> destination;
++    };
++    struct Entry
++    {
++        SafeSelectable<AudioTrack> source;
++        EditItemID id;
++        SafeSelectable<AudioTrack> destination;
++        NativeOutput native;
++        Target target;
++    };
++    SafeSelectable<Edit> owner;
++    std::vector<SafeSelectable<Track>> universe;
++    std::vector<EditItemID> universeIDs;
++    std::vector<Entry> entries;
++    std::vector<Route> routes;
++    std::map<EditItemID, size_t> byID;
++    SafeSelectable<WaveOutputDevice> defaultDevice;
++    juce::String defaultDeviceID;
++    ChannelConfiguration defaultChannels;
++
++    static NativeOutput captureNative (AudioTrack& track)
++    {
++        if (track.isPartOfSubmix() || track.isFrozen (Track::anyFreeze))
++            throw Error (Status::unsupportedTrack, "outputRouting.unsupportedTrack: Submix/frozen audio routing is not admitted");
++        auto& output = track.getOutput();
++        if (auto destination = output.getDestinationTrack())
++            return { Target::destinationTrack, destination };
++        if (output.usesDefaultAudioOut())
++            return { Target::defaultWaveDevice, {} };
++        if (output.outputsToNone())
++            return { Target::disconnected, {} };
++        throw Error (Status::unsupportedNativeOutput,
++                     "outputRouting.unsupportedNativeOutput: Named/MIDI/unresolved native device routing requires an explicit contract");
++    }
++};
++GraphOutputRouting::GraphOutputRouting (std::unique_ptr<Impl> value) : impl (std::move (value)) {}
++GraphOutputRouting::~GraphOutputRouting() = default;
++const std::vector<GraphOutputRouting::Route>& GraphOutputRouting::getRoutes() const noexcept { return impl->routes; }
++
++std::shared_ptr<const GraphOutputRouting> GraphOutputRouting::prepare (Edit& edit, std::vector<Route> routes)
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    auto next = std::make_unique<Impl>();
++    next->owner = &edit;
++    // Fix identities/order as well as IDs. Native weak references reject destroyed
++    // owners even if an allocator later reuses the same address (no pointer ABA).
++    std::set<EditItemID> allIDs;
++    for (auto* track : getAllTracks (edit))
++    {
++        if (! track->itemID.isValid() || ! allIDs.insert (track->itemID).second)
++            throw Error (Status::invalidSource, "outputRouting.invalidSource: Track universe contains invalid/duplicate native IDs");
++        next->universe.emplace_back (track);
++        next->universeIDs.push_back (track->itemID);
++        if (auto* folder = dynamic_cast<FolderTrack*> (track))
++            if (folder->isSubmixFolder() || folder->getOutput() != nullptr)
++                throw Error (Status::unsupportedTrack, "outputRouting.unsupportedTrack: Submix-folder routing is not admitted");
++        if (auto* audio = dynamic_cast<AudioTrack*> (track))
++        {
++            const auto index = next->entries.size();
++            next->byID.emplace (audio->itemID, index);
++            next->entries.push_back ({ audio, audio->itemID, {}, Impl::captureNative (*audio), Target::defaultWaveDevice });
++        }
++    }
++    // Hardware InsertPlugin output roots are a different routing namespace;
++    // don't silently represent them as TrackOutput decisions in this opt-in.
++    for (auto* plugin : edit.getPluginCache().getPlugins())
++        if (dynamic_cast<InsertPlugin*> (plugin) && plugin->state.getParent().isValid() && plugin->state.getRoot() == edit.state)
++            throw Error (Status::unsupportedNativeOutput, "outputRouting.unsupportedNativeOutput: Hardware insert device roots are not admitted");
++
++    std::set<EditItemID> supplied;
++    for (const auto& route : routes)
++    {
++        const auto found = next->byID.find (route.source);
++        if (! route.source.isValid() || found == next->byID.end())
++            throw Error (Status::invalidSource, "outputRouting.invalidSource: Source must identify an existing same-Edit AudioTrack");
++        if (! supplied.insert (route.source).second)
++            throw Error (Status::duplicateSource, "outputRouting.duplicateSource: One explicit route per AudioTrack is required");
++        auto& entry = next->entries[found->second];
++        entry.target = route.target;
++        switch (route.target)
++        {
++            case Target::defaultWaveDevice:
++            case Target::disconnected:
++                if (route.destination.isValid())
++                    throw Error (Status::invalidDestination, "outputRouting.invalidDestination: This target must not carry a destination ID");
++                break;
++            case Target::destinationTrack:
++            {
++                const auto destination = next->byID.find (route.destination);
++                if (! route.destination.isValid() || destination == next->byID.end() || destination == found)
++                    throw Error (Status::invalidDestination, "outputRouting.invalidDestination: Target must be a distinct existing same-Edit AudioTrack");
++                entry.destination = next->entries[destination->second].source;
++                break;
++            }
++            default:
++                throw Error (Status::invalidTarget, "outputRouting.invalidTarget: Unknown routing target discriminant");
++        }
++    }
++    if (supplied.size() != next->entries.size())
++        throw Error (Status::incompleteMap, "outputRouting.incompleteMap: Every existing AudioTrack needs an explicit entry");
++    // Outdegree<=1: iterative bounded colouring, no recursive graph construction
++    // until all main-output dependencies are proven acyclic.
++    std::vector<unsigned char> colour (next->entries.size(), 0);
++    std::vector<size_t> path;
++    path.reserve (next->entries.size());
++    for (size_t start = 0; start < next->entries.size(); ++start)
++    {
++        path.clear();
++        auto current = start;
++        for (;;)
++        {
++            if (colour[current] == 2) break;
++            if (colour[current] == 1)
++                throw Error (Status::cycle, "outputRouting.cycle: Main-output destinations form a cycle");
++            colour[current] = 1;
++            path.push_back (current);
++            const auto& entry = next->entries[current];
++            if (entry.target != Target::destinationTrack) break;
++            current = next->byID.at (entry.destination->itemID);
++        }
++        for (auto index : path) colour[index] = 2;
++    }
++    next->routes = std::move (routes);
++    auto* device = edit.engine.getDeviceManager().getDefaultWaveOutDevice();
++    next->defaultDevice = device;
++    if (device != nullptr)
++    {
++        next->defaultDeviceID = device->getDeviceID();
++        next->defaultChannels = device->getChannels();
++    }
++    return std::shared_ptr<const GraphOutputRouting> (new GraphOutputRouting (std::move (next)));
++}
++
++void GraphOutputRouting::validateForBuild (Edit& edit, bool needsLiveDevice) const
++{
++    TRACKTION_ASSERT_MESSAGE_THREAD
++    if (impl->owner.get() != &edit)
++        throw Error (Status::foreignEdit, "outputRouting.foreignEdit: Routing owner does not match this Edit");
++    const auto current = getAllTracks (edit);
++    if (size_t (current.size()) != impl->universe.size())
++        throw Error (Status::changedUniverse, "outputRouting.changedUniverse: Track CRUD/reorder requires a new candidate universe");
++    for (size_t index = 0; index < impl->universe.size(); ++index)
++    {
++        auto* track = current[int (index)];
++        if (track != impl->universe[index].get() || track->itemID != impl->universeIDs[index])
++            throw Error (Status::changedUniverse, "outputRouting.changedUniverse: Existing Track identities/order must remain exact");
++        if (auto* folder = dynamic_cast<FolderTrack*> (track))
++            if (folder->isSubmixFolder() || folder->getOutput() != nullptr)
++                throw Error (Status::unsupportedTrack, "outputRouting.unsupportedTrack: Submix-folder mode changed");
++    }
++    for (const auto& entry : impl->entries)
++    {
++        if (entry.source == nullptr || &entry.source->edit != &edit || entry.source->itemID != entry.id)
++            throw Error (Status::changedUniverse, "outputRouting.changedUniverse: Source Track was removed/replaced");
++        const auto actual = Impl::captureNative (*entry.source.get());
++        if (actual.target != entry.native.target || actual.destination.get() != entry.native.destination.get())
++            throw Error (Status::changedNativeOutput, "outputRouting.changedNativeOutput: Native TrackOutput changed after preparation");
++        if (entry.target == Target::destinationTrack && entry.destination == nullptr)
++            throw Error (Status::invalidDestination, "outputRouting.invalidDestination: Prepared destination no longer exists");
++    }
++    for (auto* plugin : edit.getPluginCache().getPlugins())
++        if (dynamic_cast<InsertPlugin*> (plugin) && plugin->state.getParent().isValid() && plugin->state.getRoot() == edit.state)
++            throw Error (Status::unsupportedNativeOutput, "outputRouting.unsupportedNativeOutput: Hardware insert roots changed");
++    if (needsLiveDevice)
++    {
++        auto* device = edit.engine.getDeviceManager().getDefaultWaveOutDevice();
++        if (device == nullptr || device != impl->defaultDevice.get() || ! device->isEnabled() ||
++            device->getDeviceID() != impl->defaultDeviceID || device->getChannels() != impl->defaultChannels)
++            throw Error (Status::changedDefaultDevice, "outputRouting.changedDefaultDevice: Live default output/configuration is unavailable or changed");
++    }
++}
++
++GraphOutputRouting::Resolved GraphOutputRouting::resolve (const Track& track) const
++{
++    if (impl->owner.get() != &track.edit)
++        throw Error (Status::foreignEdit, "outputRouting.foreignEdit: Track belongs to a different Edit");
++    const auto found = impl->byID.find (track.itemID);
++    if (found == impl->byID.end() || impl->entries[found->second].source.get() != &track)
++        throw Error (Status::invalidSource, "outputRouting.invalidSource: Unknown/replaced source Track");
++    const auto& entry = impl->entries[found->second];
++    auto* destination = entry.destination.get();
++    if (entry.target == Target::destinationTrack && destination == nullptr)
++        throw Error (Status::invalidDestination, "outputRouting.invalidDestination: Destination owner is unavailable");
++    return { entry.target, destination,
++             entry.target == Target::defaultWaveDevice ? impl->defaultDevice.get() : nullptr };
++}
++
++
+ 
+ //==============================================================================
+ //==============================================================================
+@@ -45,6 +242,15 @@
+     }
+ 
+     using namespace tracktion::graph;
++
++    OutputDevice* getDirectOutputDeviceForBuild (Track& track, TrackOutput& output, const CreateNodeParams& params)
++    {
++        return params.outputRouting ? params.outputRouting->resolve (track).device : output.getOutputDevice (false);
++    }
++    AudioTrack* getDirectDestinationForBuild (Track& track, TrackOutput& output, const CreateNodeParams& params)
++    {
++        return params.outputRouting ? params.outputRouting->resolve (track).destination : output.getDestinationTrack();
++    }
+ 
+     int getSidechainBusID (EditItemID sidechainSourceID)
+     {
+@@ -622,6 +828,8 @@
+     {
+         if (auto pluginList = clip.getPluginList())
+         {
++            if (params.fixedInitialisationAdmission && pluginList->size() != 0)
++                throw std::invalid_argument ("Private fixed initialisation excludes clip plugin preparation");
+             for (auto p : *pluginList)
+                 p->initialiseFully();
+ 
+@@ -844,6 +1052,8 @@
+     {
+         if (auto pluginList = clip.getPluginList())
+         {
++            if (params.fixedInitialisationAdmission && pluginList->size() != 0)
++                throw std::invalid_argument ("Private fixed initialisation excludes clip plugin preparation");
+             for (auto p : *pluginList)
+                 p->initialiseFully();
+ 
+@@ -1259,11 +1469,27 @@
+     return sumNode;
+ }
+ 
++static void requireFixedGraphPluginAdmission (const Plugin& plugin, const CreateNodeParams& params)
++{
++    if (params.fixedInitialisationAdmission && ! params.fixedInitialisationAdmission (plugin))
++        throw std::invalid_argument ("Private graph encountered an unadmitted plugin owner/type");
++}
++static bool useFixedGraphInitialisation (const Plugin& plugin, const CreateNodeParams& params)
++{
++    if (! params.fixedInitialisationAdmission) return false;
++    requireFixedGraphPluginAdmission (plugin, params);
++    if (! plugin.baseClassNeedsInitialising()) return true;
++    if (! plugin.isDetachedGraph())
++        throw std::invalid_argument ("Private graph cannot first-initialise a live native plugin");
++    return true; // Fixed path owns first-private exception safety as well.
++}
++
+ std::unique_ptr<tracktion::graph::Node> createNodeForPlugin (Plugin& plugin, const TrackMuteState* trackMuteState, std::unique_ptr<Node> node,
+                                                              const CreateNodeParams& params)
+ {
+     jassert (node != nullptr);
+ 
++    requireFixedGraphPluginAdmission (plugin, params);
+     if (plugin.isDisabled())
+         return node;
+ 
+@@ -1320,7 +1546,7 @@
+                                                               params.sampleRate, params.blockSize,
+                                                               trackMuteState, params.processState,
+                                                               params.forRendering, params.includeBypassedPlugins,
+-                                                              maxNumChannels);
++                                                              maxNumChannels, useFixedGraphInitialisation (plugin, params));
+ 
+     // If input has more channels than the plugin handles, wrap output in passthrough mode
+     // so extra channels pass through unprocessed
+@@ -1408,15 +1634,25 @@
+ std::unique_ptr<tracktion::graph::Node> createPluginNodeForList (PluginList& list, const TrackMuteState* trackMuteState, std::unique_ptr<Node> node,
+                                                                  tracktion::graph::PlayHeadState& playHeadState, const CreateNodeParams& params)
+ {
+-    for (auto p : list)
+-    {
++    auto build = [&] (const auto& plugins) -> std::unique_ptr<Node>
++    {
++    for (auto p : plugins)
++    {
++        requireFixedGraphPluginAdmission (*p, params);
++        if (params.fixedInitialisationAdmission &&
++            (dynamic_cast<RackInstance*> (p) || dynamic_cast<InsertPlugin*> (p)))
++            throw std::invalid_argument ("Private fixed initialisation excludes native racks/inserts");
+         if (! params.forRendering && p->isFrozen())
+             continue;
+ 
+         if (auto meterPlugin = dynamic_cast<LevelMeterPlugin*> (p))
+         {
+             if (! list.getEdit().state.getProperty ("viberaOwnMetering", false))
++            {
++                if (params.fixedInitialisationAdmission)
++                    throw std::invalid_argument ("Private fixed initialisation excludes active native meter plugins");
+                 node = makeNode<LevelMeasurerProcessingNode> (std::move (node), *meterPlugin);
++            }
+         }
+         else if (auto sendPlugin = dynamic_cast<AuxSendPlugin*> (p))
+         {
+@@ -1425,7 +1661,8 @@
+                                               SampleRateAndBlockSize { params.sampleRate, params.blockSize },
+                                               *sendPlugin,
+                                               playHeadState, trackMuteState,
+-                                              list.getEdit().engine.getEngineBehaviour().shouldProcessAuxSendWhenTrackIsMuted (*sendPlugin));
++                                              list.getEdit().engine.getEngineBehaviour().shouldProcessAuxSendWhenTrackIsMuted (*sendPlugin),
++                                              useFixedGraphInitialisation (*sendPlugin, params));
+         }
+         else if (auto returnPlugin = dynamic_cast<AuxReturnPlugin*> (p))
+         {
+@@ -1452,7 +1689,20 @@
+         }
+     }
+ 
+-    return node;
++    return std::move (node);
++    };
++    if (! params.pluginListResolver)
++        return build (list); // Exact normal list path; no owning copy/overlay allocation.
++    auto resolved = params.pluginListResolver (list); // One resolution, owning result.
++    juce::Array<EditItemID> identities;
++    for (auto* plugin : resolved)
++    {
++        if (plugin == nullptr || &plugin->edit != &list.getEdit() || ! plugin->itemID.isValid() ||
++            identities.contains (plugin->itemID))
++            throw std::invalid_argument ("Private plugin-list resolver returned invalid/duplicate owner");
++        identities.add (plugin->itemID);
++    }
++    return build (resolved);
+ }
+ 
+ std::unique_ptr<tracktion::graph::Node> createModifierNodeForList (ModifierList* list,
+@@ -1469,6 +1719,8 @@
+             if (modifier->getProcessingPosition() != position)
+                 continue;
+ 
++            if (params.fixedInitialisationAdmission)
++                throw std::invalid_argument ("Private fixed initialisation excludes native modifiers");
+             node = makeNode<ModifierNode> (std::move (node), modifier, params.sampleRate, params.blockSize,
+                                            trackMuteState, playHeadState, params.forRendering,
+                                            ModifierNode::ClearOutputs::no);
+@@ -1496,9 +1748,16 @@
+     return node;
+ }
+ 
+-juce::Array<Track*> getDirectInputTracks (AudioTrack& at)
++juce::Array<Track*> getDirectInputTracks (AudioTrack& at, const CreateNodeParams& params)
+ {
+     juce::Array<Track*> inputTracks;
++    if (params.outputRouting)
++    {
++        for (auto* track : getAudioTracks (at.edit))
++            if (track != &at && params.outputRouting->resolve (*track).destination == &at)
++                inputTracks.add (track);
++        return inputTracks;
++    }
+ 
+     for (auto track : getAudioTracks (at.edit))
+         if (! track->isPartOfSubmix() && track != &at && track->getOutput().outputsToDestTrack (at))
+@@ -1556,7 +1815,7 @@
+     if (! params.forRendering && at.isFrozen (AudioTrack::individualFreeze))
+         return createNodeForFrozenAudioTrack (at, playHeadState, params);
+ 
+-    auto inputTracks = getDirectInputTracks (at);
++    auto inputTracks = getDirectInputTracks (at, params);
+     const bool processMidiWhenMuted = at.state.getProperty (IDs::processMidiWhenMuted, false);
+     auto clipsMuteState = std::make_unique<TrackMuteState> (at, true, processMidiWhenMuted);
+     auto trackMuteState = std::make_unique<TrackMuteState> (at, false, processMidiWhenMuted);
+@@ -1955,6 +2214,8 @@
+ std::unique_ptr<tracktion::graph::Node> createNodeForEdit (EditPlaybackContext& epc, std::atomic<double>& audibleTimeToUpdate, const CreateNodeParams& params)
+ {
+     Edit& edit = epc.edit;
++    if (params.outputRouting)
++        params.outputRouting->validateForBuild (edit, true); // Refuse before constructing ANY native Nodes.
+     auto& playHeadState = params.processState.playHeadState;
+     auto insertPlugins = getAllPluginsOfType<InsertPlugin> (edit);
+ 
+@@ -1969,7 +2230,7 @@
+ 
+         if (auto output = getTrackOutput (*t))
+         {
+-            if (auto device = output->getOutputDevice (false))
++            if (auto device = getDirectOutputDeviceForBuild (*t, *output, params))
+             {
+                 if (! device->isEnabled())
+                     continue;
+@@ -2005,7 +2266,7 @@
+ 
+             if (auto output = getTrackOutput (*t))
+             {
+-                if (output->getOutputDevice (false) != nullptr || output->getDestinationTrack() != nullptr)
++                if (getDirectOutputDeviceForBuild (*t, *output, params) != nullptr || getDirectDestinationForBuild (*t, *output, params) != nullptr)
+                     continue;
+             }
+             else
+@@ -2161,6 +2422,8 @@
+ {
+     std::vector<std::unique_ptr<tracktion::graph::Node>> trackNodes;
+     auto params = originalParams;
++    if (params.outputRouting)
++        params.outputRouting->validateForBuild (edit, false); // Rendering needs no physical device.
+     auto& playHeadState = params.processState.playHeadState;
+ 
+     if (params.implicitlyIncludeSubmixChildTracks && params.allowedTracks != nullptr)
+@@ -2174,7 +2437,7 @@
+         // Skip submix children (they're built by their parent) and tracks with no TrackOutput
+         if (auto output = getTrackOutput (*t))
+         {
+-            if (output->getDestinationTrack() != nullptr)
++            if (getDirectDestinationForBuild (*t, *output, params) != nullptr)
+                 continue;
+         }
+         else
+@@ -2183,7 +2446,13 @@
+         }
+ 
+         if (auto node = createNodeForTrack (*t, params))
++        {
++            // Explicit disconnected is a processing-only bus in BOTH factories.
++            // Preserve the original native rendering branch when no map is set.
++            if (params.outputRouting && params.outputRouting->resolve (*t).target == GraphOutputRouting::Target::disconnected)
++                node = makeNode<SinkNode> (std::move (node));
+             trackNodes.push_back (std::move (node));
++        }
+     }
+ 
+     auto sumNode = std::make_unique<SummingNode> (std::move (trackNodes));
+@@ -2206,7 +2475,8 @@
+ 
+     auto generator = makeNode<PluginNode> (makeNode<SilentNode> (2),
+                                            plugin, params.sampleRate, params.blockSize, nullptr,
+-                                           params.processState, params.forRendering, true, -1);
++                                           params.processState, params.forRendering, true, -1,
++                                           useFixedGraphInitialisation (*plugin, params));
+ 
+     return makeSummingNode ({ output.release(), generator.release() });
+ }

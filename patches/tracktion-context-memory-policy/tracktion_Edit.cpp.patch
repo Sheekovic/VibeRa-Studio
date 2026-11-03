@@ -1,0 +1,10 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.cpp
+@@ -599,6 +599,7 @@
+           return options.initialSourceGeneration;
+       }()),
+       closedNativeIO (options.closedNativeIO),
++      disableNodeMemorySharing (options.disableNodeMemorySharing),
+       nodeGraphPreparation (std::move (options.configureNodeGraphForPreparation)),
+       tempoSequence (*this),
+       state (options.editState),

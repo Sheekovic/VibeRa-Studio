@@ -1,0 +1,84 @@
+{
+  "format": 1,
+  "feature": "plugin.wrapper.containingChain",
+  "passed": true,
+  "scope": "Affected software workflows only; full-source/module/package gates remain pending. No listening/hardware/mixed-monitor or arbitrary native widget qualification.",
+  "sourceHashMode": "text-lf-v1",
+  "sourceInputs": {
+    "src/PluginWrapperView.h": "ee9e22c01e34aa3e0eaeeca5f43bfc70c9134a0583aee5d6217cf9ff83e6fd62",
+    "src/PluginWrapperProtocol.h": "3279fc7e28f710bc738ceff7ec92928d46a0adbc22aecd6a81c89a0873999749",
+    "src/PluginProtocol.h": "0c426ef23a683e92ea1ed41ca7ca0d32558e98d06ee6f802c9eb6523cc76cfe5",
+    "src/PluginWorker.cpp": "b2ad00379522267440e6db4e6fbe9e4f7a0aba029716bdb056c8e3df1c26d545",
+    "src/PluginHost.cpp": "bb8704ce865a7a328d48b8b47c2029bad303df23100b8dc42ef5e7b753d36f43",
+    "src/PluginHost.h": "b9782ce44e0e0880f3bf69d88fa74baf658686cbea71004798a2138ddd25a6cf",
+    "src/Studio.h": "e6a849c520abbf13af1b90c426717faa1660522bffff0c307e84014e0708f694",
+    "src/StudioMcp.cpp": "f287b7fd649fb08fbef93c1f2288c2babd0f4557f8928e6a3fb642fb207a08ea",
+    "src/StudioPluginParameters.cpp": "2fe8937ab7183e0e0b0518a5ba5f55945e15699dbc0d638690a7c27500d22ba1",
+    "src/StudioPluginWrapperChains.inc": "5db55d8f0ba4175f1c3b22c74d52f38e283160227983b85d7b3ccf8ecb0a4d9a",
+    "src/StudioMixerChains.inc": "c6b2eab13758da63cb179f10b66057fd2725ee672e9c9f3588cf556571d780d6",
+    "src/StudioRoutingCoordinator.inc": "59be46f61b5602e780807681d844bb2841353252e67463fc2222528bbc5b6ee0",
+    "src/Commands.cpp": "068a7b72ed4422dd00da4d94c5dc1a05640fc201241279ed00b80056c8520723",
+    "src/Project.cpp": "67c53accc0795e10a6101d3df68524291adf02350d34a0bd968292111d24381c",
+    "src/AudioEngine.cpp": "1665203d5efbcd4c6df29aadedec4b28864d392a3c3a9f51690a791b04b91643",
+    "src/EffectChain.cpp": "5effc016ad0077d77a2e6a60d07940e25a766b8057b49c77e9371d0d3abcee2a",
+    "src/StudioChannels.cpp": "99f51b0bc0558648612ba30f24baeb5376e08ee78b224b7ecc67a003e791a08a",
+    "src/StudioMixerChainApplyAcceptance.inc": "81ab596669ab3f93006c8ffd51b931840e45c8aa52ea91f2af6f70cebfacec25",
+    "skills/vibera-studio/references/effect-chains.md": "891addf2ab3932a81e03e77eb6ec437062a9f7c71dc7cd6bfe9b8ab8c1291f16",
+    "tests/ParameterAcceptance.h": "270d3783404d2dc55b40d9ef8cb94d2c260d1520430c51a2df8878cda5e7ac3b",
+    "tests/ParameterFixture.cpp": "7d0f3921cb4474c25f1819feb77e236e3b92bc2b0b8e8890d3fb7c0496a6b373",
+    "tests/PluginWrapperViewAcceptance.h": "7b1c138e78de7be9779da11683ac0ad02ad69ff8ed053ba38cce2a30964e481b",
+    "tests/PluginWrapperProtocolAcceptance.h": "b14d320457039ac845d553f454f4234b637cd0725863dfe96cb54e9e332f9774",
+    "tests/PluginWrapperWorkflowAcceptance.inc": "186bbe6194a8d2874e3392af6d2634a654b485025046246dad5b009b3bc02ca1",
+    "src/StudioMixerDetectorAcceptance.inc": "e6c368739a98494b98b7758f4943e5caaa5bc969a9f42f589467884ea0060870",
+    "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
+    "scripts/verify-installed-mcp.py": "e33fde0eb5944dcae121fafe322d57505326f10e2423fd8ecc699e7465472f3c",
+    "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
+    "skills/vibera-studio/references/plugins.md": "6edf6b5a79566219ad0829ebf859bcae594ca3ea80b8c1afe01560f42f357f13"
+  },
+  "checks": [
+    "All six actual component callbacks emit distinct typed CONTROL intents; pending/unavailable/instrument/scalar-owner guards and retained callbacks refuse without losing I/O draft.",
+    "Native and editorless Pattern/Song: actual worker Copy-chain button targets containing effect despite different selected insert, closes exact editor, captures current native state, retains model/history/Host/transport/device.",
+    "Actual worker Chain-directory button opens owned interactive chooser; semantic cancellation drains chooser, parent and wrapper with no project/history/file mutation.",
+    "Actual stdio Copy/Save/Paste/LoadApply/directory: native provenance, independent file decode, selection, fresh replacement IDs, exact Undo, durable parent results, refusals and cancellation.",
+    "Active synthetic-device detector disconnect/reconnect: exact parent/child close ACK, native replacement, one history edge, active source recovery, original PCM/save/export oracles.",
+    "Installed Analog Lab V/MVibratoMB: actual chain file/state/history/replacement/hosted WAV and native main-I/O jobs, exact stable binary/provider/script inputs."
+  ],
+  "applicationSha256": "981994aba08bacc93008aafe8f8744ff544f7a5c2dc9ed8c29f694f1ff4bb488",
+  "workerSha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6",
+  "focused": {
+    "plugin_main_io_model": 0.0592918,
+    "plugin_main_bus_choice": 2.6055,
+    "plugin_editor_requests": 0.0271044,
+    "plugin_editor_attachment": 1.25827,
+    "mixer_effect_opening": 2.30216,
+    "mixer_effect_opening_unsupported": 2.08999,
+    "plugin_main_io_application": 2.72065,
+    "plugin_io_mcp": 8.53906,
+    "studio_channel_routing_provider": 27.7817,
+    "plugin_parameters_gui": 9.64469,
+    "plugin_wrapper_gui": 5.42601,
+    "plugin_wrapper_editorless_gui": 5.34359
+  },
+  "installed": {
+    "path": "build/windows/wrapper-chain-close-ack-final-installed-20261019/identity.json",
+    "sha256": "2ca532a7fe1c67db6c00deb0ad712f161da20f403ffcf966d3b0a3d6c9e6872a",
+    "seconds": 88.84132669999963
+  },
+  "capture": {
+    "path": "build/windows/wrapper-chain-close-ack-final-capture-20261019/verification.json",
+    "sha256": "28849503693599e512edaf0986e17994d1c787cc82dd706cf76635d7c0b00b3f",
+    "inspected": true
+  },
+  "nativeDesktop": {
+    "path": "build/windows/wrapper-chain-close-ack-native-20261019/process.json",
+    "sha256": "62746d882a0be0df1d5e511befd0d88e44427d014976f591ed10b3ead8b4252a",
+    "seconds": 34.37993439999991,
+    "reused": false
+  },
+  "nativeControlProviders": {
+    "path": "build/windows/startup-readiness-final-providers-20261019/verification.json",
+    "sha256": "1fffb42eaa3e644107f67d2a209bdaf43fa8b1915405c4775eb14bfdb3a5d9b3",
+    "seconds": 79.38838639999449
+  },
+  "inheritedMcpCoverageComplete": false
+}

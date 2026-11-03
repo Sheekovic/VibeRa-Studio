@@ -1,0 +1,14 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1245,9 +1245,10 @@
+ 
+     if (! directChannelMap.isIdentity())
+         directInput = makeNode<ChannelRemappingNode> (std::move (directInput), std::move (directChannelMap));
+ 
+-    auto sidechainInput = makeNode<ReturnNode> (getSidechainBusID (sidechainSourceID),
++    const auto sidechainBusID = plugin.getSidechainBusIDOverride().value_or (getSidechainBusID (sidechainSourceID));
++    auto sidechainInput = makeNode<ReturnNode> (sidechainBusID,
+                                                 std::make_optional (static_cast<size_t> (plugin.itemID.getRawID())));
+     sidechainInput = makeNode<ChannelRemappingNode> (std::move (sidechainInput), std::move (sidechainChannelMap));
+ 
+     if (! hasDirectChannels)

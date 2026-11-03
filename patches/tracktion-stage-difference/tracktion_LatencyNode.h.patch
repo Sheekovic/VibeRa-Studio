@@ -1,0 +1,154 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -53,11 +53,38 @@
+         if (runtimeDelay.begin) runtimeDelay.begin (runtimeDelay.context, range);
+     }
+     enum class OutputStageStatus { shape, duplicate, fanout, missing, owner, configuration, cold, unsupportedInternal, predecessorPending };
++    // ORIGINAL CONTROL-only failure receipt. Values are immutable prepared
++    // graph/configuration metadata, NEVER live FIFO cursor/PCM/MIDI contents.
++    // Runtime owner addresses are process/lifetime diagnostics, not project IDs
++    // or owning handles; no pointer in this copied receipt may be dereferenced.
++    struct OutputStageSnapshot
++    {
++        bool present = false, delayPresent = false, processorPresent = false;
++        int channels = 0, exits = 0, requestedDelaySamples = 0;
++        bool processorDelayKnown = false;
++        int processorDelaySamples = 0;
++        bool producerPathKnown = false, boundaryPathKnown = false;
++        int producerPathLatencySamples = 0, boundaryPathLatencySamples = 0;
++        size_t producerNodeId = 0, boundaryNodeId = 0; // Native topology diagnostics, NOT PCM provenance/project IDs.
++        // Actual processor rate/channel getters do not exist. Node channel shape
++        // and the existing pairwise config comparison are NOT those internals.
++    };
++    struct OutputStageDifference
++    {
++        bool known = false;
++        const void* runtimeOwner = nullptr;
++        OutputStageSnapshot before, after;
++        int processorConfigurationMatch = -1; // -1 unavailable,0 different,1 equal.
++        bool sameLegacyProcessor = false;
++    };
+     class OutputStageError final : public std::invalid_argument
+     {
+     public:
+         OutputStageError (OutputStageStatus value, const char* text) : std::invalid_argument (text), status (value) {}
++        OutputStageError (OutputStageStatus value, const char* text, OutputStageDifference receipt)
++            : std::invalid_argument (text), status (value), difference (receipt) {}
+         const OutputStageStatus status;
++        const OutputStageDifference difference{}; // Unknown for unsupported/incomplete collection.
+     };
+     // CONTROL-only fixed-graph admission. Every explicit output stage must
+     // remain present and unique with the SAME delay/rate/channel configuration.
+@@ -70,6 +97,9 @@
+             int channels = 0, exits = 0;
+             const void* origin = nullptr;
+             LatencyNode* delay = nullptr;
++            bool producerPathKnown = false, boundaryPathKnown = false;
++            int producerPathLatencySamples = 0, boundaryPathLatencySamples = 0;
++            size_t producerNodeId = 0, boundaryNodeId = 0;
+         };
+         using Stages = std::map<const void*, Stage>;
+         const auto collect = [] (NodeGraph& graph)
+@@ -84,6 +114,12 @@
+                     (stage.origin && stage.origin != props.audioCompensationStageOrigin))
+                     throw OutputStageError (OutputStageStatus::duplicate, "routing.pdcStageDuplicate: One exact producing Node per registered bus owner required");
+                 stage.origin = props.audioCompensationStageOrigin;
++                if (stage.origin == static_cast<const void*> (node))
++                {
++                    stage.producerPathKnown = true;
++                    stage.producerPathLatencySamples = props.latencyNumSamples;
++                    stage.producerNodeId = props.nodeID;
++                }
+                 if (props.numberOfChannels <= 0 || (stage.channels != 0 && stage.channels != props.numberOfChannels))
+                     throw OutputStageError (OutputStageStatus::shape, "routing.pdcStageShape: Explicit bus stage channel shape changed");
+                 stage.channels = props.numberOfChannels;
+@@ -102,12 +138,27 @@
+                 const auto owner = node->getNodeProperties().audioCompensationStage;
+                 for (auto* inputNode : node->getDirectInputNodes())
+                 {
+-                    const auto inputOwner = inputNode->getNodeProperties().audioCompensationStage;
+-                    if (inputOwner && inputOwner != owner) ++stages.at(inputOwner).exits;
++                    const auto inputProperties = inputNode->getNodeProperties();
++                    const auto inputOwner = inputProperties.audioCompensationStage;
++                    if (inputOwner && inputOwner != owner)
++                    {
++                        auto& stage = stages.at(inputOwner);
++                        ++stage.exits;
++                        stage.boundaryPathKnown = true;
++                        stage.boundaryPathLatencySamples = inputProperties.latencyNumSamples;
++                        stage.boundaryNodeId = inputProperties.nodeID;
++                    }
+                 }
+             }
+-            if (const auto rootOwner = graph.rootNode->getNodeProperties().audioCompensationStage)
+-                ++stages.at(rootOwner).exits;
++            const auto rootProperties = graph.rootNode->getNodeProperties();
++            if (const auto rootOwner = rootProperties.audioCompensationStage)
++            {
++                auto& stage = stages.at(rootOwner);
++                ++stage.exits;
++                stage.boundaryPathKnown = true;
++                stage.boundaryPathLatencySamples = rootProperties.latencyNumSamples;
++                stage.boundaryNodeId = rootProperties.nodeID;
++            }
+             for (const auto& [owner, stage] : stages)
+                 if (stage.exits != 1)
+                     throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageFanout: Exact single output consumer required");
+@@ -119,6 +170,43 @@
+         if (next.empty() && old.empty()) return false;
+         if (next.size() != old.size())
+             throw OutputStageError (OutputStageStatus::missing, "routing.pdcStageMissing: Explicit bus output stages must remain present");
++        const auto describe = [] (const Stage& stage)
++        {
++            OutputStageSnapshot receipt;
++            receipt.present = true;
++            receipt.channels = stage.channels;
++            receipt.exits = stage.exits;
++            receipt.delayPresent = stage.delay != nullptr;
++            receipt.processorPresent = stage.delay && stage.delay->latencyProcessor;
++            receipt.requestedDelaySamples = stage.delay ? stage.delay->requestedDelay : 0;
++            if (receipt.processorPresent)
++            {
++                receipt.processorDelayKnown = true;
++                receipt.processorDelaySamples = stage.delay->latencyProcessor->getLatencyNumSamples();
++            }
++            receipt.producerPathKnown = stage.producerPathKnown;
++            receipt.producerPathLatencySamples = stage.producerPathLatencySamples;
++            receipt.boundaryPathKnown = stage.boundaryPathKnown;
++            receipt.boundaryPathLatencySamples = stage.boundaryPathLatencySamples;
++            receipt.producerNodeId = stage.producerNodeId;
++            receipt.boundaryNodeId = stage.boundaryNodeId;
++            return receipt;
++        };
++        const auto difference = [&] (const void* identity, const Stage& before, const Stage& after)
++        {
++            OutputStageDifference receipt;
++            receipt.known = true;
++            receipt.runtimeOwner = identity;
++            receipt.before = describe (before);
++            receipt.after = describe (after);
++            if (before.delay && after.delay && before.delay->latencyProcessor && after.delay->latencyProcessor)
++            {
++                receipt.processorConfigurationMatch =
++                    after.delay->latencyProcessor->hasSameConfigurationAs (*before.delay->latencyProcessor) ? 1 : 0;
++                receipt.sameLegacyProcessor = after.delay->latencyProcessor == before.delay->latencyProcessor;
++            }
++            return receipt;
++        };
+         for (const auto& [identity, now] : next)
+         {
+             const auto found = old.find (identity);
+@@ -130,9 +218,11 @@
+             if (bool (now.delay) != bool (before) ||
+                 (now.delay && (!now.delay->latencyProcessor || !before->latencyProcessor ||
+                   !now.delay->latencyProcessor->hasSameConfigurationAs (*before->latencyProcessor))))
+-                throw OutputStageError (OutputStageStatus::configuration, "routing.pdcStageConfiguration: Delay/rate/path change requires a qualified joint plan");
++                throw OutputStageError (OutputStageStatus::configuration, "routing.pdcStageConfiguration: Delay/rate/path change requires a qualified joint plan",
++                                        difference (identity, found->second, now));
+             if (now.delay && now.delay->latencyProcessor != before->latencyProcessor)
+-                throw OutputStageError (OutputStageStatus::cold, "routing.pdcStageCold: Candidate did not retain its exact prior bus queue");
++                throw OutputStageError (OutputStageStatus::cold, "routing.pdcStageCold: Candidate did not retain its exact prior bus queue",
++                                        difference (identity, found->second, now));
+         }
+         // An unchanged root bus queue does not excuse a cold internal
+         // compensation stage. Preserve only exact existing legacy processor

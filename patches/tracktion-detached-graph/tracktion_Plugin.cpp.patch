@@ -1,0 +1,157 @@
+--- a/modules/tracktion_engine/plugins/tracktion_Plugin.cpp
++++ b/modules/tracktion_engine/plugins/tracktion_Plugin.cpp
+@@ -7,6 +7,10 @@
+ 
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
++
++#include <stdexcept>
++#include <cmath>
++#include <limits>
+ 
+ namespace tracktion::inline engine {
+ 
+@@ -77,8 +81,39 @@
+ Plugin::WindowState::WindowState (Plugin& p) : PluginWindowState (p.edit), plugin (p)  {}
+ 
+ //==============================================================================
++// Independent closed app-adapter contract. Validate BEFORE registration or
++// MacroParameterElement construction; no live tree/cache writes or ID allocation.
++static const juce::ValueTree& validateDetachedGraphPluginState (const PluginCreationInfo& info)
++{
++    if (info.mode == PluginCreationInfo::Mode::normal)
++        return info.state;
++    if (info.mode != PluginCreationInfo::Mode::detachedGraph)
++        throw std::invalid_argument ("Unknown plugin construction mode");
++    const auto type = info.state[IDs::type].toString();
++    if (! info.state.hasType (IDs::PLUGIN) || info.state.getParent().isValid() ||
++        ! EditItemID::fromID (info.state).isValid() || info.isNewPlugin ||
++        (type != "vibera_fixed_sampler" && type != "vibera_vst3_effect" && type != "vibera_sidechain_send" &&
++         type != "vibera_channel_balance" && type != "vibera_automation_gain" &&
++         type != "vibera_master_route" && type != "vibera_mixer_send" && type != "vibera_guide") ||
++        EditItemID::fromVar (info.state[IDs::masterPluginID]).isValid() ||
++        info.state.hasProperty (IDs::parameters) || info.edit.getPluginCache().getPluginFor (info.state) != nullptr)
++        throw std::invalid_argument ("Detached graph adapter needs private state, reserved ID and supported app type");
++    for (const auto child : info.state)
++    {
++        if (child.hasType (IDs::MODIFIERASSIGNMENTS) && child.getNumChildren() == 0 && child.getNumProperties() == 0)
++            continue; // Empty container from a normal AuxSend copy is inert; no assignments instantiated.
++        if (! child.hasType (IDs::SIDECHAINCONNECTIONS))
++            throw std::invalid_argument ("Detached graph adapter does not support native macros/modifiers/automation");
++        for (const auto wire : child)
++            if (! wire.hasType (IDs::SIDECHAINCONNECTION) || wire.getNumChildren() != 0)
++                throw std::invalid_argument ("Detached graph adapter has invalid sidechain wire state");
++    }
++    return info.state;
++}
++
+ Plugin::Plugin (PluginCreationInfo info)
+-    : AutomatableEditItem (info.edit, info.state),
++    : AutomatableEditItem (info.edit, validateDetachedGraphPluginState (info),
++                           info.mode == PluginCreationInfo::Mode::detachedGraph),
+       MacroParameterElement (info.edit, info.state),
+       engine (info.edit.engine),
+       state (info.state)
+@@ -110,7 +145,7 @@
+     state.addListener (this);
+ 
+    #if TRACKTION_ENABLE_AUTOMAP && TRACKTION_ENABLE_CONTROL_SURFACES
+-    if (! edit.isLoading())
++    if (! isDetachedGraph() && ! edit.isLoading())
+     {
+         auto& e = engine;
+ 
+@@ -134,8 +169,9 @@
+     windowState->hideWindowForShutdown();
+ 
+    #if TRACKTION_ENABLE_AUTOMAP && TRACKTION_ENABLE_CONTROL_SURFACES
+-    if (auto na = engine.getExternalControllerManager().getAutomap())
+-        na->removePlugin (this);
++    if (! isDetachedGraph())
++        if (auto na = engine.getExternalControllerManager().getAutomap())
++            na->removePlugin (this);
+    #endif
+ }
+ 
+@@ -145,7 +181,10 @@
+     state.removeListener (this);
+ 
+     quickControlParameter = nullptr;
+-    deleteAutomatableParameters();
++    if (! isDetachedGraph())
++        deleteAutomatableParameters();
++    else
++        clearParameterList();
+ }
+ 
+ int Plugin::getNumOutputChannelsGivenInputs (int)
+@@ -354,7 +393,7 @@
+ 
+ juce::UndoManager* Plugin::getUndoManager() const noexcept
+ {
+-    return &edit.getUndoManager();
++    return isDetachedGraph() ? nullptr : &edit.getUndoManager();
+ }
+ 
+ void Plugin::playStartedOrStopped()
+@@ -441,6 +480,8 @@
+ //==============================================================================
+ void Plugin::changed()
+ {
++    if (isDetachedGraph())
++        return; // Private preparation must not notify live selection/mirror/controllers.
+     Selectable::changed();
+     jassert (Selectable::isSelectableValid (&edit));
+     edit.updateMirroredPlugin (*this);
+@@ -500,6 +541,51 @@
+ void Plugin::midiPanic() {}
+ 
+ //==============================================================================
++bool Plugin::retainFixedInitialisation (double fixedRate, int fixedBlock) noexcept
++{
++    static_assert (std::atomic<int>::is_always_lock_free);
++    // The fixed configuration fields have no control writer under the caller's
++    // lease; DSP only reads them. Equal-value stores would still be a data race.
++    if (! std::isfinite (fixedRate) || fixedRate <= 0.0 || fixedBlock <= 0 ||
++        fixedRate != sampleRate || fixedBlock != blockSizeSamples)
++        return false;
++    auto count = initialiseCount.load (std::memory_order_acquire);
++    if (count <= 0 || count == std::numeric_limits<int>::max()) return false;
++    return initialiseCount.compare_exchange_strong (count, count + 1,
++               std::memory_order_acq_rel, std::memory_order_acquire);
++}
++
++void Plugin::attachFixedGraphInitialisation (const PluginInitialisationInfo& info)
++{
++    if (! std::isfinite (info.sampleRate) || info.sampleRate <= 0.0 || info.blockSizeSamples <= 0)
++        throw std::invalid_argument ("Fixed graph initialization requires valid rate/block");
++    const auto initialCount = initialiseCount.load (std::memory_order_acquire);
++    if (initialCount != 0)
++    {
++        if (! retainFixedInitialisation (info.sampleRate, info.blockSizeSamples))
++            throw std::invalid_argument ("Fixed graph owner/configuration/count admission refused");
++        return;
++    }
++    if (! isDetachedGraph())
++        throw std::invalid_argument ("Fixed graph first initialization requires a private detached shell");
++    try
++    {
++        baseClassInitialise (info); // Ordinary lifecycle, only this private shell.
++    }
++    catch (...)
++    {
++        // No complete Node exists yet. baseClassInitialise increments BEFORE
++        // virtual initialise/reset/iterator calls. The closed control lease
++        // excludes another count owner or config writer during this call.
++        isInitialisingFlag = false;
++        const auto ownedCount = initialiseCount.load (std::memory_order_acquire);
++        if (ownedCount == 1) baseClassDeinitialise();
++        else if (ownedCount != 0)
++            throw std::logic_error ("Fixed graph private initialization violated count ownership");
++        throw;
++    }
++}
++
+ void Plugin::baseClassInitialise (const PluginInitialisationInfo& info)
+ {
+     TRACKTION_ASSERT_MESSAGE_THREAD

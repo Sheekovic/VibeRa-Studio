@@ -1,0 +1,186 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -127,8 +127,9 @@
+             replaceLatencyProcessorIfPossible (info.nodeGraphToReplace);
+         }
+         else
+             prepareHistory (info);
++        prepareBoundedMidi (info);
+         prepared = true;
+     }
+ 
+     void process (ProcessContext& pc) override
+@@ -137,12 +138,13 @@
+         const auto numSamples = (int) pc.referenceSampleRange.getLength();
+         if (!historyEnabled)
+         {
+             latencyProcessor->writeAudio (source.audio);
+-            latencyProcessor->writeMIDI (source.midi);
++            if (!midiHistoryRaw) latencyProcessor->writeMIDI (source.midi);
+             pc.buffers.midi.clear();
+             latencyProcessor->readAudioOverwriting (pc.buffers.audio);
+-            latencyProcessor->readMIDI (pc.buffers.midi, numSamples);
++            if (midiHistoryRaw) processBoundedMidi (pc, source.midi);
++            else latencyProcessor->readMIDI (pc.buffers.midi, numSamples);
+             return;
+         }
+ 
+         const auto frames = pc.buffers.audio.getNumFrames();
+@@ -178,9 +180,11 @@
+             shapeFrames.fetch_add (shapeCount, std::memory_order_relaxed);
+             discontinuities.fetch_add (gapCount, std::memory_order_relaxed);
+         }
+         pc.buffers.midi.clear();
+-        if (retained.carryMidi)
++        if (midiHistoryRaw)
++            processBoundedMidi (pc, source.midi);
++        else if (retained.carryMidi)
+         {
+             if (requestedDelay == 0)
+                 pc.buffers.midi.mergeFrom (source.midi); // No added delay queue for a zero tap.
+             else
+@@ -200,8 +204,10 @@
+     int requestedDelay = 0;
+     RetainedAudioEdge retained;
+     bool historyEnabled = false, prepared = false, midiQueueReset = false;
+     std::shared_ptr<LatencyProcessor> latencyProcessor, midiProcessor;
++    std::shared_ptr<vibera::dsp::MidiCompensationHistory> midiHistory;
++    vibera::dsp::MidiCompensationHistory* midiHistoryRaw = nullptr;
+     std::shared_ptr<vibera::dsp::CompensationHistory> history;
+     vibera::dsp::CompensationHistory* historyRaw = nullptr; // Pinned by this node, never shared_ptr traffic in DSP.
+     std::vector<float> frameInput, frameOutput;
+     vibera::dsp::CompensationReuse reuse = vibera::dsp::CompensationReuse::noPreviousEdge;
+@@ -258,9 +264,9 @@
+                                 : std::make_shared<vibera::dsp::CompensationHistory> (desired, storageBytes (retained.maximumDelay, channels, false));
+         historyRaw = history.get();
+         frameInput.resize (size_t (channels));
+         frameOutput.resize (size_t (channels));
+-        if (retained.carryMidi && requestedDelay > 0)
++        if (!info.nodeGraph.rootNode->getMidiCompensationHistoryLimits().enabled() && retained.carryMidi && requestedDelay > 0)
+         {
+             midiProcessor = std::make_shared<LatencyProcessor>();
+             midiProcessor->setLatencyNumSamples (requestedDelay);
+             midiProcessor->prepareToPlay (info.sampleRate, info.blockSize, 0);
+@@ -268,11 +274,121 @@
+                 midiProcessor = oldMatch->midiProcessor;
+             else
+                 midiQueueReset = oldMatch != nullptr;
+         }
+-        else if (retained.carryMidi && oldMatch && oldMatch->requestedDelay != requestedDelay)
++        else if (!info.nodeGraph.rootNode->getMidiCompensationHistoryLimits().enabled() && retained.carryMidi && oldMatch && oldMatch->requestedDelay != requestedDelay)
+             midiQueueReset = true;
+     }
++    void prepareBoundedMidi (const PlaybackInitialisationInfo& info)
++    {
++        const auto limits = info.nodeGraph.rootNode->getMidiCompensationHistoryLimits();
++        LatencyNode* old = nullptr;
++        if (retained.key.valid() && info.nodeGraphToReplace)
++            for (auto* node : info.nodeGraphToReplace->orderedNodes)
++                if (auto* tap = dynamic_cast<LatencyNode*> (node); tap && tap->retained.key == retained.key)
++                {
++                    if (old) throw std::invalid_argument ("Ambiguous old bounded MIDI edge");
++                    old = tap;
++                }
++        if (old && old->midiHistory && (!limits.enabled() || !retained.carryMidi))
++            throw std::invalid_argument ("Cannot abandon retained MIDI state during graph preparation");
++        if (!limits.enabled() || !retained.carryMidi) return;
++        if (!retained.key.valid() || requestedDelay < 0 || uint32_t (requestedDelay) > retained.maximumDelay)
++            throw std::invalid_argument ("Bounded MIDI edge needs stable identity/delay capacity");
++        size_t bytes = 0, matches = 0;
++        auto admit = [&] (size_t amount)
++        {
++            if (bytes > limits.graphBytes || amount > limits.graphBytes - bytes)
++                throw std::length_error ("Bounded MIDI graph storage exceeds explicit budget");
++            bytes += amount;
++        };
++        for (auto* node : info.nodeGraph.orderedNodes)
++        {
++            // Pinned JUCE ArrayBase::ensureAllocatedSize reserve rounding.
++            const size_t reserved = (size_t (limits.outputEvents) + limits.outputEvents / 2 + 8) & ~size_t (7);
++            admit (reserved * sizeof (tracktion::MidiMessageWithSource));
++            if (auto* tap = dynamic_cast<LatencyNode*> (node); tap && tap->retained.carryMidi)
++            {
++                if (!tap->retained.key.valid()) throw std::invalid_argument ("Unidentified bounded MIDI edge");
++                admit (vibera::dsp::MidiCompensationHistory::storageBytes (limits));
++                matches += tap->retained.key == retained.key;
++            }
++        }
++        if (matches != 1) throw std::invalid_argument ("Ambiguous candidate bounded MIDI edge");
++        const vibera::dsp::MidiHistoryConfiguration desired {retained.key, info.sampleRate,
++            retained.maximumDelay, uint32_t (info.blockSize), limits};
++        if (old)
++        {
++            if (!old->midiHistory || old->midiHistory->configuration() != desired)
++                throw std::invalid_argument ("Incompatible bounded MIDI epoch/rate/capacity; old graph preserved");
++            midiHistory = old->midiHistory; // Immutable config + owner only. Never copy live queue/gates.
++        }
++        else
++            midiHistory = std::make_shared<vibera::dsp::MidiCompensationHistory> (desired);
++        midiHistoryRaw = midiHistory.get();
++        midiQueueReset = false;
++    }
++    void processBoundedMidi (ProcessContext& pc, const tracktion::MidiMessageArray& inputMidi)
++    {
++        pc.buffers.midi.clear();
++        const auto count = pc.referenceSampleRange.getLength();
++        if (count <= 0 || uint64_t (count) > std::numeric_limits<uint32_t>::max() ||
++            !midiHistoryRaw->beginBlock (pc.referenceSampleRange.getStart(), uint32_t (count), inputMidi.isAllNotesOff))
++        {
++            if (count <= 0 || uint64_t (count) > std::numeric_limits<uint32_t>::max())
++                midiHistoryRaw->reject (vibera::dsp::MidiHistoryFailure::invalidBlock);
++            pc.buffers.midi.isAllNotesOff = true;
++            return;
++        }
++        const auto& configuration = midiHistoryRaw->configuration();
++        for (const auto& message : inputMidi)
++        {
++            const auto sample = message.getTimeStamp() * configuration.sampleRate;
++            if (!std::isfinite (sample) || sample < 0 || sample >= double (count))
++            {
++                midiHistoryRaw->reject (vibera::dsp::MidiHistoryFailure::invalidTimestamp);
++                continue;
++            }
++            const auto frame = std::llround (sample);
++            if (frame < 0 || frame >= count)
++            {
++                midiHistoryRaw->reject (vibera::dsp::MidiHistoryFailure::invalidTimestamp);
++                continue;
++            }
++            const auto size = message.getRawDataSize();
++            if (size < 1 || size > 3)
++            {
++                midiHistoryRaw->reject (vibera::dsp::MidiHistoryFailure::unsupportedPayload);
++                continue;
++            }
++            midiHistoryRaw->enqueue (uint32_t (frame), uint32_t (requestedDelay), message.mpeSourceID,
++                {message.getRawData(), size_t (size)});
++        }
++        const auto batch = midiHistoryRaw->drain();
++        if (batch.events.size() > configuration.limits.outputEvents)
++        {
++            midiHistoryRaw->reject (vibera::dsp::MidiHistoryFailure::outputCapacity);
++            pc.buffers.midi.isAllNotesOff = true;
++            return; // No partial output can precede the safety panic.
++        }
++        for (const auto& event : batch.events)
++        {
++            const auto frame = event.due - batch.reference;
++            juce::MidiMessage message (event.bytes.data(), int (event.size), double (frame) / configuration.sampleRate);
++            pc.buffers.midi.addMidiMessage (std::move (message), event.source);
++        }
++        pc.buffers.midi.isAllNotesOff = batch.allNotesOff;
++    }
++public:
++    std::optional<vibera::dsp::CompensationEdge> getBoundedMidiHistoryEdge() const noexcept override
++    {
++        return midiHistory ? std::optional<vibera::dsp::CompensationEdge> (retained.key) : std::nullopt;
++    }
++    vibera::dsp::MidiHistoryObservation boundedMidiDiagnostics() const noexcept
++    {
++        return midiHistoryRaw ? midiHistoryRaw->observation() : vibera::dsp::MidiHistoryObservation{};
++    }
++private:
+     void replaceLatencyProcessorIfPossible (NodeGraph* oldGraph)
+     {
+         if (!oldGraph) return;
+         const auto id = getNodeProperties().nodeID;

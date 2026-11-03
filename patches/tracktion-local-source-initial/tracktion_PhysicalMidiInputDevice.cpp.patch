@@ -1,0 +1,10 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_PhysicalMidiInputDevice.cpp
++++ b/modules/tracktion_engine/playback/devices/tracktion_PhysicalMidiInputDevice.cpp
+@@ -310,6 +310,7 @@
+ 
+ InputDeviceInstance* PhysicalMidiInputDevice::createInstance (EditPlaybackContext& c)
+ {
++    if (c.refuseNativeIOAttachment()) return nullptr;
+     if (! isTrackDevice() && retrospectiveBuffer == nullptr)
+         retrospectiveBuffer = std::make_unique<RetrospectiveMidiBuffer> (c.edit.engine);
+ 

@@ -1,0 +1,18 @@
+--- a/modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp
++++ b/modules/tracktion_engine/playback/devices/tracktion_MidiInputDevice.cpp
+@@ -1031,6 +1031,7 @@
+ 
+     bool handleIncomingMidiMessage (const juce::MidiMessage& message, MPESourceID sourceID)
+     {
++        if (context.refuseNativeIOAttachment()) return false;
+         {
+             juce::ScopedLock sl (activeNotesLock);
+ 
+@@ -1478,6 +1479,7 @@
+ 
+     void masterTimeUpdate (double time)
+     {
++        if (edit.admitNativeCapability (Edit::NativeCapability::globalTimestamp) != Edit::NativeCapabilityStatus::allowed) return;
+         if (context.isPlaying())
+         {
+             pausedTime = 0;

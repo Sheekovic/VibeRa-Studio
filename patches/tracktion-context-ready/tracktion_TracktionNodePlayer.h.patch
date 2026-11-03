@@ -1,0 +1,33 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_TracktionNodePlayer.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_TracktionNodePlayer.h
+@@ -64,6 +64,9 @@
+ 
+     /** Control-thread readback; no virtual property query after publication. */
+     int getPreparedLatencySamples() const noexcept { return nodePlayer.getPreparedLatencySamples(); }
++    using GraphSelection = tracktion::graph::LockFreeMultiThreadedNodePlayer::GraphSelection;
++    GraphSelection graphSelection() const noexcept { return nodePlayer.graphSelection(); }
++
+ 
+     void setNode (std::unique_ptr<tracktion::graph::Node> newNode)
+     {
+@@ -79,6 +82,20 @@
+     {
+         nodePlayer.prepareToPlay (sampleRateToUse, blockSizeToUse);
+     }
++
++    using ReadyGraph = tracktion::graph::LockFreeMultiThreadedNodePlayer::ReadyGraph;
++    using GraphRetirementSlot = tracktion::graph::LockFreeMultiThreadedNodePlayer::GraphRetirementSlot;
++    using ReadyGraphStatus = tracktion::graph::LockFreeMultiThreadedNodePlayer::ReadyGraphStatus;
++    ReadyGraphStatus fixedGraphPreparationReadiness() const noexcept
++    { return nodePlayer.fixedGraphPreparationReadiness(); }
++    ReadyGraph prepareFixedGraph(std::unique_ptr<tracktion::graph::Node> node)
++    { return nodePlayer.prepareFixedGraph(std::move(node)); }
++    GraphRetirementSlot makeGraphRetirementSlot()
++    { return nodePlayer.makeGraphRetirementSlot(); }
++    ReadyGraphStatus validateReadyGraph(const ReadyGraph& candidate, const GraphRetirementSlot& retired) const noexcept
++    { return nodePlayer.validateReadyGraph(candidate, retired); }
++    ReadyGraphStatus publishReadyGraph(ReadyGraph& candidate, GraphRetirementSlot& retired) noexcept
++    { return nodePlayer.publishReadyGraph(candidate, retired); }
+ 
+     /** Processes a block of audio and MIDI data.
+         Returns the number of times a node was checked but unable to be processed.

@@ -1,0 +1,25 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -101,6 +101,22 @@
+     // legacy/default graphs and incumbent policy migration are not enabled.
+     bool boundedNativeMidiIngress = false;
+ 
++    // ORIGINAL CONTROL-only output-port experiment. Empty preserves native
++    // behavior. Caller admits exact producer/type/short-MIDI universe first.
++    // Positive capacity reserves PluginNode internal AND output MIDI arrays;
++    // it does not admit arbitrary plugin-generated events or fan-in.
++    struct PluginFinalOutputPlan
++    {
++        int shortMidiCapacity = 0;
++        bool moveAudioCompensationStage = false;
++        std::function<std::unique_ptr<graph::Node> (std::unique_ptr<graph::Node>)> wrap = {};
++    };
++    std::function<std::optional<PluginFinalOutputPlan> (Plugin&)> preparePluginFinalOutput = {};
++    // May return true ONLY when every real recorded-output listener is proven
++    // no-op for this exact context. Unknown consumers must refuse, not vanish.
++    std::function<bool (AudioTrack&)> omitAccountedNoopMidiObserver = {};
++
++
+     bool readAheadTimeStretchNodes = false;             /**< TEMPORARY: If true, real-time time-stretch Nodes will use a larger buffer and background thread to reduce audio CPU use. */
+ 
+     /** If set, this will be called for each output device to give an opportunity to add an

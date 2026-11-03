@@ -1,0 +1,13 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_PluginNode.cpp
+@@ -64,6 +64,10 @@
+         return *cachedNodeProperties;
+ 
+     auto props = input->getNodeProperties();
++    // Another processor is a different output stage; NEVER carry an upstream
++    // identity through effects. Only an explicitly registered final stage opts in.
++    props.audioCompensationStage = plugin->getPreparedAudioOutputStageIdentity();
++    props.audioCompensationStageOrigin = props.audioCompensationStage ? this : nullptr;
+ 
+     // Use the actual input channel count — channel conversion (e.g. mono→stereo) is handled
+     // upstream by createNodeForPlugin inserting a ChannelRemappingNode when needed

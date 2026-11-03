@@ -1,0 +1,442 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -13,8 +13,128 @@
+ #include <atomic>
+ #include <stdexcept>
+ #include <map>
++#include <cmath>
++#include <limits>
++#include <cstdint>
+ 
+ namespace tracktion::inline graph {
++
++class LatencyNode;
++
++// ORIGINAL one-shot, graph-pinned capability for exactly one registered D->0
++// output queue. Not a project ID, graph-generation receipt, MIDI bridge, or
++// general changed-path admission. Only LatencyNode can mint/admit this proof.
++class ForwardOutputDrain final
++{
++public:
++    enum class State : uint32_t { prepared, admitted, draining, finished, notAdmitted,
++                                  shape, discontinuity, queueSize, nativeMidi, unavailable, unknownReference, incompleteHistory, writerChanged, configuration };
++    struct Observation { State state; uint32_t remaining; };
++    struct Result { State state; uint32_t overwrittenFrames; };
++    ForwardOutputDrain (const ForwardOutputDrain&) = delete;
++    ForwardOutputDrain& operator= (const ForwardOutputDrain&) = delete;
++    Observation observation() const noexcept
++    {
++        const auto value = observationBits.load (std::memory_order_acquire);
++        return { static_cast<State> (value >> 32), static_cast<uint32_t> (value) };
++    }
++    int originalDelaySamples() const noexcept { return delay; }
++    const void* queueRuntimeToken() const noexcept { return processor.get(); }
++    Result drain (choc::buffer::ChannelArrayView<float> output, juce::Range<int64_t> reference) noexcept
++    {
++        // Sole adopted processing owner only. No owning-handle changes here.
++        // The first reference must follow the actual DSP-certified old queue.
++        // Neither CONTROL nor a freely chosen initial anchor can prove this.
++        if (! admitted) return fail (State::notAdmitted);
++        if (failed) return { failedState, 0 };
++        const auto count = output.getNumFrames();
++        if (output.getNumChannels() != static_cast<choc::buffer::ChannelCount> (channels) ||
++            count == 0 || count > static_cast<choc::buffer::FrameCount> (blockSize) ||
++            reference.getStart() < 0 ||
++            reference.getStart() > std::numeric_limits<int64_t>::max() - static_cast<int64_t> (count) ||
++            reference.getEnd() != reference.getStart() + static_cast<int64_t> (count))
++            return fail (State::shape);
++        if (started && reference.getStart() != expectedNextReference)
++            return fail (State::discontinuity);
++        if (remaining == 0)
++        {
++            expectedNextReference = reference.getEnd();
++            return { State::finished, 0 };
++        }
++        const auto prefix = std::min (remaining, static_cast<int> (count));
++        const auto result = processor->drainTerminalAudioPrefix (
++            output.getStart (static_cast<choc::buffer::FrameCount> (prefix)), remaining,
++            previousWriter, this, delay, sampleRate, reference.getStart(), !started);
++        using Status = LatencyProcessor::TerminalDrainStatus;
++        if (result != Status::ready)
++            return fail (result == Status::nativeMidi ? State::nativeMidi :
++                         result == Status::queueSize ? State::queueSize :
++                         result == Status::shape ? State::shape :
++                         result == Status::unknownReference ? State::unknownReference :
++                         result == Status::incompleteHistory ? State::incompleteHistory :
++                         result == Status::discontinuity ? State::discontinuity :
++                         result == Status::writerChanged ? State::writerChanged :
++                         result == Status::configuration ? State::configuration : State::unavailable);
++        started = true;
++        expectedNextReference = reference.getEnd();
++        remaining -= prefix;
++        const auto state = remaining == 0 ? State::finished : State::draining;
++        publish (state);
++        return { state, static_cast<uint32_t> (prefix) };
++    }
++    Result refuseUnexpectedMidi() noexcept { return fail (State::nativeMidi); }
++private:
++    friend class LatencyNode;
++    ForwardOutputDrain (Node& node, NodeGraph& current, NodeGraph& old, const void* ownerToken,
++                        const void* previousOrigin, const void* nextOrigin, const Node* writer,
++                        std::shared_ptr<LatencyProcessor> queue, double preparedRate,
++                        int maximumBlock, int channelCount, int samples)
++        : bindingNode (&node), candidateGraph (&current), previousGraph (&old), owner (ownerToken),
++          beforeOrigin (previousOrigin), afterOrigin (nextOrigin), previousWriter (writer), processor (std::move (queue)),
++          sampleRate (preparedRate), blockSize (maximumBlock), channels (channelCount), delay (samples),
++          remaining (samples)
++    {
++        publish (State::prepared);
++    }
++    void publish (State state) noexcept
++    {
++        observationBits.store ((uint64_t (state) << 32) | static_cast<uint32_t> (remaining),
++                               std::memory_order_release);
++    }
++    Result fail (State state) noexcept
++    {
++        failed = true;
++        failedState = state;
++        publish (state);
++        return { state, 0 };
++    }
++    Node* const bindingNode;
++    NodeGraph* const candidateGraph;
++    NodeGraph* const previousGraph;
++    const void* const owner;
++    const void* const beforeOrigin;
++    const void* const afterOrigin;
++    const Node* const previousWriter; // Compared on DSP only; never dereferenced.
++    const std::shared_ptr<LatencyProcessor> processor;
++    const double sampleRate;
++    const int blockSize, channels, delay;
++    bool admitted = false; // CONTROL before publication only, then immutable.
++    bool started = false, failed = false; // Sole DSP owner after publication.
++    State failedState = State::prepared;
++    int remaining;
++    int64_t expectedNextReference = 0;
++    std::atomic<uint64_t> observationBits { 0 };
++    static_assert (std::atomic<uint64_t>::is_always_lock_free);
++};
++
++// Node itself is supplied by the application; this narrow discovery interface
++// does not inject nodes or touch default graph transformations.
++class ForwardOutputDrainNode
++{
++public:
++    virtual ~ForwardOutputDrainNode() = default;
++    virtual ForwardOutputDrain* preparedForwardOutputDrain() const noexcept = 0;
++};
+ 
+ class LatencyNode final : public Node
+ {
+@@ -86,87 +206,171 @@
+         const OutputStageStatus status;
+         const OutputStageDifference difference{}; // Unknown for unsupported/incomplete collection.
+     };
++private:
++    struct Stage
++    {
++        int channels = 0, exits = 0;
++        const void* origin = nullptr;
++        LatencyNode* delay = nullptr;
++        ForwardOutputDrainNode* forward = nullptr;
++        Node* forwardNode = nullptr;
++        bool hasMidi = false;
++        bool producerPathKnown = false, boundaryPathKnown = false;
++        int producerPathLatencySamples = 0, boundaryPathLatencySamples = 0;
++        size_t producerNodeId = 0, boundaryNodeId = 0;
++    };
++    using Stages = std::map<const void*, Stage>;
++    static Stages collectOutputStages (NodeGraph& graph)
++    {
++        Stages stages;
++        for (auto* node : graph.orderedNodes)
++        {
++            const auto props = node->getNodeProperties();
++            if (! props.audioCompensationStage) continue;
++            auto& stage = stages[props.audioCompensationStage];
++            if (!props.audioCompensationStageOrigin ||
++                (stage.origin && stage.origin != props.audioCompensationStageOrigin))
++                throw OutputStageError (OutputStageStatus::duplicate, "routing.pdcStageDuplicate: One exact producing Node per registered bus owner required");
++            stage.origin = props.audioCompensationStageOrigin;
++            if (stage.origin == static_cast<const void*> (node))
++            {
++                stage.producerPathKnown = true;
++                stage.producerPathLatencySamples = props.latencyNumSamples;
++                stage.producerNodeId = props.nodeID;
++            }
++            if (props.numberOfChannels <= 0 || (stage.channels != 0 && stage.channels != props.numberOfChannels))
++                throw OutputStageError (OutputStageStatus::shape, "routing.pdcStageShape: Explicit bus stage channel shape changed");
++            stage.channels = props.numberOfChannels;
++            stage.hasMidi = stage.hasMidi || props.hasMidi;
++            if (auto* forward = dynamic_cast<ForwardOutputDrainNode*> (node))
++            {
++                if (stage.forward)
++                    throw OutputStageError (OutputStageStatus::fanout, "routing.pdcForwardFanout: One forward bridge per stage required");
++                stage.forward = forward;
++                stage.forwardNode = node;
++            }
++            if (auto* tap = dynamic_cast<LatencyNode*> (node))
++            {
++                if (tap->historyEnabled || stage.delay)
++                    throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageAmbiguous: Separate explicit stage per compensation fanout required");
++                stage.delay = tap;
++            }
++        }
++        // A stage may pass through wrappers but must enter ONE consumer
++        // boundary. A direct + delayed fanout may otherwise look like only
++        // one FIFO while ambiguously changing what its old queue means.
++        for (auto* node : graph.orderedNodes)
++        {
++            const auto owner = node->getNodeProperties().audioCompensationStage;
++            for (auto* inputNode : node->getDirectInputNodes())
++            {
++                const auto inputProperties = inputNode->getNodeProperties();
++                const auto inputOwner = inputProperties.audioCompensationStage;
++                if (inputOwner && inputOwner != owner)
++                {
++                    auto& stage = stages.at(inputOwner);
++                    ++stage.exits;
++                    stage.boundaryPathKnown = true;
++                    stage.boundaryPathLatencySamples = inputProperties.latencyNumSamples;
++                    stage.boundaryNodeId = inputProperties.nodeID;
++                }
++            }
++        }
++        const auto rootProperties = graph.rootNode->getNodeProperties();
++        if (const auto rootOwner = rootProperties.audioCompensationStage)
++        {
++            auto& stage = stages.at(rootOwner);
++            ++stage.exits;
++            stage.boundaryPathKnown = true;
++            stage.boundaryPathLatencySamples = rootProperties.latencyNumSamples;
++            stage.boundaryNodeId = rootProperties.nodeID;
++        }
++        for (const auto& [owner, stage] : stages)
++            if (stage.exits != 1)
++                throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageFanout: Exact single output consumer required");
++        return stages;
++    }
++    static void requireForwardScope (NodeGraph& candidate, NodeGraph& previous,
++                                     const Stages& next, const Stages& old, const void* target)
++    {
++        const auto reject = [] { throw OutputStageError (OutputStageStatus::configuration,
++            "routing.pdcForwardScope: Exact single audio D-to-zero stage and unchanged root/other paths required"); };
++        if (next.size() != old.size() || next.empty()) reject();
++        const auto newRoot = candidate.rootNode->getNodeProperties();
++        const auto oldRoot = previous.rootNode->getNodeProperties();
++        if (newRoot.latencyNumSamples != oldRoot.latencyNumSamples ||
++            newRoot.numberOfChannels != oldRoot.numberOfChannels || newRoot.hasMidi || oldRoot.hasMidi)
++            reject();
++        unsigned forwardCount = 0;
++        for (const auto& [identity, now] : next)
++        {
++            const auto found = old.find (identity);
++            if (found == old.end()) reject();
++            const auto& before = found->second;
++            if (before.forward || before.hasMidi || now.hasMidi || before.channels != now.channels ||
++                !before.producerPathKnown || !now.producerPathKnown ||
++                !before.boundaryPathKnown || !now.boundaryPathKnown) reject();
++            if (now.forward) ++forwardCount;
++            if (identity == target)
++            {
++                if (!now.forward || now.delay || !before.delay || before.delay->historyEnabled ||
++                    !before.delay->latencyProcessor || before.delay->requestedDelay <= 0) reject();
++                const auto delay = before.delay->requestedDelay;
++                if (int64_t (before.producerPathLatencySamples) + delay != now.producerPathLatencySamples ||
++                    before.boundaryPathLatencySamples != now.boundaryPathLatencySamples) reject();
++                unsigned references = 0;
++                for (auto* node : previous.orderedNodes)
++                    if (auto* tap = dynamic_cast<LatencyNode*> (node); tap &&
++                        tap->latencyProcessor == before.delay->latencyProcessor) ++references;
++                if (references != 1) reject();
++            }
++            else if (now.forward || bool (now.delay) != bool (before.delay) ||
++                     (now.delay && now.delay->requestedDelay != before.delay->requestedDelay) ||
++                     now.producerPathLatencySamples != before.producerPathLatencySamples ||
++                     now.boundaryPathLatencySamples != before.boundaryPathLatencySamples)
++                reject();
++        }
++        if (forwardCount != 1 || !next.count (target) || !old.count (target)) reject();
++    }
++public:
++    // CONTROL: mint only from actual final transformed graph/predecessor. This
++    // retains a handle, NEVER reads/copies a live FIFO, MIDI, or cursor. The
++    // existing final validator must still admit the completed prepared graph.
++    static std::unique_ptr<ForwardOutputDrain> prepareForwardOutputDrain (
++        Node& binding, const PlaybackInitialisationInfo& info, const void* owner)
++    {
++        if (!owner || !info.nodeGraphToReplace || !std::isfinite (info.sampleRate) ||
++            info.sampleRate <= 0.0 || info.blockSize <= 0)
++            throw OutputStageError (OutputStageStatus::configuration, "routing.pdcForwardPreparation: Valid predecessor/configuration required");
++        const auto next = collectOutputStages (info.nodeGraph);
++        const auto old = collectOutputStages (*info.nodeGraphToReplace);
++        requireForwardScope (info.nodeGraph, *info.nodeGraphToReplace, next, old, owner);
++        const auto& after = next.at (owner);
++        const auto& before = old.at (owner);
++        if (after.forwardNode != &binding ||
++            !before.delay->latencyProcessor->hasConfiguration (before.delay->requestedDelay,
++                                                               info.sampleRate, before.channels))
++            throw OutputStageError (OutputStageStatus::configuration, "routing.pdcForwardPreparation: Exact original processor/configuration required");
++        return std::unique_ptr<ForwardOutputDrain> (new ForwardOutputDrain (
++            binding, info.nodeGraph, *info.nodeGraphToReplace, owner, before.origin, after.origin, before.delay,
++            before.delay->latencyProcessor, info.sampleRate, info.blockSize, before.channels,
++            before.delay->requestedDelay));
++    }
+     // CONTROL-only fixed-graph admission. Every explicit output stage must
+     // remain present and unique with the SAME delay/rate/channel configuration.
+     // Includes zero-delay stages so old delay->none cannot silently discard a
+     // queued tail. This is not variable-delay/route-wide PDC qualification.
+     static bool validateStableOutputStages (NodeGraph& candidate, NodeGraph* previous)
+     {
+-        struct Stage
+-        {
+-            int channels = 0, exits = 0;
+-            const void* origin = nullptr;
+-            LatencyNode* delay = nullptr;
+-            bool producerPathKnown = false, boundaryPathKnown = false;
+-            int producerPathLatencySamples = 0, boundaryPathLatencySamples = 0;
+-            size_t producerNodeId = 0, boundaryNodeId = 0;
+-        };
+-        using Stages = std::map<const void*, Stage>;
+-        const auto collect = [] (NodeGraph& graph)
+-        {
+-            Stages stages;
+-            for (auto* node : graph.orderedNodes)
+-            {
+-                const auto props = node->getNodeProperties();
+-                if (! props.audioCompensationStage) continue;
+-                auto& stage = stages[props.audioCompensationStage];
+-                if (!props.audioCompensationStageOrigin ||
+-                    (stage.origin && stage.origin != props.audioCompensationStageOrigin))
+-                    throw OutputStageError (OutputStageStatus::duplicate, "routing.pdcStageDuplicate: One exact producing Node per registered bus owner required");
+-                stage.origin = props.audioCompensationStageOrigin;
+-                if (stage.origin == static_cast<const void*> (node))
+-                {
+-                    stage.producerPathKnown = true;
+-                    stage.producerPathLatencySamples = props.latencyNumSamples;
+-                    stage.producerNodeId = props.nodeID;
+-                }
+-                if (props.numberOfChannels <= 0 || (stage.channels != 0 && stage.channels != props.numberOfChannels))
+-                    throw OutputStageError (OutputStageStatus::shape, "routing.pdcStageShape: Explicit bus stage channel shape changed");
+-                stage.channels = props.numberOfChannels;
+-                if (auto* tap = dynamic_cast<LatencyNode*> (node))
+-                {
+-                    if (tap->historyEnabled || stage.delay)
+-                        throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageAmbiguous: Separate explicit stage per compensation fanout required");
+-                    stage.delay = tap;
+-                }
+-            }
+-            // A stage may pass through wrappers but must enter ONE consumer
+-            // boundary. A direct + delayed fanout may otherwise look like only
+-            // one FIFO while ambiguously changing what its old queue means.
+-            for (auto* node : graph.orderedNodes)
+-            {
+-                const auto owner = node->getNodeProperties().audioCompensationStage;
+-                for (auto* inputNode : node->getDirectInputNodes())
+-                {
+-                    const auto inputProperties = inputNode->getNodeProperties();
+-                    const auto inputOwner = inputProperties.audioCompensationStage;
+-                    if (inputOwner && inputOwner != owner)
+-                    {
+-                        auto& stage = stages.at(inputOwner);
+-                        ++stage.exits;
+-                        stage.boundaryPathKnown = true;
+-                        stage.boundaryPathLatencySamples = inputProperties.latencyNumSamples;
+-                        stage.boundaryNodeId = inputProperties.nodeID;
+-                    }
+-                }
+-            }
+-            const auto rootProperties = graph.rootNode->getNodeProperties();
+-            if (const auto rootOwner = rootProperties.audioCompensationStage)
+-            {
+-                auto& stage = stages.at(rootOwner);
+-                ++stage.exits;
+-                stage.boundaryPathKnown = true;
+-                stage.boundaryPathLatencySamples = rootProperties.latencyNumSamples;
+-                stage.boundaryNodeId = rootProperties.nodeID;
+-            }
+-            for (const auto& [owner, stage] : stages)
+-                if (stage.exits != 1)
+-                    throw OutputStageError (OutputStageStatus::fanout, "routing.pdcStageFanout: Exact single output consumer required");
+-            return stages;
+-        };
+-        const auto next = collect (candidate);
+-        if (! previous) return ! next.empty(); // Genuine first cold graph has no queued history.
+-        const auto old = collect (*previous);
++        const auto next = collectOutputStages (candidate);
++        if (! previous)
++        {
++            for (const auto& [owner, stage] : next)
++                if (stage.forward) throw OutputStageError (OutputStageStatus::configuration,
++                    "routing.pdcForwardPreparation: Cannot bridge a genuine first cold graph");
++            return ! next.empty(); // Genuine first cold graph has no queued history.
++        }
++        const auto old = collectOutputStages (*previous);
+         if (next.empty() && old.empty()) return false;
+         if (next.size() != old.size())
+             throw OutputStageError (OutputStageStatus::missing, "routing.pdcStageMissing: Explicit bus output stages must remain present");
+@@ -207,6 +411,7 @@
+             }
+             return receipt;
+         };
++        ForwardOutputDrain* forwardToAdmit = nullptr;
+         for (const auto& [identity, now] : next)
+         {
+             const auto found = old.find (identity);
+@@ -214,6 +419,26 @@
+                 throw OutputStageError (OutputStageStatus::owner, "routing.pdcStageOwner: Exact graph-pinned bus owner must match");
+             if (now.channels != found->second.channels)
+                 throw OutputStageError (OutputStageStatus::shape, "routing.pdcStageShape: Bus output channels changed");
++            if (found->second.forward)
++                throw OutputStageError (OutputStageStatus::configuration,
++                    "routing.pdcForwardOneShot: A prior bridge requires separately qualified continuation");
++            if (now.forward)
++            {
++                requireForwardScope (candidate, *previous, next, old, identity);
++                auto* proof = now.forward->preparedForwardOutputDrain();
++                if (!proof || proof->admitted || proof->started || proof->failed ||
++                    proof->remaining != proof->delay || proof->bindingNode != now.forwardNode ||
++                    proof->candidateGraph != &candidate || proof->previousGraph != previous ||
++                    proof->owner != identity || proof->beforeOrigin != found->second.origin ||
++                    proof->afterOrigin != now.origin || proof->previousWriter != found->second.delay ||
++                    proof->processor != found->second.delay->latencyProcessor ||
++                    proof->delay != found->second.delay->requestedDelay ||
++                    !proof->processor->hasConfiguration (proof->delay, proof->sampleRate, proof->channels))
++                    throw OutputStageError (OutputStageStatus::configuration,
++                        "routing.pdcForwardProof: Exact sealed prepared output drain required");
++                forwardToAdmit = proof;
++                continue;
++            }
+             const auto* before = found->second.delay;
+             if (bool (now.delay) != bool (before) ||
+                 (now.delay && (!now.delay->latencyProcessor || !before->latencyProcessor ||
+@@ -253,6 +478,11 @@
+                 throw OutputStageError (OutputStageStatus::unsupportedInternal,
+                     "routing.pdcInternalScope: Changed/cold internal compensation queue needs a joint plan");
+         }
++        if (forwardToAdmit)
++        {
++            forwardToAdmit->admitted = true;
++            forwardToAdmit->publish (ForwardOutputDrain::State::admitted);
++        }
+         return true;
+     }
+     struct RetainedAudioEdge
+@@ -381,12 +611,16 @@
+         const auto numSamples = (int) pc.referenceSampleRange.getLength();
+         if (!historyEnabled)
+         {
++            const auto referenceBefore = latencyProcessor->referenceBeforeAudio();
+             latencyProcessor->writeAudio (source.audio);
+             if (!midiHistoryRaw) latencyProcessor->writeMIDI (source.midi);
+             pc.buffers.midi.clear();
+             latencyProcessor->readAudioOverwriting (pc.buffers.audio);
+             if (midiHistoryRaw) processBoundedMidi (pc, source.midi);
+             else latencyProcessor->readMIDI (pc.buffers.midi, numSamples);
++            latencyProcessor->completeAudioReference (referenceBefore, this, pc.referenceSampleRange,
++                source.audio.getNumFrames(), pc.buffers.audio.getNumFrames(),
++                source.audio.getNumChannels(), pc.buffers.audio.getNumChannels());
+             return;
+         }
+ 

@@ -1,0 +1,396 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h
+@@ -148,6 +148,168 @@
+     virtual ForwardOutputDrain* preparedForwardOutputDrain() const noexcept = 0;
+ };
+ 
++// ORIGINAL closed finite-delay removal experiment. No existing/native/app
++// plugin implements this contract. A trusted original SDK test adapter must
++// explicitly guarantee finite pure-delay residual, fixed wet1/bypassfalse,
++// no MIDI/automation/sidechain and immutable supported runtime configuration.
++// Plugin name or reported latency NEVER establishes this contract.
++struct FiniteInverseResidualIdentity
++{
++    const Node* producer = nullptr; // Exact prior producing Node, never DSP-dereferenced.
++    const void* runtime = nullptr;  // Nonmoving owner pinned by both graph adapters.
++    const void* source = nullptr;   // Explicit logical source owner, not PCM provenance.
++    uint64_t epoch = 0;
++    int samples = 0, channels = 0, quantum = 0;
++    double sampleRate = 0;
++    bool operator== (const FiniteInverseResidualIdentity&) const = default;
++};
++enum class FiniteInverseResidualStatus { unsupported, ready, clock, worker, shape };
++class FiniteInverseResidualProvider
++{
++public:
++    virtual ~FiniteInverseResidualProvider() = default;
++    // CONTROL immutable metadata only, never live cursor/reference reads.
++    virtual std::optional<FiniteInverseResidualIdentity> finiteInverseResidualIdentity() const noexcept
++    { return {}; }
++    // Sole DSP owner AFTER this provider processed the exact range.
++    virtual FiniteInverseResidualStatus finiteInverseResidualOutput (juce::Range<int64_t>, int) const noexcept
++    { return FiniteInverseResidualStatus::unsupported; }
++};
++class InverseLogicalSource
++{
++public:
++    virtual ~InverseLogicalSource() = default;
++    virtual const void* inverseLogicalSourceIdentity() const noexcept = 0;
++};
++class InverseOutputResidual final
++{
++public:
++    enum class State : uint32_t { prepared, admitted, rendering, finished, notAdmitted,
++                                  shape, discontinuity, providerFault, nativeMidi, newDryMutation, newDryHistory };
++    struct Observation { State state; uint32_t remaining; };
++    InverseOutputResidual (const InverseOutputResidual&) = delete;
++    InverseOutputResidual& operator= (const InverseOutputResidual&) = delete;
++    Observation observation() const noexcept
++    {
++        const auto bits = observationBits.load (std::memory_order_acquire);
++        return { State (bits >> 32), uint32_t (bits) };
++    }
++    const void* newDryQueueRuntimeToken() const noexcept { return newDryQueue.get(); }
++    const void* retainedRuntimeToken() const noexcept { return identity.runtime; }
++    // Sole DSP owner, AFTER the actual new dry LatencyNode processed this range.
++    // Public provenance is atomic; existing reference scalars are DSP-only.
++    bool validateNewDryQueue (juce::Range<int64_t> reference) noexcept
++    {
++        if (!admitted) { fail (State::notAdmitted); return false; }
++        if (failed) return false;
++        // Node exposes no reference-range getter. Establish exact fixed-Q
++        // range shape before inferring its start from the actual DSP queue end.
++        if (reference.getStart() < 0 || identity.quantum <= 0 ||
++            reference.getStart() > std::numeric_limits<int64_t>::max() - int64_t (identity.quantum) ||
++            reference.getEnd() != reference.getStart() + int64_t (identity.quantum))
++        { fail (State::shape); return false; }
++        if (newDryUnknownMutation->load (std::memory_order_acquire))
++        { fail (State::newDryMutation); return false; }
++        if (!started)
++        {
++            // Ordinary first native write/read happens before this wrapper.
++            // A privately preprocessed candidate has already advanced revisions
++            // and cannot masquerade as a fresh, zero-primed output queue.
++            const auto baseline = newDryQueue->firstPreparedAudioRevision;
++            if (baseline > std::numeric_limits<uint64_t>::max() - 2 ||
++                newDryQueue->audioMutationRevision != baseline + 2 ||
++                newDryQueue->lastWriteRevision != baseline + 1 ||
++                newDryQueue->lastReadRevision != baseline + 2 ||
++                !newDryQueue->lastWriteSucceeded || !newDryQueue->lastReadSucceeded ||
++                !newDryQueue->referenceKnown || newDryQueue->referenceWriter != newDryWriterIdentity ||
++                newDryQueue->referenceEnd != reference.getEnd() ||
++                newDryQueue->contiguousKnownFrames != std::min (identity.samples, identity.quantum) ||
++                !newDryWriter->hasProcessed())
++            { fail (State::newDryHistory); return false; }
++        }
++        return true;
++    }
++    State select (choc::buffer::ChannelArrayView<float> destination,
++                  choc::buffer::ChannelArrayView<float> dry,
++                  choc::buffer::ChannelArrayView<float> residual,
++                  juce::Range<int64_t> reference) noexcept
++    {
++        if (!validateNewDryQueue (reference)) return failedState;
++        const auto frames = destination.getNumFrames();
++        if (frames != uint32_t (identity.quantum) || destination.getNumChannels() != 2 ||
++            dry.getNumFrames() != frames || dry.getNumChannels() != 2 ||
++            reference.getStart() < 0 || reference.getStart() > std::numeric_limits<int64_t>::max() - int64_t (frames) ||
++            reference.getEnd() != reference.getStart() + int64_t (frames))
++            return fail (State::shape);
++        if (remaining && started && reference.getStart() != nextReference) return fail (State::discontinuity);
++        if (remaining)
++        {
++            if (residual.getNumFrames() != frames || residual.getNumChannels() != 2 ||
++                !residualNode->hasProcessed() ||
++                // Provider reports its actual ProcessContext range after DSP;
++                // hasProcessed alone does not identify the emitted interval.
++                provider->finiteInverseResidualOutput (reference, int (frames)) != FiniteInverseResidualStatus::ready)
++                return fail (State::providerFault);
++        }
++        const auto prefix = std::min (remaining, int (frames));
++        for (choc::buffer::ChannelCount channel = 0; channel < 2; ++channel)
++            for (choc::buffer::FrameCount frame = 0; frame < frames; ++frame)
++                destination.getSample (channel, frame) = frame < uint32_t (prefix)
++                    ? residual.getSample (channel, frame) : dry.getSample (channel, frame);
++        remaining -= prefix;
++        started = true;
++        nextReference = reference.getEnd();
++        const auto state = remaining ? State::rendering : State::finished;
++        publish (state);
++        return state;
++    }
++    State refuseUnexpectedMidi() noexcept { return fail (State::nativeMidi); }
++private:
++    friend class LatencyNode;
++    InverseOutputResidual (Node& binding, NodeGraph& candidate, NodeGraph& previous,
++                           const void* stage, const void* before, const void* after,
++                           Node& residual, FiniteInverseResidualProvider& p,
++                           FiniteInverseResidualIdentity id, std::shared_ptr<LatencyProcessor> queue,
++                           Node& dryWriter, const void* dryWriterIdentity, const std::atomic<bool>& unknownMutation)
++        : bindingNode (&binding), candidateGraph (&candidate), previousGraph (&previous), owner (stage),
++          beforeOrigin (before), afterOrigin (after), residualNode (&residual), provider (&p),
++          identity (id), newDryQueue (std::move (queue)), newDryWriter (&dryWriter), newDryWriterIdentity (dryWriterIdentity),
++          newDryUnknownMutation (&unknownMutation), remaining (id.samples)
++    { publish (State::prepared); }
++    void publish (State state) noexcept
++    { observationBits.store ((uint64_t (state) << 32) | uint32_t (remaining), std::memory_order_release); }
++    State fail (State state) noexcept
++    { failed = true; failedState = state; publish (state); return state; }
++    Node* const bindingNode;
++    NodeGraph* const candidateGraph;
++    NodeGraph* const previousGraph;
++    const void* const owner;
++    const void* const beforeOrigin;
++    const void* const afterOrigin;
++    Node* const residualNode;
++    FiniteInverseResidualProvider* const provider;
++    const FiniteInverseResidualIdentity identity;
++    const std::shared_ptr<LatencyProcessor> newDryQueue;
++    Node* const newDryWriter;
++    const void* const newDryWriterIdentity;
++    const std::atomic<bool>* const newDryUnknownMutation;
++    bool admitted = false;
++    bool started = false, failed = false;
++    State failedState = State::prepared;
++    int remaining = 0;
++    int64_t nextReference = 0;
++    std::atomic<uint64_t> observationBits { 0 };
++    static_assert (std::atomic<uint64_t>::is_always_lock_free);
++};
++class InverseOutputResidualNode
++{
++public:
++    virtual ~InverseOutputResidualNode() = default;
++    virtual InverseOutputResidual* preparedInverseOutputResidual() const noexcept = 0;
++    virtual Node* inverseResidualInputNode() const noexcept = 0;
++};
++
++
+ class LatencyNode final : public Node
+ {
+ public:
+@@ -232,6 +394,8 @@
+         LatencyNode* delay = nullptr;
+         ForwardOutputDrainNode* forward = nullptr;
+         Node* forwardNode = nullptr;
++        InverseOutputResidualNode* inverse = nullptr;
++        Node* inverseNode = nullptr;
+         bool hasMidi = false;
+         bool producerPathKnown = false, boundaryPathKnown = false;
+         int producerPathLatencySamples = 0, boundaryPathLatencySamples = 0;
+@@ -262,10 +426,18 @@
+             stage.hasMidi = stage.hasMidi || props.hasMidi;
+             if (auto* forward = dynamic_cast<ForwardOutputDrainNode*> (node))
+             {
+-                if (stage.forward)
++                if (stage.forward || stage.inverse)
+                     throw OutputStageError (OutputStageStatus::fanout, "routing.pdcForwardFanout: One forward bridge per stage required");
+                 stage.forward = forward;
+                 stage.forwardNode = node;
++            }
++            if (auto* inverse = dynamic_cast<InverseOutputResidualNode*> (node))
++            {
++                if (stage.inverse || stage.forward)
++                    throw OutputStageError (OutputStageStatus::fanout,
++                        "routing.pdcInverseFanout: One explicit inverse adapter per stage required");
++                stage.inverse = inverse;
++                stage.inverseNode = node;
+             }
+             if (auto* tap = dynamic_cast<LatencyNode*> (node))
+             {
+@@ -350,6 +522,97 @@
+         }
+         if (forwardCount != 1 || !next.count (target) || !old.count (target)) reject();
+     }
++    static Node* stageOriginNode (NodeGraph& graph, const Stage& stage)
++    {
++        for (auto* node : graph.orderedNodes)
++            if (stage.origin == static_cast<const void*> (node)) return node;
++        return nullptr;
++    }
++    static FiniteInverseResidualIdentity requireInverseScope (
++        NodeGraph& candidate, NodeGraph& previous, const Stages& next, const Stages& old,
++        const void* identity, double rate, int block)
++    {
++        const auto reject = [] { throw OutputStageError (OutputStageStatus::configuration,
++            "routing.pdcInverseScope: Explicit finite audio-only source/new-dry joint plan required"); };
++        const auto current = next.find (identity), prior = old.find (identity);
++        if (!identity || current == next.end() || prior == old.end() || next.size() != old.size() ||
++            block != 256 || !std::isfinite (rate) || rate <= 0) reject();
++        const auto nowRoot = candidate.rootNode->getNodeProperties();
++        const auto oldRoot = previous.rootNode->getNodeProperties();
++        if (nowRoot.hasMidi || oldRoot.hasMidi || nowRoot.numberOfChannels != 2 || oldRoot.numberOfChannels != 2 ||
++            nowRoot.latencyNumSamples != oldRoot.latencyNumSamples) reject();
++        FiniteInverseResidualIdentity result;
++        for (const auto& [owner, now] : next)
++        {
++            const auto beforeFound = old.find (owner);
++            if (beforeFound == old.end()) reject();
++            const auto& before = beforeFound->second;
++            if (before.forward || now.forward || before.inverse || before.hasMidi || now.hasMidi ||
++                before.channels != 2 || now.channels != 2 || before.exits != 1 || now.exits != 1 ||
++                !before.producerPathKnown || !now.producerPathKnown || !before.boundaryPathKnown ||
++                !now.boundaryPathKnown || before.boundaryPathLatencySamples != now.boundaryPathLatencySamples)
++                reject();
++            if (owner != identity)
++            {
++                if (now.inverse || bool (before.delay) != bool (now.delay) ||
++                    before.producerPathLatencySamples != now.producerPathLatencySamples ||
++                    (now.delay && (before.delay->requestedDelay != now.delay->requestedDelay ||
++                     before.delay->latencyProcessor != now.delay->latencyProcessor))) reject();
++                continue;
++            }
++            auto* oldProducer = stageOriginNode (previous, before);
++            auto* newProducer = stageOriginNode (candidate, now);
++            auto* oldProvider = dynamic_cast<FiniteInverseResidualProvider*> (oldProducer);
++            auto* newSource = dynamic_cast<InverseLogicalSource*> (newProducer);
++            auto* residual = now.inverse ? now.inverse->inverseResidualInputNode() : nullptr;
++            auto* provider = dynamic_cast<FiniteInverseResidualProvider*> (residual);
++            if (!oldProvider || !newSource || !provider || !residual || !residual->getDirectInputNodes().empty() ||
++                before.delay || !now.delay || !now.delay->legacyQueueCreatedHere || !now.delay->latencyProcessor ||
++                now.delay->latencyProcessor->unknownCreationMutation.load (std::memory_order_acquire))
++                reject();
++            const auto described = oldProvider->finiteInverseResidualIdentity();
++            const auto retained = provider->finiteInverseResidualIdentity();
++            if (!described || !retained || *described != *retained) reject();
++            result = *described;
++            const auto d = result.samples;
++            if (result.producer != oldProducer || !result.runtime || !result.source || !result.epoch ||
++                result.channels != 2 || result.quantum != block || result.sampleRate != rate ||
++                d <= 0 || d > 131072 || newSource->inverseLogicalSourceIdentity() != result.source ||
++                before.producerPathLatencySamples != d || now.producerPathLatencySamples != 0 ||
++                now.delay->requestedDelay != d || oldRoot.latencyNumSamples != d ||
++                !now.delay->latencyProcessor->hasConfiguration (d, rate, 2)) reject();
++            for (auto* oldNode : previous.orderedNodes)
++                if (auto* oldDelay = dynamic_cast<LatencyNode*> (oldNode); oldDelay &&
++                    oldDelay->latencyProcessor == now.delay->latencyProcessor) reject();
++        }
++        if (!result.runtime) reject();
++        return result;
++    }
++public:
++    static std::unique_ptr<InverseOutputResidual> prepareInverseOutputResidual (
++        Node& binding, const PlaybackInitialisationInfo& info, const void* owner)
++    {
++        if (!info.nodeGraphToReplace || !owner)
++            throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcInversePreparation: Exact selected predecessor required");
++        const auto next = collectOutputStages (info.nodeGraph);
++        const auto old = collectOutputStages (*info.nodeGraphToReplace);
++        const auto id = requireInverseScope (info.nodeGraph, *info.nodeGraphToReplace, next, old,
++                                             owner, info.sampleRate, info.blockSize);
++        const auto& after = next.at (owner);
++        const auto& before = old.at (owner);
++        auto* residual = after.inverse ? after.inverse->inverseResidualInputNode() : nullptr;
++        auto* provider = dynamic_cast<FiniteInverseResidualProvider*> (residual);
++        if (after.inverseNode != &binding || !residual || !provider)
++            throw OutputStageError (OutputStageStatus::configuration,
++                "routing.pdcInversePreparation: Exact graph-pinned inverse adapter required");
++        return std::unique_ptr<InverseOutputResidual> (new InverseOutputResidual (
++            binding, info.nodeGraph, *info.nodeGraphToReplace, owner, before.origin, after.origin,
++            *residual, *provider, id, after.delay->latencyProcessor, *after.delay, after.delay,
++            after.delay->latencyProcessor->unknownCreationMutation));
++    }
++private:
++
+ public:
+     // CONTROL: mint only from actual final transformed graph/predecessor. This
+     // retains a handle, NEVER reads/copies a live FIFO, MIDI, or cursor. The
+@@ -386,6 +649,9 @@
+             for (const auto& [owner, stage] : next)
+                 if (stage.forward) throw OutputStageError (OutputStageStatus::configuration,
+                     "routing.pdcForwardPreparation: Cannot bridge a genuine first cold graph");
++            for (const auto& [owner, stage] : next)
++                if (stage.inverse) throw OutputStageError (OutputStageStatus::configuration,
++                    "routing.pdcInversePreparation: Cannot infer a removed prior producer from a cold graph");
+             return ! next.empty(); // Genuine first cold graph has no queued history.
+         }
+         const auto old = collectOutputStages (*previous);
+@@ -430,6 +696,7 @@
+             return receipt;
+         };
+         ForwardOutputDrain* forwardToAdmit = nullptr;
++        InverseOutputResidual* inverseToAdmit = nullptr;
+         for (const auto& [identity, now] : next)
+         {
+             const auto found = old.find (identity);
+@@ -440,6 +707,15 @@
+             if (found->second.forward)
+                 throw OutputStageError (OutputStageStatus::configuration,
+                     "routing.pdcForwardOneShot: A prior bridge requires separately qualified continuation");
++            if (found->second.inverse)
++            {
++                const auto* completed = found->second.inverse->preparedInverseOutputResidual();
++                auto* nextSource = dynamic_cast<InverseLogicalSource*> (stageOriginNode (candidate, now));
++                if (!completed || completed->observation().state != InverseOutputResidual::State::finished ||
++                    now.inverse || !nextSource || nextSource->inverseLogicalSourceIdentity() != completed->identity.source)
++                    throw OutputStageError (OutputStageStatus::configuration,
++                        "routing.pdcInversePending: Finish exact finite residual before stable continuation");
++            }
+             if (now.forward)
+             {
+                 requireForwardScope (candidate, *previous, next, old, identity);
+@@ -455,6 +731,26 @@
+                     throw OutputStageError (OutputStageStatus::configuration,
+                         "routing.pdcForwardProof: Exact sealed prepared output drain required");
+                 forwardToAdmit = proof;
++                continue;
++            }
++            if (now.inverse)
++            {
++                auto* proof = now.inverse->preparedInverseOutputResidual();
++                if (!proof) throw OutputStageError (OutputStageStatus::configuration,
++                    "routing.pdcInverseProof: Prepared inverse capability required");
++                const auto id = requireInverseScope (candidate, *previous, next, old, identity,
++                                                     proof->identity.sampleRate, proof->identity.quantum);
++                if (proof->admitted || proof->started || proof->failed || proof->remaining != id.samples ||
++                    proof->bindingNode != now.inverseNode || proof->candidateGraph != &candidate ||
++                    proof->previousGraph != previous || proof->owner != identity ||
++                    proof->beforeOrigin != found->second.origin || proof->afterOrigin != now.origin ||
++                    proof->identity != id || proof->newDryQueue != now.delay->latencyProcessor ||
++                    proof->newDryWriter != now.delay || proof->newDryWriterIdentity != now.delay ||
++                    proof->newDryUnknownMutation != &now.delay->latencyProcessor->unknownCreationMutation ||
++                    proof->residualNode != now.inverse->inverseResidualInputNode())
++                    throw OutputStageError (OutputStageStatus::configuration,
++                        "routing.pdcInverseProof: Exact graph/runtime/new-dry identity required");
++                inverseToAdmit = proof;
+                 continue;
+             }
+             const auto* before = found->second.delay;
+@@ -501,6 +797,11 @@
+             forwardToAdmit->admitted = true;
+             forwardToAdmit->publish (ForwardOutputDrain::State::admitted);
+         }
++        if (inverseToAdmit)
++        {
++            inverseToAdmit->admitted = true;
++            inverseToAdmit->publish (InverseOutputResidual::State::admitted);
++        }
+         return true;
+     }
+     struct RetainedAudioEdge
+@@ -615,12 +916,16 @@
+         if (!historyEnabled)
+         {
+             const bool zeroInput = isStructurallySilent (*input);
++            const auto* created = latencyProcessor.get();
++            const bool firstPrepare = !latencyProcessor->creationDecisionMade &&
++                !latencyProcessor->unknownCreationMutation.load (std::memory_order_acquire);
+             latencyProcessor->prepareToPlay (info.sampleRate, info.blockSize, getNodeProperties().numberOfChannels);
+             latencyProcessor->sealStructuralZeroCreation (zeroInput);
+             replaceLatencyProcessorIfPossible (info.nodeGraphToReplace);
+             // FINAL possibly inherited processor: never copy the temporary
+             // processor's pristine flag onto unknown prior history.
+             if (!zeroInput) latencyProcessor->invalidateStructuralZero();
++            legacyQueueCreatedHere = firstPrepare && created == latencyProcessor.get();
+         }
+         else
+             prepareHistory (info);
+@@ -722,6 +1027,7 @@
+     static_assert (std::atomic<RuntimeAudioDelayStatus>::is_always_lock_free);
+     RetainedAudioEdge retained;
+     bool historyEnabled = false, prepared = false, midiQueueReset = false;
++    bool legacyQueueCreatedHere = false; // CONTROL creation fact, not zero history.
+     std::shared_ptr<LatencyProcessor> latencyProcessor, midiProcessor;
+     std::shared_ptr<vibera::dsp::MidiCompensationHistory> midiHistory;
+     vibera::dsp::MidiCompensationHistory* midiHistoryRaw = nullptr;

@@ -1,0 +1,148 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_TestNodes.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_TestNodes.h
+@@ -13,6 +13,7 @@
+ #include <cstdint>
+ #include <limits>
+ #include <stdexcept>
++#include "tracktion_SendGainBlock.h"
+ 
+ namespace tracktion::inline graph {
+ 
+@@ -479,9 +480,9 @@
+     // This overload deliberately does NOT delegate to the ordinary constructor:
+     // that constructor invokes the gain getter on CONTROL.
+     GainNode (Node* inputNode, std::function<float()> gainFunc, size_t nodeHashToUse,
+-              std::shared_ptr<GainState> state)
++              std::shared_ptr<GainState> state, SendGainBlockFunction exactBlock = {})
+         : input (inputNode), gainFunction (std::move (gainFunc)), sharedGainState (std::move (state)),
+-          nodeHash (nodeHashToUse)
++          nodeHash (nodeHashToUse), blockGainFunction (std::move (exactBlock))
+     {
+         if (! input || ! gainFunction || ! sharedGainState)
+             throw std::invalid_argument ("Prepared gain node needs input, function and bank");
+@@ -514,6 +515,11 @@
+     {
+         if (! sharedGainState) return; // Exact ordinary native preparation behavior.
+         if (gainStateAttached) throw std::logic_error ("Prepared gain node already attached");
++        if (blockGainFunction)
++        {
++            if (info.blockSize <= 0) throw std::invalid_argument ("Exact send gain needs a prepared capacity");
++            frameGains.resize (static_cast<size_t> (info.blockSize)); // CONTROL only, before attachment.
++        }
+         sharedGainState->attachControl (info.sampleRate, info.blockSize);
+         gainStateAttached = true;
+     }
+@@ -571,7 +577,30 @@
+         copy (pc.buffers.audio, input->getProcessedOutput().audio);
+         pc.buffers.midi.mergeFrom (input->getProcessedOutput().midi);
+ 
+-        float gain = gainFunction();
++        bool automated = false;
++        float gain = 0;
++        if (blockGainFunction)
++        {
++            const auto frames = static_cast<size_t> (pc.buffers.audio.getNumFrames());
++            SendGainBlockResult result;
++            if (frames <= frameGains.size())
++                result = blockGainFunction (pc.referenceSampleRange, { frameGains.data(), frames });
++            bool valid = (result.mode == SendGainBlockMode::manual || result.mode == SendGainBlockMode::automated) &&
++                         std::isfinite (result.manualGain);
++            if (valid && result.mode == SendGainBlockMode::automated)
++                for (size_t frame = 0; frame < frames; ++frame) valid = valid && std::isfinite (frameGains[frame]);
++            if (valid)
++            {
++                gain = result.manualGain;
++                automated = result.mode == SendGainBlockMode::automated;
++            }
++            else
++            {
++                exactGainFaults.fetch_add (1, std::memory_order_relaxed);
++                gain = gainFunction(); // Explicit unhealthy/manual failsafe, never acknowledged as success.
++            }
++        }
++        else gain = gainFunction(); // Exact ordinary native branch, no optional provider work.
+ 
+         if (sharedGainState)
+         {
+@@ -579,6 +608,16 @@
+             // Unchanged targets preserve partial progress across graph changes.
+             auto& smoother = sharedGainState->smoother;
+             smoother.setTargetValue (gain);
++            if (automated)
++            {
++                size_t frame = 0;
++                applyGainPerFrame (pc.buffers.audio, [&]
++                {
++                    smoother.getNextValue(); // Preserve underlying manual ramp, never smooth the curve.
++                    return frameGains[frame++];
++                });
++                return;
++            }
+             if (smoother.isSmoothing())
+                 applyGainPerFrame (pc.buffers.audio, [&] { return smoother.getNextValue(); });
+             else if (gain == 0.0f) pc.buffers.audio.clear();
+@@ -603,6 +642,8 @@
+ 
+         lastGain = gain;
+     }
++
++    uint64_t getExactGainFaults() const noexcept { return exactGainFaults.load (std::memory_order_relaxed); }
+ 
+ private:
+     std::unique_ptr<Node> ownedInput;
+@@ -612,6 +653,10 @@
+     std::shared_ptr<GainState> sharedGainState;
+     bool gainStateAttached = false, gainStateRegistered = false;
+     size_t nodeHash = 0;
++    SendGainBlockFunction blockGainFunction; // Copies/destruction on CONTROL, graph-pinned input target.
++    std::vector<float> frameGains;
++    std::atomic<uint64_t> exactGainFaults { 0 };
++    static_assert (std::atomic<uint64_t>::is_always_lock_free);
+ };
+ 
+ //==============================================================================
+@@ -622,11 +667,15 @@
+     SendNode (std::unique_ptr<Node> inputNode, int busIDToUse,
+               std::function<float()> getGainFunc = nullptr,
+               std::optional<size_t> extraHashToUse_ = {},
+-              std::shared_ptr<GainNode::GainState> preparedGainState_ = {})
++              std::shared_ptr<GainNode::GainState> preparedGainState_ = {},
++              SendGainBlockFunction blockGainFunction_ = {})
+         : input (std::move (inputNode)), busID (busIDToUse),
+           gainFunction (std::move (getGainFunc)),
+-          extraHashToUse (extraHashToUse_), preparedGainState (std::move (preparedGainState_))
+-    {
++          extraHashToUse (extraHashToUse_), preparedGainState (std::move (preparedGainState_)),
++          blockGainFunction (std::move (blockGainFunction_))
++    {
++        if (blockGainFunction && ! preparedGainState)
++            throw std::invalid_argument ("Exact send block provider requires an identified retained gain bank");
+         if (preparedGainState && preparedGainState->busID() != busID)
+             throw std::invalid_argument ("Prepared send gain bus mismatch");
+         setOptimisations ({ ClearBuffers::no,
+@@ -635,6 +684,8 @@
+ 
+     const std::shared_ptr<GainNode::GainState>& getGainStateForPreparation() const noexcept
+     { return preparedGainState; } // CONTROL only, never copy a bank during DSP.
++
++    SendGainBlockFunction getBlockGainFunctionForPreparation() const { return blockGainFunction; }
+ 
+     int getBusID() const
+     {
+@@ -695,6 +746,7 @@
+     std::function<float()> gainFunction;
+     std::optional<size_t> extraHashToUse;
+     std::shared_ptr<GainNode::GainState> preparedGainState;
++    SendGainBlockFunction blockGainFunction;
+ };
+ 
+ 
+@@ -893,7 +945,7 @@
+                     continue;
+ 
+                 if (auto state = sends[(size_t) i]->getGainStateForPreparation())
+-                    ownedNodes.push_back (makeNode<GainNode> (sends[(size_t) i], std::move (gainFunction), returnNodeID, std::move (state)));
++                    ownedNodes.push_back (makeNode<GainNode> (sends[(size_t) i], std::move (gainFunction), returnNodeID, std::move (state), sends[(size_t) i]->getBlockGainFunctionForPreparation()));
+                 else
+                 ownedNodes.push_back (makeNode<GainNode> (std::move (sends[(size_t) i]), std::move (gainFunction), returnNodeID));
+ 				sends.erase (std::find (sends.begin(), sends.end(), sends[(size_t) i]));

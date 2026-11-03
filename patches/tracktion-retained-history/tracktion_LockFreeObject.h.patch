@@ -1,0 +1,23 @@
+--- a/modules/tracktion_graph/utilities/tracktion_LockFreeObject.h
++++ b/modules/tracktion_graph/utilities/tracktion_LockFreeObject.h
+@@ -80,10 +80,18 @@
+     [[nodiscard]] std::unique_ptr<ObjectType> pushNonRealTime (ObjectType&& newObj)
+     {
+         // Allocate the new storage before taking the lock as retainRealTime
+         // will spin on it from the real-time thread
+-        auto newStorage = std::make_unique<ObjectType> (std::move (newObj));
+-
++        return pushPreparedNonRealTime (std::make_unique<ObjectType> (std::move (newObj)));
++    }
++
++    /** Publishes already allocated storage on the control thread. No allocation
++        or user move construction remains after the caller commits its caches.
++        The caller retains the returned retired owner until readers quiesce.
++    */
++    [[nodiscard]] std::unique_ptr<ObjectType> pushPreparedNonRealTime (std::unique_ptr<ObjectType> newStorage) noexcept
++    {
++        assert (newStorage != nullptr);
+         std::unique_ptr<ObjectType> replacedObject;
+ 
+         {
+             // Obtain the lock on the pending object

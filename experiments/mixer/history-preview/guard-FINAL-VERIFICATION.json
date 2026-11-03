@@ -1,0 +1,64 @@
+{
+  "scope": "Frozen source-only guard bundle; no Commands/live vendor/build/native application changes",
+  "bundle": {
+    "scripts/apply-history-preview-patch.ps1": "40bb59a7caf88d84187fd67262ea36af0d21fd2a89e48a217d8a55f67ac3c4d2",
+    "patches/juce-history-preview/manifest.json": "d582b2bccc00f8f15c53c75137e0e116927eb152c632b14c9d30f5f68e83383b",
+    "patches/juce-history-preview/juce_UndoManager.h.patch": "86c04bb6c0e39c0c47add934e7f4cd2e9baf14bb7379a6875e054067497bbec6",
+    "patches/juce-history-preview/juce_UndoManager.cpp.patch": "13ed78763260e258843b5764be5cd9ac74aca482103e9472ef1005109b5fb371"
+  },
+  "rawVendorPostimages": {
+    "modules/juce_data_structures/undomanager/juce_UndoManager.h": "44e61c66b9ffed5eddb19232e6323ca0748b474b463d6efb9baf9570708e3a3e",
+    "modules/juce_data_structures/undomanager/juce_UndoManager.cpp": "f5608a00535ee9897e6b69bf2bb4e84b7fb62cbe6ca1bffdd8a8de46843e8ed6"
+  },
+  "matrixReceipts": {
+    "m/92d5bb1e": {
+      "summarySha256": "5ed008e593f4a6ca7b48dfe11430f62a301621e0f269498bc9929c5c39dd77c1",
+      "receiptsSha256": "5e54cc6993cfbc2522d2b29de705487c0a39e0d1a10400a13a336d48c6ec9ace",
+      "cases": 19,
+      "passed": true,
+      "guardSeconds": 15.218125600018539
+    },
+    "r/6c70836e": {
+      "summarySha256": "5188238d73f30a9114464e1d0e064537827c9ffd590f9c0a5a8ebafd3c94b10e",
+      "receiptsSha256": "961d05a2924861a414880ff9bb608595382ccadd5e214634924fda4d20da4eeb",
+      "cases": 3,
+      "passed": true,
+      "guardSeconds": 1.8383584000403062
+    }
+  },
+  "reparseFixtureCleanup": [
+    {
+      "path": "r\\6c70836e\\c01\\vendor\\source\\JUCE-37c894f83d379179b2070d437ccd0f1cd9af9576\\modules\\juce_data_structures\\undomanager",
+      "restoredDirectoryNotReparse": true,
+      "cleanupExit": 0
+    },
+    {
+      "path": "r\\6c70836e\\c02\\patches\\juce-history-preview",
+      "restoredDirectoryNotReparse": true,
+      "cleanupExit": 0
+    },
+    {
+      "path": "r\\6c70836e\\c03\\build\\history-preview-check\\preflight",
+      "restoredDirectoryNotReparse": true,
+      "cleanupExit": 0
+    }
+  ],
+  "liveVendorRemainsOriginal": {
+    "modules/juce_data_structures/undomanager/juce_UndoManager.h": {
+      "sha256": "c5fe50604433ac74631eacce30d2f5ddeec4d6d6ea692df93d397a0aab9dfbf0",
+      "originalSha256": "c5fe50604433ac74631eacce30d2f5ddeec4d6d6ea692df93d397a0aab9dfbf0"
+    },
+    "modules/juce_data_structures/undomanager/juce_UndoManager.cpp": {
+      "sha256": "3c671050294238a8900d53a49db10d1c15c06a03e1dcfae34ab02ff0371b968f",
+      "originalSha256": "3c671050294238a8900d53a49db10d1c15c06a03e1dcfae34ab02ff0371b968f"
+    }
+  },
+  "totalCases": 22,
+  "passed": true,
+  "remainingOwnedJobs": [],
+  "limitations": [
+    "No C++ compile or Controller acceptance run by child",
+    "No graph/model/history commit qualification",
+    "No native application, audio, plugin-hosting or listening qualification"
+  ]
+}

@@ -1,0 +1,74 @@
+--- a/modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.h
++++ b/modules/juce_audio_devices/audio_io/juce_AudioDeviceManager.h
+@@ -254,6 +254,41 @@
+     /** Returns the currently-active audio device. */
+     AudioIODevice* getCurrentAudioDevice() const noexcept               { return currentAudioDevice.get(); }
+ 
++private:
++    struct PhysicalCallbackCounters;
++
++public:
++    // ORIGINAL bounded telemetry. Readers may outlive the manager without
++    // retaining it or dereferencing destroyed native device/manager storage.
++    struct PhysicalCallbackSnapshot
++    {
++        uint64 deviceEpoch = 0, callbackSerial = 0;
++        int configuredFrames = 0, outerFrames = 0, maximumOuterFrames = 0;
++        bool active = false, countersExhausted = false, writerConflict = false, ownerAlive = false;
++    };
++    // Three bounded reads; false preserves out. Counts are BEFORE both splitters.
++    bool readPhysicalCallbackSnapshot (PhysicalCallbackSnapshot& out) const noexcept;
++    class PhysicalCallbackReader final
++    {
++    public:
++        PhysicalCallbackReader() = default;
++        bool read (PhysicalCallbackSnapshot& out) const noexcept;
++
++    private:
++        friend class AudioDeviceManager;
++        explicit PhysicalCallbackReader (std::shared_ptr<const PhysicalCallbackCounters> stateIn)
++            : state (std::move (stateIn)) {}
++        // Construct/copy/retire only on CONTROL, with graph readers quiesced.
++        // read() does not copy ownership, allocate, lock or destroy anything.
++        std::shared_ptr<const PhysicalCallbackCounters> state;
++    };
++    // CONTROL only. Pin once in the prepared session alongside its immutable
++    // budget/epoch; never rebind an old budget to a different reader source.
++    PhysicalCallbackReader getPhysicalCallbackReader() const;
++    enum class PhysicalCallbackBound { unknown, currentBufferSize };
++    // Atomic staged provenance from the actual CONTROL factory, never a name match.
++    PhysicalCallbackBound getCurrentPhysicalCallbackBound() const;
++
+     /** Returns the type of audio device currently in use.
+         @see setCurrentAudioDeviceType
+     */
+@@ -504,6 +539,29 @@
+ private:
+     //==============================================================================
+     OwnedArray<AudioIODeviceType> availableDeviceTypes;
++    // Only types actually created by the pinned Windows factories are tagged.
++    Array<AudioIODeviceType*> knownWindowsPhysicalBoundTypes; // CONTROL only.
++    AudioIODeviceType* currentPhysicalFactory = nullptr;       // CONTROL only, never dereferenced.
++    std::atomic<PhysicalCallbackBound> currentPhysicalBound { PhysicalCallbackBound::unknown };
++    friend class CallbackMaxSizeEnforcer;
++    struct PhysicalCallbackCounters
++    {
++        std::atomic<uint64> revision { 0 }, epoch { 0 }, serial { 0 };
++        std::atomic<int> configured { 0 }, frames { 0 }, maximum { 0 };
++        std::atomic<bool> active { false }, exhausted { false }, writerConflict { false }, ownerAlive { true };
++    };
++    // Allocated during manager construction, never in the audio callback.
++    std::shared_ptr<PhysicalCallbackCounters> physicalCallbackCounters = std::make_shared<PhysicalCallbackCounters>();
++    static bool readPhysicalCounters (const PhysicalCallbackCounters&, PhysicalCallbackSnapshot&) noexcept;
++    static_assert (std::atomic<uint64>::is_always_lock_free &&
++                   std::atomic<int>::is_always_lock_free && std::atomic<bool>::is_always_lock_free &&
++                   std::atomic<PhysicalCallbackBound>::is_always_lock_free,
++                   "Physical callback telemetry requires lock-free scalar atomics");
++    bool beginPhysicalPublication() noexcept;
++    void endPhysicalPublication() noexcept;
++    void physicalDeviceStarting (int configuredFrames) noexcept;
++    void physicalCallbackStarting (int originalFrames) noexcept;
++    void physicalDeviceStopped() noexcept;
+     OwnedArray<AudioDeviceSetup> lastDeviceTypeConfigs;
+ 
+     AudioDeviceSetup currentSetup;

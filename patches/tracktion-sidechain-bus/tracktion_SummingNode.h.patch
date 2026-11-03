@@ -1,0 +1,14 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h
+@@ -87,9 +87,10 @@
+             if (props.nodeID != 0 || nodeProps.nodeID != 0)
+                 hash_combine (props.nodeID, nodeProps.nodeID);
+         }
+ 
+-        cachedNodeProperties = props;
++        if (isPrepared)
++            cachedNodeProperties = props;
+ 
+         return props;
+     }
+ 

@@ -1,0 +1,25 @@
+{
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "dependency": "tracktion_engine",
+  "files": [
+    {
+      "path": "modules/tracktion_engine/plugins/tracktion_Plugin.h",
+      "patch": "patches/tracktion-sidechain-bus/tracktion_Plugin.h.patch",
+      "originalSha256": "0d47104e8ba2555f55e939e3292e5ac308ba548f56a088ac87714b0c29e9bf9b",
+      "patchedSha256": "8081f5b3533b387c7542909c4998ecc1b50df26108c65fc09340f6895fd44133"
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-sidechain-bus/tracktion_EditNodeBuilder.cpp.patch",
+      "originalSha256": "3e50e2a97a10fe08f9783c594d8a087b37d69f8931858345f41fea66dd8edba9",
+      "patchedSha256": "e8720bd117ccc1d851ed6679b113cd73286cef6676cb7810c834d38e33d923ff"
+    },
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_SummingNode.h",
+      "patch": "patches/tracktion-sidechain-bus/tracktion_SummingNode.h.patch",
+      "originalSha256": "941e03ddad45c9b76d22268228ff5bd1682f24e0af839d1c0bb81a664f1b11da",
+      "patchedSha256": "ed03be0be7a3b3143fba3b631410374c075b1a8b8a71f7a421b5c425cb2c04e1"
+    }
+  ]
+}

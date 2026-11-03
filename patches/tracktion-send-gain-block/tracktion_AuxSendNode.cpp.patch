@@ -1,0 +1,71 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_AuxSendNode.cpp
+@@ -16,7 +16,8 @@
+ AuxSendNode::AuxSendNode (std::unique_ptr<Node> inputNode, int busIDToUse,
+                           SampleRateAndBlockSize info,
+                           AuxSendPlugin& sourceSendPlugin, tracktion::graph::PlayHeadState& phs,
+-                          const TrackMuteState* trackMuteState, bool processAuxSendsWhenTrackIsMuted, bool fixedInitialisation)
++                          const TrackMuteState* trackMuteState, bool processAuxSendsWhenTrackIsMuted, bool fixedInitialisation,
++                          ProcessState* exactGainProcessState, bool forRendering)
+     : SendNode (std::move (inputNode), busIDToUse,
+                 [&sourceSendPlugin, trackMuteState, processAuxSendsWhenTrackIsMuted]
+                 {
+@@ -40,12 +41,34 @@
+                         gain *= -1.0f;
+ 
+                     return gain;
+-               }, {}, sourceSendPlugin.prepareSendGainStateForGraph()),
++               }, {}, sourceSendPlugin.prepareSendGainStateForGraph(),
++                sourceSendPlugin.hasRealtimeSendGainBlock() ? graph::SendGainBlockFunction (
++                    [this, &sourceSendPlugin, trackMuteState, processAuxSendsWhenTrackIsMuted]
++                    (juce::Range<int64_t> reference, std::span<float> gains) noexcept
++                    {
++                        if (! gainBlockReady || gainBlock.referenceRange != reference || gainBlock.frames != static_cast<int> (gains.size()))
++                            return graph::SendGainBlockResult{};
++                        auto result = sourceSendPlugin.getRealtimeSendGainBlock (gainBlock, gains);
++                        if (result.mode == graph::SendGainBlockMode::fault) return result;
++                        const bool eligible = ! trackMuteState ||
++                            (processAuxSendsWhenTrackIsMuted
++                                ? (trackMuteState->shouldTrackBeAudible() || trackMuteState->shouldTrackContentsBeProcessed())
++                                : (trackMuteState->shouldTrackBeAudible() && trackMuteState->shouldTrackContentsBeProcessed()));
++                        const auto mask = ! eligible ? 0.0f : sourceSendPlugin.invertPhase ? -1.0f : 1.0f;
++                        result.manualGain *= mask;
++                        if (result.mode == graph::SendGainBlockMode::automated)
++                            for (auto& gain : gains) gain *= mask;
++                        return result;
++                    }) : graph::SendGainBlockFunction{}),
+       playHeadState (phs),
+       pluginPtr (sourceSendPlugin),
+-      sendPlugin (sourceSendPlugin)
++      sendPlugin (sourceSendPlugin),
++      gainProcessState (exactGainProcessState), blockGainEnabled (sourceSendPlugin.hasRealtimeSendGainBlock()),
++      gainForRendering (forRendering)
+ {
+     jassert (pluginPtr != nullptr);
++    if (blockGainEnabled && ! gainProcessState)
++        throw std::invalid_argument ("Exact send block provider needs graph ProcessState");
+ 
+     if (fixedInitialisation)
+         sendPlugin.attachFixedGraphInitialisation ({ TimePosition(), info.sampleRate, info.blockSize });
+@@ -85,6 +108,21 @@
+ 
+ void AuxSendNode::process (ProcessContext& pc)
+ {
++    if (blockGainEnabled)
++    {
++        gainBlockReady = false;
++        const auto frames = static_cast<int> (pc.buffers.audio.getNumFrames());
++        if (gainProcessState && gainProcessState->referenceSampleRange == pc.referenceSampleRange &&
++            gainProcessState->numSamples == frames && frames > 0 && std::isfinite (sampleRate) && sampleRate > 0)
++        {
++            gainBlock = { pc.referenceSampleRange, sampleRate,
++                          gainProcessState->editTimeRange.getStart().inSeconds() + automationAdjustmentTime.inSeconds(),
++                          gainProcessState->editTimeRange.getLength().inSeconds() / frames,
++                          frames, playHeadState.playHead.isPlaying(), gainForRendering };
++            gainBlockReady = std::isfinite (gainBlock.editStartSeconds) && std::isfinite (gainBlock.secondsPerFrame);
++        }
++    }
++
+     if (sendPlugin.isAutomationNeeded()
+         && sendPlugin.edit.getAutomationRecordManager().isReadingAutomation())
+     {

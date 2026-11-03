@@ -1,0 +1,65 @@
+--- a/modules/tracktion_engine/model/edit/tracktion_Edit.h
++++ b/modules/tracktion_engine/model/edit/tracktion_Edit.h
+@@ -120,6 +120,12 @@
+         uint32_t numAudioTracks = 1;                                 ///< If non-zero, will ensure the edit has this many audio tracks
+ 
+         float defaultMasterVolumedB = -3.0f;                         ///< The initial level for the edit's master volume
++
++        // ORIGINAL nonserialized closed-app experiment; defaults preserve native behavior.
++        // Nonzero generation reserves LOCAL-CLOSED playback BEFORE context publication.
++        // Its reference origin stays local: native global timestamps/sync are forbidden.
++        juce::uint64 initialSourceGeneration = 0;
++        bool closedNativeIO = false; // Native wave/MIDI inputs and MIDI outputs are not supported in this Edit.
+     };
+ 
+     /** Creates an Edit from a set of Options.
+@@ -136,6 +142,40 @@
+ 
+     /// A reference to the Engine.
+     Engine& engine;
++    const juce::uint64 initialSourceGeneration;
++    const bool closedNativeIO; // Immutable construction policy, never read from project ValueTree.
++    enum class SourceReferenceDomain { managerGlobal, localClosed };
++    enum class NativeCapability { inputOutput, contextSync, globalTimestamp, externalClock };
++    enum class NativeCapabilityStatus { allowed, nativeIOForbidden, contextSyncForbidden,
++        globalTimestampForbidden, externalClockForbidden, invalidTimestamp, contextUnavailable };
++    SourceReferenceDomain sourceReferenceDomain() const noexcept
++    { return initialSourceGeneration ? SourceReferenceDomain::localClosed : SourceReferenceDomain::managerGlobal; }
++    NativeCapabilityStatus nativeCapability (NativeCapability capability) const noexcept
++    {
++        if (capability == NativeCapability::inputOutput && closedNativeIO)
++            return NativeCapabilityStatus::nativeIOForbidden;
++        if (!initialSourceGeneration) return NativeCapabilityStatus::allowed;
++        switch (capability)
++        {
++            case NativeCapability::contextSync: return NativeCapabilityStatus::contextSyncForbidden;
++            case NativeCapability::globalTimestamp: return NativeCapabilityStatus::globalTimestampForbidden;
++            case NativeCapability::externalClock: return NativeCapabilityStatus::externalClockForbidden;
++            case NativeCapability::inputOutput: return NativeCapabilityStatus::nativeIOForbidden;
++        }
++        return NativeCapabilityStatus::allowed;
++    }
++    NativeCapabilityStatus admitNativeCapability (NativeCapability capability) const noexcept
++    {
++        const auto status = nativeCapability (capability);
++        if (status != NativeCapabilityStatus::allowed)
++            nativeCapabilityRefusal.store (status, std::memory_order_release);
++        return status;
++    }
++    NativeCapabilityStatus lastNativeCapabilityRefusal() const noexcept
++    { return nativeCapabilityRefusal.load (std::memory_order_acquire); }
++    // Diagnostic scalar only; concurrent refused callers never share a payload seqlock.
++    mutable std::atomic<NativeCapabilityStatus> nativeCapabilityRefusal { NativeCapabilityStatus::allowed };
++    static_assert (std::atomic<NativeCapabilityStatus>::is_always_lock_free);
+ 
+     //==============================================================================
+     /// Returns the name of the Edit if a ProjectItem can be found for it.
+@@ -653,7 +693,7 @@
+     void enableTimecodeSync (bool);
+ 
+     /** Returns true if syncing to MIDI timecode is enabled. */
+-    bool isTimecodeSyncEnabled() const noexcept             { return midiTimecodeSourceDeviceEnabled; }
++    bool isTimecodeSyncEnabled() const noexcept             { return !initialSourceGeneration && midiTimecodeSourceDeviceEnabled; }
+ 
+     /** Returns the offset to apply to MIDI timecode. */
+     TimeDuration getTimecodeOffset() const noexcept         { return timecodeOffset; }

@@ -1,0 +1,11 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.h
+@@ -138,6 +138,8 @@
+         node which could be used to add copy-protection noise or similar.
+     */
+     static std::function<std::unique_ptr<graph::Node> (std::unique_ptr<tracktion::graph::Node>)> insertOptionalLastStageNode;
++    // CONTROL-only audit. Does not replace/suppress an arbitrary global producer.
++    static bool usesDefaultLastStageNode() noexcept;
+ };
+ 
+ //==============================================================================

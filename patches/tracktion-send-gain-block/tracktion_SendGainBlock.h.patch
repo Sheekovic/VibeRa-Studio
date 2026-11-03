@@ -1,0 +1,30 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_SendGainBlock.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_SendGainBlock.h
+@@ -0,0 +1,27 @@
++// SPDX-License-Identifier: AGPL-3.0-or-later
++// Original optional provider contract. All ownership/callback construction is CONTROL.
++#pragma once
++#include <juce_core/juce_core.h>
++#include <span>
++#include <functional>
++namespace tracktion::inline graph
++{
++enum class SendGainBlockMode { manual, automated, fault };
++struct SendGainBlockResult
++{
++    SendGainBlockMode mode = SendGainBlockMode::fault;
++    float manualGain = 0;
++};
++struct SendGainBlockContext
++{
++    juce::Range<int64_t> referenceRange;
++    double sampleRate = 0, editStartSeconds = 0, secondsPerFrame = 0;
++    int frames = 0;
++    bool playing = false, rendering = false;
++};
++// Invoked once per actual GainNode output span. The callback must return both
++// manual target and optional exact curve samples from ONE immutable document.
++// Fault is unhealthy even when audio falls back to the original manual path.
++using SendGainBlockFunction = std::function<SendGainBlockResult (
++    juce::Range<int64_t> referenceRange, std::span<float> exactGains)>;
++}

@@ -1,0 +1,112 @@
+--- a/modules/tracktion_graph/tracktion_graph/nodes/tracktion_ConnectedNode.h
++++ b/modules/tracktion_graph/tracktion_graph/nodes/tracktion_ConnectedNode.h
+@@ -90,8 +90,10 @@
+ 
+     size_t nodeID = 0;
+     std::vector<NodeConnection> connections;
+ 
++    uint32_t retainedHistoryMaximumDelay = 0;
++    bool createRetainedLatencyNodes (uint32_t maximumDelay);
+     bool createLatencyNodes();
+ };
+ 
+ 
+@@ -181,9 +183,10 @@
+         props.numberOfChannels = std::max (props.numberOfChannels, getMaxDestChannel (connection)) + 1;
+         props.latencyNumSamples = std::max (props.latencyNumSamples, nodeProps.latencyNumSamples);
+ 
+         // Hash inputs
+-        hash_combine (props.nodeID, nodeProps.nodeID);
++        const auto identity = LatencyNode::logicalInputFor (connection.node.get(), this)->getNodeProperties().nodeID;
++        hash_combine (props.nodeID, identity);
+         hash_combine (props.nodeID, connection.connectMidi);
+ 
+         for (const auto& channelConnection : connection.connectedChannels)
+         {
+@@ -209,10 +212,12 @@
+ {
+     if (options.disableLatencyCompensation)
+         return TransformResult::none;
+ 
+-    return createLatencyNodes() ? TransformResult::connectionsMade
+-                                : TransformResult::none;
++    retainedHistoryMaximumDelay = options.rootNode.getAudioCompensationHistoryMaximumDelay();
++    const bool changed = retainedHistoryMaximumDelay != 0 ? createRetainedLatencyNodes (retainedHistoryMaximumDelay)
++                                                         : createLatencyNodes();
++    return changed ? TransformResult::connectionsMade : TransformResult::none;
+ }
+ 
+ inline bool ConnectedNode::isReadyToProcess()
+ {
+@@ -224,8 +229,19 @@
+ }
+ 
+ inline void ConnectedNode::prepareToPlay (const PlaybackInitialisationInfo&)
+ {
++    if (retainedHistoryMaximumDelay != 0)
++        for (const auto& connection : connections)
++        {
++            const auto props = LatencyNode::logicalInputFor (connection.node.get(), this)->getNodeProperties();
++            if (!connection.connectedChannels.empty() && props.hasAudio && props.numberOfChannels > 0)
++            {
++                auto* tap = dynamic_cast<LatencyNode*> (connection.node.get());
++                if (!tap || !tap->belongsTo (this))
++                    throw std::invalid_argument ("Connected audio edge has no unique stable history identity");
++            }
++        }
+ }
+ 
+ inline void ConnectedNode::process (ProcessContext& pc)
+ {
+@@ -265,8 +281,51 @@
+         }
+     }
+ }
+ 
++inline bool ConnectedNode::createRetainedLatencyNodes (uint32_t maximumDelay)
++{
++    int maximum = 0;
++    for (const auto& connection : connections)
++        maximum = std::max (maximum, LatencyNode::logicalInputFor (connection.node.get(), this)->getNodeProperties().latencyNumSamples);
++    const auto consumerID = getNodeProperties().nodeID;
++    bool changed = false;
++    for (size_t port = 0; port < connections.size(); ++port)
++    {
++        auto& connection = connections[port];
++        auto& node = connection.node;
++        const auto props = LatencyNode::logicalInputFor (node.get(), this)->getNodeProperties();
++        const int64_t difference = int64_t (maximum) - int64_t (props.latencyNumSamples);
++        if (difference < 0 || difference > std::numeric_limits<int>::max())
++            throw std::invalid_argument ("Connected compensation delay overflow");
++        const auto delay = int (difference);
++        const bool audio = !connection.connectedChannels.empty() && props.hasAudio && props.numberOfChannels > 0;
++        auto* existing = dynamic_cast<LatencyNode*> (node.get());
++        if (audio && (props.nodeID == 0 || consumerID == 0))
++            continue;
++        LatencyNode::RetainedAudioEdge request { {uint64_t (props.nodeID), uint64_t (consumerID), uint32_t (port)},
++                                                 maximumDelay, this, connection.connectMidi && props.hasMidi };
++        if (existing && existing->isCompensationFor (this))
++        {
++            if (existing->usesHistory() != audio)
++                throw std::invalid_argument ("Connected compensation edge shape changed during transform");
++            if (audio) existing->updateRetainedRequest (delay, request);
++            else existing->updateLegacyCompensation (delay, request);
++            continue;
++        }
++        if (!audio && delay == 0)
++            continue;
++        if (audio && uint32_t (delay) > maximumDelay)
++            throw std::length_error ("Connected requested compensation exceeds prepared history capacity");
++        auto tap = audio ? std::make_shared<LatencyNode> (std::move (node), delay, request)
++                         : std::make_shared<LatencyNode> (std::move (node), delay);
++        if (!audio) tap->updateLegacyCompensation (delay, request);
++        node = std::move (tap);
++        changed = true;
++    }
++    return changed;
++}
++
+ inline bool ConnectedNode::createLatencyNodes()
+ {
+     bool topologyChanged = false;
+     const int maxLatency = getNodeProperties().latencyNumSamples;

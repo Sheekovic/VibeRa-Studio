@@ -1,0 +1,19 @@
+{
+  "completed": true,
+  "seconds": 0.09995800000615418,
+  "measurementScope": "Final complete verification/notice refresh invocation; initial acquisition failures are retained separately.",
+  "sampleCount": 123,
+  "sampleBytes": 178426339,
+  "librarySha256": "83702db34ee50fc48211ad459afd0bdaa7e8a0b491ec0b716d1a5814ce58c724",
+  "checks": [
+    "Every WAV/FLAC size and Git blob SHA1 matches the pinned upstream Git tree.",
+    "Every source file has positive frames and supported mono/stereo layout metadata.",
+    "Every region has SHA256 and exact source mapping/root/velocity/offset/loop provenance."
+  ],
+  "preservedFailures": [
+    "acquisition-attempt-1.json",
+    "acquisition-attempt-2.json",
+    "acquisition-attempt-3.json"
+  ],
+  "listeningPerformed": false
+}

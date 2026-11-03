@@ -1,0 +1,32 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
+@@ -133,6 +133,29 @@
+         result.delivered = bounded->read.load (std::memory_order_acquire);
+     }
+     return result;
++}
++
++LiveMidiInjectingNode::IngressObservation LiveMidiInjectingNode::BoundedIngressRuntimeView::observation() const noexcept
++{
++    IngressObservation result;
++    if(runtime)
++    {
++        result.enabled=true;result.scope=runtime->scope;result.runtime=runtime.get();result.registered=runtime->registered;
++        result.fault=runtime->fault.load(std::memory_order_acquire);
++        result.accepted=runtime->written.load(std::memory_order_acquire);
++        result.delivered=runtime->read.load(std::memory_order_acquire);
++    }
++    return result;
++}
++const AudioTrack* LiveMidiInjectingNode::BoundedIngressRuntimeView::ownerTrackControl() const noexcept
++{ return runtime ? runtime->track.get() : nullptr; }
++LiveMidiInjectingNode::BoundedIngressRuntimeView LiveMidiInjectingNode::boundedIngressRuntimeControl() const
++{
++    const auto* messages=juce::MessageManager::getInstanceWithoutCreating();
++    if(!messages||!messages->isThisTheMessageThread()||!ingressScope||!bounded||!bounded->registered||
++       bounded->track!=track||bounded->scope!=ingressScope||preparedRate<=0||preparedBlock<=0)
++        throw std::invalid_argument("nativeMidi.runtimeView: Prepared CONTROL native owner required");
++    return BoundedIngressRuntimeView(bounded); // CONTROL shared ownership only.
+ }
+ 
+ //==============================================================================

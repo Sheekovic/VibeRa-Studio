@@ -1,0 +1,1206 @@
+{
+  "format": 1,
+  "feature": "Mixer module-specific explicit semantic surfaces",
+  "passed": true,
+  "sourceHashMode": "text-lf-v1",
+  "sourceInputs": {
+    "CMakeLists.txt": "1c76148687f8b2b609ad6ca82b2aa09fe88fe386d627e2149d04c75ce7002301",
+    "scripts/mcp-coverage.py": "cdfd9bc499e3bdbd6dad1113cc8fc04262a0e7506486c811d3de400f0d3d7277",
+    "scripts/module-gate.py": "a9dbf85c431dac3501b5751242e346011b6cf94e787cd1d18fb5ae751575406d",
+    "scripts/verify-installed-mcp.py": "efe39137569501241cceff9d71a7061a3dfe8ea915893f2e8aaf98d39565fa4d",
+    "scripts/verify-mixer-automation-mcp.py": "07bc0d7d4d2e8a0c703f383122a391ea64ca1820c7fd7d442ae373e508612cb4",
+    "scripts/verify-mixer-chain-mcp.py": "606795d454f021fd705130458319e7b8d608263d81d9c145b34d1211407de749",
+    "scripts/verify-mixer-controls-desktop.py": "886ec93289c8eca2933366a1c8e3a1d3627d9870915520a5df2a591955250435",
+    "scripts/verify-mixer-controls-mcp.py": "7a353e85edbe591204dc9a4efbd53d1239091d91a6b9e3879b4557685b81788d",
+    "scripts/verify-mixer-effects-mcp.py": "ea8eb14c664e9161ab508aa5b84ede7304bc4091407d49b4dc62afdbed958a43",
+    "scripts/verify-mixer-insert-order-mcp.py": "b30c5e682425470eb8a2043cf435d932293b15bdd3ba52c043b0e6cfbd5a31d2",
+    "scripts/verify-mixer-organisation-mcp.py": "eac08ef030113da2df63f42e80d2126d66ce51eadb38648507a10c023aeceb7c",
+    "scripts/verify-mixer-routing-desktop.py": "3dc6a571e75f7730152d520035f23cb1b775861aada3d95bdf7a5ed458b88c90",
+    "scripts/verify-mixer-routing-mcp.py": "9daeccd4a41b626eb1708a3afd225087d26c4cfaf371075ea8547d5db67f568e",
+    "scripts/verify-mixer-stereo-mcp.py": "22665f318b18aa02034d099b9e8df7a8a97751def05d7675ae18bfddfdbad2d7",
+    "scripts/verify-plugin-editors-mcp.py": "59fad8077c819bf3f81e8dc35324830dff8cda1d4dc2ef5b88b7c9465f205342",
+    "skills/vibera-studio/SKILL.md": "19cb431e3a9dfd76802723f0085d2f6399d36afbe74247a8276f342e38d89a68",
+    "skills/vibera-studio/references/effect-chains.md": "72deeabc1c96b295083c23a8bc9468072a491f397bf1535196e39540022e8aa0",
+    "skills/vibera-studio/references/mixer-automation-recording.md": "ebbe636d1be76610b29a7f3fbc1be5f5d6561be3ad9afc7eae23195378b0a6a3",
+    "skills/vibera-studio/references/mixer-automation.md": "5fff2a73d688f14f0a7937fdb918ea2ba2da1b60b76c3c2d60ba8f63aac2f46f",
+    "skills/vibera-studio/references/mixer-controls.md": "971990aaf1e5e5464d4216a6a5b3365edbc6a0c9b74e0e43a26bc34e583c914e",
+    "skills/vibera-studio/references/mixer-effects.md": "8b0685190286976ebd9d3669eccab789793102db3cd54638ec86f72e9c0a26ae",
+    "skills/vibera-studio/references/mixer-insert-order.md": "035a8e9a87fbc57bbd8b6a8d857ce8e9c02a9ec6ae363b0df867e7f1da6a2d4f",
+    "skills/vibera-studio/references/mixer-organisation.md": "788457d64dbd4067b7a6f84469ad6544961ee597b7de88b8ff83d48a604e14ea",
+    "skills/vibera-studio/references/mixer-routing.md": "c8ac52ff4bbdd30251ce98d08b8cb3c3af49b87b850a1798e1fc78c1d8e35c03",
+    "skills/vibera-studio/references/mixer-stereo.md": "e7b30d8b155c64dcb3a5a84cf439c77fc465b3a3ded3ff99a5cd9431672770c8",
+    "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
+    "src/AudioEngine.cpp": "374f020f3a24bfc9044069a8cc9b4572ec5e6de520effe4913ae463505a65ea3",
+    "src/AudioEngine.h": "703fbe06e20e14287559374ecfdfdf17865e8815ebb9f5419455131b1800952e",
+    "src/Automation.cpp": "a1db51c6ecb81ed2b096868fb688a98fdd61617e243ee76b75e9eb7eda0e2996",
+    "src/Automation.h": "5867b5b96109669440fd08e0d85ff082169f4d6a2de9df31264aea2fb3cf8c7f",
+    "src/AutomationCommands.cpp": "4ca1ac4aec1ea4d43f3b591c4a18a6a5604e241427f51dfe36070102f3b6f759",
+    "src/AutomationCommands.h": "5945144556c11036fd1ca39253eb7d00b13bd5fd6bc84af9ee986adb5e32db73",
+    "src/AutomationState.cpp": "d6d6812d878bc12e09941051f5ffff5d97d5ac01078aabf8a0b995ae4ba41a95",
+    "src/AutomationState.h": "1b841145128f4713d9b21b06448198249a58af6eccc246c8a92b45b5a3985ec4",
+    "src/ChannelBalance.h": "b9aa26adec25e6b49680c4c1e18fae7cdbd99e03c4f34bc6893d73636289a748",
+    "src/ChannelRouting.inc": "4c82470c4d6a483df4bfa475fa1918f1b78c1ed684b3c1ed7fc10a85c6688097",
+    "src/ChannelRoutingCoordinator.h": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6",
+    "src/Commands.cpp": "6120d8f6c60d944de9aaf2dfe2440de245279aa94018ff3d1ef83fb37628a75e",
+    "src/Commands.h": "c300c988077d4e6f98cbbc88c1f2a0d13a3a75b31b30b9f06285bc8b63567066",
+    "src/Customization.cpp": "8825bccfc527916808754cc77dac7c9e99ccc1dfffe63b9f777fe628b72d3121",
+    "src/Customization.h": "14ba487431b72714247c9e109ad30cd3882563eb1da59054ae749f399da9071f",
+    "src/Editors.h": "5139ddc5a7f7404d3050dbe7f7077b2d0b610d5ac344711f55f567ad6235d0fe",
+    "src/EffectChain.cpp": "539c267f067827f1b3ed18d017e90c7fb6c42005548f9cd51ace1002ed4eb4d4",
+    "src/EffectChain.h": "b3e95bc178257428396d1daf392f518ab3c5d1908d320f5893a00a60124ba964",
+    "src/EffectChainPresetFiles.cpp": "4df19f0979a2ea785ec283e27799efa9dd14284dea6766bb9ca3582113d8b993",
+    "src/EffectChainPresetFiles.h": "c42644c13a62a436bff2bfb1c9246344bee54d1f684c830b95c94dc9d00b0a45",
+    "src/McpContracts.h": "a63aea5214f892066067108fa160784943531bc1e0ba4fc5fc3f3ed512ca4f45",
+    "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
+    "src/MixerAutomationContracts.h": "f79983bb9ddf5a094842c28f866b990cabf86239c1467e84eafc3983ee467e9d",
+    "src/MixerAutomationTake.h": "18287b906a8de5ac804c1b8207e476fb02f0f3e2d8cce1549605ae9bd50abd6a",
+    "src/MixerAutomationTarget.h": "86101beb4e39649e2eef185d8683072b7d227ceebb333ef011c5164d66c8522d",
+    "src/MixerAutomationUiIntent.h": "768d43c3d2306424b1529dc4d45e35672a18ac7ffdc9b5d9ffbf165730d24362",
+    "src/MixerChainContracts.h": "8635efc9020854a0174f4f84c32890d234dc6fff44122b2b5f2deeec35d03c9c",
+    "src/MixerChainControls.h": "d9bd76957e9950917ed5eeaaa528fa99d2d818064a6d50364032593f89e10c85",
+    "src/MixerChainWorkflowContracts.h": "ea72c524acf11085005ed0db2bb96e59dfcfe58bf46ff2018a7a993ed653438f",
+    "src/MixerControls.h": "df3f385ead1c854269a47e647eb29ebf48eed42d48ceb252b1393c647bc63c27",
+    "src/MixerEffectOrder.h": "2ce18f70dae6af85c94e40f39fcca0d56d1692e3ebba3be2bdbb18310c5fc996",
+    "src/MixerEffectSlots.h": "700240dad07990a693276872cf27b3ff425c62bf9caa2357dcfdb09a7a472240",
+    "src/MixerEffectsContracts.h": "bcb286991526d4114c64bc2c3b97d1ffd4325002c4220abb3450996d37647200",
+    "src/MixerGroups.h": "1dfb974785defbe0d6bf0a554d54714675d9af1b1c3b77004de10a26a750ec41",
+    "src/MixerInsertLifecycle.h": "e67a0b2547a8fc02d90aa061091aaa6db73c541b557854a79362c497e8be68b2",
+    "src/MixerInsertOrder.h": "b196962c2ef3893dad023dab938c56991ffbccd6f5f72cb64014e253f544e176",
+    "src/MixerInsertOrderContracts.h": "f0b0baf11a0f5c58336fcf54e6d0d9034ce705217029142bc9d1727c0b9d2134",
+    "src/MixerMacroContracts.h": "24f8749ac83264a7f62961d3450e5dbef1dbd40947ecf0e3897c1471caa1b3bf",
+    "src/MixerMacroInput.h": "54f9b556cc975769edafc05e3f14b4c0bea49e5b2574b267b83255cf4b28eb01",
+    "src/MixerMeter.h": "2be29e1a3786a39a255dae064b616345e3804c3fdf19225b44f2e0ee7a4b1056",
+    "src/MixerNativeIdentity.h": "45c7f30f3f59d5eb8b8ddb46e841bc206ee5fd6e22d8ebad358c9d3c42fd6389",
+    "src/MixerOrganisationContracts.h": "19032e52986f029aed9b3756dcf80f6335d33757f9ef57ec8cf69dfdfb0767bf",
+    "src/MixerOrganisationReferences.h": "fac1992b7d552187c65e7d827be36f254d74acee505d5ef76e45f660a335b9fc",
+    "src/MixerRoutePlugins.h": "c71a881cca38b057d8cb13e08d5c55d39ffabc75b9c907e1010a1f47258400ef",
+    "src/MixerRouting.cpp": "eefd3e2598e07c3826bf3cbdba34ed4e5993f2cd9d41455e405176b8de5d3369",
+    "src/MixerRouting.h": "d6846260bfcccdc088b2209e59cbbe99c4d93acc8d6cf7741d4a6f8010ae01a4",
+    "src/MixerSelection.h": "7c0487d909723602a6d3c4bd56369701707014ff4683659f0029246a74f2c72e",
+    "src/MixerSendAutomation.h": "628f986446ccc0f3f334b8cf6715769f97496a918ace292218ce4f718a25a90e",
+    "src/MixerStereoContracts.h": "dc488e94afb0276b66aa369a23e49c6e3efe7cbda2162d28ebd0f5016e820584",
+    "src/MixerTargetChoices.h": "c37364151241012dd745de7094da1ae986317b85bf3f81ed71ce2590e7038403",
+    "src/NativeScalarHistory.h": "04c1134e5de54e343bb08c8761c083115d8b5046a78338ffdaa40a27aebf00f6",
+    "src/PluginBuses.h": "59ac5e0e932b853734a4471908c652a20bf40c77d4eb21396dcd3ea7074ec29e",
+    "src/PluginGestures.h": "c549a49fe37fa5ef429398ab0f1d633841ca3f6d97daef3563ec1c0c5d4db7e1",
+    "src/PluginHost.cpp": "3a04e4df18a95d7affcb67150f0f25600bfefe2c9647c9e30ebea5ac34b83a5c",
+    "src/PluginHost.h": "bd98efccf2a35cd395b325b0479eb9ffbaaae33647de06cb7058760ccba26e17",
+    "src/PluginProtocol.h": "1dc499488c9f9a50601f721f5adbd4749855ee8bcf827bb3b2a14b419c0b6967",
+    "src/PluginWorker.cpp": "cc3049eea25de37dee36beac728632a5d370461cfd8798f73dccf5e71c65c5bd",
+    "src/ProductionPluginTransport.inc": "2b0179fbecc1d1549f1c407985abd156650794857f6a92d13664c2f35c19e76d",
+    "src/Project.cpp": "8c17db0eecda3c95cee8402ed7e30a812ddc21fa29de1d7804477640fcd3122c",
+    "src/Project.h": "1c6112ca8f2ad2caa205ee9412e285b8f80e948f736797735748cbbc0819d522",
+    "src/RemoteEffect.h": "b4ab509ffb904384b1d75aa56c9af0b935c7ec46407cd362bfe4aeaa3567747c",
+    "src/Studio.cpp": "762ed743b9211d2546977d3835d49cc93ca126d03bb275c4da4343ce622558f2",
+    "src/Studio.h": "a0ea6205b6ff0aab8e63a9cb4c0d063bd47a907dd6e790a07df9bd30d916227f",
+    "src/StudioDevicePreparation.inc": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352",
+    "src/StudioMcp.cpp": "8f54a1b4df7ead49b94df9a711e2fd1e9b829171a927ee8e0631fe071caf6669",
+    "src/StudioMixer.cpp": "b28f999ebe66abc64ffdc66a08d180e22fe934cbbe781f43f4c02392084bd883",
+    "src/StudioMixerChainApplyAcceptance.inc": "928cf9c385a7977c9e5c6b3976f71a636fbc85d0383a6564dfc42f2bb6972fd2",
+    "src/StudioMixerChainWorkflowAcceptance.cpp": "5ac5e55b02b5c71e27f25a0c29193aed4374e77efdb954128198f4a9eee63385",
+    "src/StudioMixerChains.inc": "bf41ca7505b5fa9028f1a58f3cdd958b356fee947f77a38ede0cf356acfb0006",
+    "src/StudioMixerControls.cpp": "6e0d690c98595f95e9e658de0ecd7aa74ff03ba6a57595faa91f9275a0c0301b",
+    "src/StudioMixerDetectorAcceptance.inc": "a91c87ae5a07c89afc1ec399238c4b31052d44e59d00ba55f1262cadc1c1ec68",
+    "src/StudioMixerEffectOpeningAcceptance.inc": "f8480467a4114031360e7d95a22c39ec1decc35272d07b1c26c25b7cb567fd3d",
+    "src/StudioMixerInsertLifecycleAcceptance.inc": "44f3c64b6ab598dd67aa7617bf95236b089caa9edb1da397aa626ab39d5a96e6",
+    "src/StudioMixerMacros.inc": "abf1e5e3245642ad4b6b0a8b3bfa2703d9483ec3473f52035978935b1cbead0e",
+    "src/StudioMixerOrganisation.inc": "0b9cd0b6bc1b08de1faf65d584f29ddc2586bd84e3b3989299728c4b44a64b03",
+    "src/StudioMixerTargetAcceptance.inc": "c96b0b33d7d30e54a7532af5f3a40f4aa211b05d51e9bbb00e6bbe25c4e3ff60",
+    "src/StudioNativeScalar.inc": "eaa95f0ac359eee489f44a426f0ffd42975320abcdfa28903f355ed997b9def4",
+    "src/StudioNativeScalarAcceptance.inc": "e20ae4ac14262716ed94ee41695cf5895ae359b67ac26c08e08258816461177a",
+    "src/StudioPluginIo.inc": "ff3f53993520dcc21dc018ab35c826e4dc5d84e59473c0596fb076032eb9b4dc",
+    "src/StudioPluginParameters.cpp": "0cfe57b9be00024699aded7db2dee9c89ab4a3ab1d0770c8560600d46f6f8cea",
+    "src/StudioRoutingCoordinator.inc": "8e0954d5acf698f4e2d88c1a9bf4f6468ef5fbd52187197222edbb6ca8f78529",
+    "tests/InstalledStudioEffectChainApply.inc": "f29e1ee25d4504ee9ca314d5b958a786679fca8edf98f830e2fbaac8a22ea21e",
+    "tests/MixerAudioPortAcceptance.h": "e9187ec36df8b5fe1c3520c3c768d868efc04df8e8e71e9d997e4424e45a62f8",
+    "tests/MixerAutomationCoreAcceptance.h": "d0be139d8b7c66ef9031f15daa54662a6bee6450a867a34eb334d5c505ea6512",
+    "tests/MixerAutomationNativeAcceptance.h": "04a68d932c5cea9da102d11d628b59bc7696813ea3221cdfc79d84453014d48b",
+    "tests/MixerAutomationTakeAcceptance.h": "0c68ae3e0f145485a469afa833c284652cbd7d8ffc85994b5e8e14c2df3fdf17",
+    "tests/MixerAutomationUiAcceptance.inc": "577f7b1315f977f4bb2310e5ed8d53bf3b3ec65813cd435977d78735dbc36deb",
+    "tests/MixerChainCommandPreparationAcceptance.h": "a2fed0dcd5df7b1114c5c8245d11de4f1ef79a1a2a36844303fccfb621379913",
+    "tests/MixerChainControlsAcceptance.h": "7aba2a263dc64c20c2fd3943df2b79e5116845f10728112768790fcc36c04fc8",
+    "tests/MixerChainLiveAcceptance.h": "c92fd47fabe472eb5030168c9ce545140157d938870ed60b62b0f96ea412527b",
+    "tests/MixerControlsAcceptance.h": "537421bc59fa7eece27c62c2bc410d763dae92335966492031578d69ae7dd9af",
+    "tests/MixerDetectorModelAcceptance.h": "252fe5fdab0a900950f865d3f47331313a78bfdc34780df49d84e05ee726bcef",
+    "tests/MixerEffectOpeningCapture.h": "c7b53d13641d5cbcb3d070c683914964b938a71898bc46e916bafd6f045758e9",
+    "tests/MixerEffectReplacementPreparationAcceptance.h": "34433928e2eade5dfb63731e962496213bdd01db68a190db7d80b85d47414007",
+    "tests/MixerEffectSlotsAcceptance.h": "7e6d82fa6c67be7205dfa82ac38cb55fd37f306607a0105b4db03a3acd752d41",
+    "tests/MixerEffectSlotsAcceptance.inc": "51587e26756ec9f1e80440668121546e97291ba7f688b0e1cc3c37ffa667f1fe",
+    "tests/MixerInsertLifecycleAcceptance.h": "368d1beb92c6e5c000aad28d3f72d91df40a7b18b91f0bf568c21edaae17f511",
+    "tests/MixerInsertOrderAcceptance.h": "7cf25865f91b3639dee5e89059a70cd582896fc0a28e25a80470bba2e7c72682",
+    "tests/MixerInsertOrderUiAcceptance.inc": "a53a36d48cb7ffab2901c3599a217ea7c138c87cd1cd3cf15fd0fd9aaf1f1f52",
+    "tests/MixerLatencyFixture.cpp": "70b18d76fd0a5cbaffcac2afa0ff4464b5ba52fdd5bd8162fdc7c47f4dea4e64",
+    "tests/MixerMacroConfigurationAcceptance.h": "980b4d63e154fb6dd1eebcc2d4fb31e1581907ea083c07a7c7c88525ed055d92",
+    "tests/MixerNativeIdentityAcceptance.h": "bb6847b96e7d22d7c11d9344e4fb1e3d83c80d4e516b66cab65eb14e7f3062be",
+    "tests/MixerNativeIdentityExtendedAcceptance.h": "0bffa1d737fc7fb64aa0542e2f97776d169f29a8936c5e007befec3038f3569a",
+    "tests/MixerOrganisationAcceptance.h": "ddd9d155eea23ac92c621171959164c1fbf00218725cc0c5077d07bbda513a3a",
+    "tests/MixerOrganisationUiAcceptance.inc": "fc2d8ef951032ba72b5c911aeb1c1adeaa95a9ea8478432b15349699612a8b62",
+    "tests/MixerOverloadAcceptance.h": "4c671f823c0ca19200f4ff8aa7f75fed2c30732ed539c9ab0ffc0e3dc108a315",
+    "tests/MixerReadabilityAcceptance.h": "7e1179631d42c36a57b5e0e41f4ae999f8b019793dd2d3cee5f587a46f5aeaf9",
+    "tests/MixerRiskAcceptance.h": "a557704020e41e8c3916ad33d0b19c5205708ed6b4202513f9c9e460f0eb4e46",
+    "tests/MixerRoutingAcceptance.h": "3f39f8f4ffac2a8c661f42e73d4f454dce13006e144f58a57564bd4befbf8f6d",
+    "tests/MixerRoutingLiveAcceptance.h": "5712bba034bcb41e9d4263037fe678fcb2d5749e9e61c9e3f0f62cfbf56e77c9",
+    "tests/MixerSendModelAcceptance.h": "797d7aa28128d17f5bf82ac3bba5aa659e1c6b3a1cd4b9e9199189535e8bfa7d",
+    "tests/MixerSendProductionAcceptance.h": "42f17e5e69c2d1fe12747586c93e5e4c571866ecff086e3ab89408a722fe2a97",
+    "tests/MixerSendRuntimeAcceptance.h": "0e58933711c6337c285dd814f6f0104aaa7e6d02cbbf09ecc291878c0421ee1b",
+    "tests/MixerStereoAcceptance.h": "22e97e0525315c492dfbf185215927f4cf7a2948504e747f373f852b6da649b4",
+    "tests/MixerStereoNativeAcceptance.h": "fedf4b27e4097702b49a1711505571168760948f325cb98dac94373be22cc861",
+    "tests/MixerStereoUiAcceptance.inc": "850e6d1cc6613d16bd862d6afb597e50767131c23d9cc5209476fc464a7b8f4e",
+    "tests/MixerTargetChoicesAcceptance.h": "d722fa58da49f37ca4615a24bf360fce9a3996be9a5a9dd833c9b6ca3f0bfdc2",
+    "tests/MixerWorkspaceReadabilityAcceptance.h": "c43e3e5f47f23725db9748d8d456c4611b6c4f1d989e8bbe8381bdc59304c18e",
+    "tests/PluginHostWetMixAcceptance.h": "3830a80aa31cef1e443ef6fec0c51c2651ed4b2ea7ecff7a2311c1d055648f3a",
+    "tests/StoppedEffectChangePlanAcceptance.h": "b1ccdfd8826ee6e2db74ea92cf77084c5a5c03ba242a0cf15bc8e028482275a4",
+    "tests/StoppedEffectCommandPreparationAcceptance.h": "3b3f8446454c61258869ead791ee5559d3e624d9f4f5f704a8c0200538d4dd49",
+    "tests/StoppedEffectForwardSdkAcceptance.h": "9a11ad6c6da71303848b1fd5051ab546f684ff5fd229c7aa3b320a9a14dff8ac",
+    "tests/StoppedEffectInverseSdkAcceptance.h": "0c247b7b3b2297940a2d021f1160b57586a85fb18c5d7065e2ea9ef3f77a641e",
+    "tests/StoppedEffectNativeAcceptance.h": "f87d725e3d8a589e0844b24d5e66f69adf699153afc124f18f825df719b28320",
+    "tests/StoppedEffectOrdinaryForwardAcceptance.h": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
+  },
+  "applicationSha256": "fc17a78daa85a9b5ebd9f69d34462222a2d31fddf9d7635cb37d4b79f27b903c",
+  "checks": [
+    {
+      "id": "mixer.routing",
+      "tests": [
+        "mixer_routing_mcp",
+        "mixer_routing_gui",
+        "mixer_controls_audio",
+        "studio_channel_routing_provider",
+        "studio_channel_routing_same_config"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.native",
+      "tests": [
+        "mixer_effect_opening",
+        "mixer_effect_opening_unsupported",
+        "plugin_editors_mcp"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.controls",
+      "tests": [
+        "mixer_effect_slots_gui",
+        "mixer_effect_slots_mcp",
+        "plugin_parameters_gui"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.power",
+      "tests": [
+        "mixer_effect_slots_gui",
+        "mixer_effect_slots_mcp",
+        "mixer_bypass_transition"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.remove",
+      "tests": [
+        "mixer_effect_slots_gui",
+        "mixer_effect_slots_mcp",
+        "mixer_chain_workflow",
+        "mixer_chain_mcp"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.browse",
+      "tests": [
+        "mixer_effect_slots_gui",
+        "mixer_effect_slots_mcp"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.scroll",
+      "tests": [
+        "mixer_effect_slots_gui",
+        "mixer_effect_slots_mcp"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.reorder",
+      "tests": [
+        "mixer_effect_slots_gui",
+        "mixer_effect_slots_mcp",
+        "mixer_chain_workflow"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.orderContext",
+      "tests": [
+        "mixer_effect_slots_gui",
+        "mixer_effect_slots_mcp"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.wet",
+      "tests": [
+        "mixer_chain_controls",
+        "plugin_host_wet_mix",
+        "mixer_chain_live_export",
+        "midi_take_recovery_gui",
+        "mixer_effect_slots_mcp"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.effects.chainBypass",
+      "tests": [
+        "mixer_chain_controls",
+        "plugin_host_wet_mix",
+        "mixer_chain_live_export",
+        "midi_take_recovery_gui",
+        "mixer_effect_slots_mcp"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.stereoSeparation",
+      "tests": [
+        "mixer_stereo_gui",
+        "mixer_stereo_mcp",
+        "mixer_stereo_controls",
+        "mixer_stereo_native",
+        "midi_take_recovery_gui"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.phaseInvert",
+      "tests": [
+        "mixer_stereo_gui",
+        "mixer_stereo_mcp",
+        "mixer_stereo_controls",
+        "mixer_stereo_native"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.stereoSwap",
+      "tests": [
+        "mixer_stereo_gui",
+        "mixer_stereo_mcp",
+        "mixer_stereo_controls",
+        "mixer_stereo_native"
+      ],
+      "passed": true,
+      "scope": "Only named operation and genuine shared application/semantic behavior; no arbitrary native widget coverage."
+    },
+    {
+      "id": "mixer.moduleWorkflows",
+      "tests": [
+        "mixer_organisation",
+        "mixer_organisation_gui",
+        "mixer_organisation_mcp",
+        "mixer_insert_order_gui",
+        "mixer_insert_order_mcp",
+        "mixer_controls_mcp",
+        "mixer_controls_gui",
+        "mixer_chain_data",
+        "mixer_chain_file_jobs",
+        "mixer_chain_workflow",
+        "mixer_chain_mcp"
+      ],
+      "passed": true,
+      "scope": "Canonical organisation, meter reset/readback and practical chain clipboard/preset/application/history; component and MCP cases, no comprehensive native OS-input audit."
+    }
+  ],
+  "testRun": {
+    "tests": 184,
+    "passed": 184,
+    "failed": 0,
+    "skipped": 0,
+    "disabled": 0,
+    "testSeconds": 1029.0,
+    "totalSeconds": 1067.6927504999985,
+    "sourceInputsStable": true,
+    "compiledInputsStable": true,
+    "allStepExitCodesZero": true
+  },
+  "evidence": [
+    {
+      "path": "build/dev/20261018-215530/verification.json",
+      "sha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/dev/20261018-215530/ctest.xml",
+      "sha256": "31cf584850cdb9de01a015bbf97aede8b5edd752e57c2537485ce87c94b020cf",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/mixer-final-native-full-20261018/process.json",
+      "sha256": "463b83406970e3e165e3eb4317e33851230d90ea72fb0ef2991d64fcb7427418",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/mixer-candidate-final-installed-identity-20261018/verification.json",
+      "sha256": "a8fceba5c21f456ae3da4d66c769e317e32165c7c3aef9bc26c192b4d36145c6",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/mixer-catalogue-verifier-overlay-20261018/derived/index.json",
+      "sha256": "77ab66b981743f4a65d78775e0be8bbb1c63cbe59d74a069382c5cb80ba89aec",
+      "role": "Bounded current catalogue-verifier follow-up; compiled source/184 tests unaffected, not rerun"
+    }
+  ],
+  "dependencyHashes": [
+    {
+      "path": "CMakeLists.txt",
+      "mode": "content",
+      "sha256": "1c76148687f8b2b609ad6ca82b2aa09fe88fe386d627e2149d04c75ce7002301"
+    },
+    {
+      "path": "scripts/mcp-coverage.py",
+      "mode": "content",
+      "sha256": "cdfd9bc499e3bdbd6dad1113cc8fc04262a0e7506486c811d3de400f0d3d7277"
+    },
+    {
+      "path": "scripts/module-gate.py",
+      "mode": "content",
+      "sha256": "a9dbf85c431dac3501b5751242e346011b6cf94e787cd1d18fb5ae751575406d"
+    },
+    {
+      "path": "scripts/verify-installed-mcp.py",
+      "mode": "content",
+      "sha256": "efe39137569501241cceff9d71a7061a3dfe8ea915893f2e8aaf98d39565fa4d"
+    },
+    {
+      "path": "scripts/verify-mixer-automation-mcp.py",
+      "mode": "content",
+      "sha256": "07bc0d7d4d2e8a0c703f383122a391ea64ca1820c7fd7d442ae373e508612cb4"
+    },
+    {
+      "path": "scripts/verify-mixer-chain-mcp.py",
+      "mode": "content",
+      "sha256": "606795d454f021fd705130458319e7b8d608263d81d9c145b34d1211407de749"
+    },
+    {
+      "path": "scripts/verify-mixer-controls-desktop.py",
+      "mode": "content",
+      "sha256": "886ec93289c8eca2933366a1c8e3a1d3627d9870915520a5df2a591955250435"
+    },
+    {
+      "path": "scripts/verify-mixer-controls-mcp.py",
+      "mode": "content",
+      "sha256": "7a353e85edbe591204dc9a4efbd53d1239091d91a6b9e3879b4557685b81788d"
+    },
+    {
+      "path": "scripts/verify-mixer-effects-mcp.py",
+      "mode": "content",
+      "sha256": "ea8eb14c664e9161ab508aa5b84ede7304bc4091407d49b4dc62afdbed958a43"
+    },
+    {
+      "path": "scripts/verify-mixer-insert-order-mcp.py",
+      "mode": "content",
+      "sha256": "b30c5e682425470eb8a2043cf435d932293b15bdd3ba52c043b0e6cfbd5a31d2"
+    },
+    {
+      "path": "scripts/verify-mixer-organisation-mcp.py",
+      "mode": "content",
+      "sha256": "eac08ef030113da2df63f42e80d2126d66ce51eadb38648507a10c023aeceb7c"
+    },
+    {
+      "path": "scripts/verify-mixer-routing-desktop.py",
+      "mode": "content",
+      "sha256": "3dc6a571e75f7730152d520035f23cb1b775861aada3d95bdf7a5ed458b88c90"
+    },
+    {
+      "path": "scripts/verify-mixer-routing-mcp.py",
+      "mode": "content",
+      "sha256": "9daeccd4a41b626eb1708a3afd225087d26c4cfaf371075ea8547d5db67f568e"
+    },
+    {
+      "path": "scripts/verify-mixer-stereo-mcp.py",
+      "mode": "content",
+      "sha256": "22665f318b18aa02034d099b9e8df7a8a97751def05d7675ae18bfddfdbad2d7"
+    },
+    {
+      "path": "scripts/verify-plugin-editors-mcp.py",
+      "mode": "content",
+      "sha256": "59fad8077c819bf3f81e8dc35324830dff8cda1d4dc2ef5b88b7c9465f205342"
+    },
+    {
+      "path": "skills/vibera-studio/SKILL.md",
+      "mode": "content",
+      "sha256": "19cb431e3a9dfd76802723f0085d2f6399d36afbe74247a8276f342e38d89a68"
+    },
+    {
+      "path": "skills/vibera-studio/references/effect-chains.md",
+      "mode": "content",
+      "sha256": "72deeabc1c96b295083c23a8bc9468072a491f397bf1535196e39540022e8aa0"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-automation-recording.md",
+      "mode": "content",
+      "sha256": "ebbe636d1be76610b29a7f3fbc1be5f5d6561be3ad9afc7eae23195378b0a6a3"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-automation.md",
+      "mode": "content",
+      "sha256": "5fff2a73d688f14f0a7937fdb918ea2ba2da1b60b76c3c2d60ba8f63aac2f46f"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-controls.md",
+      "mode": "content",
+      "sha256": "971990aaf1e5e5464d4216a6a5b3365edbc6a0c9b74e0e43a26bc34e583c914e"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-effects.md",
+      "mode": "content",
+      "sha256": "8b0685190286976ebd9d3669eccab789793102db3cd54638ec86f72e9c0a26ae"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-insert-order.md",
+      "mode": "content",
+      "sha256": "035a8e9a87fbc57bbd8b6a8d857ce8e9c02a9ec6ae363b0df867e7f1da6a2d4f"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-organisation.md",
+      "mode": "content",
+      "sha256": "788457d64dbd4067b7a6f84469ad6544961ee597b7de88b8ff83d48a604e14ea"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-routing.md",
+      "mode": "content",
+      "sha256": "c8ac52ff4bbdd30251ce98d08b8cb3c3af49b87b850a1798e1fc78c1d8e35c03"
+    },
+    {
+      "path": "skills/vibera-studio/references/mixer-stereo.md",
+      "mode": "content",
+      "sha256": "e7b30d8b155c64dcb3a5a84cf439c77fc465b3a3ded3ff99a5cd9431672770c8"
+    },
+    {
+      "path": "skills/vibera-studio/scripts/stdio_client.py",
+      "mode": "content",
+      "sha256": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81"
+    },
+    {
+      "path": "src/AudioEngine.cpp",
+      "mode": "content",
+      "sha256": "374f020f3a24bfc9044069a8cc9b4572ec5e6de520effe4913ae463505a65ea3"
+    },
+    {
+      "path": "src/AudioEngine.h",
+      "mode": "content",
+      "sha256": "703fbe06e20e14287559374ecfdfdf17865e8815ebb9f5419455131b1800952e"
+    },
+    {
+      "path": "src/Automation.cpp",
+      "mode": "content",
+      "sha256": "a1db51c6ecb81ed2b096868fb688a98fdd61617e243ee76b75e9eb7eda0e2996"
+    },
+    {
+      "path": "src/Automation.h",
+      "mode": "content",
+      "sha256": "5867b5b96109669440fd08e0d85ff082169f4d6a2de9df31264aea2fb3cf8c7f"
+    },
+    {
+      "path": "src/AutomationCommands.cpp",
+      "mode": "content",
+      "sha256": "4ca1ac4aec1ea4d43f3b591c4a18a6a5604e241427f51dfe36070102f3b6f759"
+    },
+    {
+      "path": "src/AutomationCommands.h",
+      "mode": "content",
+      "sha256": "5945144556c11036fd1ca39253eb7d00b13bd5fd6bc84af9ee986adb5e32db73"
+    },
+    {
+      "path": "src/AutomationState.cpp",
+      "mode": "content",
+      "sha256": "d6d6812d878bc12e09941051f5ffff5d97d5ac01078aabf8a0b995ae4ba41a95"
+    },
+    {
+      "path": "src/AutomationState.h",
+      "mode": "content",
+      "sha256": "1b841145128f4713d9b21b06448198249a58af6eccc246c8a92b45b5a3985ec4"
+    },
+    {
+      "path": "src/ChannelBalance.h",
+      "mode": "content",
+      "sha256": "b9aa26adec25e6b49680c4c1e18fae7cdbd99e03c4f34bc6893d73636289a748"
+    },
+    {
+      "path": "src/ChannelRouting.inc",
+      "mode": "exact",
+      "sha256": "4c82470c4d6a483df4bfa475fa1918f1b78c1ed684b3c1ed7fc10a85c6688097"
+    },
+    {
+      "path": "src/ChannelRoutingCoordinator.h",
+      "mode": "content",
+      "sha256": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6"
+    },
+    {
+      "path": "src/Commands.cpp",
+      "mode": "content",
+      "sha256": "6120d8f6c60d944de9aaf2dfe2440de245279aa94018ff3d1ef83fb37628a75e"
+    },
+    {
+      "path": "src/Commands.h",
+      "mode": "content",
+      "sha256": "c300c988077d4e6f98cbbc88c1f2a0d13a3a75b31b30b9f06285bc8b63567066"
+    },
+    {
+      "path": "src/Customization.cpp",
+      "mode": "content",
+      "sha256": "8825bccfc527916808754cc77dac7c9e99ccc1dfffe63b9f777fe628b72d3121"
+    },
+    {
+      "path": "src/Customization.h",
+      "mode": "content",
+      "sha256": "14ba487431b72714247c9e109ad30cd3882563eb1da59054ae749f399da9071f"
+    },
+    {
+      "path": "src/Editors.h",
+      "mode": "content",
+      "sha256": "5139ddc5a7f7404d3050dbe7f7077b2d0b610d5ac344711f55f567ad6235d0fe"
+    },
+    {
+      "path": "src/EffectChain.cpp",
+      "mode": "content",
+      "sha256": "539c267f067827f1b3ed18d017e90c7fb6c42005548f9cd51ace1002ed4eb4d4"
+    },
+    {
+      "path": "src/EffectChain.h",
+      "mode": "content",
+      "sha256": "b3e95bc178257428396d1daf392f518ab3c5d1908d320f5893a00a60124ba964"
+    },
+    {
+      "path": "src/EffectChainPresetFiles.cpp",
+      "mode": "content",
+      "sha256": "4df19f0979a2ea785ec283e27799efa9dd14284dea6766bb9ca3582113d8b993"
+    },
+    {
+      "path": "src/EffectChainPresetFiles.h",
+      "mode": "content",
+      "sha256": "c42644c13a62a436bff2bfb1c9246344bee54d1f684c830b95c94dc9d00b0a45"
+    },
+    {
+      "path": "src/McpContracts.h",
+      "mode": "content",
+      "sha256": "a63aea5214f892066067108fa160784943531bc1e0ba4fc5fc3f3ed512ca4f45"
+    },
+    {
+      "path": "src/McpSchema.h",
+      "mode": "content",
+      "sha256": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa"
+    },
+    {
+      "path": "src/MixerAutomationContracts.h",
+      "mode": "content",
+      "sha256": "f79983bb9ddf5a094842c28f866b990cabf86239c1467e84eafc3983ee467e9d"
+    },
+    {
+      "path": "src/MixerAutomationTake.h",
+      "mode": "content",
+      "sha256": "18287b906a8de5ac804c1b8207e476fb02f0f3e2d8cce1549605ae9bd50abd6a"
+    },
+    {
+      "path": "src/MixerAutomationTarget.h",
+      "mode": "content",
+      "sha256": "86101beb4e39649e2eef185d8683072b7d227ceebb333ef011c5164d66c8522d"
+    },
+    {
+      "path": "src/MixerAutomationUiIntent.h",
+      "mode": "content",
+      "sha256": "768d43c3d2306424b1529dc4d45e35672a18ac7ffdc9b5d9ffbf165730d24362"
+    },
+    {
+      "path": "src/MixerChainContracts.h",
+      "mode": "content",
+      "sha256": "8635efc9020854a0174f4f84c32890d234dc6fff44122b2b5f2deeec35d03c9c"
+    },
+    {
+      "path": "src/MixerChainControls.h",
+      "mode": "content",
+      "sha256": "d9bd76957e9950917ed5eeaaa528fa99d2d818064a6d50364032593f89e10c85"
+    },
+    {
+      "path": "src/MixerChainWorkflowContracts.h",
+      "mode": "content",
+      "sha256": "ea72c524acf11085005ed0db2bb96e59dfcfe58bf46ff2018a7a993ed653438f"
+    },
+    {
+      "path": "src/MixerControls.h",
+      "mode": "content",
+      "sha256": "df3f385ead1c854269a47e647eb29ebf48eed42d48ceb252b1393c647bc63c27"
+    },
+    {
+      "path": "src/MixerEffectOrder.h",
+      "mode": "content",
+      "sha256": "2ce18f70dae6af85c94e40f39fcca0d56d1692e3ebba3be2bdbb18310c5fc996"
+    },
+    {
+      "path": "src/MixerEffectSlots.h",
+      "mode": "content",
+      "sha256": "700240dad07990a693276872cf27b3ff425c62bf9caa2357dcfdb09a7a472240"
+    },
+    {
+      "path": "src/MixerEffectsContracts.h",
+      "mode": "content",
+      "sha256": "bcb286991526d4114c64bc2c3b97d1ffd4325002c4220abb3450996d37647200"
+    },
+    {
+      "path": "src/MixerGroups.h",
+      "mode": "content",
+      "sha256": "1dfb974785defbe0d6bf0a554d54714675d9af1b1c3b77004de10a26a750ec41"
+    },
+    {
+      "path": "src/MixerInsertLifecycle.h",
+      "mode": "content",
+      "sha256": "e67a0b2547a8fc02d90aa061091aaa6db73c541b557854a79362c497e8be68b2"
+    },
+    {
+      "path": "src/MixerInsertOrder.h",
+      "mode": "content",
+      "sha256": "b196962c2ef3893dad023dab938c56991ffbccd6f5f72cb64014e253f544e176"
+    },
+    {
+      "path": "src/MixerInsertOrderContracts.h",
+      "mode": "content",
+      "sha256": "f0b0baf11a0f5c58336fcf54e6d0d9034ce705217029142bc9d1727c0b9d2134"
+    },
+    {
+      "path": "src/MixerMacroContracts.h",
+      "mode": "content",
+      "sha256": "24f8749ac83264a7f62961d3450e5dbef1dbd40947ecf0e3897c1471caa1b3bf"
+    },
+    {
+      "path": "src/MixerMacroInput.h",
+      "mode": "content",
+      "sha256": "54f9b556cc975769edafc05e3f14b4c0bea49e5b2574b267b83255cf4b28eb01"
+    },
+    {
+      "path": "src/MixerMeter.h",
+      "mode": "content",
+      "sha256": "2be29e1a3786a39a255dae064b616345e3804c3fdf19225b44f2e0ee7a4b1056"
+    },
+    {
+      "path": "src/MixerNativeIdentity.h",
+      "mode": "content",
+      "sha256": "45c7f30f3f59d5eb8b8ddb46e841bc206ee5fd6e22d8ebad358c9d3c42fd6389"
+    },
+    {
+      "path": "src/MixerOrganisationContracts.h",
+      "mode": "content",
+      "sha256": "19032e52986f029aed9b3756dcf80f6335d33757f9ef57ec8cf69dfdfb0767bf"
+    },
+    {
+      "path": "src/MixerOrganisationReferences.h",
+      "mode": "content",
+      "sha256": "fac1992b7d552187c65e7d827be36f254d74acee505d5ef76e45f660a335b9fc"
+    },
+    {
+      "path": "src/MixerRoutePlugins.h",
+      "mode": "content",
+      "sha256": "c71a881cca38b057d8cb13e08d5c55d39ffabc75b9c907e1010a1f47258400ef"
+    },
+    {
+      "path": "src/MixerRouting.cpp",
+      "mode": "content",
+      "sha256": "eefd3e2598e07c3826bf3cbdba34ed4e5993f2cd9d41455e405176b8de5d3369"
+    },
+    {
+      "path": "src/MixerRouting.h",
+      "mode": "content",
+      "sha256": "d6846260bfcccdc088b2209e59cbbe99c4d93acc8d6cf7741d4a6f8010ae01a4"
+    },
+    {
+      "path": "src/MixerSelection.h",
+      "mode": "content",
+      "sha256": "7c0487d909723602a6d3c4bd56369701707014ff4683659f0029246a74f2c72e"
+    },
+    {
+      "path": "src/MixerSendAutomation.h",
+      "mode": "content",
+      "sha256": "628f986446ccc0f3f334b8cf6715769f97496a918ace292218ce4f718a25a90e"
+    },
+    {
+      "path": "src/MixerStereoContracts.h",
+      "mode": "content",
+      "sha256": "dc488e94afb0276b66aa369a23e49c6e3efe7cbda2162d28ebd0f5016e820584"
+    },
+    {
+      "path": "src/MixerTargetChoices.h",
+      "mode": "content",
+      "sha256": "c37364151241012dd745de7094da1ae986317b85bf3f81ed71ce2590e7038403"
+    },
+    {
+      "path": "src/NativeScalarHistory.h",
+      "mode": "content",
+      "sha256": "04c1134e5de54e343bb08c8761c083115d8b5046a78338ffdaa40a27aebf00f6"
+    },
+    {
+      "path": "src/PluginBuses.h",
+      "mode": "content",
+      "sha256": "59ac5e0e932b853734a4471908c652a20bf40c77d4eb21396dcd3ea7074ec29e"
+    },
+    {
+      "path": "src/PluginGestures.h",
+      "mode": "content",
+      "sha256": "c549a49fe37fa5ef429398ab0f1d633841ca3f6d97daef3563ec1c0c5d4db7e1"
+    },
+    {
+      "path": "src/PluginHost.cpp",
+      "mode": "content",
+      "sha256": "3a04e4df18a95d7affcb67150f0f25600bfefe2c9647c9e30ebea5ac34b83a5c"
+    },
+    {
+      "path": "src/PluginHost.h",
+      "mode": "content",
+      "sha256": "bd98efccf2a35cd395b325b0479eb9ffbaaae33647de06cb7058760ccba26e17"
+    },
+    {
+      "path": "src/PluginProtocol.h",
+      "mode": "content",
+      "sha256": "1dc499488c9f9a50601f721f5adbd4749855ee8bcf827bb3b2a14b419c0b6967"
+    },
+    {
+      "path": "src/PluginWorker.cpp",
+      "mode": "content",
+      "sha256": "cc3049eea25de37dee36beac728632a5d370461cfd8798f73dccf5e71c65c5bd"
+    },
+    {
+      "path": "src/ProductionPluginTransport.inc",
+      "mode": "exact",
+      "sha256": "2b0179fbecc1d1549f1c407985abd156650794857f6a92d13664c2f35c19e76d"
+    },
+    {
+      "path": "src/Project.cpp",
+      "mode": "content",
+      "sha256": "8c17db0eecda3c95cee8402ed7e30a812ddc21fa29de1d7804477640fcd3122c"
+    },
+    {
+      "path": "src/Project.h",
+      "mode": "content",
+      "sha256": "1c6112ca8f2ad2caa205ee9412e285b8f80e948f736797735748cbbc0819d522"
+    },
+    {
+      "path": "src/RemoteEffect.h",
+      "mode": "content",
+      "sha256": "b4ab509ffb904384b1d75aa56c9af0b935c7ec46407cd362bfe4aeaa3567747c"
+    },
+    {
+      "path": "src/Studio.cpp",
+      "mode": "content",
+      "sha256": "762ed743b9211d2546977d3835d49cc93ca126d03bb275c4da4343ce622558f2"
+    },
+    {
+      "path": "src/Studio.h",
+      "mode": "content",
+      "sha256": "a0ea6205b6ff0aab8e63a9cb4c0d063bd47a907dd6e790a07df9bd30d916227f"
+    },
+    {
+      "path": "src/StudioDevicePreparation.inc",
+      "mode": "exact",
+      "sha256": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352"
+    },
+    {
+      "path": "src/StudioMcp.cpp",
+      "mode": "content",
+      "sha256": "8f54a1b4df7ead49b94df9a711e2fd1e9b829171a927ee8e0631fe071caf6669"
+    },
+    {
+      "path": "src/StudioMixer.cpp",
+      "mode": "content",
+      "sha256": "b28f999ebe66abc64ffdc66a08d180e22fe934cbbe781f43f4c02392084bd883"
+    },
+    {
+      "path": "src/StudioMixerChainApplyAcceptance.inc",
+      "mode": "exact",
+      "sha256": "928cf9c385a7977c9e5c6b3976f71a636fbc85d0383a6564dfc42f2bb6972fd2"
+    },
+    {
+      "path": "src/StudioMixerChainWorkflowAcceptance.cpp",
+      "mode": "content",
+      "sha256": "5ac5e55b02b5c71e27f25a0c29193aed4374e77efdb954128198f4a9eee63385"
+    },
+    {
+      "path": "src/StudioMixerChains.inc",
+      "mode": "exact",
+      "sha256": "bf41ca7505b5fa9028f1a58f3cdd958b356fee947f77a38ede0cf356acfb0006"
+    },
+    {
+      "path": "src/StudioMixerControls.cpp",
+      "mode": "content",
+      "sha256": "6e0d690c98595f95e9e658de0ecd7aa74ff03ba6a57595faa91f9275a0c0301b"
+    },
+    {
+      "path": "src/StudioMixerDetectorAcceptance.inc",
+      "mode": "exact",
+      "sha256": "a91c87ae5a07c89afc1ec399238c4b31052d44e59d00ba55f1262cadc1c1ec68"
+    },
+    {
+      "path": "src/StudioMixerEffectOpeningAcceptance.inc",
+      "mode": "exact",
+      "sha256": "f8480467a4114031360e7d95a22c39ec1decc35272d07b1c26c25b7cb567fd3d"
+    },
+    {
+      "path": "src/StudioMixerInsertLifecycleAcceptance.inc",
+      "mode": "exact",
+      "sha256": "44f3c64b6ab598dd67aa7617bf95236b089caa9edb1da397aa626ab39d5a96e6"
+    },
+    {
+      "path": "src/StudioMixerMacros.inc",
+      "mode": "exact",
+      "sha256": "abf1e5e3245642ad4b6b0a8b3bfa2703d9483ec3473f52035978935b1cbead0e"
+    },
+    {
+      "path": "src/StudioMixerOrganisation.inc",
+      "mode": "exact",
+      "sha256": "0b9cd0b6bc1b08de1faf65d584f29ddc2586bd84e3b3989299728c4b44a64b03"
+    },
+    {
+      "path": "src/StudioMixerTargetAcceptance.inc",
+      "mode": "exact",
+      "sha256": "c96b0b33d7d30e54a7532af5f3a40f4aa211b05d51e9bbb00e6bbe25c4e3ff60"
+    },
+    {
+      "path": "src/StudioNativeScalar.inc",
+      "mode": "exact",
+      "sha256": "eaa95f0ac359eee489f44a426f0ffd42975320abcdfa28903f355ed997b9def4"
+    },
+    {
+      "path": "src/StudioNativeScalarAcceptance.inc",
+      "mode": "exact",
+      "sha256": "e20ae4ac14262716ed94ee41695cf5895ae359b67ac26c08e08258816461177a"
+    },
+    {
+      "path": "src/StudioPluginIo.inc",
+      "mode": "exact",
+      "sha256": "ff3f53993520dcc21dc018ab35c826e4dc5d84e59473c0596fb076032eb9b4dc"
+    },
+    {
+      "path": "src/StudioPluginParameters.cpp",
+      "mode": "content",
+      "sha256": "0cfe57b9be00024699aded7db2dee9c89ab4a3ab1d0770c8560600d46f6f8cea"
+    },
+    {
+      "path": "src/StudioRoutingCoordinator.inc",
+      "mode": "exact",
+      "sha256": "8e0954d5acf698f4e2d88c1a9bf4f6468ef5fbd52187197222edbb6ca8f78529"
+    },
+    {
+      "path": "tests/InstalledStudioEffectChainApply.inc",
+      "mode": "exact",
+      "sha256": "f29e1ee25d4504ee9ca314d5b958a786679fca8edf98f830e2fbaac8a22ea21e"
+    },
+    {
+      "path": "tests/MixerAudioPortAcceptance.h",
+      "mode": "content",
+      "sha256": "e9187ec36df8b5fe1c3520c3c768d868efc04df8e8e71e9d997e4424e45a62f8"
+    },
+    {
+      "path": "tests/MixerAutomationCoreAcceptance.h",
+      "mode": "content",
+      "sha256": "d0be139d8b7c66ef9031f15daa54662a6bee6450a867a34eb334d5c505ea6512"
+    },
+    {
+      "path": "tests/MixerAutomationNativeAcceptance.h",
+      "mode": "content",
+      "sha256": "04a68d932c5cea9da102d11d628b59bc7696813ea3221cdfc79d84453014d48b"
+    },
+    {
+      "path": "tests/MixerAutomationTakeAcceptance.h",
+      "mode": "content",
+      "sha256": "0c68ae3e0f145485a469afa833c284652cbd7d8ffc85994b5e8e14c2df3fdf17"
+    },
+    {
+      "path": "tests/MixerAutomationUiAcceptance.inc",
+      "mode": "exact",
+      "sha256": "577f7b1315f977f4bb2310e5ed8d53bf3b3ec65813cd435977d78735dbc36deb"
+    },
+    {
+      "path": "tests/MixerChainCommandPreparationAcceptance.h",
+      "mode": "content",
+      "sha256": "a2fed0dcd5df7b1114c5c8245d11de4f1ef79a1a2a36844303fccfb621379913"
+    },
+    {
+      "path": "tests/MixerChainControlsAcceptance.h",
+      "mode": "content",
+      "sha256": "7aba2a263dc64c20c2fd3943df2b79e5116845f10728112768790fcc36c04fc8"
+    },
+    {
+      "path": "tests/MixerChainLiveAcceptance.h",
+      "mode": "content",
+      "sha256": "c92fd47fabe472eb5030168c9ce545140157d938870ed60b62b0f96ea412527b"
+    },
+    {
+      "path": "tests/MixerControlsAcceptance.h",
+      "mode": "content",
+      "sha256": "537421bc59fa7eece27c62c2bc410d763dae92335966492031578d69ae7dd9af"
+    },
+    {
+      "path": "tests/MixerDetectorModelAcceptance.h",
+      "mode": "content",
+      "sha256": "252fe5fdab0a900950f865d3f47331313a78bfdc34780df49d84e05ee726bcef"
+    },
+    {
+      "path": "tests/MixerEffectOpeningCapture.h",
+      "mode": "content",
+      "sha256": "c7b53d13641d5cbcb3d070c683914964b938a71898bc46e916bafd6f045758e9"
+    },
+    {
+      "path": "tests/MixerEffectReplacementPreparationAcceptance.h",
+      "mode": "content",
+      "sha256": "34433928e2eade5dfb63731e962496213bdd01db68a190db7d80b85d47414007"
+    },
+    {
+      "path": "tests/MixerEffectSlotsAcceptance.h",
+      "mode": "content",
+      "sha256": "7e6d82fa6c67be7205dfa82ac38cb55fd37f306607a0105b4db03a3acd752d41"
+    },
+    {
+      "path": "tests/MixerEffectSlotsAcceptance.inc",
+      "mode": "exact",
+      "sha256": "51587e26756ec9f1e80440668121546e97291ba7f688b0e1cc3c37ffa667f1fe"
+    },
+    {
+      "path": "tests/MixerInsertLifecycleAcceptance.h",
+      "mode": "content",
+      "sha256": "368d1beb92c6e5c000aad28d3f72d91df40a7b18b91f0bf568c21edaae17f511"
+    },
+    {
+      "path": "tests/MixerInsertOrderAcceptance.h",
+      "mode": "content",
+      "sha256": "7cf25865f91b3639dee5e89059a70cd582896fc0a28e25a80470bba2e7c72682"
+    },
+    {
+      "path": "tests/MixerInsertOrderUiAcceptance.inc",
+      "mode": "exact",
+      "sha256": "a53a36d48cb7ffab2901c3599a217ea7c138c87cd1cd3cf15fd0fd9aaf1f1f52"
+    },
+    {
+      "path": "tests/MixerLatencyFixture.cpp",
+      "mode": "content",
+      "sha256": "70b18d76fd0a5cbaffcac2afa0ff4464b5ba52fdd5bd8162fdc7c47f4dea4e64"
+    },
+    {
+      "path": "tests/MixerMacroConfigurationAcceptance.h",
+      "mode": "content",
+      "sha256": "980b4d63e154fb6dd1eebcc2d4fb31e1581907ea083c07a7c7c88525ed055d92"
+    },
+    {
+      "path": "tests/MixerNativeIdentityAcceptance.h",
+      "mode": "content",
+      "sha256": "bb6847b96e7d22d7c11d9344e4fb1e3d83c80d4e516b66cab65eb14e7f3062be"
+    },
+    {
+      "path": "tests/MixerNativeIdentityExtendedAcceptance.h",
+      "mode": "content",
+      "sha256": "0bffa1d737fc7fb64aa0542e2f97776d169f29a8936c5e007befec3038f3569a"
+    },
+    {
+      "path": "tests/MixerOrganisationAcceptance.h",
+      "mode": "content",
+      "sha256": "ddd9d155eea23ac92c621171959164c1fbf00218725cc0c5077d07bbda513a3a"
+    },
+    {
+      "path": "tests/MixerOrganisationUiAcceptance.inc",
+      "mode": "exact",
+      "sha256": "fc2d8ef951032ba72b5c911aeb1c1adeaa95a9ea8478432b15349699612a8b62"
+    },
+    {
+      "path": "tests/MixerOverloadAcceptance.h",
+      "mode": "content",
+      "sha256": "4c671f823c0ca19200f4ff8aa7f75fed2c30732ed539c9ab0ffc0e3dc108a315"
+    },
+    {
+      "path": "tests/MixerReadabilityAcceptance.h",
+      "mode": "content",
+      "sha256": "7e1179631d42c36a57b5e0e41f4ae999f8b019793dd2d3cee5f587a46f5aeaf9"
+    },
+    {
+      "path": "tests/MixerRiskAcceptance.h",
+      "mode": "content",
+      "sha256": "a557704020e41e8c3916ad33d0b19c5205708ed6b4202513f9c9e460f0eb4e46"
+    },
+    {
+      "path": "tests/MixerRoutingAcceptance.h",
+      "mode": "content",
+      "sha256": "3f39f8f4ffac2a8c661f42e73d4f454dce13006e144f58a57564bd4befbf8f6d"
+    },
+    {
+      "path": "tests/MixerRoutingLiveAcceptance.h",
+      "mode": "content",
+      "sha256": "5712bba034bcb41e9d4263037fe678fcb2d5749e9e61c9e3f0f62cfbf56e77c9"
+    },
+    {
+      "path": "tests/MixerSendModelAcceptance.h",
+      "mode": "content",
+      "sha256": "797d7aa28128d17f5bf82ac3bba5aa659e1c6b3a1cd4b9e9199189535e8bfa7d"
+    },
+    {
+      "path": "tests/MixerSendProductionAcceptance.h",
+      "mode": "content",
+      "sha256": "42f17e5e69c2d1fe12747586c93e5e4c571866ecff086e3ab89408a722fe2a97"
+    },
+    {
+      "path": "tests/MixerSendRuntimeAcceptance.h",
+      "mode": "content",
+      "sha256": "0e58933711c6337c285dd814f6f0104aaa7e6d02cbbf09ecc291878c0421ee1b"
+    },
+    {
+      "path": "tests/MixerStereoAcceptance.h",
+      "mode": "content",
+      "sha256": "22e97e0525315c492dfbf185215927f4cf7a2948504e747f373f852b6da649b4"
+    },
+    {
+      "path": "tests/MixerStereoNativeAcceptance.h",
+      "mode": "content",
+      "sha256": "fedf4b27e4097702b49a1711505571168760948f325cb98dac94373be22cc861"
+    },
+    {
+      "path": "tests/MixerStereoUiAcceptance.inc",
+      "mode": "exact",
+      "sha256": "850e6d1cc6613d16bd862d6afb597e50767131c23d9cc5209476fc464a7b8f4e"
+    },
+    {
+      "path": "tests/MixerTargetChoicesAcceptance.h",
+      "mode": "content",
+      "sha256": "d722fa58da49f37ca4615a24bf360fce9a3996be9a5a9dd833c9b6ca3f0bfdc2"
+    },
+    {
+      "path": "tests/MixerWorkspaceReadabilityAcceptance.h",
+      "mode": "content",
+      "sha256": "c43e3e5f47f23725db9748d8d456c4611b6c4f1d989e8bbe8381bdc59304c18e"
+    },
+    {
+      "path": "tests/PluginHostWetMixAcceptance.h",
+      "mode": "content",
+      "sha256": "3830a80aa31cef1e443ef6fec0c51c2651ed4b2ea7ecff7a2311c1d055648f3a"
+    },
+    {
+      "path": "tests/StoppedEffectChangePlanAcceptance.h",
+      "mode": "content",
+      "sha256": "b1ccdfd8826ee6e2db74ea92cf77084c5a5c03ba242a0cf15bc8e028482275a4"
+    },
+    {
+      "path": "tests/StoppedEffectCommandPreparationAcceptance.h",
+      "mode": "content",
+      "sha256": "3b3f8446454c61258869ead791ee5559d3e624d9f4f5f704a8c0200538d4dd49"
+    },
+    {
+      "path": "tests/StoppedEffectForwardSdkAcceptance.h",
+      "mode": "content",
+      "sha256": "9a11ad6c6da71303848b1fd5051ab546f684ff5fd229c7aa3b320a9a14dff8ac"
+    },
+    {
+      "path": "tests/StoppedEffectInverseSdkAcceptance.h",
+      "mode": "content",
+      "sha256": "0c247b7b3b2297940a2d021f1160b57586a85fb18c5d7065e2ea9ef3f77a641e"
+    },
+    {
+      "path": "tests/StoppedEffectNativeAcceptance.h",
+      "mode": "content",
+      "sha256": "f87d725e3d8a589e0844b24d5e66f69adf699153afc124f18f825df719b28320"
+    },
+    {
+      "path": "tests/StoppedEffectOrdinaryForwardAcceptance.h",
+      "mode": "content",
+      "sha256": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
+    }
+  ],
+  "candidateHashes": [
+    {
+      "path": "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe",
+      "sha256": "fc17a78daa85a9b5ebd9f69d34462222a2d31fddf9d7635cb37d4b79f27b903c"
+    },
+    {
+      "path": "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe",
+      "sha256": "6e02557aad3bf9e805b95167609d75db09d021ad329d91e7830ab6d1bf8fbfda"
+    },
+    {
+      "path": "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe",
+      "sha256": "c5f04134f3398c1c3fff230bdafff63d12a27e48cc386be3a4ea97432a49bb66"
+    }
+  ],
+  "runtimeArtifacts": [
+    {
+      "path": "build/dev/20261018-215530/verification.json",
+      "sha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/dev/20261018-215530/ctest.xml",
+      "sha256": "31cf584850cdb9de01a015bbf97aede8b5edd752e57c2537485ce87c94b020cf",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/mixer-final-native-full-20261018/process.json",
+      "sha256": "463b83406970e3e165e3eb4317e33851230d90ea72fb0ef2991d64fcb7427418",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/windows/mixer-candidate-final-installed-identity-20261018/verification.json",
+      "sha256": "a8fceba5c21f456ae3da4d66c769e317e32165c7c3aef9bc26c192b4d36145c6",
+      "role": "Actual passed current identity-bound evidence; origin scopes retained"
+    },
+    {
+      "path": "build/mixer-catalogue-verifier-overlay-20261018/derived/index.json",
+      "sha256": "77ab66b981743f4a65d78775e0be8bbb1c63cbe59d74a069382c5cb80ba89aec",
+      "role": "Bounded current catalogue-verifier follow-up; compiled source/184 tests unaffected, not rerun"
+    }
+  ],
+  "sourceProvenance": {
+    "sourceRun": "build/dev/20261018-215530/verification.json",
+    "sourceRunSha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a",
+    "baseline": "build/dev/20261018-215530/inputs.json",
+    "baselineSha256": "2994a22095d111f69b937a78ea48025f5601636aed5f2153f0062aa5bba21967",
+    "trackedCoverageInputCount": 151,
+    "componentAttribution": "Passed full-run CTest plus unique component/terminal files within exact CTest start-to-source-receipt mtime window; component itself has no embedded binary hash",
+    "full184PrecededPackageVerifierFollowup": true,
+    "full184RerunAfterPackageVerifierFollowup": false
+  },
+  "limits": [
+    "All pre-existing non-Mixer rows and plugin.audioIo are preserved. inventoryComplete remains false and the full inherited MCP gate remains failing.",
+    "Native editor services are semantically tested through the same UI/MCP service, but the generic explicit-row mapper cannot qualify a tool-only row without canonical commands. No fabricated command or operational gap claim.",
+    "Component menu/control and native DSP tests do not establish comprehensive native OS-input GUI coverage, listening, hardware or arbitrary proprietary plugin-widget control.",
+    "Only listed row-specific cases are qualified; no comprehensive legacy GUI audit, unsupported surround/multi-output or general seamless structural transition claim.",
+    "Coverage inputs and dependencies are tracked text only. Historical ignored receipts and binaries are separate facts, never gitarchive inputs. Candidate hashes require genuine final provenance/rebinding before cleanup."
+  ],
+  "previousEvidence": {
+    "commit": "15f7a9d",
+    "path": "docs/mcp/MIXER_MODULE_EVIDENCE.json",
+    "sha256": "105cfa56e94bf9be4f3fed6834908834974b0336b0e583e7fcb59d69dcd06624",
+    "scope": "Historical prior exact-binary qualification; preserved in Git, not reused for current binary identity"
+  },
+  "scope": "Compiled source/full184 and existing Mixer semantic outcomes remain unchanged. Only an external package catalogue verifier changed; independent current installed branch qualifies that caller correction. Exact stage/final still mandatory; inherited MCP remains incomplete.",
+  "catalogueVerifierFollowup": {
+    "sourceSnapshot": "E:\\Projects\\VibeRa Studio\\build\\dev\\20261018-215530\\inputs.json",
+    "fullReceipt": {
+      "path": "build/dev/20261018-215530/verification.json",
+      "mode": "exact",
+      "sha256": "8b2e4e74af1d2e58beea0525ee94ba6c2a4aa955ac69531e0975a1ddfb97a11a"
+    },
+    "providerIdentity": {
+      "path": "build/windows/mixer-catalogue-observer-qualified-20261018/identity.json",
+      "mode": "exact",
+      "sha256": "292a38b588d9268b96173134327e169d346cc1e40fc380e212b3285e9916b850"
+    },
+    "full184PrecededVerifierDelta": true,
+    "full184RerunAfterVerifierDelta": false,
+    "onlyChangedVerifier": "scripts/verify-catalogue-mcp.py",
+    "unchangedObserverSeconds": 25
+  }
+}

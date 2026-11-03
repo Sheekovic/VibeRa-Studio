@@ -1,0 +1,116 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.h
+@@ -10,6 +10,7 @@
+ 
+ #pragma once
+ #include <cstdint>
++#include <cstddef>
+ #include <limits>
+ #include <memory>
+ 
+@@ -43,9 +44,95 @@
+     int64_t referenceStart = 0, referenceEnd = 0;
+ };
+ 
++// ORIGINAL internal diagnostic only. Caller-owned fixed storage, one callback
++// writer, CONTROL installs/removes/resets/reads ONLY while processing is quiescent.
++// No owning handles/callbacks/strings or per-node clock reads. A null pointer
++// leaves the ordinary path free of additional high-resolution clock calls.
++struct NativePhaseCapture
++{
++    struct Context
++    {
++        int64_t entered = 0, exited = 0;
++        uintptr_t context = 0;
++        uint64_t label = 0;
++        size_t graphBegin = 0, graphEnd = 0;
++        int frames = 0;
++        bool completed = false;
++    };
++    struct Graph
++    {
++        int64_t preparationStart = 0, preparationEnd = 0, processingEnd = 0, mixEnd = 0;
++        int64_t referenceStart = 0, referenceEnd = 0;
++        uintptr_t player = 0;
++        uint64_t label = 0, selectionSerial = 0;
++        size_t contextIndex = 0, nodeCount = 0, configuredThreads = 0;
++        uint32_t frames = 0;
++        bool singleThreaded = false, completed = false;
++    };
++    Context* contexts = nullptr;
++    size_t contextCapacity = 0;
++    Graph* graphs = nullptr;
++    size_t graphCapacity = 0;
++    size_t contextUsed = 0, graphUsed = 0;
++    uint64_t droppedContexts = 0, droppedGraphs = 0, label = 0;
++    size_t activeContext = std::numeric_limits<size_t>::max();
++
++    static void dropped (uint64_t& value) noexcept
++    { if (value != std::numeric_limits<uint64_t>::max()) ++value; }
++    Graph* beginGraph (const void* player, uint64_t serial, juce::Range<int64_t> range,
++                       uint32_t frames, size_t nodes, size_t threads) noexcept
++    {
++        if (!graphs || graphUsed >= graphCapacity) { dropped (droppedGraphs); return nullptr; }
++        auto& record = graphs[graphUsed++];
++        record = {};
++        record.player = reinterpret_cast<uintptr_t> (player);
++        record.label = label; record.contextIndex = activeContext;
++        record.selectionSerial = serial; record.referenceStart = range.getStart();
++        record.referenceEnd = range.getEnd(); record.frames = frames;
++        record.nodeCount = nodes; record.configuredThreads = threads;
++        record.preparationStart = juce::Time::getHighResolutionTicks();
++        return &record;
++    }
++    class ContextScope
++    {
++        NativePhaseCapture* capture = nullptr;
++        Context* record = nullptr;
++        size_t previousContext = std::numeric_limits<size_t>::max();
++    public:
++        ContextScope (NativePhaseCapture* value, const void* owner, int frames) noexcept : capture (value)
++        {
++            if (!capture) return;
++            previousContext = capture->activeContext;
++            if (!capture->contexts || capture->contextUsed >= capture->contextCapacity)
++            {
++                capture->activeContext = std::numeric_limits<size_t>::max();
++                dropped (capture->droppedContexts); return;
++            }
++            capture->activeContext = capture->contextUsed;
++            record = &capture->contexts[capture->contextUsed++];
++            *record = {};
++            record->context = reinterpret_cast<uintptr_t> (owner);
++            record->label = capture->label; record->frames = frames;
++            record->graphBegin = capture->graphUsed;
++            record->entered = juce::Time::getHighResolutionTicks();
++        }
++        ~ContextScope() noexcept
++        {
++            if (record)
++            {
++                record->exited = juce::Time::getHighResolutionTicks();
++                record->graphEnd = capture->graphUsed;
++            }
++            if (capture) capture->activeContext = previousContext;
++        }
++        void completed() noexcept { if (record) record->completed = true; }
++    };
++};
++
+ class LockFreeMultiThreadedNodePlayer
+ {
+ private:
++    NativePhaseCapture* nativePhaseCapture = nullptr;
+     //==============================================================================
+     template<typename Type>
+     class LockFreeFifo
+@@ -274,6 +361,9 @@
+         Calling this will cause a drop in the output stream as the Node is re-prepared.
+     */
+     void prepareToPlay (double sampleRateToUse, int blockSizeToUse);
++
++    // Non-owning diagnostic storage; sole CONTROL owner and quiescent callback.
++    void setNativePhaseCapture (NativePhaseCapture* capture) noexcept { nativePhaseCapture = capture; }
+ 
+     // Internal opt-in, sole CONTROL owner. Never call these APIs in process().
+     // Initial supported scope explicitly excludes pooled allocations: incumbent

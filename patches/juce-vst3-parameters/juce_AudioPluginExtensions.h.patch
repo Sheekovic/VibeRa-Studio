@@ -1,0 +1,26 @@
+--- a/modules/juce_audio_processors_headless/utilities/juce_AudioPluginExtensions.h
++++ b/modules/juce_audio_processors_headless/utilities/juce_AudioPluginExtensions.h
+@@ -86,10 +86,23 @@
+     /** Can be used to retrieve information about a VST3 that is wrapped by an AudioProcessor. */
+     struct VST3Client
+     {
++        // VibeRa local extension, AGPL-3.0-or-later. No external plugin ABI changes.
++        struct ParameterInfo
++        {
++            uint32 id = 0, flags = 0;
++            int32 stepCount = 0, unitId = 0;
++            float defaultValue = 0;
++        };
++        struct ParameterEvent { uint32 id = 0; int sampleOffset = 0; float value = 0; };
++        static constexpr int maximumParameterEvents = 8192;
+         virtual ~VST3Client() = default;
+         virtual Steinberg::Vst::IComponent* getIComponentPtr() const noexcept = 0;
+         virtual MemoryBlock getPreset() const = 0;
+         virtual bool setPreset (const MemoryBlock&) = 0;
++        virtual bool getNativeParameterInfo (uint32, ParameterInfo&) const { return false; }
++        virtual bool getNativeParameterValue (uint32, float&) const { return false; }
++        // DSP thread only: copies validated events into prepared storage for the next processBlock.
++        virtual bool setParameterEventsForNextBlock (Span<const ParameterEvent>, int) { return false; }
+     };
+ 
+     /** Can be used to retrieve information about an AudioUnit that is wrapped by an AudioProcessor. */

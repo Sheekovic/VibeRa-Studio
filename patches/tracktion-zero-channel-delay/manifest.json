@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "dependency": "tracktion_engine",
+  "revision": "4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "sourceDirectory": "tracktion_engine-4536d8a21664fe6ec2aa34b25abc87fa2a0d3b86",
+  "archiveSha256": "77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076",
+  "license": "GPL-3.0-or-later",
+  "productionEnabled": false,
+  "qualification": "Original CONTROL-only exact prepared legacy zero-audio-channel output predicate. No history certificate is minted, no MIDI properties/queues are changed, and unknown populated processors retain refusal. No generic routing or app MIDI ownership qualification.",
+  "sourceProvenance": {
+    "draftFreezeSha256": "2d1c41644400b8261e5ff4e076ce367fd5810fe87b800b9d041239140527268d",
+    "draftPayloadSha256": "e56664e4fb65d9f12d3e1942451cd1f636be9cc8244bef3ae22d33a00e816dd3",
+    "referenceImplementation": "Independent original extension around pinned Tracktion source; upstream license/notices retained"
+  },
+  "appliesAfter": "patches/tracktion-whole-source-exchange/manifest.json",
+  "files": [
+    {
+      "path": "modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h",
+      "patch": "patches/tracktion-zero-channel-delay/tracktion_LatencyNode.h.patch",
+      "originalSha256": "cdf6e031594b50bc73bcfb7808ce70090a0c00ad50887b84094b222a5f1502a8",
+      "patchedSha256": "08377d8b098ccd1cc92024fa08b673bde57c99466f2c8037058606d398b7d849",
+      "patchSha256": "9411a47206663058a2e4da0672d99f61f0a2188f268f8d594972c4058da7d808",
+      "addedLines": 24,
+      "deletedLines": 1,
+      "lineage": [
+        "patches/tracktion-retained-history/manifest.json",
+        "patches/tracktion-retained-midi/manifest.json",
+        "patches/tracktion-consumed-phase/manifest.json",
+        "patches/tracktion-stable-bus-stage/manifest.json",
+        "patches/tracktion-stage-difference/manifest.json",
+        "patches/tracktion-forward-stage-drain/manifest.json",
+        "patches/tracktion-zero-history-creation/manifest.json",
+        "patches/tracktion-inverse-stage-residual/manifest.json",
+        "patches/tracktion-inverse-stage-seal/manifest.json",
+        "patches/tracktion-prepared-audio-zero/manifest.json",
+        "patches/tracktion-whole-source-exchange/manifest.json"
+      ]
+    },
+    {
+      "path": "modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp",
+      "patch": "patches/tracktion-zero-channel-delay/tracktion_EditNodeBuilder.cpp.patch",
+      "originalSha256": "8d484f24de269db24a84c66f1849f31094c90c86bfb287aac0b6811c6061c513",
+      "patchedSha256": "a4123302c6f0e7b8a5626627ccf1c7708cce59bccb13ed52e0446742dc4e1b95",
+      "patchSha256": "89add8e350862e283843f2f3f41110b7eace6ab476d8cdb3643de211483ff600",
+      "addedLines": 7,
+      "deletedLines": 2,
+      "lineage": [
+        "patches/tracktion-sidechain-bus/manifest.json",
+        "patches/tracktion-owned-metering/manifest.json",
+        "patches/tracktion-detached-graph/manifest.json",
+        "patches/tracktion-send-gain-block/manifest.json",
+        "patches/tracktion-native-midi-ingress/manifest.json",
+        "patches/tracktion-plugin-final-output/manifest.json",
+        "patches/tracktion-app-source-port-bridge/manifest.json",
+        "patches/tracktion-prepared-audio-zero/manifest.json",
+        "patches/tracktion-context-memory-policy/manifest.json",
+        "patches/tracktion-empty-arranger-proof/manifest.json",
+        "patches/tracktion-whole-source-exchange/manifest.json"
+      ]
+    }
+  ]
+}

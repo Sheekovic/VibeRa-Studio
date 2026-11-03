@@ -1,0 +1,29 @@
+{
+  "revision": "1d95888bec3ae0a17c0c4af791810d5a63f6bc35",
+  "license": "GPL-2.0-or-later",
+  "path": "src/finer/R3LiveShifter.cpp",
+  "originalSha256": "3e5e1bfc532d50b5f0ca821178d1a1fce66b2c05e0fe5b6e98b0237be2dac45c",
+  "preparedSha256": "62ccf3b89db44f657865201e7a6dccee1aaa797a2654b64f28470af0393c265c",
+  "old": "    int requiredInOutbuf = int(ceil(incount / outRatio));",
+  "new": "    // VibeRa experiment: retain an actual source sample for interpolation across ratio changes.\n    int requiredInOutbuf = int(ceil(incount / outRatio)) + (outRatio > 1.0 ? 1 : 0);",
+  "scope": "Experimental output-source availability. No fabricated output padding; pitch, latency, continuity and bounded processing remain qualification gates. Prepared storage reuse after measured C/aligned allocation failure; device/block sizes unchanged.",
+  "legacyPreparedSha256": [
+    "fb31749d80c614c5934e1840360597909f481c83ef2a141ee88b132858b6d618"
+  ],
+  "legacyEdits": [
+    {
+      "old": "    resamplerParameters.maxBufferSize = m_guideConfiguration.longestFftSize;",
+      "new": "    // VibeRa: prepare the existing maximum resample output request, not just FFT input.\n    resamplerParameters.maxBufferSize = int(m_channelData[0]->resampled.size());"
+    }
+  ],
+  "edits": [
+    {
+      "old": "    int requiredInOutbuf = int(ceil(incount / outRatio));",
+      "new": "    // VibeRa experiment: retain an actual source sample for interpolation across ratio changes.\n    int requiredInOutbuf = int(ceil(incount / outRatio)) + (outRatio > 1.0 ? 1 : 0);"
+    },
+    {
+      "old": "    resamplerParameters.maxBufferSize = m_guideConfiguration.longestFftSize;",
+      "new": "    // VibeRa: prepare the existing maximum resample output request, not just FFT input.\n    resamplerParameters.maxBufferSize = int(m_channelData[0]->resampled.size());"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+--- a/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
++++ b/modules/tracktion_engine/playback/tracktion_EditPlaybackContext.h
+@@ -8,7 +8,7 @@
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
+ 
+-namespace tracktion::inline graph { struct GraphSelection; }
++namespace tracktion::inline graph { struct GraphSelection; struct NativePhaseCapture; }
+ 
+ namespace tracktion::inline engine {
+ 
+@@ -166,6 +166,9 @@
+     // latency cannot be inferred from a current selection snapshot.
+     using GraphSelection = graph::GraphSelection;
+     GraphSelection getGraphSelection() const noexcept;
++    // Diagnostic only, requires allocated context, sole CONTROL owner, callback
++    // quiescent during install/remove. Caller storage outlives all callbacks.
++    bool setNativePhaseCapture (graph::NativePhaseCapture*) noexcept;
+     // False leaves caller's output unchanged; caller must explicitly retain or
+     // refuse work. Never substitute zero for an unavailable/stale receipt.
+     bool tryGetSelectedGraphLatencySamples (int& samples) const noexcept;
+@@ -293,6 +296,7 @@
+ 
+     struct NodePlaybackContext;
+     std::unique_ptr<NodePlaybackContext> nodePlaybackContext;
++    graph::NativePhaseCapture* nativePhaseCapture = nullptr;
+ 
+     juce::WeakReference<EditPlaybackContext> nodeContextToSyncTo;
+     std::atomic<double> audiblePlaybackTime { 0.0 };

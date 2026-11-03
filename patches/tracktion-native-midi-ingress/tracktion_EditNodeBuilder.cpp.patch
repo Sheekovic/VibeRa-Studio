@@ -1,0 +1,48 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_EditNodeBuilder.cpp
+@@ -1526,7 +1526,7 @@
+         if (plugin.getOwnerTrack() != nullptr || plugin.getOwnerClip() != nullptr)
+             maxNumChannels = effectivePluginChannels;
+ 
+-    // If the input has fewer channels than the plugin expects, pre-convert (e.g. mono→stereo)
++    // If the input has fewer channels than the plugin expects, pre-convert (e.g. monoâ†’stereo)
+     // so the plugin receives the right number of channels. This must happen before the
+     // sidechain input is summed in: sidechain wires assume two track channels, and a
+     // conversion applied after the sum would squash the sidechain channels back down
+@@ -1583,7 +1583,7 @@
+     // The input to the instance is referenced by the dry signal path
+     auto* inputNode = node.get();
+ 
+-    // Expand incoming channels to match the Rack's expected input count (e.g. mono→stereo),
++    // Expand incoming channels to match the Rack's expected input count (e.g. monoâ†’stereo),
+     // mirroring the same logic applied to regular plugins in createNodeForPlugin().
+     const int incomingChannels = node->getNodeProperties().numberOfChannels;
+     const int rackInputChannels = rackInstance.getNumInputChannels();
+@@ -1596,7 +1596,7 @@
+                                                                  ChannelMap::conversion (incomingChannels, rackInputChannels));
+     }
+ 
+-    // Send — use numInputChannels
++    // Send â€” use numInputChannels
+     // N.B. the channel indices from the RackInstance start at 1 so we need to subtract this to get a 0-indexed channel
+     RackInstanceNode::ChannelMap sendChannelMap;
+     const int numSendChannels = rackInstance.getNumInputChannels();
+@@ -1612,7 +1612,7 @@
+     node = makeNode<SendNode> (std::move (node), rackInputID);
+     node = makeNode<ReturnNode> (makeNode<SinkNode> (std::move (node)), rackOutputID);
+ 
+-    // Return — use numOutputChannels
++    // Return â€” use numOutputChannels
+     RackInstanceNode::ChannelMap returnChannelMap;
+     const int numReturnChannels = rackInstance.getNumOutputChannels();
+ 
+@@ -1851,7 +1851,8 @@
+         node = makeNode<LiveMidiOutputNode> (at, std::move (node));
+ 
+     if (node)
+-        node = makeNode<LiveMidiInjectingNode> (at, std::move (node));
++        node = makeNode<LiveMidiInjectingNode> (at, std::move (node),
++                                                  params.boundedNativeMidiIngress ? &params.processState : nullptr);
+ 
+     if (node == nullptr && inputTracks.isEmpty() && liveInputNode == nullptr)
+     {

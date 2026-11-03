@@ -1,0 +1,138 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
+@@ -158,26 +158,53 @@
+     return BoundedIngressRuntimeView(bounded); // CONTROL shared ownership only.
+ }
+ 
++// ORIGINAL ordinary-policy owner. Payload semantics and inherited generic
++// lock/allocation behaviour remain unchanged. Only ownership moves from graph
++// shell to exact Track/context Runtime; no queue transfer during preparation.
++struct LiveMidiInjectingNode::LegacyRuntime final : AudioTrack::Listener
++{
++    const AudioTrack::Ptr track;
++    const ProcessState* const scope;
++    juce::CriticalSection lock;
++    MidiMessageArray messages;
++    const MPESourceID source = createUniqueMPESourceID();
++    LegacyRuntime (AudioTrack& owner, const ProcessState* context) : track (&owner), scope (context)
++    { track->addListener (this); }
++    ~LegacyRuntime() override { track->removeListener (this); } // Excluded CONTROL retirement only.
++    void injectLiveMidiMessage (AudioTrack& owner, const MidiMessageWithSource& input, bool& used) override
++    {
++        if (&owner != track.get()) return;
++        auto value = input;
++        value.setTimeStamp (0.0);
++        const juce::ScopedLock hold (lock);
++        messages.add (std::move (value));
++        used = true; // Broadcast remains legitimate for independent contexts.
++    }
++    void recordedMidiMessageSentToPlugins (AudioTrack&, const juce::MidiMessage&) override {}
++};
++
+ //==============================================================================
+ //==============================================================================
+ LiveMidiInjectingNode::LiveMidiInjectingNode (AudioTrack& at, std::unique_ptr<tracktion::graph::Node> inputNode,
+-                                               const ProcessState* boundedScope)
+-    : track (at), input (std::move (inputNode)), ingressScope (boundedScope)
++                                               const ProcessState* boundedScope, const ProcessState* ordinaryScope)
++    : track (at), input (std::move (inputNode)), ingressScope (boundedScope), legacyScope (ordinaryScope)
+ {
+     setOptimisations ({ tracktion::graph::ClearBuffers::no,
+                         tracktion::graph::AllocateAudioBuffer::no });
+ 
++    if (ingressScope && legacyScope)
++        throw std::invalid_argument ("nativeMidi.policy: Exactly one ingress policy/context required");
+     if (ingressScope)
+     {
+         if (!track->edit.closedNativeIO || !track->edit.initialSourceGeneration)
+             throw std::invalid_argument ("nativeMidi.closedScope: Explicit closed/local Edit required");
+     }
+-    else track->addListener (this); // Default native behavior unchanged.
++    else if (!legacyScope) track->addListener (this); // Direct null/null compatibility only.
+ }
+ 
+ LiveMidiInjectingNode::~LiveMidiInjectingNode()
+ {
+-    if (!ingressScope) track->removeListener (this);
++    if (!ingressScope && !legacyScope) track->removeListener (this);
+     // Native graph retirement/destruction must remain CONTROL-owned. No DSP
+     // callback copies/releases this owner, and cancellation never drains it.
+ }
+@@ -240,11 +267,60 @@
+             bounded = std::make_shared<BoundedRuntime> (*track, ingressScope, preparedRate, preparedBlock);
+         return;
+     }
++    if (legacyScope)
++    {
++        const auto* messages = juce::MessageManager::getInstanceWithoutCreating();
++        if (!messages || !messages->isThisTheMessageThread())
++            throw std::invalid_argument ("nativeMidi.legacyControl: Actual CONTROL preparation required");
++        size_t readers = 0;
++        for (auto* node : info.nodeGraph.orderedNodes)
++            if (auto* other = dynamic_cast<LiveMidiInjectingNode*> (node); other && other->track == track)
++            {
++                if (other->ingressScope || other->legacyScope != legacyScope || ++readers != 1)
++                    throw std::invalid_argument ("nativeMidi.legacyFanout: One exact Track/context reader required");
++            }
++        if (readers != 1)
++            throw std::invalid_argument ("nativeMidi.legacyFanout: Actual candidate reader missing");
++        LiveMidiInjectingNode* predecessor = nullptr;
++        if (info.nodeGraphToReplace)
++            for (auto* node : info.nodeGraphToReplace->orderedNodes)
++                if (auto* old = dynamic_cast<LiveMidiInjectingNode*> (node); old && old->track == track)
++                {
++                    if (predecessor || old->ingressScope || old->legacyScope != legacyScope || !old->legacy)
++                        throw std::invalid_argument ("nativeMidi.legacyPredecessor: Exact unique prepared Track/context required");
++                    predecessor = old;
++                }
++        if (legacy)
++        {
++            // Same-shell native rate/block reprepare can have no predecessor.
++            // It must retain this already-owned generic queue, not reset it.
++            if (legacy->track != track || legacy->scope != legacyScope ||
++                (predecessor && predecessor->legacy != legacy))
++                throw std::invalid_argument ("nativeMidi.legacyReprepare: Original owner changed");
++            return;
++        }
++        if (predecessor)
++        {
++            legacy = predecessor->legacy; // CONTROL owner only. NEVER peek/swap/copy/reset payload.
++            return;
++        }
++        // lastGraphPosted may be a gap which DSP has not adopted. A surviving
++        // Runtime is refusal evidence ONLY, never an alternate owner lookup.
++        for (auto* listener : track->getListeners().getListeners())
++        {
++            if (auto* old = dynamic_cast<BoundedRuntime*> (listener); old && old->track == track && old->scope == legacyScope)
++                throw std::invalid_argument ("nativeMidi.policy: Surviving bounded context requires explicit disposal before ordinary rebuild");
++            if (auto* old = dynamic_cast<LegacyRuntime*> (listener); old && old->track == track && old->scope == legacyScope)
++                throw std::invalid_argument ("nativeMidi.legacyPendingGap: Retire exact context owner before fresh reintroduction");
++        }
++        legacy = std::make_shared<LegacyRuntime> (*track, legacyScope);
++        return;
++    }
+     // Never silently migrate a bounded live queue into an ordinary legacy shell.
+     if (info.nodeGraphToReplace)
+         for (auto* node : info.nodeGraphToReplace->orderedNodes)
+-            if (auto* old = dynamic_cast<LiveMidiInjectingNode*> (node); old && old->track == track && old->ingressScope)
+-                throw std::invalid_argument ("nativeMidi.policy: Bounded ingress requires explicit disposal before legacy rebuild");
++            if (auto* old = dynamic_cast<LiveMidiInjectingNode*> (node); old && old->track == track && (old->ingressScope || old->legacyScope))
++                throw std::invalid_argument ("nativeMidi.policy: Scoped ingress requires explicit disposal before null compatibility rebuild");
+     if (auto oldNode = findNodeWithIDIfNonZero<LiveMidiInjectingNode> (info.nodeGraphToReplace, getNodeProperties().nodeID))
+     {
+         if (oldNode->track == track)
+@@ -277,6 +353,14 @@
+     destMidiBlock.copyFrom (sourceBuffers.midi);
+     setAudioOutput (input.get(), sourceBuffers.audio);
+ 
++    if (legacyScope)
++    {
++        jassert (legacy);
++        if (!legacy) return;
++        const juce::ScopedLock hold (legacy->lock);
++        if (!legacy->messages.isEmpty()) destMidiBlock.mergeFromAndClear (legacy->messages);
++        return;
++    }
+     const juce::ScopedLock sl (liveMidiLock);
+ 
+     if (liveMidiMessages.isEmpty())

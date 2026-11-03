@@ -1,0 +1,408 @@
+{
+  "format": 1,
+  "id": "rack-pattern-sampler",
+  "name": "Channel Rack / Pattern / sampler - compose and recall instrument variations",
+  "state": "in_progress",
+  "checklist": "docs/modules/RACK-PATTERN-SAMPLER.md",
+  "nextAction": "Integrate narrow new-note-mode MCP coverage evidence, run full223 source regression on stable inputs and fix actual regressions; checkpoint then continue the complete RPS checklist. Global5 voice controls and per-note Slide/Porta/color/Properties have scoped source/MCP/component/real Analog proof, not whole-module/package qualification. Preserve all14 rows and sole qualified0.0.65.",
+  "requirements": [
+    {
+      "id": "RPS-A",
+      "name": "Multi-instrument Pattern and Rack fundamentals",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Retain multi-Channel scores, linked/unique sources, stable IDs, filtered gestures/drops, independent bulk selection and active MIDI target, name-button instrument opening, separate Piano Roll and missing/empty recovery.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-B",
+      "name": "Channel metadata, groups and advanced management/solo",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Names/colours/icons/sorting/order; groups/filtering/bulk actions/advanced menus; explicit clone score/settings/link and delete-reference policy; group/locked solo and Alt precedence with exact mute restoration.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-C",
+      "name": "Complete step composition and graph editing",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Retain strokes/full extent/basic fills/melodic conversion/velocity/swing; Advanced Fill, nonvelocity graph properties and removed-step semantics with precise gestures/history/cancel.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ],
+      "priorEvidence": [
+        {
+          "scope": "Partial RPS-C/H/L/M: actual manual+per-note sampler Mod X/Y, all nine Graph properties, scoped27 composite source checks, MCP90, real Analog and inspected captures; not complete module/full213/package/native OS/listening/hardware qualification.",
+          "path": "build/sampler-modulation-20261021/verification.json",
+          "sha256": "ec3cfdb1a7a92a5cdb390b975cce29afd18ab1f35741d31b769c37b1095f896c"
+        }
+      ]
+    },
+    {
+      "id": "RPS-D",
+      "name": "Automatic/manual Pattern extent and per-Pattern meter",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Auto/manual/shrink/growth and musical units, Pattern/document meter interaction, dormant notes, linked placement windows and playback/export/recording boundaries.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-E",
+      "name": "Independent Channel loops and Burn-to-Pattern",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Per-Channel loop lengths and Bar/Beat/Step modes, non-destructive repetition and explicit editable Burn destination/properties/identity/history; whole-range transport Loop is separate.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-F",
+      "name": "Pattern management, variations and rendering",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Retain single-Pattern actions, Split/Transpose and Picker; complete bulk/advanced groups/unused-slot and render variants with linked-versus-independent and asynchronous media/native-state semantics.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-G",
+      "name": "Sampler source shaping and audition",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Retain waveform/root/keyboard/pitch/range/reverse/normalize/ADSR and immutable source reuse; source processing/editing, quality and preview-versus-processed audition with safe file ownership.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-H",
+      "name": "Sampler filters, envelopes and modulation",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Functional filter/modulation envelopes/LFO, delay/hold/tension/amount/tempo synchronization and explicit targets/depth with live/manual/automation musical behavior.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ],
+      "priorEvidence": [
+        {
+          "scope": "Partial RPS-C/H/L/M: actual manual+per-note sampler Mod X/Y, all nine Graph properties, scoped27 composite source checks, MCP90, real Analog and inspected captures; not complete module/full213/package/native OS/listening/hardware qualification.",
+          "path": "build/sampler-modulation-20261021/verification.json",
+          "sha256": "ec3cfdb1a7a92a5cdb390b975cce29afd18ab1f35741d31b769c37b1095f896c"
+        },
+        {
+          "scope": "Earlier envelope/LFO/one-shot checkpoint7af89af full215 passed; historical failures retained. This receipt does not qualify subsequent Automation Clip changes.",
+          "path": "build/sampler-envelope-20261021/verification.json",
+          "sha256": "15fb476730dfdb52c521c0058b886240129fcd42b69ff28c677ae8b6547ff1e7"
+        },
+        {
+          "scope": "Scoped RPS-H Automation Clip workflow passed; full216 attempt214passed/2failed, module/package/human qualification open",
+          "path": "build/sampler-envelope-20261021/automation-verification.json",
+          "sha256": "d52897dd8e32956bc2b4e678a8802b946dee70358b5ff394428f0b3606f77e0f"
+        },
+        {
+          "scope": "Scoped fixed project sampler absolute CC links/Learn:7/7 affected plus final3/3,106 real stdio checks; actual popup/Settings/selectors/invalid UI and exact-head held-playback component evidence, six inspected images. New4 explicit controls/one callback bound to proof. Full source/module/package and human qualification open.",
+          "path": "build/sampler-envelope-20261021/midi-controller-verification.json",
+          "sha256": "5ed6bbaa6bbc1b002350ae9f5ef3d5b91d49b1ea8431637b0261c3a05ec45a4c"
+        }
+      ]
+    },
+    {
+      "id": "RPS-I",
+      "name": "Sampler voice/choke/Mono/portamento behavior",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Retain shared bounded polyphony, Cut/Cut-by/step self-cut; complete Mono/portamento/retrigger/release/ownership policies without claiming control over arbitrary native internals.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ],
+      "priorEvidence": [
+        {
+          "scope": "Partial RPS-I/L/M five original voice controls: scoped4/4,97 actual musical MCP,57 mapping checks, real Analog held Pattern/Song84 callbacks each, inspected component UI. Full source/dev15s gate/module/package/human remain open.",
+          "path": "build/sampler-voice-modes-20261021/verification.json",
+          "sha256": "ace960a3c19356e3540a28871e49a972e11edda79be6cc8284375c864e2abb7e"
+        },
+        {
+          "scope": "Scoped per-note Slide/Porta/color/Properties runtime plus actual installed Analog sibling Pattern/Song: current638-assertion provider branch,171 measured256/48k callbacks each, zerooverrun/probedheap/destruction/unaffectedPCMerror. No whole-module/package/nativeOS/listening/hardware/FL curve qualification.",
+          "path": "build/windows/sampler-note-provider-20261021-1104/verification.json",
+          "sha256": "322b759a1e884582635e1fcd37b3e181c025711c9a5d11ebb96296338406a665"
+        }
+      ]
+    },
+    {
+      "id": "RPS-J",
+      "name": "Tempo analysis, musical fitting, sample loops and stretching",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Owned cancellable source/settings-bound analysis/confirmation; trimmed-range quarter-beat/bar Resample fit; loop metadata/crossfades/boundary quality; separately qualified pitch-preserving stretching/quality and honest limits.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-K",
+      "name": "Reusable sampler/Channel/instrument presets",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Explicit score/link/media/native-state policy, portable supported presets, missing recovery, exact async save/load/cancel/overwrite and compatibility errors.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ]
+    },
+    {
+      "id": "RPS-L",
+      "name": "Application interaction, musical safety and persistence",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Usable native geometry/context/keyboard/gestures, one history/exact cancel/errors, playback/held takes/clocks/resources, safe bounded structural recovery, migration/save/reopen/export and failure safety.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ],
+      "priorEvidence": [
+        {
+          "scope": "Partial RPS-C/H/L/M: actual manual+per-note sampler Mod X/Y, all nine Graph properties, scoped27 composite source checks, MCP90, real Analog and inspected captures; not complete module/full213/package/native OS/listening/hardware qualification.",
+          "path": "build/sampler-modulation-20261021/verification.json",
+          "sha256": "ec3cfdb1a7a92a5cdb390b975cce29afd18ab1f35741d31b769c37b1095f896c"
+        },
+        {
+          "scope": "Earlier envelope/LFO/one-shot checkpoint7af89af full215 passed; historical failures retained. This receipt does not qualify subsequent Automation Clip changes.",
+          "path": "build/sampler-envelope-20261021/verification.json",
+          "sha256": "15fb476730dfdb52c521c0058b886240129fcd42b69ff28c677ae8b6547ff1e7"
+        },
+        {
+          "scope": "Scoped RPS-H Automation Clip workflow passed; full216 attempt214passed/2failed, module/package/human qualification open",
+          "path": "build/sampler-envelope-20261021/automation-verification.json",
+          "sha256": "d52897dd8e32956bc2b4e678a8802b946dee70358b5ff394428f0b3606f77e0f"
+        },
+        {
+          "scope": "Scoped fixed project sampler absolute CC links/Learn:7/7 affected plus final3/3,106 real stdio checks; actual popup/Settings/selectors/invalid UI and exact-head held-playback component evidence, six inspected images. New4 explicit controls/one callback bound to proof. Full source/module/package and human qualification open.",
+          "path": "build/sampler-envelope-20261021/midi-controller-verification.json",
+          "sha256": "5ed6bbaa6bbc1b002350ae9f5ef3d5b91d49b1ea8431637b0261c3a05ec45a4c"
+        },
+        {
+          "scope": "Partial RPS-I/L/M five original voice controls: scoped4/4,97 actual musical MCP,57 mapping checks, real Analog held Pattern/Song84 callbacks each, inspected component UI. Full source/dev15s gate/module/package/human remain open.",
+          "path": "build/sampler-voice-modes-20261021/verification.json",
+          "sha256": "ace960a3c19356e3540a28871e49a972e11edda79be6cc8284375c864e2abb7e"
+        }
+      ]
+    },
+    {
+      "id": "RPS-M",
+      "name": "Canonical semantic workflows and provider-neutral guidance",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Typed discoverable shared UI/MCP behavior/readback/units/prerequisites, truthful jobs, relevant macros/controllers and skill/evidence; inherited unrelated full-MCP consolidation stays explicitly deferred.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/rps-current/verification.json",
+          "sha256": "9560ac32803d77cf10632f88029a427e4a2d467da74d287475a20073178c1873"
+        }
+      ],
+      "priorEvidence": [
+        {
+          "scope": "Partial RPS-C/H/L/M: actual manual+per-note sampler Mod X/Y, all nine Graph properties, scoped27 composite source checks, MCP90, real Analog and inspected captures; not complete module/full213/package/native OS/listening/hardware qualification.",
+          "path": "build/sampler-modulation-20261021/verification.json",
+          "sha256": "ec3cfdb1a7a92a5cdb390b975cce29afd18ab1f35741d31b769c37b1095f896c"
+        },
+        {
+          "scope": "Earlier envelope/LFO/one-shot checkpoint7af89af full215 passed; historical failures retained. This receipt does not qualify subsequent Automation Clip changes.",
+          "path": "build/sampler-envelope-20261021/verification.json",
+          "sha256": "15fb476730dfdb52c521c0058b886240129fcd42b69ff28c677ae8b6547ff1e7"
+        },
+        {
+          "scope": "Scoped RPS-H Automation Clip workflow passed; full216 attempt214passed/2failed, module/package/human qualification open",
+          "path": "build/sampler-envelope-20261021/automation-verification.json",
+          "sha256": "d52897dd8e32956bc2b4e678a8802b946dee70358b5ff394428f0b3606f77e0f"
+        },
+        {
+          "scope": "Scoped fixed project sampler absolute CC links/Learn:7/7 affected plus final3/3,106 real stdio checks; actual popup/Settings/selectors/invalid UI and exact-head held-playback component evidence, six inspected images. New4 explicit controls/one callback bound to proof. Full source/module/package and human qualification open.",
+          "path": "build/sampler-envelope-20261021/midi-controller-verification.json",
+          "sha256": "5ed6bbaa6bbc1b002350ae9f5ef3d5b91d49b1ea8431637b0261c3a05ec45a4c"
+        },
+        {
+          "scope": "Partial RPS-I/L/M five original voice controls: scoped4/4,97 actual musical MCP,57 mapping checks, real Analog held Pattern/Song84 callbacks each, inspected component UI. Full source/dev15s gate/module/package/human remain open.",
+          "path": "build/sampler-voice-modes-20261021/verification.json",
+          "sha256": "ace960a3c19356e3540a28871e49a972e11edda79be6cc8284375c864e2abb7e"
+        }
+      ]
+    },
+    {
+      "id": "RPS-N",
+      "name": "Exact complete module source and packaged candidate",
+      "status": "open",
+      "releaseRequired": true,
+      "phase": "release",
+      "scope": "Full required current source/regression/installed-provider/module/staged/final gates, exact input/binary identities and audit before sole-distribution replacement; no subset release qualification.",
+      "evidence": []
+    }
+  ],
+  "externalAcceptance": [
+    {
+      "name": "Listening: sample/envelope/loop/stretch quality and transitions",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "name": "Physical MIDI/audio hardware and latency",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "name": "Native mixed-monitor/DPI and no-tutorial workflow familiarity",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "baselineContext": [
+    {
+      "path": "docs/ROADMAP.md",
+      "scope": "CR-01/CR-02/PT-01/SA-01 whole-workflow obligations; historical subset rows are not module qualification."
+    },
+    {
+      "path": "docs/FEATURE_PARITY.md",
+      "scope": "Full feature-family obligation, with later implementation/receipts resolving stale pending lists."
+    },
+    {
+      "path": "build/module-qualification/mixer-ipc19-release/verification.json",
+      "scope": "Released Mixer and retained Rack/Pattern/sampler regression baseline only; not evidence checking any RPS row."
+    }
+  ],
+  "evidencePolicy": "Only verified rows with passed structured receipts binding actual dependencies and exact candidate binaries satisfy module-gate. Source presence, historical subset results, synthetic/component/OS-input checks and human listening/hardware are distinct. All software rows remain unqualified here.",
+  "updated": "2026-10-21",
+  "progressEvidence": [
+    {
+      "scope": "Source-bound tempo/resample increment only; RPS-J remains incomplete. Composite192 source case evidence, no fresh full-green invocation/release/human proof.",
+      "path": "build/sampler-tempo-semantic-20261019/verification.json",
+      "sha256": "132743f11348492ca86824b44f59919ce71c4b7c1f47f889a32f06600a9c9b20"
+    },
+    {
+      "scope": "Channel appearance/selected-slot sorting only; RPS-B incomplete. Full193 run192PASS/old F2 pinFAIL retained; affected current Browser/musical/callback pass; no fresh full-green/release/human qualification.",
+      "path": "build/channel-appearance-mcp-20261020/verification.json",
+      "sha256": "3b071413a2f8e9f768cf6b64b3ee4c5b056e5e47785894072f4197daaa64b202"
+    },
+    {
+      "scope": "Partial RPS-B scoped solo/mute locks, exact history/persistence/macros/live/offline;194 composite regression, no fresh full invocation/module release/human proof.",
+      "path": "build/channel-scoped-solo-mcp-20261020/verification.json",
+      "sha256": "f295370e97bde4e7be4ad27a82fe3a8d5ed9231304fbab11476d6380a1ff697a"
+    },
+    {
+      "scope": "Visual colour chooser:9 affected current tests, actual native held-input retry, inspected PNGs; retained startup failure, full module/source/package/human gates open.",
+      "path": "build/channel-colour-picker-20261020/verification.json",
+      "sha256": "263ca1b6088f0fd5cb56df7d911f1dbcc649db9960a1917c5350bfe13c7f5e8c"
+    },
+    {
+      "scope": "Partial RPS-B/L/M Automation source clear/preserve clone: fresh full196 source tests, actual MCP/persistence/PCM, Picker and installed held-input checks; no module/package/human qualification.",
+      "path": "build/automation-source-clone-20261020/verification.json",
+      "sha256": "fbae901b071b2a3af936b6fbbe8364cd78e4a7cf686cd5828ea008284bb56b99"
+    },
+    {
+      "scope": "Partial RPS-E/L/M independent Channel loops/stopped Burn:198 composite161fresh/37unchanged-app source cases, actual native held capture, independent PCM and UI/MCP; complete module/human gates open.",
+      "path": "build/channel-loops-20261020/verification.json",
+      "sha256": "fc92c68c3b2c4e29a38f2a625a8fc50ed3b97eb205413df648e8175f170c5bdc"
+    },
+    {
+      "scope": "Partial RPS-D/L/M Auto/manual extent and Pattern meter: current3 model/musical and4 application/MCP/GUI cases, installed Pattern/Song and Piano; full190/200 failure and startup/timing failures retained, no complete source/module/package/human qualification.",
+      "path": "build/pattern-extent-20261020/verification.json",
+      "sha256": "b1d9e8551cca58c64d8455a55a4bb5c3f9d51db3cfded22837b4216db73e4e4d"
+    },
+    {
+      "scope": "Retained-step source/raw addressing/profile10/scoped UI-MCP with focused real Analog evidence; first full203PASS/5FAIL retained, all five branches repaired and broader12PASS. Content restoration is a build fix; no fresh full208-green/module/package/human qualification.",
+      "path": "build/windows/step-memory-integration/verification.json",
+      "sha256": "49aecb5f851a9525a223cc52538550a30236aa827c1ad66f301c335976eaa70c"
+    },
+    {
+      "scope": "Narrow missing-content CMake and macro-ceiling fixture repairs; actual current-stamp restoration/unchanged binaries, four Synth branches, profile/build guards and broader12. Not a fresh full suite or module release.",
+      "path": "build/windows/step-memory-integration/post-regression-repairs.json",
+      "sha256": "b318da6724011e7abd6c095d57111c19136011c78d4844e15c9d56fd4549fac6"
+    },
+    {
+      "scope": "Partial RPS-E/L/M source-bound Piano appearances/editing/Slice/profile11: current18 broader passes, GUI,460 MCP checks and actual Analog virtual Pattern/Song; retained fixture/environment failures. No complete module/source/package or native OS/listening/hardware qualification.",
+      "path": "build/piano-loop-preview-20261020/verification.json",
+      "sha256": "17d2fb8534b6f17df2d115dae794c50492ca71e64bbf9a8d3c703d988ea9edba"
+    },
+    {
+      "scope": "Partial RPS-C/L/M sampler Pan/Fine Graph, prepared voice PCM and truthful MIDI omission, plus inherited imported-score macro payload repair/profile12.28 affected passes (composite origin retained), actual Analog warm callbacks and inspected component captures; no full source/module/package/native OS/listening/hardware qualification.",
+      "path": "build/step-graph-property-research-20261020/integrated-verification.json",
+      "sha256": "541db73c08c5d9ed622b14f722c6154ce058efa936d735a6a99d304b670199db"
+    },
+    {
+      "scope": "Partial RPS-C/L/M Shift timing;28 current affected passes, actual Analog/builtin352 warm callbacks,54 Shift-specific MCP checks, exact PCM/MIDI/file/macro/history and inspected captures. Original boundary policies; no full module/source/package/native OS/listening/hardware qualification.",
+      "path": "build/step-shift-20261020/verification.json",
+      "sha256": "c7d4c76cab87f705cafc29b49bc9ed8c71565dbda58da4e7bbee692d33ab5930"
+    },
+    {
+      "scope": "Partial RPS-C/L/M Repeat:28 current affected passes,68 Repeat-specific MCP checks, literal PCM/MIDI, actual Analog/builtin544 warm callbacks and inspected musical-rate readout. Retained admission/compile failures repaired; no full source/module/package/human qualification.",
+      "path": "build/step-repeat-20261020/verification.json",
+      "sha256": "87e23929dbc878eaedbb2976f0a514ca0f8e39b575fc5d0e2509b21f9ae32f98"
+    },
+    {
+      "scope": "Partial RPS-C/L/M Release:42 affected source cases,452 actual MCP/76 Release checks, actual Analog held Pattern/Song, original VST3 release-byte PCM and inspected UI. Confirmed off7096 repaired; all module/human/full release gates open.",
+      "path": "build/step-release-20261020/verification.json",
+      "sha256": "a9a0406b8932170f23a9b635c99adde78ea3e7270cfae35a478e140f68fdbeaa"
+    },
+    {
+      "scope": "Partial RPS-H/L/M manual sampler filter implementation:64 actual MCP checks, model/PCM/GUI and installed Analog held Pattern/Song pass; full211 original208PASS/3FAIL, verifier-only repairs yield210/211 composite. Inverse SDK30s timeout remains unresolved; no module/source/package/native OS/listening/hardware qualification.",
+      "path": "build/sampler-filter-20261021/verification.json",
+      "sha256": "459f10aa724855eee4ed90bb130caf54a06afd45aa0a46a3e2098c6ff791bc2d"
+    },
+    {
+      "scope": "Partial RPS-C/H/L/M: actual manual+per-note sampler Mod X/Y, all nine Graph properties, scoped27 composite source checks, MCP90, real Analog and inspected captures; not complete module/full213/package/native OS/listening/hardware qualification.",
+      "path": "build/sampler-modulation-20261021/verification.json",
+      "sha256": "ec3cfdb1a7a92a5cdb390b975cce29afd18ab1f35741d31b769c37b1095f896c"
+    },
+    {
+      "scope": "Partial RPS-H/L/M envelopes/LFO:14 focused passes,100 actual MCP checks, real Analog held Pattern/Song, exact one-shot repair PCM and inspected components. Firstfull210/215 and cancelled122-pass run retained; fresh full215/module/package/human qualification pending.",
+      "path": "build/sampler-envelope-20261021/verification.json",
+      "sha256": "15fb476730dfdb52c521c0058b886240129fcd42b69ff28c677ae8b6547ff1e7"
+    },
+    {
+      "scope": "Partial RPS-I/L/M five original voice controls: scoped4/4,97 actual musical MCP,57 mapping checks, real Analog held Pattern/Song84 callbacks each, inspected component UI. Full source/dev15s gate/module/package/human remain open.",
+      "path": "build/sampler-voice-modes-20261021/verification.json",
+      "sha256": "ace960a3c19356e3540a28871e49a972e11edda79be6cc8284375c864e2abb7e"
+    }
+  ]
+}

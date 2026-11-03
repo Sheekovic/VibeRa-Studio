@@ -1,0 +1,210 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.cpp
+@@ -10,20 +10,135 @@
+ 
+ namespace tracktion::inline engine {
+ 
+-//==============================================================================
+-//==============================================================================
+-LiveMidiInjectingNode::LiveMidiInjectingNode (AudioTrack& at, std::unique_ptr<tracktion::graph::Node> inputNode)
+-    : track (at), input (std::move (inputNode))
++// ORIGINAL explicit fixed-context, short-message ingress. One listener and
++// queue per retained Runtime, not per graph shell. Registered/reclaimed CONTROL.
++struct LiveMidiInjectingNode::BoundedRuntime final : AudioTrack::Listener
++{
++    static constexpr uint64_t capacity = 512;
++    struct Event { std::array<uint8_t, 3> bytes{}; uint8_t size = 0; MPESourceID source = {}; };
++    AudioTrack::Ptr track;
++    const ProcessState* const scope;
++    const juce::Thread::ThreadID producerThread;
++    const double rate;
++    const int block;
++    std::array<Event, capacity> queue{};
++    std::atomic<uint64_t> written{0}, read{0};
++    std::atomic<IngressFault> fault{IngressFault::none};
++    bool registered = false; // CONTROL, immutable while any graph processes.
++    static_assert (std::atomic<uint64_t>::is_always_lock_free);
++    static_assert (std::atomic<IngressFault>::is_always_lock_free);
++    BoundedRuntime (AudioTrack& owner, const ProcessState* sourceScope, double sampleRate, int maximumBlock)
++        : track (&owner), scope (sourceScope), producerThread (juce::Thread::getCurrentThreadId()),
++          rate (sampleRate), block (maximumBlock)
++    {
++        track->addListener (this);
++        registered = true;
++    }
++    ~BoundedRuntime() override
++    {
++        if (registered) track->removeListener (this);
++    }
++    void fail (IngressFault reason) noexcept
++    {
++        auto expected = IngressFault::none;
++        fault.compare_exchange_strong (expected, reason, std::memory_order_release, std::memory_order_relaxed);
++    }
++    void injectLiveMidiMessage (AudioTrack& owner, const MidiMessageWithSource& message, bool& wasUsed) override
++    {
++        if (&owner != track.get()) return;
++        // Do not use global wasUsed suppression: another legitimate context
++        // has its own queue/listener and must receive its own single delivery.
++        wasUsed = true; // Handled outcome; explicit fault below is NOT acceptance.
++        // Scalar OS thread identity only: MessageManager's query takes a mutex.
++        if (juce::Thread::getCurrentThreadId() != producerThread)
++        { fail (IngressFault::wrongProducer); return; }
++        if (fault.load (std::memory_order_acquire) != IngressFault::none) return;
++        const int size = message.getRawDataSize();
++        const auto* bytes = message.getRawData();
++        if (size < 1 || size > 3 || bytes[0] < 0x80 || bytes[0] == 0xf0 || bytes[0] == 0xf7 ||
++            juce::MidiMessage::getMessageLengthFromFirstByte (bytes[0]) != size)
++        { fail (IngressFault::unsupportedMessage); return; }
++        const auto head = written.load (std::memory_order_relaxed);
++        const auto tail = read.load (std::memory_order_acquire);
++        if (head == std::numeric_limits<uint64_t>::max())
++        { fail (IngressFault::counterExhausted); return; }
++        if (head < tail || head - tail >= capacity)
++        { fail (IngressFault::queueFull); return; }
++        auto& slot = queue[size_t (head % capacity)];
++        slot.size = uint8_t (size); slot.source = message.mpeSourceID;
++        for (int i = 0; i < size; ++i) slot.bytes[size_t (i)] = bytes[i];
++        written.store (head + 1, std::memory_order_release);
++    }
++    void recordedMidiMessageSentToPlugins (AudioTrack&, const juce::MidiMessage&) override {}
++    bool emit (const MidiMessageArray& source, MidiMessageArray& destination, uint32_t preparedCapacity) noexcept
++    {
++        if (fault.load (std::memory_order_acquire) != IngressFault::none) return false;
++        const auto tail = read.load (std::memory_order_relaxed);
++        const auto head = written.load (std::memory_order_acquire);
++        const auto available = head >= tail ? head - tail : capacity + 1;
++        if (available > capacity || source.size() < 0 || uint64_t (source.size()) + available > preparedCapacity)
++        { fail (IngressFault::sourceQuota); return false; }
++        // Unknown large upstream data must not allocate during copying. The
++        // application still needs closed-source/fan-in admission at activation.
++        for (const auto& message : source)
++        {
++            const auto size = message.getRawDataSize();
++            const auto* bytes = message.getRawData();
++            if (size < 1 || size > 3 || bytes[0] < 0x80 || bytes[0] == 0xf0 || bytes[0] == 0xf7 ||
++                juce::MidiMessage::getMessageLengthFromFirstByte (bytes[0]) != size)
++            { fail (IngressFault::sourceMessage); return false; }
++        }
++        destination.copyFrom (source); // Existing output array reserved CONTROL.
++        for (uint64_t n = 0; n < available; ++n)
++        {
++            const auto& event = queue[size_t ((tail + n) % capacity)];
++            // Explicit short constructors are noexcept/inline in pinned JUCE.
++            auto message = event.size == 1 ? juce::MidiMessage (int (event.bytes[0]), 0.0)
++                : event.size == 2 ? juce::MidiMessage (int (event.bytes[0]), int (event.bytes[1]), 0.0)
++                : juce::MidiMessage (int (event.bytes[0]), int (event.bytes[1]), int (event.bytes[2]), 0.0);
++            destination.addMidiMessage (std::move (message), event.source);
++        }
++        read.store (head, std::memory_order_release);
++        return true;
++    }
++};
++
++LiveMidiInjectingNode::IngressObservation LiveMidiInjectingNode::boundedIngressObservation() const noexcept
++{
++    IngressObservation result;
++    result.enabled = ingressScope != nullptr; result.scope = ingressScope;
++    if (bounded)
++    {
++        result.runtime = bounded.get(); result.registered = bounded->registered;
++        result.fault = bounded->fault.load (std::memory_order_acquire);
++        result.accepted = bounded->written.load (std::memory_order_acquire);
++        result.delivered = bounded->read.load (std::memory_order_acquire);
++    }
++    return result;
++}
++
++//==============================================================================
++//==============================================================================
++LiveMidiInjectingNode::LiveMidiInjectingNode (AudioTrack& at, std::unique_ptr<tracktion::graph::Node> inputNode,
++                                               const ProcessState* boundedScope)
++    : track (at), input (std::move (inputNode)), ingressScope (boundedScope)
+ {
+     setOptimisations ({ tracktion::graph::ClearBuffers::no,
+                         tracktion::graph::AllocateAudioBuffer::no });
+ 
+-    track->addListener (this);
++    if (ingressScope)
++    {
++        if (!track->edit.closedNativeIO || !track->edit.initialSourceGeneration)
++            throw std::invalid_argument ("nativeMidi.closedScope: Explicit closed/local Edit required");
++    }
++    else track->addListener (this); // Default native behavior unchanged.
+ }
+ 
+ LiveMidiInjectingNode::~LiveMidiInjectingNode()
+ {
+-    track->removeListener (this);
++    if (!ingressScope) track->removeListener (this);
++    // Native graph retirement/destruction must remain CONTROL-owned. No DSP
++    // callback copies/releases this owner, and cancellation never drains it.
+ }
+ 
+ //==============================================================================
+@@ -44,6 +159,51 @@
+ 
+ void LiveMidiInjectingNode::prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo& info)
+ {
++    if (ingressScope)
++    {
++        const auto* messages = juce::MessageManager::getInstanceWithoutCreating();
++        if (!messages || !messages->isThisTheMessageThread())
++            throw std::invalid_argument ("nativeMidi.controlOwner: Actual message-thread preparation required");
++        if (!std::isfinite (info.sampleRate) || info.sampleRate <= 0 || info.blockSize <= 0)
++            throw std::invalid_argument ("nativeMidi.configuration: Positive finite rate/block required");
++        if (bounded) throw std::invalid_argument ("nativeMidi.reprepare: One private shell preparation required");
++        size_t candidateReaders = 0;
++        for (auto* node : info.nodeGraph.orderedNodes)
++            if (auto* other = dynamic_cast<LiveMidiInjectingNode*> (node); other &&
++                other->track == track && other->ingressScope == ingressScope) ++candidateReaders;
++        if (candidateReaders != 1)
++            throw std::invalid_argument ("nativeMidi.fanout: One actual selected reader per track/context required");
++        LiveMidiInjectingNode* predecessor = nullptr;
++        if (info.nodeGraphToReplace)
++            for (auto* node : info.nodeGraphToReplace->orderedNodes)
++                if (auto* old = dynamic_cast<LiveMidiInjectingNode*> (node); old && old->track == track)
++                {
++                    if (old->ingressScope != ingressScope || predecessor)
++                        throw std::invalid_argument ("nativeMidi.scope: Exact unique track/context predecessor required");
++                    predecessor = old;
++                }
++        preparedRate = info.sampleRate; preparedBlock = info.blockSize;
++        preparedMidiCapacity = uint32_t (BoundedRuntime::capacity);
++        reserveMidiOutputForPreparation (int (preparedMidiCapacity)); // Reservation only, no MIDI-history policy.
++        if (predecessor)
++        {
++            if (!predecessor->bounded || predecessor->preparedRate != preparedRate ||
++                predecessor->preparedBlock != preparedBlock || predecessor->bounded->scope != ingressScope ||
++                predecessor->bounded->track != track || predecessor->bounded->rate != preparedRate ||
++                predecessor->bounded->block != preparedBlock ||
++                predecessor->bounded->fault.load (std::memory_order_acquire) != IngressFault::none)
++                throw std::invalid_argument ("nativeMidi.predecessor: Prepared healthy identical-rate/block ingress required");
++            bounded = predecessor->bounded; // PRIVATE CONTROL shell only; zero payload movement.
++        }
++        else
++            bounded = std::make_shared<BoundedRuntime> (*track, ingressScope, preparedRate, preparedBlock);
++        return;
++    }
++    // Never silently migrate a bounded live queue into an ordinary legacy shell.
++    if (info.nodeGraphToReplace)
++        for (auto* node : info.nodeGraphToReplace->orderedNodes)
++            if (auto* old = dynamic_cast<LiveMidiInjectingNode*> (node); old && old->track == track && old->ingressScope)
++                throw std::invalid_argument ("nativeMidi.policy: Bounded ingress requires explicit disposal before legacy rebuild");
+     if (auto oldNode = findNodeWithIDIfNonZero<LiveMidiInjectingNode> (info.nodeGraphToReplace, getNodeProperties().nodeID))
+     {
+         if (oldNode->track == track)
+@@ -66,6 +226,13 @@
+     auto& destMidiBlock = pc.buffers.midi;
+     jassert (sourceBuffers.audio.getSize() == pc.buffers.audio.getSize());
+ 
++    if (ingressScope)
++    {
++        setAudioOutput (input.get(), sourceBuffers.audio);
++        if (!bounded || !bounded->emit (sourceBuffers.midi, destMidiBlock, preparedMidiCapacity))
++            destMidiBlock.clear(); // Typed failed ingress, never claim healthy event delivery.
++        return;
++    }
+     destMidiBlock.copyFrom (sourceBuffers.midi);
+     setAudioOutput (input.get(), sourceBuffers.audio);
+ 

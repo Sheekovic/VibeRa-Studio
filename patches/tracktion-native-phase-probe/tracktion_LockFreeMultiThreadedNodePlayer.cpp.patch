@@ -1,0 +1,43 @@
+--- a/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
++++ b/modules/tracktion_graph/tracktion_graph/tracktion_LockFreeMultiThreadedNodePlayer.cpp
+@@ -176,15 +176,20 @@
+     numSamplesToProcess = pc.numSamples;
+     referenceSampleRange = pc.referenceSampleRange;
+ 
++    auto* const phase = nativePhaseCapture ? nativePhaseCapture->beginGraph (
++        this, preparedNode->selectionSerial, referenceSampleRange, uint32_t (pc.numSamples),
++        preparedNode->graph->orderedNodes.size(), numThreadsToUse.load (std::memory_order_acquire)) : nullptr;
+     // Prepare all the nodes to be played back
+     for (auto node : preparedNode->graph->orderedNodes)
+         node->prepareForNextBlock (referenceSampleRange);
++    if (phase) phase->preparationEnd = juce::Time::getHighResolutionTicks();
+ 
+     // We need to retain the root so we can get the output from it
+     preparedNode->graph->rootNode->retain();
+ 
+     if (numThreadsToUse.load (std::memory_order_acquire) == 0 || preparedNode->graph->orderedNodes.size() == 1)
+     {
++        if (phase) phase->singleThreaded = true;
+         for (auto node : preparedNode->graph->orderedNodes)
+             node->process (numSamplesToProcess, referenceSampleRange);
+     }
+@@ -205,6 +210,7 @@
+         }
+     }
+ 
++    if (phase) phase->processingEnd = juce::Time::getHighResolutionTicks();
+     // Add output from graph to buffers
+     {
+         auto output = preparedNode->graph->rootNode->getProcessedOutput();
+@@ -219,6 +225,11 @@
+ 
+     // We need to release the root to match the previous retain
+     preparedNode->graph->rootNode->release();
++    if (phase)
++    {
++        phase->mixEnd = juce::Time::getHighResolutionTicks();
++        phase->completed = true;
++    }
+ 
+     return -1;
+ }

@@ -1,0 +1,54 @@
+--- a/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
++++ b/modules/tracktion_engine/playback/graph/tracktion_LiveMidiInjectingNode.h
+@@ -8,7 +8,15 @@
+     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
+ */
+ 
++#include <array>
++#include <cstdint>
++#include <atomic>
++#include <memory>
++#include <limits>
++#include <cmath>
++
+ namespace tracktion::inline engine {
++struct ProcessState;
+ 
+ //==============================================================================
+ //==============================================================================
+@@ -20,7 +28,21 @@
+                                       private AudioTrack::Listener
+ {
+ public:
+-    LiveMidiInjectingNode (AudioTrack&, std::unique_ptr<tracktion::graph::Node>);
++    // Null scope preserves the ordinary native implementation. The bounded
++    // internal mode requires a closed/local Edit and the actual ProcessState
++    // identity of ONE native context/player; separate contexts get separate queues.
++    LiveMidiInjectingNode (AudioTrack&, std::unique_ptr<tracktion::graph::Node>, const ProcessState* boundedScope = nullptr);
++    enum class IngressFault : uint32_t { none, wrongProducer, unsupportedMessage, queueFull,
++                                       sourceQuota, sourceMessage, counterExhausted };
++    struct IngressObservation
++    {
++        bool enabled = false, registered = false;
++        IngressFault fault = IngressFault::none;
++        const void* runtime = nullptr;
++        const void* scope = nullptr;
++        uint64_t accepted = 0, delivered = 0; // Independent atomics; not a concurrent coherent snapshot.
++    };
++    IngressObservation boundedIngressObservation() const noexcept;
+     ~LiveMidiInjectingNode() override;
+ 
+     //==============================================================================
+@@ -35,6 +57,12 @@
+     AudioTrack::Ptr track;
+     std::unique_ptr<tracktion::graph::Node> input;
+ 
++    struct BoundedRuntime;
++    const ProcessState* const ingressScope;
++    std::shared_ptr<BoundedRuntime> bounded;
++    uint32_t preparedMidiCapacity = 0;
++    double preparedRate = 0;
++    int preparedBlock = 0;
+     juce::CriticalSection liveMidiLock;
+     MidiMessageArray liveMidiMessages;
+     MPESourceID midiSourceID = createUniqueMPESourceID();
