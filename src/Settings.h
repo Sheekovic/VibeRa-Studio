@@ -1261,7 +1261,7 @@ class ScrollingSettingsPage final : public juce::Component
 
   public:
     explicit ScrollingSettingsPage(juce::Component *page, int width = 740, int height = 500)
-        : minimumWidth(width), minimumHeight(height)
+        : minimumWidth(std::max(width, page->getWidth())), minimumHeight(std::max(height, page->getHeight()))
     {
         addAndMakeVisible(viewport);
         viewport.setScrollBarsShown(true, true);
@@ -1271,6 +1271,8 @@ class ScrollingSettingsPage final : public juce::Component
     {
         return viewport.getViewedComponent();
     }
+    // The size that shows the whole page without scrolling (its own size when it set one).
+    juce::Point<int> naturalSize() const { return {minimumWidth, minimumHeight}; }
     void resized() override
     {
         viewport.setBounds(getLocalBounds());
@@ -1306,6 +1308,28 @@ class SettingsContent final : public juce::TabbedComponent
         addTab("Controllers", colour, new ScrollingSettingsPage(new ControllerPage(studio)), true);
         addTab("AI", colour, new ScrollingSettingsPage(new AiPage(studio)), true);
         setSize(760, 560);
+        fitToCurrentTab();
+    }
+    // Opens (and switches tabs) at the size that shows the whole page, within the screen.
+    void currentTabChanged(int, const juce::String &) override
+    {
+        fitToCurrentTab();
+    }
+    void fitToCurrentTab()
+    {
+        auto *holder = dynamic_cast<ScrollingSettingsPage *>(getCurrentContentComponent());
+        if (!holder)
+            return;
+        const auto natural = holder->naturalSize();
+        auto area = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
+        if (auto *peer = getPeer())
+            if (const auto *display = juce::Desktop::getInstance().getDisplays().getDisplayForRect(peer->getBounds()))
+                area = display->userArea;
+        const int width = std::min(std::max(760, natural.x + 4), area.getWidth() - 40);
+        const int height = std::min(natural.y + getTabBarDepth() + 4, area.getHeight() - 80);
+        setSize(width, std::max(360, height));
+        if (auto *window = getTopLevelComponent(); window != this)
+            window->setBounds(window->getBounds().constrainedWithin(area));
     }
 };
 } // namespace vibera

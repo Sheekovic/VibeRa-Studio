@@ -23,6 +23,10 @@ class AiPage final : public juce::Component, private juce::Timer
         yueLowVram{"YuE2 low-VRAM mode (8 GB budget)"};
     juce::TextButton aceInstall{"Install / start ACE-Step"}, aceStop{"Stop server"}, yueInstall{"Install / check YuE2"},
         cancelJob{"Cancel"};
+    // Install/download/generation progress (-1 = indeterminate); beside the engine's button.
+    double progressValue = 0;
+    juce::ProgressBar progress{progressValue};
+    bool progressForYue = false;
     juce::Label agentHeading, stepsLabel;
     juce::ToggleButton mayEdit{"CoProducer may edit the project"};
     juce::Slider steps;
@@ -149,6 +153,15 @@ class AiPage final : public juce::Component, private juce::Timer
         else if (snapshot.state != ai::JobState::idle)
             text << snapshot.engine << ": " << snapshot.message;
         job.setText(text, juce::dontSendNotification);
+        const bool running = snapshot.state == ai::JobState::running;
+        progressValue = running ? (snapshot.progress >= 0 ? snapshot.progress : -1.) : 0.;
+        progress.setTextToDisplay(running ? snapshot.stage : juce::String{});
+        if (progress.isVisible() != running || progressForYue != (snapshot.engine == "yue2"))
+        {
+            progressForYue = snapshot.engine == "yue2";
+            progress.setVisible(running);
+            resized();
+        }
         cancelJob.setEnabled(snapshot.state == ai::JobState::running);
         test.setEnabled(!studio.aiConnection.running.load());
     }
@@ -315,6 +328,7 @@ class AiPage final : public juce::Component, private juce::Timer
         {
             if (auto started = studio.aiMusic.prepare("ace-step", settings().music); started.failed())
                 job.setText(started.getErrorMessage(), juce::dontSendNotification);
+            timerCallback(); // Show the progress bar at once.
         };
         aceStop.onClick = [this] { studio.aiMusic.stopServer(); };
         caption(yueLabel, "YuE2 (lyrics-to-song)");
@@ -338,6 +352,7 @@ class AiPage final : public juce::Component, private juce::Timer
         {
             if (auto started = studio.aiMusic.prepare("yue2", settings().music); started.failed())
                 job.setText(started.getErrorMessage(), juce::dontSendNotification);
+            timerCallback();
         };
         cancelJob.onClick = [this] { studio.aiMusic.cancel(); };
         for (auto *c : std::initializer_list<juce::Component *>{&rootPath, &rootBrowse, &aceUrl, &aceAuto, &aceStatus,
@@ -367,6 +382,8 @@ class AiPage final : public juce::Component, private juce::Timer
         for (auto *c : std::initializer_list<juce::Component *>{&mayEdit, &steps, &openProducer})
             addAndMakeVisible(c);
         syncProvider();
+        addChildComponent(progress);
+        progress.setColour(juce::ProgressBar::foregroundColourId, accent);
         setSize(640, 870);
         startTimerHz(4);
         timerCallback();
@@ -424,6 +441,8 @@ class AiPage final : public juce::Component, private juce::Timer
         y += 36;
         aceInstall.setBounds(x, y, 200, 28);
         aceStop.setBounds(x + 208, y, 110, 28);
+        if (!progressForYue)
+            progress.setBounds(x + 330, y + 2, w - 330, 24);
         y += 44;
         yueLabel.setBounds(x, y, w, 26);
         y += 28;
@@ -434,6 +453,8 @@ class AiPage final : public juce::Component, private juce::Timer
         y += 36;
         yueLowVram.setBounds(x, y, 300, 28);
         yueInstall.setBounds(x + w - 190, y, 190, 28);
+        if (progressForYue)
+            progress.setBounds(x + 310, y + 2, w - 510, 24);
         y += 40;
         job.setBounds(x, y, w - 100, 28);
         cancelJob.setBounds(x + w - 90, y, 90, 28);
