@@ -84,7 +84,7 @@ You need Windows, **Visual Studio 2022** with the C++ desktop workload (it inclu
 and Python 3.
 
 ```powershell
-git clone https://github.com/<your-account>/VibeRa-Studio.git
+git clone https://github.com/Sheekovic/VibeRa-Studio.git
 cd VibeRa-Studio
 powershell -ExecutionPolicy Bypass -File scripts/fetch-dependencies.ps1
 powershell -ExecutionPolicy Bypass -File scripts/apply-dependency-patches.ps1
