@@ -1273,7 +1273,17 @@ class ScrollingSettingsPage final : public juce::Component
         return viewport.getViewedComponent();
     }
     // The size that shows the whole page without scrolling (its own size when it set one).
-    juce::Point<int> naturalSize() const { return {minimumWidth, minimumHeight}; }
+    // The bottom of the page's visible controls counts, so pages that reserve spare height
+    // (the device selector) do not open with empty space.
+    juce::Point<int> naturalSize() const
+    {
+        int bottom = 0;
+        if (auto *page = viewport.getViewedComponent())
+            for (auto *child : page->getChildren())
+                if (child->isVisible())
+                    bottom = std::max(bottom, child->getBottom());
+        return {minimumWidth, bottom > 0 ? std::min(minimumHeight, bottom + 16) : minimumHeight};
+    }
     void resized() override
     {
         viewport.setBounds(getLocalBounds());
