@@ -437,6 +437,12 @@ compile (build.ps1 -CompileOnly) and commit; run tests only when the owner asks 
 breakage is found, and promote dist only on request. The release transaction keeps its
 own gates when it is requested.
 
+Owner decision (2026-11-03, later): after every change, compile and refresh the owner's
+dist copy with `scripts/update-dist.ps1` (app, worker, Content, CoProducer, skill; refuses
+while VibeRa runs from dist; writes QUICK-UPDATE.txt with the untested commit). This is a
+convenience copy, not a qualified release: provenance.json/SOURCE.txt keep describing the
+last qualified package, and the full release transaction still runs only on request.
+
 ###2026-10-19 complete light-test qualification
 
 The complete144-case development inventory now uses FOUR bounded isolated
