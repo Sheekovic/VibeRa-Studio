@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include "AudioFileCheck.h"
 #include <juce_audio_formats/juce_audio_formats.h>
 #include <deque>
 namespace vibera
@@ -48,7 +49,8 @@ class AudioClipImporter final : private juce::Thread
             {
                 const auto size = job.file.getSize();
                 const auto modified = job.file.getLastModificationTime();
-                std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(job.file));
+                std::unique_ptr<juce::AudioFormatReader> reader(
+                    decodableAudioFile(job.file) ? formats.createReaderFor(job.file) : nullptr);
                 if (!reader || !std::isfinite(reader->sampleRate) || reader->sampleRate <= 0 ||
                     reader->lengthInSamples < 2 || reader->numChannels == 0)
                     job.result = juce::Result::fail("Unreadable audio clip: " + job.file.getFileName());

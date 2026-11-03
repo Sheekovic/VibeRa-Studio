@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "AudioFileCheck.h"
 #include "SampleCache.h"
 #include <algorithm>
 #include <signalsmith-stretch/signalsmith-stretch.h>
@@ -143,7 +144,8 @@ juce::Result SampleCache::prepare(const juce::String &requested, std::shared_ptr
     {
         juce::AudioFormatManager formats;
         formats.registerBasicFormats();
-        std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(file));
+        std::unique_ptr<juce::AudioFormatReader> reader(
+            decodableAudioFile(file) ? formats.createReaderFor(file) : nullptr);
         if (!reader || reader->sampleRate <= 0 || reader->lengthInSamples < 2 ||
             reader->lengthInSamples > reader->sampleRate * 30)
             return juce::Result::fail("Choose a readable sample up to 30 seconds long: " +

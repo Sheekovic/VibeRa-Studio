@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
 #include "FlpImport.h"
+#include "AudioFileCheck.h"
 
 // FLP import from a small original fixture built here byte by byte (no FL files).
 namespace flp_import_acceptance
@@ -145,6 +146,26 @@ inline void tests(const juce::File &folder)
                 project.placements[0].lane == 2 && project.placements[0].pattern == project.patterns[0].id,
             "The Playlist Pattern clip lands on its beat, length and track");
     require(project.validate().wasOk(), "The converted project is valid");
+    // A WAV holding compressed data (FL's Ogg-in-WAV tag 0x674F) is refused before decoding.
+    {
+        juce::MemoryOutputStream wav;
+        wav.write("RIFF", 4);
+        wav.writeInt(36);
+        wav.write("WAVEfmt ", 8);
+        wav.writeInt(16);
+        wav.writeShort(short(0x674f));
+        wav.writeShort(1);
+        wav.writeInt(44100);
+        wav.writeInt(88200);
+        wav.writeShort(2);
+        wav.writeShort(16);
+        wav.write("data", 4);
+        wav.writeInt(0);
+        const auto ogg = folder.getChildFile("ogg-in-wav.wav");
+        require(ogg.replaceWithData(wav.getData(), wav.getDataSize()), "Ogg-in-WAV fixture written");
+        require(!decodableAudioFile(ogg) && decodableAudioFile(sample),
+                "Ogg-in-WAV is refused; a PCM WAV is accepted");
+    }
     const auto bad = folder.getChildFile("not-flp.flp");
     bad.replaceWithText("hello");
     require(importFlp(bad, project, report).failed(), "Non-FLP files are refused");

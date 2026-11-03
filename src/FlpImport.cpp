@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "FlpImport.h"
+#include "AudioFileCheck.h"
 #include <map>
 #include <set>
 
@@ -99,6 +100,8 @@ juce::String resolveSample(juce::String path, const juce::File &project)
 }
 double audioSeconds(const juce::String &path)
 {
+    if (!decodableAudioFile(juce::File(path)))
+        return 0;
     juce::AudioFormatManager formats;
     formats.registerBasicFormats();
     std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(juce::File(path)));
