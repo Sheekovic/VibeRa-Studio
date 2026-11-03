@@ -380,11 +380,16 @@ inline juce::var commandArgumentSchema(const juce::String &id)
             extra = R"(,"enabled":{"type":"boolean","description":"true joins the group of the track above (consecutive grouped tracks form one group under its first track); false leaves it."})";
         else if (id == "track.collapse")
             extra = R"(,"enabled":{"type":"boolean","description":"true hides the group's other tracks in the Playlist (they still play); false shows them."})";
+        else if (id == "track.lock")
+            extra = R"(,"enabled":{"type":"boolean","description":"true protects the track's clips: clip edits that would add, move, change or remove them are refused."})";
+        else if (id == "track.height")
+            extra = R"(,"value":{"type":"number","minimum":0.5,"maximum":3,"description":"Row height relative to the Playlist lane height (0.5 small, 1 normal, 2 large, 3 extra large)."})";
         else if (id == "track.move")
             extra = R"(,"value":{"type":"integer","enum":[-1,1],"description":"-1 swaps with the track above, 1 with the one below (clips and settings)."})";
         const auto required = id == "track.insert" || id == "track.delete" || id == "track.solo" ? R"(["lane"])"
                               : id == "track.rename"                      ? R"(["lane","text"])"
-                              : id == "track.mute" || id == "track.group" || id == "track.collapse" ? R"(["lane","enabled"])"
+                              : id == "track.mute" || id == "track.group" || id == "track.collapse" || id == "track.lock"
+                                  ? R"(["lane","enabled"])"
                                                                           : R"(["lane","value"])";
         return juce::JSON::parse(
             juce::String(R"({"type":"object","additionalProperties":false,"properties":{"lane":{"type":"integer","minimum":0,"maximum":127,"description":")") +

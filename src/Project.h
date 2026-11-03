@@ -200,6 +200,7 @@ struct PlaylistTrack
     bool groupedAbove = false; // Joins the group of the track above (version 51).
     bool collapsed = false;    // On a group's first track: hide the grouped tracks (view only; they play).
     bool locked = false;       // Clips on this track cannot be added, moved, edited or deleted (v56).
+    double height = 1;         // Row height relative to the Playlist lane height, .5..3 (v56).
 };
 // A stored (inactive) Playlist arrangement (version 48); see Arrangements.h.
 struct Arrangement

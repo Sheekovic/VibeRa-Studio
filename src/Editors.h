@@ -781,9 +781,44 @@ class Studio::Editor final : public juce::Component,
     {
         return std::max(1, (rackContentBottom() - 44) / rackRowHeight());
     }
+    // Playlist rows can differ in height (track.height); these place rows from laneOffset.
+    int rowPixels(int row) const
+    {
+        // Fast path: with every track at the default height, rows are uniform.
+        const auto &tracks = s.controller.project.tracks;
+        if (type != 2 || std::all_of(tracks.begin(), tracks.end(), [](const auto &t) { return t.height == 1; }))
+            return std::max(12, laneHeight());
+        const auto *track = s.controller.project.track(laneAtRow(row));
+        return std::max(12, int(std::lround(laneHeight() * (track ? track->height : 1.))));
+    }
+    int rowTop(int row) const
+    {
+        const auto &tracks = s.controller.project.tracks;
+        if (type != 2 || std::all_of(tracks.begin(), tracks.end(), [](const auto &t) { return t.height == 1; }))
+            return gridTop() + (row - laneOffset) * std::max(12, laneHeight());
+        int y = gridTop();
+        if (row >= laneOffset)
+            for (int r = laneOffset; r < row; ++r)
+                y += rowPixels(r);
+        else
+            for (int r = row; r < laneOffset; ++r)
+                y -= rowPixels(r);
+        return y;
+    }
+    int rowAtY(int y) const
+    {
+        int row = laneOffset, top = gridTop();
+        while (row < laneOffset + 256 && top + rowPixels(row) <= y)
+            top += rowPixels(row++);
+        return row;
+    }
     int playlistRows() const
     {
-        return std::max(1, (getHeight() - gridTop() - scrollBarThickness) / laneHeight());
+        int rows = 0, y = gridTop();
+        const int bottom = getHeight() - scrollBarThickness;
+        while (rows < 128 && y + rowPixels(laneOffset + rows) <= bottom)
+            y += rowPixels(laneOffset + rows++);
+        return std::max(1, rows);
     }
     void navigationChanged()
     {
@@ -818,7 +853,7 @@ class Studio::Editor final : public juce::Component,
     {
         const auto start = beatAt(region.getX());
         const auto span = region.getWidth() / spacing();
-        const auto firstLane = laneOffset + int((region.getY() - gridTop()) / laneHeight());
+        const auto firstLane = rowAtY(int(region.getY()));
         const auto rows = std::max(1., double(region.getHeight()) / laneHeight());
         savePlaylistView();
         zoom = juce::jlimit(1.e-8, 256.,
@@ -958,16 +993,15 @@ class Studio::Editor final : public juce::Component,
     }
     int laneAtY(int y) const
     {
-        return juce::jlimit(0, 127, laneAtRow((y - gridTop()) / laneHeight() + laneOffset));
+        return juce::jlimit(0, 127, laneAtRow(rowAtY(y)));
     }
     juce::Rectangle<float> cr(const Placement &p) const
     {
         const int row = type == 2 ? rowOfLane(p.lane) : p.lane;
         if (row < 0)
             return {}; // Hidden in a collapsed group.
-        return {float(leftEdge() + (p.beat - scroll) * spacing()),
-                float(gridTop() + 2 + (row - laneOffset) * laneHeight()), float(p.length * spacing() - 2),
-                float(laneHeight() - 4)};
+        return {float(leftEdge() + (p.beat - scroll) * spacing()), float(rowTop(row) + 2),
+                float(p.length * spacing() - 2), float(rowPixels(row) - 4)};
     }
     Id hit(juce::Point<float> point) const
     {
@@ -1103,7 +1137,7 @@ class Studio::Editor final : public juce::Component,
     juce::Point<int> playlistPosition(double beat, int lane) const
     {
         return {leftEdge() + int((beat - scroll) * spacing()) + 2,
-                gridTop() + (std::max(0, rowOfLane(lane)) - laneOffset) * laneHeight() + laneHeight() / 2};
+                rowTop(std::max(0, rowOfLane(lane))) + rowPixels(std::max(0, rowOfLane(lane))) / 2};
     }
     juce::Rectangle<int> playlistGridBounds() const
     {
@@ -2955,17 +2989,15 @@ class Studio::Editor final : public juce::Component,
             }
             else
             {
-                for (int row = 0; row < std::min(visibleLaneCount() - laneOffset,
-                                                 (getHeight() - top - scrollBarThickness + laneHeight() - 1) /
-                                                     laneHeight());
-                     ++row)
+                for (int row = 0, y = top; row < visibleLaneCount() - laneOffset && y < getHeight() - scrollBarThickness;
+                     y += rowPixels(row + laneOffset), ++row)
                 {
-                    int y = top + row * laneHeight();
+                    const int rowHeight = rowPixels(row + laneOffset);
                     g.setColour(row % 2 ? bg.brighter(.025f) : bg);
-                    g.fillRect(left, y, getWidth() - left, laneHeight());
+                    g.fillRect(left, y, getWidth() - left, rowHeight);
                     // Track header card: full-height colour tab, name, and a quiet lane number.
                     const auto header = juce::Rectangle<float>(float(pickerWidth() + 3), float(y + 2),
-                                                               float(left - pickerWidth() - 7), float(laneHeight() - 4));
+                                                               float(left - pickerWidth() - 7), float(rowHeight - 4));
                     g.setColour(panel.brighter(.04f));
                     g.fillRoundedRectangle(header, 4.f);
                     const int rowLane = laneAtRow(row + laneOffset);
@@ -2980,7 +3012,7 @@ class Studio::Editor final : public juce::Component,
                     {
                         // A muted track dims its lane; its clips stay visible but silent.
                         g.setColour(juce::Colours::black.withAlpha(.28f));
-                        g.fillRect(juce::Rectangle<int>(left, y, getWidth() - left, laneHeight()));
+                        g.fillRect(juce::Rectangle<int>(left, y, getWidth() - left, rowHeight));
                     }
                     if (row == 0)
                         for (const auto &change : s.controller.project.tempoChanges)
@@ -3877,6 +3909,15 @@ class Studio::Editor final : public juce::Component,
         menu.addItem(8, "Group with track above", lane > 0, info && info->groupedAbove);
         menu.addItem(9, headInfo && headInfo->collapsed ? "Expand group" : "Collapse group", inGroup);
         menu.addItem(10, "Lock track (protect its clips)", true, info && info->locked);
+        {
+            juce::PopupMenu heights;
+            const double current = info ? info->height : 1.;
+            heights.addItem(11, "Small", true, current == .5);
+            heights.addItem(12, "Normal", true, current == 1);
+            heights.addItem(13, "Large", true, current == 2);
+            heights.addItem(14, "Extra large", true, current == 3);
+            menu.addSubMenu("Height", heights);
+        }
         menu.addItem(2, "Rename...");
         const std::array<juce::uint32, 8> palette{0xffef6576, 0xffe8a33d, 0xffe6d35a, 0xff6fcf7f,
                                                    0xff4fb3d9, 0xff7d8cf0, 0xffc77df0, 0xff9aa3ad};
@@ -3902,6 +3943,12 @@ class Studio::Editor final : public juce::Component,
                                    return;
                                if (chosen == 7)
                                    run("track.solo", [](CommandArgs &) {});
+                               else if (chosen >= 11 && chosen <= 14)
+                                   run("track.height", [&](CommandArgs &a)
+                                       {
+                                           constexpr double sizes[]{.5, 1., 2., 3.};
+                                           a.value = sizes[chosen - 11];
+                                       });
                                else if (chosen == 10)
                                    run("track.lock", [&](CommandArgs &a)
                                        {

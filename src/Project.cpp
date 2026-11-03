@@ -472,6 +472,8 @@ juce::ValueTree Project::state() const
                 set(entry, "collapsed", true);
             if (track.locked)
                 set(entry, "locked", true);
+            if (track.height != 1)
+                set(entry, "height", track.height);
             trackTree.appendChild(entry, nullptr);
         }
         root.appendChild(trackTree, nullptr);
@@ -1003,6 +1005,13 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             if (entry.hasProperty("locked") && fileVersion < 56)
                 return juce::Result::fail("Playlist track locks need project version 56");
             track.locked = bool(entry["locked"]);
+            if (entry.hasProperty("height"))
+            {
+                const double height = double(entry["height"]);
+                if (fileVersion < 56 || !std::isfinite(height) || height < .5 || height > 3)
+                    return juce::Result::fail("Playlist track heights are .5..3 and need project version 56");
+                track.height = height;
+            }
             if (entry.hasProperty("colour"))
             {
                 const auto text = entry["colour"].toString();

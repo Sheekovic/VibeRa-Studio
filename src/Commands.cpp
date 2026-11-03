@@ -784,6 +784,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"track.group", "Group Playlist track with the track above", Scope::playlist, true, true, "command"},
         {"track.collapse", "Collapse Playlist track group", Scope::playlist, true, true, "command"},
         {"track.lock", "Lock Playlist track", Scope::playlist, true, true, "command"},
+        {"track.height", "Set Playlist track height", Scope::playlist, true, true, "command"},
         {"track.insert", "Insert Playlist track", Scope::playlist, true, true, "command"},
         {"track.delete", "Delete Playlist track", Scope::playlist, true, true, "command"},
         {"track.move", "Move Playlist track", Scope::playlist, true, true, "command"},
@@ -4914,6 +4915,12 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         }
         else if (id == "track.lock")
             entry(a.lane).locked = a.enabled;
+        else if (id == "track.height")
+        {
+            if (!std::isfinite(a.value) || a.value < .5 || a.value > 3)
+                return juce::Result::fail("Track height is .5..3 times the lane height");
+            entry(a.lane).height = a.value;
+        }
         else if (id == "track.collapse")
         {
             int head = a.lane; // Collapse acts on the group the lane belongs to.
@@ -4963,7 +4970,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             remap([&](int lane) { return lane == a.lane ? other : lane == other ? a.lane : lane; });
         }
         std::erase_if(next.tracks, [](auto &t)
-                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed && !t.locked; });
+                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed && !t.locked && t.height == 1; });
         for (auto &t : next.tracks)
             t.groupedAbove = t.groupedAbove && t.lane > 0; // A move to the top track ungroups it.
         std::sort(next.tracks.begin(), next.tracks.end(), [](auto &x, auto &y) { return x.lane < y.lane; });
