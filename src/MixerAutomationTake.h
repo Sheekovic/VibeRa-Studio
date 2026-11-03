@@ -42,7 +42,27 @@ class MixerAutomationTake
     Id channel = 0;
     double rate = 0, originSeconds = 0, originBeat = 0, stopSeconds = 0;
     double tempo = 120;
+    // Song loop overdub: elapsed time folds into [loopStartBeat, loopEndBeat); every pass
+    // writes over the span it touched in earlier passes (latest pass wins).
+    bool looped = false;
+    double loopStartBeat = 0, loopEndBeat = 0;
     Phase phase = Phase::armed;
+    struct Folded
+    {
+        double beat = 0; // Song beat.
+        int pass = 0;
+    };
+    Folded fold(double seconds) const noexcept
+    {
+        const double song = originBeat + (seconds - originSeconds) * tempo / 60.;
+        const double span = loopEndBeat - loopStartBeat;
+        if (!looped || !(span > 0) || song < loopEndBeat)
+            return {song, 0};
+        const double wrapped = (song - loopEndBeat) / span;
+        const int pass = 1 + int(std::floor(wrapped));
+        return {loopStartBeat + (wrapped - std::floor(wrapped)) * span, pass};
+    }
+    bool wrapped() const noexcept { return looped && fold(stopSeconds).pass > 0; }
 
     static juce::Result prepare(const Project &p, bool dirty, int insert, int lane,
                                 const juce::String &identity, const juce::String &token, unsigned session,
@@ -182,7 +202,12 @@ class MixerAutomationTake
                 stopSeconds < originSeconds)
                 return juce::Result::fail("automationRecording.invalidClock: Missing fixed source cutoff");
             auto next = *expected;
-            const double length = std::max(1. / rate, stopSeconds - originSeconds) * tempo / 60.;
+            // A take that wrapped the loop covers the whole loop (from the origin if it began
+            // earlier); otherwise the recorded span from the origin.
+            const bool wrap = wrapped();
+            const double start = wrap ? std::min(originBeat, loopStartBeat) : originBeat;
+            const double length = wrap ? loopEndBeat - start
+                                       : std::max(1. / rate, stopSeconds - originSeconds) * tempo / 60.;
             for (const auto &t : targets)
             {
                 if (std::none_of(events.begin(), events.end(), [&](const auto &e) { return e.key == t.key; }))
@@ -194,17 +219,70 @@ class MixerAutomationTake
                 source.links = {{t.key, t.minimum, t.maximum}};
                 source.points.push_back({next.allocate(), 0, t.normalizedManual(), AutomationShape::hold, 0});
                 float last = t.normalizedManual();
-                for (const auto &e : events)
-                    if (e.key == t.key)
+                if (!wrap)
+                {
+                    for (const auto &e : events)
+                        if (e.key == t.key)
+                        {
+                            const double beat =
+                                juce::jlimit(0., length, (e.seconds - originSeconds) * tempo / 60.);
+                            last = (e.value - t.minimum) / (t.maximum - t.minimum);
+                            if (beat == source.points.back().beat)
+                                source.points.back().value = last;
+                            else
+                                source.points.push_back({next.allocate(), beat, last, AutomationShape::hold, 0});
+                        }
+                }
+                else
+                {
+                    // Overdub passes in order: a pass removes earlier points inside the span it
+                    // touched, then adds its own.
+                    std::vector<std::pair<double, float>> points{{0., t.normalizedManual()}};
+                    std::vector<std::pair<double, float>> pass;
+                    int current = -1;
+                    auto flush = [&]
                     {
-                        const double beat =
-                            juce::jlimit(0., length, (e.seconds - originSeconds) * tempo / 60.);
-                        last = (e.value - t.minimum) / (t.maximum - t.minimum);
-                        if (beat == source.points.back().beat)
-                            source.points.back().value = last;
+                        if (pass.empty())
+                            return;
+                        const double from = pass.front().first, to = pass.back().first;
+                        std::erase_if(points, [&](const auto &p) { return p.first >= from && p.first <= to; });
+                        for (const auto &p : pass)
+                            points.push_back(p);
+                        std::stable_sort(points.begin(), points.end(),
+                                         [](const auto &a, const auto &b) { return a.first < b.first; });
+                        pass.clear();
+                    };
+                    for (const auto &e : events)
+                        if (e.key == t.key)
+                        {
+                            const auto folded = fold(e.seconds);
+                            if (folded.pass != current)
+                            {
+                                flush();
+                                current = folded.pass;
+                            }
+                            const double beat = juce::jlimit(0., length, folded.beat - start);
+                            const float value = float((e.value - t.minimum) / (t.maximum - t.minimum));
+                            if (!pass.empty() && pass.back().first >= beat)
+                            {
+                                // Within one pass time only moves forward; equal beats keep the latest.
+                                if (pass.back().first == beat)
+                                    pass.back().second = value;
+                                continue;
+                            }
+                            pass.push_back({beat, value});
+                        }
+                    flush();
+                    if (points.empty() || points.front().first > 0)
+                        points.insert(points.begin(), {0., t.normalizedManual()});
+                    source.points.clear();
+                    for (const auto &[beat, value] : points)
+                        if (!source.points.empty() && source.points.back().beat == beat)
+                            source.points.back().value = value;
                         else
-                            source.points.push_back({next.allocate(), beat, last, AutomationShape::hold, 0});
-                    }
+                            source.points.push_back({next.allocate(), beat, value, AutomationShape::hold, 0});
+                    last = source.points.back().value;
+                }
                 if (source.points.back().beat == length && source.points.size() == 1)
                     return juce::Result::fail(
                         "automationRecording.invalidClock: Positive capture span required");
@@ -212,7 +290,7 @@ class MixerAutomationTake
                     source.points.push_back({next.allocate(), length, last, AutomationShape::hold, 0});
                 next.automation.initialValues.push_back({t.key, t.manual});
                 next.automation.placements.push_back(
-                    {next.allocate(), source.id, originBeat, length, 0, lane, false});
+                    {next.allocate(), source.id, start, length, 0, lane, false});
                 next.automation.sources.push_back(std::move(source));
             }
             if (auto result = next.validate(); result.failed())

@@ -18,10 +18,61 @@ inline void publish(Controller &c, std::unique_ptr<PreparedControllerChange> &p)
     require(c.commitPreparedChange(*p), "Actual canonical commit");
     c.deliverPendingNotifications();
 }
+// Song loop overdub: loop beats 4..8 at 120 BPM; pass 1 rewrites the span pass 0 touched.
+inline void verifyLoopOverdub()
+{
+    auto p = Project::empty();
+    p.tempo = 120;
+    std::unique_ptr<MixerAutomationTake> take;
+    require(MixerAutomationTake::prepare(p, false, 1, 2, "loop", "loop-take", 7, take).wasOk(),
+            "Prepare loop take");
+    take->rate = 48000;
+    take->originSeconds = 10;
+    take->originBeat = 4;
+    take->looped = true;
+    take->loopStartBeat = 4;
+    take->loopEndBeat = 8;
+    take->phase = MixerAutomationTake::Phase::capturing;
+    const auto gain = *MixerAutomationTake::keyForCommand("mixer.gain", 1, 0);
+    const auto pan = *MixerAutomationTake::keyForCommand("mixer.pan", 1, 0);
+    auto add = [&](const AutomationKey &key, double seconds, float value)
+    {
+        const MixerAutomationTake::Event e{key, seconds, value};
+        require(take->admitEvent(e).wasOk(), "Loop event admission");
+        auto expected = std::make_unique<Project>(p);
+        take->accepted(e, expected);
+    };
+    add(gain, 10.5, .2f);  // Pass 0, beat 5.
+    add(gain, 11., .4f);   // Pass 0, beat 6.
+    add(pan, 11.5, -.5f);  // Pass 0, beat 7 (not touched again).
+    add(gain, 12.5, .8f);  // Pass 1, song beat 9 -> loop beat 5.
+    add(gain, 13., .9f);   // Pass 1, beat 6.
+    add(gain, 13.5, .7f);  // Pass 1, beat 7.
+    require(take->fold(12.5).pass == 1 && std::abs(take->fold(12.5).beat - 5) < 1.e-9, "Loop fold position");
+    take->stopSeconds = 14; // Song beat 12: wrapped twice.
+    take->phase = MixerAutomationTake::Phase::ready;
+    Project recorded;
+    require(take->destination(false, recorded).wasOk(), "Loop take destination");
+    require(recorded.automation.placements.size() == 2, "Gain and pan clips");
+    for (const auto &placement : recorded.automation.placements)
+        require(std::abs(placement.beat - 4) < 1.e-9 && std::abs(placement.length - 4) < 1.e-9,
+                "A wrapped take covers the whole loop");
+    AutomationProgram program;
+    std::string error;
+    require(AutomationProgram::compile(recorded.automation, true, program, error, recorded.automationDefaults()),
+            "Compile loop take");
+    auto approx = [](std::optional<float> v, float x) { return v && std::abs(*v - x) < 1.e-5f; };
+    require(approx(program.valueAt(gain, 4.5), 1.f), "Before the first touch: manual gain");
+    require(approx(program.valueAt(gain, 5.5), .8f), "Latest pass replaces beat 5");
+    require(approx(program.valueAt(gain, 6.5), .9f), "Latest pass replaces beat 6");
+    require(approx(program.valueAt(gain, 7.5), .7f), "Latest pass adds beat 7");
+    require(approx(program.valueAt(pan, 7.5), -.5f), "An earlier pass of another control survives");
+}
 __declspec(noinline) inline juce::Result verify(const juce::File &output)
 {
     try
     {
+        verifyLoopOverdub();
         require(output.createDirectory().wasOk(), "Owned touch output");
         auto c = std::make_unique<Controller>();
         auto p = Project::empty();

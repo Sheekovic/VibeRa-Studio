@@ -89,9 +89,12 @@ juce::Result Studio::startAutomationRecording(int insert, int lane)
         hasPendingMidiTake() || !audioImports.idle() || audioImportAfterTake ||
         midiController.learnIndex >= 0 || nextAutomationTouchSession == std::numeric_limits<unsigned>::max())
         return juce::Result::fail("automationRecording.busy: Finish pending work before arming");
-    if (patternMode || audio.looping())
-        return juce::Result::fail("automationRecording.unsupportedMode: Song without loop required; Pattern "
-                                  "events and overdub remain separate work");
+    if (patternMode)
+        return juce::Result::fail("automationRecording.unsupportedMode: Song mode required; Pattern-mode "
+                                  "automation events remain separate work");
+    const auto loop = audio.looping() ? audio.loopSeconds() : std::nullopt;
+    if (audio.looping() && (!loop || !(loop->second > loop->first)))
+        return juce::Result::fail("automationRecording.unsupportedMode: The Song loop has no length");
     auto source = audio.midiInput.retainRecordingLane();
     auto *device = audio.engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
     MidiClock::Position clock;
@@ -105,6 +108,12 @@ juce::Result Studio::startAutomationRecording(int insert, int lane)
                                          controller.projectIdentity, juce::Uuid().toString(), session, next);
         result.failed())
         return result;
+    if (loop)
+    {
+        next->looped = true;
+        next->loopStartBeat = loop->first * next->tempo / 60.;
+        next->loopEndBeat = loop->second * next->tempo / 60.;
+    }
     next->channel = source->channel;
     next->epoch = source->epoch.load();
     next->rate = device->getCurrentSampleRate();
@@ -209,7 +218,14 @@ juce::Result Studio::automationRecordingSourceCurrent() const
     auto *device = audio.engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
     if (controller.projectIdentity != t.identity || !t.sourceCurrent(controller.project) ||
         (!t.cutoffFrozen &&
-         (patternMode || audio.looping() || audio.midiInput.retainRecordingLane() != automationTouchSource ||
+         (patternMode || audio.looping() != t.looped ||
+          (t.looped && [&]
+           {
+               const auto loop = audio.loopSeconds();
+               return !loop || std::abs(loop->first * t.tempo / 60. - t.loopStartBeat) > 1.e-9 ||
+                      std::abs(loop->second * t.tempo / 60. - t.loopEndBeat) > 1.e-9;
+           }()) ||
+          audio.midiInput.retainRecordingLane() != automationTouchSource ||
           automationTouchSource->epoch.load() != t.epoch || automationTouchSource->channel != t.channel ||
           !device || device != automationTouchDevice || device->getCurrentSampleRate() != t.rate ||
           audio.midiInput.controls.dropped() != t.dropped ||
