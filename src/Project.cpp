@@ -510,6 +510,8 @@ juce::ValueTree Project::state() const
         set(t, "truncateSwing", c.truncateSwing);
         set(t, "audioClip", c.audioClip);
         set(t, "audioDuration", c.audioDuration);
+        if (c.mpe)
+            set(t, "mpe", true);
         if (std::any_of(c.tuning.begin(), c.tuning.end(), [](double cents) { return cents != 0; }))
         {
             juce::StringArray cents;
@@ -1409,6 +1411,12 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
         p.channels.back().audioClip = bool(c["audioClip"]);
         p.channels.back().audioDuration =
             c.hasProperty("audioDuration") ? exactNumber(c["audioDuration"]) : 0;
+        if (c.hasProperty("mpe"))
+        {
+            if (int(t["version"]) < 56)
+                return juce::Result::fail("MPE tuning needs project version 56");
+            p.channels.back().mpe = bool(c["mpe"]);
+        }
         if (int(t["version"]) < 3 && p.channels.back().audioClip)
             return juce::Result::fail("Audio Clip Channels require project version 3");
         if (c.hasProperty("tuning"))

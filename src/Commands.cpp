@@ -733,6 +733,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.controller.delete", "Delete controller events", Scope::piano, true, true, "command"},
         {"channel.tuning", "Set Channel tuning", Scope::rack, true, true, "command"},
         {"channel.scale", "Set Channel keyboard-mapped scale", Scope::rack, true, true, "command"},
+        {"channel.mpe", "Play Channel tuning through MPE", Scope::rack, true, true, "command"},
         {"channel.sliceToChannels", "Slice sample to Channels", Scope::rack, true, true, "command"},
         {"notes.arpeggiate", "Arpeggiate chords", Scope::piano, true, true, "command"},
         {"notes.strum", "Strum chords", Scope::piano, true, true, "command"},
@@ -4940,6 +4941,13 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         for (auto &t : next.tracks)
             t.groupedAbove = t.groupedAbove && t.lane > 0; // A move to the top track ungroups it.
         std::sort(next.tracks.begin(), next.tracks.end(), [](auto &x, auto &y) { return x.lane < y.lane; });
+    }
+    if (id == "channel.mpe")
+    {
+        auto *target = next.channel(a.channel);
+        if (!target || !target->instrument)
+            return juce::Result::fail("MPE tuning is for plugin instrument Channels");
+        target->mpe = a.enabled;
     }
     if (id == "channel.scale")
     {

@@ -263,6 +263,19 @@ void Studio::addChannelTuningItems(juce::PopupMenu &menu, Id channel)
                               });
                       });
     tuningMenu.addSubMenu("Load Scala (.scl)", scala);
+    if (target->instrument)
+    {
+        tuningMenu.addSeparator();
+        tuningMenu.addItem("Play tuning through MPE (plugin)", true, target->mpe, [safe, channel, on = !target->mpe]
+                           {
+                               if (!safe)
+                                   return;
+                               CommandArgs args;
+                               args.channel = channel;
+                               args.enabled = on;
+                               safe->command("channel.mpe", args);
+                           });
+    }
     menu.addSubMenu("Tuning", tuningMenu);
     const bool sliceable = !target->instrument && juce::File::isAbsolutePath(target->source);
     menu.addItem("Slice to Channels (auto)", sliceable, false, [safe, channel]

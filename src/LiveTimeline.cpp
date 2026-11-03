@@ -116,13 +116,15 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
         channel.pan = c.pan;
         channel.sampler = PreparedSamplerSettings(c.sampler, p.tempo);
         channel.sampleInstrument = !c.instrument && !c.audioClip;
+        channel.mpe = c.instrument && c.mpe;
         if (!prepareSamplerModulationAutomation(result->automation, c.id, channel.sampleInstrument,
                                                 channel.modulationLanes))
             return {};
         // A keyboard-mapped scale moves each key by whole semitones plus a cents remainder.
         auto scaled = [&](const ScheduledNote &n)
         {
-            const double deviation = channel.sampleInstrument ? tuning::scaleDeviation(c.scale, c.scaleRoot, n.pitch) : 0.;
+            const double deviation =
+                channel.sampleInstrument || channel.mpe ? tuning::scaleDeviation(c.scale, c.scaleRoot, n.pitch) : 0.;
             const int semitones = juce::roundToInt(deviation / 100.);
             return std::pair{juce::jlimit(0, 127, n.pitch + semitones), deviation - 100. * semitones};
         };
@@ -142,6 +144,9 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
                                n.modX,
                                n.modY)
                          : PreparedNoteExpression{},
+                     float(channel.mpe ? n.fineCents + (c.scale.empty() ? c.tuning[size_t(n.pitch % 12)]
+                                                                         : scaled(n).second)
+                                       : 0.),
                      n.repeatOrdinal, noteReleaseMidiVelocity(n.releaseVelocity), n.slide, n.portamento,
                      n.colourGroup});
         std::sort(channel.notes.begin(), channel.notes.end(),

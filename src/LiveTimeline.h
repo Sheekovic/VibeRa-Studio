@@ -21,6 +21,7 @@ struct LiveNote
     float velocity = .8f;
     bool step = false;
     PreparedNoteExpression expression;
+    float cents = 0; // MPE plugin Channels: tuning + fine cents sent as a per-note pitch bend.
     std::uint32_t repeatOrdinal = 0; // Prepared sub-trigger, never a persisted source ID.
     std::uint8_t noteOffVelocity = 0; // Prepared MIDI byte; not envelope release duration.
     bool slide = false, portamento = false;
@@ -32,6 +33,7 @@ struct LiveChannel
     float gain = 1, pan = 0;
     PreparedSamplerSettings sampler;
     bool sampleInstrument = true;
+    bool mpe = false; // Plugin instrument with MPE tuning (LiveMidi member channels).
     // Lane pointers belong to this same immutable LiveDocument; no callback lookup/ownership.
     std::vector<SamplerModulationAutomationLane> modulationLanes;
     std::vector<SamplerCutInput> inputCuts;

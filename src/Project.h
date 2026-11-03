@@ -41,12 +41,15 @@ struct Channel
     bool audioClip = false;
     double audioDuration = 0; // Full source duration in seconds; only for Audio Clip Channels.
     // Cents added to every note of each pitch class (C..B), +/-100 (version 47). The local
-    // sampler plays it with each note's own fine tuning; MIDI 1 plugins ignore it.
+    // sampler plays it with each note's own fine tuning; plugins only through `mpe` below.
     std::array<double, 12> tuning{};
     // Keyboard-mapped scale of any size (version 53): degree cents (last = period) from
     // scaleRoot; non-empty overrides the 12-tone table above. See tuning::scaleDeviation.
     std::vector<double> scale;
     int scaleRoot = 60;
+    // Plugin instruments (version 56): play the tuning above through MPE, each note on its
+    // own member channel (2..16) with a pitch bend of the note's cents (+/-48 semitone range).
+    bool mpe = false;
     SamplerSettings sampler;
     Id group = 0;        // Display group only; zero means Unsorted, never a routing boundary.
     double swingMix = 1; // Multiplier of global Swing; source notes remain unchanged.
@@ -204,7 +207,7 @@ struct Arrangement
 };
 struct Project
 {
-    static constexpr int currentVersion = 55;
+    static constexpr int currentVersion = 56;
     int version = currentVersion;
     Id nextId = 1;
     juce::String name = "Untitled";

@@ -15,6 +15,7 @@ class LiveMidi
         std::uint32_t repeatOrdinal = 0;
         std::uint8_t noteOffVelocity = 0;
         std::uint8_t midiChannel = 0; // Actual emitted channel, independent of later source recoloring.
+        std::uint8_t group = 0;       // Source colour group (equals midiChannel unless MPE).
     };
     std::array<Gate, 128> gates{};
     std::uint64_t generation = 0;
@@ -22,6 +23,8 @@ class LiveMidi
     double frameOrigin = 0, frameRate = 0;
     std::uint64_t frameCursor = 0;
     bool wasPlaying = false;
+    bool mpe = false;         // This Channel plays MPE: per-note member channels 2..16.
+    std::uint8_t member = 0;  // Last member channel handed out (0-based 1..15).
     int count = 0;
     void emit(int frame, int status, int pitch, int velocity = 0) noexcept
     {
@@ -57,9 +60,25 @@ class LiveMidi
             free = &gates[0];
             emit(frame, 0x80 | free->midiChannel, free->pitch);
         }
-        emit(frame, 0x90 | n.colourGroup, n.pitch, juce::roundToInt(n.velocity * 127));
+        auto channel = std::uint8_t(n.colourGroup);
+        if (mpe)
+        {
+            // Next member channel not sounding (or the next one when all 15 are busy), then
+            // the note's cents as its pitch bend before the note-on.
+            for (int tries = 0; tries < 15; ++tries)
+            {
+                member = std::uint8_t(member % 15 + 1);
+                if (std::none_of(gates.begin(), gates.end(),
+                                 [&](const Gate &g) { return g.active && g.midiChannel == member; }))
+                    break;
+            }
+            channel = member;
+            const int bend = juce::jlimit(0, 16383, juce::roundToInt(8192 + n.cents / 4800. * 8192));
+            emit(frame, 0xe0 | channel, bend & 127, bend >> 7);
+        }
+        emit(frame, 0x90 | channel, n.pitch, juce::roundToInt(n.velocity * 127));
         *free = {true,    n.note,          n.placement,       n.pitch,
-                 n.start, n.repeatOrdinal, n.noteOffVelocity, std::uint8_t(n.colourGroup)};
+                 n.start, n.repeatOrdinal, n.noteOffVelocity, channel, std::uint8_t(n.colourGroup)};
     }
     void off(Id note, Id placement, int frame, std::uint32_t repeatOrdinal) noexcept
     {
@@ -82,6 +101,7 @@ class LiveMidi
         frameOrigin = frameRate = 0;
         frameCursor = 0;
         wasPlaying = false;
+        member = 0;
     }
     int process(const LiveDocument &document, Id channelId, double time, int frames, double rate,
                 bool playing) noexcept
@@ -109,7 +129,22 @@ class LiveMidi
             frameOrigin = time;
             frameRate = rate;
             frameCursor = 0;
+            if (channel->mpe)
+            {
+                // MPE lower zone: master channel 1 with 15 members, each bending +/-48 semitones.
+                emit(0, 0xb0, 101, 0);
+                emit(0, 0xb0, 100, 6);
+                emit(0, 0xb0, 6, 15);
+                for (int m = 1; m < 16; ++m)
+                {
+                    emit(0, 0xb0 | m, 101, 0);
+                    emit(0, 0xb0 | m, 100, 0);
+                    emit(0, 0xb0 | m, 6, 48);
+                    emit(0, 0xb0 | m, 38, 0);
+                }
+            }
         }
+        mpe = channel->mpe;
         // Wide nearest-even coordinate anchored to this contiguous playback
         // run. Preserve the same wire frame through callback partitions.
         const auto realizedFrame = [&](double eventTime) noexcept
@@ -121,7 +156,7 @@ class LiveMidi
                 if (g.active)
                 {
                     auto *n = channel->find(g.note, g.placement, g.repeatOrdinal);
-                    if (!n || n->slide || n->colourGroup != g.midiChannel || n->pitch != g.pitch ||
+                    if (!n || n->slide || n->colourGroup != g.group || n->pitch != g.pitch ||
                         n->start != g.start || realizedFrame(n->end) < beginFrame)
                     {
                         emit(0, 0x80 | g.midiChannel, g.pitch);

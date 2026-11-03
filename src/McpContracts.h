@@ -426,13 +426,15 @@ inline juce::var commandArgumentSchema(const juce::String &id)
           "properties":{"pattern":{"type":"integer","minimum":1,"description":"Stable Pattern ID."},
           "value":{"type":"number","minimum":-1,"maximum":64,"description":"Performance launch step in beats: -1 one bar of the Song meter (default), 0 immediately, otherwise 0.0625..64. Saved with the Pattern (project v49)."}},
           "required":["pattern","value"]})JSON");
+    if (id == "channel.mpe")
+        return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{"channel":{"type":"integer","minimum":1,"description":"Plugin instrument Channel."},"enabled":{"type":"boolean","default":true,"description":"Play the Channel tuning table/scale and per-note fine cents through MPE: each note on its own member channel 2..16 with a pitch bend of its cents; the zone (channels 2..16, bend range 48 semitones) is announced on every playback start. The plugin must support MPE. Saved with the Channel (project v56)."}},"required":["channel"]})");
     if (id == "channel.scale")
         return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{"channel":{"type":"integer","minimum":1},"scale":{"type":"array","maxItems":128,"items":{"type":"number","exclusiveMinimum":0,"maximum":4800},"description":"Degree cents after the implicit 0, rising; the last is the period (1200 for an octave). Empty clears. Consecutive keys play consecutive degrees (e.g. 24 values of 50..1200 = 24-EDO)."},"pitch":{"type":"integer","minimum":0,"maximum":127,"description":"Root key that plays at its normal pitch (default 60)."}},"required":["channel","scale"]})");
     if (id == "channel.tuning")
     {
         properties.getDynamicObject()->setProperty(
             "tuning",
-            juce::JSON::parse(R"({"type":"array","minItems":12,"maxItems":12,"items":{"type":"number","minimum":-100,"maximum":100},"description":"Cents added to every note of each pitch class C, C#, ... B (all zero = equal temperament). Played by the local sampler; MIDI 1 plugin instruments ignore it."})"));
+            juce::JSON::parse(R"({"type":"array","minItems":12,"maxItems":12,"items":{"type":"number","minimum":-100,"maximum":100},"description":"Cents added to every note of each pitch class C, C#, ... B (all zero = equal temperament). Played by the local sampler, and by plugin instruments with channel.mpe enabled; other plugin instruments ignore it."})"));
         schema.getDynamicObject()->setProperty("required", juce::Array<juce::var>{"channel", "tuning"});
     }
     if (id.startsWith("tempo.change."))

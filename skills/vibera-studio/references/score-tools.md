@@ -63,8 +63,12 @@ All take `ids` (empty = the whole selected/explicit Channel part) plus `pattern`
 - `notes.maqam {text: maqam, pitch: tonic}`: real quarter tones (24-TET) for rast,
   bayati, saba, sikah, huzam, hijaz, nahawand, kurd, ajam, nawaAthar, jiharkah. Notes
   become MIDI pitch + `fineCents` (-50 for half-flat degrees). Sikah/Huzam tonic is a
-  half flat below the given pitch. The local sampler plays fine cents; MIDI 1 plugin
-  instruments (VST3) ignore them.
+  half flat below the given pitch. The local sampler plays fine cents; plugin
+  instruments (VST3) ignore them unless MPE tuning is on (below).
 - Channel tuning: `vibera_command channel.tuning {channel, tuning: [12 cents, C..B]}` (all
   zero = equal temperament); read back as `tuning` in `vibera_inspect channels`. The UI
   offers maqam presets on any tonic and 12-note Scala (.scl) files (Channel menu > Tuning).
+- Plugin tuning through MPE: `vibera_command channel.mpe {channel, enabled}` on a plugin
+  instrument Channel sends each note on its own member channel 2..16 with a pitch bend of
+  its tuning + fine cents (48-semitone range, zone announced at playback start). The
+  plugin must support MPE; otherwise leave it off.
