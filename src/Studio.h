@@ -891,6 +891,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Splits a several-track take into one WAV per track (`<name>-in<k>.wav`).
     static juce::Result splitAudioTake(const juce::File &, int tracks, std::vector<juce::File> &parts);
     AudioInputSettings audioInput;
+    // Mixer record arm: route the recording input into `insert` (again disarms it).
+    juce::Result toggleInsertRecordArm(int insert);
+    bool insertRecordArmed(int insert) const { return audioInput.enabled && audioInput.insert == insert && insert > 0; }
     AudioTakeOutcome audioTake;
     std::uint64_t audioTakeSerial = 0;
     bool audioTaking = false, audioTakePlacementPending = false, persistentAudioInput = false;

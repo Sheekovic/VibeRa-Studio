@@ -50,6 +50,31 @@ void Studio::loadAudioInputSettings(bool persistent)
         audioInput = next;
 }
 
+juce::Result Studio::toggleInsertRecordArm(int insert)
+{
+    if (insert <= 0 || insert > 125)
+        return juce::Result::fail("Record arm works on Mixer inserts 1..125");
+    auto next = audioInput;
+    if (insertRecordArmed(insert))
+        next.insert = 0; // Disarm: takes go to Playlist clips again.
+    else
+    {
+        next.enabled = true;
+        next.insert = insert;
+    }
+    auto result = applyAudioInput(next);
+    if (result.wasOk())
+    {
+        saveAudioInputSettings();
+        status = next.insert > 0 ? "Insert " + juce::String(insert) + " armed: recording goes into it"
+                                 : juce::String("Insert disarmed: recording goes to Playlist clips");
+    }
+    else
+        status = result.getErrorMessage();
+    repaint();
+    return result;
+}
+
 void Studio::saveAudioInputSettings() const
 {
     if (!persistentAudioInput)

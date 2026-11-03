@@ -108,6 +108,15 @@ juce::Result Studio::verifyDropTargets(const juce::File &folder)
     const double long120 = detectFileTempo(writeClicks("groove-10s.wav", 10., .5), how);
     if (std::abs(long120 - 120) > 3 && std::abs(long120 - 60) > 2 && std::abs(long120 - 240) > 5)
         return fail("a 10 s groove at 120 BPM was not detected (" + juce::String(long120) + ", " + how + ")");
+    // 6. Mixer record arm: arming routes the recording input into the insert, again disarms.
+    if (toggleInsertRecordArm(3).failed() || !insertRecordArmed(3) || audioInput.insert != 3)
+        return fail("arming insert 3 did not route recording into it (" + status + ")");
+    if (toggleInsertRecordArm(5).failed() || insertRecordArmed(3) || !insertRecordArmed(5))
+        return fail("arming another insert did not move the arm");
+    if (toggleInsertRecordArm(5).failed() || insertRecordArmed(5) || audioInput.insert != 0)
+        return fail("arming again did not disarm");
+    if (toggleInsertRecordArm(0).wasOk())
+        return fail("the Master was armed");
     return juce::Result::ok();
 }
 } // namespace vibera

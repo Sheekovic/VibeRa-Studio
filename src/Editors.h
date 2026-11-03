@@ -1975,6 +1975,14 @@ class Studio::Editor final : public juce::Component,
         auto b = mixerRouteButtonBounds(insert);
         return {b.getX() - 6, 34, mixerWidth() - 9, 24};
     }
+    // Record arm dot at the right of each insert header (not Master).
+    juce::Rectangle<int> mixerRecordBounds(int insert) const
+    {
+        if (insert <= 0 || getHeight() < 180)
+            return {};
+        const auto b = mixerNameBounds(insert);
+        return {b.getRight() - 22, b.getY() + 4, 16, 16};
+    }
     int mixerFaderTravel() const
     {
         // Logical coordinates: tall/maximised windows must not require huge hand travel.
@@ -3433,7 +3441,15 @@ class Studio::Editor final : public juce::Component,
                 g.fillRoundedRectangle(float(x + 2), 34.f, float(width - 9), 3.f, 1.5f);
                 g.setColour(ink);
                 g.setFont(juce::Font(vibera::uiFont, 13, juce::Font::bold));
-                g.drawFittedText(m.name, {x + 9, 34, width - 20, 24}, juce::Justification::centredLeft, 1, .9f);
+                g.drawFittedText(m.name, {x + 9, 34, width - (m.index > 0 ? 40 : 20), 24}, juce::Justification::centredLeft, 1, .9f);
+                if (const auto arm = mixerRecordBounds(m.index); !arm.isEmpty())
+                {
+                    const bool armed = s.insertRecordArmed(m.index);
+                    g.setColour(armed ? juce::Colour(0xffef4f5f) : ink.withAlpha(.25f));
+                    g.fillEllipse(arm.toFloat().reduced(3.f));
+                    g.setColour(armed ? juce::Colour(0xffff8a95) : ink.withAlpha(.4f));
+                    g.drawEllipse(arm.toFloat().reduced(2.f), 1.f);
+                }
                 if (const auto *group = mixerGroup(project, mixerGroupFor(project, m.index)))
                 {
                     g.setColour(group->colour ? juce::Colour(group->colour) : accent);
@@ -4445,6 +4461,11 @@ class Studio::Editor final : public juce::Component,
                     a.enabled = !route;
                     s.command("mixer.route", a);
                 }
+                return;
+            }
+            if (!e.mods.isRightButtonDown() && mixerRecordBounds(destination).contains(e.position.toInt()))
+            {
+                s.toggleInsertRecordArm(destination);
                 return;
             }
             const bool nameTarget = mixerControlHit(mixerNameBounds(destination), e.position);
