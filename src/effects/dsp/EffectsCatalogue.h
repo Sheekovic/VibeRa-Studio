@@ -121,6 +121,18 @@ inline constexpr ParameterSpec saturator[] = {{"drive", "Drive", 0, 24, 6, "dB"}
 inline constexpr ParameterSpec maximizer[] = {{"gain", "Gain", 0, 24, 0, "dB"},
                                               {"ceiling", "Ceiling", -12, 0, -.3f, "dB"},
                                               {"release", "Release", 1, 1000, 80, "ms", .35f}};
+inline constexpr ParameterSpec studioReverb[] = {
+    {"type", "Type: 0 Room, 1 Plate, 2 Hall", 0, 2, 2, "", 1, 1},
+    {"size", "Size", 0, 1, .6f, ""},
+    {"decay", "Decay", .2f, 20, 2.5f, "s", .4f},
+    {"predelay", "Pre-delay", 0, 250, 20, "ms", .5f},
+    {"damping", "Damping", 0, 1, .45f, ""},
+    {"diffusion", "Diffusion", 0, 1, .75f, ""},
+    {"modulation", "Modulation", 0, 1, .35f, ""},
+    {"low-cut", "Low cut", 20, 1000, 120, "Hz", .3f},
+    {"high-cut", "High cut", 1000, 20000, 9000, "Hz", .3f},
+    {"width", "Width", 0, 1, 1, ""},
+    {"mix", "Mix", 0, 1, .3f, ""}};
 template <std::size_t N>
 constexpr EffectSpec entry(EffectId id, const char *slug, const char *name, const char *category,
                            const ParameterSpec (&parameters)[N])
@@ -159,7 +171,8 @@ inline constexpr std::array effects = {
     entry(EffectId::transientShaper, "transient-shaper", "Transient Shaper", "Dynamics", transient),
     entry(EffectId::multiband, "multiband", "Multiband Dynamics", "Dynamics", multiband),
     entry(EffectId::saturator, "saturator", "Saturator", "Distortion", saturator),
-    entry(EffectId::maximizer, "maximizer", "Maximizer", "Dynamics", maximizer)};
+    entry(EffectId::maximizer, "maximizer", "Maximizer", "Dynamics", maximizer),
+    entry(EffectId::studioReverb, "studio-reverb", "Studio Reverb", "Time", studioReverb)};
 static_assert(effects.size() == static_cast<std::size_t>(EffectId::count));
 } // namespace catalogue
 inline std::span<const EffectSpec> catalogueEntries() noexcept

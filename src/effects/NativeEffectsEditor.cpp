@@ -216,6 +216,12 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
                 static const char *modes[]{"Low pass", "High pass", "Band pass"};
                 return juce::String(modes[juce::jlimit(0, 2, int(std::lround(v)))]);
             };
+        else if (spec.id == EffectId::studioReverb && id == "type")
+            row->slider.textFromValueFunction = [](double v)
+            {
+                static const char *types[]{"Room", "Plate", "Hall"};
+                return juce::String(types[juce::jlimit(0, 2, int(std::lround(v)))]);
+            };
         else if (p.interval == 1 && p.minimum == 0 && p.maximum == 1)
             row->slider.textFromValueFunction = [](double v) { return juce::String(v >= .5 ? "On" : "Off"); };
         if (row->slider.textFromValueFunction)

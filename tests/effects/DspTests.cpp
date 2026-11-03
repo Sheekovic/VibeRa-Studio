@@ -567,6 +567,48 @@ void studioOracles()
     Engine engine;
     engine.prepare(48000);
     require(engine.latencySamples(EffectId::maximizer) == 72, "Maximizer reports its 1.5 ms lookahead");
+    // Studio Reverb: the measured decay follows the Decay setting, the tail is stereo,
+    // and Mix 0 is the dry signal.
+    for (float decay : {1.f, 3.f})
+    {
+        auto rv = defaultValues(EffectId::studioReverb);
+        rv[2] = decay;
+        rv[3] = 0;
+        rv[7] = 20;
+        rv[8] = 20000;
+        rv[10] = 1;
+        const int length = int(48000 * (decay * 1.6 + .5));
+        const auto tail = renderEffect(EffectId::studioReverb, rv, [](int i) { return i == 0 ? 1.f : 0.f; }, length);
+        // Schroeder backward integration of the energy, then the -5..-25 dB slope.
+        std::vector<double> energy(static_cast<std::size_t>(length), 0.0);
+        double total = 0;
+        for (int i = length - 1; i >= 0; --i)
+        {
+            total += double(tail.left[size_t(i)]) * tail.left[size_t(i)] + double(tail.right[size_t(i)]) * tail.right[size_t(i)];
+            energy[size_t(i)] = total;
+        }
+        int t5 = -1, t25 = -1;
+        for (int i = 0; i < length; ++i)
+        {
+            const double db = 10 * std::log10(energy[size_t(i)] / energy[0] + 1e-30);
+            if (t5 < 0 && db <= -5)
+                t5 = i;
+            if (t25 < 0 && db <= -25)
+                t25 = i;
+        }
+        require(t5 > 0 && t25 > t5, "Studio Reverb tail decays");
+        const double rt60 = (t25 - t5) / 48000. * 3.;
+        require(std::abs(rt60 - decay) < decay * .3,
+                "Studio Reverb decay matches its setting (" + std::to_string(rt60) + " s for " + std::to_string(decay) + " s)");
+        double difference = 0;
+        for (int i = 2000; i < 20000; ++i)
+            difference += std::abs(tail.left[size_t(i)] - tail.right[size_t(i)]);
+        require(difference > 1, "Studio Reverb tail is stereo");
+    }
+    auto dryVerb = defaultValues(EffectId::studioReverb);
+    dryVerb[10] = 0;
+    require(std::abs(rmsOf(renderEffect(EffectId::studioReverb, dryVerb, sine(500), n).left, 24000, n) / (.25 / std::sqrt(2.)) - 1) < .01,
+            "Studio Reverb mix 0 is dry");
 }
 int main()
 {

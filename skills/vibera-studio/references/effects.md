@@ -67,6 +67,9 @@ Mixing and mastering processors:
 - Saturator (`saturator`): drive, character (tape to tube), tone tilt, mix, output.
 - Maximizer (`maximizer`): gain, ceiling, release; 1.5 ms lookahead (reported latency),
   the output never exceeds the ceiling. De-esser, Multiband and Maximizer show gain reduction.
+- Studio Reverb (`studio-reverb`): type (0 Room, 1 Plate, 2 Hall), size, decay (RT60
+  seconds), pre-delay, damping, diffusion, modulation, low/high cut of the tail, width, mix.
+  An 8-line feedback delay network; the measured decay follows the setting.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

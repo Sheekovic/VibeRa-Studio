@@ -50,6 +50,7 @@ class StudioEffects
     void processMultiband(float &left, float &right) noexcept;
     void processSaturator(float &left, float &right) noexcept;
     void processMaximizer(float &left, float &right) noexcept;
+    void processReverb(float &left, float &right) noexcept;
     double coefficient(double milliseconds) const noexcept;
 
     EffectId effect_ = EffectId::parametricEq;
@@ -77,6 +78,20 @@ class StudioEffects
     double held_ = 1, boxcarSum_ = 0;
     std::vector<double> boxcar_;
     int boxcarCursor_ = 0;
+    // Studio Reverb: pre-delay, four input diffusers per side and an 8-line feedback
+    // delay network with Hadamard mixing, damping and slow delay modulation.
+    static constexpr int lines = 8;
+    std::vector<float> predelay_;
+    int predelayWrite_ = 0, predelaySamples_ = 0;
+    std::array<std::vector<float>, 8> diffuser_{};
+    std::array<int, 8> diffuserLength_{}, diffuserWrite_{};
+    double diffusion_ = .5;
+    std::array<std::vector<float>, lines> line_{};
+    std::array<double, lines> lineLength_{}, lineGain_{}, damp_{};
+    std::array<int, lines> lineWrite_{};
+    double dampCoefficient_ = .5, modDepth_ = 0, width_ = 1, wetMix_ = .3;
+    double lfo_ = 0;
+    Filter wetLow_{}, wetHigh_{};
     bool prepared_ = false;
 };
 } // namespace vibera::effects

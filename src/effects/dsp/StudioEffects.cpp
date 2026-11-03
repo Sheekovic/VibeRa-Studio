@@ -78,6 +78,12 @@ void StudioEffects::prepare(double sampleRate)
     delayR_.assign(size_t(lookahead_), 0.f);
     required_.assign(size_t(lookahead_ + 1), 1.f);
     boxcar_.assign(size_t(lookahead_), 1.);
+    // Reverb buffers sized for the largest settings (Hall, full size, 250 ms pre-delay).
+    predelay_.assign(2 * (size_t(sampleRate * .26) + 2), 0.f); // Interleaved stereo.
+    for (auto &d : diffuser_)
+        d.assign(size_t(sampleRate * .03) + 2, 0.f);
+    for (auto &l : line_)
+        l.assign(size_t(sampleRate * .26) + 4, 0.f);
     prepared_ = true;
     reset();
 }
@@ -104,6 +110,18 @@ void StudioEffects::reset() noexcept
     boxcarSum_ = double(boxcar_.size());
     held_ = 1;
     cursor_ = boxcarCursor_ = 0;
+    std::fill(predelay_.begin(), predelay_.end(), 0.f);
+    for (auto &d : diffuser_)
+        std::fill(d.begin(), d.end(), 0.f);
+    for (auto &l : line_)
+        std::fill(l.begin(), l.end(), 0.f);
+    predelayWrite_ = 0;
+    diffuserWrite_.fill(0);
+    lineWrite_.fill(0);
+    damp_.fill(0);
+    lfo_ = 0;
+    wetLow_.reset();
+    wetHigh_.reset();
     reductionDb_ = 0;
 }
 int StudioEffects::latencySamples(EffectId effect) const noexcept
@@ -152,6 +170,37 @@ void StudioEffects::setParameters(EffectId effect, const Values &values) noexcep
         for (int i = 0; i < 4; ++i)
             allpass_[size_t(i)].set(i < 2 ? K::lowPass : K::highPass, high, .70710678, 0, rate);
     }
+    else if (effect == EffectId::studioReverb)
+    {
+        // Mutually prime base lengths (ms); the type scales the space, Size scales within it.
+        constexpr double base[lines]{29.7, 37.1, 41.1, 43.7, 53.3, 61.7, 71.9, 79.3};
+        constexpr double typeScale[3]{.45, .7, 1.25};
+        const int type = std::clamp(int(std::lround(values[0])), 0, 2);
+        const double scale = typeScale[type] * (.5 + values[1]);
+        const double decay = std::max(.2, double(values[2]));
+        for (int i = 0; i < lines; ++i)
+        {
+            const double length = std::min(base[i] * scale * .001 * rate, double(line_[size_t(i)].size()) - 3);
+            lineLength_[size_t(i)] = length;
+            // Gain per pass for the requested RT60 (60 dB down after `decay` seconds).
+            lineGain_[size_t(i)] = std::pow(10., -3. * length / (rate * decay));
+        }
+        constexpr double diffuserMs[4]{4.77, 3.59, 12.73, 9.31};
+        for (int i = 0; i < 8; ++i)
+            diffuserLength_[size_t(i)] = std::clamp(int(diffuserMs[i % 4] * (i < 4 ? 1. : 1.07) * (type == 1 ? 1.4 : 1.) *
+                                                        .001 * rate),
+                                                    1, int(diffuser_[size_t(i)].size()) - 1);
+        // Plates diffuse densely from the start; rooms keep early detail.
+        diffusion_ = values[5] * (type == 1 ? .75 : type == 2 ? .7 : .6);
+        predelaySamples_ = std::clamp(int(values[3] * .001 * rate), 0, int(predelay_.size()) / 2 - 2);
+        const double cutoff = 20000. * std::pow(1500. / 20000., double(values[4]));
+        dampCoefficient_ = std::exp(-2 * pi * cutoff / rate);
+        modDepth_ = values[6] * .0007 * rate; // Up to 0.7 ms of slow delay modulation.
+        wetLow_.set(K::highPass, values[7], .70710678, 0, rate);
+        wetHigh_.set(K::lowPass, values[8], .70710678, 0, rate);
+        width_ = values[9];
+        wetMix_ = values[10];
+    }
     else if (effect == EffectId::saturator)
     {
         tiltLow_.set(K::lowShelf, 300, .70710678, -values[2] * 6, rate);
@@ -181,6 +230,9 @@ void StudioEffects::process(float &left, float &right) noexcept
         break;
     case EffectId::maximizer:
         processMaximizer(left, right);
+        break;
+    case EffectId::studioReverb:
+        processReverb(left, right);
         break;
     default:
         break;
@@ -374,5 +426,85 @@ void StudioEffects::processMaximizer(float &left, float &right) noexcept
     const float limit = float(ceiling);
     left = std::clamp(float(delayedL * smoothed), -limit, limit);
     right = std::clamp(float(delayedR * smoothed), -limit, limit);
+}
+void StudioEffects::processReverb(float &left, float &right) noexcept
+{
+    const float dryL = left, dryR = right;
+    // Pre-delay (shared, mono-preserving stereo pair interleaved in one ring).
+    const int size = int(predelay_.size()) / 2;
+    const int read = (predelayWrite_ - predelaySamples_ + size) % size;
+    float inL = predelay_[size_t(read * 2)], inR = predelay_[size_t(read * 2 + 1)];
+    predelay_[size_t(predelayWrite_ * 2)] = left;
+    predelay_[size_t(predelayWrite_ * 2 + 1)] = right;
+    predelayWrite_ = (predelayWrite_ + 1) % size;
+    // Input diffusion: four Schroeder allpasses per side smear the attack into a cloud.
+    const auto diffuse = [&](float x, int first)
+    {
+        for (int i = first; i < first + 4; ++i)
+        {
+            auto &d = diffuser_[size_t(i)];
+            const int length = diffuserLength_[size_t(i)];
+            const int at = diffuserWrite_[size_t(i)];
+            const float delayed = d[size_t((at - length + int(d.size())) % int(d.size()))];
+            const float v = float(x + diffusion_ * delayed);
+            d[size_t(at)] = v;
+            diffuserWrite_[size_t(i)] = (at + 1) % int(d.size());
+            x = float(delayed - diffusion_ * v);
+        }
+        return x;
+    };
+    inL = diffuse(inL, 0);
+    inR = diffuse(inR, 4);
+    // Read every line (three with slow modulated fractional reads), damp, mix with an
+    // orthonormal 8x8 Hadamard matrix and feed back with the RT60 gain.
+    lfo_ += 2 * pi * .37 / sampleRate_;
+    if (lfo_ > 2 * pi)
+        lfo_ -= 2 * pi;
+    std::array<double, lines> s{};
+    for (int i = 0; i < lines; ++i)
+    {
+        const auto &buffer = line_[size_t(i)];
+        const int n = int(buffer.size());
+        double delay = lineLength_[size_t(i)];
+        if (i == 1 || i == 4 || i == 6)
+            delay += modDepth_ * std::sin(lfo_ * (1 + i * .13) + i);
+        delay = std::clamp(delay, 1., double(n - 3));
+        double position = lineWrite_[size_t(i)] - delay;
+        while (position < 0)
+            position += n;
+        const int i0 = int(position), i1 = (i0 + 1) % n;
+        const double fraction = position - i0;
+        const double y = buffer[size_t(i0)] + (buffer[size_t(i1)] - buffer[size_t(i0)]) * fraction;
+        damp_[size_t(i)] = y + (damp_[size_t(i)] - y) * dampCoefficient_;
+        s[size_t(i)] = damp_[size_t(i)];
+    }
+    // Fast Walsh-Hadamard transform (normalized).
+    for (int h = 1; h < lines; h *= 2)
+        for (int i = 0; i < lines; i += h * 2)
+            for (int j = i; j < i + h; ++j)
+            {
+                const double a = s[size_t(j)], b = s[size_t(j + h)];
+                s[size_t(j)] = a + b;
+                s[size_t(j + h)] = a - b;
+            }
+    const double norm = 1 / std::sqrt(double(lines));
+    double outL = 0, outR = 0;
+    for (int i = 0; i < lines; ++i)
+    {
+        auto &buffer = line_[size_t(i)];
+        const double input = (i % 2 == 0 ? inL : inR) * .5;
+        buffer[size_t(lineWrite_[size_t(i)])] = float(input + s[size_t(i)] * norm * lineGain_[size_t(i)]);
+        lineWrite_[size_t(i)] = (lineWrite_[size_t(i)] + 1) % int(buffer.size());
+        (i % 2 == 0 ? outL : outR) += damp_[size_t(i)];
+    }
+    outL *= .35;
+    outR *= .35;
+    // Width (mid/side) and tone shaping of the tail only.
+    const double mid = (outL + outR) * .5, side = (outL - outR) * .5 * width_;
+    float wetL = float(mid + side), wetR = float(mid - side);
+    wetL = wetHigh_.tick(wetLow_.tick(wetL, 0), 0);
+    wetR = wetHigh_.tick(wetLow_.tick(wetR, 1), 1);
+    left = float(dryL * (1 - wetMix_) + wetL * wetMix_);
+    right = float(dryR * (1 - wetMix_) + wetR * wetMix_);
 }
 } // namespace vibera::effects
