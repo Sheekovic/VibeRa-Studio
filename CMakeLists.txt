@@ -1058,3 +1058,10 @@ add_test(NAME vibera_synth_content COMMAND "${Python3_EXECUTABLE}"
   --library "${CMAKE_CURRENT_SOURCE_DIR}/assets/synthesizer/library.json"
   --output "${CMAKE_CURRENT_BINARY_DIR}/synthesizer-content/verification.json")
 set_tests_properties(vibera_synth_content PROPERTIES TIMEOUT 60 RUN_SERIAL TRUE)
+
+# VibeRa Tune shifts pitch with the Signalsmith Stretch (MIT) bundled with the pinned engine.
+foreach(tune_target VibeRaPluginWorker VibeRaEffectsDspTests VibeRaNativeEffectsTests VibeRaSynthPluginTests)
+  if(TARGET ${tune_target})
+    target_include_directories(${tune_target} PRIVATE "${TE_ROOT}/modules/tracktion_engine/3rd_party/signalsmith-stretch")
+  endif()
+endforeach()

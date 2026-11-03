@@ -82,7 +82,11 @@ inline constexpr ParameterSpec tune[] = {
     {"scale", "Scale 0Chr 1Maj 2Min 3HMin 4Pent 5Rast 6Bayati 7Saba 8Sikah 9Huzam 10Hijaz 11Nahawand 12Kurd 13Athar 14Jiharkah", 0, 14, 1, "", 1, 1},
     {"retune", "Retune time", 0, 400, 40, "ms", .4f},
     {"amount", "Amount", 0, 1, 1, ""},
-    {"mix", "Mix", 0, 1, 1, ""}};
+    {"mix", "Mix", 0, 1, 1, ""},
+    {"humanize", "Humanize", 0, 1, 0, ""},
+    {"flex", "Flex (cents, 0 = off)", 0, 100, 0, "cents"},
+    {"formants", "Keep formants", 0, 1, 1, "", 1, 1},
+    {"transpose", "Transpose", -12, 12, 0, "st", 1, 1}};
 inline constexpr ParameterSpec vocoder[] = {{"note", "Carrier note (MIDI)", 24, 96, 48, "", 1, 1},
                                             {"release", "Release", 5, 500, 60, "ms", .4f},
                                             {"noise", "Noise", 0, 1, .15f, ""},

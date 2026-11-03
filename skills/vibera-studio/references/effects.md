@@ -48,8 +48,12 @@ from the running executable; current source is not a qualified distribution.
 VibeRa Tune (type `tune`): pitch correction. Parameters: key 0..11 (C..B), scale 0..14
 (Chromatic, Major, Minor, Harmonic minor, Minor pentatonic, Rast, Bayati, Saba, Sikah,
 Huzam, Hijaz, Nahawand, Kurd, Nawa Athar, Jiharkah; maqamat use quarter tones; Sikah/Huzam
-tonic is a half flat below the key), retune 0..400 ms, amount, mix. Monophonic sources
-only; adds about 10 ms of delay that is not reported for compensation.
+tonic is a half flat below the key), retune 0..400 ms (0 = hard robotic tune), amount, mix,
+humanize 0..1 (slower correction on held notes), flex 0..100 cents (0 off; corrects only near
+a degree, leaving slides alone), formants 0/1 (keep the voice character, default on) and
+transpose -12..12 semitones. Shifting uses the vendored Signalsmith Stretch; the fixed delay
+(about 110 ms at 48 kHz) is reported as plugin latency and compensated by the host.
+Monophonic sources only.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

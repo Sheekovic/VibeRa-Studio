@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "PitchCorrect.h"
+#include <signalsmith-stretch.h>
 
 #include <algorithm>
 #include <cmath>
@@ -42,31 +43,50 @@ const char *PitchCorrect::scaleName(int index) noexcept
     return index >= 0 && index < scaleCount ? scales[index].name : "";
 }
 
+struct PitchCorrect::Stretch
+{
+    signalsmith::stretch::SignalsmithStretch<float> engine;
+};
+PitchCorrect::PitchCorrect() = default;
+PitchCorrect::~PitchCorrect() = default;
+PitchCorrect::PitchCorrect(PitchCorrect &&) noexcept = default;
+PitchCorrect &PitchCorrect::operator=(PitchCorrect &&) noexcept = default;
 void PitchCorrect::prepare(double sampleRate)
 {
     sampleRate_ = sampleRate;
     analysis_.assign(analysisSize, 0.f);
     difference_.assign(analysisSize / 2, 0.f);
-    window_ = std::max(64, int(sampleRate * .02));
-    lineL_.assign(size_t(window_ * 2 + 4), 0.f);
-    lineR_.assign(size_t(window_ * 2 + 4), 0.f);
+    raw_.assign(analysisSize / 2, 0.f);
+    if (!stretch_)
+        stretch_ = std::make_unique<Stretch>();
+    // About 50 ms analysis blocks: long enough for low voices, short enough to track.
+    const int blockSamples = std::max(512, int(sampleRate * .1));
+    stretch_->engine.configure(2, blockSamples, blockSamples / 4);
+    latency_ = block + stretch_->engine.inputLatency() + stretch_->engine.outputLatency();
+    dryL_.assign(size_t(latency_), 0.f);
+    dryR_.assign(size_t(latency_), 0.f);
+    ratioHistory_.assign(size_t(std::max(1, stretch_->engine.inputLatency() / block) + 1), 1.);
     prepared_ = true;
     reset();
 }
-
 void PitchCorrect::reset() noexcept
 {
     std::fill(analysis_.begin(), analysis_.end(), 0.f);
-    std::fill(lineL_.begin(), lineL_.end(), 0.f);
-    std::fill(lineR_.begin(), lineR_.end(), 0.f);
-    analysisWrite_ = hopCounter_ = write_ = 0;
+    std::fill(dryL_.begin(), dryL_.end(), 0.f);
+    std::fill(dryR_.begin(), dryR_.end(), 0.f);
+    std::fill(ratioHistory_.begin(), ratioHistory_.end(), 1.);
+    inL_.fill(0);
+    inR_.fill(0);
+    outL_.fill(0);
+    outR_.fill(0);
+    if (stretch_)
+        stretch_->engine.reset();
+    analysisWrite_ = hopCounter_ = fill_ = dryWrite_ = ratioWrite_ = 0;
     decimateCarry_ = 0;
     decimatePhase_ = false;
-    detected_ = target_ = 0;
+    detected_ = target_ = lastTarget_ = heldSeconds_ = 0;
     ratio_ = ratioTarget_ = 1;
-    phase_ = 0;
 }
-
 void PitchCorrect::setParameters(const Values &values) noexcept
 {
     key_ = std::clamp(int(std::lround(values[0])), 0, 11);
@@ -74,8 +94,11 @@ void PitchCorrect::setParameters(const Values &values) noexcept
     retuneSeconds_ = std::max(0., double(values[2]) / 1000.);
     amount_ = std::clamp(double(values[3]), 0., 1.);
     mix_ = std::clamp(double(values[4]), 0., 1.);
+    humanize_ = std::clamp(double(values[5]), 0., 1.);
+    flexCents_ = std::clamp(double(values[6]), 0., 100.);
+    formants_ = values[7] >= .5f;
+    transpose_ = std::pow(2., std::clamp(double(std::lround(values[8])), -12., 12.) / 12.);
 }
-
 double PitchCorrect::nearestDegree(double hz) const noexcept
 {
     const auto &s = scales[scale_];
@@ -126,6 +149,7 @@ void PitchCorrect::analyse() noexcept
         running += sum;
         const double normalized = running > 0 ? sum * lag / running : 1;
         difference_[size_t(lag)] = float(normalized);
+        raw_[size_t(lag)] = float(sum);
         if (lag >= minLag && normalized < .15 && chosen < 0)
             chosen = lag;
         if (chosen > 0 && lag > chosen && difference_[size_t(lag)] > difference_[size_t(lag - 1)])
@@ -139,19 +163,40 @@ void PitchCorrect::analyse() noexcept
         ratioTarget_ = 1;
         return;
     }
-    // Parabolic interpolation around the minimum.
+    // Parabolic interpolation on the raw difference (the normalized curve is skewed by its
+    // running mean and biases the period by several cents).
     double lag = chosen;
     if (chosen > 1 && chosen < maxLag)
     {
-        const double a = difference_[size_t(chosen - 1)], b = difference_[size_t(chosen)],
-                     c = difference_[size_t(chosen + 1)];
-        const double denominator = a - 2 * b + c;
-        if (std::abs(denominator) > 1.e-12)
-            lag += .5 * (a - c) / denominator;
+        // The raw minimum can sit one lag beside the normalized one; refine around it.
+        int centre = chosen;
+        if (raw_[size_t(centre - 1)] < raw_[size_t(centre)])
+            --centre;
+        else if (centre + 1 < maxLag && raw_[size_t(centre + 1)] < raw_[size_t(centre)])
+            ++centre;
+        if (centre > 1 && centre < maxLag)
+        {
+            const double a = raw_[size_t(centre - 1)], b = raw_[size_t(centre)], c = raw_[size_t(centre + 1)];
+            const double denominator = a - 2 * b + c;
+            lag = centre;
+            if (std::abs(denominator) > 1.e-12)
+                lag += .5 * (a - c) / denominator;
+        }
     }
     detected_ = rate / lag;
     target_ = nearestDegree(detected_);
-    ratioTarget_ = std::pow(target_ / detected_, amount_);
+    // Flex: full correction within the window around a degree, fading to none at twice it,
+    // so slides and ornaments between notes pass untouched.
+    double strength = amount_;
+    if (flexCents_ > 0)
+    {
+        const double deviation = std::abs(1200. * std::log2(detected_ / target_));
+        strength *= std::clamp(2. - deviation / flexCents_, 0., 1.);
+    }
+    if (std::abs(target_ - lastTarget_) > 1.e-6)
+        heldSeconds_ = 0;
+    lastTarget_ = target_;
+    ratioTarget_ = std::pow(target_ / detected_, strength);
 }
 
 void PitchCorrect::process(float &left, float &right) noexcept
@@ -173,33 +218,35 @@ void PitchCorrect::process(float &left, float &right) noexcept
         hopCounter_ = 0;
         analyse();
     }
-    // Glide toward the target ratio over the retune time (instant when zero).
-    const double coefficient = retuneSeconds_ <= 0 ? 1. : 1. - std::exp(-1. / (retuneSeconds_ * sampleRate_));
+    // Glide toward the target over the retune time; Humanize stretches it up to 5x as a
+    // note is held, keeping long notes natural while fast changes still snap.
+    heldSeconds_ += 1. / sampleRate_;
+    const double retune = retuneSeconds_ * (1. + humanize_ * 4. * std::min(1., heldSeconds_ / .4));
+    const double coefficient = retune <= 0 ? 1. : 1. - std::exp(-1. / (retune * sampleRate_));
     ratio_ += (ratioTarget_ - ratio_) * coefficient;
-    // Two read heads half a window apart; each delay sweeps at (1 - ratio) and wraps,
-    // crossfaded with a raised-cosine so the wrap is never heard.
-    const int size = int(lineL_.size());
-    lineL_[size_t(write_)] = left;
-    lineR_[size_t(write_)] = right;
-    phase_ += (1. - ratio_) / window_;
-    phase_ -= std::floor(phase_);
-    float outL = 0, outR = 0;
-    for (int head = 0; head < 2; ++head)
+    // Aligned dry path for Mix: the slot about to be overwritten is latency_ samples old.
+    const float dryOutL = dryL_[size_t(dryWrite_)], dryOutR = dryR_[size_t(dryWrite_)];
+    dryL_[size_t(dryWrite_)] = left;
+    dryR_[size_t(dryWrite_)] = right;
+    dryWrite_ = (dryWrite_ + 1) % int(dryL_.size());
+    // Block FIFO through the stretcher.
+    inL_[size_t(fill_)] = left;
+    inR_[size_t(fill_)] = right;
+    const float wetL = outL_[size_t(fill_)], wetR = outR_[size_t(fill_)];
+    if (++fill_ == block)
     {
-        double p = phase_ + head * .5;
-        p -= std::floor(p);
-        const double delay = 2. + p * window_;
-        const double gain = .5 - .5 * std::cos(2. * 3.141592653589793 * p);
-        double read = write_ - delay;
-        while (read < 0)
-            read += size;
-        const int i0 = int(read), i1 = (i0 + 1) % size;
-        const float frac = float(read - i0);
-        outL += float(gain) * (lineL_[size_t(i0)] + frac * (lineL_[size_t(i1)] - lineL_[size_t(i0)]));
-        outR += float(gain) * (lineR_[size_t(i0)] + frac * (lineR_[size_t(i1)] - lineR_[size_t(i0)]));
+        fill_ = 0;
+        // The stretcher is working on audio about inputLatency old: use the ratio detected then.
+        ratioHistory_[size_t(ratioWrite_)] = ratio_;
+        ratioWrite_ = (ratioWrite_ + 1) % int(ratioHistory_.size());
+        const double ratio = ratioHistory_[size_t(ratioWrite_)] * transpose_;
+        auto &engine = stretch_->engine;
+        engine.setTransposeFactor(float(ratio));
+        engine.setFormantFactor(1.f, formants_);
+        float *inputs[2]{inL_.data(), inR_.data()}, *outputs[2]{outL_.data(), outR_.data()};
+        engine.process(inputs, block, outputs, block);
     }
-    write_ = (write_ + 1) % size;
-    left = float(mix_) * outL + float(1 - mix_) * left;
-    right = float(mix_) * outR + float(1 - mix_) * right;
+    left = float(mix_) * wetL + float(1 - mix_) * dryOutL;
+    right = float(mix_) * wetR + float(1 - mix_) * dryOutR;
 }
 } // namespace vibera::effects

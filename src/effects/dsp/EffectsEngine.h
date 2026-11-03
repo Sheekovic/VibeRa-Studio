@@ -23,6 +23,11 @@ class Engine
     bool configured = false;
 
   public:
+    // Fixed added delay of an effect (only Tune delays its output).
+    int latencySamples(EffectId effect) const noexcept
+    {
+        return effect == EffectId::pitchCorrect ? tune.latencySamples() : 0;
+    }
     void prepare(double sampleRate)
     {
         if (!std::isfinite(sampleRate) || sampleRate < 8000 || sampleRate > 384000)

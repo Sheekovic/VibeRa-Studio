@@ -355,7 +355,8 @@ double measuredHz(const std::vector<float> &signal, int from, double rate)
         }
     return crossings > 1 ? (crossings - 1) * rate / (last - first) : 0;
 }
-double tuned(double inputHz, int key, int scale, double rate = 48000)
+double tuned(double inputHz, int key, int scale, double rate = 48000, float amount = 1, float transpose = 0,
+             float flex = 0)
 {
     Engine engine;
     engine.prepare(rate);
@@ -363,6 +364,9 @@ double tuned(double inputHz, int key, int scale, double rate = 48000)
     values[0] = float(key);
     values[1] = float(scale);
     values[2] = 0; // Instant retune.
+    values[3] = amount;
+    values[8] = transpose;
+    values[6] = flex;
     require(engine.setParameters(EffectId::pitchCorrect, values), "Tune parameters accepted");
     const int count = int(rate * 1.5);
     auto left = std::vector<float>(static_cast<std::size_t>(count)), right = left;
@@ -379,6 +383,20 @@ double tuned(double inputHz, int key, int scale, double rate = 48000)
 }
 void tuneOracles()
 {
+    // Shifter accuracy and the added controls: transparent at amount 0, octave transpose,
+    // Flex leaves a note far from every degree alone, and the delay is reported.
+    require(std::abs(tuned(450, 0, 0, 48000, 0) - 450) < .5, "Tune amount 0 passes the pitch through");
+    require(std::abs(tuned(450, 0, 0, 48000, 0, 12) - 900) < 1, "Tune transpose +12 doubles the pitch");
+    require(std::abs(tuned(450, 0, 0, 48000, 0, -1) - 424.74) < .5, "Tune transpose -1 lowers a semitone");
+    require(std::abs(tuned(452, 0, 1, 48000, 1, 0, 20) - 452) < 1.5,
+            "Flex 20 cents leaves a note about 47 cents from C major alone");
+    require(std::abs(tuned(442, 0, 1, 48000, 1, 0, 20) - 440) < 1.5, "Flex still corrects a note near a degree");
+    {
+        Engine engine;
+        engine.prepare(48000);
+        require(engine.latencySamples(EffectId::pitchCorrect) > 128 && engine.latencySamples(EffectId::reverb) == 0,
+                "Tune reports its fixed delay; other effects report none");
+    }
     const double a = tuned(450, 0, 0);
     require(std::abs(a - 440) < 1.5, "Chromatic: 450 Hz is corrected to A4 440 Hz (got " + std::to_string(a) + ")");
     const double halfFlat = 329.6276 * std::pow(2., -50. / 1200);
