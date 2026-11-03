@@ -747,6 +747,15 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     std::unique_ptr<juce::TooltipWindow> tooltips; // Hover hints for every window of the app.
     ScoreLog scoreLog;
     void drainScoreLog();
+    // Step record: with the transport stopped, played notes (MIDI or typing keyboard) are
+    // written at a cursor in the selected Pattern; a chord commits when every key is up and
+    // the cursor then advances by the snap (one Undo per chord).
+    bool stepRecord = false;
+    double stepCursor = 0;
+    std::map<int, float> stepHeld;
+    std::vector<std::pair<int, float>> stepChord;
+    void stepRecordEvent(const MidiCapture::Event &);
+    double stepLength() const { return snap > 0 ? snap : .25; }
     juce::Result verifyScoreLog(const juce::File &);
     TypingKeyboard typingKeys;
     PerformanceInput performanceInput;

@@ -403,6 +403,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"view.settings", "Settings", Scope::global, false, true, "action"},
         {"view.drumPads", "Drum pads", Scope::global, false, true, "action"},
         {"view.chordProgression", "Create a chord progression", Scope::global, false, true, "action"},
+        {"transport.stepRecord", "Step record", Scope::global, false, true, "action"},
+        {"transport.stepRest", "Step record rest", Scope::global, false, true, "action"},
         {"view.plugins", "VST3 plugin browser", Scope::global, false, true, "action"},
         {"browser.back", "Browser previous folder", Scope::browser, false, true,
          "gap:semantic adapter and end-to-end qualification pending"},

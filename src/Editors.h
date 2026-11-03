@@ -3402,6 +3402,18 @@ class Studio::Editor final : public juce::Component,
                     g.drawVerticalLine(x, 28.f, float(getHeight()));
                 }
             }
+            if (type == 1 && s.stepRecord)
+            {
+                // Step record cursor: where the next played notes are written.
+                const int x = int(left + (s.stepCursor - scroll) * spacing());
+                if (x >= left && x < getWidth())
+                {
+                    g.setColour(orange.withAlpha(.18f));
+                    g.fillRect(float(x), 28.f, float(s.stepLength() * spacing()), float(getHeight() - 28));
+                    g.setColour(orange);
+                    g.fillRect(float(x) - 1.f, 28.f, 2.f, float(getHeight() - 28));
+                }
+            }
         }
         else
         {

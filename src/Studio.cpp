@@ -1814,9 +1814,49 @@ void Studio::drainScoreLog()
             {
                 event.source = source;
                 scoreLog.add(event);
+                if (stepRecord && !audio.playing())
+                    stepRecordEvent(event);
             }
     }
     scoreLog.prune(juce::Time::getMillisecondCounterHiRes() / 1000.);
+}
+void Studio::stepRecordEvent(const MidiCapture::Event &event)
+{
+    const int kind = event.bytes[0] & 0xf0, pitch = event.bytes[1] & 127, velocity = event.bytes[2];
+    if (kind == 0x90 && velocity > 0)
+    {
+        stepHeld[pitch] = velocity / 127.f;
+        if (std::none_of(stepChord.begin(), stepChord.end(), [&](const auto &n) { return n.first == pitch; }))
+            stepChord.push_back({pitch, velocity / 127.f});
+        return;
+    }
+    if (kind != 0x80 && kind != 0x90)
+        return;
+    stepHeld.erase(pitch);
+    if (!stepHeld.empty() || stepChord.empty())
+        return;
+    const auto *channel = controller.project.channel(selectedChannel);
+    if (!channel || channel->audioClip)
+    {
+        status = "Step record: select an instrument or sampler Channel";
+        stepChord.clear();
+        return;
+    }
+    CommandArgs a;
+    a.pattern = selectedPattern;
+    a.channel = channel->id;
+    a.enabled = true; // Blend: keep the Pattern's other notes.
+    for (const auto &[notePitch, noteVelocity] : stepChord)
+        a.recordedNotes.push_back({0, channel->id, stepCursor, stepLength(), notePitch, noteVelocity, false});
+    stepChord.clear();
+    const auto revision = controller.revision;
+    command("notes.import", a);
+    if (controller.revision != revision)
+    {
+        stepCursor += stepLength();
+        status = "Step record: next step at beat " + juce::String(stepCursor + 1, 2);
+    }
+    refresh();
 }
 void Studio::clearScoreLog()
 {
@@ -3313,6 +3353,8 @@ void Studio::toolsMenu()
     menu.addItem(203, "Performance mode (launch Patterns live)");
     menu.addItem(205, "Drum pads (play and load a kit)");
     menu.addItem(206, "Create a chord progression...");
+    menu.addItem(207, "Step record (write played notes at a cursor)", true, stepRecord);
+    menu.addItem(208, "Step record: insert a rest", stepRecord);
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
                           (missingCount ? " (" + juce::String(missingCount) + " missing)" : juce::String()),
@@ -3357,6 +3399,16 @@ void Studio::toolsMenu()
                 return safe->showDrumPads();
             if (choice == 206)
                 return safe->showChordProgression();
+            if (choice == 207)
+            {
+                safe->performAction("transport.stepRecord");
+                return;
+            }
+            if (choice == 208)
+            {
+                safe->performAction("transport.stepRest");
+                return;
+            }
             if (choice == 204)
             {
                 safe->chooser = std::make_unique<juce::FileChooser>("Folder to search for the missing samples",
@@ -3938,6 +3990,30 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.mixer")
     {
         toggleEditor(3);
+        return true;
+    }
+    if (action == "transport.stepRecord")
+    {
+        stepRecord = !stepRecord;
+        stepHeld.clear();
+        stepChord.clear();
+        if (stepRecord)
+        {
+            const double here = std::max(0., audio.positionBeat());
+            stepCursor = std::floor(here / stepLength() + 1.e-9) * stepLength();
+        }
+        status = stepRecord ? "Step record on: play notes to write them at beat " + juce::String(stepCursor + 1, 2)
+                            : juce::String("Step record off");
+        repaint();
+        return true;
+    }
+    if (action == "transport.stepRest")
+    {
+        if (!stepRecord)
+            return false;
+        stepCursor += stepLength();
+        status = "Step record: rest, next step at beat " + juce::String(stepCursor + 1, 2);
+        repaint();
         return true;
     }
     if (action == "view.drumPads")

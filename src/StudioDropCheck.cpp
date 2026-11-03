@@ -117,6 +117,47 @@ juce::Result Studio::verifyDropTargets(const juce::File &folder)
         return fail("arming again did not disarm");
     if (toggleInsertRecordArm(0).wasOk())
         return fail("the Master was armed");
+    // 7. Step record: a chord commits on release at the cursor, the cursor advances by the
+    // snap, a rest skips a step.
+    selectedChannel = controller.project.channels.back().id;
+    for (auto &channel : controller.project.channels)
+        if (!channel.audioClip && !channel.instrument)
+            selectedChannel = channel.id;
+    snap = .5;
+    audio.stop();
+    performAction("transport.stepRecord");
+    if (!stepRecord || stepCursor != 0)
+        return fail("step record did not start at the playhead");
+    const auto event = [&](int status, int pitch, int velocity)
+    {
+        MidiCapture::Event e;
+        e.bytes = {std::uint8_t(status), std::uint8_t(pitch), std::uint8_t(velocity)};
+        stepRecordEvent(e);
+    };
+    auto *pattern = controller.project.pattern(selectedPattern);
+    const auto notesBefore = pattern ? pattern->notes.size() : 0;
+    event(0x90, 60, 100);
+    event(0x90, 64, 90);
+    event(0x80, 60, 0);
+    if (controller.project.pattern(selectedPattern)->notes.size() != notesBefore)
+        return fail("a chord was written before every key was released");
+    event(0x80, 64, 0);
+    event(0x90, 67, 100);
+    event(0x90, 67, 0); // Note-on with velocity 0 is a release.
+    performAction("transport.stepRest");
+    event(0x90, 72, 100);
+    event(0x80, 72, 0);
+    std::vector<std::pair<double, int>> written;
+    for (const auto &n : controller.project.pattern(selectedPattern)->notes)
+        if (n.channel == selectedChannel && (n.pitch == 60 || n.pitch == 64 || n.pitch == 67 || n.pitch == 72) && !n.step)
+            written.push_back({n.beat, n.pitch});
+    std::sort(written.begin(), written.end());
+    const std::vector<std::pair<double, int>> expected{{0., 60}, {0., 64}, {.5, 67}, {1.5, 72}};
+    if (written != expected || stepCursor != 2.)
+        return fail("step record wrote the wrong positions or cursor (" + juce::String(stepCursor) + ")");
+    performAction("transport.stepRecord");
+    if (stepRecord)
+        return fail("step record did not turn off");
     return juce::Result::ok();
 }
 } // namespace vibera

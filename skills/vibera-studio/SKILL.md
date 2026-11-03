@@ -255,6 +255,10 @@ Tempo map: `vibera_command tempo.change.add {beat (> 0), value: BPM 10..999, ste
 `vibera_inspect {"entity":"tempo"}` (row 0 is the base tempo; `seconds` per change). Song
 mode only. Shaped curves: `tempo.curve {beat, length, value, text: linear|ease|in|out}`
 glides from the tempo at `beat` to `value` (16 ramps, changes inside replaced, one Undo).
+Step record: action `transport.stepRecord` (Tools menu) toggles writing played notes (MIDI or
+typing keyboard, transport stopped) at a cursor in the selected Pattern/Channel; a chord commits
+when every key is up (one Undo) and the cursor advances by the snap; `transport.stepRest` skips a
+step. Playlist `track.lock` protects a track's clips. Export `tail`: cut|leave|wrap.
 Chord progressions: `vibera_command view.chordProgression` (Tools > Create a chord
 progression) opens the generator: key, scale (major, minor, dorian, mixolydian, harmonic
 minor), 2-8 chords, octave, chord length, Conventional..Adventurous; click a chord to roll it;
