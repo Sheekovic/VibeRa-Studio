@@ -370,3 +370,5 @@ Previous note-mute card qualified0.0.60: source34/34, staging19/19, package48/48
 canonical native, real provider and skill0.19.0. [Behavior/evidence](PIANO_NOTE_MUTE.md).
 
 FLP import (source; flp_import fixture test and real FL 11.5/20/21/24 demo opens): File > Open and `vibera_project open` convert .flp projects (tempo, meter, samplers, audio clips, Channel levels/inserts, Patterns/notes, first arrangement Playlist). Remaining: FL plugin/effect conversion (not possible for FL-native plugins), automation clips, mixer levels/effects, clip offsets and mutes.
+
+Channel Rack capacity raised from 128 to 999 Channels (Project::maxChannels; channel_management and flp_import checks pass). Known open issue: exporting the very large FL 21 demo 'Bombs Away' (about 200 Channels, 600 audio clips) after FLP import renders far below realtime, also when capped at 128 Channels; smaller imported projects (14-44 Channels) export at 25x realtime. Cause not yet found.

@@ -51,7 +51,7 @@ class SamplerCutMonitor
         std::int64_t channel = 0;
         int lane = 0;
     };
-    std::array<Slot, 384> slots{}; // 128 Channels x MIDI/typing/preview.
+    std::array<Slot, 384> slots{}; // Sources of one cut group: up to 128 Channels x MIDI/typing/preview.
     int group = -1;
     std::size_t size = 0;
 

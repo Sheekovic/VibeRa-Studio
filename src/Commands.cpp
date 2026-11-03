@@ -2507,8 +2507,8 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         }
         else if (id == "rack.group.assign")
         {
-            if (a.ids.empty() || a.ids.size() > 128)
-                return juce::Result::fail("Select 1..128 Channels to group");
+            if (a.ids.empty() || a.ids.size() > size_t(Project::maxChannels))
+                return juce::Result::fail("Select 1.." + juce::String(Project::maxChannels) + " Channels to group");
             for (auto channel : a.ids)
                 if (!next.channel(channel))
                     return missing();
@@ -3545,8 +3545,9 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         std::set<Id> tracks;
         for (const auto &note : a.recordedNotes)
             tracks.insert(note.channel);
-        if (tracks.count(0) || *tracks.rbegin() > 256 || next.channels.size() + tracks.size() > 128)
-            return juce::Result::fail("Import at most 128 Channels in total from MIDI tracks 1..256");
+        if (tracks.count(0) || *tracks.rbegin() > 256 || next.channels.size() + tracks.size() > size_t(Project::maxChannels))
+            return juce::Result::fail("Import at most " + juce::String(Project::maxChannels) +
+                                      " Channels in total from MIDI tracks 1..256");
         const auto source = *templateChannel;
         std::map<Id, Id> created;
         for (const auto track : tracks)
@@ -4780,8 +4781,8 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
     if (id == "media.relink")
     {
         // Points Channels at found files again; every other setting (name, tempo, envelopes) stays.
-        if (a.relinks.empty() || a.relinks.size() > 128)
-            return juce::Result::fail("Relink 1..128 Channels");
+        if (a.relinks.empty() || a.relinks.size() > size_t(Project::maxChannels))
+            return juce::Result::fail("Relink 1.." + juce::String(Project::maxChannels) + " Channels");
         for (const auto &[channelId, path] : a.relinks)
         {
             auto *channel = next.channel(channelId);

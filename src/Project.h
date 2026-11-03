@@ -214,6 +214,7 @@ struct Arrangement
 struct Project
 {
     static constexpr int currentVersion = 56;
+    static constexpr int maxChannels = 999; // Channel Rack capacity (FL-sized projects).
     int version = currentVersion;
     Id nextId = 1;
     juce::String name = "Untitled";

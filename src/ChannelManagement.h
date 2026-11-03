@@ -11,15 +11,15 @@ inline juce::Result applyChannelManagement(Project &project, const juce::String 
     if (targets.empty() && args.channel)
         targets.push_back(args.channel);
     std::set<Id> chosen;
-    if (targets.empty() || targets.size() > 128)
-        return juce::Result::fail("Choose 1..128 Channels");
+    if (targets.empty() || targets.size() > size_t(Project::maxChannels))
+        return juce::Result::fail("Choose 1.." + juce::String(Project::maxChannels) + " Channels");
     for (auto target : targets)
         if (!project.channel(target) || !chosen.insert(target).second)
             return juce::Result::fail("Channel targets are unavailable or duplicated");
     if (id == "channel.clone")
     {
-        if (project.channels.size() + chosen.size() > 128)
-            return juce::Result::fail("Cloning would exceed the 128 Channel limit");
+        if (project.channels.size() + chosen.size() > size_t(Project::maxChannels))
+            return juce::Result::fail("Cloning would exceed the " + juce::String(Project::maxChannels) + " Channel limit");
         auto original = project.channels;
         juce::StringArray names;
         for (const auto &channel : original)

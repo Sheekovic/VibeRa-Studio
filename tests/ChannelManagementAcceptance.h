@@ -194,7 +194,7 @@ static void channelManagementTests(const juce::File &folder)
                 cleanup.project.validate().wasOk(),
             "Deleting every Channel leaves a valid empty Rack with reusable Mixer automation");
     Controller full;
-    while (full.project.channels.size() < 128)
+    while (full.project.channels.size() < size_t(Project::maxChannels))
         full.project.channels.push_back(
             {full.project.allocate(), "Capacity", "builtin:kick", 0, .7f, 0, false});
     const auto fullState = full.project.state();

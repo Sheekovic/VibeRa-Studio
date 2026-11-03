@@ -115,10 +115,12 @@ juce::String FlpImportReport::summary() const
         text << " Not converted (FL plugins): " << unconvertedPlugins.joinIntoString(", ") << ".";
     if (!missingSamples.isEmpty())
         text << " " << missingSamples.size() << " sample(s) missing.";
+    if (!unreadableSamples.isEmpty())
+        text << " " << unreadableSamples.size() << " sample(s) in an unsupported format (e.g. .wv) left silent.";
     if (automationClipsSkipped > 0)
         text << " " << automationClipsSkipped << " FL automation clip(s) not converted.";
     if (unusedChannelsSkipped > 0)
-        text << " " << unusedChannelsSkipped << " unused Channel(s) left out (128 Channel limit).";
+        text << " " << unusedChannelsSkipped << " unused Channel(s) left out (Channel limit).";
     return text;
 }
 
@@ -306,8 +308,8 @@ juce::Result importFlp(const juce::File &file, Project &result, FlpImportReport 
 
     // Channels: samplers keep their sample, audio-clip Channels their file; FL plugins become
     // named silent placeholders (their sound lives inside FL).
-    // FL automation clips (type 5) have no VibeRa Channel equivalent here; beyond 128
-    // Channels only those that notes or Playlist items use are kept.
+    // FL automation clips (type 5) have no VibeRa Channel equivalent here; beyond the Rack
+    // capacity only Channels that notes or Playlist items use are kept.
     std::set<int> used;
     for (const auto &[index, pattern] : patterns)
         for (const auto &note : pattern.notes)
@@ -319,12 +321,12 @@ juce::Result importFlp(const juce::File &file, Project &result, FlpImportReport 
     report.automationClipsSkipped = int(std::count_if(flChannels.begin(), flChannels.end(),
                                                       [](const auto &c) { return c.type == 5; }));
     std::erase_if(flChannels, [](const auto &c) { return c.type == 5; });
-    if (flChannels.size() > 128)
+    if (flChannels.size() > size_t(Project::maxChannels))
     {
         const auto before = flChannels.size();
         std::erase_if(flChannels, [&](const auto &c) { return !used.count(c.index); });
-        if (flChannels.size() > 128)
-            flChannels.resize(128);
+        if (flChannels.size() > size_t(Project::maxChannels))
+            flChannels.resize(size_t(Project::maxChannels));
         report.unusedChannelsSkipped = int(before - flChannels.size());
     }
     int highestInsert = 0;
@@ -342,7 +344,18 @@ juce::Result importFlp(const juce::File &file, Project &result, FlpImportReport 
         channel.gain = float(fl.gain);
         channel.pan = float(fl.pan);
         highestInsert = std::max(highestInsert, channel.mixer);
-        if (fl.type == 4 && path.isNotEmpty())
+        // A file that exists but cannot be decoded stays a named silent placeholder, so the
+        // project still plays and exports.
+        const bool unreadable = path.isNotEmpty() && juce::File(path).existsAsFile() && !(audioSeconds(path) > 0);
+        if (unreadable)
+            report.unreadableSamples.add(path);
+        if (unreadable)
+        {
+            channel.name << " (unsupported sample)";
+            channel.muted = true;
+            channel.source = "builtin:kick";
+        }
+        else if (fl.type == 4 && path.isNotEmpty())
         {
             channel.audioClip = true;
             channel.source = path;

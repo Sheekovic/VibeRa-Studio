@@ -11,6 +11,7 @@ struct FlpImportReport
     int channels = 0, patterns = 0, notes = 0, patternClips = 0, audioClips = 0;
     juce::StringArray unconvertedPlugins; // FL generator/effect names left as empty placeholders.
     juce::StringArray missingSamples;
+    juce::StringArray unreadableSamples; // Present but in a format VibeRa cannot decode (e.g. WavPack).
     int automationClipsSkipped = 0, unusedChannelsSkipped = 0;
     juce::String summary() const;
 };

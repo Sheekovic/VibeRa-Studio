@@ -1918,7 +1918,7 @@ juce::Result Project::validate() const
     if (!std::isfinite(tempo) || tempo < 20 || tempo > 400 || numerator < 1 || numerator > 32 ||
         (denominator != 2 && denominator != 4 && denominator != 8 && denominator != 16))
         return fail("Invalid tempo or meter");
-    if (channels.size() > 128 || channelGroups.size() > 256 || patterns.empty() || patterns.size() > 1024 ||
+    if (channels.size() > size_t(maxChannels) || channelGroups.size() > 256 || patterns.empty() || patterns.size() > 1024 ||
         placements.size() + audioPlacements.size() + automation.placements.size() > 100000 || mixer.empty() ||
         mixer.size() > 129)
         return fail("Project limits exceeded or missing required data");
