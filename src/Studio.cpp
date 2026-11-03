@@ -538,6 +538,8 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     newPattern.setTooltip("New pattern");
     exportWav.setButtonText("Export");
     devices.setTooltip("Audio devices, editable shortcuts and document macros");
+    if (persistentTyping)
+        recentSources.load(profileFile().getSiblingFile("recent-sources.json"));
     browser = std::make_unique<Browser>(*this);
     addAndMakeVisible(*browser);
     juce::StringArray names{"Channel Rack", "Piano roll", "Playlist", "Mixer"};
@@ -5458,6 +5460,7 @@ void Studio::importAudioClip(const juce::File &file, double beat, int lane)
         repaint();
         return;
     }
+    recentSources.record(file.getFullPathName());
     if (!audioImports.request({file, controller.projectIdentity, beat, 0, lane}))
         status = "Audio import queue full or unavailable; try again";
     else
@@ -5571,7 +5574,10 @@ void Studio::loadSample(const juce::String &source, bool replace, Id channel)
     CommandArgs a;
     a.channel = channel ? channel : selectedChannel;
     a.text = source;
+    const auto revisionBefore = controller.revision;
     command(replace ? "channel.source" : "channel.add", a);
+    if (controller.revision != revisionBefore)
+        recentSources.record(source); // Learn the producer's favourite sounds.
     if (!replace && status == "Ready")
         selectedChannel = controller.project.channels.back().id;
     refresh();

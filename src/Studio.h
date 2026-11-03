@@ -23,6 +23,7 @@
 #include "ai/AiSettings.h"
 #include <deque>
 #include "Performance.h"
+#include "RecentSources.h"
 #include "MissingMedia.h"
 #include <thread>
 #include "ai/MusicEngines.h"
@@ -823,6 +824,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void pollPerformance();
     void showPerformance();
     std::unique_ptr<juce::DocumentWindow> drumPadsWindow;
+    // Learns the samples/instruments the producer loads most (Browser "Recent" section).
+    RecentSources recentSources;
     void showDrumPads();
     juce::var performanceState() const;
     bool togglePerformancePad(int index);

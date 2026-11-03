@@ -6113,10 +6113,43 @@ class Studio::Editor final : public juce::Component,
                (type == 1 && !source.startsWith("builtin:") &&
                 juce::File(source).hasFileExtension("mid;midi"));
     }
+    // Drop feedback: an accent outline while an accepted item hovers this editor.
+    bool dropHover = false;
+    void itemDragEnter(const SourceDetails &) override
+    {
+        dropHover = true;
+        repaint();
+    }
+    void itemDragExit(const SourceDetails &) override
+    {
+        dropHover = false;
+        repaint();
+    }
+    void fileDragEnter(const juce::StringArray &, int, int) override
+    {
+        dropHover = true;
+        repaint();
+    }
+    void fileDragExit(const juce::StringArray &) override
+    {
+        dropHover = false;
+        repaint();
+    }
+    void paintOverChildren(juce::Graphics &g) override
+    {
+        if (!dropHover)
+            return;
+        g.setColour(accent.withAlpha(.12f));
+        g.fillRoundedRectangle(getLocalBounds().toFloat().reduced(2.f), 6.f);
+        g.setColour(accent);
+        g.drawRoundedRectangle(getLocalBounds().toFloat().reduced(2.f), 6.f, 2.f);
+    }
     void itemDropped(const SourceDetails &d) override
     {
-        if (type == 0 && s.rackGraphVisible && d.localPosition.y >= rackContentBottom())
-            return; // The graph is never an obscured Channel replacement target.
+        dropHover = false;
+        repaint();
+        // Over the Rack's velocity graph the drop adds a new Channel (the graph is never an
+        // obscured replacement target, but the drop must not be lost).
         if (d.description.isObject())
         {
             placePickerSource(d.description, d.localPosition);
@@ -6138,7 +6171,8 @@ class Studio::Editor final : public juce::Component,
             return;
         }
         int row = (d.localPosition.y - 44) / rackRowHeight() + rackOffset;
-        bool replace = d.localPosition.y >= 44 && row >= 0 && s.rackChannelAt(row) != nullptr &&
+        const bool overGraph = s.rackGraphVisible && d.localPosition.y >= rackContentBottom();
+        bool replace = !overGraph && d.localPosition.y >= 44 && row >= 0 && s.rackChannelAt(row) != nullptr &&
                        d.localPosition.x < stepStart();
         if (replace)
             s.selectedChannel = s.rackChannelAt(row)->id;
@@ -6156,15 +6190,15 @@ class Studio::Editor final : public juce::Component,
     }
     void filesDroppedWithModifiers(const juce::StringArray &files, int x, int y, juce::ModifierKeys modifiers)
     {
-        if (type == 0 && s.rackGraphVisible && y >= rackContentBottom())
-            return;
+        dropHover = false;
+        repaint();
         if (files.size() != 1)
             return;
         if (type == 2)
         {
-            if (y >= gridTop())
-                s.importAudioClip(juce::File(files[0]), snap(beatAt(std::max(x, leftEdge())), modifiers),
-                                  laneAtY(y));
+            // Anywhere over the Playlist places the clip; above the grid it lands on the top lane.
+            s.importAudioClip(juce::File(files[0]), snap(beatAt(std::max(x, leftEdge())), modifiers),
+                              laneAtY(std::max(y, gridTop())));
             return;
         }
         if (juce::File(files[0]).hasFileExtension("mid;midi"))
@@ -6180,7 +6214,8 @@ class Studio::Editor final : public juce::Component,
         if (type != 0)
             return;
         int row = (y - 44) / rackRowHeight() + rackOffset;
-        bool replace = y >= 44 && s.rackChannelAt(row) != nullptr && x < stepStart();
+        const bool overGraph = s.rackGraphVisible && y >= rackContentBottom();
+        bool replace = !overGraph && y >= 44 && s.rackChannelAt(row) != nullptr && x < stepStart();
         if (replace)
             s.selectedChannel = s.rackChannelAt(row)->id;
         s.loadSample(files[0], replace);
@@ -6392,10 +6427,24 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
     {
         return getHeight() < 700 ? 28 : 38;
     }
+    static constexpr int recentRows = 5;
     int sampleHeading() const
     {
-        return soundsCollapsed ? 72 - (nativeHosted ? 30 : 0) : soundTop() + 4 * soundStride() + 6;
+        return soundsCollapsed ? 72 - (nativeHosted ? 30 : 0) : soundTop() + recentRows * soundStride() + 6;
     }
+    // The producer's learned favourites (best of each role first); built-in sounds fill the
+    // remaining rows until enough has been learned.
+    std::vector<juce::String> recent() const
+    {
+        std::vector<juce::String> list;
+        for (const auto &entry : s.recentSources.favourites(recentRows))
+            list.push_back(entry.source);
+        for (const auto &builtin : sources)
+            if (int(list.size()) < recentRows && std::find(list.begin(), list.end(), builtin) == list.end())
+                list.push_back(builtin);
+        return list;
+    }
+    juce::String pressedSource;
     bool started = false;
     bool movingHeader = false;
     juce::Rectangle<int> dragBounds;
@@ -6500,17 +6549,24 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
             g.drawHorizontalLine(30, 0, float(getWidth()));
             label(g, "Browser", {12, 0, getWidth() - (s.floatingWindows[4] ? 100 : 48), 30}, ink, 13);
         }
-        label(g, soundsCollapsed ? ">  ORIGINAL INSTRUMENTS" : "v  ORIGINAL INSTRUMENTS",
+        label(g, soundsCollapsed ? ">  RECENT SAMPLES / INSTRUMENTS" : "v  RECENT SAMPLES / INSTRUMENTS",
               {12, nativeHosted ? 10 : 40, getWidth() - 24, 24}, muted, 11);
-        for (int i = 0; i < (soundsCollapsed ? 0 : 4); ++i)
+        const auto list = recent();
+        static const juce::StringArray roleOrder{"Kick", "Snare", "Clap", "Hat", "808", "Cymbal", "Perc", "Bass", "Vocal", "FX", "Sample"};
+        for (int i = 0; i < (soundsCollapsed ? 0 : int(list.size())); ++i)
         {
-            int y = soundTop() + i * soundStride();
+            const int y = soundTop() + i * soundStride();
+            const auto &source = list[size_t(i)];
+            const auto role = RecentSources::role(source);
+            const auto colour = channelColour(std::max(0, roleOrder.indexOf(role)));
             g.setColour(i == pressed ? grid : panel);
             g.fillRoundedRectangle(8.f, float(y), float(getWidth() - 16), float(soundStride() - 4), 3);
-            g.setColour(channelColour(i));
-            g.fillRoundedRectangle(17.f, float(y + 10), 9.f, 12.f, 2);
-            label(g, sourceName(sources[i]).toUpperCase(), {36, y, getWidth() - 48, soundStride() - 4}, ink,
-                  12);
+            g.setColour(colour);
+            g.fillRoundedRectangle(14.f, float(y + 6), 4.f, float(soundStride() - 16), 2);
+            const bool builtin = source.startsWith("builtin:");
+            label(g, builtin ? sourceName(source).toUpperCase() : juce::File(source).getFileNameWithoutExtension(),
+                  {26, y, getWidth() - 96, soundStride() - 4}, ink, 12);
+            label(g, role.toUpperCase(), {getWidth() - 68, y, 54, soundStride() - 4}, colour.withAlpha(.85f), 9);
         }
         label(g, "SAMPLES", {12, sampleHeading(), getWidth() - 24, 24}, muted, 11);
         if (getHeight() >= 700)
@@ -6569,12 +6625,33 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
             repaint();
             return;
         }
-        pressed = (!soundsCollapsed && e.y >= soundTop() && e.y < soundTop() + 4 * soundStride())
-                      ? juce::jlimit(0, 3, (e.y - soundTop()) / soundStride())
+        const auto list = recent();
+        pressed = (!soundsCollapsed && e.y >= soundTop() && e.y < soundTop() + int(list.size()) * soundStride())
+                      ? juce::jlimit(0, int(list.size()) - 1, (e.y - soundTop()) / soundStride())
                       : -1;
         started = false;
+        pressedSource = pressed >= 0 ? list[size_t(pressed)] : juce::String{};
+        if (pressed >= 0 && e.mods.isPopupMenu())
+        {
+            juce::PopupMenu menu;
+            menu.addItem(1, "Load into a new Channel");
+            menu.addItem(2, "Forget this sound", !pressedSource.startsWith("builtin:"));
+            auto safe = juce::Component::SafePointer<Browser>(this);
+            const auto source = pressedSource;
+            menu.showMenuAsync({}, [safe, source](int choice)
+                               {
+                                   if (!safe)
+                                       return;
+                                   if (choice == 1)
+                                       safe->s.loadSample(source, false);
+                                   if (choice == 2)
+                                       safe->s.recentSources.forget(source);
+                                   safe->repaint();
+                               });
+            return;
+        }
         if (pressed >= 0)
-            s.audio.requestAudition(sources[pressed]);
+            s.audio.requestAudition(pressedSource);
         repaint();
     }
     void mouseDrag(const juce::MouseEvent &e) override
@@ -6588,7 +6665,7 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
         if (pressed >= 0 && !started && e.getDistanceFromDragStart() > 5)
         {
             started = true;
-            s.startDragging(sources[pressed], this, juce::ScaledImage{}, true);
+            s.startDragging(pressedSource, this, juce::ScaledImage{}, true);
         }
     }
     void mouseUp(const juce::MouseEvent &) override
@@ -6603,7 +6680,7 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
             return;
         }
         if (pressed >= 0)
-            s.loadSample(sources[pressed], false);
+            s.loadSample(pressedSource, false);
     }
 };
 } // namespace vibera

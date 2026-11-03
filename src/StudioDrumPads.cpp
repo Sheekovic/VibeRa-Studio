@@ -141,7 +141,10 @@ void Studio::showDrumPads()
                 CommandArgs args;
                 args.text = file.getFullPathName();
                 if (s.controller.execute("channel.add", args).wasOk())
+                {
+                    s.recentSources.record(args.text);
                     ++added;
+                }
             }
             s.refresh();
             s.status = added > 0 ? "Drum kit: added " + juce::String(added) + " sample Channel(s) from " + folder.getFileName()
