@@ -437,6 +437,8 @@ inline juce::var commandArgumentSchema(const juce::String &id)
             juce::JSON::parse(R"({"type":"array","minItems":12,"maxItems":12,"items":{"type":"number","minimum":-100,"maximum":100},"description":"Cents added to every note of each pitch class C, C#, ... B (all zero = equal temperament). Played by the local sampler, and by plugin instruments with channel.mpe enabled; other plugin instruments ignore it."})"));
         schema.getDynamicObject()->setProperty("required", juce::Array<juce::var>{"channel", "tuning"});
     }
+    if (id == "tempo.curve")
+        return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{"beat":{"type":"number","minimum":0,"description":"Song beat where the curve starts from the tempo playing there."},"length":{"type":"number","minimum":0.25,"description":"Curve length in beats."},"value":{"type":"number","minimum":10,"maximum":999,"description":"Tempo in BPM reached at the end and kept after it."},"text":{"type":"string","enum":["linear","ease","in","out"],"default":"linear","description":"Shape: linear, ease (slow-fast-slow), in (starts slowly) or out (ends slowly). Drawn as 16 linear ramps; tempo changes inside the span are replaced (one Undo)."}},"required":["beat","length","value"]})");
     if (id.startsWith("tempo.change."))
     {
         auto describe = [&](const char *field, const char *text)

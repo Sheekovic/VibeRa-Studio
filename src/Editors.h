@@ -1329,6 +1329,12 @@ class Studio::Editor final : public juce::Component,
                 menu.addItem(14, "Jump to previous marker", markers);
                 menu.addItem(15, "Select (loop) section between markers", markers);
                 menu.addItem(12, "Add tempo change at playhead...");
+                juce::PopupMenu curves;
+                curves.addItem(2001, "Linear");
+                curves.addItem(2002, "Ease in and out");
+                curves.addItem(2003, "Ease in (starts slowly)");
+                curves.addItem(2004, "Ease out (ends slowly)");
+                menu.addSubMenu("Tempo curve over the time selection", curves, s.playlistRange.has_value());
                 juce::PopupMenu meters;
                 for (const auto &[n, d] : std::vector<std::pair<int, int>>{{2, 4}, {3, 4}, {4, 4}, {5, 4}, {6, 8}, {7, 8}, {9, 8}, {12, 8}})
                     meters.addItem(1000 + n * 100 + d, juce::String(n) + "/" + juce::String(d));
@@ -1431,6 +1437,26 @@ class Studio::Editor final : public juce::Component,
                             a.numerator = (result - 1000) / 100;
                             a.denominator = (result - 1000) % 100;
                             safe->s.command("meter.change.add", a);
+                            return;
+                        }
+                        if (result >= 2001 && result <= 2004 && safe->s.playlistRange)
+                        {
+                            const auto range = *safe->s.playlistRange;
+                            const char *shapes[]{"linear", "ease", "in", "out"};
+                            const juce::String shape = shapes[result - 2001];
+                            tempoDialog("Tempo at the end of the selection",
+                                        safe->s.controller.project.songTempo().bpmAt(range.second),
+                                        [safe, range, shape](double value, bool)
+                                        {
+                                            if (!safe)
+                                                return;
+                                            CommandArgs a;
+                                            a.beat = range.first;
+                                            a.length = range.second - range.first;
+                                            a.value = value;
+                                            a.text = shape;
+                                            safe->s.command("tempo.curve", a);
+                                        });
                             return;
                         }
                         if (result == 12)

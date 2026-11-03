@@ -763,6 +763,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tempo.change.add", "Add tempo change", Scope::playlist, true, true, "command"},
         {"tempo.change.set", "Edit tempo change", Scope::playlist, true, true, "command"},
         {"tempo.change.delete", "Delete tempo change", Scope::playlist, true, true, "command"},
+        {"tempo.curve", "Draw tempo curve", Scope::playlist, true, true, "command"},
         {"marker.add", "Add Playlist marker", Scope::playlist, true, true, "command"},
         {"marker.rename", "Rename Playlist marker", Scope::playlist, true, true, "command"},
         {"marker.move", "Move Playlist marker", Scope::playlist, true, true, "command"},
@@ -4976,6 +4977,39 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 return juce::Result::fail("Tuning offsets are +/-100 cents");
         target->tuning = *a.tuning;
         target->scale.clear(); // A 12-tone table replaces a keyboard-mapped scale.
+    }
+    if (id == "tempo.curve")
+    {
+        // A shaped glide from the tempo at `beat` to `value` BPM over `length` beats, drawn as
+        // 16 linear ramps; changes inside the span are replaced, later ones are kept.
+        const double from = a.beat, to = a.beat + a.length;
+        const auto shape = a.text.isEmpty() ? juce::String("linear") : a.text;
+        if (!std::isfinite(from) || from < 0 || !std::isfinite(a.length) || a.length < .25 || to > 1000000 ||
+            !std::isfinite(a.value) || a.value < 10 || a.value > 999)
+            return juce::Result::fail("Tempo curves need beat >= 0, length >= 0.25 beats and 10..999 BPM");
+        if (shape != "linear" && shape != "ease" && shape != "in" && shape != "out")
+            return juce::Result::fail("Curve shapes: linear, ease, in or out");
+        const double start = from > 0 ? next.songTempo().bpmAt(from) : next.tempo;
+        std::erase_if(next.tempoChanges, [&](const auto &change)
+                      { return change.beat >= from - 1.e-9 && change.beat <= to + 1.e-9; });
+        if (next.tempoChanges.size() + 17 > 4096)
+            return juce::Result::fail("Too many tempo changes");
+        if (from > 0)
+            next.tempoChanges.push_back({next.allocate(), from, start, false});
+        else
+            next.tempo = start;
+        constexpr int pieces = 16;
+        for (int k = 1; k <= pieces; ++k)
+        {
+            const double x = double(k) / pieces;
+            const double y = shape == "ease" ? .5 - .5 * std::cos(juce::MathConstants<double>::pi * x)
+                             : shape == "in" ? x * x
+                             : shape == "out" ? 1 - (1 - x) * (1 - x)
+                                              : x;
+            next.tempoChanges.push_back({next.allocate(), from + a.length * x, start + (a.value - start) * y, true});
+        }
+        std::sort(next.tempoChanges.begin(), next.tempoChanges.end(),
+                  [](const auto &x, const auto &y) { return x.beat < y.beat; });
     }
     if (id.startsWith("tempo.change."))
     {
