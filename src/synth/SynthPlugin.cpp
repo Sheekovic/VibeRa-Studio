@@ -505,6 +505,9 @@ void SynthPlugin::configure(const Values &v) noexcept
                    0.f, 100.f);
     p.motion = get(ParameterId::motion);
     p.unisonVoices = int(get(ParameterId::unisonVoices));
+    p.wavetableBank = int(get(ParameterId::wavetableBank));
+    p.wavetablePosition = get(ParameterId::wavetablePosition);
+    p.wavetableEnvelope = get(ParameterId::wavetableEnvelope);
     p.unisonDetuneCents = get(ParameterId::unisonDetuneCents);
     p.unisonSpread = get(ParameterId::unisonSpread);
     p.subLevel = get(ParameterId::subLevel);

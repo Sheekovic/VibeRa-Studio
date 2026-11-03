@@ -13,7 +13,8 @@
 namespace vibera::ipc
 {
 constexpr int frames = 8192, slots = 8, events = 512, stateBytes = 16 * 1024 * 1024;
-constexpr int version = 20; // Bounded native patch ACKs require an exact app/worker pair.
+constexpr int version = 21; // Bounded native patch ACKs require an exact app/worker pair.
+constexpr int patchValues = 96; // Scalars in one atomic native patch (a whole Synth preset).
 constexpr std::uint32_t magic = 0x56525330 + version;
 constexpr int parameters = 8192, parameterEvents = 8192;
 struct ParameterInfo
@@ -56,7 +57,7 @@ struct ParameterControl
     float previousValue = 0; // Actual native scalar read immediately before this write.
     int beforeKnown = 0; // 0 unknown; 1 successful write with a finite normalized BEFORE.
     unsigned patchCount = 0; // Zero retains the existing single-scalar contract.
-    std::array<ParameterPatchValue, 64> patch{}; // Validated completely before any native mutation.
+    std::array<ParameterPatchValue, patchValues> patch{}; // Validated completely before any native mutation.
 };
 enum class DspPhase : int
 {

@@ -946,8 +946,8 @@ void allEditorControls(SynthPlugin &plugin, juce::AudioProcessorEditor &editor)
                 "Native widget restore changed unrelated gestures or left one open: " + id);
         componentCase("ui.parameter." + juce::String(spec.key));
     }
-    require(sliders == 52 && combos == 6 && toggles == 5 && sliders + combos + toggles == 63,
-            "All 63 actual native widgets must be exercised, excluding only factory identity");
+    require(sliders == 55 && combos == 6 && toggles == 5 && sliders + combos + toggles == 66,
+            "All 66 actual native widgets must be exercised, excluding only factory identity");
     require(plugin.restoreState(entryState.getData(), int(entryState.getSize())),
             "Cannot restore complete entry patch after 63 actual UI control edits");
     awaitEditor([&] { return source->getSelectedId() == 1; },

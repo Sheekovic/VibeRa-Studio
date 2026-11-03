@@ -238,6 +238,12 @@ const char *parameterHelp(ParameterId id)
         return "Oscillator 2 frequency-modulates oscillator 1 for bells, keys and grit.";
     case ParameterId::analogDrift:
         return "Small random pitch, phase and cutoff differences per note.";
+    case ParameterId::wavetableBank:
+        return "Table used by oscillators set to Wavetable: Analog Morph, Harmonic Sweep, Formant, Pulse Sweep, Digital.";
+    case ParameterId::wavetablePosition:
+        return "Where in the table the Wavetable oscillators play; turn it to morph the tone.";
+    case ParameterId::wavetableEnvelope:
+        return "How far the mod envelope (or the amp envelope when it is off) sweeps the table position.";
     default:
         return "";
     }
@@ -837,9 +843,9 @@ struct SynthEditor::Impl : private juce::FocusChangeListener
                   "Filter response; Bypass sends the oscillators straight to the amplifier.");
         bindCombo(sourceType, ParameterId::sourceType, {"Oscillators", "Recorded sample", "Sample + synth"},
                   "Sound source; recorded options need a preset with a sample map.");
-        bindCombo(oscillator1, ParameterId::oscillatorType, {"Sine", "Saw", "Square", "Triangle", "Noise"},
+        bindCombo(oscillator1, ParameterId::oscillatorType, {"Sine", "Saw", "Square", "Triangle", "Noise", "Wavetable"},
                   "Waveform of oscillator 1 (the FM carrier).");
-        bindCombo(oscillator2, ParameterId::oscillator2Type, {"Sine", "Saw", "Square", "Triangle", "Noise"},
+        bindCombo(oscillator2, ParameterId::oscillator2Type, {"Sine", "Saw", "Square", "Triangle", "Noise", "Wavetable"},
                   "Waveform of oscillator 2 (also the FM modulator).");
         bindCombo(filterModel, ParameterId::filterModel, {"12 dB SVF", "24 dB Ladder"},
                   "Filter slope: smooth 12 dB state-variable or a steeper, saturating 24 dB ladder.");
@@ -1457,7 +1463,8 @@ struct SynthEditor::Impl : private juce::FocusChangeListener
         rowOfKnobs({ParameterId::attackMs, ParameterId::decayMs, ParameterId::sustain, ParameterId::releaseMs,
                     ParameterId::envelopeCurve, ParameterId::velocityToAmp},
                    body(envelopeArea));
-        rowOfKnobs({ParameterId::modAttackMs, ParameterId::modDecayMs, ParameterId::modSustain},
+        rowOfKnobs({ParameterId::modAttackMs, ParameterId::modDecayMs, ParameterId::modSustain,
+                    ParameterId::wavetableBank, ParameterId::wavetablePosition, ParameterId::wavetableEnvelope},
                    body(modulationArea));
 
         auto modeSlot = headerSlot(voiceArea, 70);
@@ -1553,7 +1560,7 @@ struct SynthEditor::Impl : private juce::FocusChangeListener
         card(g, unisonArea, "UNISON  /  SUB  /  NOISE", unisonColour);
         card(g, filterArea, "FILTER", filterColour);
         card(g, envelopeArea, "AMP ENVELOPE", envColour);
-        card(g, modulationArea, "MOD ENV", envColour);
+        card(g, modulationArea, "MOD ENV  /  WAVETABLE", envColour);
         card(g, voiceArea, "VOICE", voiceColour);
         card(g, effectsArea);
         g.setColour(border.withAlpha(.7f));

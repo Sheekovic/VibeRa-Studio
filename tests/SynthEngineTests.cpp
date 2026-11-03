@@ -809,12 +809,79 @@ void productionVoice()
     require(std::abs(mean / 12000) < .002 && energy(pulse.left, 12000, 24000) > 1e-4,
             "Asymmetric pulse left a DC offset");
     Parameters bad = plain();
-    bad.unisonVoices = 8;
+    bad.unisonVoices = 17;
     Engine engine;
     engine.prepare(48000);
     require(!engine.setParameters(bad), "Out-of-range unison count admitted");
 }
 } // namespace
+// Wavetable oscillator: right pitch, the position changes the timbre, a high note stays
+// band-limited (no energy folding below its fundamental), and 16-voice unison works.
+void wavetableVoice()
+{
+    const std::array<MidiEvent, 2> notes{{{MidiType::noteOn, 0, 1, 69, 1}, {MidiType::noteOff, 20000, 1, 69, 0}}};
+    auto p = plain();
+    p.waveform1 = Waveform::wavetable;
+    p.wavetableBank = 0;
+    p.wavetablePosition = 0; // Pure sine frame.
+    const auto sine = render(p, 24000, notes);
+    require(energy(sine.left, 2000, 18000) > .001, "Wavetable produced no PCM");
+    require(std::abs(frequency(sine.left, 2000, 18000, 48000) - 440) < .2, "Wavetable A4 tuning is wrong");
+    p.wavetablePosition = 1; // Square frame: far more high harmonics.
+    const auto square = render(p, 24000, notes);
+    const auto roughness = [](const std::vector<float> &a)
+    {
+        double d = 0, e = 0;
+        for (std::size_t i = 2001; i < 18000; ++i)
+        {
+            d += double(a[i] - a[i - 1]) * (a[i] - a[i - 1]);
+            e += double(a[i]) * a[i];
+        }
+        return d / e;
+    };
+    require(roughness(square.left) > roughness(sine.left) * 8, "Table position did not change the timbre");
+    p.wavetableEnvelope = 1;
+    p.wavetablePosition = 0;
+    p.decayMs = 300;
+    p.sustain = 0;
+    const auto swept = render(p, 24000, notes);
+    require(swept.left != sine.left, "Envelope to position did not move the table");
+    // A high note (C8, 4186 Hz) on the brightest frame: no alias below the fundamental.
+    auto high = plain();
+    high.waveform1 = Waveform::wavetable;
+    high.wavetablePosition = 1;
+    const std::array<MidiEvent, 1> c8{{{MidiType::noteOn, 0, 1, 108, 1}}};
+    const auto bright = render(high, 16384, c8);
+    double low = 0, total = 0;
+    for (int k = 13; k < 23900; k += 13)
+    {
+        double re = 0, im = 0;
+        for (int i = 4000; i < 16384; ++i)
+        {
+            const double window = .5 - .5 * std::cos(2 * 3.141592653589793 * (i - 4000) / 12384.0);
+            re += window * bright.left[std::size_t(i)] * std::cos(2 * 3.141592653589793 * k * i / 48000.0);
+            im += window * bright.left[std::size_t(i)] * std::sin(2 * 3.141592653589793 * k * i / 48000.0);
+        }
+        const double power = re * re + im * im;
+        total += power;
+        if (k < 4000)
+            low += power;
+    }
+    require(total > 0 && low < total * .02, "High wavetable note aliased below its fundamental");
+    auto wide = plain();
+    wide.waveform1 = Waveform::wavetable;
+    wide.unisonVoices = 16;
+    wide.unisonDetuneCents = 30;
+    wide.unisonSpread = 1;
+    const auto stack = render(wide, 24000, notes);
+    require(energy(stack.left, 2000, 18000) > .0005 && stack.left != stack.right,
+            "16-voice wavetable unison produced no wide PCM");
+    Parameters bad = plain();
+    bad.wavetableBank = 9;
+    Engine engine;
+    engine.prepare(48000);
+    require(!engine.setParameters(bad), "Unknown wavetable bank accepted");
+}
 int main()
 {
     const auto start = std::chrono::steady_clock::now();
@@ -827,6 +894,7 @@ int main()
         safetyAndStealing();
         filterAndPolyphonyStress();
         productionVoice();
+        wavetableVoice();
         std::cout
             << "PASS original hybrid synth DSP; " << checks
             << " checks; callback C++ heap=" << synth_test::allocations << "/" << synth_test::destructions

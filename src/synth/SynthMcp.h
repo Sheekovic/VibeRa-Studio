@@ -130,7 +130,9 @@ inline juce::var synthDiscovery(const SynthBrowserState &state)
         else if (p.id == ParameterId::filterType)
             choices = {"Low pass", "High pass", "Band pass", "Bypass"};
         else if (p.id == ParameterId::oscillatorType || p.id == ParameterId::oscillator2Type)
-            choices = {"Sine", "Saw", "Pulse", "Triangle", "Noise"};
+            choices = {"Sine", "Saw", "Pulse", "Triangle", "Noise", "Wavetable"};
+        else if (p.id == ParameterId::wavetableBank)
+            choices = {"Analog Morph", "Harmonic Sweep", "Formant", "Pulse Sweep", "Digital"};
         else if (p.interval == 1 && p.minimum == 0 && p.maximum == 1)
             choices = {"Off", "On"};
         if (!choices.isEmpty())

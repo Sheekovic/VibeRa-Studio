@@ -24,7 +24,8 @@ enum class Waveform
     saw,
     square,
     triangle,
-    noise
+    noise,
+    wavetable // Appended: morphing band-limited table (Wavetables.h).
 };
 enum class VoiceMode
 {
@@ -97,6 +98,10 @@ struct Parameters
     float envelopeCurve = 0, velocityToAmp = 1, glideMs = 0;
     VoiceMode voiceMode = VoiceMode::poly;
     float fmAmount = 0, analogDrift = 0;
+    // Wavetable oscillators: bank, morph position and how far the mod envelope (or the
+    // amplitude envelope when it is off) moves the position (-1..1).
+    int wavetableBank = 0;
+    float wavetablePosition = 0, wavetableEnvelope = 0;
 };
 
 enum class MidiType
@@ -148,7 +153,7 @@ class Engine
         release,
         finished
     };
-    static constexpr int maximumUnison = 7;
+    static constexpr int maximumUnison = 16;
     struct Voice
     {
         const SampleZone *zone = nullptr;
@@ -166,6 +171,7 @@ class Engine
         float envelope = 0, releaseStep = 0, velocity = 0;
         float modEnvelope = 0, modReleaseStep = 0;
         float driftRatio = 1, driftCutoff = 1;
+        double tablePosition = 0; // Wavetable morph position for this sample.
         float sampleGain = 1, samplePanLeft = 1, samplePanRight = 1;
         float stealLeft = 0, stealRight = 0, lastLeft = 0, lastRight = 0;
         unsigned stealSamples = 0;

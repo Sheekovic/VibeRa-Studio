@@ -78,13 +78,16 @@ enum class ParameterId : std::uint32_t
     voiceMode,
     fmAmount,
     analogDrift,
+    wavetableBank,
+    wavetablePosition,
+    wavetableEnvelope,
     count
 };
 inline constexpr std::size_t parameterCount = static_cast<std::size_t>(ParameterId::count);
 // Scalars present in every earlier schema 1 state; later IDs are optional there.
 inline constexpr std::size_t legacyParameterCount = static_cast<std::size_t>(ParameterId::factoryPreset) + 1;
-// A complete preset patch must fit the bounded native patch ACK (64 scalars).
-static_assert(parameterCount <= 64);
+// A complete preset patch must fit the bounded native patch ACK (ipc::patchValues = 96).
+static_assert(parameterCount <= 96);
 using Values = std::array<float, parameterCount>;
 constexpr std::size_t parameterIndex(ParameterId id) noexcept
 {

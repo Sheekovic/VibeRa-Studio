@@ -45,6 +45,6 @@ struct PluginParameterResult
     float previousValue = 0;
     bool beforeKnown = false;
     unsigned patchCount = 0;
-    std::array<ipc::ParameterPatchValue, 64> patch{};
+    std::array<ipc::ParameterPatchValue, ipc::patchValues> patch{};
 };
 } // namespace vibera

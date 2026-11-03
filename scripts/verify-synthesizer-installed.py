@@ -351,7 +351,7 @@ def main():
         discovery = call("vibera_synth", dict(action="list", genre="All Genres", family="All", search="", favoritesOnly=False))
         check(Path(discovery["userDirectory"]).resolve() == user_root, "actual service uses standard AppData rather than a development override")
         presets = discovery["presets"]
-        check(len(presets) == 77 and len({preset["id"] for preset in presets}) == 77, "all 77 distinct installed factory patches")
+        check(len(presets) == 81 and len({preset["id"] for preset in presets}) == 81, "all 81 distinct installed factory patches")
         check(discovery["separateVST3"] is False, "first-class native instrument requires no external VST3")
         kinds = {kind: sum(preset["sourceKind"] == kind for preset in presets) for kind in ("SAMPLE", "SAMPLE + SYNTH", "SYNTHESIS")}
         check(kinds == {"SAMPLE": 20, "SAMPLE + SYNTH": 1, "SYNTHESIS": 56}, "installed 20 recorded / one hybrid / 56 synthesized patch inventory")

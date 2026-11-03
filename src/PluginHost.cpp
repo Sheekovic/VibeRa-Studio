@@ -1130,7 +1130,7 @@ unsigned PluginHost::setParameter(std::uint32_t id, float value, unsigned genera
 }
 unsigned PluginHost::setParameterPatch(std::span<const std::pair<std::uint32_t,float>> values, unsigned generation)
 {
-    if(values.empty() || values.size()>64 || editorBusy()) return 0;
+    if(values.empty() || values.size()>ipc::patchValues || editorBusy()) return 0;
     auto *shared=impl->shared;
     if(!shared || !alive() || generation==0) return 0;
     for(std::size_t i=0;i<values.size();++i)

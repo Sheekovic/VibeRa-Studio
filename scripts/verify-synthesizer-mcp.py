@@ -185,7 +185,7 @@ def main():
         # BEFORE any preference or user-file mutation, require actual isolation.
         check(Path(discovery["userDirectory"]).resolve() == output / "user", "owned user directory honored before writes")
         presets = discovery["presets"]
-        check(len(presets) == 77 and len({p["id"] for p in presets}) == 77, "all 77 distinct stable factory IDs")
+        check(len(presets) == 81 and len({p["id"] for p in presets}) == 81, "all 81 distinct stable factory IDs")
         check(all(g in discovery["genres"] for g in ["Pop", "Jazz", "Funk", "Hip-Hop", "R&B", "Electronic", "Rock", "Cinematic", "Arabic"]), "all nine genre groups")
         check(discovery["separateVST3"] is False, "native engine does not require external VST3")
         families = {"Piano", "Electric Piano", "Violin", "Strings", "Bass", "Guitar", "Brass", "Woodwinds",

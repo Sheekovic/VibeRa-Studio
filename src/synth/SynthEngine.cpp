@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "SynthEngine.h"
+#include "Wavetables.h"
 
 #include <algorithm>
 #include <cmath>
@@ -154,8 +155,10 @@ const SampleZone *PreparedSampleMap::zoneFor(int note, int velocity,
 bool Engine::validParameters(const Parameters &p) noexcept
 {
     return p.sourceMode >= SourceMode::oscillator && p.sourceMode <= SourceMode::hybrid &&
-           p.waveform1 >= Waveform::sine && p.waveform1 <= Waveform::noise && p.waveform2 >= Waveform::sine &&
-           p.waveform2 <= Waveform::noise && p.filterType >= FilterType::lowpass &&
+           p.waveform1 >= Waveform::sine && p.waveform1 <= Waveform::wavetable &&
+           p.waveform2 >= Waveform::sine && p.waveform2 <= Waveform::wavetable && p.wavetableBank >= 0 &&
+           p.wavetableBank < Wavetables::banks && inRange(p.wavetablePosition, 0, 1) &&
+           inRange(p.wavetableEnvelope, -1, 1) && p.filterType >= FilterType::lowpass &&
            p.filterType <= FilterType::bypass && inRange(p.oscillator1Level, 0, 1) &&
            inRange(p.oscillator2Level, 0, 1) && inRange(p.oscillator2Semitones, -48, 48) &&
            inRange(p.detuneCents, -100, 100) && inRange(p.pulseWidth, .05f, .95f) &&
@@ -183,6 +186,7 @@ void Engine::prepare(double sampleRate)
     triangleLeak_ = std::exp(-2 * pi * 2 / sampleRate);
     dcCoefficient_ = std::exp(-2 * pi * 5 / sampleRate);
     configured_ = false;
+    (void) Wavetables::instance(); // Build the tables here, never on the audio thread.
     prepared_ = true;
     reset();
 }
@@ -284,6 +288,9 @@ void Engine::smooth() noexcept
     update(current_.glideMs, target_.glideMs);
     update(current_.fmAmount, target_.fmAmount);
     update(current_.analogDrift, target_.analogDrift);
+    update(current_.wavetablePosition, target_.wavetablePosition);
+    update(current_.wavetableEnvelope, target_.wavetableEnvelope);
+    current_.wavetableBank = target_.wavetableBank;
     // Zero decay is a mode switch (follow the amplitude envelope), not a time.
     if (target_.modDecayMs <= 0 || current_.modDecayMs <= 0)
         current_.modDecayMs = target_.modDecayMs;
@@ -687,7 +694,9 @@ float Engine::oscillator(Voice &voice, Waveform waveform, double &phase, float &
         p += offset;
         p -= std::floor(p);
     }
-    if (waveform == Waveform::noise)
+    if (waveform == Waveform::wavetable)
+        result = Wavetables::instance().sample(current_.wavetableBank, voice.tablePosition, p, step);
+    else if (waveform == Waveform::noise)
         result = random(voice);
     else if (waveform == Waveform::sine)
         result = std::sin(2 * pi * p);
@@ -729,6 +738,8 @@ void Engine::render(Voice &voice, double lfo, float &left, float &right) noexcep
             voice.glideOctaves = 0;
     }
     double l = 0, r = 0;
+    voice.tablePosition = std::clamp(double(current_.wavetablePosition) +
+                                         double(current_.wavetableEnvelope) * modulation, 0.0, 1.0);
     if (current_.sourceMode != SourceMode::sample)
     {
         const double step = voice.frequency * pitch / sampleRate_;

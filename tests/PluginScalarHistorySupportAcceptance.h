@@ -184,7 +184,7 @@ static void synthScalarPatchHistoryTests()
 static void pluginScalarHistorySupportTests()
 {
     synthScalarPatchHistoryTests();
-    static_assert(ipc::version == 20); // Wrapper actions and bounded native patches require the matching IPC20 pair.
+    static_assert(ipc::version == 21); // Wrapper actions and bounded native patches require the matching IPC21 pair.
     {
         synth::Values values{};
         const auto &preset=synth::factoryPresets().front();
