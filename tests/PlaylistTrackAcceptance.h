@@ -158,5 +158,30 @@ inline void tests(const juce::File &)
     require(run("track.mute", 1, [](CommandArgs &x) { x.enabled = false; }).wasOk(), "Unmute");
     require(controller.project.tracks.size() == 1 && !controller.project.track(1)->muted,
             "Unmuting keeps the name and colour");
+
+    // Locked tracks protect their clips from every clip edit; unlocking restores editing.
+    require(run("track.lock", 127, [](CommandArgs &x) { x.enabled = true; }).wasOk() &&
+                controller.project.track(127)->locked,
+            "A track locks");
+    Id lastClip = 0;
+    for (const auto &clip : controller.project.placements)
+        if (clip.lane == 127)
+            lastClip = clip.id;
+    CommandArgs move;
+    move.ids = {lastClip};
+    move.beat = 4;
+    require(controller.execute("clip.move", move).failed(), "A clip on a locked track cannot move");
+    CommandArgs into = last;
+    into.beat = 8;
+    require(controller.execute("clip.add", into).failed(), "No clip can be added to a locked track");
+    CommandArgs remove;
+    remove.ids = {lastClip};
+    require(controller.execute("clip.delete", remove).failed(), "A clip on a locked track cannot be deleted");
+    Project reloaded;
+    require(Project::parse(controller.project.state(), reloaded).wasOk() && reloaded.track(127)->locked,
+            "The lock survives save/load");
+    require(run("track.lock", 127, [](CommandArgs &x) { x.enabled = false; }).wasOk() &&
+                controller.execute("clip.move", move).wasOk(),
+            "Unlocking allows editing again");
 }
 } // namespace playlist_track_acceptance

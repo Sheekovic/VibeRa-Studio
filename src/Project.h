@@ -199,6 +199,7 @@ struct PlaylistTrack
     bool muted = false;      // Silences every clip on the track without touching clip mute.
     bool groupedAbove = false; // Joins the group of the track above (version 51).
     bool collapsed = false;    // On a group's first track: hide the grouped tracks (view only; they play).
+    bool locked = false;       // Clips on this track cannot be added, moved, edited or deleted (v56).
 };
 // A stored (inactive) Playlist arrangement (version 48); see Arrangements.h.
 struct Arrangement

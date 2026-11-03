@@ -781,6 +781,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"track.solo", "Solo Playlist track", Scope::playlist, true, true, "command"},
         {"track.group", "Group Playlist track with the track above", Scope::playlist, true, true, "command"},
         {"track.collapse", "Collapse Playlist track group", Scope::playlist, true, true, "command"},
+        {"track.lock", "Lock Playlist track", Scope::playlist, true, true, "command"},
         {"track.insert", "Insert Playlist track", Scope::playlist, true, true, "command"},
         {"track.delete", "Delete Playlist track", Scope::playlist, true, true, "command"},
         {"track.move", "Move Playlist track", Scope::playlist, true, true, "command"},
@@ -4909,6 +4910,8 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 return juce::Result::fail("The first track has no track above to group with");
             entry(a.lane).groupedAbove = a.enabled;
         }
+        else if (id == "track.lock")
+            entry(a.lane).locked = a.enabled;
         else if (id == "track.collapse")
         {
             int head = a.lane; // Collapse acts on the group the lane belongs to.
@@ -4958,7 +4961,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             remap([&](int lane) { return lane == a.lane ? other : lane == other ? a.lane : lane; });
         }
         std::erase_if(next.tracks, [](auto &t)
-                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed; });
+                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed && !t.locked; });
         for (auto &t : next.tracks)
             t.groupedAbove = t.groupedAbove && t.lane > 0; // A move to the top track ungroups it.
         std::sort(next.tracks.begin(), next.tracks.end(), [](auto &x, auto &y) { return x.lane < y.lane; });
@@ -5164,6 +5167,38 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
     if (id == "channel.delete" || id == "rack.deleteSelected" || id == "project.meter")
         for (auto &pattern : next.patterns)
             refreshAutomaticPatternLength(next, pattern);
+    // Locked Playlist tracks: no clip edit may add, move, change or remove a clip on them.
+    if (id.startsWith("clip.") || id.startsWith("audio.") || id == "notes.record" || id.startsWith("automation.clip"))
+    {
+        const auto lockedLane = [&](int lane)
+        {
+            const auto *before = canonicalSource.track(lane);
+            const auto *after = next.track(lane);
+            return (before && before->locked) || (after && after->locked);
+        };
+        const auto clipsOn = [&](const Project &p, int lane)
+        {
+            juce::StringArray rows;
+            for (const auto &c : p.placements)
+                if (c.lane == lane)
+                    rows.add(juce::String(c.id) + "p" + juce::String(c.pattern) + "@" + juce::String(c.beat, 6) + "+" +
+                             juce::String(c.length, 6) + "o" + juce::String(c.offset, 6) + (c.muted ? "m" : ""));
+            for (const auto &c : p.audioPlacements)
+                if (c.lane == lane)
+                    rows.add(juce::String(c.id) + "a" + juce::String(c.channel) + "@" + juce::String(c.beat, 6) + "+" +
+                             juce::String(c.duration, 6) + "o" + juce::String(c.offset, 6) + (c.muted ? "m" : "") + "f" +
+                             juce::String(c.fadeIn, 4) + "/" + juce::String(c.fadeOut, 4));
+            for (const auto &c : p.automation.placements)
+                if (c.lane == lane)
+                    rows.add(juce::String(c.id) + "u" + juce::String(c.source) + "@" + juce::String(c.beat, 6) + "+" +
+                             juce::String(c.length, 6) + "o" + juce::String(c.offset, 6) + (c.muted ? "m" : ""));
+            rows.sort(false);
+            return rows.joinIntoString(";");
+        };
+        for (int lane = 0; lane < 128; ++lane)
+            if (lockedLane(lane) && clipsOn(canonicalSource, lane) != clipsOn(next, lane))
+                return juce::Result::fail("Track " + juce::String(lane + 1) + " is locked; unlock it to edit its clips");
+    }
     auto status = next.validate();
     if (status.failed())
         return status;

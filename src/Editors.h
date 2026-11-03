@@ -3047,8 +3047,20 @@ class Studio::Editor final : public juce::Component,
                             : juce::String();
                     g.drawText(groupMark + (trackInfo && trackInfo->name.isNotEmpty() ? trackInfo->name
                                                                            : "Track " + juce::String(rowLane + 1)) +
-                                   (trackInfo && trackInfo->muted ? " (muted)" : ""),
+                                   (trackInfo && trackInfo->muted ? " (muted)" : "") +
+                                   (trackInfo && trackInfo->locked ? " (locked)" : ""),
                                header.withTrimmedLeft(22).withTrimmedRight(26), juce::Justification::centredLeft, true);
+                    if (trackInfo && trackInfo->locked)
+                    {
+                        // Padlock: body and shackle at the header's right edge.
+                        const auto body = juce::Rectangle<float>(float(header.getRight()) - 22.f, float(header.getCentreY()) - 1.f, 9.f, 7.f);
+                        g.setColour(orange);
+                        g.fillRoundedRectangle(body, 1.5f);
+                        juce::Path shackle;
+                        shackle.addCentredArc(body.getCentreX(), body.getY(), 3.f, 3.5f, 0, -juce::MathConstants<float>::halfPi,
+                                              juce::MathConstants<float>::halfPi, true);
+                        g.strokePath(shackle, juce::PathStrokeType(1.5f));
+                    }
                     g.setColour(muted.withAlpha(.7f));
                     g.setFont(juce::Font(vibera::uiFont, 11.f, juce::Font::plain));
                     g.drawText(juce::String(rowLane + 1), header.withTrimmedRight(8),
@@ -3836,6 +3848,7 @@ class Studio::Editor final : public juce::Component,
         const auto *headInfo = s.controller.project.track(head);
         menu.addItem(8, "Group with track above", lane > 0, info && info->groupedAbove);
         menu.addItem(9, headInfo && headInfo->collapsed ? "Expand group" : "Collapse group", inGroup);
+        menu.addItem(10, "Lock track (protect its clips)", true, info && info->locked);
         menu.addItem(2, "Rename...");
         const std::array<juce::uint32, 8> palette{0xffef6576, 0xffe8a33d, 0xffe6d35a, 0xff6fcf7f,
                                                    0xff4fb3d9, 0xff7d8cf0, 0xffc77df0, 0xff9aa3ad};
@@ -3861,6 +3874,12 @@ class Studio::Editor final : public juce::Component,
                                    return;
                                if (chosen == 7)
                                    run("track.solo", [](CommandArgs &) {});
+                               else if (chosen == 10)
+                                   run("track.lock", [&](CommandArgs &a)
+                                       {
+                                           const auto *t = safe->s.controller.project.track(lane);
+                                           a.enabled = !(t && t->locked);
+                                       });
                                else if (chosen == 8)
                                    run("track.group", [&](CommandArgs &a)
                                        {

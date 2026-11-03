@@ -470,6 +470,8 @@ juce::ValueTree Project::state() const
                 set(entry, "grouped", true);
             if (track.collapsed)
                 set(entry, "collapsed", true);
+            if (track.locked)
+                set(entry, "locked", true);
             trackTree.appendChild(entry, nullptr);
         }
         root.appendChild(trackTree, nullptr);
@@ -998,6 +1000,9 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 return juce::Result::fail("Playlist track groups need project version 51");
             track.groupedAbove = bool(entry["grouped"]) && track.lane > 0;
             track.collapsed = bool(entry["collapsed"]);
+            if (entry.hasProperty("locked") && fileVersion < 56)
+                return juce::Result::fail("Playlist track locks need project version 56");
+            track.locked = bool(entry["locked"]);
             if (entry.hasProperty("colour"))
             {
                 const auto text = entry["colour"].toString();
