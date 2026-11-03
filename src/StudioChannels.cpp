@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "Studio.h"
+#include <map>
+#include "synth/SynthRegistry.h"
 #include "Tuning.h"
 #include "SliceDetect.h"
 #include "ChannelManagement.h"
@@ -155,6 +157,99 @@ juce::Result Studio::cancelChannelEdit(const juce::String &id)
             return juce::Result::ok();
         }
     return juce::Result::fail("Channel job is foreign, expired or unknown");
+}
+std::optional<juce::PluginDescription> Studio::instrumentByIdentifier(const juce::String &identifier) const
+{
+    if (synth::nativeDescription().createIdentifierString() == identifier)
+        return synth::nativeDescription();
+    for (const auto &d : plugins.snapshot().plugins)
+        if (d.isInstrument && d.createIdentifierString() == identifier)
+            return d;
+    return std::nullopt;
+}
+void Studio::addInstrument(const juce::PluginDescription &description, Id replace)
+{
+    CommandArgs a;
+    a.text = description.createXml()->toString();
+    a.channel = replace ? replace : selectedChannel;
+    const auto revision = controller.revision;
+    command(replace ? "plugin.instrument.replace" : "plugin.instrument.create", a);
+    if (controller.revision != revision)
+    {
+        recentSources.record("plugin:" + description.createIdentifierString());
+        if (!replace)
+            selectedChannel = controller.project.channels.back().id;
+        status = (replace ? "Replaced with " : "Added ") + description.name;
+    }
+    refresh();
+}
+void Studio::addInstrumentItems(juce::PopupMenu &menu, Id replace)
+{
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    const auto add = [&](juce::PopupMenu &target, const juce::PluginDescription &d)
+    {
+        juce::PopupMenu::Item item(d.name);
+        item.action = [safe, d, replace]
+        {
+            if (safe)
+                safe->addInstrument(d, replace);
+        };
+        target.addItem(item);
+    };
+    menu.addSectionHeader("VibeRa");
+    add(menu, synth::nativeDescription());
+    // Scanned instruments: an all-plugins list, then one submenu per category.
+    auto list = plugins.snapshot().plugins;
+    std::erase_if(list, [](const auto &d) { return !d.isInstrument; });
+    std::sort(list.begin(), list.end(), [](const auto &a, const auto &b) { return a.name.compareIgnoreCase(b.name) < 0; });
+    if (!list.empty())
+    {
+        menu.addSectionHeader("Plugins");
+        std::map<juce::String, juce::PopupMenu> categories;
+        for (const auto &d : list)
+        {
+            add(menu, d);
+            const auto category = d.category.isNotEmpty() ? d.category.replace("|", " / ") : juce::String("Other");
+            add(categories[category], d);
+            if (d.manufacturerName.isNotEmpty())
+                add(categories["By maker / " + d.manufacturerName], d);
+        }
+        juce::PopupMenu byCategory;
+        for (auto &[name, sub] : categories)
+            byCategory.addSubMenu(name, sub);
+        menu.addSubMenu("Categories", byCategory);
+    }
+    menu.addSeparator();
+    if (!replace)
+    {
+        juce::PopupMenu::Item sample("Load sample...");
+        sample.action = [safe]
+        {
+            if (!safe)
+                return;
+            safe->chooser = std::make_unique<juce::FileChooser>("Load sample", juce::File{}, "*.wav;*.aif;*.aiff;*.flac;*.ogg;*.mp3");
+            safe->chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                                       [safe](const juce::FileChooser &fc)
+                                       {
+                                           if (safe && fc.getResult().existsAsFile())
+                                               safe->loadSample(fc.getResult().getFullPathName(), false);
+                                       });
+        };
+        menu.addItem(sample);
+    }
+    juce::PopupMenu::Item more(list.empty() ? "Find plugins (scan VST3 folders)..." : "More plugins / rescan...");
+    more.action = [safe]
+    {
+        if (safe)
+            safe->showPlugins();
+    };
+    menu.addItem(more);
+}
+void Studio::showInstrumentMenu(Id replace)
+{
+    juce::PopupMenu menu;
+    addInstrumentItems(menu, replace);
+    menu.showMenuAsync({});
 }
 void Studio::addChannelManagementItems(juce::PopupMenu &menu, const std::vector<Id> &ids)
 {

@@ -5571,6 +5571,14 @@ void Studio::pollAudioImports()
 
 void Studio::loadSample(const juce::String &source, bool replace, Id channel)
 {
+    if (source.startsWith("plugin:"))
+    {
+        if (const auto description = instrumentByIdentifier(source.fromFirstOccurrenceOf(":", false, false)))
+            addInstrument(*description, replace ? (channel ? channel : selectedChannel) : 0);
+        else
+            status = "That instrument is no longer installed; rescan plugins";
+        return;
+    }
     CommandArgs a;
     a.channel = channel ? channel : selectedChannel;
     a.text = source;

@@ -766,6 +766,17 @@ class Studio::Editor final : public juce::Component,
         // Retain every insert; use existing horizontal scrolling instead of tiny labels/targets.
         return std::max(108, (mixerStripWidth() - 30) / int(s.controller.project.mixer.size()));
     }
+    // The Rack add button sits under the last visible Channel while there is room for it.
+    bool rackPlusHover = false;
+    juce::Rectangle<int> rackPlusBounds() const
+    {
+        if (type != 0)
+            return {};
+        const int footer = 44 + (int(s.visibleRackChannels().size()) - rackOffset) * rackRowHeight();
+        if (footer < 44 || footer + 30 > rackContentBottom())
+            return {};
+        return {34, footer + 3, std::max(60, stepStart() - 44), 24};
+    }
     int rackRows() const
     {
         return std::max(1, (rackContentBottom() - 44) / rackRowHeight());
@@ -2790,6 +2801,16 @@ class Studio::Editor final : public juce::Component,
                 }
             }
             const int footer = 44 + (int(visibleChannels.size()) - rackOffset) * rackRowHeight();
+            if (const auto plus = rackPlusBounds(); !plus.isEmpty())
+            {
+                // FL-style add button under the Channels: opens the instrument picker.
+                g.setColour(panel.brighter(rackPlusHover ? .14f : .06f));
+                g.fillRoundedRectangle(plus.toFloat(), 4.f);
+                g.setColour(accent.withAlpha(rackPlusHover ? 1.f : .7f));
+                g.drawRoundedRectangle(plus.toFloat().reduced(.5f), 4.f, 1.f);
+                g.setFont(juce::Font(vibera::uiFont, 18.f, juce::Font::bold));
+                g.drawText("+", plus, juce::Justification::centred);
+            }
             if (rackContentBottom() > footer + 28)
                 label(g,
                       visibleChannels.empty() ? "No Channels in this group. Add a sample or instrument."
@@ -2797,7 +2818,8 @@ class Studio::Editor final : public juce::Component,
                           ? "MIDI: " + project.channel(s.selectedChannel)->name + " (outside filter)"
                           : juce::String(int(s.selectedChannels.size())) +
                                 " selected | Selector: right-click/drag, double-click all",
-                      {12, footer, getWidth() - 24, 28}, muted, 10);
+                      {rackPlusBounds().isEmpty() ? 12 : rackPlusBounds().getRight() + 12, footer,
+                       getWidth() - 24, 28}, muted, 10);
         }
         else if (type == 1 || type == 2)
         {
@@ -4053,8 +4075,19 @@ class Studio::Editor final : public juce::Component,
                                 });
                 return;
             }
+            if (rackPlusBounds().contains(e.getPosition()))
+            {
+                s.showInstrumentMenu();
+                return;
+            }
             int row = (e.y - 44) / rackRowHeight() + rackOffset;
             auto *targetChannel = s.rackChannelAt(row);
+            if (e.y >= 44 && !targetChannel && e.mods.isRightButtonDown() &&
+                !(s.rackGraphVisible && e.y >= rackContentBottom()))
+            {
+                s.showInstrumentMenu(); // Right-click on an empty Rack area adds an instrument.
+                return;
+            }
             if (e.y < 44 || row >= rackOffset + rackRows() || !targetChannel)
                 return;
             const auto channelId = targetChannel->id;
@@ -4120,6 +4153,13 @@ class Studio::Editor final : public juce::Component,
                     m.addItem(1, "Piano roll", !c.audioClip);
                     m.addItem(2, "Open instrument");
                     m.addItem(3, "Browse native / VST3 instruments...", !c.audioClip);
+                    {
+                        juce::PopupMenu insert, replaceWith;
+                        s.addInstrumentItems(insert);
+                        s.addInstrumentItems(replaceWith, c.id);
+                        m.addSubMenu("Insert", insert);
+                        m.addSubMenu("Replace", replaceWith, !c.audioClip);
+                    }
                     m.addItem(4, "Cut itself", !c.audioClip && !c.instrument);
                     m.addItem(5, "Name / colour / icon...    F2 / middle-click");
                     m.addSeparator();
@@ -6564,9 +6604,16 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
             g.setColour(colour);
             g.fillRoundedRectangle(14.f, float(y + 6), 4.f, float(soundStride() - 16), 2);
             const bool builtin = source.startsWith("builtin:");
-            label(g, builtin ? sourceName(source).toUpperCase() : juce::File(source).getFileNameWithoutExtension(),
+            const auto plugin = source.startsWith("plugin:")
+                                    ? s.instrumentByIdentifier(source.fromFirstOccurrenceOf(":", false, false))
+                                    : std::nullopt;
+            label(g,
+                  builtin                       ? sourceName(source).toUpperCase()
+                  : source.startsWith("plugin:") ? (plugin ? plugin->name : juce::String("Missing instrument"))
+                                                 : juce::File(source).getFileNameWithoutExtension(),
                   {26, y, getWidth() - 96, soundStride() - 4}, ink, 12);
-            label(g, role.toUpperCase(), {getWidth() - 68, y, 54, soundStride() - 4}, colour.withAlpha(.85f), 9);
+            if (!builtin) // A built-in's name already says its role.
+                label(g, role.toUpperCase(), {getWidth() - 68, y, 54, soundStride() - 4}, colour.withAlpha(.85f), 9);
         }
         label(g, "SAMPLES", {12, sampleHeading(), getWidth() - 24, 24}, muted, 11);
         if (getHeight() >= 700)

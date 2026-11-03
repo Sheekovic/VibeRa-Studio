@@ -29,6 +29,8 @@ class RecentSources
     // Role from the file or builtin name ("Kick", "Snare", ...), or "Sample".
     static juce::String role(const juce::String &source)
     {
+        if (source.startsWith("plugin:"))
+            return "Instrument";
         const auto name = (source.startsWith("builtin:") ? source.fromFirstOccurrenceOf(":", false, false)
                                                         : juce::File(source).getFileNameWithoutExtension())
                               .toLowerCase();
@@ -79,7 +81,8 @@ class RecentSources
     }
     void record(const juce::String &source)
     {
-        if (source.isEmpty() || (!source.startsWith("builtin:") && !juce::File::isAbsolutePath(source)))
+        if (source.isEmpty() ||
+            (!source.startsWith("builtin:") && !source.startsWith("plugin:") && !juce::File::isAbsolutePath(source)))
             return;
         const auto now = juce::Time::currentTimeMillis();
         auto found = std::find_if(entries.begin(), entries.end(), [&](const Entry &e) { return e.source == source; });
@@ -111,7 +114,10 @@ class RecentSources
         const auto now = juce::Time::currentTimeMillis();
         auto ranked = entries;
         std::erase_if(ranked, [](const Entry &e)
-                      { return !e.source.startsWith("builtin:") && !juce::File(e.source).existsAsFile(); });
+                      {
+                          return !e.source.startsWith("builtin:") && !e.source.startsWith("plugin:") &&
+                                 !juce::File(e.source).existsAsFile();
+                      });
         std::sort(ranked.begin(), ranked.end(),
                   [&](const Entry &a, const Entry &b) { return a.score(now) > b.score(now); });
         std::vector<Entry> result;

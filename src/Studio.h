@@ -360,6 +360,13 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::var channelEditState(const juce::String &) const;
     juce::Result cancelChannelEdit(const juce::String &);
     void addChannelManagementItems(juce::PopupMenu &, const std::vector<Id> &);
+    // Instrument picker (Rack + button, empty-area right-click, channel Insert/Replace):
+    // the native Synth, then scanned VST3 instruments grouped by category, Load sample and
+    // More plugins. `replace` swaps that Channel's source instead of adding a Channel.
+    void addInstrumentItems(juce::PopupMenu &, Id replace = 0);
+    void showInstrumentMenu(Id replace = 0);
+    void addInstrument(const juce::PluginDescription &, Id replace = 0);
+    std::optional<juce::PluginDescription> instrumentByIdentifier(const juce::String &) const;
     void addChannelPresetItems(juce::PopupMenu &, Id channel);
     void addChannelTuningItems(juce::PopupMenu &, Id channel);
     // Detects onsets in a sampler Channel's file and slices it into Channels + a Pattern.
