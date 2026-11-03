@@ -265,6 +265,10 @@ add_test(NAME audio_recording_mcp COMMAND "${Python3_EXECUTABLE}"
   "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-audio-recording-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/audio_recording_mcp")
 set_tests_properties(audio_recording_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME tempo_warp_mcp COMMAND "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-tempo-warp-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/tempo_warp_mcp")
+set_tests_properties(tempo_warp_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME ai_claude_mcp COMMAND "${Python3_EXECUTABLE}"
   "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-ai-claude-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/ai_claude_mcp")
