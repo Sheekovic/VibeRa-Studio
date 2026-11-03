@@ -50,6 +50,8 @@ struct Channel
     // Plugin instruments (version 56): play the tuning above through MPE, each note on its
     // own member channel (2..16) with a pitch bend of the note's cents (+/-48 semitone range).
     bool mpe = false;
+    // Broadcast this Channel's tuning to MTS-ESP client plugins (version 56; one Channel).
+    bool mtsEsp = false;
     SamplerSettings sampler;
     Id group = 0;        // Display group only; zero means Unsorted, never a routing boundary.
     double swingMix = 1; // Multiplier of global Swing; source notes remain unchanged.

@@ -263,9 +263,20 @@ void Studio::addChannelTuningItems(juce::PopupMenu &menu, Id channel)
                               });
                       });
     tuningMenu.addSubMenu("Load Scala (.scl)", scala);
+    tuningMenu.addSeparator();
+    tuningMenu.addItem(target->mtsEsp && !mtsEsp.registered() ? "Broadcast via MTS-ESP (library not found or busy)"
+                                                              : "Broadcast via MTS-ESP",
+                       true, target->mtsEsp, [safe, channel, on = !target->mtsEsp]
+                       {
+                           if (!safe)
+                               return;
+                           CommandArgs args;
+                           args.channel = channel;
+                           args.enabled = on;
+                           safe->command("channel.mtsEsp", args);
+                       });
     if (target->instrument)
     {
-        tuningMenu.addSeparator();
         tuningMenu.addItem("Play tuning through MPE (plugin)", true, target->mpe, [safe, channel, on = !target->mpe]
                            {
                                if (!safe)

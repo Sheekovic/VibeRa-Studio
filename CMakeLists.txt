@@ -12,7 +12,7 @@ endif()
 add_subdirectory("${JUCE_ROOT}" juce)
 add_subdirectory("${TE_ROOT}/modules" tracktion)
 include(cmake/TracktionImplementation.cmake)
-add_library(VibeRaCore STATIC src/NoteSlice.cpp src/NoteStretch.cpp src/MixerRouting.cpp src/Project.cpp src/Commands.cpp src/AudioEngine.cpp src/AudioInputCapture.cpp src/AudioStretch.cpp src/Customization.cpp src/Groove.cpp src/SampleCache.cpp src/LiveTimeline.cpp src/Automation.cpp src/AutomationState.cpp src/AutomationCommands.cpp src/PluginAutomationBlock.cpp src/PluginBinding.cpp src/PluginStateEncoding.cpp src/PluginHost.cpp src/PluginCatalog.cpp src/WorkerProcess.cpp src/MidiInput.cpp src/MidiController.cpp src/CoProducer.cpp src/CoProducerWorker.cpp)
+add_library(VibeRaCore STATIC src/NoteSlice.cpp src/NoteStretch.cpp src/MixerRouting.cpp src/Project.cpp src/Commands.cpp src/AudioEngine.cpp src/AudioInputCapture.cpp src/AudioStretch.cpp src/MtsEsp.cpp src/third_party/mts-esp/libMTSMaster.cpp src/Customization.cpp src/Groove.cpp src/SampleCache.cpp src/LiveTimeline.cpp src/Automation.cpp src/AutomationState.cpp src/AutomationCommands.cpp src/PluginAutomationBlock.cpp src/PluginBinding.cpp src/PluginStateEncoding.cpp src/PluginHost.cpp src/PluginCatalog.cpp src/WorkerProcess.cpp src/MidiInput.cpp src/MidiController.cpp src/CoProducer.cpp src/CoProducerWorker.cpp)
 # Signalsmith Stretch (MIT) is vendored with Tracktion; used offline for Audio Clip stretching.
 target_include_directories(VibeRaCore PRIVATE "${TE_ROOT}/modules/tracktion_engine/3rd_party/signalsmith-stretch")
 target_sources(VibeRaCore PRIVATE src/synth/SynthPresets.cpp)

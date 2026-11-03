@@ -734,6 +734,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.tuning", "Set Channel tuning", Scope::rack, true, true, "command"},
         {"channel.scale", "Set Channel keyboard-mapped scale", Scope::rack, true, true, "command"},
         {"channel.mpe", "Play Channel tuning through MPE", Scope::rack, true, true, "command"},
+        {"channel.mtsEsp", "Broadcast Channel tuning via MTS-ESP", Scope::rack, true, true, "command"},
         {"channel.sliceToChannels", "Slice sample to Channels", Scope::rack, true, true, "command"},
         {"notes.arpeggiate", "Arpeggiate chords", Scope::piano, true, true, "command"},
         {"notes.strum", "Strum chords", Scope::piano, true, true, "command"},
@@ -4942,6 +4943,16 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         for (auto &t : next.tracks)
             t.groupedAbove = t.groupedAbove && t.lane > 0; // A move to the top track ungroups it.
         std::sort(next.tracks.begin(), next.tracks.end(), [](auto &x, auto &y) { return x.lane < y.lane; });
+    }
+    if (id == "channel.mtsEsp")
+    {
+        // At most one Channel is the MTS-ESP tuning source; enabling moves it here.
+        auto *target = next.channel(a.channel);
+        if (!target || target->audioClip)
+            return missing();
+        for (auto &channel : next.channels)
+            channel.mtsEsp = false;
+        target->mtsEsp = a.enabled;
     }
     if (id == "channel.mpe")
     {

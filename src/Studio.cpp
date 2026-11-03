@@ -5191,6 +5191,7 @@ void Studio::timerCallback()
     pollAudioTake();
     pollExportEncoding();
     pollStretchJob();
+    mtsEsp.sync(controller.project);
     pollPerformance();
     syncSongLoop();
     if (videoWindow)

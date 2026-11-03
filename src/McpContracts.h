@@ -426,6 +426,8 @@ inline juce::var commandArgumentSchema(const juce::String &id)
           "properties":{"pattern":{"type":"integer","minimum":1,"description":"Stable Pattern ID."},
           "value":{"type":"number","minimum":-1,"maximum":64,"description":"Performance launch step in beats: -1 one bar of the Song meter (default), 0 immediately, otherwise 0.0625..64. Saved with the Pattern (project v49)."}},
           "required":["pattern","value"]})JSON");
+    if (id == "channel.mtsEsp")
+        return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{"channel":{"type":"integer","minimum":1},"enabled":{"type":"boolean","default":true,"description":"Broadcast this Channel's tuning table or scale to every MTS-ESP client plugin (enabling clears it on other Channels; saved, project v56). Needs the user-installed MTS-ESP library (LIBMTS.dll) and no other master running; read vibera_inspect channels mtsEspActive."}},"required":["channel"]})");
     if (id == "channel.mpe")
         return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{"channel":{"type":"integer","minimum":1,"description":"Plugin instrument Channel."},"enabled":{"type":"boolean","default":true,"description":"Play the Channel tuning table/scale and per-note fine cents through MPE: each note on its own member channel 2..16 with a pitch bend of its cents; the zone (channels 2..16, bend range 48 semitones) is announced on every playback start. The plugin must support MPE. Saved with the Channel (project v56)."}},"required":["channel"]})");
     if (id == "channel.scale")

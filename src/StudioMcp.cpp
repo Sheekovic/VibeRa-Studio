@@ -2137,6 +2137,22 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                         cents.add(value);
                     set(row, "tuning", cents);
                 }
+                if (!c.scale.empty())
+                {
+                    juce::Array<juce::var> degrees;
+                    for (auto value : c.scale)
+                        degrees.add(value);
+                    set(row, "scale", degrees);
+                    set(row, "scaleRoot", c.scaleRoot);
+                }
+                if (c.mpe)
+                    set(row, "mpe", true);
+                if (c.mtsEsp)
+                {
+                    set(row, "mtsEsp", true);
+                    set(row, "mtsEspActive", mtsEsp.registered());
+                    set(row, "mtsEspClients", mtsEsp.clients());
+                }
                 if (c.instrument)
                     set(row, "plugin", juce::int64(c.instrument->id));
                 append(row);

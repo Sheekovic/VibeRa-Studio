@@ -72,3 +72,6 @@ All take `ids` (empty = the whole selected/explicit Channel part) plus `pattern`
   instrument Channel sends each note on its own member channel 2..16 with a pitch bend of
   its tuning + fine cents (48-semitone range, zone announced at playback start). The
   plugin must support MPE; otherwise leave it off.
+- MTS-ESP: `vibera_command channel.mtsEsp {channel, enabled}` broadcasts that Channel's
+  tuning to every MTS-ESP client plugin (one source Channel). Needs the user-installed
+  LIBMTS.dll; `vibera_inspect channels` shows `mtsEspActive` and `mtsEspClients`.

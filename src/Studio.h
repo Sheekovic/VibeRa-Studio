@@ -5,6 +5,7 @@
 #include "AudioEngine.h"
 #include "ChannelRoutingCoordinator.h"
 #include "Customization.h"
+#include "MtsEsp.h"
 #include "MidiController.h"
 #include "AudioClipImporter.h"
 #include "Theme.h"
@@ -806,6 +807,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
         }
     };
     std::unique_ptr<StretchJob> stretchJob;
+    MtsEspMaster mtsEsp; // Broadcasts the mtsEsp Channel tuning (Studio timer).
     // Video player following the transport (Tools > Video player).
     std::unique_ptr<class VideoPlayerWindow> videoWindow;
     // Performance mode: launched Patterns are written into the Song at bar boundaries.
