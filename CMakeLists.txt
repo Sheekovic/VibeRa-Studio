@@ -44,7 +44,7 @@ if(MSVC)
 endif()
 juce_add_gui_app(VibeRa PRODUCT_NAME "VibeRa Studio" COMPANY_NAME "VibeRa" VERSION "${PROJECT_VERSION}" ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-512.png" ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-64.png")
 juce_add_binary_data(VibeRaBranding SOURCES assets/vibera-symbol.svg)
-target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioDropCheck.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp)
+target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioDropCheck.cpp src/StudioAutosave.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp)
 target_include_directories(VibeRa PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_sources(VibeRa PRIVATE src/StudioPicker.cpp)
 

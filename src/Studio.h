@@ -255,6 +255,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result verifyRackGroups(const juce::File &);
     juce::Result verifyClipGroups(const juce::File &);
     juce::Result verifyDropTargets(const juce::File &);
+    void verifyAutosave(const juce::File &folder, std::function<void(juce::Result)> completion);
     juce::Result verifyNoteMute(const juce::File &);
     juce::Result verifyNoteSlice(const juce::File &);
     juce::Result verifyNoteStretch(const juce::File &);
@@ -844,6 +845,31 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     std::unique_ptr<juce::DocumentWindow> drumPadsWindow;
     // Learns the samples/instruments the producer loads most (Browser "Recent" section).
     RecentSources recentSources;
+    // Autosave, backups and crash recovery (StudioAutosave.cpp). Autosave writes the dirty
+    // project every `autosaveSeconds` while stopped; a session marker without a clean exit
+    // offers the autosave at the next start; Save keeps `backupCount` previous versions.
+    bool autosaveEnabled = false, autosaveRunning = false;
+    double autosaveSeconds = 120, lastAutosaveTime = 0;
+    std::uint64_t autosaveRevision = 0;
+    static constexpr int backupCount = 5;
+    juce::File lastAutosaveFile;
+    juce::File autosaveDirectory() const;
+    juce::File autosaveFile() const;
+    juce::File sessionMarkerFile() const;
+    void writeSessionMarker();
+    void startAutosaveSession();
+    void endAutosaveSession();
+    void serviceAutosave();
+    void autosaveNow(std::function<void(juce::Result)> completion);
+    juce::Result recoverAutosave(const juce::File &autosave, const juce::File &original);
+    void rotateBackups(const juce::File &project);
+    struct CrashedSession
+    {
+        juce::File marker, autosave, project;
+        juce::Time time;
+    };
+    // Newest autosave left by a VibeRa that did not exit cleanly; older markers are removed.
+    std::optional<CrashedSession> findCrashedSession();
     void showDrumPads();
     std::unique_ptr<juce::DocumentWindow> chordWindow;
     void showChordProgression();

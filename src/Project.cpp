@@ -2394,6 +2394,22 @@ juce::Result saveProject(const Project &project, const juce::File &file)
         return juce::Result::fail("Project write failed; previous file preserved");
     return juce::Result::ok();
 }
+juce::Result saveProjectSnapshot(const Project &project, const juce::File &file)
+{
+    auto valid = project.validate();
+    if (valid.failed())
+        return valid;
+    if (!file.getParentDirectory().createDirectory())
+        return juce::Result::fail("Cannot create snapshot directory");
+    juce::TemporaryFile temporary(file);
+    auto state = project.state();
+    preserveNumericPrecision(state);
+    auto xml = state.createXml();
+    if (!temporary.getFile().replaceWithText(xml->toString()) ||
+        temporary.getFile().getSize() > 32 * 1024 * 1024 || !temporary.overwriteTargetFileWithTemporary())
+        return juce::Result::fail("Snapshot write failed; previous file preserved");
+    return juce::Result::ok();
+}
 juce::Result loadProject(const juce::File &file, Project &result)
 {
     if (!file.existsAsFile() || file.getSize() > 32 * 1024 * 1024)

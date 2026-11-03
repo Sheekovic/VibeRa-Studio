@@ -628,11 +628,21 @@ class VibeRaApplication final : public juce::JUCEApplication
                     auto *studio = dynamic_cast<vibera::Studio *>(window->getContentComponent());
                     const auto result = studio->verifyDropTargets(folder);
                     if (result.failed())
+                    {
                         juce::Logger::writeToLog(result.getErrorMessage());
-                    else
-                        juce::Logger::writeToLog("PASS drop targets");
-                    setApplicationReturnValue(result.wasOk() ? 0 : 1);
-                    quit();
+                        setApplicationReturnValue(1);
+                        quit();
+                        return;
+                    }
+                    juce::Logger::writeToLog("PASS drop targets");
+                    studio->verifyAutosave(folder.getChildFile("autosave"),
+                                           [this](juce::Result autosave)
+                                           {
+                                               juce::Logger::writeToLog(autosave.wasOk() ? juce::String("PASS autosave")
+                                                                                         : autosave.getErrorMessage());
+                                               setApplicationReturnValue(autosave.wasOk() ? 0 : 1);
+                                               quit();
+                                           });
                 });
         }
         if (clipGroupsCheck)

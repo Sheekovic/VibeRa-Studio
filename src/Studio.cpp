@@ -651,6 +651,8 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     applyAppearance();
     startTimerHz(20);
     if (persistentTyping)
+        startAutosaveSession();
+    if (persistentTyping)
     {
         auto safe = juce::Component::SafePointer<Studio>(this);
         juce::MessageManager::callAsync(
@@ -674,6 +676,7 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
 }
 Studio::~Studio()
 {
+    endAutosaveSession();
     if (samplerControllerLearn)
         midiController.cancelProjectLearn(samplerControllerLearn->serial);
     if (samplerControllerLearnWindow)
@@ -3360,6 +3363,8 @@ void Studio::toolsMenu()
     menu.addItem(204, "Find missing samples..." +
                           (missingCount ? " (" + juce::String(missingCount) + " missing)" : juce::String()),
                  missingCount > 0);
+    // Save keeps five backups per project; autosave covers unexpected closes.
+    menu.addItem(224, "Open project backups folder", profileFile().getSiblingFile("backups").isDirectory());
     juce::PopupMenu layouts;
     layouts.addItem(220, "Balanced auto tiling", true, autoTileMode == 1);
     layouts.addItem(221, "Focus active editor", true, autoTileMode == 2);
@@ -3392,6 +3397,14 @@ void Studio::toolsMenu()
                                           "automation.plugin.init.remove"}[choice - 300],
                         operation, code);
                 }
+                return;
+            }
+            if (choice == 224)
+            {
+                const auto folder = safe->profileFile().getSiblingFile("backups");
+                const auto own = safe->projectFile == juce::File{} ? juce::File{}
+                                 : folder.getChildFile(safe->projectFile.getFileNameWithoutExtension());
+                (own.isDirectory() ? own : folder).startAsProcess();
                 return;
             }
             if (choice == 203)
@@ -5255,6 +5268,7 @@ juce::var Studio::midiTakeState() const
 void Studio::timerCallback()
 {
     pollAiMusic();
+    serviceAutosave();
     if (!mixerChainApplying() || mixerChainRecovering())
         serviceDevicePreparation();
     routingCoordinator.poll({patternMode, selectedPattern});
@@ -5770,7 +5784,11 @@ void Studio::saveTo(const juce::File &file, std::function<void(juce::Result)> co
             if (!safe)
                 return;
             if (result.wasOk())
+            {
+                if (safe->autosaveEnabled)
+                    safe->rotateBackups(file);
                 result = saveProject(snapshot, file);
+            }
             safe->status = result.wasOk() ? "Saved " + file.getFileName() : result.getErrorMessage();
             if (const auto missing = missingMedia(snapshot); result.wasOk() && !missing.empty())
                 safe->status << " | " << int(missing.size())
@@ -5780,6 +5798,7 @@ void Studio::saveTo(const juce::File &file, std::function<void(juce::Result)> co
                 safe->projectFile = file;
                 if (safe->controller.revision == revision)
                     safe->controller.dirty = false;
+                safe->autosaveRevision = revision; // Saved work needs no autosave.
                 safe->audio.markCapturedPluginStateSaved();
                 for (auto &c : safe->controller.project.channels)
                     if (c.instrument)

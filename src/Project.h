@@ -378,6 +378,8 @@ struct ScheduledNote
 };
 std::vector<ScheduledNote> sequence(const Project &, bool patternMode, Id selectedPattern);
 juce::Result saveProject(const Project &, const juce::File &);
+// Atomic write keeping absolute media paths (no media collection): autosaves and backups.
+juce::Result saveProjectSnapshot(const Project &, const juce::File &);
 juce::Result loadProject(const juce::File &, Project &);
 juce::String sourceName(const juce::String &);
 } // namespace vibera
