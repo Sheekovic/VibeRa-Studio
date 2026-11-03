@@ -1261,7 +1261,8 @@ class ScrollingSettingsPage final : public juce::Component
 
   public:
     explicit ScrollingSettingsPage(juce::Component *page, int width = 740, int height = 500)
-        : minimumWidth(std::max(width, page->getWidth())), minimumHeight(std::max(height, page->getHeight()))
+        : minimumWidth(std::max(width, page->getWidth())),
+          minimumHeight(page->getHeight() > 0 ? page->getHeight() : height) // A page's own height is its content.
     {
         addAndMakeVisible(viewport);
         viewport.setScrollBarsShown(true, true);
