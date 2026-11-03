@@ -1328,7 +1328,7 @@ class SettingsContent final : public juce::TabbedComponent
                 area = display->userArea;
         const int width = std::min(std::max(760, natural.x + 4), area.getWidth() - 40);
         const int height = std::min(natural.y + getTabBarDepth() + 4, area.getHeight() - 80);
-        setSize(width, std::max(360, height));
+        setSize(width, std::max(240, height));
         if (auto *window = getTopLevelComponent(); window != this)
             window->setBounds(window->getBounds().constrainedWithin(area));
     }
