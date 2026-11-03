@@ -43,7 +43,7 @@ class SampleFileBrowser final : public juce::Component,
     juce::Component content;
     juce::Viewport viewport;
     juce::TextButton choose{"Folder..."}, up{"Up"}, reread{"Refresh"};
-    juce::TextButton back{"< Back"}, forward{"Forward >"};
+    juce::TextButton back{"<"}, forward{">"};
     ToolbarButton previewStop{"Stop preview"};
     ToolbarButton previewPlay{"Play"};
     PreviewPlayerView playerView;
@@ -1070,14 +1070,13 @@ class SampleFileBrowser final : public juce::Component,
         tagsButton.setBounds(tabs.removeFromRight(42));
         views.setBounds(tabs);
         area.removeFromTop(3);
+        // One navigation row: back, forward, up, folder and refresh.
         auto buttons = area.removeFromTop(26);
-        choose.setBounds(buttons.removeFromLeft(72));
-        up.setBounds(buttons.removeFromLeft(35));
-        reread.setBounds(buttons);
-        area.removeFromTop(3);
-        auto nav = area.removeFromTop(24);
-        back.setBounds(nav.removeFromLeft(nav.getWidth() / 2));
-        forward.setBounds(nav);
+        back.setBounds(buttons.removeFromLeft(26));
+        forward.setBounds(buttons.removeFromLeft(26));
+        up.setBounds(buttons.removeFromLeft(34));
+        reread.setBounds(buttons.removeFromRight(62));
+        choose.setBounds(buttons);
         area.removeFromTop(3);
         auto rootRow = area.removeFromTop(24);
         forget.setBounds(rootRow.removeFromRight(24));

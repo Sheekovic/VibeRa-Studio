@@ -3350,7 +3350,7 @@ class Studio::Editor final : public juce::Component,
                   "Name: F2 / middle-click | Move: Alt arrows / Shift-wheel name | Enable: mute / Ctrl solo "
                   "| Pan: "
                   "double-click centre",
-                  {12, 0, getWidth() - 24, 27}, muted, 14);
+                  {12, 0, getWidth() - 24, 27}, muted.withAlpha(.5f), 11); // Quiet hint, not a heading.
             int width = mixerWidth();
             int position = 0;
             g.saveState();

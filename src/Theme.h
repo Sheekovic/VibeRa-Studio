@@ -211,18 +211,35 @@ class WorkspaceLook final : public juce::LookAndFeel_V4
                               bool down) override
     {
         auto r = b.getLocalBounds().toFloat().reduced(.5f);
-        auto onColour = b.isColourSpecified(juce::TextButton::buttonOnColourId)
-                            ? b.findColour(juce::TextButton::buttonOnColourId)
-                            : accent.darker(.55f);
+        const bool custom = b.isColourSpecified(juce::TextButton::buttonOnColourId);
+        if (b.getToggleState() && !custom)
+        {
+            // Modern active state: a soft accent tint with an accent underline instead of a
+            // saturated fill, so many active toggles never overpower the work area.
+            auto tint = panel.interpolatedWith(accent, b.isEnabled() ? (over ? .24f : .17f) : .07f);
+            if (down)
+                tint = tint.brighter(.1f);
+            g.setColour(tint);
+            g.fillRoundedRectangle(r, 4.f);
+            g.setColour(accent.withAlpha(b.isEnabled() ? .55f : .2f));
+            g.drawRoundedRectangle(r, 4.f, 1.f);
+            if (b.isEnabled() && r.getWidth() > 24)
+            {
+                g.setColour(accent);
+                g.fillRoundedRectangle(r.getX() + 6.f, r.getBottom() - 3.f, r.getWidth() - 12.f, 2.f, 1.f);
+            }
+            return;
+        }
+        auto onColour = custom ? b.findColour(juce::TextButton::buttonOnColourId) : accent.darker(.55f);
         auto colour = b.getToggleState() ? onColour : panel.brighter(over ? .09f : .025f);
         if (down)
             colour = colour.brighter(.12f);
         if (!b.isEnabled() && b.getToggleState())
             colour = colour.interpolatedWith(panel, .6f); // A disabled primary action must not look clickable.
         g.setColour(colour);
-        g.fillRoundedRectangle(r, 3.f);
+        g.fillRoundedRectangle(r, 4.f);
         g.setColour(b.getToggleState() && b.isEnabled() ? onColour.brighter(.5f) : grid);
-        g.drawRoundedRectangle(r, 3.f, 1.f);
+        g.drawRoundedRectangle(r, 4.f, 1.f);
     }
     void drawComboBox(juce::Graphics &g, int w, int h, bool, int, int, int, int, juce::ComboBox &box) override
     {

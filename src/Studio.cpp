@@ -746,16 +746,28 @@ void Studio::paint(juce::Graphics &g)
     const auto clockMeter = playbackMeter(controller.project, patternMode, selectedPattern);
     const double bar = clockMeter.first * 4. / clockMeter.second;
     double beat = audio.positionBeat();
-    const int x = snapChoice.getRight() + 14; // Song position follows the transport row.
-    if (getWidth() > 1510)
+    // Song position display: a recessed panel with bar : beat, the meter and play state,
+    // placed after the transport row whenever it fits before the editor buttons.
+    const juce::Rectangle<int> display(snapChoice.getRight() + 12, 38, 196, 36);
+    if (display.getRight() + 10 < browserButton.getX())
     {
-        label(g,
-              juce::String(int(beat / bar) + 1).paddedLeft('0', 2) + " : " +
-                  juce::String(int(std::fmod(std::max(0., beat), bar) * clockMeter.second / 4.) + 1)
-                      .paddedLeft('0', 2),
-              {x, 38, 94, 22}, accent, 19);
+        const auto box = display.toFloat();
+        g.setColour(bg.darker(.35f));
+        g.fillRoundedRectangle(box, 6.f);
+        g.setColour(grid);
+        g.drawRoundedRectangle(box.reduced(.5f), 6.f, 1.f);
+        const bool running = audio.playing();
+        g.setColour(running ? accent : muted.withAlpha(.6f));
+        g.fillEllipse(box.getX() + 10.f, box.getCentreY() - 3.5f, 7.f, 7.f);
+        const int barNumber = int(beat / bar) + 1;
+        const int beatNumber = int(std::fmod(std::max(0., beat), bar) * clockMeter.second / 4.) + 1;
+        g.setColour(running ? accent : ink);
+        g.setFont(juce::Font(juce::Font::getDefaultMonospacedFontName(), 21.f, juce::Font::bold));
+        g.drawText(juce::String(barNumber).paddedLeft('0', 3) + ":" + juce::String(beatNumber).paddedLeft('0', 2),
+                   display.withTrimmedLeft(24).withWidth(104), juce::Justification::centredLeft);
+        label(g, "BAR : BEAT", {display.getX() + 128, display.getY() + 3, 64, 14}, muted, 9);
         label(g, juce::String(clockMeter.first) + " / " + juce::String(clockMeter.second),
-              {x + 100, 39, 50, 23}, muted, 12);
+              {display.getX() + 128, display.getY() + 17, 64, 16}, ink, 13);
     }
     g.setColour(panel);
     g.fillRect(0, getHeight() - 25, getWidth(), 25);
