@@ -6712,7 +6712,27 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
         if (pressed >= 0 && !started && e.getDistanceFromDragStart() > 5)
         {
             started = true;
-            s.startDragging(pressedSource, this, juce::ScaledImage{}, true);
+            // A small labelled chip follows the mouse (an empty image would make JUCE drag a
+            // snapshot of the whole Browser over the editors).
+            const auto name = pressedSource.startsWith("builtin:") ? sourceName(pressedSource).toUpperCase()
+                              : pressedSource.startsWith("plugin:")
+                                  ? (s.instrumentByIdentifier(pressedSource.fromFirstOccurrenceOf(":", false, false))
+                                         ? s.instrumentByIdentifier(pressedSource.fromFirstOccurrenceOf(":", false, false))->name
+                                         : juce::String("Instrument"))
+                                  : juce::File(pressedSource).getFileNameWithoutExtension();
+            juce::Image chip(juce::Image::ARGB, 180, 26, true);
+            {
+                juce::Graphics g(chip);
+                g.setColour(panel.brighter(.12f).withAlpha(.92f));
+                g.fillRoundedRectangle(0.f, 0.f, 180.f, 26.f, 6.f);
+                g.setColour(accent);
+                g.drawRoundedRectangle(.5f, .5f, 179.f, 25.f, 6.f, 1.f);
+                g.setColour(ink);
+                g.setFont(juce::Font(vibera::uiFont, 12.f, juce::Font::bold));
+                g.drawText(name, 10, 0, 164, 26, juce::Justification::centredLeft, true);
+            }
+            const juce::Point<int> offset(-12, -13);
+            s.startDragging(pressedSource, this, juce::ScaledImage(chip), true, &offset);
         }
     }
     void mouseUp(const juce::MouseEvent &) override
