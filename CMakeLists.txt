@@ -44,7 +44,7 @@ if(MSVC)
 endif()
 juce_add_gui_app(VibeRa PRODUCT_NAME "VibeRa Studio" COMPANY_NAME "VibeRa" VERSION "${PROJECT_VERSION}" ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-512.png" ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-64.png")
 juce_add_binary_data(VibeRaBranding SOURCES assets/vibera-symbol.svg)
-target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp)
+target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp)
 target_include_directories(VibeRa PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_sources(VibeRa PRIVATE src/StudioPicker.cpp)
 
@@ -310,6 +310,8 @@ set_tests_properties(channel_tuning PROPERTIES TIMEOUT 60)
 add_test(NAME controller_recording COMMAND VibeRaTests --controller-recording-check
   "${CMAKE_CURRENT_BINARY_DIR}/controller_recording")
 set_tests_properties(controller_recording PROPERTIES TIMEOUT 60)
+add_test(NAME chord_progression COMMAND VibeRaTests --chord-progression-check)
+set_tests_properties(chord_progression PROPERTIES TIMEOUT 60)
 add_test(NAME flp_import COMMAND VibeRaTests --flp-import-check
   "${CMAKE_CURRENT_BINARY_DIR}/flp_import")
 set_tests_properties(flp_import PROPERTIES TIMEOUT 60)

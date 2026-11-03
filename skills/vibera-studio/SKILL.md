@@ -255,6 +255,12 @@ Tempo map: `vibera_command tempo.change.add {beat (> 0), value: BPM 10..999, ste
 `vibera_inspect {"entity":"tempo"}` (row 0 is the base tempo; `seconds` per change). Song
 mode only. Shaped curves: `tempo.curve {beat, length, value, text: linear|ease|in|out}`
 glides from the tempo at `beat` to `value` (16 ramps, changes inside replaced, one Undo).
+Chord progressions: `vibera_command view.chordProgression` (Tools > Create a chord
+progression) opens the generator: key, scale (major, minor, dorian, mixolydian, harmonic
+minor), 2-8 chords, octave, chord length, Conventional..Adventurous; click a chord to roll it;
+Accept writes chords (+ optional bass) to the selected Channel in the selected Pattern through
+`notes.import` (one Undo). Instruments: the Rack + button, a right-click on empty Rack space and
+the Channel menu Insert/Replace list the native Synth and scanned VST3 instruments.
 Drum pads: `vibera_command view.drumPads` (Tools > Drum pads) opens a 4x4 pad grid playing
 the first 16 sampler Channels (pad 1 bottom-left; keys 1-4/Q-R/A-F/Z-V). A hit selects the
 Channel and plays its root key through the live input path, so it records into MIDI takes.

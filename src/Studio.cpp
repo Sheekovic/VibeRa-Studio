@@ -3312,6 +3312,7 @@ void Studio::toolsMenu()
     menu.addItem(202, videoWindow ? "Close video player" : "Video player (follows the transport)...");
     menu.addItem(203, "Performance mode (launch Patterns live)");
     menu.addItem(205, "Drum pads (play and load a kit)");
+    menu.addItem(206, "Create a chord progression...");
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
                           (missingCount ? " (" + juce::String(missingCount) + " missing)" : juce::String()),
@@ -3354,6 +3355,8 @@ void Studio::toolsMenu()
                 return safe->showPerformance();
             if (choice == 205)
                 return safe->showDrumPads();
+            if (choice == 206)
+                return safe->showChordProgression();
             if (choice == 204)
             {
                 safe->chooser = std::make_unique<juce::FileChooser>("Folder to search for the missing samples",
@@ -3940,6 +3943,11 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.drumPads")
     {
         showDrumPads();
+        return true;
+    }
+    if (action == "view.chordProgression")
+    {
+        showChordProgression();
         return true;
     }
     if (action == "view.settings")

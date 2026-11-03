@@ -834,6 +834,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Learns the samples/instruments the producer loads most (Browser "Recent" section).
     RecentSources recentSources;
     void showDrumPads();
+    std::unique_ptr<juce::DocumentWindow> chordWindow;
+    void showChordProgression();
     juce::var performanceState() const;
     bool togglePerformancePad(int index);
     // Piano Roll scale/maqam guide (view only): name empty = off.
