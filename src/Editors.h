@@ -2764,13 +2764,23 @@ class Studio::Editor final : public juce::Component,
                                                                : colour;
                         auto r = juce::Rectangle<float>(stepStart() + (j - stepOffset) * width, float(y + 6),
                                                         width - 3, 20.f);
+                        // Off steps alternate per beat group with clear contrast (the odd group
+                        // carries a hint of the Channel colour) so beats read at a glance.
+                        const bool oddGroup = (j / (16 / patternDenominator(project, *p))) % 2 != 0;
                         g.setColour(on ? stepColour
-                                       : ((j / (16 / patternDenominator(project, *p))) % 2
-                                              ? grid.brighter(.09f)
-                                              : grid.darker(.15f)));
-                        g.fillRoundedRectangle(r, 3);
-                        g.setColour(on ? stepColour.brighter(.28f) : grid.brighter(.15f));
-                        g.fillRoundedRectangle(r.withHeight(2.f).translated(0, 2), 1);
+                                       : oddGroup ? grid.interpolatedWith(colour, .14f).brighter(.05f)
+                                                  : bg.brighter(.1f));
+                        g.fillRoundedRectangle(r, 3.5f);
+                        if (on)
+                        {
+                            g.setColour(stepColour.brighter(.32f));
+                            g.fillRoundedRectangle(r.withHeight(2.f).translated(0, 2), 1);
+                        }
+                        else
+                        {
+                            g.setColour(juce::Colours::black.withAlpha(.18f));
+                            g.fillRoundedRectangle(r.withTrimmedTop(r.getHeight() - 3), 1.5f);
+                        }
                         if (period > 0 && std::abs(std::fmod(j * .25, period)) < .0001)
                         {
                             g.setColour(accent);
@@ -3040,8 +3050,15 @@ class Studio::Editor final : public juce::Component,
                 bool bar = songMeter ? songBar.beatInBar < .0001 || songBar.barLength - songBar.beatInBar < .0001
                                      : std::abs(b / barBeats() - std::round(b / barBeats())) < .0001;
                 bool beat = std::abs(b - std::round(b)) < .0001;
-                g.setColour(bar ? grid.brighter(.25f) : grid.withAlpha(beat ? .8f : .4f));
-                g.drawVerticalLine(x, float(top), float((type == 1 ? noteBottom() : getHeight())));
+                const float bottom = float(type == 1 ? noteBottom() : getHeight());
+                // Every other bar gets a faint band so long phrases read by bar at a glance.
+                if (bar && !songMeter && int(std::round(b / barBeats())) % 2 == 1)
+                {
+                    g.setColour(ink.withAlpha(.022f));
+                    g.fillRect(float(x), float(top), float(barBeats() * spacing()), bottom - float(top));
+                }
+                g.setColour(bar ? grid.brighter(.5f) : grid.withAlpha(beat ? .8f : .35f));
+                g.drawVerticalLine(x, float(top), bottom);
                 if (bar)
                 {
                     const int number = songMeter ? s.controller.project.barPosition(b + .0002).bar + 1
