@@ -4716,6 +4716,9 @@ class Studio::Editor final : public juce::Component,
                     stretch.addItem(25, "Fit to 1 bar");
                     stretch.addItem(26, "Fit to 2 bars");
                     stretch.addItem(27, "Fit to 4 bars");
+                    stretch.addSeparator();
+                    stretch.addItem(28, "Warp to Song tempo (played at the base tempo)");
+                    stretch.addItem(29, "Warp to Song tempo (played at the clip start tempo)");
                     m.addSubMenu("Stretch (keep pitch)", stretch);
                     juce::PopupMenu editAudio;
                     editAudio.addItem(30, "Reverse");
@@ -4756,6 +4759,17 @@ class Studio::Editor final : public juce::Component,
                                         const char *edits[] = {"reverse", "normalize", "gain", "gain", "consolidate"};
                                         const double values[] = {0, -.3, 3, -3, 0};
                                         if (auto r = safe->s.editAudioClip(id, edits[n - 30], values[n - 30]); r.failed())
+                                            safe->s.status = r.getErrorMessage();
+                                        return;
+                                    }
+                                    if (n == 28 || n == 29)
+                                    {
+                                        const auto *clip = safe->audioClip(id);
+                                        if (!clip)
+                                            return;
+                                        const auto &project = safe->s.controller.project;
+                                        const double bpm = n == 28 ? project.tempo : project.songTempo().bpmAt(clip->beat);
+                                        if (auto r = safe->s.warpAudioClip(id, bpm); r.failed())
                                             safe->s.status = r.getErrorMessage();
                                         return;
                                     }

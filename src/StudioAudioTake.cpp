@@ -551,6 +551,55 @@ juce::Result Studio::stretchAudioClip(Id clip, double ratio, const juce::String 
     return juce::Result::ok();
 }
 
+// Warps a clip recorded at `sourceBpm` onto the Song tempo map: each source beat lands on
+// the matching Song beat from the clip start, so the clip follows jumps and ramps. Rendered
+// offline (pitch kept) and applied like a stretch, as one Undo step.
+juce::Result Studio::warpAudioClip(Id clip, double sourceBpm, const juce::String &operation)
+{
+    if (stretchJob)
+        return juce::Result::fail("An audio clip job is already running");
+    const auto found = std::find_if(controller.project.audioPlacements.begin(), controller.project.audioPlacements.end(),
+                                    [&](const auto &p) { return p.id == clip; });
+    if (found == controller.project.audioPlacements.end())
+        return juce::Result::fail("Select an Audio Clip to warp");
+    const auto *source = controller.project.channel(found->channel);
+    if (!source || !(found->duration > 0))
+        return juce::Result::fail("The clip has no source");
+    if (!(sourceBpm >= 10 && sourceBpm <= 522))
+        return juce::Result::fail("Source tempo is 10..522 BPM");
+    // (source seconds, output seconds) every 1/16 beat of the source.
+    const auto &project = controller.project;
+    const double beats = found->duration * sourceBpm / 60., zero = project.songSeconds(found->beat);
+    std::vector<std::pair<double, double>> map{{0., 0.}};
+    for (double b = .0625; b < beats; b += .0625)
+        map.emplace_back(b * 60. / sourceBpm, project.songSeconds(found->beat + b) - zero);
+    map.emplace_back(found->duration, project.songSeconds(found->beat + beats) - zero);
+    const auto folder = projectFile != juce::File{}
+                            ? projectFile.getParentDirectory().getChildFile("Stretched")
+                            : juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
+                                  .getChildFile("VibeRa Studio/Stretched");
+    if (!folder.createDirectory())
+        return juce::Result::fail("Cannot create " + folder.getFullPathName());
+    auto job = std::make_unique<StretchJob>();
+    job->clip = clip;
+    job->seconds = map.back().second;
+    job->project = controller.projectIdentity;
+    job->operation = operation;
+    job->target = folder.getChildFile(juce::File(source->source).getFileNameWithoutExtension() + " warped.wav")
+                      .getNonexistentSibling(false);
+    auto *raw = job.get();
+    const juce::File input(source->source);
+    const double offset = found->offset, duration = found->duration;
+    job->thread = std::thread([raw, input, offset, duration, map]
+                              {
+                                  raw->result = warpAudioFile(input, offset, duration, map, raw->target);
+                                  raw->done = true;
+                              });
+    stretchJob = std::move(job);
+    status = "Warping " + source->name + " to the Song tempo...";
+    return juce::Result::ok();
+}
+
 juce::Result Studio::editAudioClip(Id clip, const juce::String &edit, double value, const juce::String &operation)
 {
     if (stretchJob)

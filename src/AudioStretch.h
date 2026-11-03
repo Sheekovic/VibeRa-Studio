@@ -15,4 +15,9 @@ juce::Result stretchAudioFile(const juce::File &source, double offsetSeconds, do
 juce::Result editAudioFile(const juce::File &source, double offsetSeconds, double durationSeconds,
                            const juce::String &operation, double value, double fadeIn, double fadeOut,
                            const juce::File &target);
+// Time-varying pitch-preserving stretch of a source window: `map` is increasing
+// (source seconds, output seconds) points from (0, 0); each span plays at its own rate
+// (0.25..4). Used to warp an Audio Clip onto the Song tempo map.
+juce::Result warpAudioFile(const juce::File &source, double offsetSeconds, double durationSeconds,
+                           const std::vector<std::pair<double, double>> &map, const juce::File &target);
 } // namespace vibera

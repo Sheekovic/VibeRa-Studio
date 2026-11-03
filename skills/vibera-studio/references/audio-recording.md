@@ -89,6 +89,10 @@ Stretching (any Audio Clip): `vibera_project {"action":"stretchClip","clip":id,"
 (new length / old, 0.25..4) or `"beats": n` to fit the clip to n beats. A job renders a
 pitch-preserving stretched WAV (Stretched/ next to the project), then the clip plays it
 from its start in one Undo step; the original file is untouched.
+Warping to the Song tempo: `{"action":"warpClip","clip":id,"bpm":b}` (b = the tempo the
+clip was played at, default the base tempo). Each source beat is rendered onto the
+matching Song beat from the clip start, so the clip follows tempo jumps and ramps; same
+job/apply path as stretchClip. Re-warp after editing the tempo map.
 Sample edits: `{"action":"editClip","clip":id,"edit":"reverse|normalize|gain|consolidate",
 "value":...}` writes a new file (Edited/) and swaps the clip source in one Undo step.
 normalize takes a target dBFS, gain dB; consolidate bakes the clip window and its fades.

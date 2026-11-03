@@ -845,6 +845,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void closeVideo();
     juce::var videoState() const;
     juce::Result stretchAudioClip(Id clip, double ratio, const juce::String &operation = {});
+    juce::Result warpAudioClip(Id clip, double sourceBpm, const juce::String &operation = {});
     // reverse | normalize (value dBFS) | gain (value dB) | consolidate, as a new source.
     juce::Result editAudioClip(Id clip, const juce::String &edit, double value, const juce::String &operation = {});
     void pollStretchJob();

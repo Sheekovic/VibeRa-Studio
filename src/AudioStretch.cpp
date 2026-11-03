@@ -110,4 +110,91 @@ juce::Result editAudioFile(const juce::File &source, double offsetSeconds, doubl
     target.deleteFile();
     return part.moveFileTo(target) ? juce::Result::ok() : juce::Result::fail("Cannot finish " + target.getFileName());
 }
+// Variable-ratio stretch: `map` holds increasing (input seconds, output seconds) points
+// from (0, 0) to the window end; each span plays at its own rate. The stretcher is fed
+// in short output blocks, keeping its input lookahead at the current rate's seek length.
+juce::Result warpAudioFile(const juce::File &source, double offsetSeconds, double durationSeconds,
+                           const std::vector<std::pair<double, double>> &map, const juce::File &target)
+{
+    if (map.size() < 2 || !(durationSeconds > 0) || offsetSeconds < 0)
+        return juce::Result::fail("Warping needs a positive source window and a time map");
+    for (size_t i = 1; i < map.size(); ++i)
+    {
+        const double in = map[i].first - map[i - 1].first, out = map[i].second - map[i - 1].second;
+        if (!(in > 0 && out > 0) || out / in < .25 || out / in > 4)
+            return juce::Result::fail("The tempo change needs a stretch outside 0.25..4");
+    }
+    juce::AudioFormatManager formats;
+    formats.registerBasicFormats();
+    std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(source));
+    if (!reader || reader->sampleRate <= 0)
+        return juce::Result::fail("Cannot read " + source.getFileName());
+    const auto rate = reader->sampleRate;
+    const int channels = int(juce::jlimit(1u, 2u, reader->numChannels));
+    const auto start = juce::int64(offsetSeconds * rate);
+    const int inFrames = int(std::min<juce::int64>(juce::int64(durationSeconds * rate), reader->lengthInSamples - start));
+    if (inFrames < 4096)
+        return juce::Result::fail("The clip is too short to warp (under 0.1 s)");
+    const int outFrames = int(std::round(inFrames * map.back().second / map.back().first));
+    juce::AudioBuffer<float> input(channels, inFrames), output(channels, outFrames);
+    reader->read(&input, 0, inFrames, start, true, channels > 1);
+    // Input frame heard at output frame `o`, and the playback rate (input/output) there.
+    const double scaleIn = inFrames / (map.back().first * rate), scaleOut = outFrames / (map.back().second * rate);
+    size_t span = 1;
+    auto locate = [&](double o)
+    {
+        const double seconds = o / (rate * scaleOut);
+        while (span + 1 < map.size() && map[span].second < seconds)
+            ++span;
+        const auto &a = map[span - 1], &b = map[span];
+        const double playback = (b.first - a.first) / (b.second - a.second);
+        const double in = a.first + (std::clamp(seconds, a.second, b.second) - a.second) * playback;
+        return std::pair{in * rate * scaleIn, playback * scaleIn / scaleOut};
+    };
+    signalsmith::stretch::SignalsmithStretch<float> stretch;
+    stretch.presetDefault(channels, float(rate));
+    std::vector<float *> in(static_cast<size_t>(channels)), out(in);
+    auto point = [&](std::vector<float *> &ptrs, juce::AudioBuffer<float> &buffer, int frame)
+    {
+        for (int c = 0; c < channels; ++c)
+            ptrs[size_t(c)] = buffer.getWritePointer(c) + frame;
+    };
+    const double firstRate = locate(0).second;
+    int consumed = std::min(inFrames, stretch.outputSeekLength(float(firstRate)));
+    if (consumed >= inFrames)
+        return juce::Result::fail("The clip is too short to warp");
+    point(in, input, 0);
+    stretch.outputSeek(in, consumed);
+    const int tail = stretch.outputLatency();
+    int written = 0;
+    constexpr int block = 512;
+    while (written < outFrames - tail)
+    {
+        const int frames = std::min(block, outFrames - tail - written);
+        const auto [position, playback] = locate(written + frames);
+        const int want = std::clamp(int(std::lround(position)) + stretch.outputSeekLength(float(playback)), consumed,
+                                    inFrames);
+        point(in, input, consumed);
+        point(out, output, written);
+        stretch.process(in, want - consumed, out, frames);
+        consumed = want;
+        written += frames;
+    }
+    point(out, output, written);
+    stretch.flush(out, outFrames - written, float(locate(outFrames).second));
+    const auto part = target.getSiblingFile(target.getFileName() + ".part");
+    part.deleteFile();
+    {
+        juce::WavAudioFormat wav;
+        std::unique_ptr<juce::AudioFormatWriter> writer(
+            wav.createWriterFor(part.createOutputStream().release(), rate, unsigned(channels), 24, {}, 0));
+        if (!writer || !writer->writeFromAudioSampleBuffer(output, 0, outFrames))
+        {
+            part.deleteFile();
+            return juce::Result::fail("Writing " + target.getFileName() + " failed");
+        }
+    }
+    target.deleteFile();
+    return part.moveFileTo(target) ? juce::Result::ok() : juce::Result::fail("Cannot finish " + target.getFileName());
+}
 } // namespace vibera
