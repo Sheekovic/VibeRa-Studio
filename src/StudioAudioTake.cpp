@@ -567,13 +567,19 @@ juce::Result Studio::warpAudioClip(Id clip, double sourceBpm, const juce::String
         return juce::Result::fail("The clip has no source");
     if (!(sourceBpm >= 10 && sourceBpm <= 522))
         return juce::Result::fail("Source tempo is 10..522 BPM");
+    // A clip warped before renders again from its original source, never from a warp.
+    const auto *original = found->warpBpm > 0 ? controller.project.channel(found->warpChannel) : nullptr;
+    if (original && juce::File::isAbsolutePath(original->source))
+        source = original;
+    const double offset = original ? found->warpOffset : found->offset;
+    const double duration = original ? found->warpDuration : found->duration;
     // (source seconds, output seconds) every 1/16 beat of the source.
     const auto &project = controller.project;
-    const double beats = found->duration * sourceBpm / 60., zero = project.songSeconds(found->beat);
+    const double beats = duration * sourceBpm / 60., zero = project.songSeconds(found->beat);
     std::vector<std::pair<double, double>> map{{0., 0.}};
     for (double b = .0625; b < beats; b += .0625)
         map.emplace_back(b * 60. / sourceBpm, project.songSeconds(found->beat + b) - zero);
-    map.emplace_back(found->duration, project.songSeconds(found->beat + beats) - zero);
+    map.emplace_back(duration, project.songSeconds(found->beat + beats) - zero);
     const auto folder = projectFile != juce::File{}
                             ? projectFile.getParentDirectory().getChildFile("Stretched")
                             : juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
@@ -585,11 +591,11 @@ juce::Result Studio::warpAudioClip(Id clip, double sourceBpm, const juce::String
     job->seconds = map.back().second;
     job->project = controller.projectIdentity;
     job->operation = operation;
+    job->warpBpm = sourceBpm;
     job->target = folder.getChildFile(juce::File(source->source).getFileNameWithoutExtension() + " warped.wav")
                       .getNonexistentSibling(false);
     auto *raw = job.get();
     const juce::File input(source->source);
-    const double offset = found->offset, duration = found->duration;
     job->thread = std::thread([raw, input, offset, duration, map]
                               {
                                   raw->result = warpAudioFile(input, offset, duration, map, raw->target);
@@ -598,6 +604,60 @@ juce::Result Studio::warpAudioClip(Id clip, double sourceBpm, const juce::String
     stretchJob = std::move(job);
     status = "Warping " + source->name + " to the Song tempo...";
     return juce::Result::ok();
+}
+
+// Re-warps clips whose tempo map or position changed since their last warp, one job at a
+// time, after edits settle for 0.8 s. Each re-render is its own Undo step; undoing it does
+// not re-trigger (the signature it was made for is remembered).
+void Studio::followTempoWarps()
+{
+    if (stretchJob || audioTaking)
+        return;
+    const auto &project = controller.project;
+    juce::String tempo(project.tempo, 6);
+    for (const auto &change : project.tempoChanges)
+        tempo << ";" << juce::String(change.beat, 6) << "," << juce::String(change.bpm, 6) << (change.ramp ? "r" : "");
+    const AudioPlacement *due = nullptr;
+    juce::String dueSignature;
+    for (const auto &clip : project.audioPlacements)
+    {
+        if (!(clip.warpBpm > 0) || !project.channel(clip.warpChannel))
+            continue;
+        const auto signature = tempo + "@" + juce::String(clip.beat, 6) + "/" + juce::String(clip.warpBpm, 6);
+        const auto known = warpSignatures.find(clip.id);
+        if (known == warpSignatures.end())
+        {
+            // First sight (e.g. after opening): trust a clip whose length already matches.
+            const double beats = clip.warpDuration * clip.warpBpm / 60.;
+            const double expected = project.songSeconds(clip.beat + beats) - project.songSeconds(clip.beat);
+            if (std::abs(expected - clip.duration) < .002)
+            {
+                warpSignatures[clip.id] = signature;
+                continue;
+            }
+        }
+        else if (known->second == signature)
+            continue;
+        due = &clip;
+        dueSignature = signature;
+        break;
+    }
+    const double now = juce::Time::getMillisecondCounterHiRes() / 1000.;
+    if (!due)
+    {
+        rewarpPendingSince = 0;
+        return;
+    }
+    if (rewarpPendingSince == 0)
+        rewarpPendingSince = now;
+    if (now - rewarpPendingSince < .8)
+        return;
+    rewarpPendingSince = 0;
+    warpSignatures[due->id] = dueSignature; // Also on failure: never retry the same input in a loop.
+    if (auto started = warpAudioClip(due->id, due->warpBpm); started.failed())
+        status = "Re-warp: " + started.getErrorMessage();
+    else
+        status = "Re-warping a clip to the new tempo...";
 }
 
 juce::Result Studio::editAudioClip(Id clip, const juce::String &edit, double value, const juce::String &operation)
@@ -960,6 +1020,7 @@ void Studio::pollStretchJob()
         args.text = job->target.getFullPathName();
         args.length = job->seconds;
         args.step = job->bakedFades;
+        args.warpBpm = job->warpBpm;
         result = controller.execute("audio.stretchApply", args);
         if (result.wasOk())
             refresh();

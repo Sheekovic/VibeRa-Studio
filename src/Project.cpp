@@ -744,6 +744,13 @@ juce::ValueTree Project::state() const
             set(t, "fadeIn", p.fadeIn);
         if (p.fadeOut > 0)
             set(t, "fadeOut", p.fadeOut);
+        if (p.warpBpm > 0)
+        {
+            set(t, "warpBpm", p.warpBpm);
+            set(t, "warpChannel", juce::int64(p.warpChannel));
+            set(t, "warpOffset", p.warpOffset);
+            set(t, "warpDuration", p.warpDuration);
+        }
         als.appendChild(t, nullptr);
     }
     root.appendChild(als, nullptr);
@@ -1689,6 +1696,16 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             return juce::Result::fail("Audio Clip fades require project version 43");
         p.audioPlacements.back().fadeIn = e.hasProperty("fadeIn") ? exactNumber(e["fadeIn"]) : 0.;
         p.audioPlacements.back().fadeOut = e.hasProperty("fadeOut") ? exactNumber(e["fadeOut"]) : 0.;
+        if (e.hasProperty("warpBpm"))
+        {
+            if (int(t["version"]) < 56)
+                return juce::Result::fail("Warped Audio Clips require project version 56");
+            auto &clip = p.audioPlacements.back();
+            clip.warpBpm = exactNumber(e["warpBpm"]);
+            clip.warpChannel = juce::int64(e["warpChannel"]);
+            clip.warpOffset = exactNumber(e["warpOffset"]);
+            clip.warpDuration = exactNumber(e["warpDuration"]);
+        }
     }
     int mixerGroupTrees = 0;
     for (const auto &tree : t)
@@ -2131,6 +2148,8 @@ juce::Result Project::validate() const
             p.offset + p.duration > source->audioDuration + 1.e-9 || !std::isfinite(p.fadeIn) ||
             !std::isfinite(p.fadeOut) || p.fadeIn < 0 || p.fadeOut < 0 ||
             p.fadeIn + p.fadeOut > p.duration + 1.e-9 ||
+            !std::isfinite(p.warpBpm) || p.warpBpm < 0 || p.warpBpm > 522 || !std::isfinite(p.warpOffset) ||
+            p.warpOffset < 0 || !std::isfinite(p.warpDuration) || p.warpDuration < 0 ||
             p.beat > 1000000)
             return fail("Invalid audio placement");
     }

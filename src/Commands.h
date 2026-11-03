@@ -148,6 +148,8 @@ struct CommandArgs
     std::vector<double> slicePoints;
     // audio.comp: [fromBeat, toBeat] swipe range on the chosen take (whole clip when absent).
     std::optional<std::array<double, 2>> compRange;
+    // audio.stretchApply from a tempo warp: the source tempo (0 = plain stretch/edit).
+    double warpBpm = 0;
     // Exact send destination; required only for Mixer automationControl=send.
     // `target` remains the Automation source ID and `mixer` the stable source insert.
     std::optional<int> automationSendTarget;

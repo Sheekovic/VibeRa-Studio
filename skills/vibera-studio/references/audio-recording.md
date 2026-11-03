@@ -92,7 +92,9 @@ from its start in one Undo step; the original file is untouched.
 Warping to the Song tempo: `{"action":"warpClip","clip":id,"bpm":b}` (b = the tempo the
 clip was played at, default the base tempo). Each source beat is rendered onto the
 matching Song beat from the clip start, so the clip follows tempo jumps and ramps; same
-job/apply path as stretchClip. Re-warp after editing the tempo map.
+job/apply path as stretchClip. A warped clip keeps its original source and tempo (`clips`
+rows keep the file) and is re-rendered automatically after tempo-map edits or moves;
+a later stretch or edit ends the warp.
 Sample edits: `{"action":"editClip","clip":id,"edit":"reverse|normalize|gain|consolidate",
 "value":...}` writes a new file (Edited/) and swaps the clip source in one Undo step.
 normalize takes a target dBFS, gain dB; consolidate bakes the clip window and its fades.

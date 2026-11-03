@@ -4359,14 +4359,24 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         channel.audioDuration = a.length;
         const double scale = found->duration > 0 ? a.length / found->duration : 1;
         const auto oldChannel = found->channel;
+        // A warp keeps the original source (the first warp's) so re-warps never stack.
+        if (a.warpBpm > 0 && !(found->warpBpm > 0 && next.channel(found->warpChannel)))
+        {
+            found->warpChannel = oldChannel;
+            found->warpOffset = found->offset;
+            found->warpDuration = found->duration;
+        }
+        found->warpBpm = a.warpBpm;
+        if (!(a.warpBpm > 0))
+            found->warpChannel = 0, found->warpOffset = found->warpDuration = 0;
         found->channel = channel.id;
         found->offset = 0;
         found->duration = a.length;
         found->fadeIn = a.step ? 0 : found->fadeIn * scale;
         found->fadeOut = a.step ? 0 : found->fadeOut * scale;
         next.channels.push_back(std::move(channel));
-        if (std::none_of(next.audioPlacements.begin(), next.audioPlacements.end(),
-                         [&](const auto &clip) { return clip.channel == oldChannel; }))
+        if (std::none_of(next.audioPlacements.begin(), next.audioPlacements.end(), [&](const auto &clip)
+                         { return clip.channel == oldChannel || (clip.warpBpm > 0 && clip.warpChannel == oldChannel); }))
             std::erase_if(next.channels, [&](const auto &c) { return c.id == oldChannel; });
     }
     else if (id == "audio.fade")

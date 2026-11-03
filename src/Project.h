@@ -157,6 +157,10 @@ struct AudioPlacement
     double beat = 0, offset = 0, duration = 0; // Source window in seconds; no automatic stretching.
     bool muted = false;
     double fadeIn = 0, fadeOut = 0; // Seconds at the clip edges; fadeIn + fadeOut <= duration.
+    // Warped to the Song tempo (version 56): the original Channel and source window played
+    // at warpBpm. The app re-renders the warp when the tempo map or clip position changes.
+    double warpBpm = 0, warpOffset = 0, warpDuration = 0;
+    Id warpChannel = 0;
 };
 // A Song tempo change (project version 45). The base `tempo` applies from beat 0; each
 // change applies from its beat, or ramps linearly into it from the previous tempo.

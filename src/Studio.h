@@ -799,6 +799,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
         juce::File target;
         double seconds = 0;
         bool bakedFades = false;
+        double warpBpm = 0; // A tempo warp: recorded on the clip so it can be re-warped.
         juce::String project, operation;
         ~StretchJob()
         {
@@ -808,6 +809,11 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     };
     std::unique_ptr<StretchJob> stretchJob;
     MtsEspMaster mtsEsp; // Broadcasts the mtsEsp Channel tuning (Studio timer).
+    // Warped clips follow tempo edits: the tempo/position signature each clip was last
+    // warped for, and when a pending change was first seen (debounce).
+    std::map<Id, juce::String> warpSignatures;
+    double rewarpPendingSince = 0;
+    void followTempoWarps();
     // Video player following the transport (Tools > Video player).
     std::unique_ptr<class VideoPlayerWindow> videoWindow;
     // Performance mode: launched Patterns are written into the Song at bar boundaries.
