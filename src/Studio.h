@@ -822,6 +822,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result launchPattern(Id pattern, bool on);
     void pollPerformance();
     void showPerformance();
+    std::unique_ptr<juce::DocumentWindow> drumPadsWindow;
+    void showDrumPads();
     juce::var performanceState() const;
     bool togglePerformancePad(int index);
     // Piano Roll scale/maqam guide (view only): name empty = off.

@@ -401,6 +401,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"view.piano", "Show Piano roll", Scope::global, false, true, "action"},
         {"view.mixer", "Show Mixer", Scope::global, false, true, "action"},
         {"view.settings", "Settings", Scope::global, false, true, "action"},
+        {"view.drumPads", "Drum pads", Scope::global, false, true, "action"},
         {"view.plugins", "VST3 plugin browser", Scope::global, false, true, "action"},
         {"browser.back", "Browser previous folder", Scope::browser, false, true,
          "gap:semantic adapter and end-to-end qualification pending"},

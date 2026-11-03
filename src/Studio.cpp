@@ -3309,6 +3309,7 @@ void Studio::toolsMenu()
     menu.addItem(201, "Restore docked workspace layout");
     menu.addItem(202, videoWindow ? "Close video player" : "Video player (follows the transport)...");
     menu.addItem(203, "Performance mode (launch Patterns live)");
+    menu.addItem(205, "Drum pads (play and load a kit)");
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
                           (missingCount ? " (" + juce::String(missingCount) + " missing)" : juce::String()),
@@ -3349,6 +3350,8 @@ void Studio::toolsMenu()
             }
             if (choice == 203)
                 return safe->showPerformance();
+            if (choice == 205)
+                return safe->showDrumPads();
             if (choice == 204)
             {
                 safe->chooser = std::make_unique<juce::FileChooser>("Folder to search for the missing samples",
@@ -3930,6 +3933,11 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.mixer")
     {
         toggleEditor(3);
+        return true;
+    }
+    if (action == "view.drumPads")
+    {
+        showDrumPads();
         return true;
     }
     if (action == "view.settings")
