@@ -40,6 +40,7 @@ enum class EffectId
     saturator,
     maximizer,
     studioReverb,
+    spectrumAnalyzer,
     count
 };
 inline constexpr std::size_t maximumParameters = 12;

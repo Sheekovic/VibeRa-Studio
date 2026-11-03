@@ -133,6 +133,8 @@ inline constexpr ParameterSpec studioReverb[] = {
     {"high-cut", "High cut", 1000, 20000, 9000, "Hz", .3f},
     {"width", "Width", 0, 1, 1, ""},
     {"mix", "Mix", 0, 1, .3f, ""}};
+inline constexpr ParameterSpec analyzer[] = {{"slope", "Display slope", 0, 6, 3, "dB/oct"},
+                                             {"falloff", "Falloff", 0, 1, .5f, ""}};
 template <std::size_t N>
 constexpr EffectSpec entry(EffectId id, const char *slug, const char *name, const char *category,
                            const ParameterSpec (&parameters)[N])
@@ -172,7 +174,8 @@ inline constexpr std::array effects = {
     entry(EffectId::multiband, "multiband", "Multiband Dynamics", "Dynamics", multiband),
     entry(EffectId::saturator, "saturator", "Saturator", "Distortion", saturator),
     entry(EffectId::maximizer, "maximizer", "Maximizer", "Dynamics", maximizer),
-    entry(EffectId::studioReverb, "studio-reverb", "Studio Reverb", "Time", studioReverb)};
+    entry(EffectId::studioReverb, "studio-reverb", "Studio Reverb", "Time", studioReverb),
+    entry(EffectId::spectrumAnalyzer, "spectrum-analyzer", "Spectrum Analyzer", "Utility", analyzer)};
 static_assert(effects.size() == static_cast<std::size_t>(EffectId::count));
 } // namespace catalogue
 inline std::span<const EffectSpec> catalogueEntries() noexcept

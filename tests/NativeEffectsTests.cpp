@@ -530,9 +530,37 @@ void editors(const juce::File &output)
                     "Actual silent output clears both meter readings without fabricated animation");
             instance.releaseResources();
         }
+        if (spec.id == EffectId::spectrumAnalyzer)
+        {
+            // The analyzer passes audio through and hands its newest samples to the editor.
+            instance.prepareToPlay(48000, 256);
+            juce::AudioBuffer<float> pcm(2, 256);
+            juce::MidiBuffer midi;
+            int t = 0;
+            for (int block = 0; block < 24; ++block)
+            {
+                for (int frame = 0; frame < 256; ++frame, ++t)
+                {
+                    const float v = .3f * std::sin(2.f * juce::MathConstants<float>::pi * 220.f * t / 48000.f) +
+                                    .05f * std::sin(2.f * juce::MathConstants<float>::pi * 4400.f * t / 48000.f);
+                    pcm.setSample(0, frame, v);
+                    pcm.setSample(1, frame, v);
+                }
+                const float before = pcm.getSample(0, 100);
+                instance.processBlock(pcm, midi);
+                require(pcm.getSample(0, 100) == before, "Spectrum Analyzer passes audio through unchanged");
+            }
+            std::vector<float> latest(4096);
+            instance.latestSamples(latest.data(), 4096);
+            float top = 0;
+            for (float v : latest)
+                top = std::max(top, std::abs(v));
+            require(top > .3f, "Spectrum Analyzer hands the processed samples to its editor");
+            editor->repaint();
+        }
         if (spec.id == EffectId::graphicEq || spec.id == EffectId::delay || spec.id == EffectId::limiter ||
             spec.id == EffectId::compressor || spec.id == EffectId::filter || spec.id == EffectId::parametricEq ||
-            spec.id == EffectId::maximizer || spec.id == EffectId::studioReverb || spec.id == EffectId::pitchCorrect)
+            spec.id == EffectId::maximizer || spec.id == EffectId::studioReverb || spec.id == EffectId::spectrumAnalyzer || spec.id == EffectId::pitchCorrect)
         {
             const auto image = editor->createComponentSnapshot(editor->getLocalBounds());
             auto stream = output.getChildFile(juce::String(spec.slug) + ".png").createOutputStream();

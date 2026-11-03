@@ -47,6 +47,9 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     float peak(int channel) const noexcept;
     // Gain reduction of the dynamics processors (dB, <= 0), for the editor meter.
     float gainReductionDb() const noexcept { return reduction_.load(std::memory_order_relaxed); }
+    // Spectrum Analyzer: copies the newest `count` mono samples (oldest first).
+    static constexpr int captureSize = 8192;
+    void latestSamples(float *out, int count) const noexcept;
 
     void fillInPluginDescription(juce::PluginDescription &) const override;
     const juce::String getName() const override;
@@ -103,6 +106,8 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     // Existing DSP peak stores replace it; zero then means genuine silence.
     std::atomic<float> peakLeft_{-1}, peakRight_{-1};
     std::atomic<float> reduction_{0};
+    std::array<std::atomic<float>, captureSize> capture_{};
+    std::atomic<std::uint32_t> captureWrite_{0};
 };
 
 std::unique_ptr<juce::AudioPluginInstance> createNativeEffect(const juce::PluginDescription &);

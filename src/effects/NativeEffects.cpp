@@ -287,7 +287,21 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
     }
     peakLeft_.store(maximumLeft, std::memory_order_relaxed);
     reduction_.store(engine_.gainReductionDb(), std::memory_order_relaxed);
+    if (effect_ == EffectId::spectrumAnalyzer)
+    {
+        auto write = captureWrite_.load(std::memory_order_relaxed);
+        for (int i = 0; i < frames; ++i)
+            capture_[size_t(write++ % captureSize)].store(.5f * (left[i] + right[i]), std::memory_order_relaxed);
+        captureWrite_.store(write, std::memory_order_release);
+    }
     peakRight_.store(maximumRight, std::memory_order_relaxed);
+}
+void NativeEffectInstance::latestSamples(float *out, int count) const noexcept
+{
+    count = std::min(count, captureSize);
+    const auto end = captureWrite_.load(std::memory_order_acquire);
+    for (int i = 0; i < count; ++i)
+        out[i] = capture_[size_t((end - std::uint32_t(count) + std::uint32_t(i)) % captureSize)].load(std::memory_order_relaxed);
 }
 float NativeEffectInstance::peak(int channel) const noexcept
 {

@@ -70,6 +70,8 @@ Mixing and mastering processors:
 - Studio Reverb (`studio-reverb`): type (0 Room, 1 Plate, 2 Hall), size, decay (RT60
   seconds), pre-delay, damping, diffusion, modulation, low/high cut of the tail, width, mix.
   An 8-line feedback delay network; the measured decay follows the setting.
+- Spectrum Analyzer (`spectrum-analyzer`): passes audio unchanged; its editor draws a live
+  4096-point spectrum (20 Hz..20 kHz) with display slope (dB/oct) and falloff.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

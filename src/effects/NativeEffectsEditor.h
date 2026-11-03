@@ -36,7 +36,8 @@ class NativeEffectsEditor final : public juce::AudioProcessorEditor, private juc
     NativeEffectInstance &instance_;
     // Response curve (Parametric EQ) or gain reduction meter (studio dynamics).
     juce::Rectangle<int> display_;
-    bool curve_ = false, reduction_ = false;
+    bool curve_ = false, reduction_ = false, spectrum_ = false;
+    std::vector<float> spectrumDb_; // Smoothed magnitude per FFT bin.
     float shownReduction_ = 0;
     void paintDisplay(juce::Graphics &);
     juce::Label brand_, heading_, subtitle_, footer_;

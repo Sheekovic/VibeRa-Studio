@@ -3,6 +3,7 @@
 #include "dsp/StudioEffects.h"
 #include "dsp/PitchCorrect.h"
 #include <cmath>
+#include <complex>
 
 namespace vibera::effects
 {
@@ -134,14 +135,15 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
     const bool equalizer = spec.id == EffectId::graphicEq;
     curve_ = spec.id == EffectId::parametricEq;
     reduction_ = spec.id == EffectId::deEsser || spec.id == EffectId::multiband || spec.id == EffectId::maximizer;
-    const int displayHeight = curve_ ? 220 : reduction_ ? 74 : 0;
+    spectrum_ = spec.id == EffectId::spectrumAnalyzer;
+    const int displayHeight = curve_ ? 220 : spectrum_ ? 330 : reduction_ ? 74 : 0;
     const int minimumColumns = juce::jmin(3, int(spec.parameterCount));
     const int minimumRows = (int(spec.parameterCount) + minimumColumns - 1) / minimumColumns;
     const int minimumHeight =
         (equalizer ? 500 : headerHeight + bottomHeight + minimumRows * 164) + displayHeight;
     setResizable(true, false);
     setResizeLimits(equalizer ? 720 : 560, minimumHeight, 1440, 1200);
-    setSize(equalizer || curve_        ? 1000
+    setSize(equalizer || curve_ || spectrum_ ? 1000
             : spec.parameterCount <= 2 ? 600
                                        : 780,
             juce::jmax(minimumHeight, (equalizer ? 540 : 510) + displayHeight));
@@ -322,6 +324,39 @@ void NativeEffectsEditor::paint(juce::Graphics &graphics)
     if (!display_.isEmpty())
         paintDisplay(graphics);
 }
+namespace
+{
+// In-place radix-2 FFT (independent textbook implementation) for the analyzer display.
+void fft(std::vector<std::complex<float>> &a)
+{
+    const size_t n = a.size();
+    for (size_t i = 1, j = 0; i < n; ++i)
+    {
+        size_t bit = n >> 1;
+        for (; j & bit; bit >>= 1)
+            j ^= bit;
+        j ^= bit;
+        if (i < j)
+            std::swap(a[i], a[j]);
+    }
+    for (size_t length = 2; length <= n; length <<= 1)
+    {
+        const float angle = -2.f * juce::MathConstants<float>::pi / float(length);
+        const std::complex<float> step(std::cos(angle), std::sin(angle));
+        for (size_t i = 0; i < n; i += length)
+        {
+            std::complex<float> w(1.f, 0.f);
+            for (size_t k = 0; k < length / 2; ++k)
+            {
+                const auto u = a[i + k], v = a[i + k + length / 2] * w;
+                a[i + k] = u + v;
+                a[i + k + length / 2] = u - v;
+                w *= step;
+            }
+        }
+    }
+}
+} // namespace
 void NativeEffectsEditor::paintDisplay(juce::Graphics &g)
 {
     const auto box = display_.toFloat();
@@ -330,6 +365,86 @@ void NativeEffectsEditor::paintDisplay(juce::Graphics &g)
     g.setColour(border);
     g.drawRoundedRectangle(box.reduced(.5f), 12.f, 1.f);
     auto plot = box.reduced(16.f, 14.f);
+    if (spectrum_)
+    {
+        constexpr int size = 4096;
+        std::vector<float> samples(size);
+        instance_.latestSamples(samples.data(), size);
+        std::vector<std::complex<float>> bins(size);
+        for (int i = 0; i < size; ++i)
+            bins[size_t(i)] = {samples[size_t(i)] * (.5f - .5f * std::cos(2.f * juce::MathConstants<float>::pi * i / (size - 1))), 0.f};
+        fft(bins);
+        const double rate = instance_.getSampleRate() > 0 ? instance_.getSampleRate() : 48000.;
+        const float slope = rows_.size() > 0 ? float(rows_[0]->slider.getValue()) : 3.f;
+        const float falloff = rows_.size() > 1 ? float(rows_[1]->slider.getValue()) : .5f;
+        spectrumDb_.resize(size / 2, -120.f);
+        for (int k = 1; k < size / 2; ++k)
+        {
+            const double hz = k * rate / size;
+            // Hann window coherent gain 0.5; slope tilts the display around 1 kHz.
+            float db = juce::Decibels::gainToDecibels(std::abs(bins[size_t(k)]) * 4.f / size, -120.f) +
+                       slope * float(std::log2(std::max(hz, 1.) / 1000.));
+            auto &shown = spectrumDb_[size_t(k)];
+            shown = db > shown ? db : shown - (1.f + 9.f * (1.f - falloff)) * .5f;
+            shown = std::max(shown, -120.f);
+        }
+        const auto xOf = [&](double hz) { return plot.getX() + float(std::log(hz / 20.) / std::log(1000.)) * plot.getWidth(); };
+        const auto yOf = [&](double db) { return plot.getY() + float(-db / 90.) * plot.getHeight(); };
+        g.setFont(juce::FontOptions(10.f));
+        for (double hz : {50., 100., 200., 500., 1000., 2000., 5000., 10000.})
+        {
+            g.setColour(border.withAlpha(.5f));
+            g.drawVerticalLine(int(xOf(hz)), plot.getY(), plot.getBottom());
+            g.setColour(secondary);
+            g.drawText(hz >= 1000 ? juce::String(int(hz / 1000)) + "k" : juce::String(int(hz)), int(xOf(hz)) + 3,
+                       int(plot.getBottom()) - 13, 32, 12, juce::Justification::centredLeft);
+        }
+        for (double db : {-12., -24., -36., -48., -60., -72.})
+        {
+            g.setColour(border.withAlpha(.45f));
+            g.drawHorizontalLine(int(yOf(db)), plot.getX(), plot.getRight());
+            g.setColour(secondary);
+            g.drawText(juce::String(int(db)), int(plot.getX()) + 3, int(yOf(db)) - 13, 40, 12,
+                       juce::Justification::centredLeft);
+        }
+        juce::Path line, fill;
+        bool started = false;
+        float lastX = -1;
+        for (int k = 1; k < size / 2; ++k)
+        {
+            const double hz = k * rate / size;
+            if (hz < 20 || hz > 20000)
+                continue;
+            const float x = xOf(hz);
+            if (started && x - lastX < 1.5f)
+                continue;
+            const float y = juce::jlimit(plot.getY(), plot.getBottom(), yOf(spectrumDb_[size_t(k)]));
+            if (!started)
+            {
+                line.startNewSubPath(x, y);
+                fill.startNewSubPath(x, plot.getBottom());
+                fill.lineTo(x, y);
+                started = true;
+            }
+            else
+            {
+                line.lineTo(x, y);
+                fill.lineTo(x, y);
+            }
+            lastX = x;
+        }
+        if (started)
+        {
+            fill.lineTo(lastX, plot.getBottom());
+            fill.closeSubPath();
+            g.setGradientFill(juce::ColourGradient(teal.withAlpha(.35f), 0.f, plot.getY(), teal.withAlpha(.03f), 0.f,
+                                                   plot.getBottom(), false));
+            g.fillPath(fill);
+            g.setColour(teal);
+            g.strokePath(line, juce::PathStrokeType(1.6f));
+        }
+        return;
+    }
     if (curve_)
     {
         Values values{};
@@ -410,7 +525,10 @@ void NativeEffectsEditor::resized()
     footer_.setBounds(24, getHeight() - 28, getWidth() - 48, 20);
     auto area =
         juce::Rectangle<int>(20, headerHeight, getWidth() - 40, getHeight() - headerHeight - bottomHeight);
-    display_ = curve_ ? area.removeFromTop(210) : reduction_ ? area.removeFromTop(64) : juce::Rectangle<int>{};
+    display_ = curve_      ? area.removeFromTop(210)
+               : spectrum_ ? area.removeFromTop(320)
+               : reduction_ ? area.removeFromTop(64)
+                            : juce::Rectangle<int>{};
     if (!display_.isEmpty())
         area.removeFromTop(10);
     if (rows_.empty())
