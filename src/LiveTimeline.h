@@ -34,6 +34,11 @@ struct LiveChannel
     PreparedSamplerSettings sampler;
     bool sampleInstrument = true;
     bool mpe = false; // Plugin instrument with MPE tuning (LiveMidi member channels).
+    // Live keyboard tuning for local samplers (prepared off-thread): the key each played key
+    // sounds and its cents, from the Channel tuning table or keyboard-mapped scale.
+    bool liveTuned = false;
+    std::array<std::uint8_t, 128> liveKey{};
+    std::array<PreparedNoteExpression, 128> liveExpression{};
     // Lane pointers belong to this same immutable LiveDocument; no callback lookup/ownership.
     std::vector<SamplerModulationAutomationLane> modulationLanes;
     std::vector<SamplerCutInput> inputCuts;

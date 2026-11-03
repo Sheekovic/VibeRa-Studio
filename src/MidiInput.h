@@ -242,7 +242,10 @@ class MidiMonitor
         }
         lane->read.store(r, std::memory_order_release);
     }
-    void apply(VoiceBank &voices) noexcept
+    // `keys`/`expressions` (128 each, optional) play the Channel's live tuning: the sounding key
+    // and cents for every played key. Release still matches the played key's tag.
+    void apply(VoiceBank &voices, const std::uint8_t *keys = nullptr,
+               const PreparedNoteExpression *expressions = nullptr) noexcept
     {
         if (panicked)
             voices.visitActive([&](auto &v) { voices.releaseTagged(v.note, v.placement, true); });
@@ -255,7 +258,8 @@ class MidiMonitor
                 held[channel][pitch] = true;
                 deferred[channel][pitch] = false;
                 voices.releaseTagged(tag(channel, pitch), 0, true);
-                voices.noteOn(pitch, bytes[2] / 127.f, tag(channel, pitch), 0, 0, sequences[size_t(i)], {}, 0,
+                voices.noteOn(keys ? int(keys[pitch]) : pitch, bytes[2] / 127.f, tag(channel, pitch), 0, 0,
+                              sequences[size_t(i)], expressions ? expressions[pitch] : PreparedNoteExpression{}, 0,
                               false, channel);
             }
             else if (kind == 0x80 || (kind == 0x90 && bytes[2] == 0))

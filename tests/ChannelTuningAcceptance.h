@@ -117,6 +117,9 @@ inline void tests(const juce::File &)
         require(liveChannel && liveChannel->notes.size() == 1 && liveChannel->notes[0].pitch == 66 &&
                     same(liveChannel->notes[0].expression.tuning, 1.),
                 "Key 72 plays 6 semitones up (12 quarter tones) with no remainder");
+        require(liveChannel->liveTuned && liveChannel->liveKey[72] == 66 && liveChannel->liveKey[60] == 60 &&
+                    same(liveChannel->liveExpression[72].tuning, 1.),
+                "Live keys follow the mapped scale too (key 72 sounds 66)");
         CommandArgs bad = scale;
         bad.scale = std::vector<double>{100, 50};
         require(controller.execute("channel.scale", bad).failed(), "Falling degrees are refused");
@@ -125,6 +128,14 @@ inline void tests(const juce::File &)
         table.tuning = rast;
         require(controller.execute("channel.tuning", table).wasOk() && controller.project.channel(channel)->scale.empty(),
                 "A 12-tone table replaces the mapped scale");
+        {
+            const auto rastDocument = compileLiveDocument(controller.project, true, pattern, 3);
+            const auto *live = rastDocument ? rastDocument->find(channel) : nullptr;
+            require(live && live->liveTuned && live->liveKey[64] == 64 &&
+                        std::abs(live->liveExpression[64].tuning - std::pow(2., -50. / 1200.)) < 1e-9 &&
+                        same(live->liveExpression[67].tuning, 1.),
+                    "Live keyboard plays Rast: E a quarter tone flat, G untouched");
+        }
 
         // MTS-ESP source: one Channel at a time, saved; key frequencies follow the table.
         CommandArgs mts;

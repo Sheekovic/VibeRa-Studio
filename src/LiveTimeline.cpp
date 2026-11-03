@@ -117,6 +117,25 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
         channel.sampler = PreparedSamplerSettings(c.sampler, p.tempo);
         channel.sampleInstrument = !c.instrument && !c.audioClip;
         channel.mpe = c.instrument && c.mpe;
+        if (channel.sampleInstrument &&
+            (!c.scale.empty() || std::any_of(c.tuning.begin(), c.tuning.end(), [](double cents) { return cents != 0; })))
+        {
+            channel.liveTuned = true;
+            for (int key = 0; key < 128; ++key)
+            {
+                double cents = c.tuning[size_t(key % 12)];
+                int sounding = key;
+                if (!c.scale.empty())
+                {
+                    const double deviation = tuning::scaleDeviation(c.scale, c.scaleRoot, key);
+                    const int semitones = juce::roundToInt(deviation / 100.);
+                    sounding = juce::jlimit(0, 127, key + semitones);
+                    cents = deviation - 100. * semitones;
+                }
+                channel.liveKey[size_t(key)] = std::uint8_t(sounding);
+                channel.liveExpression[size_t(key)] = PreparedNoteExpression::prepare(0, juce::jlimit(-100., 100., cents));
+            }
+        }
         if (!prepareSamplerModulationAutomation(result->automation, c.id, channel.sampleInstrument,
                                                 channel.modulationLanes))
             return {};

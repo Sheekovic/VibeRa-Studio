@@ -801,6 +801,7 @@ class FixedSampler final : public te::Plugin
             auto &lease = lastDocument;
             const std::array<VoiceBank *, 3> extra{&runtime->inputVoices, &runtime->typingVoices,
                                                    &runtime->previewVoices};
+            const LiveChannel *liveTuning = nullptr; // Set once the document lease is known.
             auto applyInputs = [&]
             {
                 if (!fc.isRendering)
@@ -818,8 +819,10 @@ class FixedSampler final : public te::Plugin
                         runtime->observedInputKeys.store(runtime->input.liveKeyCountRT() +
                                                              runtime->typing.liveKeyCountRT(),
                                                          std::memory_order_relaxed);
-                    runtime->input.apply(runtime->inputVoices);
-                    runtime->typing.apply(runtime->typingVoices);
+                    const auto *keys = liveTuning ? liveTuning->liveKey.data() : nullptr;
+                    const auto *expressions = liveTuning ? liveTuning->liveExpression.data() : nullptr;
+                    runtime->input.apply(runtime->inputVoices, keys, expressions);
+                    runtime->typing.apply(runtime->typingVoices, keys, expressions);
                     if (runtime->previewInput.panicked)
                         runtime->previewVoices.releaseAllQuickly();
                     runtime->previewInput.apply(runtime->previewVoices);
@@ -852,6 +855,7 @@ class FixedSampler final : public te::Plugin
                     runtime->voiceBudget.configure(selectedChannel->sampler.values.maxPoly);
                     samplerSettingsGeneration = lease.document->generation;
                 }
+                liveTuning = local && selectedChannel->liveTuned ? selectedChannel : nullptr;
                 applyInputs();
                 std::uint64_t liveCut = 0;
                 if (const auto *channel = lease.document->find(channelId); channel && !fc.isRendering)
