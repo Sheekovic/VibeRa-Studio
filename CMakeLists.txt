@@ -38,6 +38,11 @@ target_compile_definitions(VibeRaCore PUBLIC
   TRACKTION_ENABLE_ARA=0 TRACKTION_ENABLE_CMAJOR=0 TRACKTION_ENABLE_VIDEO=0)
 target_link_libraries(VibeRaCore PUBLIC tracktion::tracktion_engine tracktion::tracktion_graph
   tracktion::tracktion_core juce::juce_audio_utils juce::juce_dsp juce::juce_cryptography)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  # Static Core consumers need JUCE HTTPS and Tracktion's non-inline atomics.
+  # Reuse JUCE's pkg-config curl target so curl's own link dependencies follow.
+  target_link_libraries(VibeRaCore PUBLIC juce::pkgconfig_JUCE_CURL_LINUX_DEPS atomic)
+endif()
 if(WIN32)
   target_link_libraries(VibeRaCore PUBLIC dwmapi)
 endif()
