@@ -202,6 +202,7 @@ struct PlaylistTrack
     bool locked = false;       // Clips on this track cannot be added, moved, edited or deleted (v56).
     double height = 1;         // Row height relative to the Playlist lane height, .5..3 (v56).
     Id channel = 0;            // Instrument track: drawing makes Patterns for this Channel (v56).
+    bool audio = false;        // Audio track: audio recordings land here first (v56).
 };
 // A stored (inactive) Playlist arrangement (version 48); see Arrangements.h.
 struct Arrangement

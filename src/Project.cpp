@@ -476,6 +476,8 @@ juce::ValueTree Project::state() const
                 set(entry, "height", track.height);
             if (track.channel != 0)
                 set(entry, "channel", juce::int64(track.channel));
+            if (track.audio)
+                set(entry, "audio", true);
             trackTree.appendChild(entry, nullptr);
         }
         root.appendChild(trackTree, nullptr);
@@ -1020,6 +1022,9 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                     return juce::Result::fail("Instrument tracks need project version 56");
                 track.channel = Id(juce::int64(entry["channel"]));
             }
+            if (entry.hasProperty("audio") && fileVersion < 56)
+                return juce::Result::fail("Audio tracks need project version 56");
+            track.audio = bool(entry["audio"]) && track.channel == 0;
             if (entry.hasProperty("colour"))
             {
                 const auto text = entry["colour"].toString();

@@ -2,6 +2,7 @@
 // Audio-input recording: input selection and monitoring, take lifecycle around the
 // transport, and placement of the finished WAV as an undoable Playlist Audio Clip.
 #include "Studio.h"
+#include "TakeLanes.h"
 #include "McpSchema.h"
 #include "AudioStretch.h"
 #include "AudioFileCheck.h"
@@ -1358,31 +1359,15 @@ void Studio::placeAudioTake()
         return;
     audioTakePlacementPending = false;
     const auto &project = controller.project;
-    auto free = [&](int lane, double from, double to)
-    {
-        return std::none_of(project.placements.begin(), project.placements.end(),
-                            [&](const auto &p) { return p.lane == lane && p.beat < to && p.beat + p.length > from; }) &&
-               std::none_of(project.audioPlacements.begin(), project.audioPlacements.end(),
-                            [&](const auto &p)
-                            { return p.lane == lane && p.beat < to && project.audioEndBeat(p.beat, p.duration) > from; });
-    };
     // Passes of one input stack on consecutive tracks; each input track gets its own block.
+    // Audio tracks are preferred (TakeLanes.h).
     const int count = juce::jmax(1, int(audioTakePasses.size()));
     const int tracks = juce::jmax(1, int(audioTake.files.size()));
     const int lanes = count * tracks;
-    int lane = 0;
-    while (lane + lanes < 128)
-    {
-        bool fits = true;
-        for (int i = 0; i < lanes && fits; ++i)
-        {
-            const auto &pass = audioTakePasses[size_t(i % count)];
-            fits = free(lane + i, project.songBeat(pass.edit), project.songBeat(pass.edit + pass.duration));
-        }
-        if (fits)
-            break;
-        ++lane;
-    }
+    std::vector<std::pair<double, double>> spans;
+    for (const auto &pass : audioTakePasses)
+        spans.push_back({project.songBeat(pass.edit), project.songBeat(pass.edit + pass.duration)});
+    const int lane = chooseTakeLane(project, spans, tracks);
     CommandArgs args;
     args.text = audioTake.file.getFullPathName();
     args.length = audioTake.seconds;

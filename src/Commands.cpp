@@ -787,6 +787,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"track.height", "Set Playlist track height", Scope::playlist, true, true, "command"},
         {"track.instrument", "Make instrument track", Scope::playlist, true, true, "command"},
         {"track.instrumentClip", "New Pattern on instrument track", Scope::playlist, true, true, "command"},
+        {"track.audio", "Make audio track", Scope::playlist, true, true, "command"},
         {"track.insert", "Insert Playlist track", Scope::playlist, true, true, "command"},
         {"track.delete", "Delete Playlist track", Scope::playlist, true, true, "command"},
         {"track.move", "Move Playlist track", Scope::playlist, true, true, "command"},
@@ -1052,7 +1053,7 @@ juce::Result Controller::prepareSnapshotChange(Project next, const Project &hist
         if (unbound)
             std::erase_if(next.tracks, [](const auto &t)
                           { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed &&
-                                   !t.locked && t.height == 1 && t.channel == 0; });
+                                   !t.locked && t.height == 1 && t.channel == 0 && !t.audio; });
         if (auto valid = next.validate(); valid.failed())
             return valid;
         if (recordHistory)
@@ -4960,6 +4961,14 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     return juce::Result::fail("Instrument tracks take a sampler or instrument Channel");
             }
             entry(a.lane).channel = a.channel;
+            if (a.channel != 0)
+                entry(a.lane).audio = false;
+        }
+        else if (id == "track.audio")
+        {
+            entry(a.lane).audio = a.enabled;
+            if (a.enabled)
+                entry(a.lane).channel = 0;
         }
         else if (id == "track.instrumentClip")
         {
@@ -5028,7 +5037,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             remap([&](int lane) { return lane == a.lane ? other : lane == other ? a.lane : lane; });
         }
         std::erase_if(next.tracks, [](auto &t)
-                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed && !t.locked && t.height == 1 && t.channel == 0; });
+                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed && !t.locked && t.height == 1 && t.channel == 0 && !t.audio; });
         for (auto &t : next.tracks)
             t.groupedAbove = t.groupedAbove && t.lane > 0; // A move to the top track ungroups it.
         std::sort(next.tracks.begin(), next.tracks.end(), [](auto &x, auto &y) { return x.lane < y.lane; });

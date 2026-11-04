@@ -3089,7 +3089,7 @@ class Studio::Editor final : public juce::Component,
                     g.drawText(groupMark + (trackInfo && trackInfo->name.isNotEmpty() ? trackInfo->name
                                             : trackChannel ? trackChannel->name
                                                            : "Track " + juce::String(rowLane + 1)) +
-                                   (trackChannel ? " (instrument)" : "") +
+                                   (trackChannel ? " (instrument)" : trackInfo && trackInfo->audio ? " (audio)" : "") +
                                    (trackInfo && trackInfo->muted ? " (muted)" : "") +
                                    (trackInfo && trackInfo->locked ? " (locked)" : ""),
                                header.withTrimmedLeft(22).withTrimmedRight(26), juce::Justification::centredLeft, true);
@@ -3935,6 +3935,7 @@ class Studio::Editor final : public juce::Component,
                 }
             menu.addSubMenu("Instrument track", instruments);
         }
+        menu.addItem(15, "Audio track (recordings land here)", true, info && info->audio);
         menu.addItem(2, "Rename...");
         const std::array<juce::uint32, 8> palette{0xffef6576, 0xffe8a33d, 0xffe6d35a, 0xff6fcf7f,
                                                    0xff4fb3d9, 0xff7d8cf0, 0xffc77df0, 0xff9aa3ad};
@@ -3961,6 +3962,12 @@ class Studio::Editor final : public juce::Component,
                                if (chosen >= 100 && chosen <= 100 + int(instrumentChoices.size()))
                                    run("track.instrument", [&](CommandArgs &a)
                                        { a.channel = chosen == 100 ? 0 : instrumentChoices[size_t(chosen - 101)]; });
+                               else if (chosen == 15)
+                                   run("track.audio", [&](CommandArgs &a)
+                                       {
+                                           const auto *t = safe->s.controller.project.track(lane);
+                                           a.enabled = !(t && t->audio);
+                                       });
                                else if (chosen == 7)
                                    run("track.solo", [](CommandArgs &) {});
                                else if (chosen >= 11 && chosen <= 14)

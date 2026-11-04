@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include "../src/TakeLanes.h"
 #include "Commands.h"
 
 // Playlist track settings and operations: rename/colour/mute (mute silences the track's
@@ -216,5 +217,36 @@ inline void tests(const juce::File &)
     removeChannel.channel = channel;
     require(controller.execute("channel.delete", removeChannel).wasOk() && !controller.project.track(20),
             "Deleting the Channel turns the track back into a free track");
+
+    // Audio tracks: recordings land on the first audio track with room.
+    const std::vector<std::pair<double, double>> take{{0., 4.}};
+    const int freeLane = chooseTakeLane(controller.project, take, 1);
+    require(run("track.audio", 40, [](CommandArgs &x) { x.enabled = true; }).wasOk() &&
+                controller.project.track(40) && controller.project.track(40)->audio,
+            "A track becomes an audio track");
+    require(chooseTakeLane(controller.project, take, 1) == 40, "A take lands on the audio track");
+    require(run("track.audio", 30, [](CommandArgs &x) { x.enabled = true; }).wasOk() &&
+                chooseTakeLane(controller.project, take, 1) == 30,
+            "The first audio track (in lane order) is preferred");
+    CommandArgs busy;
+    busy.pattern = controller.project.patterns.front().id;
+    busy.lane = 30;
+    busy.beat = 2;
+    busy.length = 4;
+    require(controller.execute("clip.add", busy).wasOk() && chooseTakeLane(controller.project, take, 1) == 40,
+            "A busy audio track passes the take to the next audio track");
+    require(chooseTakeLane(controller.project, {{0., 4.}, {0., 4.}}, 1) == 40 &&
+                controller.project.track(40)->audio,
+            "Stacked passes start on the audio track and use the tracks below it");
+    require(run("track.instrument", 40, [&](CommandArgs &x) { x.channel = controller.project.channels[0].id; }).wasOk() &&
+                !controller.project.track(40)->audio,
+            "An instrument track is not an audio track");
+    Project withAudio;
+    require(Project::parse(controller.project.state(), withAudio).wasOk() && withAudio.track(30) && withAudio.track(30)->audio,
+            "Audio tracks survive save and reload");
+    require(run("track.audio", 30, [](CommandArgs &x) { x.enabled = false; }).wasOk() &&
+                run("track.instrument", 40, [](CommandArgs &x) { x.channel = 0; }).wasOk() &&
+                chooseTakeLane(controller.project, take, 1) != 30 && chooseTakeLane(controller.project, take, 1) <= freeLane,
+            "Without audio tracks the first free track is used, as before");
 }
 } // namespace playlist_track_acceptance
