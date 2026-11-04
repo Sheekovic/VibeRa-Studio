@@ -3,8 +3,26 @@
 #include <bit>
 #include <cmath>
 #include <cstdint>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
+#include <type_traits>
+
+template <class Number>
+static std::string numberFailure(const char *phase, Number expected, Number actual, const std::string &text)
+{
+    using Bits = std::conditional_t<sizeof(Number) == 8, std::uint64_t, std::uint32_t>;
+    std::ostringstream output;
+    output.imbue(std::locale::classic());
+    output << phase << " binary" << sizeof(Number) * 8 << " text=" << std::quoted(text) << std::scientific
+           << std::setprecision(std::numeric_limits<Number>::max_digits10) << " expected=" << expected
+           << " parsed=" << actual << " expected_bits=0x" << std::hex << std::bit_cast<Bits>(expected)
+           << " parsed_bits=0x" << std::bit_cast<Bits>(actual) << std::dec
+           << " expected_subnormal=" << (std::fpclassify(expected) == FP_SUBNORMAL);
+    return output.str();
+}
 
 static void require(bool condition, const char *message)
 {
@@ -37,9 +55,11 @@ int main()
             const auto text = vibera::number_text::formatClassic(value);
             require(text.find(',') == std::string::npos, "locale leaked into project number");
             double restored = 0;
-            require(vibera::number_text::parseClassic(text, restored), "saved number was rejected");
-            require(std::bit_cast<std::uint64_t>(restored) == std::bit_cast<std::uint64_t>(value),
-                    "project number lost binary64 precision/sign");
+            if (!vibera::number_text::parseClassic(text, restored))
+                throw std::runtime_error(numberFailure("saved number was rejected", value, restored, text));
+            if (std::bit_cast<std::uint64_t>(restored) != std::bit_cast<std::uint64_t>(value))
+                throw std::runtime_error(
+                    numberFailure("project number lost precision/sign", value, restored, text));
         };
         for (double value : {0.0, -0.0, 0.1, -0.1, 1.0000000000000002,
                              std::numeric_limits<double>::denorm_min(), std::numeric_limits<double>::min(),
@@ -71,14 +91,17 @@ int main()
         {
             const auto text = vibera::number_text::formatClassic(original);
             float restored = 0;
-            require(vibera::number_text::parseClassic(text, restored), "classic float rejected");
-            require(std::bit_cast<std::uint32_t>(restored) == std::bit_cast<std::uint32_t>(original),
-                    "classic float round trip changed value/sign");
+            if (!vibera::number_text::parseClassic(text, restored))
+                throw std::runtime_error(numberFailure("classic float rejected", original, restored, text));
+            if (std::bit_cast<std::uint32_t>(restored) != std::bit_cast<std::uint32_t>(original))
+                throw std::runtime_error(
+                    numberFailure("classic float changed value/sign", original, restored, text));
             const auto result =
                 vibera::number_text::fromChars(text.data(), text.data() + text.size(), restored);
-            require(result.ec == std::errc{} && result.ptr == text.data() + text.size() &&
-                        std::bit_cast<std::uint32_t>(restored) == std::bit_cast<std::uint32_t>(original),
-                    "platform float parser round trip changed value/sign");
+            if (result.ec != std::errc{} || result.ptr != text.data() + text.size() ||
+                std::bit_cast<std::uint32_t>(restored) != std::bit_cast<std::uint32_t>(original))
+                throw std::runtime_error(
+                    numberFailure("platform float changed value/sign", original, restored, text));
         }
         for (std::string text : {"+1", "1x", "1e39"})
         {
