@@ -2,6 +2,7 @@
 #pragma once
 #include "../src/Commands.h"
 #include "../src/MixerAutomationTake.h"
+#include "../src/PatternAutomation.h"
 #include "../src/MidiControlInput.h"
 #include <stdexcept>
 
@@ -68,11 +69,81 @@ inline void verifyLoopOverdub()
     require(approx(program.valueAt(gain, 7.5), .7f), "Latest pass adds beat 7");
     require(approx(program.valueAt(pan, 7.5), -.5f), "An earlier pass of another control survives");
 }
+// Pattern mode: the take becomes Pattern automation that plays with the Pattern everywhere.
+inline void verifyPatternTake()
+{
+    auto p = Project::empty();
+    p.tempo = 120;
+    auto &part = p.patterns.front();
+    part.length = 4;
+    std::unique_ptr<MixerAutomationTake> take;
+    require(MixerAutomationTake::prepare(p, false, 1, 0, "pattern", "pattern-take", 9, take).wasOk(),
+            "Prepare Pattern take");
+    take->rate = 48000;
+    take->originSeconds = 10;
+    take->originBeat = 0;
+    take->pattern = part.id;
+    take->looped = true;
+    take->loopStartBeat = 0;
+    take->loopEndBeat = 4;
+    take->phase = MixerAutomationTake::Phase::capturing;
+    const auto gain = *MixerAutomationTake::keyForCommand("mixer.gain", 1, 0);
+    auto add = [&](double seconds, float value)
+    {
+        const MixerAutomationTake::Event e{gain, seconds, value};
+        require(take->admitEvent(e).wasOk(), "Pattern event admission");
+        auto expected = std::make_unique<Project>(p);
+        take->accepted(e, expected);
+    };
+    add(10.5, .5f); // Beat 1.
+    add(12.5, .7f); // Beat 5 -> second pass, Pattern beat 1 (replaces .5).
+    take->stopSeconds = 11.5; // Beat 3: one pass only; still covers the whole Pattern.
+    take->phase = MixerAutomationTake::Phase::ready;
+    Project recorded;
+    take->stopSeconds = 13;
+    require(take->destination(false, recorded).wasOk(), "Pattern take destination");
+    const auto *recordedPart = recorded.pattern(part.id);
+    require(recordedPart && recordedPart->automation.size() == 1 && recorded.automation.placements.empty() &&
+                recordedPart->automation[0].beat == 0 && recordedPart->automation[0].length == 4,
+            "The take is Pattern automation covering the Pattern, not a Playlist clip");
+    require(recorded.validate().wasOk(), "Recorded Pattern automation validates");
+    Project reloaded;
+    require(Project::parse(recorded.state(), reloaded).wasOk() && reloaded.pattern(part.id) &&
+                reloaded.pattern(part.id)->automation.size() == 1,
+            "Pattern automation survives save and reload");
+    auto program = [](const AudibleAutomation &audible, const Project &project)
+    {
+        AutomationProgram result;
+        std::string error;
+        require(AutomationProgram::compile(audible.document, audible.songMode, result, error,
+                                           project.automationDefaults()),
+                "Compile audible automation");
+        return result;
+    };
+    auto approx = [](std::optional<float> v, float x) { return v && std::abs(*v - x) < 1.e-5f; };
+    const auto inPattern = program(audibleAutomation(recorded, true, part.id), recorded);
+    require(approx(inPattern.valueAt(gain, .5), 1.f) && approx(inPattern.valueAt(gain, 1.5), .7f),
+            "Pattern mode plays the Pattern automation (latest pass)");
+    recorded.placements.push_back({recorded.allocate(), part.id, 2, 8, 4, 0});
+    recorded.placements.push_back({recorded.allocate(), part.id, 3, 16, 2, 1}); // Window: Pattern beats 1..3.
+    const auto inSong = program(audibleAutomation(recorded, false, 0), recorded);
+    require(approx(inSong.valueAt(gain, 8.5), 1.f) && approx(inSong.valueAt(gain, 9.5), .7f),
+            "Song mode plays it where the Pattern is placed");
+    require(approx(inSong.valueAt(gain, 16.5), .7f), "A placement window with an offset starts inside the Pattern");
+    const auto otherPattern = program(audibleAutomation(recorded, true, 0), recorded);
+    require(!otherPattern.valueAt(gain, 1.5) || approx(otherPattern.valueAt(gain, 1.5), 1.f),
+            "Another Pattern does not play it");
+    // Deleting the source removes the Pattern windows (no dangling reference).
+    auto deleted = recorded;
+    deleted.automation.sources.clear();
+    require(deleted.validate().failed(), "A dangling Pattern window is invalid until pruned");
+}
 __declspec(noinline) inline juce::Result verify(const juce::File &output)
 {
     try
     {
         verifyLoopOverdub();
+        verifyPatternTake();
         require(output.createDirectory().wasOk(), "Owned touch output");
         auto c = std::make_unique<Controller>();
         auto p = Project::empty();

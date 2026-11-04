@@ -89,11 +89,11 @@ juce::Result Studio::startAutomationRecording(int insert, int lane)
         hasPendingMidiTake() || !audioImports.idle() || audioImportAfterTake ||
         midiController.learnIndex >= 0 || nextAutomationTouchSession == std::numeric_limits<unsigned>::max())
         return juce::Result::fail("automationRecording.busy: Finish pending work before arming");
-    if (patternMode)
-        return juce::Result::fail("automationRecording.unsupportedMode: Song mode required; Pattern-mode "
-                                  "automation events remain separate work");
-    const auto loop = audio.looping() ? audio.loopSeconds() : std::nullopt;
-    if (audio.looping() && (!loop || !(loop->second > loop->first)))
+    const auto *recordedPattern = patternMode ? controller.project.pattern(selectedPattern) : nullptr;
+    if (patternMode && (!recordedPattern || !(recordedPattern->length > 0)))
+        return juce::Result::fail("automationRecording.unsupportedMode: Select a Pattern with a length");
+    const auto loop = !patternMode && audio.looping() ? audio.loopSeconds() : std::nullopt;
+    if (!patternMode && audio.looping() && (!loop || !(loop->second > loop->first)))
         return juce::Result::fail("automationRecording.unsupportedMode: The Song loop has no length");
     auto source = audio.midiInput.retainRecordingLane();
     auto *device = audio.engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
@@ -108,7 +108,15 @@ juce::Result Studio::startAutomationRecording(int insert, int lane)
                                          controller.projectIdentity, juce::Uuid().toString(), session, next);
         result.failed())
         return result;
-    if (loop)
+    if (recordedPattern)
+    {
+        // Pattern mode: the transport loops the Pattern; the take becomes its Pattern automation.
+        next->pattern = recordedPattern->id;
+        next->looped = true;
+        next->loopStartBeat = 0;
+        next->loopEndBeat = recordedPattern->length;
+    }
+    else if (loop)
     {
         next->looped = true;
         next->loopStartBeat = loop->first * next->tempo / 60.;
@@ -218,8 +226,9 @@ juce::Result Studio::automationRecordingSourceCurrent() const
     auto *device = audio.engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
     if (controller.projectIdentity != t.identity || !t.sourceCurrent(controller.project) ||
         (!t.cutoffFrozen &&
-         (patternMode || audio.looping() != t.looped ||
-          (t.looped && [&]
+         (patternMode != (t.pattern != 0) || (patternMode && selectedPattern != t.pattern) ||
+          (!patternMode && audio.looping() != t.looped) ||
+          (!patternMode && t.looped && [&]
            {
                const auto loop = audio.loopSeconds();
                return !loop || std::abs(loop->first * t.tempo / 60. - t.loopStartBeat) > 1.e-9 ||

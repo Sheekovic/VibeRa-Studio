@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "LiveTimeline.h"
+#include "PatternAutomation.h"
 #include "Tuning.h"
 #include "NoteRelease.h"
 #include "PatternExtent.h"
@@ -59,16 +60,9 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
             result->denominator = patternDenominator(p, *part);
         }
     std::string error;
-    // A muted Playlist track silences its Automation Clips like any clip mute.
-    const bool trackMuted = std::any_of(p.tracks.begin(), p.tracks.end(), [](const auto &t) { return t.muted; });
-    std::optional<AutomationDocument> audible;
-    if (trackMuted)
-    {
-        audible = p.automation;
-        for (auto &placement : audible->placements)
-            placement.muted = placement.muted || p.laneMuted(placement.lane);
-    }
-    if (!AutomationProgram::compile(audible ? *audible : p.automation, !pattern, result->automation, error,
+    // Playlist Automation Clips (muted tracks silence theirs) plus Pattern automation.
+    const auto audible = audibleAutomation(p, pattern, selected);
+    if (!AutomationProgram::compile(audible.document, audible.songMode, result->automation, error,
                                     p.automationDefaults()))
         return {};
     for (const auto &m : p.mixer)

@@ -103,6 +103,9 @@ struct Pattern
     bool autoLength = true;                // Canonical score edits recompute the last occupied musical bar.
     int numerator = 0, denominator = 0;    // Both zero inherit the document meter.
     double launchQuantum = -1;             // Performance launch step in beats: -1 one bar, 0 immediately.
+    // Pattern automation (v56): windows of project automation sources at Pattern beats (lane and
+    // id unused). Plays with the Pattern in Song and Pattern mode (PatternAutomation.h).
+    std::vector<AutomationPlacement> automation;
 };
 // -1 (one bar of the Song meter), 0 (immediately) or 1/16 beat .. 64 beats.
 inline bool validLaunchQuantum(double beats) noexcept

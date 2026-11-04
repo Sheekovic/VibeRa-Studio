@@ -667,6 +667,18 @@ juce::ValueTree Project::state() const
                 set(e, "modY", n.modY);
             t.appendChild(e, nullptr);
         }
+        for (const auto &w : p.automation)
+        {
+            juce::ValueTree e("AUTOMATION");
+            set(e, "source", juce::int64(w.source));
+            set(e, "beat", w.beat);
+            set(e, "length", w.length);
+            if (w.offset != 0)
+                set(e, "offset", w.offset);
+            if (w.muted)
+                set(e, "muted", true);
+            t.appendChild(e, nullptr);
+        }
         for (const auto &c : p.controllers)
         {
             juce::ValueTree e("CONTROLLER");
@@ -1558,6 +1570,19 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                     {channel, *channelLoopMode(n["mode"].toString()), exactNumber(n["length"])});
                 continue;
             }
+            if (n.hasType("AUTOMATION"))
+            {
+                if (fileVersion < 56)
+                    return juce::Result::fail("Pattern automation needs project version 56");
+                AutomationPlacement window;
+                window.source = juce::int64(n["source"]);
+                window.beat = exactNumber(n["beat"]);
+                window.length = exactNumber(n["length"]);
+                window.offset = n.hasProperty("offset") ? exactNumber(n["offset"]) : 0.;
+                window.muted = bool(n["muted"]);
+                pat.automation.push_back(window);
+                continue;
+            }
             if (n.hasType("CONTROLLER"))
             {
                 if (fileVersion < 46)
@@ -2144,6 +2169,17 @@ juce::Result Project::validate() const
                 !std::isfinite(n.modY) || n.modY < 0 || n.modY > 1 || n.colourGroup < 0 ||
                 n.colourGroup > 15 || (n.slide && n.repeatMode != 0))
                 return fail("Invalid note");
+        if (p.automation.size() > 4096)
+            return fail("Too much Pattern automation");
+        for (const auto &w : p.automation)
+        {
+            const auto source = std::find_if(automation.sources.begin(), automation.sources.end(),
+                                             [&](const auto &s) { return s.id == w.source; });
+            if (source == automation.sources.end() || !std::isfinite(w.beat) || w.beat < 0 ||
+                !std::isfinite(w.length) || w.length <= 0 || !std::isfinite(w.offset) || w.offset < 0 ||
+                w.offset + w.length > source->length + 1.e-9 || w.beat + w.length > 1.e6)
+                return fail("Invalid Pattern automation window");
+        }
         if (p.controllers.size() > 100000)
             return fail("Too many controller events");
         for (const auto &c : p.controllers)

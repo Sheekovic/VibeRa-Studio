@@ -1043,6 +1043,10 @@ juce::Result Controller::prepareSnapshotChange(Project next, const Project &hist
     {
         if (revision == std::numeric_limits<std::uint64_t>::max() || undo.isPerformingUndoRedo())
             return juce::Result::fail("history.busy: Cannot prepare canonical mutation");
+        for (auto &pattern : next.patterns) // A deleted automation source leaves no Pattern window behind.
+            std::erase_if(pattern.automation, [&](const auto &w)
+                          { return std::none_of(next.automation.sources.begin(), next.automation.sources.end(),
+                                                [&](const auto &s) { return s.id == w.source; }); });
         bool unbound = false; // A deleted Channel turns its instrument track back into a free track.
         for (auto &track : next.tracks)
             if (track.channel != 0 && !next.channel(track.channel))

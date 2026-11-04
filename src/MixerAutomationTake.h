@@ -46,6 +46,8 @@ class MixerAutomationTake
     // writes over the span it touched in earlier passes (latest pass wins).
     bool looped = false;
     double loopStartBeat = 0, loopEndBeat = 0;
+    // Pattern mode: the take is Pattern automation of this Pattern, covering its whole loop.
+    Id pattern = 0;
     Phase phase = Phase::armed;
     struct Folded
     {
@@ -204,7 +206,7 @@ class MixerAutomationTake
             auto next = *expected;
             // A take that wrapped the loop covers the whole loop (from the origin if it began
             // earlier); otherwise the recorded span from the origin.
-            const bool wrap = wrapped();
+            const bool wrap = wrapped() || (pattern != 0 && looped);
             const double start = wrap ? std::min(originBeat, loopStartBeat) : originBeat;
             const double length = wrap ? loopEndBeat - start
                                        : std::max(1. / rate, stopSeconds - originSeconds) * tempo / 60.;
@@ -289,8 +291,16 @@ class MixerAutomationTake
                 if (source.points.back().beat < length)
                     source.points.push_back({next.allocate(), length, last, AutomationShape::hold, 0});
                 next.automation.initialValues.push_back({t.key, t.manual});
-                next.automation.placements.push_back(
-                    {next.allocate(), source.id, start, length, 0, lane, false});
+                if (pattern != 0)
+                {
+                    auto *part = next.pattern(pattern);
+                    if (!part)
+                        return juce::Result::fail("automationRecording.staleSource: The recorded Pattern is gone");
+                    part->automation.push_back({0, source.id, start, length, 0, 0, false});
+                }
+                else
+                    next.automation.placements.push_back(
+                        {next.allocate(), source.id, start, length, 0, lane, false});
                 next.automation.sources.push_back(std::move(source));
             }
             if (auto result = next.validate(); result.failed())

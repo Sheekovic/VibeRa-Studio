@@ -196,9 +196,9 @@ try:
     no_clock = call("vibera_automationRecording", {"action":"arm", "insert":1,
         "projectIdentity":before_arm["projectIdentity"], "revision":before_arm["revision"]})
     check(no_clock.get("isError") is True and
-          no_clock["structuredContent"]["error"]["code"] == "automationRecording.unsupportedMode" and
+          no_clock["structuredContent"]["error"]["code"] == "automationRecording.clockUnavailable" and
           call("vibera_state")["structuredContent"]["revision"] == before_arm["revision"],
-          "Actual Pattern-mode arm refuses without fabricating a recording clock or changing Project")
+          "Pattern-mode arm (now supported) refuses without a real input clock and leaves the Project unchanged")
     catalogue = call("vibera_catalogue", {"action":"state"})["structuredContent"]
     check(catalogue["disposableSettings"] and catalogue["scanState"] == "idle" and
           catalogue["pluginCount"] == 0 and catalogue["standardLocations"],
