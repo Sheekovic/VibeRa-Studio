@@ -71,7 +71,12 @@ jobs:
         run: cmake --preset ${{ matrix.configure }}
 
       - name: Build
-        run: cmake --build --preset ${{ matrix.build }} --target VibeRa VibeRaPluginWorker
+        # Ninja keeps compiling independent objects to expose all errors in one run.
+        # -k 0 retains a failing exit status; Windows/MSBuild keeps its own options.
+        run: cmake --build --preset ${{ matrix.build }} --target VibeRa VibeRaPluginWorker VibeRaNumberTextTests ${{ runner.os != 'Windows' && '-- -k 0' || '' }}
+
+      - name: Verify project numeric text on the native standard library
+        run: ctest --test-dir build/${{ matrix.configure }} -C Release -R '^project_number_text$' --output-on-failure
 
       - name: Assemble and archive native candidate
         shell: pwsh

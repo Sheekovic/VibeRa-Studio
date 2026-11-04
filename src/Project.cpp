@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <charconv>
 #include <limits>
+#include "NumberText.h"
 
 namespace vibera
 {
@@ -838,9 +839,14 @@ static double exactNumber(const juce::var &value)
     if (begin != end && *begin == '+')
         ++begin;
     double number = 0;
+#if JUCE_MAC
+    return number_text::parseClassic(std::string_view(begin, size_t(end - begin)), number)
+               ? number : std::numeric_limits<double>::quiet_NaN();
+#else
     const auto converted = std::from_chars(begin, end, number, std::chars_format::general);
     return converted.ec == std::errc{} && converted.ptr == end ? number
                                                                : std::numeric_limits<double>::quiet_NaN();
+#endif
 }
 juce::Result Project::parse(const juce::ValueTree &t, Project &result)
 {
@@ -2398,12 +2404,16 @@ static void preserveNumericPrecision(juce::ValueTree &tree)
         auto value = tree.getProperty(name);
         if (value.isDouble())
         {
+#if JUCE_MAC
+            tree.setProperty(name, juce::String(number_text::formatClassic(double(value))), nullptr);
+#else
             char buffer[64];
             auto converted =
                 std::to_chars(std::begin(buffer), std::end(buffer), double(value), std::chars_format::general,
                               std::numeric_limits<double>::max_digits10);
             jassert(converted.ec == std::errc{});
             tree.setProperty(name, juce::String::fromUTF8(buffer, int(converted.ptr - buffer)), nullptr);
+#endif
         }
     }
     for (auto child : tree)

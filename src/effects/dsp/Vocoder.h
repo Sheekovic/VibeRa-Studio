@@ -4,6 +4,7 @@
 #include "EffectsTypes.h"
 
 #include <array>
+#include <cstdint>
 
 namespace vibera::effects
 {
