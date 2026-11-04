@@ -3592,6 +3592,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "metronome", audio.metronome());
     set(state, "countInBars", audio.countInBars());
     set(state, "positionBeat", audio.positionBeat());
+    set(state, "playlistRange", playlistRange ? juce::var(juce::Array<juce::var>{playlistRange->first, playlistRange->second}) : juce::var());
     set(state, "tempo", controller.project.tempo);
     set(state, "pianoNoteModes",
         static_cast<Editor *>(windows[1]->getContentComponent())
@@ -4103,6 +4104,9 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         auto e = obj();
         auto *component = windows[size_t(i)]->getContentComponent();
         set(e, "index", i);
+        if (i == 1 || i == 2)
+            if (auto *timeline = dynamic_cast<Editor *>(component))
+                set(e, "timeline", timeline->timelineGeometry());
         set(e, "visible",
             detachedWindows[size_t(i)] ? detachedWindows[size_t(i)]->isVisible()
                                        : windows[size_t(i)]->isVisible());

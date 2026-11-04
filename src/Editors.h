@@ -453,6 +453,7 @@ class Studio::Editor final : public juce::Component,
     double savedZoom = 1, savedScroll = 0, savedVerticalZoom = 1;
     int savedTopPitch = 72;
     bool timeSelecting = false, timeSelectionAdd = false;
+    bool rulerScrubbing = false; // Playlist ruler: left-drag moves the playhead continuously.
     bool pitchSelecting = false, pitchSelectionAdd = false;
     int pitchAnchor = 60, pitchFirst = 60, pitchLast = 60;
     double timeAnchor = 0, timeStart = 0, timeEnd = 0;
@@ -464,6 +465,58 @@ class Studio::Editor final : public juce::Component,
     bool hasTimeSelection() const
     {
         return timeEnd - timeStart > 1.e-8;
+    }
+    // Playlist ruler right-click menu (familiar timeline actions at the clicked beat).
+    void rulerMenu(double beat)
+    {
+        const auto &project = s.controller.project;
+        const double bar = project.numerator * 4. / std::max(1, project.denominator);
+        const double snapped = s.snap > 0 ? std::floor(beat / s.snap + .5) * s.snap : beat;
+        juce::PopupMenu m;
+        m.addItem(1, "Play from here");
+        m.addItem(2, "Add marker here");
+        m.addSeparator();
+        m.addItem(3, "Select this bar");
+        m.addItem(4, "Select to song end");
+        m.addItem(5, "Clear time selection", bool(s.playlistRange));
+        juce::Component::SafePointer<Editor> safe(this);
+        m.showMenuAsync({}, [safe, beat, snapped, bar](int chosen)
+                        {
+                            if (!safe || chosen == 0)
+                                return;
+                            auto &studio = safe->s;
+                            if (chosen == 1)
+                            {
+                                studio.audio.seekBeat(std::max(0., snapped));
+                                if (!studio.audio.playing())
+                                    studio.play.onClick();
+                            }
+                            else if (chosen == 2)
+                            {
+                                CommandArgs a;
+                                a.beat = std::max(0., snapped);
+                                a.text = "Marker";
+                                studio.command("marker.add", a);
+                            }
+                            else if (chosen == 3)
+                            {
+                                const double start = std::floor(beat / bar) * bar;
+                                studio.playlistRange = std::pair{start, start + bar};
+                            }
+                            else if (chosen == 4)
+                            {
+                                double end = 0;
+                                for (const auto &clip : studio.controller.project.placements)
+                                    end = std::max(end, clip.beat + clip.length);
+                                for (const auto &clip : studio.controller.project.audioPlacements)
+                                    end = std::max(end, studio.controller.project.audioEndBeat(clip.beat, clip.duration));
+                                if (end > snapped + 1.e-8)
+                                    studio.playlistRange = std::pair{std::max(0., snapped), end};
+                            }
+                            else if (chosen == 5)
+                                studio.playlistRange.reset();
+                            safe->repaint();
+                        });
     }
     ViewportBar horizontalBar{false}, verticalBar{true};
     juce::TextButton midiFileButton{"Menu"};
@@ -1114,6 +1167,18 @@ class Studio::Editor final : public juce::Component,
     ClipPicker *clipPicker() const
     {
         return picker.get();
+    }
+    // Timeline geometry in editor pixels (readback for pointer tests): the ruler band, the
+    // first grid x, pixels per beat and the first visible beat.
+    juce::var timelineGeometry() const
+    {
+        auto *o = new juce::DynamicObject();
+        o->setProperty("rulerTop", gridTop() - 22);
+        o->setProperty("rulerBottom", gridTop());
+        o->setProperty("gridLeft", leftEdge());
+        o->setProperty("pixelsPerBeat", spacing());
+        o->setProperty("scrollBeat", scroll);
+        return juce::var(o);
     }
     bool isPickerShown() const
     {
@@ -4802,6 +4867,30 @@ class Studio::Editor final : public juce::Component,
                 repaint();
                 return;
             }
+        if (type == 2 && e.y < gridTop() && e.y >= gridTop() - 22 && e.x >= leftEdge())
+        {
+            if (e.mods.isPopupMenu())
+            {
+                rulerMenu(beatAt(float(e.x)));
+                return;
+            }
+            // Grab an edge of the time selection to resize it (the other edge stays).
+            if (e.mods.isLeftButtonDown() && !e.mods.isCtrlDown() && e.getNumberOfClicks() < 2 && s.playlistRange)
+            {
+                const auto edgeX = [&](double beat) { return float(leftEdge()) + float((beat - scroll) * spacing()); };
+                const bool nearStart = std::abs(e.position.x - edgeX(s.playlistRange->first)) <= 5.f;
+                const bool nearEnd = std::abs(e.position.x - edgeX(s.playlistRange->second)) <= 5.f;
+                if (nearStart || nearEnd)
+                {
+                    timeSelecting = true;
+                    timeAnchor = nearStart ? s.playlistRange->second : s.playlistRange->first;
+                    timeStart = s.playlistRange->first;
+                    timeEnd = s.playlistRange->second;
+                    repaint();
+                    return;
+                }
+            }
+        }
         if (type == 2 && e.y < gridTop() && e.y >= gridTop() - 22 && e.x >= leftEdge() &&
             e.mods.isLeftButtonDown() && (e.mods.isCtrlDown() || e.getNumberOfClicks() >= 2))
         {
@@ -4838,6 +4927,7 @@ class Studio::Editor final : public juce::Component,
                     return;
                 }
                 s.audio.seekBeat(beatAt(e.x));
+                rulerScrubbing = type == 2 && e.mods.isLeftButtonDown();
                 if (type == 2 && s.playlistRange &&
                     (beatAt(e.x) < s.playlistRange->first || beatAt(e.x) > s.playlistRange->second))
                 {
@@ -5357,6 +5447,12 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseDrag(const juce::MouseEvent &e) override
     {
+        if (rulerScrubbing)
+        {
+            s.audio.seekBeat(beatAt(juce::jlimit(float(leftEdge()), float(getWidth() - rightInset()), e.position.x)));
+            repaint();
+            return;
+        }
         if (mixerStereo)
         {
             if (!validMixerStereo())
@@ -5830,6 +5926,7 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseUp(const juce::MouseEvent &e) override
     {
+        rulerScrubbing = false;
         if (mixerStereo)
         {
             const auto result = finishMixerStereo(true);
