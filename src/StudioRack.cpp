@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #include "Studio.h"
 #include "Editors.h"
 #include "InstrumentWindow.h"
@@ -103,7 +104,7 @@ void Studio::channelLoopLengthDialog(Id channel, Id pattern)
                 args.text = "fixed";
                 const auto text = window->getTextEditorContents("length").trim();
                 const auto utf8 = text.toStdString();
-                const auto parsed = std::from_chars(utf8.data(), utf8.data() + utf8.size(), args.length);
+                const auto parsed = vibera::number_text::fromChars(utf8.data(), utf8.data() + utf8.size(), args.length);
                 if (text.isEmpty() || parsed.ec != std::errc{} || parsed.ptr != utf8.data() + utf8.size())
                 {
                     safe->status = "channelLoop.invalidLength: Enter a positive beat length";

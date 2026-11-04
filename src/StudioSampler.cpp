@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #include "Studio.h"
 #include "InstrumentWindow.h"
 #include "SamplerTempoContracts.h"
@@ -260,7 +261,7 @@ void Studio::samplerAutomationRangeDialog(const SamplerAutomationUiIntent &inten
                     auto bytes = text.trim().toStdString();
                     if (!bytes.empty() && bytes.front() == '+')
                         bytes.erase(bytes.begin());
-                    const auto parsed = std::from_chars(bytes.data(), bytes.data() + bytes.size(), value);
+                    const auto parsed = vibera::number_text::fromChars(bytes.data(), bytes.data() + bytes.size(), value);
                     return parsed.ec == std::errc{} && parsed.ptr == bytes.data() + bytes.size() &&
                            std::isfinite(value);
                 };

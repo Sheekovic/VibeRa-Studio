@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #include "AutomationState.h"
 #include "SamplerAutomationParameters.h"
 #include <charconv>
@@ -28,7 +29,7 @@ bool integer(const juce::var &value, std::int64_t &number)
     if (!value.isString())
         return false;
     const auto text = value.toString().toStdString();
-    const auto result = std::from_chars(text.data(), text.data() + text.size(), number);
+    const auto result = vibera::number_text::fromChars(text.data(), text.data() + text.size(), number);
     return result.ec == std::errc{} && result.ptr == text.data() + text.size();
 }
 bool number(const juce::var &value, double &number)
@@ -39,7 +40,7 @@ bool number(const juce::var &value, double &number)
     {
         const auto text = value.toString().toStdString();
         const auto result =
-            std::from_chars(text.data(), text.data() + text.size(), number, std::chars_format::general);
+            vibera::number_text::fromChars(text.data(), text.data() + text.size(), number, std::chars_format::general);
         if (result.ec != std::errc{} || result.ptr != text.data() + text.size())
             return false;
     }

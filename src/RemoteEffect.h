@@ -110,7 +110,7 @@ class RemoteEffect final : public tracktion::Plugin
         }
         // Actual selected root prefetch, BEFORE any child. The native root
         // separately proves exact old root/generation/end and source authority.
-        bool beginReference(juce::Range<juce::int64> range) noexcept
+        bool beginReference(juce::Range<std::int64_t> range) noexcept
         {
             if (fault != Fault::none)
                 return false;
@@ -144,7 +144,7 @@ class RemoteEffect final : public tracktion::Plugin
         }
         // Actual post-child root check. Never equates Host logical frames with
         // native reference time; it checks their observed interval DIFFERENCE.
-        bool finishReference(juce::Range<juce::int64> range) noexcept
+        bool finishReference(juce::Range<std::int64_t> range) noexcept
         {
             if (fault != Fault::none)
                 return false;
@@ -267,7 +267,7 @@ class RemoteEffect final : public tracktion::Plugin
         Fault fault = Fault::none;
         bool open = false, started = false, allCompleted = false, lastReady = false;
         int rendered = 0;
-        juce::Range<juce::int64> currentReference;
+        juce::Range<std::int64_t> currentReference;
         juce::int64 nextReference = 0, lastReferenceEnd = 0;
         PluginDryHistory::Witness before, lastWitness;
         std::atomic<std::uint64_t> published{std::uint32_t(Phase::prepared)};
@@ -323,7 +323,7 @@ class RemoteEffect final : public tracktion::Plugin
         }
         // Root must separately bind the actual predecessor root/generation and
         // continuity owner. Delegate here INSTEAD of opening either observer.
-        bool beginReference(juce::Range<juce::int64> range) noexcept
+        bool beginReference(juce::Range<std::int64_t> range) noexcept
         {
             if (fault != Fault::none)
                 return false;
@@ -351,7 +351,7 @@ class RemoteEffect final : public tracktion::Plugin
             publish();
             return true;
         }
-        bool finishReference(juce::Range<juce::int64> range) noexcept
+        bool finishReference(juce::Range<std::int64_t> range) noexcept
         {
             if (fault != Fault::none)
                 return false;
@@ -481,7 +481,7 @@ class RemoteEffect final : public tracktion::Plugin
         bool open = false, started = false, usingDry = true;
         int rendered = 0, fadePosition = 0;
         std::uint64_t frames = 0;
-        juce::Range<juce::int64> current;
+        juce::Range<std::int64_t> current;
         juce::int64 nextReference = 0;
         std::atomic<std::uint64_t> published{std::uint32_t(Phase::prepared)};
         static_assert(std::atomic<std::uint64_t>::is_always_lock_free);

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #pragma once
 #include "McpContracts.h"
 #include "McpSchema.h"
@@ -260,7 +261,7 @@ class PianoNotePropertiesPanel final : public juce::Component
             {
                 const auto text = fields[index].getText().trim().toStdString();
                 double number = 0;
-                const auto converted = std::from_chars(text.data(), text.data() + text.size(), number,
+                const auto converted = vibera::number_text::fromChars(text.data(), text.data() + text.size(), number,
                                                        std::chars_format::general);
                 if (text.empty() || converted.ec != std::errc{} ||
                     converted.ptr != text.data() + text.size() || !std::isfinite(number) ||

@@ -44,7 +44,7 @@ class GenerationJob
     mutable std::mutex mutex;
     JobResult result;
     std::atomic<bool> cancelled{false};
-    std::jthread thread;
+    std::thread thread;
 
   public:
     GenerationJob() = default;

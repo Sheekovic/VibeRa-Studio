@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #pragma once
 #include "Studio.h"
 #include "MacroSliceInput.h"
@@ -744,7 +745,7 @@ class MacroPage final : public juce::Component, private juce::ListBoxModel
                 else if (id.endsWith("colour"))
                 {
                     const auto input = amount.getText().trim().toStdString();
-                    const auto parsed = std::from_chars(input.data(), input.data()+input.size(), a.value);
+                    const auto parsed = vibera::number_text::fromChars(input.data(), input.data()+input.size(), a.value);
                     if (parsed.ec != std::errc{} || parsed.ptr != input.data()+input.size() || !validMixerColour(a.value))
                     { report(juce::Result::fail("mixer.group.invalidColour: Enter theme0 or opaque ARGB")); return; }
                 }
@@ -759,7 +760,7 @@ class MacroPage final : public juce::Component, private juce::ListBoxModel
             {
                 const auto input = amount.getText().trim().toStdString();
                 int position = -1;
-                const auto parsed = std::from_chars(input.data(), input.data()+input.size(), position);
+                const auto parsed = vibera::number_text::fromChars(input.data(), input.data()+input.size(), position);
                 if (parsed.ec != std::errc{} || parsed.ptr != input.data()+input.size() || position < 0 || position > 128)
                 { report(juce::Result::fail("mixer.invalidPosition: Enter an exact display row0..128")); return; }
                 a.mixerPosition = position;
@@ -780,7 +781,7 @@ class MacroPage final : public juce::Component, private juce::ListBoxModel
             else if (id == "mixer.pan" || id == "mixer.gain" || id == "mixer.colour")
             {
                 auto input = amount.getText().trim().toStdString();
-                auto parsed = std::from_chars(input.data(), input.data() + input.size(), a.value);
+                auto parsed = vibera::number_text::fromChars(input.data(), input.data() + input.size(), a.value);
                 if (parsed.ec != std::errc{} || parsed.ptr != input.data() + input.size() ||
                     !std::isfinite(a.value))
                 {
@@ -791,7 +792,7 @@ class MacroPage final : public juce::Component, private juce::ListBoxModel
             else if (id == "steps.modX" || id == "steps.modY")
             {
                 const auto input = amount.getText().trim().toStdString();
-                const auto parsed = std::from_chars(input.data(), input.data() + input.size(), a.value);
+                const auto parsed = vibera::number_text::fromChars(input.data(), input.data() + input.size(), a.value);
                 const auto *info =
                     stepExpressionInfo(id == "steps.modX" ? StepExpression::modX : StepExpression::modY);
                 if (parsed.ec != std::errc{} || parsed.ptr != input.data() + input.size() ||
@@ -804,7 +805,7 @@ class MacroPage final : public juce::Component, private juce::ListBoxModel
             else if (id == "steps.release")
             {
                 const auto input = amount.getText().trim().toStdString();
-                const auto parsed = std::from_chars(input.data(), input.data() + input.size(), a.value);
+                const auto parsed = vibera::number_text::fromChars(input.data(), input.data() + input.size(), a.value);
                 const auto *info = stepReleaseInfo();
                 if (parsed.ec != std::errc{} || parsed.ptr != input.data() + input.size() ||
                     !std::isfinite(a.value) || a.value < info->minimum || a.value > info->maximum)
@@ -818,7 +819,7 @@ class MacroPage final : public juce::Component, private juce::ListBoxModel
             {
                 const auto input = amount.getText().trim().toStdString();
                 int mode = -1;
-                const auto parsed = std::from_chars(input.data(), input.data() + input.size(), mode);
+                const auto parsed = vibera::number_text::fromChars(input.data(), input.data() + input.size(), mode);
                 if (parsed.ec != std::errc{} || parsed.ptr != input.data() + input.size() ||
                     !noteRepeatRate(mode))
                 {
@@ -830,7 +831,7 @@ class MacroPage final : public juce::Component, private juce::ListBoxModel
             else if (id == "steps.shift")
             {
                 const auto input = amount.getText().trim().toStdString();
-                const auto parsed = std::from_chars(input.data(), input.data() + input.size(), a.value);
+                const auto parsed = vibera::number_text::fromChars(input.data(), input.data() + input.size(), a.value);
                 const auto *info = stepShiftInfo();
                 if (parsed.ec != std::errc{} || parsed.ptr != input.data() + input.size() ||
                     !std::isfinite(a.value) || a.value < info->minimum || a.value > info->maximum)

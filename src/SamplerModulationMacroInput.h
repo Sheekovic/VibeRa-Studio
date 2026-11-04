@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #pragma once
 #include "Commands.h"
 #include <charconv>
@@ -13,7 +14,7 @@ inline juce::Result parseSamplerModulationMacro(const juce::String &command, con
     const int target = samplerModulationTarget(destination.toStdString());
     const auto numeric = input.fromFirstOccurrenceOf(":", false, false).trim().toStdString();
     double value = 0;
-    const auto parsed = std::from_chars(numeric.data(), numeric.data() + numeric.size(), value);
+    const auto parsed = vibera::number_text::fromChars(numeric.data(), numeric.data() + numeric.size(), value);
     if (!parameter || target < 0 || numeric.empty() || parsed.ec != std::errc{} ||
         parsed.ptr != numeric.data() + numeric.size() || (target == 1 && parameter->id.substr(0, 3) != "lfo"))
         return juce::Result::fail("samplerModulation.invalidMacro: Use destination:value, e.g. cutoff:0.5");

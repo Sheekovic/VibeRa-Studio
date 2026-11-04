@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include <charconv>
 #include <iomanip>
 #include <limits>
 #include <locale>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace vibera::number_text
 {
 // Project-file CONTROL work only. Older Apple libc++ lacks floating charconv.
 // Classic locale keeps the on-disk decimal separator independent of the UI/OS.
-inline bool parseClassic(std::string_view text, double &number)
+template <class Number> inline bool parseClassic(std::string_view text, Number &number)
 {
+    static_assert(std::is_floating_point_v<Number>);
     // num_get accepts hexadecimal forms on some standard libraries. Project
     // text uses the decimal grammar of chars_format::general.
     size_t at = 0;
@@ -54,6 +57,26 @@ inline bool parseClassic(std::string_view text, double &number)
             if (c >= '1' && c <= '9')
                 return false;
     return true;
+}
+// Every caller validates whole-token consumption. Integer charconv remains
+// available on older Apple libc++; only floating conversion needs a fallback.
+template <class Number>
+inline std::from_chars_result fromChars(const char *first, const char *last, Number &number,
+                                        std::chars_format format = std::chars_format::general)
+{
+    if constexpr (std::is_integral_v<Number>)
+        return std::from_chars(first, last, number);
+    else
+    {
+#if defined(__APPLE__)
+        if (first == last || *first == '+' || format != std::chars_format::general ||
+            !parseClassic(std::string_view(first, size_t(last - first)), number))
+            return {first, std::errc::invalid_argument};
+        return {last, {}};
+#else
+        return std::from_chars(first, last, number, format);
+#endif
+    }
 }
 inline std::string formatClassic(double number)
 {

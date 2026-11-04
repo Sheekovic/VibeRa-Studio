@@ -3168,7 +3168,7 @@ void AudioEngine::publishLoopBounds()
             auto range = transport.getLoopRange();
             range = range.withEnd(
                 std::max(range.getEnd(), range.getStart() + te::TimeDuration::fromSeconds(.001)));
-            head->setLoopRange(enabled, enabled ? te::toSamples(range, rate) : juce::Range<juce::int64>{});
+            head->setLoopRange(enabled, enabled ? te::toSamples(range, rate) : juce::Range<std::int64_t>{});
         }
 }
 void AudioEngine::setMidiTarget(Id channel)

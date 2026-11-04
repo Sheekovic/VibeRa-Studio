@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #pragma once
 #include "Studio.h"
 #include "WindowChrome.h"
@@ -1003,7 +1004,7 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                     const auto *first = text.toRawUTF8();
                     const auto *last = first + text.getNumBytesAsUTF8();
                     double value = 0;
-                    const auto parsed = std::from_chars(first, last, value);
+                    const auto parsed = vibera::number_text::fromChars(first, last, value);
                     if (text.isEmpty() || parsed.ec != std::errc{} || parsed.ptr != last ||
                         !std::isfinite(value) || value < 0 || value > (i == 0 ? 10000. : 64.))
                     {

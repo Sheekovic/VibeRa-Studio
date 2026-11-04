@@ -66,6 +66,28 @@ int main()
                 "exact zero incorrectly treated as underflow");
         require(vibera::number_text::parseClassic("1.25e+2", value) && value == 125,
                 "valid exponent rejected");
+        for (float original :
+             {0.0f, -0.0f, 0.1f, std::numeric_limits<float>::denorm_min(), std::numeric_limits<float>::max()})
+        {
+            const auto text = vibera::number_text::formatClassic(original);
+            float restored = 0;
+            require(vibera::number_text::parseClassic(text, restored), "classic float rejected");
+            require(std::bit_cast<std::uint32_t>(restored) == std::bit_cast<std::uint32_t>(original),
+                    "classic float round trip changed value/sign");
+            const auto result =
+                vibera::number_text::fromChars(text.data(), text.data() + text.size(), restored);
+            require(result.ec == std::errc{} && result.ptr == text.data() + text.size() &&
+                        std::bit_cast<std::uint32_t>(restored) == std::bit_cast<std::uint32_t>(original),
+                    "platform float parser round trip changed value/sign");
+        }
+        for (std::string text : {"+1", "1x", "1e39"})
+        {
+            float restored = 0;
+            const auto result =
+                vibera::number_text::fromChars(text.data(), text.data() + text.size(), restored);
+            require(result.ec != std::errc{} || result.ptr != text.data() + text.size(),
+                    "platform float parser accepted invalid token/range");
+        }
         std::cout << "PASS " << checked + 9 << " exact binary64 round trips, locale and rejection cases\n";
         return 0;
     }

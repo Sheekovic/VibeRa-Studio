@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #pragma once
 #include "PluginStateEncoding.h"
 #include "PluginProtocol.h"
@@ -145,10 +146,10 @@ inline juce::Result rewritePluginParameterStates(const juce::String &freshAfter,
                     continue;
                 const auto key = child->getStringAttribute("id").toStdString();
                 std::uint32_t originalId = 0;
-                const auto parsed = std::from_chars(key.data(), key.data() + key.size(), originalId);
+                const auto parsed = vibera::number_text::fromChars(key.data(), key.data() + key.size(), originalId);
                 const auto valueText = child->getStringAttribute("value").toStdString();
                 float originalValue = 0;
-                const auto parsedValue = std::from_chars(valueText.data(), valueText.data() + valueText.size(), originalValue);
+                const auto parsedValue = vibera::number_text::fromChars(valueText.data(), valueText.data() + valueText.size(), originalValue);
                 if (!child->hasTagName("PARAM") || child->getNumAttributes() != 2 || child->getFirstChildElement() ||
                     parsed.ec != std::errc{} || parsed.ptr != key.data() + key.size() || originalId < first ||
                     originalId - first >= spec.parameterCount || !originalIds.insert(originalId).second ||
@@ -182,11 +183,11 @@ inline juce::Result rewritePluginParameterStates(const juce::String &freshAfter,
                 return juce::Result::fail("parameterHistory.overlay");
             const auto idText = entry->getStringAttribute("id").toStdString();
             std::uint32_t nativeId = 0;
-            const auto parsedId = std::from_chars(idText.data(), idText.data() + idText.size(), nativeId);
+            const auto parsedId = vibera::number_text::fromChars(idText.data(), idText.data() + idText.size(), nativeId);
             const auto valueText = entry->getStringAttribute("value").toStdString();
             float value = 0;
             const auto parsedValue =
-                std::from_chars(valueText.data(), valueText.data() + valueText.size(), value);
+                vibera::number_text::fromChars(valueText.data(), valueText.data() + valueText.size(), value);
             if (idText.empty() || parsedId.ec != std::errc{} ||
                 parsedId.ptr != idText.data() + idText.size() || !seen.insert(nativeId).second ||
                 valueText.empty() || parsedValue.ec != std::errc{} ||

@@ -329,7 +329,7 @@ juce::Result GenerationJob::start(Request request, ProviderConfig config)
         result = {};
         result.status = JobStatus::running;
     }
-    thread = std::jthread(
+    thread = std::thread(
         [this, request = std::move(request), config = std::move(config)]
         {
             JobResult terminal;

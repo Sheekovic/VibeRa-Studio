@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #include "Studio.h"
 #include "Editors.h"
 #include "MixerControls.h"
@@ -408,7 +409,7 @@ void Studio::automationSourceDialog(Id sourceId)
                     auto bytes = text.trim().toStdString();
                     if (!bytes.empty() && bytes.front() == '+')
                         bytes.erase(bytes.begin());
-                    const auto result = std::from_chars(bytes.data(), bytes.data() + bytes.size(), value);
+                    const auto result = vibera::number_text::fromChars(bytes.data(), bytes.data() + bytes.size(), value);
                     return result.ec == std::errc{} && result.ptr == bytes.data() + bytes.size() &&
                            std::isfinite(value);
                 };
@@ -530,7 +531,7 @@ void Studio::mixerValueDialog(int index, MixerAutomationControl control, std::op
                     }
                     const auto text = d->getTextEditorContents("amount").trim().toStdString();
                     double value = 0;
-                    auto parsed = std::from_chars(text.data(), text.data() + text.size(), value);
+                    auto parsed = vibera::number_text::fromChars(text.data(), text.data() + text.size(), value);
                     if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() ||
                         !std::isfinite(value))
                     {
@@ -619,7 +620,7 @@ void Studio::mixerStereoDialog(int index)
             auto text = d->getTextEditorContents("amount").trim().toStdString();
             if (!text.empty() && text.front() == '+') text.erase(text.begin());
             double value = 0;
-            const auto parsed = std::from_chars(text.data(), text.data() + text.size(), value);
+            const auto parsed = vibera::number_text::fromChars(text.data(), text.data() + text.size(), value);
             if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() || !std::isfinite(value))
             { safe->status = "Enter a complete finite stereo separation number"; return; }
             CommandArgs args; args.mixer = index; args.value = value;

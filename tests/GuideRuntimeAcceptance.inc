@@ -280,7 +280,8 @@ VIBERA_NOINLINE static Measurement lateFailure()
     auto f = std::make_unique<Fixture>();
     const std::vector<Tick> ticks{{0, true}};
     f->process(*f->incumbent, 93, ticks);
-    const auto identity = f->incumbent->runtimeIdentity(), epoch = f->incumbent->runtimeEpochControl();
+    const auto identity = f->incumbent->runtimeIdentity();
+    const auto epoch = f->incumbent->runtimeEpochControl();
     bool failed = false;
     try
     {
@@ -303,7 +304,8 @@ VIBERA_NOINLINE static Measurement refusalPaths()
     auto f = std::make_unique<Fixture>();
     const std::vector<Tick> ticks{{0, true}};
     f->process(*f->incumbent, 93, ticks);
-    const auto identity = f->incumbent->runtimeIdentity(), epoch = f->incumbent->runtimeEpochControl();
+    const auto identity = f->incumbent->runtimeIdentity();
+    const auto epoch = f->incumbent->runtimeEpochControl();
     auto changedControl = f->fresh(f->candidateTimeline, std::make_shared<GuideControl>());
     check(dynamic_cast<GuidePlugin *>(changedControl.get())
               ->shareCompatibleRuntimeFrom(*f->incumbent)

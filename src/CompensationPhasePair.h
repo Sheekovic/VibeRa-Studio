@@ -24,7 +24,7 @@ class CompensationPhasePairClock
 {
     const CompensationPhasePairPlan plan;
     tracktion::PluginNode *const sourceNode, *const wetNode;
-    juce::Range<juce::int64> reference;
+    juce::Range<std::int64_t> reference;
     std::optional<PluginConsumedLatency> sourceBefore, wetBefore;
     std::uint64_t sourceSubmitted = 0, wetSubmitted = 0;
     int sourceCursor = -1, wetCursor = -1;
@@ -80,7 +80,7 @@ class CompensationPhasePairClock
             plan.wet->transportLatencySamples() != plan.quantum)
             throw std::invalid_argument("Phase-pair clock supports one-quantum transport only");
     }
-    void begin(juce::Range<juce::int64> range) noexcept
+    void begin(juce::Range<std::int64_t> range) noexcept
     {
         reference = range;
         sourceBefore = plan.source->consumedLatency();
@@ -90,7 +90,7 @@ class CompensationPhasePairClock
         sourceCursor = plan.source->packetFrame();
         wetCursor = plan.wet->packetFrame();
     }
-    tracktion::graph::LatencyNode::RuntimeAudioDelay resolve(juce::Range<juce::int64> range,
+    tracktion::graph::LatencyNode::RuntimeAudioDelay resolve(juce::Range<std::int64_t> range,
                                                              std::uint32_t frames) const noexcept
     {
         using Read = tracktion::graph::LatencyNode::RuntimeAudioDelay;
@@ -137,12 +137,12 @@ class CompensationPhasePairClock
             return Read{Status::invalidReceipt, 0};
         return Read{Status::ready, std::uint32_t(plan.quantum + wet->stamp.nativeSamples)};
     }
-    static void beginThunk(void *context, juce::Range<juce::int64> range) noexcept
+    static void beginThunk(void *context, juce::Range<std::int64_t> range) noexcept
     {
         static_cast<CompensationPhasePairClock *>(context)->begin(range);
     }
     static tracktion::graph::LatencyNode::RuntimeAudioDelay
-    resolveThunk(void *context, juce::Range<juce::int64> range, std::uint32_t frames) noexcept
+    resolveThunk(void *context, juce::Range<std::int64_t> range, std::uint32_t frames) noexcept
     {
         return static_cast<const CompensationPhasePairClock *>(context)->resolve(range, frames);
     }

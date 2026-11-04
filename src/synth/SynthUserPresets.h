@@ -3,6 +3,7 @@
 #include "SynthBrowser.h"
 #include "SynthState.h"
 #include <set>
+#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -144,7 +145,7 @@ inline juce::Result readSynthUserPreset(const juce::File &file, SynthUserPreset 
     if (!stream)
         return juce::Result::fail("Cannot read user preset");
     juce::MemoryBlock bytes;
-    stream->readIntoMemoryBlock(bytes, juce::ssize_t(maximumSynthStateBytes + 1));
+    stream->readIntoMemoryBlock(bytes, static_cast<std::ptrdiff_t>(maximumSynthStateBytes + 1));
     if (bytes.getSize() > maximumSynthStateBytes)
         return juce::Result::fail("synth.invalidUserPreset: Maximum user preset size is256KB");
     SynthUserPreset next;

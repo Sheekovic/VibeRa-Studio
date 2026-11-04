@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #pragma once
 #include "Commands.h"
 #include <charconv>
@@ -13,7 +14,7 @@ inline juce::Result parseMixerMacro(const juce::String &action, const juce::Stri
     const auto colon = text.find(':');
     const auto targetText = text.substr(0, colon);
     int target = -1;
-    auto parsed = std::from_chars(targetText.data(), targetText.data() + targetText.size(), target);
+    auto parsed = vibera::number_text::fromChars(targetText.data(), targetText.data() + targetText.size(), target);
     if (parsed.ec != std::errc{} || parsed.ptr != targetText.data() + targetText.size() || target < 0)
         return juce::Result::fail("Enter an existing destination insert index (0=Master)");
     CommandArgs next = out;
@@ -29,7 +30,7 @@ inline juce::Result parseMixerMacro(const juce::String &action, const juce::Stri
             return juce::Result::fail("Use destination:amount (e.g.2:50)");
         const auto amount = text.substr(colon + 1);
         double value = 0;
-        auto number = std::from_chars(amount.data(), amount.data() + amount.size(), value);
+        auto number = vibera::number_text::fromChars(amount.data(), amount.data() + amount.size(), value);
         if (number.ec != std::errc{} || number.ptr != amount.data() + amount.size() || !std::isfinite(value))
             return juce::Result::fail("Amount must be a complete finite number");
         if (action == "mixer.send")

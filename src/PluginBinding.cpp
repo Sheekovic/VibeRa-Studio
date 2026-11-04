@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #include "PluginBinding.h"
 #include <charconv>
 #include <cmath>
@@ -20,7 +21,7 @@ bool integer(const juce::var &value, std::int64_t &result)
     if (!value.isString())
         return false;
     const auto text = value.toString().toStdString();
-    const auto parsed = std::from_chars(text.data(), text.data() + text.size(), result);
+    const auto parsed = vibera::number_text::fromChars(text.data(), text.data() + text.size(), result);
     return parsed.ec == std::errc{} && parsed.ptr == text.data() + text.size();
 }
 bool scalar(const juce::var &value, float &result)
@@ -31,7 +32,7 @@ bool scalar(const juce::var &value, float &result)
     else if (value.isString())
     {
         const auto text = value.toString().toStdString();
-        const auto parsed = std::from_chars(text.data(), text.data() + text.size(), number);
+        const auto parsed = vibera::number_text::fromChars(text.data(), text.data() + text.size(), number);
         if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size())
             return false;
     }

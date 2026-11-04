@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NumberText.h"
 #pragma once
 #include "Studio.h"
 #include "ScoreTools.h"
@@ -197,7 +198,7 @@ class Studio::Editor final : public juce::Component,
                                         {
                                             const auto utf8 = text.trim().toStdString();
                                             const auto r =
-                                                std::from_chars(utf8.data(), utf8.data() + utf8.size(), out);
+                                                vibera::number_text::fromChars(utf8.data(), utf8.data() + utf8.size(), out);
                                             return r.ec == std::errc{} &&
                                                    r.ptr == utf8.data() + utf8.size() && std::isfinite(out);
                                         };
