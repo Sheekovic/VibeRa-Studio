@@ -560,7 +560,7 @@ void editors(const juce::File &output)
         }
         if (spec.id == EffectId::graphicEq || spec.id == EffectId::delay || spec.id == EffectId::limiter ||
             spec.id == EffectId::compressor || spec.id == EffectId::filter || spec.id == EffectId::parametricEq ||
-            spec.id == EffectId::maximizer || spec.id == EffectId::studioReverb || spec.id == EffectId::spectrumAnalyzer || spec.id == EffectId::pitchCorrect)
+            spec.id == EffectId::maximizer || spec.id == EffectId::studioReverb || spec.id == EffectId::spectrumAnalyzer || spec.id == EffectId::beatGate || spec.id == EffectId::pitchCorrect)
         {
             const auto image = editor->createComponentSnapshot(editor->getLocalBounds());
             auto stream = output.getChildFile(juce::String(spec.slug) + ".png").createOutputStream();

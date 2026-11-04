@@ -609,6 +609,65 @@ void studioOracles()
     dryVerb[10] = 0;
     require(std::abs(rmsOf(renderEffect(EffectId::studioReverb, dryVerb, sine(500), n).left, 24000, n) / (.25 / std::sqrt(2.)) - 1) < .01,
             "Studio Reverb mix 0 is dry");
+    // Beat Gate at the free-running 120 BPM clock (no host time): 1 beat = 24000 samples.
+    {
+        constexpr int beat = 24000;
+        auto gate = defaultValues(EffectId::beatGate); // Pulse, 1/16 steps (6000 samples), depth 1.
+        const auto pulse = renderEffect(EffectId::beatGate, gate, sine(500), 2 * beat);
+        const double open = rmsOf(pulse.left, 1000, 5000), closed = rmsOf(pulse.left, 7000, 11000);
+        require(open > .17 && closed < .002, "Beat Gate Pulse opens on even 1/16 steps and closes on odd ones (" +
+                                                 std::to_string(open) + ", " + std::to_string(closed) + ")");
+        require(rmsOf(pulse.left, 13000, 17000) > .17, "Beat Gate reopens on the next step");
+        auto halfDepth = gate;
+        halfDepth[2] = .5f;
+        const double partial = rmsOf(renderEffect(EffectId::beatGate, halfDepth, sine(500), beat).left, 7000, 11000);
+        require(std::abs(partial / open - .5) < .03, "Gate depth 0.5 halves the closed steps");
+        auto dry = gate;
+        dry[8] = 0;
+        require(std::abs(rmsOf(renderEffect(EffectId::beatGate, dry, sine(500), beat).left, 7000, 11000) /
+                             (.25 / std::sqrt(2.)) - 1) < .01,
+                "Beat Gate mix 0 is dry");
+
+        // Stutter 1/8 (12000 samples) in 1-beat segments: the second half repeats the first.
+        auto stutter = defaultValues(EffectId::beatGate);
+        stutter[0] = 0; // Open gate.
+        stutter[4] = 2;
+        const auto ramp = [](int i) { return float((i % 24000) * 1.e-5); };
+        const auto repeated = renderEffect(EffectId::beatGate, stutter, ramp, 2 * beat);
+        double error = 0;
+        for (int k = 500; k < 11500; ++k)
+            error = std::max(error, double(std::abs(repeated.left[size_t(12000 + k)] - ramp(k))));
+        require(error < 1.e-6, "Stutter replays the segment's first slice exactly");
+        require(std::abs(repeated.left[size_t(beat + 600)] - ramp(beat + 600)) < 1.e-6,
+                "The next segment plays live again");
+
+        // Half-time over 2-beat cycles: output sample c reads input c/2 of the same cycle.
+        auto half = defaultValues(EffectId::beatGate);
+        half[0] = 0;
+        half[6] = 1;
+        const auto slow = renderEffect(EffectId::beatGate, half, ramp, 2 * beat);
+        double drift = 0;
+        for (int c = 1000; c < 40000; c += 2)
+            drift = std::max(drift, double(std::abs(slow.left[size_t(c)] - ramp(c / 2))));
+        require(drift < 1.e-6, "Half-time plays the cycle at half speed");
+
+        // A playing host re-anchors the beat: at beat 0.25 (an odd 1/16 step) Pulse is closed.
+        Engine hosted;
+        hosted.prepare(48000);
+        require(hosted.setParameters(EffectId::beatGate, gate), "Beat Gate parameters accepted");
+        std::vector<float> l(4000), r(4000);
+        for (int i = 0; i < 4000; ++i)
+            l[size_t(i)] = r[size_t(i)] = sine(500)(i);
+        hosted.setTransport(true, true, .25, 120);
+        hosted.process(l.data(), r.data(), 4000);
+        require(rmsOf(l, 1000, 4000) < .002, "Beat Gate follows the host beat position");
+        std::vector<float> l2(4000), r2(4000);
+        for (int i = 0; i < 4000; ++i)
+            l2[size_t(i)] = r2[size_t(i)] = sine(500)(i);
+        hosted.setTransport(true, true, 0., 120);
+        hosted.process(l2.data(), r2.data(), 4000);
+        require(rmsOf(l2, 1000, 4000) > .17, "A seek back to beat 0 reopens the gate");
+    }
 }
 int main()
 {

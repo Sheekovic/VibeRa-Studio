@@ -133,6 +133,16 @@ inline constexpr ParameterSpec studioReverb[] = {
     {"high-cut", "High cut", 1000, 20000, 9000, "Hz", .3f},
     {"width", "Width", 0, 1, 1, ""},
     {"mix", "Mix", 0, 1, .3f, ""}};
+inline constexpr ParameterSpec beatGate[] = {
+    {"pattern", "Pattern: 0 Open, 1 Pulse, 2 Offbeat, 3 Dotted, 4 Chop, 5 Broken, 6 Half bar, 7 Build", 0, 7, 1, "", 1, 1},
+    {"step", "Step: 0 1/32, 1 1/16, 2 1/8, 3 1/4", 0, 3, 1, "", 1, 1},
+    {"depth", "Gate depth", 0, 1, 1, ""},
+    {"smooth", "Smoothing", 0, 30, 3, "ms", .5f},
+    {"stutter", "Stutter: 0 Off, 1 1/4, 2 1/8, 3 1/16, 4 1/32", 0, 4, 0, "", 1, 1},
+    {"hold", "Stutter hold: 0 1/2 beat, 1 1 beat, 2 2 beats", 0, 2, 1, "", 1, 1},
+    {"half-time", "Half-time", 0, 1, 0, "", 1, 1},
+    {"cycle", "Half-time cycle: 0 1 beat, 1 2 beats, 2 4 beats", 0, 2, 1, "", 1, 1},
+    {"mix", "Mix", 0, 1, 1, ""}};
 inline constexpr ParameterSpec analyzer[] = {{"slope", "Display slope", 0, 6, 3, "dB/oct"},
                                              {"falloff", "Falloff", 0, 1, .5f, ""}};
 template <std::size_t N>
@@ -175,7 +185,8 @@ inline constexpr std::array effects = {
     entry(EffectId::saturator, "saturator", "Saturator", "Distortion", saturator),
     entry(EffectId::maximizer, "maximizer", "Maximizer", "Dynamics", maximizer),
     entry(EffectId::studioReverb, "studio-reverb", "Studio Reverb", "Time", studioReverb),
-    entry(EffectId::spectrumAnalyzer, "spectrum-analyzer", "Spectrum Analyzer", "Utility", analyzer)};
+    entry(EffectId::spectrumAnalyzer, "spectrum-analyzer", "Spectrum Analyzer", "Utility", analyzer),
+    entry(EffectId::beatGate, "beat-gate", "Beat Gate", "Time", beatGate)};
 static_assert(effects.size() == static_cast<std::size_t>(EffectId::count));
 } // namespace catalogue
 inline std::span<const EffectSpec> catalogueEntries() noexcept

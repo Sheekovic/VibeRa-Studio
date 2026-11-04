@@ -72,6 +72,12 @@ Mixing and mastering processors:
   An 8-line feedback delay network; the measured decay follows the setting.
 - Spectrum Analyzer (`spectrum-analyzer`): passes audio unchanged; its editor draws a live
   4096-point spectrum (20 Hz..20 kHz) with display slope (dB/oct) and falloff.
+- Beat Gate (`beat-gate`): tempo-synced gate, stutter and half-time. pattern (0 Open, 1 Pulse,
+  2 Offbeat, 3 Dotted, 4 Chop, 5 Broken, 6 Half bar, 7 Build; 16 steps), step (0 1/32, 1 1/16,
+  2 1/8, 3 1/4), gate depth, smoothing (ms), stutter (0 Off, 1 1/4 .. 4 1/32; repeats the first
+  slice of each hold segment), hold (0 1/2, 1 1, 2 2 beats), half-time (on/off; plays each cycle at
+  half speed, one octave down), cycle (0 1, 1 2, 2 4 beats), mix. Follows the song beat while the
+  transport plays; when stopped it keeps its own clock at the last tempo.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

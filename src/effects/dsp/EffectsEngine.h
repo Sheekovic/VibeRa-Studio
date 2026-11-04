@@ -7,6 +7,7 @@
 #include "PitchCorrect.h"
 #include "StudioEffects.h"
 #include "Vocoder.h"
+#include "BeatGate.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -20,6 +21,7 @@ class Engine
     PitchCorrect tune;
     Vocoder vocoder;
     StudioEffects studio;
+    BeatGate beat;
     EffectId selected = EffectId::balance;
     bool prepared = false;
     bool configured = false;
@@ -40,6 +42,7 @@ class Engine
         tune.prepare(sampleRate);
         vocoder.prepare(sampleRate);
         studio.prepare(sampleRate);
+        beat.prepare(sampleRate);
         prepared = true;
         selected = EffectId::balance;
         configured = false;
@@ -52,6 +55,12 @@ class Engine
         tune.reset();
         vocoder.reset();
         studio.reset();
+        beat.reset();
+    }
+    // Host time for tempo-synced effects (Beat Gate), once per block before process().
+    void setTransport(bool hasPosition, bool playing, double ppq, double bpm) noexcept
+    {
+        beat.setTransport(hasPosition, playing, ppq, bpm);
     }
     // Last gain reduction (dB) of the selected dynamics processor, for editor meters.
     float gainReductionDb() const noexcept { return studio.gainReductionDb(); }
@@ -84,6 +93,8 @@ class Engine
             tune.setParameters(values);
         else if (effect == EffectId::vocoder)
             vocoder.setParameters(values);
+        else if (effect == EffectId::beatGate)
+            beat.setParameters(values);
         else
             studio.setParameters(effect, values);
         return true;
@@ -106,6 +117,8 @@ class Engine
                 tune.process(l, r);
             else if (selected == EffectId::vocoder)
                 vocoder.process(l, r);
+            else if (selected == EffectId::beatGate)
+                beat.process(l, r);
             else
                 studio.process(l, r);
             left[i] = std::isfinite(l) ? l : 0.0f;

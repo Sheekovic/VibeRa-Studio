@@ -254,6 +254,22 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
         eventFrames_ = 0;
         return;
     }
+    if (effect_ == EffectId::beatGate)
+    {
+        // Lock-free host time read (the worker's play head is atomic scalars).
+        bool hasPosition = false, playing = false;
+        double ppq = 0, bpm = 0;
+        if (auto *head = getPlayHead())
+            if (const auto position = head->getPosition())
+            {
+                playing = position->getIsPlaying();
+                if (const auto beat = position->getPpqPosition())
+                    hasPosition = true, ppq = *beat;
+                if (const auto tempo = position->getBpm())
+                    bpm = *tempo;
+            }
+        engine_.setTransport(hasPosition, playing, ppq, bpm);
+    }
     auto *left = buffer.getWritePointer(0), *right = buffer.getWritePointer(1);
     int cursor = 0;
     std::size_t event = 0;

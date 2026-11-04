@@ -224,6 +224,22 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
                 static const char *types[]{"Room", "Plate", "Hall"};
                 return juce::String(types[juce::jlimit(0, 2, int(std::lround(v)))]);
             };
+        else if (spec.id == EffectId::beatGate && id == "pattern")
+            row->slider.textFromValueFunction = [](double v)
+            { return juce::String(BeatGate::patternName(juce::jlimit(0, BeatGate::patternCount - 1, int(std::lround(v))))); };
+        else if (spec.id == EffectId::beatGate && (id == "step" || id == "stutter" || id == "hold" || id == "cycle"))
+            row->slider.textFromValueFunction = [id](double v)
+            {
+                static const char *steps[]{"1/32", "1/16", "1/8", "1/4"};
+                static const char *stutters[]{"Off", "1/4", "1/8", "1/16", "1/32"};
+                static const char *holds[]{"1/2 beat", "1 beat", "2 beats"};
+                static const char *cycles[]{"1 beat", "2 beats", "4 beats"};
+                const int i = int(std::lround(v));
+                return juce::String(id == "step"      ? steps[juce::jlimit(0, 3, i)]
+                                    : id == "stutter" ? stutters[juce::jlimit(0, 4, i)]
+                                    : id == "hold"    ? holds[juce::jlimit(0, 2, i)]
+                                                      : cycles[juce::jlimit(0, 2, i)]);
+            };
         else if (p.interval == 1 && p.minimum == 0 && p.maximum == 1)
             row->slider.textFromValueFunction = [](double v) { return juce::String(v >= .5 ? "On" : "Off"); };
         if (row->slider.textFromValueFunction)
