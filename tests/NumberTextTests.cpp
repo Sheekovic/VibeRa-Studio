@@ -65,6 +65,11 @@ int main()
                              std::numeric_limits<double>::denorm_min(), std::numeric_limits<double>::min(),
                              std::numeric_limits<double>::max(), -std::numeric_limits<double>::max()})
             roundTrip(value);
+        for (double value :
+             {std::numeric_limits<double>::denorm_min(), -std::numeric_limits<double>::denorm_min(),
+              std::nextafter(std::numeric_limits<double>::min(), 0.0),
+              -std::nextafter(std::numeric_limits<double>::min(), 0.0)})
+            roundTrip(value);
         std::uint64_t bits = 0x123456789abcdef0;
         int checked = 0;
         for (int i = 0; i < 4000; ++i)
@@ -80,14 +85,18 @@ int main()
             }
         }
         double value = 0;
-        for (const auto *text : {"", "1x", " 1", "1 ", "1,5", "0x1p2", "1e999", "1e-999", "--1"})
+        for (const auto *text : {"", "1x", " 1", "1 ", "1,5", "0x1p2", "1e999", "-1e999", "1e-999", "-1e-999",
+                                 "2e-324", "4.9406564584124654e-324x", "--1"})
             require(!vibera::number_text::parseClassic(text, value), text);
         require(vibera::number_text::parseClassic("0e-999", value) && value == 0,
                 "exact zero incorrectly treated as underflow");
         require(vibera::number_text::parseClassic("1.25e+2", value) && value == 125,
                 "valid exponent rejected");
         for (float original :
-             {0.0f, -0.0f, 0.1f, std::numeric_limits<float>::denorm_min(), std::numeric_limits<float>::max()})
+             {0.0f, -0.0f, 0.1f, std::numeric_limits<float>::denorm_min(),
+              -std::numeric_limits<float>::denorm_min(),
+              std::nextafter(std::numeric_limits<float>::min(), 0.0f),
+              -std::nextafter(std::numeric_limits<float>::min(), 0.0f), std::numeric_limits<float>::max()})
         {
             const auto text = vibera::number_text::formatClassic(original);
             float restored = 0;
@@ -103,15 +112,18 @@ int main()
                 throw std::runtime_error(
                     numberFailure("platform float changed value/sign", original, restored, text));
         }
-        for (std::string text : {"+1", "1x", "1e39"})
+        for (std::string text : {"+1", "1x", "1e39", "-1e39", "1e-999", "1e-46", "1.4012984643248171e-45x"})
         {
             float restored = 0;
+            if (text != "+1") // Classic accepts the leading plus used by project text.
+                require(!vibera::number_text::parseClassic(text, restored),
+                        "classic float parser accepted invalid token/range");
             const auto result =
                 vibera::number_text::fromChars(text.data(), text.data() + text.size(), restored);
             require(result.ec != std::errc{} || result.ptr != text.data() + text.size(),
                     "platform float parser accepted invalid token/range");
         }
-        std::cout << "PASS " << checked + 9 << " exact binary64 round trips, locale and rejection cases\n";
+        std::cout << "PASS " << checked + 13 << " exact binary64 round trips, locale and rejection cases\n";
         return 0;
     }
     catch (const std::exception &error)

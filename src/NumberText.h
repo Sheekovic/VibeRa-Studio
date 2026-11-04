@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
 #include <charconv>
+#include <cmath>
 #include <iomanip>
 #include <limits>
 #include <locale>
@@ -48,7 +49,13 @@ template <class Number> inline bool parseClassic(std::string_view text, Number &
         return false;
     std::istringstream input{std::string(text)};
     input.imbue(std::locale::classic());
-    if (!(input >> std::noskipws >> number) || !input.eof())
+    input >> std::noskipws >> number;
+    // Apple num_get reports failbit for correctly rounded, representable
+    // subnormals. Accept only that range outcome after complete consumption:
+    // badbit, overflow, partial tokens and underflow to zero still fail.
+    const bool representableUnderflow = input.rdstate() == (std::ios_base::eofbit | std::ios_base::failbit) &&
+                                        std::fpclassify(number) == FP_SUBNORMAL;
+    if (!input.eof() || (input.fail() && !representableUnderflow))
         return false;
     // Some num_get implementations silently round underflow to zero, whereas
     // from_chars refuses it. A nonzero decimal mantissa must not become zero.
