@@ -80,8 +80,19 @@ struct NotePropertiesPatch
 juce::Result validateNotePropertiesPatch(const NotePropertiesPatch &);
 juce::Result decodeNotePropertiesPatch(const juce::var &, NotePropertiesPatch &);
 juce::var notePropertiesState(const NotePropertiesPatch &);
+// Copied Playlist clips (Ctrl+C / Ctrl+X): placements at their original beats and tracks;
+// origin is the earliest beat. clip.paste places them so that origin lands at args.beat.
+struct ClipClipboard
+{
+    std::vector<Placement> patterns;
+    std::vector<AudioPlacement> audio;
+    std::vector<AutomationPlacement> automation;
+    double origin = 0;
+    bool empty() const noexcept { return patterns.empty() && audio.empty() && automation.empty(); }
+};
 struct CommandArgs
 {
+    std::shared_ptr<const ClipClipboard> clipboard; // clip.paste only.
     Id target = 0, channel = 0, pattern = 0;
     double beat = 0, length = .25, value = 0;
     int pitch = 60, lane = 0, mixer = 0;

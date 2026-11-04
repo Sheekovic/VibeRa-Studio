@@ -808,6 +808,14 @@ const std::vector<CommandInfo> &commandRegistry()
         {"clip.duplicate", "Duplicate clips", Scope::playlist, true, true, "command"},
         {"clip.unique", "Make Unique", Scope::playlist, true, true, "command"},
         {"clip.splitChannels", "Split Pattern clip by channel", Scope::playlist, true, true, "command"},
+        {"clip.copy", "Copy clips", Scope::playlist, false, true, "action"},
+        {"clip.cut", "Cut clips", Scope::playlist, false, true, "action"},
+        {"clip.paste", "Paste clips at the playhead", Scope::playlist, true, true, "command"},
+        {"clip.chop", "Chop clips into bars or beats", Scope::playlist, true, true, "command"},
+        {"clip.quantize", "Quick quantize clip start times", Scope::playlist, true, true, "command"},
+        {"time.insert", "Insert space (time selection)", Scope::playlist, true, true, "command"},
+        {"time.delete", "Delete space (time selection)", Scope::playlist, true, true, "command"},
+        {"time.insertSliced", "Insert space and slice clips (time selection)", Scope::playlist, false, true, "action"},
         {"clip.merge", "Merge Pattern clips", Scope::playlist, true, true, "command"},
         {"clip.slice", "Slice clips at beat", Scope::playlist, true, true, "command"},
         {"clip.slip", "Slip source content", Scope::playlist, true, true, "command"},
@@ -2336,6 +2344,62 @@ juce::Result Controller::prepareAutomationTouchFinish(const MixerAutomationTake 
     }
 }
 // The file tempo map and meter from a MIDI import replace the project's (one Undo with the notes).
+// Cut every clip that `pick` accepts and that strictly contains `beat` into a left part
+// (the original id) and a right part (a new id, recorded in `made`). Audio fades stay on the
+// outer edges. Returns whether anything was cut.
+template <typename Pick>
+static bool sliceClipsAt(Project &next, const Pick &pick, double beat, std::map<Id, Id> &made)
+{
+    std::vector<Placement> patterns;
+    std::vector<AudioPlacement> audio;
+    std::vector<AutomationPlacement> automation;
+    for (auto &clip : next.automation.placements)
+        if (pick(clip.id) && beat > clip.beat + 1.e-9 && beat < clip.beat + clip.length - 1.e-9)
+        {
+            auto right = clip;
+            const auto left = beat - clip.beat;
+            right.id = next.allocate();
+            made.emplace(clip.id, right.id);
+            right.beat = beat;
+            right.offset += left;
+            right.length -= left;
+            clip.length = left;
+            automation.push_back(right);
+        }
+    for (auto &clip : next.placements)
+        if (pick(clip.id) && beat > clip.beat + 1.e-9 && beat < clip.beat + clip.length - 1.e-9)
+        {
+            const auto left = beat - clip.beat;
+            auto right = clip;
+            right.id = next.allocate();
+            made.emplace(clip.id, right.id);
+            right.beat = beat;
+            right.offset += left;
+            right.length -= left;
+            clip.length = left;
+            patterns.push_back(right);
+        }
+    for (auto &clip : next.audioPlacements)
+        if (pick(clip.id) && beat > clip.beat + 1.e-9 && beat < next.audioEndBeat(clip.beat, clip.duration) - 1.e-9)
+        {
+            const auto left = next.songSeconds(beat) - next.songSeconds(clip.beat);
+            auto right = clip;
+            right.id = next.allocate();
+            made.emplace(clip.id, right.id);
+            right.beat = beat;
+            right.offset += left;
+            right.duration -= left;
+            right.fadeIn = 0; // Fades stay on the clip's outer edges, never at the cut.
+            clip.duration = left;
+            clip.fadeOut = 0;
+            audio.push_back(right);
+        }
+    next.placements.insert(next.placements.end(), patterns.begin(), patterns.end());
+    next.audioPlacements.insert(next.audioPlacements.end(), audio.begin(), audio.end());
+    next.automation.placements.insert(next.automation.placements.end(), automation.begin(), automation.end());
+    return !(patterns.empty() && audio.empty() && automation.empty());
+}
+
 static juce::Result applyImportedTempo(Project &next, const CommandArgs::ImportedTempo &map)
 {
     for (const auto &[beat, bpm] : map.tempos)
@@ -4559,57 +4623,160 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
     else if (id == "clip.slice")
     {
         std::map<Id, Id> slicedMembers;
-        std::vector<Placement> patterns;
-        std::vector<AudioPlacement> audio;
-        std::vector<AutomationPlacement> automation;
-        for (auto &clip : next.automation.placements)
-            if (chosen(clip.id) && a.beat > clip.beat && a.beat < clip.beat + clip.length)
-            {
-                auto right = clip;
-                const auto left = a.beat - clip.beat;
-                right.id = next.allocate();
-                slicedMembers.emplace(clip.id, right.id);
-                right.beat = a.beat;
-                right.offset += left;
-                right.length -= left;
-                clip.length = left;
-                automation.push_back(right);
-            }
-        for (auto &clip : next.placements)
-            if (chosen(clip.id) && a.beat > clip.beat && a.beat < clip.beat + clip.length)
-            {
-                const auto left = a.beat - clip.beat;
-                auto right = clip;
-                right.id = next.allocate();
-                slicedMembers.emplace(clip.id, right.id);
-                right.beat = a.beat;
-                right.offset += left;
-                right.length -= left;
-                clip.length = left;
-                patterns.push_back(right);
-            }
-        for (auto &clip : next.audioPlacements)
-            if (chosen(clip.id) && a.beat > clip.beat &&
-                a.beat < next.audioEndBeat(clip.beat, clip.duration))
-            {
-                const auto left = next.songSeconds(a.beat) - next.songSeconds(clip.beat);
-                auto right = clip;
-                right.id = next.allocate();
-                slicedMembers.emplace(clip.id, right.id);
-                right.beat = a.beat;
-                right.offset += left;
-                right.duration -= left;
-                right.fadeIn = 0; // Fades stay on the clip's outer edges, never at the cut.
-                clip.duration = left;
-                clip.fadeOut = 0;
-                audio.push_back(right);
-            }
-        if (patterns.empty() && audio.empty() && automation.empty())
+        if (!sliceClipsAt(next, chosen, a.beat, slicedMembers))
             return juce::Result::fail("Slice inside a clip");
-        next.placements.insert(next.placements.end(), patterns.begin(), patterns.end());
-        next.audioPlacements.insert(next.audioPlacements.end(), audio.begin(), audio.end());
-        next.automation.placements.insert(next.automation.placements.end(), automation.begin(),
-                                          automation.end());
+        extendSlicedClipGroups(next, slicedMembers);
+    }
+    else if (id == "clip.chop")
+    {
+        // Cut each chosen clip at every multiple of `length` beats on the Song grid.
+        if (!std::isfinite(a.length) || a.length < .0625 || a.length > 64)
+            return juce::Result::fail("Chop length is 1/16..64 beats");
+        double first = 1.e18, last = -1.e18;
+        for (const auto &clip : next.placements)
+            if (chosen(clip.id))
+                first = std::min(first, clip.beat), last = std::max(last, clip.beat + clip.length);
+        for (const auto &clip : next.automation.placements)
+            if (chosen(clip.id))
+                first = std::min(first, clip.beat), last = std::max(last, clip.beat + clip.length);
+        for (const auto &clip : next.audioPlacements)
+            if (chosen(clip.id))
+                first = std::min(first, clip.beat), last = std::max(last, next.audioEndBeat(clip.beat, clip.duration));
+        if (!(last > first))
+            return juce::Result::fail("Select clips to chop");
+        if ((last - first) / a.length > 4096)
+            return juce::Result::fail("Chop would make more than 4096 pieces");
+        std::set<Id> pieces;
+        std::map<Id, Id> slicedMembers;
+        const auto inChop = [&](Id clip) { return chosen(clip) || pieces.contains(clip); };
+        for (double cut = std::ceil(first / a.length + 1.e-9) * a.length; cut < last - 1.e-9; cut += a.length)
+        {
+            std::map<Id, Id> made;
+            sliceClipsAt(next, inChop, cut, made);
+            for (const auto &[from, to] : made)
+                pieces.insert(to), slicedMembers.emplace(from, to);
+        }
+        if (pieces.empty())
+            return juce::Result::fail("The selected clips are shorter than one piece");
+        extendSlicedClipGroups(next, slicedMembers);
+    }
+    else if (id == "clip.quantize")
+    {
+        // Snap the start of each chosen clip to the grid (length and content unchanged).
+        if (!std::isfinite(a.length) || a.length < .0625 || a.length > 64)
+            return juce::Result::fail("Quantize grid is 1/16..64 beats");
+        const auto snapped = [&](double beat) { return std::max(0., std::round(beat / a.length) * a.length); };
+        bool any = false;
+        for (auto &clip : next.placements)
+            if (chosen(clip.id))
+                clip.beat = snapped(clip.beat), any = true;
+        for (auto &clip : next.audioPlacements)
+            if (chosen(clip.id))
+                clip.beat = snapped(clip.beat), any = true;
+        for (auto &clip : next.automation.placements)
+            if (chosen(clip.id))
+                clip.beat = snapped(clip.beat), any = true;
+        if (!any)
+            return juce::Result::fail("Select clips to quantize");
+    }
+    else if (id == "clip.paste")
+    {
+        auto board = a.clipboard;
+        if (!board || board->empty())
+        {
+            auto copied = std::make_shared<ClipClipboard>();
+            copied->origin = 1.e18;
+            for (const auto &c : next.placements)
+                if (chosen(c.id))
+                    copied->patterns.push_back(c), copied->origin = std::min(copied->origin, c.beat);
+            for (const auto &c : next.audioPlacements)
+                if (chosen(c.id))
+                    copied->audio.push_back(c), copied->origin = std::min(copied->origin, c.beat);
+            for (const auto &c : next.automation.placements)
+                if (chosen(c.id))
+                    copied->automation.push_back(c), copied->origin = std::min(copied->origin, c.beat);
+            board = copied;
+        }
+        if (!board || board->empty())
+            return juce::Result::fail("Copy or cut clips first (Ctrl+C / Ctrl+X)");
+        if (!std::isfinite(a.beat) || a.beat < 0 || a.beat > 1000000)
+            return juce::Result::fail("Paste position is 0..1000000 beats");
+        const double shift = a.beat - board->origin;
+        if (next.placements.size() + next.audioPlacements.size() + next.automation.placements.size() +
+                board->patterns.size() + board->audio.size() + board->automation.size() >
+            100000)
+            return juce::Result::fail("Paste would exceed the project's clip limit");
+        for (auto clip : board->patterns)
+        {
+            if (!next.pattern(clip.pattern))
+                return juce::Result::fail("A copied clip's Pattern no longer exists");
+            clip.id = next.allocate();
+            clip.beat += shift;
+            next.placements.push_back(clip);
+        }
+        for (auto clip : board->audio)
+        {
+            if (!next.channel(clip.channel))
+                return juce::Result::fail("A copied audio clip's source no longer exists");
+            clip.id = next.allocate();
+            clip.beat += shift;
+            next.audioPlacements.push_back(clip);
+        }
+        for (auto clip : board->automation)
+        {
+            if (!next.automationSource(clip.source))
+                return juce::Result::fail("A copied automation clip's source no longer exists");
+            clip.id = next.allocate();
+            clip.beat += shift;
+            next.automation.placements.push_back(clip);
+        }
+    }
+    else if (id == "time.insert" || id == "time.delete")
+    {
+        // Time selection [beat, beat + length): insert moves everything at or after its start
+        // later (optionally slicing clips that cross it first: args.enabled); delete removes
+        // what is inside (clips cut at both edges) and pulls everything after it earlier.
+        // Markers, tempo and time-signature changes move with the content.
+        if (!std::isfinite(a.beat) || !std::isfinite(a.length) || a.beat < 0 || a.length < .0625 ||
+            a.beat + a.length > 1000000)
+            return juce::Result::fail("Select a time range on the ruler first (Ctrl+drag)");
+        const double start = a.beat, end = a.beat + a.length, length = a.length;
+        const auto every = [](Id) { return true; };
+        std::map<Id, Id> slicedMembers;
+        if (id == "time.delete" || a.enabled)
+            sliceClipsAt(next, every, start, slicedMembers);
+        if (id == "time.delete")
+        {
+            sliceClipsAt(next, every, end, slicedMembers);
+            const auto inside = [&](double beat) { return beat >= start - 1.e-9 && beat < end - 1.e-9; };
+            std::erase_if(next.placements, [&](const auto &c) { return inside(c.beat); });
+            std::erase_if(next.audioPlacements, [&](const auto &c) { return inside(c.beat); });
+            std::erase_if(next.automation.placements, [&](const auto &c) { return inside(c.beat); });
+            std::erase_if(next.markers, [&](const auto &m) { return inside(m.beat); });
+            std::erase_if(next.tempoChanges, [&](const auto &t) { return inside(t.beat); });
+            std::erase_if(next.meterChanges, [&](const auto &m) { return inside(m.beat); });
+        }
+        const double shift = id == "time.insert" ? length : -length;
+        const double from = id == "time.insert" ? start : end;
+        const auto moves = [&](double beat) { return beat >= from - 1.e-9; };
+        for (auto &c : next.placements)
+            if (moves(c.beat))
+                c.beat = std::max(0., c.beat + shift);
+        for (auto &c : next.audioPlacements)
+            if (moves(c.beat))
+                c.beat = std::max(0., c.beat + shift);
+        for (auto &c : next.automation.placements)
+            if (moves(c.beat))
+                c.beat = std::max(0., c.beat + shift);
+        for (auto &m : next.markers)
+            if (moves(m.beat))
+                m.beat = std::max(0., m.beat + shift);
+        for (auto &t : next.tempoChanges)
+            if (moves(t.beat))
+                t.beat = std::max(0., t.beat + shift);
+        for (auto &m : next.meterChanges)
+            if (moves(m.beat))
+                m.beat = std::max(0., m.beat + shift);
         extendSlicedClipGroups(next, slicedMembers);
     }
     else if (id == "clip.slip")

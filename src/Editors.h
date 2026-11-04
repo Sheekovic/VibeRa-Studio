@@ -5016,7 +5016,8 @@ class Studio::Editor final : public juce::Component,
         {
             if (type == 2 && id && !e.mods.isRightButtonDown())
             {
-                list = {id};
+                if (std::find(list.begin(), list.end(), id) == list.end())
+                    list = {id};
                 juce::PopupMenu m;
                 m.addItem(1, "Make Unique");
                 m.addItem(2, "Delete");
@@ -5024,6 +5025,16 @@ class Studio::Editor final : public juce::Component,
                 {
                     m.addItem(60, "Split by channel");
                     m.addItem(61, "Merge selected Pattern clips (Ctrl+G)", s.selectedClips.size() >= 2);
+                }
+                {
+                    juce::PopupMenu chop;
+                    chop.addItem(62, "Bars");
+                    chop.addItem(63, "Beats");
+                    chop.addItem(64, "Half beats");
+                    chop.addItem(65, "Snap step");
+                    m.addSubMenu("Chop into", chop);
+                    m.addItem(66, "Select all similar clips");
+                    m.addItem(67, "Quick quantize start times (Ctrl+Q)");
                 }
                 m.addItem(3, automationClip(id) ? "Automation source / targets"
                              : audioClip(id)    ? "Channel settings"
@@ -5101,6 +5112,37 @@ class Studio::Editor final : public juce::Component,
                                         a.ids = safe->s.effectiveClipSelection();
                                         safe->s.command("clip.merge", a);
                                     }
+                                    if (n >= 62 && n <= 65)
+                                    {
+                                        const auto &p = safe->s.controller.project;
+                                        const double bar = p.numerator * 4. / std::max(1, p.denominator);
+                                        a.ids = safe->s.effectiveClipSelection();
+                                        a.length = n == 62 ? bar : n == 63 ? 1. : n == 64 ? .5
+                                                 : (safe->s.snap > 0 ? safe->s.snap : 1.);
+                                        safe->s.command("clip.chop", a);
+                                    }
+                                    if (n == 66)
+                                    {
+                                        // Same Pattern, same audio source, same automation source.
+                                        const auto &p = safe->s.controller.project;
+                                        std::vector<Id> similar;
+                                        for (const auto &c : p.placements)
+                                            if (std::any_of(p.placements.begin(), p.placements.end(), [&](const auto &x)
+                                                            { return x.id == id && x.pattern == c.pattern; }))
+                                                similar.push_back(c.id);
+                                        for (const auto &c : p.audioPlacements)
+                                            if (std::any_of(p.audioPlacements.begin(), p.audioPlacements.end(), [&](const auto &x)
+                                                            { return x.id == id && x.channel == c.channel; }))
+                                                similar.push_back(c.id);
+                                        for (const auto &c : p.automation.placements)
+                                            if (std::any_of(p.automation.placements.begin(), p.automation.placements.end(),
+                                                            [&](const auto &x) { return x.id == id && x.source == c.source; }))
+                                                similar.push_back(c.id);
+                                        safe->s.selectItems(true, similar);
+                                        safe->repaint();
+                                    }
+                                    if (n == 67)
+                                        safe->s.performAction("clip.quantize", nullptr);
                                     if (n == 4)
                                         safe->s.command("audio.comp", a);
                                     if (n == 6)

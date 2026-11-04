@@ -15,3 +15,14 @@
   here, Add marker here, Select this bar, Select to song end, Clear time selection.
   Read `state.playlistRange` and `editors[2].timeline` (ruler band, grid left, pixels per
   beat, scroll) for pointer tests.
+- **Copy / cut / paste** (Ctrl+C / Ctrl+X / Ctrl+V): pasted clips keep their tracks and
+  spacing; the earliest lands at the playhead (snapped). MCP: `clip.paste` with `args.ids`
+  (clips to copy) and `args.beat`.
+- **Insert space** (`time.insert`, Ctrl+Insert; Ctrl+Alt+Insert also slices crossing clips,
+  `args.enabled`) and **Delete space** (`time.delete`, Ctrl+Delete) use the ruler time
+  selection (`args.beat`, `args.length`). Clips, markers, tempo and time-signature changes
+  after it move; Delete cuts crossing clips at both edges and removes what is inside.
+- **Chop** (`clip.chop`, `args.length` = piece in beats; clip menu > Chop into) cuts the
+  selected clips on the Song grid. **Quick quantize** (`clip.quantize`, Ctrl+Q,
+  `args.length` = grid) snaps clip starts, keeping lengths. Clip menu > Select all similar
+  clips selects clips of the same Pattern, audio source or automation source. One Undo each.

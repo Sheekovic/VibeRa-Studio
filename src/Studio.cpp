@@ -4414,6 +4414,99 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "clip.copy" || action == "clip.cut")
+    {
+        const auto ids = effectiveClipSelection();
+        auto board = std::make_shared<ClipClipboard>();
+        board->origin = 1.e18;
+        const auto &p = controller.project;
+        for (const auto &c : p.placements)
+            if (selected(ids, c.id))
+                board->patterns.push_back(c), board->origin = std::min(board->origin, c.beat);
+        for (const auto &c : p.audioPlacements)
+            if (selected(ids, c.id))
+                board->audio.push_back(c), board->origin = std::min(board->origin, c.beat);
+        for (const auto &c : p.automation.placements)
+            if (selected(ids, c.id))
+                board->automation.push_back(c), board->origin = std::min(board->origin, c.beat);
+        if (board->empty())
+        {
+            status = "Select clips to copy";
+            repaint();
+            return false;
+        }
+        const auto count = board->patterns.size() + board->audio.size() + board->automation.size();
+        clipClipboard = board;
+        if (action == "clip.cut")
+        {
+            a.ids = ids;
+            command("clip.delete", a);
+        }
+        else
+            status = juce::String(int(count)) + (count == 1 ? " clip copied" : " clips copied");
+        repaint();
+        return true;
+    }
+    if (action == "clip.paste")
+    {
+        if (!clipClipboard || clipClipboard->empty())
+        {
+            status = "Copy or cut clips first (Ctrl+C / Ctrl+X)";
+            repaint();
+            return false;
+        }
+        a.clipboard = clipClipboard;
+        a.ids.clear();
+        const auto playhead = std::max(0., audio.positionBeat());
+        a.beat = snap > 0 ? std::floor(playhead / snap + 1.e-9) * snap : playhead;
+        const auto firstNew = controller.project.nextId;
+        command(action, a);
+        if (status != "Ready")
+            return false;
+        std::vector<Id> pasted;
+        for (const auto &c : controller.project.placements)
+            if (c.id >= firstNew)
+                pasted.push_back(c.id);
+        for (const auto &c : controller.project.audioPlacements)
+            if (c.id >= firstNew)
+                pasted.push_back(c.id);
+        for (const auto &c : controller.project.automation.placements)
+            if (c.id >= firstNew)
+                pasted.push_back(c.id);
+        selectItems(true, pasted);
+        return true;
+    }
+    if (action == "clip.quantize")
+    {
+        a.ids = effectiveClipSelection();
+        if (a.ids.empty())
+        {
+            for (const auto &c : controller.project.placements)
+                a.ids.push_back(c.id);
+            for (const auto &c : controller.project.audioPlacements)
+                a.ids.push_back(c.id);
+            for (const auto &c : controller.project.automation.placements)
+                a.ids.push_back(c.id);
+        }
+        a.length = snap > 0 ? snap : 1.;
+        command(action, a);
+        return status == "Ready";
+    }
+    if (action == "time.insert" || action == "time.insertSliced" || action == "time.delete")
+    {
+        if (!playlistRange || playlistRange->second - playlistRange->first < .0625)
+        {
+            status = "Select time on the ruler first (Ctrl+drag)";
+            repaint();
+            return false;
+        }
+        a.ids.clear();
+        a.beat = playlistRange->first;
+        a.length = playlistRange->second - playlistRange->first;
+        a.enabled = action == "time.insertSliced";
+        command(action == "time.delete" ? "time.delete" : "time.insert", a);
+        return status == "Ready";
+    }
     if (action == "notes.duplicate" || action == "clip.duplicate")
     {
         bool piano = action == "notes.duplicate";

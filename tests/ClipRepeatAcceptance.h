@@ -155,6 +155,70 @@ inline void tests()
                 "Merged notes keep their places, including the repeated clip");
         controller.undoEdit();
         require(controller.project.placements.size() == 2, "Merge is one Undo step");
+
+        // Playlist editing: paste, insert/delete space, chop and quick quantize.
+        auto clipAt = [&](double beat) -> const Placement *
+        {
+            for (const auto &c : controller.project.placements)
+                if (std::abs(c.beat - beat) < 1e-9)
+                    return &c;
+            return nullptr;
+        };
+        auto withMarker = controller.project;
+        withMarker.markers.push_back({withMarker.allocate(), 10, "Drop"});
+        controller.replace(withMarker);
+        CommandArgs paste;
+        paste.ids = {first};
+        paste.beat = 16;
+        require(controller.execute("clip.paste", paste).wasOk(), "Paste clips by id");
+        require(controller.project.placements.size() == 3 && clipAt(16) && clipAt(16)->length == 4 &&
+                    clipAt(16)->lane == 2 && clipAt(16)->id != first,
+                "A pasted clip is a new clip at the paste beat on the same track");
+        controller.undoEdit();
+
+        CommandArgs insert;
+        insert.beat = 4;
+        insert.length = 2;
+        insert.enabled = false;
+        require(controller.execute("time.insert", insert).wasOk(), "Insert space");
+        require(clipAt(0) && clipAt(10) && controller.project.markers.front().beat == 12,
+                "Insert space moves later clips and markers by the inserted length");
+        controller.undoEdit();
+
+        CommandArgs remove;
+        remove.beat = 9;
+        remove.length = 2;
+        require(controller.execute("time.delete", remove).wasOk(), "Delete space");
+        const auto *left = clipAt(8), *right = clipAt(9);
+        require(controller.project.placements.size() == 3 && left && right && std::abs(left->length - 1) < 1e-9 &&
+                    std::abs(right->length - 5) < 1e-9 && std::abs(right->offset - 3) < 1e-9,
+                "Delete space cuts the crossing clip, removes the inside and closes the gap");
+        require(controller.project.markers.empty(), "A marker inside the deleted space is removed");
+        controller.undoEdit();
+        require(controller.project.placements.size() == 2 && controller.project.markers.size() == 1,
+                "Delete space is one Undo step");
+
+        CommandArgs chop;
+        chop.ids = {first};
+        chop.length = 1;
+        require(controller.execute("clip.chop", chop).wasOk(), "Chop a clip into beats");
+        std::vector<double> offsets;
+        for (const auto &c : controller.project.placements)
+            if (c.beat < 4)
+                offsets.push_back(c.offset);
+        std::sort(offsets.begin(), offsets.end());
+        require(offsets == std::vector<double>{0, 1, 2, 3}, "A 4-beat clip chops into four 1-beat pieces");
+        controller.undoEdit();
+
+        CommandArgs quantize;
+        quantize.ids = {second};
+        quantize.length = 3;
+        require(controller.execute("clip.quantize", quantize).wasOk(), "Quick quantize clip starts");
+        require(clipAt(9) && clipAt(9)->id == second && clipAt(9)->length == 8,
+                "Quick quantize snaps the start and keeps the length");
+        CommandArgs empty;
+        empty.beat = 4;
+        require(controller.execute("clip.paste", empty).failed(), "Paste with nothing copied fails");
     }
 }
 } // namespace clip_repeat_acceptance

@@ -239,6 +239,13 @@ Customization Customization::familiarDefaults()
     add("notes.delete", Scope::piano, juce::KeyPress::deleteKey);
     add("clip.duplicate", Scope::playlist, 'B', ctrl);
     add("clip.merge", Scope::playlist, 'G', ctrl);
+    add("clip.copy", Scope::playlist, 'C', ctrl);
+    add("clip.cut", Scope::playlist, 'X', ctrl);
+    add("clip.paste", Scope::playlist, 'V', ctrl);
+    add("clip.quantize", Scope::playlist, 'Q', ctrl);
+    add("time.insert", Scope::playlist, juce::KeyPress::insertKey, ctrl);
+    add("time.insertSliced", Scope::playlist, juce::KeyPress::insertKey, ctrl | juce::ModifierKeys::altModifier);
+    add("time.delete", Scope::playlist, juce::KeyPress::deleteKey, ctrl);
     add("clip.delete", Scope::playlist, juce::KeyPress::deleteKey);
     add("channel.mixer", Scope::rack, 'L', ctrl);
     add("rack.group.dialog", Scope::rack, 'G', juce::ModifierKeys::altModifier);
