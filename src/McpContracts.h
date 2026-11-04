@@ -386,8 +386,14 @@ inline juce::var commandArgumentSchema(const juce::String &id)
             extra = R"(,"value":{"type":"number","minimum":0.5,"maximum":3,"description":"Row height relative to the Playlist lane height (0.5 small, 1 normal, 2 large, 3 extra large)."})";
         else if (id == "track.move")
             extra = R"(,"value":{"type":"integer","enum":[-1,1],"description":"-1 swaps with the track above, 1 with the one below (clips and settings)."})";
+        else if (id == "track.instrument")
+            extra = R"(,"channel":{"type":"integer","minimum":0,"description":"Sampler or instrument Channel ID the track belongs to (drawing on it makes Patterns for that Channel); 0 makes it a free track."})";
+        else if (id == "track.instrumentClip")
+            extra = R"(,"beat":{"type":"number","minimum":0,"description":"Where the new one-bar Pattern for the track's Channel is placed."})";
         const auto required = id == "track.insert" || id == "track.delete" || id == "track.solo" ? R"(["lane"])"
                               : id == "track.rename"                      ? R"(["lane","text"])"
+                              : id == "track.instrument"                  ? R"(["lane","channel"])"
+                              : id == "track.instrumentClip"              ? R"(["lane","beat"])"
                               : id == "track.mute" || id == "track.group" || id == "track.collapse" || id == "track.lock"
                                   ? R"(["lane","enabled"])"
                                                                           : R"(["lane","value"])";

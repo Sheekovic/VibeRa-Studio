@@ -183,5 +183,38 @@ inline void tests(const juce::File &)
     require(run("track.lock", 127, [](CommandArgs &x) { x.enabled = false; }).wasOk() &&
                 controller.execute("clip.move", move).wasOk(),
             "Unlocking allows editing again");
+
+    // Instrument tracks: a track bound to a Channel makes Patterns for it.
+    const auto channel = controller.project.channels[1].id;
+    const auto channelName = controller.project.channels[1].name;
+    require(run("track.instrumentClip", 20, [](CommandArgs &x) { x.beat = 0; }).failed(),
+            "A free track has no instrument clip");
+    require(run("track.instrument", 20, [](CommandArgs &x) { x.channel = 999999; }).failed(),
+            "A missing Channel cannot own a track");
+    require(run("track.instrument", 20, [&](CommandArgs &x) { x.channel = channel; }).wasOk() &&
+                controller.project.track(20) && controller.project.track(20)->channel == channel,
+            "A track becomes an instrument track");
+    const auto patternsBefore = controller.project.patterns.size();
+    const auto clipsBefore = controller.project.placements.size();
+    const auto beforeClip = controller.project.state();
+    require(run("track.instrumentClip", 20, [](CommandArgs &x) { x.beat = 8; }).wasOk(), "Draw on the instrument track");
+    require(controller.project.patterns.size() == patternsBefore + 1 &&
+                controller.project.placements.size() == clipsBefore + 1 &&
+                controller.project.placements.back().lane == 20 && controller.project.placements.back().beat == 8 &&
+                controller.project.placements.back().pattern == controller.project.patterns.back().id &&
+                controller.project.patterns.back().name == channelName + " 1",
+            "It makes a new Pattern named after the Channel and places it on the track");
+    run("track.instrumentClip", 20, [](CommandArgs &x) { x.beat = 12; });
+    require(controller.project.patterns.back().name == channelName + " 2", "Instrument Patterns are numbered");
+    controller.undoEdit();
+    controller.undoEdit();
+    require(controller.project.state().isEquivalentTo(beforeClip), "Each instrument clip is one exact Undo step");
+    Project bound;
+    require(Project::parse(controller.project.state(), bound).wasOk() && bound.track(20) && bound.track(20)->channel == channel,
+            "The instrument track survives save and reload");
+    CommandArgs removeChannel;
+    removeChannel.channel = channel;
+    require(controller.execute("channel.delete", removeChannel).wasOk() && !controller.project.track(20),
+            "Deleting the Channel turns the track back into a free track");
 }
 } // namespace playlist_track_acceptance

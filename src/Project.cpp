@@ -474,6 +474,8 @@ juce::ValueTree Project::state() const
                 set(entry, "locked", true);
             if (track.height != 1)
                 set(entry, "height", track.height);
+            if (track.channel != 0)
+                set(entry, "channel", juce::int64(track.channel));
             trackTree.appendChild(entry, nullptr);
         }
         root.appendChild(trackTree, nullptr);
@@ -1011,6 +1013,12 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 if (fileVersion < 56 || !std::isfinite(height) || height < .5 || height > 3)
                     return juce::Result::fail("Playlist track heights are .5..3 and need project version 56");
                 track.height = height;
+            }
+            if (entry.hasProperty("channel"))
+            {
+                if (fileVersion < 56)
+                    return juce::Result::fail("Instrument tracks need project version 56");
+                track.channel = Id(juce::int64(entry["channel"]));
             }
             if (entry.hasProperty("colour"))
             {

@@ -3085,8 +3085,11 @@ class Studio::Editor final : public juce::Component,
                         : nextInfo && nextInfo->groupedAbove
                             ? juce::String::charToString(juce::juce_wchar(trackInfo && trackInfo->collapsed ? 0x25b8 : 0x25be)) + " "
                             : juce::String();
+                    const auto *trackChannel = trackInfo && trackInfo->channel ? s.controller.project.channel(trackInfo->channel) : nullptr;
                     g.drawText(groupMark + (trackInfo && trackInfo->name.isNotEmpty() ? trackInfo->name
-                                                                           : "Track " + juce::String(rowLane + 1)) +
+                                            : trackChannel ? trackChannel->name
+                                                           : "Track " + juce::String(rowLane + 1)) +
+                                   (trackChannel ? " (instrument)" : "") +
                                    (trackInfo && trackInfo->muted ? " (muted)" : "") +
                                    (trackInfo && trackInfo->locked ? " (locked)" : ""),
                                header.withTrimmedLeft(22).withTrimmedRight(26), juce::Justification::centredLeft, true);
@@ -3918,6 +3921,20 @@ class Studio::Editor final : public juce::Component,
             heights.addItem(14, "Extra large", true, current == 3);
             menu.addSubMenu("Height", heights);
         }
+        std::vector<Id> instrumentChoices;
+        {
+            // Instrument track: drawing on the track makes a new Pattern for this Channel.
+            juce::PopupMenu instruments;
+            instruments.addItem(100, "None (free track)", true, !info || info->channel == 0);
+            for (const auto &channel : s.controller.project.channels)
+                if (!channel.audioClip && instrumentChoices.size() < 200)
+                {
+                    instrumentChoices.push_back(channel.id);
+                    instruments.addItem(100 + int(instrumentChoices.size()), channel.name, true,
+                                        info && info->channel == channel.id);
+                }
+            menu.addSubMenu("Instrument track", instruments);
+        }
         menu.addItem(2, "Rename...");
         const std::array<juce::uint32, 8> palette{0xffef6576, 0xffe8a33d, 0xffe6d35a, 0xff6fcf7f,
                                                    0xff4fb3d9, 0xff7d8cf0, 0xffc77df0, 0xff9aa3ad};
@@ -3936,12 +3953,15 @@ class Studio::Editor final : public juce::Component,
         menu.addItem(5, "Move track up", lane > 0);
         menu.addItem(6, "Move track down", lane < 127);
         menu.showMenuAsync(juce::PopupMenu::Options(),
-                           [safe = juce::Component::SafePointer<Editor>(this), lane, run, palette,
+                           [safe = juce::Component::SafePointer<Editor>(this), lane, run, palette, instrumentChoices,
                             name = info ? info->name : juce::String()](int chosen)
                            {
                                if (!safe || chosen <= 0)
                                    return;
-                               if (chosen == 7)
+                               if (chosen >= 100 && chosen <= 100 + int(instrumentChoices.size()))
+                                   run("track.instrument", [&](CommandArgs &a)
+                                       { a.channel = chosen == 100 ? 0 : instrumentChoices[size_t(chosen - 101)]; });
+                               else if (chosen == 7)
                                    run("track.solo", [](CommandArgs &) {});
                                else if (chosen >= 11 && chosen <= 14)
                                    run("track.height", [&](CommandArgs &a)
@@ -5271,10 +5291,27 @@ class Studio::Editor final : public juce::Component,
             else
             {
                 a.lane = laneAtY(e.y);
-                auto sources = pickerSelection();
-                sources.lane = a.lane;
-                sources.beat = a.beat;
-                placeSources(std::move(sources));
+                const auto *track = s.controller.project.track(a.lane);
+                if (track && track->channel && s.controller.project.channel(track->channel))
+                {
+                    // Instrument track: a new Pattern for its Channel, opened in the Piano Roll.
+                    const auto channel = track->channel;
+                    const auto revision = s.controller.revision;
+                    s.command("track.instrumentClip", a);
+                    if (s.controller.revision != revision && !s.controller.project.patterns.empty())
+                    {
+                        s.selectPattern(s.controller.project.patterns.back().id);
+                        s.selectedChannel = channel;
+                        s.showEditor(1);
+                    }
+                }
+                else
+                {
+                    auto sources = pickerSelection();
+                    sources.lane = a.lane;
+                    sources.beat = a.beat;
+                    placeSources(std::move(sources));
+                }
             }
         }
         repaint();

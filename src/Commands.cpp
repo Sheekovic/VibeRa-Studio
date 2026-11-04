@@ -785,6 +785,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"track.collapse", "Collapse Playlist track group", Scope::playlist, true, true, "command"},
         {"track.lock", "Lock Playlist track", Scope::playlist, true, true, "command"},
         {"track.height", "Set Playlist track height", Scope::playlist, true, true, "command"},
+        {"track.instrument", "Make instrument track", Scope::playlist, true, true, "command"},
+        {"track.instrumentClip", "New Pattern on instrument track", Scope::playlist, true, true, "command"},
         {"track.insert", "Insert Playlist track", Scope::playlist, true, true, "command"},
         {"track.delete", "Delete Playlist track", Scope::playlist, true, true, "command"},
         {"track.move", "Move Playlist track", Scope::playlist, true, true, "command"},
@@ -1040,6 +1042,17 @@ juce::Result Controller::prepareSnapshotChange(Project next, const Project &hist
     {
         if (revision == std::numeric_limits<std::uint64_t>::max() || undo.isPerformingUndoRedo())
             return juce::Result::fail("history.busy: Cannot prepare canonical mutation");
+        bool unbound = false; // A deleted Channel turns its instrument track back into a free track.
+        for (auto &track : next.tracks)
+            if (track.channel != 0 && !next.channel(track.channel))
+            {
+                track.channel = 0;
+                unbound = true;
+            }
+        if (unbound)
+            std::erase_if(next.tracks, [](const auto &t)
+                          { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed &&
+                                   !t.locked && t.height == 1 && t.channel == 0; });
         if (auto valid = next.validate(); valid.failed())
             return valid;
         if (recordHistory)
@@ -4937,6 +4950,35 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 return juce::Result::fail("Track height is .5..3 times the lane height");
             entry(a.lane).height = a.value;
         }
+        else if (id == "track.instrument")
+        {
+            // FL-style instrument track: the track belongs to one Channel (0 makes it a free track).
+            if (a.channel != 0)
+            {
+                const auto *channel = next.channel(a.channel);
+                if (!channel || channel->audioClip)
+                    return juce::Result::fail("Instrument tracks take a sampler or instrument Channel");
+            }
+            entry(a.lane).channel = a.channel;
+        }
+        else if (id == "track.instrumentClip")
+        {
+            // A new Pattern for the track's Channel, placed at `beat` (one bar, one Undo).
+            const auto *track = next.track(a.lane);
+            const auto *channel = track && track->channel ? next.channel(track->channel) : nullptr;
+            if (!channel)
+                return juce::Result::fail("This is not an instrument track");
+            if (!std::isfinite(a.beat) || a.beat < 0)
+                return juce::Result::fail("Clip position must be a beat >= 0");
+            int count = 1;
+            for (const auto &pattern : next.patterns)
+                if (pattern.name.startsWith(channel->name + " "))
+                    ++count;
+            const double bar = next.numerator * 4. / next.denominator;
+            const auto pattern = next.allocate();
+            next.patterns.push_back({pattern, channel->name + " " + juce::String(count), bar, {}});
+            next.placements.push_back({next.allocate(), pattern, a.lane, a.beat, bar, 0});
+        }
         else if (id == "track.collapse")
         {
             int head = a.lane; // Collapse acts on the group the lane belongs to.
@@ -4986,7 +5028,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             remap([&](int lane) { return lane == a.lane ? other : lane == other ? a.lane : lane; });
         }
         std::erase_if(next.tracks, [](auto &t)
-                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed && !t.locked && t.height == 1; });
+                      { return t.name.isEmpty() && t.colour == 0 && !t.muted && !t.groupedAbove && !t.collapsed && !t.locked && t.height == 1 && t.channel == 0; });
         for (auto &t : next.tracks)
             t.groupedAbove = t.groupedAbove && t.lane > 0; // A move to the top track ungroups it.
         std::sort(next.tracks.begin(), next.tracks.end(), [](auto &x, auto &y) { return x.lane < y.lane; });
