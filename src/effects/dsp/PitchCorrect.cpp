@@ -43,6 +43,13 @@ const char *PitchCorrect::scaleName(int index) noexcept
 {
     return index >= 0 && index < scaleCount ? scales[index].name : "";
 }
+int PitchCorrect::scaleDegrees(int index, std::array<int, 12> &cents, int &tonicCents) noexcept
+{
+    const auto &s = scales[index >= 0 && index < scaleCount ? index : 0];
+    cents = s.cents;
+    tonicCents = s.tonicCents;
+    return s.count;
+}
 
 struct PitchCorrect::Stretch
 {

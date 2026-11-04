@@ -21,6 +21,8 @@ class PitchCorrect
   public:
     static constexpr int scaleCount = 15;
     static const char *scaleName(int index) noexcept;
+    // Degrees of a scale in cents above the key (tonic offset in cents), for displays.
+    static int scaleDegrees(int index, std::array<int, 12> &cents, int &tonicCents) noexcept;
     void prepare(double sampleRate);
     void reset() noexcept;
     void setParameters(const Values &values) noexcept;

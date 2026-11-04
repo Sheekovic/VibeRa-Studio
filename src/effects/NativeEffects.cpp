@@ -271,6 +271,12 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
         engine_.setTransport(hasPosition, playing, ppq, bpm);
     }
     auto *left = buffer.getWritePointer(0), *right = buffer.getWritePointer(1);
+    {
+        float input = 0;
+        for (int i = 0; i < frames; ++i)
+            input = std::max(input, std::max(std::abs(left[i]), std::abs(right[i])));
+        inputPeak_.store(std::isfinite(input) ? input : 0.f, std::memory_order_relaxed);
+    }
     int cursor = 0;
     std::size_t event = 0;
     while (cursor < frames)
@@ -303,12 +309,22 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
     }
     peakLeft_.store(maximumLeft, std::memory_order_relaxed);
     reduction_.store(engine_.gainReductionDb(), std::memory_order_relaxed);
-    if (effect_ == EffectId::spectrumAnalyzer)
     {
+        // Every effect feeds its editor visual (relaxed atomics; no locks or allocation).
         auto write = captureWrite_.load(std::memory_order_relaxed);
-        for (int i = 0; i < frames; ++i)
-            capture_[size_t(write++ % captureSize)].store(.5f * (left[i] + right[i]), std::memory_order_relaxed);
+        for (int i = 0; i < frames; ++i, ++write)
+        {
+            capture_[size_t(write % captureSize)].store(.5f * (left[i] + right[i]), std::memory_order_relaxed);
+            captureSide_[size_t(write % captureSize)].store(.5f * (left[i] - right[i]), std::memory_order_relaxed);
+        }
         captureWrite_.store(write, std::memory_order_release);
+    }
+    if (effect_ == EffectId::beatGate)
+        beat_.store(engine_.beatPosition(), std::memory_order_relaxed);
+    else if (effect_ == EffectId::pitchCorrect)
+    {
+        detectedHz_.store(engine_.tuneDetectedHz(), std::memory_order_relaxed);
+        targetHz_.store(engine_.tuneTargetHz(), std::memory_order_relaxed);
     }
     peakRight_.store(maximumRight, std::memory_order_relaxed);
 }
@@ -318,6 +334,17 @@ void NativeEffectInstance::latestSamples(float *out, int count) const noexcept
     const auto end = captureWrite_.load(std::memory_order_acquire);
     for (int i = 0; i < count; ++i)
         out[i] = capture_[size_t((end - std::uint32_t(count) + std::uint32_t(i)) % captureSize)].load(std::memory_order_relaxed);
+}
+void NativeEffectInstance::latestStereo(float *mid, float *side, int count) const noexcept
+{
+    count = std::min(count, captureSize);
+    const auto end = captureWrite_.load(std::memory_order_acquire);
+    for (int i = 0; i < count; ++i)
+    {
+        const auto at = size_t((end - std::uint32_t(count) + std::uint32_t(i)) % captureSize);
+        mid[i] = capture_[at].load(std::memory_order_relaxed);
+        side[i] = captureSide_[at].load(std::memory_order_relaxed);
+    }
 }
 float NativeEffectInstance::peak(int channel) const noexcept
 {

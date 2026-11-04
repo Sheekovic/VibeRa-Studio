@@ -50,6 +50,13 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     // Spectrum Analyzer: copies the newest `count` mono samples (oldest first).
     static constexpr int captureSize = 8192;
     void latestSamples(float *out, int count) const noexcept;
+    // Editor visuals (every effect): the newest output as mid (L+R)/2 and side (L-R)/2,
+    // the input sample peak of the last block, the Beat Gate beat and Tune's pitches.
+    void latestStereo(float *mid, float *side, int count) const noexcept;
+    float inputPeak() const noexcept { return inputPeak_.load(std::memory_order_relaxed); }
+    double beatPosition() const noexcept { return beat_.load(std::memory_order_relaxed); }
+    double detectedHz() const noexcept { return detectedHz_.load(std::memory_order_relaxed); }
+    double targetHz() const noexcept { return targetHz_.load(std::memory_order_relaxed); }
 
     void fillInPluginDescription(juce::PluginDescription &) const override;
     const juce::String getName() const override;
@@ -106,7 +113,9 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     // Existing DSP peak stores replace it; zero then means genuine silence.
     std::atomic<float> peakLeft_{-1}, peakRight_{-1};
     std::atomic<float> reduction_{0};
-    std::array<std::atomic<float>, captureSize> capture_{};
+    std::array<std::atomic<float>, captureSize> capture_{}, captureSide_{};
+    std::atomic<float> inputPeak_{0};
+    std::atomic<double> beat_{0}, detectedHz_{0}, targetHz_{0};
     std::atomic<std::uint32_t> captureWrite_{0};
 };
 

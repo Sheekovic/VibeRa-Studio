@@ -62,6 +62,10 @@ class Engine
     {
         beat.setTransport(hasPosition, playing, ppq, bpm);
     }
+    // Display readback (relaxed copies are taken by the plugin instance after each block).
+    double beatPosition() const noexcept { return beat.beatPosition(); }
+    double tuneDetectedHz() const noexcept { return tune.detectedHz(); }
+    double tuneTargetHz() const noexcept { return tune.targetHz(); }
     // Last gain reduction (dB) of the selected dynamics processor, for editor meters.
     float gainReductionDb() const noexcept { return studio.gainReductionDb(); }
     // Bad automation values are refused before changing the active DSP settings.

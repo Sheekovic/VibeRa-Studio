@@ -38,6 +38,7 @@ class NativeEffectsEditor final : public juce::AudioProcessorEditor, private juc
     juce::Rectangle<int> display_;
     bool curve_ = false, reduction_ = false, spectrum_ = false;
     std::vector<float> spectrumDb_; // Smoothed magnitude per FFT bin.
+    std::vector<float> visualMid_, visualSide_; // Live output for the effect visual.
     float shownReduction_ = 0;
     void paintDisplay(juce::Graphics &);
     juce::Label brand_, heading_, subtitle_, footer_;

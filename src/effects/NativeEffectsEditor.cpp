@@ -2,6 +2,7 @@
 #include "NativeEffectsEditor.h"
 #include "dsp/StudioEffects.h"
 #include "dsp/PitchCorrect.h"
+#include "NativeEffectsVisuals.h"
 #include <cmath>
 #include <complex>
 
@@ -10,8 +11,24 @@ namespace vibera::effects
 namespace
 {
 constexpr int headerHeight = 116, bottomHeight = 128;
-const juce::Colour background(0xff141a20), cardFill(0xff202a33), border(0xff33424c), teal(0xff59e0c8),
-    foreground(0xffe5edf1), secondary(0xff94aab6);
+// A lighter slate palette: raised cards and plates read clearly without a near-black ground.
+const juce::Colour background(0xff24323c), backgroundTop(0xff31424f), cardFill(0xff364753), border(0xff4f6370),
+    teal(0xff5fe6cf), warm(0xffffb35c), foreground(0xfff2f7f9), secondary(0xffb6c7d0), plate(0xff283842),
+    well(0xff2a3943);
+// Balanced grid: as few rows as fit, then as few columns as those rows need; a short last
+// row is centred, so every layout is symmetric (9 -> 3x3, 7 -> 4+3, 11 -> 4+4+3).
+struct Grid
+{
+    int columns = 1, lines = 1;
+};
+Grid balancedGrid(int count, int maximumColumns)
+{
+    Grid grid;
+    maximumColumns = juce::jlimit(1, juce::jmax(1, count), maximumColumns);
+    grid.lines = (count + maximumColumns - 1) / maximumColumns;
+    grid.columns = (count + grid.lines - 1) / grid.lines;
+    return grid;
+}
 
 juce::String peakText(float gain)
 {
@@ -32,7 +49,7 @@ void NativeEffectsEditor::ControlsLookAndFeel::drawRotarySlider(juce::Graphics &
     const float radius = diameter * .5f, angle = start + position * (end - start);
     juce::Path track, active;
     track.addCentredArc(centre.x, centre.y, radius, radius, 0.f, start, end, true);
-    g.setColour(juce::Colour(0xff11191f));
+    g.setColour(well);
     g.strokePath(track,
                  juce::PathStrokeType(5.f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
     active.addCentredArc(centre.x, centre.y, radius, radius, 0.f, start, angle, true);
@@ -40,10 +57,10 @@ void NativeEffectsEditor::ControlsLookAndFeel::drawRotarySlider(juce::Graphics &
     g.strokePath(active,
                  juce::PathStrokeType(4.f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
     auto face = bounds.reduced(9.f);
-    g.setGradientFill(juce::ColourGradient(juce::Colour(0xff455661), face.getTopLeft(),
-                                           juce::Colour(0xff212d36), face.getBottomRight(), false));
+    g.setGradientFill(juce::ColourGradient(juce::Colour(0xff5d717d), face.getTopLeft(),
+                                           juce::Colour(0xff34444f), face.getBottomRight(), false));
     g.fillEllipse(face);
-    g.setColour(juce::Colour(0xff596c77).withAlpha(.5f));
+    g.setColour(juce::Colour(0xff7b8f9a).withAlpha(.6f));
     g.drawEllipse(face, 1.f);
     const float pointerRadius = juce::jmax(1.f, radius - 15.f);
     const juce::Point<float> tip(centre.x + std::sin(angle) * pointerRadius,
@@ -67,7 +84,7 @@ void NativeEffectsEditor::ControlsLookAndFeel::drawLinearSlider(juce::Graphics &
         return;
     }
     const float centre = float(x) + float(width) * .5f;
-    g.setColour(juce::Colour(0xff11191f));
+    g.setColour(well);
     g.fillRoundedRectangle(centre - 3.f, float(y), 6.f, float(height), 3.f);
     const float defaultPosition =
         float(y + height) -
@@ -98,7 +115,7 @@ void NativeEffectsEditor::StereoOutputMeter::update(float left, float right)
 void NativeEffectsEditor::StereoOutputMeter::paint(juce::Graphics &g)
 {
     const auto bounds = getLocalBounds().toFloat();
-    g.setColour(juce::Colour(0xff11191f));
+    g.setColour(plate);
     g.fillRoundedRectangle(bounds, 10.f);
     g.setColour(border);
     g.drawRoundedRectangle(bounds.reduced(.5f), 10.f, 1.f);
@@ -136,17 +153,21 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
     curve_ = spec.id == EffectId::parametricEq;
     reduction_ = spec.id == EffectId::deEsser || spec.id == EffectId::multiband || spec.id == EffectId::maximizer;
     spectrum_ = spec.id == EffectId::spectrumAnalyzer;
-    const int displayHeight = curve_ ? 220 : spectrum_ ? 330 : reduction_ ? 74 : 0;
-    const int minimumColumns = juce::jmin(3, int(spec.parameterCount));
-    const int minimumRows = (int(spec.parameterCount) + minimumColumns - 1) / minimumColumns;
-    const int minimumHeight =
-        (equalizer ? 500 : headerHeight + bottomHeight + minimumRows * 164) + displayHeight;
+    // Every effect shows a live visual of what its controls change.
+    const int displayHeight = (curve_ ? 210 : spectrum_ ? 320 : 190) + 10;
+    const int count = int(spec.parameterCount);
+    const int width = equalizer || curve_ || spectrum_ ? 1000 : count <= 2 ? 640 : 780;
+    const int minimumWidth = equalizer ? 720 : 560;
+    // The narrowest window has the most rows; the preferred width may need fewer.
+    const auto narrowest = balancedGrid(count, equalizer ? count : (minimumWidth - 40) / 160);
+    const auto preferred = balancedGrid(count, equalizer ? count : (width - 40) / 160);
+    const auto heightFor = [&](const Grid &grid)
+    { return headerHeight + bottomHeight + displayHeight + (equalizer ? 300 : grid.lines * 150); };
     setResizable(true, false);
-    setResizeLimits(equalizer ? 720 : 560, minimumHeight, 1440, 1200);
-    setSize(equalizer || curve_ || spectrum_ ? 1000
-            : spec.parameterCount <= 2 ? 600
-                                       : 780,
-            juce::jmax(minimumHeight, (equalizer ? 540 : 510) + displayHeight));
+    setResizeLimits(minimumWidth, heightFor(narrowest), 1440, 1400);
+    visualMid_.resize(4096);
+    visualSide_.resize(4096);
+    setSize(width, juce::jmax(heightFor(narrowest), heightFor(preferred) + (equalizer ? 0 : 16)));
     brand_.setText("V I B E R A   /   E F F E C T S", juce::dontSendNotification);
     brand_.setFont(juce::FontOptions(11.f, juce::Font::bold));
     brand_.setColour(juce::Label::textColourId, teal);
@@ -188,7 +209,7 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
                                              : juce::Slider::RotaryVerticalDrag);
         row->slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, equalizer ? 74 : 126, 26);
         row->slider.setColour(juce::Slider::textBoxTextColourId, teal);
-        row->slider.setColour(juce::Slider::textBoxBackgroundColourId, juce::Colour(0xff172128));
+        row->slider.setColour(juce::Slider::textBoxBackgroundColourId, plate);
         row->slider.setColour(juce::Slider::textBoxOutlineColourId, border);
         const juce::String unit(p.unit);
         row->slider.setTextValueSuffix(unit.isEmpty() ? "" : " " + unit);
@@ -318,7 +339,7 @@ void NativeEffectsEditor::timerCallback()
 }
 void NativeEffectsEditor::paint(juce::Graphics &graphics)
 {
-    graphics.setGradientFill(juce::ColourGradient(juce::Colour(0xff202d36), 0.f, 0.f, background,
+    graphics.setGradientFill(juce::ColourGradient(backgroundTop, 0.f, 0.f, background,
                                                   float(getWidth()), float(getHeight()), false));
     graphics.fillAll();
     graphics.setColour(teal.withAlpha(.65f));
@@ -328,7 +349,7 @@ void NativeEffectsEditor::paint(juce::Graphics &graphics)
     for (const auto &row : rows_)
     {
         const auto card = row->card.toFloat();
-        graphics.setColour(juce::Colour(0xff0c1217).withAlpha(.35f));
+        graphics.setColour(juce::Colour(0xff10181e).withAlpha(.22f));
         graphics.fillRoundedRectangle(card.translated(0.f, 3.f), 12.f);
         graphics.setColour(cardFill);
         graphics.fillRoundedRectangle(card, 12.f);
@@ -376,7 +397,7 @@ void fft(std::vector<std::complex<float>> &a)
 void NativeEffectsEditor::paintDisplay(juce::Graphics &g)
 {
     const auto box = display_.toFloat();
-    g.setColour(juce::Colour(0xff111a20));
+    g.setColour(plate);
     g.fillRoundedRectangle(box, 12.f);
     g.setColour(border);
     g.drawRoundedRectangle(box.reduced(.5f), 12.f, 1.f);
@@ -510,27 +531,41 @@ void NativeEffectsEditor::paintDisplay(juce::Graphics &g)
         for (const auto &[frequency, gain] : handles)
         {
             const float x = xOf(values[size_t(frequency)]), y = yOf(values[size_t(gain)]);
-            g.setColour(juce::Colour(0xff111a20));
+            g.setColour(plate);
             g.fillEllipse(x - 6.f, y - 6.f, 12.f, 12.f);
             g.setColour(teal);
             g.drawEllipse(x - 6.f, y - 6.f, 12.f, 12.f, 2.f);
         }
         return;
     }
-    // Gain reduction: a bar growing left from 0 dB to -24 dB with its value.
-    g.setColour(secondary);
-    g.setFont(juce::FontOptions(11.f, juce::Font::bold));
-    g.drawText("GAIN REDUCTION", plot.removeFromTop(16.f), juce::Justification::centredLeft);
-    auto bar = plot.removeFromTop(16.f).withTrimmedRight(90.f);
-    g.setColour(cardFill);
-    g.fillRoundedRectangle(bar, 4.f);
-    const float fraction = juce::jlimit(0.f, 1.f, -shownReduction_ / 24.f);
-    g.setColour(juce::Colour(0xffffb35c));
-    g.fillRoundedRectangle(bar.withWidth(bar.getWidth() * fraction), 4.f);
-    g.setColour(foreground);
-    g.setFont(juce::FontOptions(13.f, juce::Font::bold));
-    g.drawText(juce::String(shownReduction_, 1) + " dB", int(bar.getRight()) + 10, int(bar.getY()) - 2, 80, 20,
-               juce::Justification::centredLeft);
+    Values values{};
+    for (size_t i = 0; i < rows_.size(); ++i)
+        values[i] = float(rows_[i]->slider.getValue());
+    instance_.latestStereo(visualMid_.data(), visualSide_.data(), int(visualMid_.size()));
+    visuals::Live live;
+    live.mid = visualMid_.data();
+    live.side = visualSide_.data();
+    live.count = int(visualMid_.size());
+    live.inputPeak = instance_.inputPeak();
+    live.outputPeak = std::max(0.f, std::max(instance_.peak(0), instance_.peak(1)));
+    live.reductionDb = shownReduction_;
+    live.beat = instance_.beatPosition();
+    live.clock = juce::Time::getMillisecondCounterHiRes() / 1000.;
+    live.rate = instance_.getSampleRate() > 0 ? instance_.getSampleRate() : 48000.;
+    live.detectedHz = instance_.detectedHz();
+    live.targetHz = instance_.targetHz();
+    const visuals::Palette palette{teal, warm, foreground, secondary, border, plate};
+    visuals::paint(g, plot, instance_.effectId(), values, live, palette);
+    if (reduction_ && instance_.effectId() != EffectId::deEsser)
+    {
+        // Live gain reduction readout for the studio dynamics (bottom corner, clear of captions).
+        auto badge = juce::Rectangle<float>(box.getRight() - 150.f, box.getBottom() - 36.f, 136.f, 22.f);
+        g.setColour(warm.withAlpha(.18f));
+        g.fillRoundedRectangle(badge, 6.f);
+        g.setColour(warm);
+        g.setFont(juce::FontOptions(12.f, juce::Font::bold));
+        g.drawText("GR " + juce::String(shownReduction_, 1) + " dB", badge, juce::Justification::centred);
+    }
 }
 void NativeEffectsEditor::resized()
 {
@@ -541,26 +576,24 @@ void NativeEffectsEditor::resized()
     footer_.setBounds(24, getHeight() - 28, getWidth() - 48, 20);
     auto area =
         juce::Rectangle<int>(20, headerHeight, getWidth() - 40, getHeight() - headerHeight - bottomHeight);
-    display_ = curve_      ? area.removeFromTop(210)
-               : spectrum_ ? area.removeFromTop(320)
-               : reduction_ ? area.removeFromTop(64)
-                            : juce::Rectangle<int>{};
-    if (!display_.isEmpty())
-        area.removeFromTop(10);
+    display_ = area.removeFromTop(curve_ ? 210 : spectrum_ ? 320 : 190);
+    area.removeFromTop(10);
     if (rows_.empty())
         return;
     const bool equalizer = instance_.effectId() == EffectId::graphicEq;
     const int count = int(rows_.size());
-    const int columns = equalizer ? count : juce::jlimit(1, juce::jmin(4, count), area.getWidth() / 160);
-    const int lines = (count + columns - 1) / columns;
+    const auto grid = balancedGrid(count, equalizer ? count : juce::jmin(4, area.getWidth() / 160));
+    const int columns = grid.columns, lines = grid.lines;
     constexpr int gap = 10;
     const int cellWidth = (area.getWidth() - gap * (columns - 1)) / columns;
     const int cellHeight = (area.getHeight() - gap * (lines - 1)) / lines;
     for (std::size_t i = 0; i < rows_.size(); ++i)
     {
         auto &row = *rows_[i];
-        row.card = {area.getX() + (int(i) % columns) * (cellWidth + gap),
-                    area.getY() + (int(i) / columns) * (cellHeight + gap), cellWidth, cellHeight};
+        const int line = int(i) / columns, inLine = juce::jmin(columns, count - line * columns);
+        const int indent = (columns - inLine) * (cellWidth + gap) / 2; // Centre a short last row.
+        row.card = {area.getX() + indent + (int(i) % columns) * (cellWidth + gap),
+                    area.getY() + line * (cellHeight + gap), cellWidth, cellHeight};
         row.label.setBounds(row.card.reduced(8, 0).removeFromTop(38));
         row.slider.setBounds(row.card.withTrimmedTop(38).reduced(equalizer ? 3 : 8, 8));
     }
