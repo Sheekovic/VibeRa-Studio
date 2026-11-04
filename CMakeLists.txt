@@ -936,7 +936,8 @@ if(WIN32)
   if(NOT EXISTS "${_physical_manifest}" OR NOT EXISTS "${_physical_guard}")
     message(FATAL_ERROR "Physical-burst leaf requires the reviewed strict physical-callback patch family")
   endif()
-  execute_process(COMMAND powershell -NoProfile -ExecutionPolicy Bypass -File "${_physical_guard}" -VerifyOnly
+  execute_process(COMMAND ${CMAKE_COMMAND} -E env --unset=PSModulePath
+    powershell -NoProfile -ExecutionPolicy Bypass -File "${_physical_guard}" -VerifyOnly
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     RESULT_VARIABLE _physical_verified OUTPUT_VARIABLE _physical_guard_output ERROR_VARIABLE _physical_guard_error)
   if(NOT _physical_verified STREQUAL "0")
