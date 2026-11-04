@@ -31,6 +31,7 @@
 #include "ai/ClaudeCli.h"
 #include "ai/CodexAgent.h"
 #include "ai/McpLoopback.h"
+#include "Updater.h"
 #include <atomic>
 
 namespace vibera
@@ -256,6 +257,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result verifyClipGroups(const juce::File &);
     juce::Result verifyDropTargets(const juce::File &);
     void verifyAutosave(const juce::File &folder, std::function<void(juce::Result)> completion);
+    juce::var updateStatus() const;
+    juce::Result requestUpdateCheck() { return checkForUpdates(true, false); }
     juce::Result verifyNoteMute(const juce::File &);
     juce::Result verifyNoteSlice(const juce::File &);
     juce::Result verifyNoteStretch(const juce::File &);
@@ -868,6 +871,28 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
         juce::File marker, autosave, project;
         juce::Time time;
     };
+    // In-app updates from GitHub Releases (StudioUpdater.cpp, logic in Updater.h). Checks
+    // run on a worker thread; the user sees what changed and approves every download and
+    // install. Phases: idle, checking, upToDate, available, downloading, ready, failed.
+    struct UpdateJob;
+    std::shared_ptr<UpdateJob> updateJob;
+    juce::String updatePhase = "idle", updateMessage, updateSkippedTag;
+    double updateProgress = 0;
+    bool updateOfferShown = false;
+    juce::File updateDownloaded;
+    std::optional<updates::Release> availableUpdate;
+    juce::File updateSettingsFile() const;
+    juce::var loadUpdateSettings() const;
+    void saveUpdateSettings(const juce::var &);
+    void scheduleStartupUpdateCheck();
+    juce::Result checkForUpdates(bool manual, bool interactive = true);
+    void cancelUpdateWork();
+    void pollUpdates();
+    void showUpdateOffer();
+    juce::Result downloadUpdate();
+    void offerUpdateInstall();
+    void installDownloadedUpdate();
+    void updateSettingsMenu();
     // Newest autosave left by a VibeRa that did not exit cleanly; older markers are removed.
     std::optional<CrashedSession> findCrashedSession();
     void showDrumPads();

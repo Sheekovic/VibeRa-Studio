@@ -651,7 +651,10 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     applyAppearance();
     startTimerHz(20);
     if (persistentTyping)
+    {
         startAutosaveSession();
+        scheduleStartupUpdateCheck(); // At most daily; VIBERA_NO_UPDATE_CHECK disables it.
+    }
     if (persistentTyping)
     {
         auto safe = juce::Component::SafePointer<Studio>(this);
@@ -677,6 +680,7 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
 Studio::~Studio()
 {
     endAutosaveSession();
+    cancelUpdateWork();
     if (samplerControllerLearn)
         midiController.cancelProjectLearn(samplerControllerLearn->serial);
     if (samplerControllerLearnWindow)
@@ -3372,6 +3376,10 @@ void Studio::toolsMenu()
                  missingCount > 0);
     // Save keeps five backups per project; autosave covers unexpected closes.
     menu.addItem(224, "Open project backups folder", profileFile().getSiblingFile("backups").isDirectory());
+    menu.addItem(225, updatePhase == "available" ? "Update available: " + (availableUpdate ? availableUpdate->name : juce::String()) + "..."
+                      : updatePhase == "downloading" ? "Downloading update..."
+                      : updatePhase == "ready"       ? "Install downloaded update..."
+                                                     : juce::String("Check for updates..."));
     juce::PopupMenu layouts;
     layouts.addItem(220, "Balanced auto tiling", true, autoTileMode == 1);
     layouts.addItem(221, "Focus active editor", true, autoTileMode == 2);
@@ -3437,6 +3445,8 @@ void Studio::toolsMenu()
                 safe->performAction("transport.stepRest");
                 return;
             }
+            if (choice == 225)
+                return safe->updateSettingsMenu();
             if (choice == 204)
             {
                 safe->chooser = std::make_unique<juce::FileChooser>("Folder to search for the missing samples",
@@ -5276,6 +5286,7 @@ void Studio::timerCallback()
 {
     pollAiMusic();
     serviceAutosave();
+    pollUpdates();
     if (!mixerChainApplying() || mixerChainRecovering())
         serviceDevicePreparation();
     routingCoordinator.poll({patternMode, selectedPattern});

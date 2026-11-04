@@ -35,7 +35,7 @@ bool runOnMessageThread(std::function<void()> fn, const ai::CancelCheck &cancell
             return false;
     return true;
 }
-const juce::StringArray readOnlyTools{"vibera_state", "vibera_inspect", "vibera_commands", "vibera_snapshot",
+const juce::StringArray readOnlyTools{"vibera_state", "vibera_inspect", "vibera_commands", "vibera_snapshot", "vibera_update",
                                       "vibera_selection"};
 // Diagnostic pointer/key simulation and this tool itself are never offered to the agent.
 const juce::StringArray hiddenTools{"vibera_ai", "vibera_audioRecording", "vibera_pointer", "vibera_key"};

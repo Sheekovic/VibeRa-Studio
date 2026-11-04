@@ -281,6 +281,7 @@ static juce::Result awaitProjection(AudioEngine &, const Project &, bool, Id);
 #include "ControllerRecordingAcceptance.h"
 #include "ChannelTuningAcceptance.h"
 #include "AudioStretchAcceptance.h"
+#include "UpdaterAcceptance.h"
 #include "ArrangementAcceptance.h"
 #include "PlaylistTrackAcceptance.h"
 #include "MidiImportExtrasAcceptance.h"
@@ -4904,6 +4905,14 @@ int main(int argc, char **argv)
             require(test::prepareBuildAcceptanceAttempt(argv[2], output).wasOk(), "Owned arrangement output");
             arrangement_acceptance::tests(output);
             std::cout << "PASS arrangements " << assertions << " assertions" << std::endl;
+            return 0;
+        }
+        if (argc == 3 && juce::String(argv[1]) == "--updater-check")
+        {
+            juce::File output;
+            require(test::prepareBuildAcceptanceAttempt(argv[2], output).wasOk(), "Owned updater output");
+            updater_acceptance::tests(output);
+            std::cout << "PASS updater " << assertions << " assertions" << std::endl;
             return 0;
         }
         if (argc == 3 && juce::String(argv[1]) == "--audio-stretch-check")
