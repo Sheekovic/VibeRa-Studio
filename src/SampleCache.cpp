@@ -2,6 +2,7 @@
 #include "AudioFileCheck.h"
 #include "SampleCache.h"
 #include <algorithm>
+#include <cstring>
 #include <signalsmith-stretch/signalsmith-stretch.h>
 
 namespace vibera
