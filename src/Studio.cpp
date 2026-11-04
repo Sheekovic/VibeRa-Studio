@@ -4408,6 +4408,12 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "clip.merge")
+    {
+        a.ids = effectiveClipSelection();
+        command(action, a);
+        return true;
+    }
     if (action == "notes.duplicate" || action == "clip.duplicate")
     {
         bool piano = action == "notes.duplicate";

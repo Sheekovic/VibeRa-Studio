@@ -3,6 +3,7 @@
 #include "../src/Project.h"
 #include "../src/PatternChannelLoops.h"
 #include "../src/PatternAutomation.h"
+#include "../src/Commands.h"
 
 // A Pattern clip longer than its Pattern repeats the Pattern (familiar Playlist behavior).
 namespace clip_repeat_acceptance
@@ -93,5 +94,67 @@ inline void tests()
     for (const auto &placed : audible.document.placements)
         windows += placed.source == source.id ? 1 : 0;
     require(windows == 3, "Pattern automation repeats with a longer clip");
+
+    // Split by channel and merge, through the canonical commands (one Undo each).
+    {
+        Controller controller;
+        auto q = Project::empty();
+        auto &pattern = q.patterns.front();
+        pattern.notes.clear();
+        pattern.length = 4;
+        pattern.autoLength = false;
+        const Id kick = q.channels[0].id, snare = q.channels[1].id;
+        for (const auto &[channelId, beat] : std::vector<std::pair<Id, double>>{{kick, 0}, {snare, 1}, {kick, 2}})
+        {
+            Note n;
+            n.id = q.allocate();
+            n.channel = channelId;
+            n.beat = beat;
+            n.length = .25;
+            n.pitch = 60;
+            n.velocity = .8;
+            pattern.notes.push_back(n);
+        }
+        q.placements.clear();
+        const Id first = q.allocate(), second = q.allocate();
+        q.placements.push_back({first, pattern.id, 2, 0, 4, 0});
+        q.placements.push_back({second, pattern.id, 2, 8, 8, 0}); // Plays the Pattern twice.
+        controller.replace(q);
+        const auto patternsBefore = controller.project.patterns.size();
+        CommandArgs split;
+        split.target = first;
+        require(controller.execute("clip.splitChannels", split).wasOk(), "Split a Pattern clip by channel");
+        const auto &after = controller.project;
+        std::vector<int> lanes;
+        for (const auto &clip : after.placements)
+            if (clip.id != second)
+                lanes.push_back(clip.lane);
+        std::sort(lanes.begin(), lanes.end());
+        require(after.patterns.size() == patternsBefore + 2 && lanes == std::vector<int>{2, 3},
+                "Two Channels give two clips on the clip's track and the one below");
+        require(after.pattern(pattern.id) && after.pattern(pattern.id)->notes.size() == 3,
+                "The source Pattern is unchanged for its other clips");
+        controller.undoEdit();
+        require(controller.project.placements.size() == 2, "Split is one Undo step");
+
+        CommandArgs merge;
+        merge.ids = {first, second};
+        require(controller.execute("clip.merge", merge).wasOk(), "Merge two Pattern clips");
+        const auto &merged = controller.project;
+        require(merged.placements.size() == 1 && merged.placements.front().beat == 0 &&
+                    std::abs(merged.placements.front().length - 16) < 1e-9,
+                "Merged clips become one clip spanning them");
+        const auto *one = merged.pattern(merged.placements.front().pattern);
+        require(one != nullptr, "The merged Pattern exists");
+        std::vector<double> kicks;
+        for (const auto &n : one->notes)
+            if (n.channel == kick)
+                kicks.push_back(n.beat);
+        std::sort(kicks.begin(), kicks.end());
+        require(kicks == std::vector<double>{0, 2, 8, 10, 12, 14},
+                "Merged notes keep their places, including the repeated clip");
+        controller.undoEdit();
+        require(controller.project.placements.size() == 2, "Merge is one Undo step");
+    }
 }
 } // namespace clip_repeat_acceptance

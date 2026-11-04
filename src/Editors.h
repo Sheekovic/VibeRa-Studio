@@ -5020,6 +5020,11 @@ class Studio::Editor final : public juce::Component,
                 juce::PopupMenu m;
                 m.addItem(1, "Make Unique");
                 m.addItem(2, "Delete");
+                if (!automationClip(id) && !audioClip(id))
+                {
+                    m.addItem(60, "Split by channel");
+                    m.addItem(61, "Merge selected Pattern clips (Ctrl+G)", s.selectedClips.size() >= 2);
+                }
                 m.addItem(3, automationClip(id) ? "Automation source / targets"
                              : audioClip(id)    ? "Channel settings"
                                                 : "Edit Pattern");
@@ -5089,6 +5094,13 @@ class Studio::Editor final : public juce::Component,
                                         safe->s.command("clip.unique", a);
                                     if (n == 2)
                                         safe->s.command("clip.delete", a);
+                                    if (n == 60)
+                                        safe->s.command("clip.splitChannels", a);
+                                    if (n == 61)
+                                    {
+                                        a.ids = safe->s.effectiveClipSelection();
+                                        safe->s.command("clip.merge", a);
+                                    }
                                     if (n == 4)
                                         safe->s.command("audio.comp", a);
                                     if (n == 6)

@@ -238,6 +238,7 @@ Customization Customization::familiarDefaults()
     add("notes.duplicate", Scope::piano, 'B', ctrl);
     add("notes.delete", Scope::piano, juce::KeyPress::deleteKey);
     add("clip.duplicate", Scope::playlist, 'B', ctrl);
+    add("clip.merge", Scope::playlist, 'G', ctrl);
     add("clip.delete", Scope::playlist, juce::KeyPress::deleteKey);
     add("channel.mixer", Scope::rack, 'L', ctrl);
     add("rack.group.dialog", Scope::rack, 'G', juce::ModifierKeys::altModifier);

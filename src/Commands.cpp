@@ -807,6 +807,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"clip.delete", "Delete clips", Scope::playlist, true, true, "command"},
         {"clip.duplicate", "Duplicate clips", Scope::playlist, true, true, "command"},
         {"clip.unique", "Make Unique", Scope::playlist, true, true, "command"},
+        {"clip.splitChannels", "Split Pattern clip by channel", Scope::playlist, true, true, "command"},
+        {"clip.merge", "Merge Pattern clips", Scope::playlist, true, true, "command"},
         {"clip.slice", "Slice clips at beat", Scope::playlist, true, true, "command"},
         {"clip.slip", "Slip source content", Scope::playlist, true, true, "command"},
         {"clip.mute", "Mute clips", Scope::playlist, true, true, "command"},
@@ -4669,6 +4671,123 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         copy.name += " unique";
         it->channel = copy.id;
         next.channels.push_back(std::move(copy));
+    }
+    else if (id == "clip.splitChannels")
+    {
+        // One clip becomes one clip per Channel, each on its own track (the clip's track
+        // and the ones below), at the same position and window. Only this clip changes:
+        // the source Pattern stays for its other placements.
+        auto it = std::find_if(next.placements.begin(), next.placements.end(),
+                               [&](auto &p) { return p.id == a.target; });
+        if (it == next.placements.end())
+            return missing();
+        const auto *source = next.pattern(it->pattern);
+        if (!source)
+            return missing();
+        const Placement original = *it;
+        std::vector<Pattern> parts;
+        for (const auto &channel : next.channels)
+        {
+            Pattern part = *source;
+            std::erase_if(part.notes, [&](const auto &note) { return note.channel != channel.id; });
+            std::erase_if(part.controllers, [&](const auto &event) { return event.channel != channel.id; });
+            std::erase_if(part.channelLoops, [&](const auto &loop) { return loop.channel != channel.id; });
+            if (part.notes.empty() && part.channelLoops.empty())
+                continue;
+            if (!parts.empty())
+                part.automation.clear(); // Pattern automation stays with the first part only.
+            part.name = (source->name + " - " + channel.name).trim().substring(0, 256);
+            parts.push_back(std::move(part));
+        }
+        if (parts.empty())
+            return juce::Result::fail("This Pattern clip has no Channel notes to split");
+        if (parts.size() == 1)
+            return juce::Result::fail("This Pattern clip uses one Channel; there is nothing to split");
+        if (next.patterns.size() + parts.size() > 1024 || original.lane + int(parts.size()) > 1000)
+            return juce::Result::fail("Split by channel would exceed the project's Pattern or track limit");
+        next.placements.erase(it);
+        for (size_t i = 0; i < parts.size(); ++i)
+        {
+            auto &part = parts[i];
+            part.id = next.allocate();
+            for (auto &n : part.notes)
+                n.id = next.allocate();
+            for (auto &event : part.controllers)
+                event.id = next.allocate();
+            Placement clip = original;
+            clip.id = next.allocate();
+            clip.pattern = part.id;
+            clip.lane = original.lane + int(i);
+            next.placements.push_back(clip);
+            next.patterns.push_back(std::move(part));
+        }
+    }
+    else if (id == "clip.merge")
+    {
+        // The selected Pattern clips become one new Pattern holding what actually plays in
+        // them (Channel loops, clip repeats and windows rendered into plain notes), placed
+        // once from the earliest clip on its track.
+        std::vector<Placement> clips;
+        for (const auto target : a.ids)
+            if (const auto found = std::find_if(next.placements.begin(), next.placements.end(),
+                                                [&](const auto &p) { return p.id == target; });
+                found != next.placements.end())
+                clips.push_back(*found);
+        if (clips.size() < 2 || a.ids.size() > 1024)
+            return juce::Result::fail("Select two or more Pattern clips to merge");
+        std::sort(clips.begin(), clips.end(), [](const auto &x, const auto &y)
+                  { return std::tie(x.beat, x.lane) < std::tie(y.beat, y.lane); });
+        const double start = clips.front().beat;
+        double end = start;
+        for (const auto &clip : clips)
+            end = std::max(end, clip.beat + clip.length);
+        Pattern merged;
+        merged.id = next.allocate();
+        merged.name = "Merged";
+        merged.autoLength = false;
+        merged.length = std::max(.25, end - start);
+        if (const auto *first = next.pattern(clips.front().pattern))
+            merged.colour = first->colour;
+        for (const auto &clip : clips)
+        {
+            const auto *pattern = next.pattern(clip.pattern);
+            if (!pattern)
+                return missing();
+            const auto occurrences = rawPatternOccurrences(next, *pattern);
+            forEachClipRepeat(clip.length, clip.offset, pattern->length,
+                              [&](double position, double length, double offset, std::uint32_t)
+                              {
+                                  const double base = clip.beat - start + position - offset;
+                                  for (const auto &occurrence : occurrences)
+                                  {
+                                      const auto &n = occurrence.note;
+                                      if (n.beat < offset || n.beat >= offset + length)
+                                          continue;
+                                      Note copy = n;
+                                      copy.id = next.allocate();
+                                      copy.beat = base + n.beat;
+                                      copy.length = std::min(n.length, offset + length - n.beat);
+                                      copy.muted = n.muted || clip.muted;
+                                      merged.notes.push_back(copy);
+                                  }
+                                  for (const auto &event : pattern->controllers)
+                                      if (event.beat >= offset && event.beat < offset + length)
+                                      {
+                                          auto copy = event;
+                                          copy.id = next.allocate();
+                                          copy.beat = base + event.beat;
+                                          merged.controllers.push_back(copy);
+                                      }
+                              });
+        }
+        if (merged.notes.size() > 100000)
+            return juce::Result::fail("The merged Pattern would exceed 100000 notes");
+        std::set<Id> removed;
+        for (const auto &clip : clips)
+            removed.insert(clip.id);
+        std::erase_if(next.placements, [&](const auto &p) { return removed.contains(p.id); });
+        next.placements.push_back({next.allocate(), merged.id, clips.front().lane, start, merged.length, 0, false});
+        next.patterns.push_back(std::move(merged));
     }
     else if (id == "clip.unique")
     {
