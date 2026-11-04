@@ -1,0 +1,55 @@
+# macOS build on every source push to main and every pull request; a manual run also
+# packages it (archive) as a downloadable artifact.
+# Steps live in build-platform.yml; release.yml builds all platforms for v* tags.
+name: macOS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'cmake/**'
+      - 'patches/**'
+      - 'scripts/**'
+      - 'plugins/**'
+      - 'assets/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'dependencies.lock.json'
+      - '.github/workflows/build-platform.yml'
+      - '.github/workflows/build-macos.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'cmake/**'
+      - 'patches/**'
+      - 'scripts/**'
+      - 'plugins/**'
+      - 'assets/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'dependencies.lock.json'
+      - '.github/workflows/build-platform.yml'
+      - '.github/workflows/build-macos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push supersedes an older macOS push build; manual runs are never cancelled.
+concurrency:
+  group: build-macos-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+jobs:
+  build:
+    uses: ./.github/workflows/build-platform.yml
+    with:
+      platform: macos-universal
+      runner: macos-15
+      configure: macos
+      build: macos-release
+      package: ${{ github.event_name == 'workflow_dispatch' }}

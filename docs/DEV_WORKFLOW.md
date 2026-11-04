@@ -597,9 +597,14 @@ artefact, not a development checkpoint. `installer_package` verifies the pipelin
 
 ## Cross-platform GitHub build candidates
 
-Actions > Build release > Run workflow compiles Windows x64, Linux x64 and
-universal macOS (Apple Silicon/Intel) candidates and retains their artifacts.
-Pushing a `v<version>` tag matching CMake's project version also assembles a
+Each platform has its own workflow: **Windows** (`build-windows.yml`), **Linux**
+(`build-linux.yml`) and **macOS** (`build-macos.yml`, universal Apple Silicon/Intel).
+Each compiles, links and runs the focused native number test on every source push
+to `main` and every pull request; a newer push cancels that platform's older push
+build. Actions > *platform* > Run workflow also packages that platform's candidate
+(Windows adds the setup) as a downloadable artifact. All three share the steps in
+`build-platform.yml`. Pushing a `v<version>` tag matching CMake's project version
+runs **Release** (`release.yml`), which builds and packages all three and assembles a
 **draft prerelease**, only after all three builds succeed. Publishing that draft
 is a separate owner action. The workflow does not run acceptance tests or promote
 the qualified local `dist/VibeRa Studio`; successful compilation and packaging

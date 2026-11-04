@@ -1,0 +1,104 @@
+# Shared native build for one platform, called by build-windows.yml, build-linux.yml,
+# build-macos.yml (every source push/pull request) and release.yml (v* tags).
+# Compilation, linking and the focused native test are not audio/UI acceptance.
+name: Build one platform
+
+on:
+  workflow_call:
+    inputs:
+      platform: {type: string, required: true}   # windows-x64 | linux-x64 | macos-universal
+      runner: {type: string, required: true}
+      configure: {type: string, required: true}  # CMake configure preset
+      build: {type: string, required: true}      # CMake build preset
+      package:
+        type: boolean
+        default: false                           # Archive (+ Windows installer) and upload it.
+      release-tag:
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ inputs.platform }}
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build pkg-config libasound2-dev libjack-jackd2-dev \
+            libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev \
+            libxrandr-dev libxrender-dev libxi-dev libfreetype6-dev libfontconfig1-dev \
+            libgl1-mesa-dev libcurl4-openssl-dev
+
+      - name: Install macOS build tools
+        if: runner.os == 'macOS'
+        run: command -v ninja || brew install ninja
+
+      # Cache verified archives, never stale patched source trees.
+      - name: Cache dependency archives
+        uses: actions/cache@v4
+        with:
+          path: vendor/archives
+          key: dependency-archives-${{ hashFiles('dependencies.lock.json') }}
+
+      - name: Fetch and patch pinned dependencies
+        shell: pwsh
+        run: ./scripts/fetch-dependencies.ps1
+
+      - name: Configure
+        run: cmake --preset ${{ inputs.configure }}
+
+      - name: Build
+        # Ninja keeps compiling independent objects to expose all errors in one run.
+        # -k 0 retains a failing exit status; Windows/MSBuild keeps its own options.
+        run: cmake --build --preset ${{ inputs.build }} --target VibeRa VibeRaPluginWorker VibeRaNumberTextTests ${{ runner.os != 'Windows' && '-- -k 0' || '' }}
+
+      - name: Verify project numeric text on the native standard library
+        run: ctest --test-dir build/${{ inputs.configure }} -C Release -R '^project_number_text$' --output-on-failure
+
+      - name: Assemble and archive native candidate
+        if: inputs.package
+        shell: pwsh
+        env:
+          BUILD_PLATFORM: ${{ inputs.platform }}
+          BUILD_PRESET: ${{ inputs.configure }}
+          RELEASE_TAG: ${{ inputs.release-tag }}
+        run: |
+          python scripts/ci-package.py --platform $env:BUILD_PLATFORM --build-dir "build/$env:BUILD_PRESET" --tag "$env:RELEASE_TAG"
+          if ($LASTEXITCODE -ne 0) { throw 'Native candidate packaging failed' }
+
+      - name: Build Windows installer
+        if: runner.os == 'Windows' && inputs.package
+        shell: pwsh
+        run: |
+          ./scripts/make-installer.ps1 -Source 'out/stage/VibeRa Studio' -Output out/installer
+          $manifest = Get-Content -Encoding utf8 out/candidate-windows-x64.json -Raw | ConvertFrom-Json
+          Move-Item out/installer/VibeRa-Studio-Setup.exe "out/$($manifest.archiveBase)-Setup.exe"
+          python scripts/ci-package.py --record-installer "out/$($manifest.archiveBase)-Setup.exe"
+          if ($LASTEXITCODE -ne 0) { throw 'Installer checksum failed' }
+
+      - name: Keep the candidate
+        if: inputs.package
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-${{ inputs.platform }}
+          if-no-files-found: error
+          path: |
+            out/*.zip
+            out/*.tar.gz
+            out/*-Setup.exe
+            out/*.sha256
+            out/candidate-*.json

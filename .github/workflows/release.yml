@@ -1,153 +1,53 @@
-# Native builds on Windows, Linux and macOS. Every source push to main (and every pull
-# request) compiles all three, so a platform-specific error is caught the same day.
-# Packaging runs only for manual runs and v* tags; tags create draft releases.
-# Compilation is not audio/UI acceptance.
-name: Build release
+# Draft release for a v* tag: builds and packages Windows, Linux and macOS (the same steps as
+# the per-platform workflows, in build-platform.yml), then attaches every file and checksum to
+# one draft prerelease. Nothing is published until a maintainer publishes the draft.
+name: Release
 
 on:
   push:
-    branches: [main]
     tags: ['v*']
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'cmake/**'
-      - 'patches/**'
-      - 'scripts/**'
-      - 'plugins/**'
-      - 'assets/**'
-      - 'CMakeLists.txt'
-      - 'CMakePresets.json'
-      - 'dependencies.lock.json'
-      - '.github/workflows/release.yml'
-  pull_request:
-    branches: [main]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'cmake/**'
-      - 'patches/**'
-      - 'scripts/**'
-      - 'plugins/**'
-      - 'assets/**'
-      - 'CMakeLists.txt'
-      - 'CMakePresets.json'
-      - 'dependencies.lock.json'
-      - '.github/workflows/release.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
 
-# A newer push supersedes an older push build; manual and tag builds are never cancelled
-# by pushes (separate groups).
 concurrency:
-  group: build-${{ github.event_name }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/') }}
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build:
-    name: ${{ matrix.platform }}
-    runs-on: ${{ matrix.runner }}
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows-x64
-            runner: windows-2022
-            configure: windows
-            build: release
-          - platform: linux-x64
-            runner: ubuntu-24.04
-            configure: linux
-            build: linux-release
-          - platform: macos-universal
-            runner: macos-15
-            configure: macos
-            build: macos-release
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
+  windows:
+    uses: ./.github/workflows/build-platform.yml
+    with:
+      platform: windows-x64
+      runner: windows-2022
+      configure: windows
+      build: release
+      package: true
+      release-tag: ${{ github.ref_name }}
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+  linux:
+    uses: ./.github/workflows/build-platform.yml
+    with:
+      platform: linux-x64
+      runner: ubuntu-24.04
+      configure: linux
+      build: linux-release
+      package: true
+      release-tag: ${{ github.ref_name }}
 
-      - name: Install Linux build dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build pkg-config libasound2-dev libjack-jackd2-dev \
-            libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev \
-            libxrandr-dev libxrender-dev libxi-dev libfreetype6-dev libfontconfig1-dev \
-            libgl1-mesa-dev libcurl4-openssl-dev
-
-      - name: Install macOS build tools
-        if: runner.os == 'macOS'
-        run: command -v ninja || brew install ninja
-
-      # Cache verified archives, never stale patched source trees.
-      - name: Cache dependency archives
-        uses: actions/cache@v4
-        with:
-          path: vendor/archives
-          key: dependency-archives-${{ hashFiles('dependencies.lock.json') }}
-
-      - name: Fetch and patch pinned dependencies
-        shell: pwsh
-        run: ./scripts/fetch-dependencies.ps1
-
-      - name: Configure
-        run: cmake --preset ${{ matrix.configure }}
-
-      - name: Build
-        # Ninja keeps compiling independent objects to expose all errors in one run.
-        # -k 0 retains a failing exit status; Windows/MSBuild keeps its own options.
-        run: cmake --build --preset ${{ matrix.build }} --target VibeRa VibeRaPluginWorker VibeRaNumberTextTests ${{ runner.os != 'Windows' && '-- -k 0' || '' }}
-
-      - name: Verify project numeric text on the native standard library
-        run: ctest --test-dir build/${{ matrix.configure }} -C Release -R '^project_number_text$' --output-on-failure
-
-      - name: Assemble and archive native candidate
-        if: (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/'))
-        shell: pwsh
-        env:
-          BUILD_PLATFORM: ${{ matrix.platform }}
-          BUILD_PRESET: ${{ matrix.configure }}
-          RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
-        run: |
-          python scripts/ci-package.py --platform $env:BUILD_PLATFORM --build-dir "build/$env:BUILD_PRESET" --tag "$env:RELEASE_TAG"
-          if ($LASTEXITCODE -ne 0) { throw 'Native candidate packaging failed' }
-
-      - name: Build Windows installer
-        if: runner.os == 'Windows' && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/'))
-        shell: pwsh
-        run: |
-          ./scripts/make-installer.ps1 -Source 'out/stage/VibeRa Studio' -Output out/installer
-          $manifest = Get-Content -Encoding utf8 out/candidate-windows-x64.json -Raw | ConvertFrom-Json
-          Move-Item out/installer/VibeRa-Studio-Setup.exe "out/$($manifest.archiveBase)-Setup.exe"
-          python scripts/ci-package.py --record-installer "out/$($manifest.archiveBase)-Setup.exe"
-          if ($LASTEXITCODE -ne 0) { throw 'Installer checksum failed' }
-
-      - name: Keep the candidate
-        if: (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/'))
-        uses: actions/upload-artifact@v4
-        with:
-          name: candidate-${{ matrix.platform }}
-          if-no-files-found: error
-          path: |
-            out/*.zip
-            out/*.tar.gz
-            out/*-Setup.exe
-            out/*.sha256
-            out/candidate-*.json
+  macos:
+    uses: ./.github/workflows/build-platform.yml
+    with:
+      platform: macos-universal
+      runner: macos-15
+      configure: macos
+      build: macos-release
+      package: true
+      release-tag: ${{ github.ref_name }}
 
   release:
     name: Assemble draft release
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: [windows, linux, macos]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
