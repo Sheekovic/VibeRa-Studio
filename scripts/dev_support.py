@@ -5,9 +5,11 @@ import ctypes
 import hashlib
 import json
 import os
+import errno
 from pathlib import Path
 import secrets
 import subprocess
+import sys
 import time
 from contextlib import contextmanager
 
@@ -52,8 +54,39 @@ def owned_job_members():
     raise RuntimeError("Engineering descendant limit exceeded; reconcile rather than bypass")
 
 
+class _DarwinBSDInfo(ctypes.Structure):
+    # Darwin libproc PROC_PIDTBSDINFO, including microsecond process birth time.
+    _fields_ = [(name, ctypes.c_uint32) for name in (
+        'flags', 'status', 'xstatus', 'pid', 'ppid', 'uid', 'gid', 'ruid',
+        'rgid', 'svuid', 'svgid', 'reserved')]
+    _fields_ += [('comm', ctypes.c_char * 16), ('name', ctypes.c_char * 32)]
+    _fields_ += [(name, ctypes.c_uint32) for name in (
+        'nfiles', 'pgid', 'pjobc', 'e_tdev', 'e_tpgid')]
+    _fields_ += [('nice', ctypes.c_int32), ('start_sec', ctypes.c_uint64),
+                ('start_usec', ctypes.c_uint64)]
+
+
+def _darwin_process_identity(pid):
+    libproc = ctypes.CDLL('/usr/lib/libproc.dylib', use_errno=True)
+    query = libproc.proc_pidinfo
+    query.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_uint64, ctypes.c_void_p, ctypes.c_int]
+    query.restype = ctypes.c_int
+    info = _DarwinBSDInfo()
+    ctypes.set_errno(0)
+    size = query(pid, 3, 0, ctypes.byref(info), ctypes.sizeof(info))
+    if size == ctypes.sizeof(info) and info.pid == pid and info.start_sec > 0:
+        return f'{info.start_sec}:{info.start_usec}'
+    if size == 0 and ctypes.get_errno() == errno.ESRCH:
+        return None
+    raise RuntimeError(f'Cannot establish process identity for PID {pid}; preserve uncertain process')
+
+
 def process_identity(pid):
     """PID plus OS creation identity; an inaccessible process is not an owner."""
+    if not isinstance(pid, int) or pid <= 0 or pid > 0x7fffffff:
+        return None
+    if sys.platform == 'darwin':
+        return _darwin_process_identity(pid)
     if os.name != "nt":
         try:
             return Path(f"/proc/{pid}/stat").read_text().split()[21]
