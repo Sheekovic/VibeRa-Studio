@@ -11,10 +11,7 @@
 #include "Vst3EditorBridge.h"
 #include "effects/NativeEffects.h"
 #include "effects/NativeEffectsRegistry.h"
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
+#include "PluginIpcResources.h"
 #include <charconv>
 #include <set>
 #include <cmath>
@@ -336,7 +333,7 @@ class WorkerApp final : public juce::JUCEApplication,
                         private juce::Timer,
                         private juce::AudioProcessorListener
 {
-    HANDLE mapping = nullptr;
+    PluginIpcResources resources;
     ipc::Shared *shared = nullptr;
     juce::AudioPluginFormatManager formats;
     std::unique_ptr<juce::AudioPluginInstance> plugin;
@@ -443,7 +440,7 @@ class WorkerApp final : public juce::JUCEApplication,
     const juce::String schemaTraceDirectory =
         juce::SystemStats::getEnvironmentVariable("VIBERA_SCHEMA_TRACE_DIRECTORY", {});
     const juce::String schemaTraceIdentity =
-        juce::String(GetCurrentProcessId()) + "-" + juce::Uuid().toString();
+        juce::String(pluginProcessId()) + "-" + juce::Uuid().toString();
     unsigned schemaRefreshSerial = 0, tracedRefreshSerial = 0;
     std::vector<std::pair<unsigned, juce::String>> schemaTraces;
     void captureSchemaTrace()
@@ -962,14 +959,13 @@ class WorkerApp final : public juce::JUCEApplication,
                     owner.processPackets();
                 }
                 owner.controlIdle = true;
-                WaitForSingleObject(owner.wake, 10); // worker waits; host only signals
+                owner.resources.wait(10); // worker waits; host only signals
             }
             owner.shared->dspPhase.store(ipc::DspPhase::stopped, std::memory_order_release);
         }
     };
     std::unique_ptr<Dsp> dsp;
-    HANDLE parent = nullptr;
-    HANDLE wake = nullptr;
+    PluginParentProcess parent;
     void fail(const juce::String &error)
     {
         if (shared)
@@ -1015,14 +1011,12 @@ class WorkerApp final : public juce::JUCEApplication,
             fail("Invalid worker arguments");
             return;
         }
-        mapping = OpenFileMappingW(FILE_MAP_ALL_ACCESS, FALSE, args[1].toWideCharPointer());
-        if (!mapping)
+        if (!resources.open(args[1]))
         {
-            fail("Cannot open IPC mapping");
+            fail("Cannot open IPC mapping or audio notification");
             return;
         }
-        shared = static_cast<ipc::Shared *>(
-            MapViewOfFile(mapping, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(ipc::Shared)));
+        shared = resources.data();
         if (!shared || shared->signature != ipc::magic || shared->blockSize < 16 ||
             shared->blockSize > ipc::frames || !std::isfinite(shared->rate) || shared->rate < 8000 ||
             shared->rate > 192000 || !shared->requestedBuses.valid() ||
@@ -1031,13 +1025,7 @@ class WorkerApp final : public juce::JUCEApplication,
             fail("Invalid IPC configuration");
             return;
         }
-        parent = OpenProcess(SYNCHRONIZE, FALSE, shared->parentPid);
-        wake = OpenEventW(SYNCHRONIZE | EVENT_MODIFY_STATE, FALSE, (args[1] + "-audio").toWideCharPointer());
-        if (!wake)
-        {
-            fail("Cannot open audio notification");
-            return;
-        }
+        parent.open(shared->parentPid);
         auto xml = juce::XmlDocument::parse(juce::File(args[2]));
         juce::PluginDescription description;
         if (!xml || !description.loadFromXml(*xml) ||
@@ -1507,7 +1495,7 @@ class WorkerApp final : public juce::JUCEApplication,
             quit();
             return;
         }
-        if (shared->shutdown.load() || (parent && WaitForSingleObject(parent, 0) == WAIT_OBJECT_0))
+        if (shared->shutdown.load() || parent.exited())
         {
             quit();
             return;
@@ -1548,7 +1536,7 @@ class WorkerApp final : public juce::JUCEApplication,
                 }
                 captureFlushSerial = request;
                 stateFlushTicket = flushRequest.fetch_add(1) + 1;
-                SetEvent(wake);
+                resources.signal();
                 return;
             }
             if (!controlIdle.load() || flushReady.load(std::memory_order_acquire) != stateFlushTicket)
@@ -1566,7 +1554,7 @@ class WorkerApp final : public juce::JUCEApplication,
                     return;
                 }
                 stateFlushTicket = flushRequest.fetch_add(1) + 1;
-                SetEvent(wake);
+                resources.signal();
                 return;
             }
             juce::MemoryBlock state;
@@ -1605,7 +1593,7 @@ class WorkerApp final : public juce::JUCEApplication,
             stateSerial = request;
             capturedStateReady.store(request, std::memory_order_release);
             controlRequested = false;
-            SetEvent(wake);
+            resources.signal();
         }
     }
     void processPackets()
@@ -1747,8 +1735,8 @@ class WorkerApp final : public juce::JUCEApplication,
         if (dsp)
         {
             dsp->signalThreadShouldExit();
-            if (wake)
-                SetEvent(wake);
+            if (resources.data())
+                resources.signal();
             dsp->stopThread(10000);
             dsp.reset();
         }
@@ -1767,24 +1755,10 @@ class WorkerApp final : public juce::JUCEApplication,
         {
             if (shared->status.load() != -1)
                 shared->status = 2;
-            UnmapViewOfFile(shared);
             shared = nullptr;
         }
-        if (parent)
-        {
-            CloseHandle(parent);
-            parent = nullptr;
-        }
-        if (wake)
-        {
-            CloseHandle(wake);
-            wake = nullptr;
-        }
-        if (mapping)
-        {
-            CloseHandle(mapping);
-            mapping = nullptr;
-        }
+        parent.reset();
+        resources.reset();
     }
 };
 } // namespace

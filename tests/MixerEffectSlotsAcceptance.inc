@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../src/NoInline.h"
 // Include once at the end of StudioMixerControls.cpp, outside its namespace.
 // Component handlers and semantic calls only; no native OS input or audio claim.
 #include "MixerEffectSlotsAcceptance.h"
@@ -6,7 +7,7 @@
 #include "MixerWorkspaceReadabilityAcceptance.h"
 namespace vibera
 {
-__declspec(noinline) juce::Result Studio::verifyMixerChainControlsUi()
+VIBERA_NOINLINE juce::Result Studio::verifyMixerChainControlsUi()
 {
     auto fail = [](const char *message) { return juce::Result::fail(message); };
     auto *editor = static_cast<Editor *>(windows[3]->getContentComponent());

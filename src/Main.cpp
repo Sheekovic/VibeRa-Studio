@@ -3,9 +3,13 @@
 #include "WindowChrome.h"
 #include "McpServer.h"
 #include "VibeRaVersion.h"
+#if JUCE_WINDOWS
 #include "NativeMixerMeterDriver.h"
+#endif
 #include "BuildAcceptanceOutput.h"
+#if JUCE_WINDOWS
 #include "../tests/InstalledStudioEffectTransactionAcceptance.h"
+#endif
 #include <juce_cryptography/juce_cryptography.h>
 class VibeRaApplication final : public juce::JUCEApplication
 {
@@ -61,9 +65,11 @@ class VibeRaApplication final : public juce::JUCEApplication
     };
     std::unique_ptr<Window> window;
     std::unique_ptr<vibera::McpServer> mcp;
+#if JUCE_WINDOWS
     std::unique_ptr<vibera::test::NativeMeterStorage> nativeMeterStorage;
     std::unique_ptr<vibera::test::NativeMixerMeterDriver> nativeMeterDriver;
     juce::File nativeMeterOutput;
+#endif
 
   public:
     const juce::String getApplicationName() override
@@ -92,6 +98,7 @@ class VibeRaApplication final : public juce::JUCEApplication
                                    argument.startsWith("--plugin-save-capture") ||
                                    argument.startsWith("--plugin-main-io");
                         });
+#if JUCE_WINDOWS
         if (effectOpeningRequested)
         {
             const bool original =
@@ -196,6 +203,15 @@ class VibeRaApplication final : public juce::JUCEApplication
             }
             return;
         }
+#else
+        if (effectOpeningRequested)
+        {
+            juce::Logger::writeToLog("Unsupported platform: installed-provider opening acceptance requires Windows");
+            setApplicationReturnValue(1);
+            quit();
+            return;
+        }
+#endif
         const bool effectSlotsRequested = std::any_of(args.begin(), args.end(), [](const auto &argument)
                                                       { return argument.startsWith("--mixer-effects-ui"); });
         if (effectSlotsRequested)
@@ -262,6 +278,7 @@ class VibeRaApplication final : public juce::JUCEApplication
                        arg.startsWith("--mixer-stereo-ui") || arg.startsWith("--mixer-automation-ui") ||
                        arg.startsWith("--mixer-organisation-ui") || arg.startsWith("--mixer-chain-workflow");
             });
+#if JUCE_WINDOWS
         if (recoveryRequested)
         {
             const bool mixerTargets = args.size() == 2 && args[0] == "--mixer-targets-ui-check";
@@ -436,7 +453,17 @@ class VibeRaApplication final : public juce::JUCEApplication
             }
             return;
         }
+#else
+        if (recoveryRequested)
+        {
+            juce::Logger::writeToLog("Unsupported platform: native recovery acceptance requires Windows");
+            setApplicationReturnValue(1);
+            quit();
+            return;
+        }
+#endif
         const bool nativeMeterFixture = args.contains("--native-mixer-meter-fixture");
+#if JUCE_WINDOWS
         if (nativeMeterFixture)
         {
             // Exactly one explicit test launch; no user project/open/default
@@ -472,6 +499,15 @@ class VibeRaApplication final : public juce::JUCEApplication
                 return;
             }
         }
+#else
+        if (nativeMeterFixture)
+        {
+            juce::Logger::writeToLog("Unsupported platform: native mixer meter acceptance requires Windows");
+            setApplicationReturnValue(1);
+            quit();
+            return;
+        }
+#endif
         bool smoke = args.size() == 2 && args[0] == "--smoke-test";
         bool pianoCheck = args.size() == 3 && args[0] == "--piano-navigation-check";
         bool samplerCheck = args.size() == 2 && args[0] == "--sampler-gesture-check";
@@ -525,6 +561,7 @@ class VibeRaApplication final : public juce::JUCEApplication
                 : 0); // These owned acceptance drivers dispatch only fixed256-frame callbacks.
         if (args.contains("--window-check-project") || args.contains("--detached-window-check-project"))
             window->setVisible(true);
+#if JUCE_WINDOWS
         if (nativeMeterFixture)
         {
             auto *studio = dynamic_cast<vibera::Studio *>(window->getContentComponent());
@@ -556,6 +593,7 @@ class VibeRaApplication final : public juce::JUCEApplication
                 return;
             }
         }
+#endif
         if (mixerControlsCheck)
         {
             juce::MessageManager::callAsync(
@@ -1034,6 +1072,7 @@ class VibeRaApplication final : public juce::JUCEApplication
                 {
                     if (!safe)
                         throw std::runtime_error("Application closed");
+#if JUCE_WINDOWS
                     if (nativeMeterDriver && name == "vibera_project")
                     {
                         const auto action = arguments["action"].toString();
@@ -1050,6 +1089,7 @@ class VibeRaApplication final : public juce::JUCEApplication
                                     "Native meter fixture file target must remain in its owned output");
                         }
                     }
+#endif
                     return safe->mcpCall(name, arguments);
                 });
             if (!mcp->start())
@@ -1123,6 +1163,7 @@ class VibeRaApplication final : public juce::JUCEApplication
     void shutdown() override
     {
         mcp.reset();
+#if JUCE_WINDOWS
         if (nativeMeterDriver)
         {
             try
@@ -1144,8 +1185,11 @@ class VibeRaApplication final : public juce::JUCEApplication
             }
             nativeMeterDriver.reset();
         }
+#endif
         window.reset();
+#if JUCE_WINDOWS
         nativeMeterStorage.reset(); // Keep isolated engine storage active through its destruction.
+#endif
     }
 };
 START_JUCE_APPLICATION(VibeRaApplication)

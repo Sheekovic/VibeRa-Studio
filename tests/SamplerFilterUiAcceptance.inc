@@ -63,7 +63,7 @@
         controller.project.channel(second)->sampler.filterCutoff != 1 ||
         controller.project.channel(second)->sampler.filterResonance != 0 || selectedChannel != second ||
         !filterHint->getText().contains("112.5 Hz") || !filterHint->getText().contains("Q 6.35") ||
-        !filterHint->getText().contains("Preview source is dry"))
+        !filterType->getTooltip().contains("Preview source bypasses Channel processing"))
         return fail("Sampler filter drag/grouped values/Hz-Q hints or exact Channel target incorrect");
     controller.undoEdit();
     if (!controller.project.state().isEquivalentTo(original))
@@ -87,7 +87,8 @@
     if (auto *viewport = controls->findParentComponentOfClass<juce::Viewport>())
     {
         const auto previous = viewport->getViewPosition();
-        viewport->setViewPosition(0, 970);
+        window->showPage(1); // The filter lives on the Envelope / instrument page.
+        viewport->setViewPosition(0, 0);
         auto stream = folder.getChildFile("sampler-filter-controls.png").createOutputStream();
         if (!stream)
             return fail("Sampler filter component screenshot stream unavailable");

@@ -27,7 +27,11 @@ juce::String apiBase(const MusicEngineConfig &config)
 // treats "I:\..." as a remote host, so never rely on PATH lookup; archives are passed relative to cwd.
 juce::String systemTar()
 {
+#if JUCE_WINDOWS
     return juce::File::getSpecialLocation(juce::File::windowsSystemDirectory).getChildFile("tar.exe").getFullPathName();
+#else
+    return "/usr/bin/tar";
+#endif
 }
 juce::File findFile(const juce::File &root, const juce::String &name, int depth = 3)
 {
@@ -233,11 +237,21 @@ juce::File MusicEngines::yueRoot(const MusicEngineConfig &c)
 }
 bool MusicEngines::aceStepInstalled(const MusicEngineConfig &c)
 {
+#if JUCE_WINDOWS
     return findFile(aceStepRoot(c), "start_api_server.bat") != juce::File{};
+#else
+    juce::ignoreUnused(c);
+    return false; // The managed portable installation is Windows-specific.
+#endif
 }
 bool MusicEngines::yueInstalled(const MusicEngineConfig &c)
 {
+#if JUCE_WINDOWS
     return yueRoot(c).getChildFile(".venv/Scripts/yue2.exe").existsAsFile();
+#else
+    juce::ignoreUnused(c);
+    return false;
+#endif
 }
 
 MusicEngines::~MusicEngines()
@@ -390,6 +404,10 @@ juce::Result MusicEngines::checkHardware(const juce::String &engine, juce::int64
 juce::Result MusicEngines::runProcess(const juce::StringArray &command, const juce::File &cwd, const juce::File &log,
                                       int timeoutMs, const juce::String &stage)
 {
+#if !JUCE_WINDOWS
+    juce::ignoreUnused(command, cwd, log, timeoutMs, stage);
+    return juce::Result::fail("music.platformUnsupported: Managed music-engine commands currently require Windows");
+#else
     // A generated .cmd keeps quoting simple and sends all output to the log file.
     juce::String line;
     for (const auto &part : command)
@@ -423,10 +441,17 @@ juce::Result MusicEngines::runProcess(const juce::StringArray &command, const ju
         return juce::Result::fail("music.stepFailed: " + stage + " failed (exit " +
                                   juce::String(process.getExitCode()) + "); see " + log.getFullPathName());
     return juce::Result::ok();
+#endif
 }
 
 juce::Result MusicEngines::ensureAceStep(const MusicEngineConfig &config)
 {
+#if !JUCE_WINDOWS
+    juce::ignoreUnused(config);
+    return juce::Result::fail(
+        "music.platformUnsupported: Managed ACE-Step installation currently requires Windows. "
+        "Start an ACE-Step API server separately and set its URL in Settings > AI");
+#else
     if (aceStepInstalled(config))
         return juce::Result::ok();
     const auto root = aceStepRoot(config);
@@ -456,6 +481,7 @@ juce::Result MusicEngines::ensureAceStep(const MusicEngineConfig &config)
         return juce::Result::fail("music.install: ACE-Step archive did not contain start_api_server.bat");
     archive.deleteFile(); // Reproducible download; the extracted install is what is kept.
     return juce::Result::ok();
+#endif
 }
 
 bool MusicEngines::serverRunning() const
@@ -623,6 +649,10 @@ juce::Result MusicEngines::generateAceStep(const MusicRequest &request, const Mu
 
 juce::Result MusicEngines::ensureYue(const MusicEngineConfig &config)
 {
+#if !JUCE_WINDOWS
+    juce::ignoreUnused(config);
+    return juce::Result::fail("music.platformUnsupported: Managed YuE2 installation and launch currently require Windows");
+#else
     if (yueInstalled(config))
         return juce::Result::ok();
     const auto root = yueRoot(config);
@@ -675,6 +705,7 @@ juce::Result MusicEngines::ensureYue(const MusicEngineConfig &config)
     return yueInstalled(config) ? juce::Result::ok()
                                 : juce::Result::fail("music.install: yue2.exe missing after install; see " +
                                                      log.getFullPathName());
+#endif
 }
 
 juce::Result MusicEngines::generateYue(const MusicRequest &request, const MusicEngineConfig &config,

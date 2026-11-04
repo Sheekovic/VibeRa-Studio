@@ -77,28 +77,29 @@
         return fail("Voice-mode controls lost their scrollable owner");
     const auto previousBounds = window->getBounds();
     const auto previousView = viewport->getViewPosition();
+    // Voice modes live on the Miscellaneous page of the three-page Channel settings window.
+    window->showPage(2);
     for (const int width : {360, 620, 980})
     {
         window->setSize(width, 680);
         window->refreshFromProject();
-        for (auto *component :
-             std::array<juce::Component *, 7>{mono, porta, full, slide, gate, heading, hint})
-            if (component->getWidth() < 24 || component->getHeight() < 20 ||
+        for (auto *component : std::array<juce::Component *, 5>{mono, porta, full, slide, gate})
+            if (!component->isVisible() || component->getWidth() < 24 || component->getHeight() < 20 ||
                 !controls->getLocalBounds().contains(component->getBounds()))
-                return fail("Voice-mode control is clipped or too small in minimum/resized content");
+                return fail("Voice-mode control is hidden, clipped or too small in minimum/resized content");
         if (mono->getBounds().intersects(porta->getBounds()) ||
             porta->getBounds().intersects(full->getBounds()) ||
-            slide->getBounds().intersects(gate->getBounds()) || gate->getBottom() > hint->getY() ||
-            hint->getBottom() > controls->findChildWithID("instrument.sampler.reverse")->getY() ||
+            slide->getBounds().intersects(gate->getBounds()) || !keyboard->isVisible() ||
+            gate->getBottom() > keyboard->getY() || slide->getBottom() > keyboard->getY() ||
             keyboard->getBottom() > controls->getHeight())
             return fail("Voice-mode section overlaps retained controls or clips keyboard content");
-        viewport->setViewPosition(100000, heading->getY() - 8);
+        viewport->setViewPosition(100000, 0);
         if (width == 360 && viewport->getViewPositionX() <= 0)
             return fail("Minimum-width sampler cannot scroll to all original voice controls");
     }
-    window->setSize(620, 680);
+    window->setSize(860, 640);
     window->refreshFromProject();
-    viewport->setViewPosition(0, heading->getY() - 8);
+    viewport->setViewPosition(0, 0);
     {
         auto stream = folder.getChildFile("sampler-voice-modes.png").createOutputStream();
         if (!stream || !stream->setPosition(0) || stream->truncate().failed() ||

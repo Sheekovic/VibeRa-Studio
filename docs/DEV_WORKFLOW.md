@@ -594,3 +594,35 @@ builds `VibeRa-Studio-Setup.exe` (default: from `dist/VibeRa Studio` into
 The setup installs per user into `%LOCALAPPDATA%\Programs\VibeRa Studio` with shortcuts
 and an uninstall entry. Build it from a qualified distribution only; it is a release
 artefact, not a development checkpoint. `installer_package` verifies the pipeline.
+
+## Cross-platform GitHub build candidates
+
+Actions > Build release > Run workflow compiles Windows x64, Linux x64 and
+universal macOS (Apple Silicon/Intel) candidates and retains their artifacts.
+Pushing a `v<version>` tag matching CMake's project version also assembles a
+**draft prerelease**, only after all three builds succeed. Publishing that draft
+is a separate owner action. The workflow does not run acceptance tests or promote
+the qualified local `dist/VibeRa Studio`; successful compilation and packaging
+leave native audio, recording, plugin and UI acceptance unverified.
+
+Artifacts are `VibeRa-Studio-<version>-windows-x64.zip` and `-Setup.exe`,
+`VibeRa-Studio-<version>-linux-x64.tar.gz`, and
+`VibeRa-Studio-<version>-macos-universal.zip`, with SHA-256 sidecars and
+`candidate-<platform>.json` source/binary manifests. macOS bundles are ad-hoc
+signed, without Developer ID signing or notarization. Linux assumes Ubuntu 24.04
+or compatible system libraries as its initial baseline; older distributions and
+the actual minimum supported OS versions are unverified.
+
+The workflow reuses the pinned dependency fetch/patch scripts under `pwsh`,
+then builds only `VibeRa` and `VibeRaPluginWorker` with the existing Windows
+`release` preset or new `linux-release` / `macos-release` presets. Packaging runs
+only on isolated GitHub runners through `scripts/ci-package.py`; it verifies
+required adjacent runtime content, POSIX binary architecture and available
+dynamic libraries, but those checks do not establish musical functionality.
+
+Current platform gaps remain explicit: video playback uses Windows Media
+Foundation; managed AI installers and DPAPI-backed key storage are Windows-only;
+native OS acceptance fixtures have not been ported. Physical callback factory
+provenance is currently verified only on Windows. Linux/macOS hardware plugin
+transport therefore remains unqualified and refuses unknown callback bounds.
+No deadline, buffer or transport-bound relaxation establishes portability.

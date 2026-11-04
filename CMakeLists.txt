@@ -24,9 +24,13 @@ target_sources(VibeRaCore PRIVATE src/StoppedEffectWorkers.cpp src/PluginAutomat
 target_sources(VibeRaCore PRIVATE src/EffectChain.cpp src/EffectChainPresetFiles.cpp src/ChannelPreset.cpp)
 target_sources(VibeRaCore PRIVATE src/ChannelRoutingEffects.cpp)
 target_sources(VibeRaCore PRIVATE src/ai/AiSettings.cpp src/ai/AiHttp.cpp src/ai/LlmClient.cpp src/ai/MusicEngines.cpp src/ai/ProducerAgent.cpp src/ai/McpLoopback.cpp src/ai/CodexAgent.cpp src/ai/ClaudeCli.cpp)
+set(VIBERA_USE_CURL 0)
+if(UNIX AND NOT APPLE)
+  set(VIBERA_USE_CURL 1)
+endif()
 target_compile_definitions(VibeRaCore PUBLIC
   JUCE_USE_LAME_AUDIO_FORMAT=1
-  JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_MODAL_LOOPS_PERMITTED=0
+  JUCE_WEB_BROWSER=0 JUCE_USE_CURL=${VIBERA_USE_CURL} JUCE_MODAL_LOOPS_PERMITTED=0
   JUCE_PLUGINHOST_VST=0 JUCE_PLUGINHOST_VST3=0 JUCE_PLUGINHOST_AU=0
   JUCE_PLUGINHOST_LADSPA=0 JUCE_ASIO=0 JUCE_WASAPI=1
   TRACKTION_ENABLE_REWIRE=0 TRACKTION_ENABLE_AUTOMAP=0
@@ -100,7 +104,7 @@ target_compile_definitions(VibeRaScannerFixture PRIVATE
 target_link_libraries(VibeRaScannerFixture PRIVATE juce::juce_audio_processors_headless)
 add_dependencies(VibeRaTests VibeRaScannerFixture)
 add_custom_command(TARGET VibeRaTests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-  "$<TARGET_FILE:VibeRaScannerFixture>" "$<TARGET_FILE_DIR:VibeRaTests>/VibeRaScannerFixture.exe")
+  "$<TARGET_FILE:VibeRaScannerFixture>" "$<TARGET_FILE_DIR:VibeRaTests>/$<TARGET_FILE_NAME:VibeRaScannerFixture>")
 juce_add_gui_app(VibeRaPluginWorker PRODUCT_NAME "VibeRa Plugin Worker" COMPANY_NAME "VibeRa")
 target_sources(VibeRaPluginWorker PRIVATE src/PluginWorker.cpp src/PluginEditorClock.cpp)
 target_sources(VibeRaPluginWorker PRIVATE src/effects/NativeEffects.cpp src/effects/NativeEffectsEditor.cpp
@@ -120,7 +124,7 @@ endif()
 foreach(host VibeRa VibeRaTests)
   add_dependencies(${host} VibeRaPluginWorker)
   add_custom_command(TARGET ${host} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "$<TARGET_FILE:VibeRaPluginWorker>" "$<TARGET_FILE_DIR:${host}>/VibeRa Plugin Worker.exe")
+    "$<TARGET_FILE:VibeRaPluginWorker>" "$<TARGET_FILE_DIR:${host}>/$<TARGET_FILE_NAME:VibeRaPluginWorker>")
 endforeach()
 enable_testing()
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
@@ -413,7 +417,9 @@ add_library(VibeRaBusChoiceFixture MODULE tests/NativeBusChoiceFixture.cpp)
 target_include_directories(VibeRaBusChoiceFixture PRIVATE "${VST3_SDK_ROOT}")
 set_target_properties(VibeRaBusChoiceFixture PROPERTIES PREFIX "" SUFFIX ".vst3")
 add_dependencies(VibeRaTests VibeRaBusChoiceFixture)
-add_dependencies(VibeRa VibeRaBusChoiceFixture)
+if(WIN32)
+  add_dependencies(VibeRa VibeRaBusChoiceFixture)
+endif()
 add_test(NAME plugin_main_io_model COMMAND VibeRaTests --plugin-main-io-model-check)
 set_tests_properties(plugin_main_io_model PROPERTIES TIMEOUT 30 RUN_SERIAL TRUE)
 add_test(NAME plugin_main_bus_choice COMMAND VibeRaTests --plugin-bus-choice-check
@@ -430,7 +436,9 @@ add_library(VibeRaMixerLatencyFixture MODULE tests/MixerLatencyFixture.cpp)
 target_include_directories(VibeRaMixerLatencyFixture PRIVATE "${VST3_SDK_ROOT}")
 set_target_properties(VibeRaMixerLatencyFixture PROPERTIES PREFIX "" SUFFIX ".vst3")
 add_dependencies(VibeRaTests VibeRaMixerLatencyFixture)
-add_dependencies(VibeRa VibeRaMixerLatencyFixture)
+if(WIN32)
+  add_dependencies(VibeRa VibeRaMixerLatencyFixture)
+endif()
 add_test(NAME plugin_latency_mcp COMMAND "${Python3_EXECUTABLE}"
   "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-plugin-latency-mcp.py" "$<TARGET_FILE:VibeRa>"
   "${CMAKE_CURRENT_BINARY_DIR}/plugin_latency_mcp" "$<TARGET_FILE:VibeRaMixerLatencyFixture>")
@@ -865,7 +873,9 @@ add_dependencies(VibeRaTests VibeRaParameterFixture)
 add_test(NAME isolated_parameters COMMAND VibeRaTests --parameter-check
   "${CMAKE_CURRENT_BINARY_DIR}/parameter_acceptance" "$<TARGET_FILE:VibeRaParameterFixture>")
 set_tests_properties(isolated_parameters PROPERTIES TIMEOUT 90)
-add_dependencies(VibeRa VibeRaParameterFixture)
+if(WIN32)
+  add_dependencies(VibeRa VibeRaParameterFixture)
+endif()
 add_test(NAME plugin_parameters_gui COMMAND VibeRa --parameter-ui-check
   "${CMAKE_CURRENT_BINARY_DIR}/parameter_gui_acceptance" "$<TARGET_FILE:VibeRaParameterFixture>")
 set_tests_properties(plugin_parameters_gui PROPERTIES TIMEOUT 90)
@@ -1034,6 +1044,13 @@ set(VIBERA_SYNTH_CONTENT_HOSTS VibeRaPluginWorker VibeRa VibeRaTests VibeRaSynth
 set(VIBERA_SYNTH_CONTENT_OUTPUTS)
 foreach(host IN LISTS VIBERA_SYNTH_CONTENT_HOSTS)
   get_target_property(content_destination ${host} RUNTIME_OUTPUT_DIRECTORY)
+  if(APPLE)
+    get_target_property(content_bundle ${host} MACOSX_BUNDLE)
+    if(content_bundle)
+      get_target_property(content_name ${host} JUCE_PRODUCT_NAME)
+      string(APPEND content_destination "/${content_name}.app/Contents/MacOS")
+    endif()
+  endif()
   foreach(content IN LISTS VIBERA_SYNTH_CONTENT)
     file(RELATIVE_PATH content_relative "${CMAKE_CURRENT_SOURCE_DIR}/assets/synthesizer" "${content}")
     list(APPEND VIBERA_SYNTH_CONTENT_OUTPUTS

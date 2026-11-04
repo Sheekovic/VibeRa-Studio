@@ -9,10 +9,7 @@
 #include "HostWetMix.h"
 #include "WorkerProcess.h"
 #include "PluginControlRequests.h"
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
+#include "PluginIpcResources.h"
 #include <new>
 #include <cmath>
 #include <set>
@@ -25,11 +22,17 @@ namespace vibera
 juce::File pluginWorkerExecutable()
 {
     return juce::File::getSpecialLocation(juce::File::currentExecutableFile)
-        .getSiblingFile("VibeRa Plugin Worker.exe");
+        .getSiblingFile(
+#if JUCE_WINDOWS
+            "VibeRa Plugin Worker.exe"
+#else
+            "VibeRa Plugin Worker"
+#endif
+        );
 }
 struct PluginHost::Impl
 {
-    HANDLE mapping = nullptr, wake = nullptr;
+    PluginIpcResources resources;
     ipc::Shared *shared = nullptr;
     WorkerProcess child;
     juce::File descriptorFile;
@@ -219,12 +222,7 @@ struct PluginHost::Impl
             shared->shutdown.store(1);
         if (child.isRunning() && !child.waitForProcessToFinish(2000) && allowForcedWorkerTermination)
             child.kill(); // only our owned worker
-        if (shared)
-            UnmapViewOfFile(shared);
-        if (mapping)
-            CloseHandle(mapping);
-        if (wake)
-            CloseHandle(wake);
+        resources.reset();
         if (descriptorFile.existsAsFile())
             descriptorFile.deleteFile();
     }
@@ -489,7 +487,7 @@ juce::Result PluginHost::start(const PluginSpec &spec, double rate, int block, b
     const auto startupBegan = juce::Time::getMillisecondCounterHiRes();
     if (cancelled && cancelled())
         return juce::Result::fail("Plugin preparation cancelled");
-    if (impl->retiring || impl->shared || impl->mapping || impl->wake || impl->child.processId() != 0)
+    if (impl->retiring || impl->shared || impl->resources.data() || impl->child.processId() != 0)
         return juce::Result::fail("Plugin host startup is single-use; prepare a new owned host");
     if (block < 16 || block > ipc::frames || !std::isfinite(rate) || rate < 8000 || rate > 192000)
         return juce::Result::fail("Unsupported VST3 device configuration");
@@ -545,20 +543,12 @@ juce::Result PluginHost::start(const PluginSpec &spec, double rate, int block, b
     if (!decodePluginState(spec.state, state))
         return juce::Result::fail("Invalid or oversized VST3 state");
     auto name = "Local\\VibeRa-" + juce::Uuid().toString();
-    impl->wake = CreateEventW(nullptr, FALSE, FALSE, (name + "-audio").toWideCharPointer());
-    if (!impl->wake)
-        return juce::Result::fail("Cannot create plugin audio notification");
-    impl->mapping = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0,
-                                       DWORD(sizeof(ipc::Shared)), name.toWideCharPointer());
-    if (!impl->mapping)
-        return juce::Result::fail("Cannot create plugin shared memory");
-    impl->shared = static_cast<ipc::Shared *>(
-        MapViewOfFile(impl->mapping, FILE_MAP_ALL_ACCESS, 0, 0, sizeof(ipc::Shared)));
-    if (!impl->shared)
-        return juce::Result::fail("Cannot map plugin shared memory");
+    if (!impl->resources.create(name))
+        return juce::Result::fail("Cannot create plugin shared memory or notification");
+    impl->shared = impl->resources.data();
     new (impl->shared) ipc::Shared;
     auto &shared = *impl->shared;
-    shared.parentPid = GetCurrentProcessId();
+    shared.parentPid = pluginProcessId();
     shared.instrument = spec.instrument;
     shared.rate = rate;
     shared.blockSize = block;
@@ -1848,7 +1838,7 @@ void PluginHost::process(juce::AudioBuffer<float> &buffer, int offset, int count
                 std::copy_n(p.parameters.data(), p.parameterCount, p.input->parameters.data());
                 std::copy_n(p.midi.data(), p.midiCount, p.input->midi.data());
                 p.input->status.store(1, std::memory_order_release);
-                SetEvent(p.wake); // signal only; the live host never waits for its worker
+                p.resources.signal(); // signal only; the live host never waits for its worker
                 ++p.submitted;
             }
             else

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../src/NoInline.h"
 // SOURCE-ONLY original proposal. Include INSIDE namespace vibera immediately
 // after FixedSampler definition, alongside the existing internal fixture seam.
 namespace test
 {
-__declspec(noinline) void instrumentRuntimeTests(const juce::File &folder, const PluginSpec &original)
+VIBERA_NOINLINE void instrumentRuntimeTests(const juce::File &folder, const PluginSpec &original)
 {
     const auto require = [](bool condition, const juce::String &message)
     {

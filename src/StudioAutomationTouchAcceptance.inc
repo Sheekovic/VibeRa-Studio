@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NoInline.h"
 // Original actual Studio/Controller/MCP + synthetic-device acceptance. No hardware.
-__declspec(noinline) juce::Result Studio::verifyAutomationTouch(const juce::File &folder)
+VIBERA_NOINLINE juce::Result Studio::verifyAutomationTouch(const juce::File &folder)
 {
     if (!bool(getProperties()["viberaAutomationTouchFixture"]) ||
         getProperties()["viberaAutomationTouchOutput"].toString() != folder.getFullPathName())

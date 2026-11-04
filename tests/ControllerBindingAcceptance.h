@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include "../src/NoInline.h"
 #include "../src/MidiController.h"
 #include "../src/McpSchema.h"
 #include <stdexcept>
@@ -27,7 +28,7 @@ inline ControllerBinding original()
     b.maximum = 2;
     return b;
 }
-__declspec(noinline) inline juce::Result verify(const juce::File &output)
+VIBERA_NOINLINE inline juce::Result verify(const juce::File &output)
 {
     try
     {
@@ -150,7 +151,7 @@ __declspec(noinline) inline juce::Result verify(const juce::File &output)
 }
 // Root may instantiate this in its fresh isolated Studio(false,256) GUI branch.
 // It refuses production/hardware settings before ANY mutation. No app is launched here.
-template <class StudioType> __declspec(noinline) juce::Result verifyPublicMcp(StudioType &studio)
+template <class StudioType> VIBERA_NOINLINE juce::Result verifyPublicMcp(StudioType &studio)
 {
     try
     {

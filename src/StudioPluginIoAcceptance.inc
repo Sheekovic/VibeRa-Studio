@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NoInline.h"
 // Include inside namespace vibera in StudioMcp.cpp, after McpSchema.h is available.
 // Original SDK/application/component dispatch, actual no-device workers and file
 // jobs and genuine nonzero offline WAV. No OS input, physical device, live
 // callback/independent waveform or listening qualification.
-__declspec(noinline) juce::Result Studio::verifyPluginIo(const juce::File &folder, const juce::File &binary)
+VIBERA_NOINLINE juce::Result Studio::verifyPluginIo(const juce::File &folder, const juce::File &binary)
 {
     if (!controllerTestMode || !pluginTestSettings || !workflowTestSettings || !folder.isDirectory() ||
         folder.getChildFile("plugin-io.json").exists() || afterPluginState || mixerChainBusy() ||

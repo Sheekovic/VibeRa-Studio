@@ -146,7 +146,12 @@ Dialect AiSettings::dialect() const
 juce::File suggestEngineRoot()
 {
     constexpr juce::int64 wanted = juce::int64(60) << 30;
+#if JUCE_WINDOWS
     const auto local = juce::File::getSpecialLocation(juce::File::windowsLocalAppData).getChildFile("VibeRa Studio/ai");
+#else
+    const auto local = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
+                           .getChildFile("VibeRa Studio/ai");
+#endif
     if (local.getParentDirectory().getBytesFreeOnVolume() >= wanted)
         return local;
     juce::Array<juce::File> roots;

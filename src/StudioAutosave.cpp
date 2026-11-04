@@ -4,15 +4,35 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#include <limits>
+#if JUCE_WINDOWS
 #include <windows.h>
+#else
+#include <unistd.h>
+#include <signal.h>
+#include <cerrno>
+#if JUCE_MAC
+#include <libproc.h>
+#include <sys/proc.h>
+#endif
+#endif
 
 namespace vibera
 {
 namespace
 {
+std::uint32_t currentProcessId()
+{
+#if JUCE_WINDOWS
+    return GetCurrentProcessId();
+#else
+    return std::uint32_t(getpid());
+#endif
+}
 // Creation time of a live process, 0 when it no longer runs (PID + creation identity).
 std::uint64_t processCreation(std::uint32_t pid)
 {
+#if JUCE_WINDOWS
     auto *process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, DWORD(pid));
     if (!process)
         return 0;
@@ -24,6 +44,28 @@ std::uint64_t processCreation(std::uint32_t pid)
         result = (std::uint64_t(created.dwHighDateTime) << 32) | created.dwLowDateTime;
     CloseHandle(process);
     return result;
+#else
+    if (pid == 0 || pid > std::uint32_t(std::numeric_limits<pid_t>::max()))
+        return 0;
+#if JUCE_MAC
+    proc_bsdinfo info{};
+    if (proc_pidinfo(int(pid), PROC_PIDTBSDINFO, 0, &info, sizeof(info)) == sizeof(info))
+        return info.pbi_status == SZOMB ? 0 :
+            std::uint64_t(info.pbi_start_tvsec) * 1000000 + info.pbi_start_tvusec;
+#else
+    const auto stat = juce::File("/proc/" + juce::String(pid) + "/stat").loadFileAsString();
+    // comm (field 2) can contain whitespace and parentheses. Parse after its last ')'.
+    const auto end = stat.lastIndexOfChar(')');
+    if (end >= 0)
+    {
+        const auto fields = juce::StringArray::fromTokens(stat.substring(end + 1).trim(), " ", "");
+        if (fields.size() > 19)
+            return fields[0] == "Z" ? 0 : std::uint64_t(fields[19].getLargeIntValue());
+    }
+#endif
+    // Preserve another live session when its creation metadata is inaccessible.
+    return kill(pid_t(pid), 0) == 0 || errno == EPERM ? std::numeric_limits<std::uint64_t>::max() : 0;
+#endif
 }
 } // namespace
 
@@ -34,20 +76,20 @@ juce::File Studio::autosaveDirectory() const
 
 juce::File Studio::sessionMarkerFile() const
 {
-    return autosaveDirectory().getChildFile("session-" + juce::String(GetCurrentProcessId()) + ".json");
+    return autosaveDirectory().getChildFile("session-" + juce::String(currentProcessId()) + ".json");
 }
 
 juce::File Studio::autosaveFile() const
 {
     const auto stem = projectFile == juce::File{} ? juce::String("Untitled") : projectFile.getFileNameWithoutExtension();
-    return autosaveDirectory().getChildFile(stem + " (" + juce::String(GetCurrentProcessId()) + ").autosave.vibra");
+    return autosaveDirectory().getChildFile(stem + " (" + juce::String(currentProcessId()) + ").autosave.vibra");
 }
 
 void Studio::writeSessionMarker()
 {
     auto marker = std::make_unique<juce::DynamicObject>();
-    marker->setProperty("pid", int(GetCurrentProcessId()));
-    marker->setProperty("created", juce::String(juce::int64(processCreation(GetCurrentProcessId()))));
+    marker->setProperty("pid", int(currentProcessId()));
+    marker->setProperty("created", juce::String(juce::int64(processCreation(currentProcessId()))));
     marker->setProperty("autosave", lastAutosaveFile.getFullPathName());
     marker->setProperty("project", projectFile.getFullPathName());
     marker->setProperty("time", juce::Time::getCurrentTime().toISO8601(true));
@@ -75,7 +117,9 @@ std::optional<Studio::CrashedSession> Studio::findCrashedSession()
         const auto json = juce::JSON::parse(marker);
         const auto pid = std::uint32_t(int(json["pid"]));
         const auto created = std::uint64_t(json["created"].toString().getLargeIntValue());
-        if (pid == GetCurrentProcessId() || (pid != 0 && created != 0 && processCreation(pid) == created))
+        const auto liveCreation = processCreation(pid);
+        if (pid == currentProcessId() || (pid != 0 && created != 0 &&
+            (liveCreation == created || liveCreation == std::numeric_limits<std::uint64_t>::max())))
             continue; // This session, or another VibeRa still running.
         const juce::File autosave(json["autosave"].toString());
         if (json["autosave"].toString().isNotEmpty() && juce::File::isAbsolutePath(autosave.getFullPathName()) &&

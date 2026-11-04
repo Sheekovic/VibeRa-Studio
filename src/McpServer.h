@@ -1,7 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
 #include <juce_gui_basics/juce_gui_basics.h>
+#if JUCE_WINDOWS
 #include <windows.h>
+#else
+#include <unistd.h>
+#include <poll.h>
+#include <sys/stat.h>
+#include <signal.h>
+#include <pthread.h>
+#include <cerrno>
+#endif
 #include <atomic>
 #include "McpSchema.h"
 
@@ -23,8 +32,36 @@ class McpServer final : private juce::Thread
     std::function<juce::var(const juce::String &, const juce::var &)> invoke;
     juce::var catalog;
     bool negotiated = false, initialized = false;
+#if JUCE_WINDOWS
     HANDLE input = INVALID_HANDLE_VALUE, output = INVALID_HANDLE_VALUE;
     std::atomic<HANDLE> ioThread{nullptr};
+#else
+    int input = STDIN_FILENO, output = STDOUT_FILENO;
+    bool writeReply(const char *bytes, size_t count)
+    {
+        while (count && !threadShouldExit())
+        {
+            pollfd ready{output, POLLOUT, 0};
+            const auto status = poll(&ready, 1, 20);
+            if (status < 0 && errno == EINTR)
+                continue;
+            if (status < 0 || (ready.revents & (POLLERR | POLLHUP | POLLNVAL)))
+                return false;
+            if (status == 0)
+                continue;
+            // At most POSIX PIPE_BUF's minimum: a ready pipe can accept this
+            // bounded write without waiting for its reader to drain more data.
+            const auto written = ::write(output, bytes, std::min<size_t>(count, 512));
+            if (written < 0 && errno == EINTR)
+                continue;
+            if (written <= 0)
+                return false;
+            bytes += written;
+            count -= size_t(written);
+        }
+        return count == 0;
+    }
+#endif
     static juce::var object()
     {
         return juce::var(new juce::DynamicObject);
@@ -178,15 +215,26 @@ class McpServer final : private juce::Thread
     }
     void run() override
     {
+#if JUCE_WINDOWS
         HANDLE ownedThread = nullptr;
         if (!DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &ownedThread, 0,
                              FALSE, DUPLICATE_SAME_ACCESS))
             return;
         ioThread = ownedThread;
+#else
+        // A disconnected MCP client must not terminate the DAW via SIGPIPE.
+        // Mask only this owned I/O thread; do not change process signal policy.
+        sigset_t blocked;
+        sigemptyset(&blocked);
+        sigaddset(&blocked, SIGPIPE);
+        if (pthread_sigmask(SIG_BLOCK, &blocked, nullptr) != 0)
+            return;
+#endif
         std::string line;
         bool oversized = false;
         while (!threadShouldExit())
         {
+#if JUCE_WINDOWS
             DWORD available = 0;
             if (!PeekNamedPipe(input, nullptr, 0, nullptr, &available, nullptr))
                 break;
@@ -200,6 +248,23 @@ class McpServer final : private juce::Thread
             if (!ReadFile(input, bytes, juce::jmin(DWORD(sizeof(bytes)), available), &read, nullptr))
                 break;
             for (DWORD i = 0; i < read && !threadShouldExit(); ++i)
+#else
+            pollfd ready{input, POLLIN, 0};
+            const auto status = poll(&ready, 1, 20);
+            if (status < 0 && errno == EINTR)
+                continue;
+            if (status < 0 || (ready.revents & (POLLERR | POLLNVAL)))
+                break;
+            if (status == 0)
+                continue;
+            char bytes[4096];
+            const auto read = ::read(input, bytes, sizeof(bytes));
+            if (read < 0 && errno == EINTR)
+                continue;
+            if (read <= 0)
+                break;
+            for (ssize_t i = 0; i < read && !threadShouldExit(); ++i)
+#endif
             {
                 if (bytes[i] != '\n')
                 {
@@ -236,8 +301,12 @@ class McpServer final : private juce::Thread
                     continue;
                 const auto serialized = juce::JSON::toString(reply, true) + "\n";
                 auto wire = serialized.toUTF8(); // Retain the owning String until the write completes.
+#if JUCE_WINDOWS
                 DWORD written = 0;
                 if (!WriteFile(output, wire.getAddress(), DWORD(wire.sizeInBytes() - 1), &written, nullptr))
+#else
+                if (!writeReply(wire.getAddress(), wire.sizeInBytes() - 1))
+#endif
                 {
                     signalThreadShouldExit();
                     break;
@@ -260,10 +329,17 @@ class McpServer final : private juce::Thread
     }
     bool start()
     {
+#if JUCE_WINDOWS
         input = GetStdHandle(STD_INPUT_HANDLE);
         output = GetStdHandle(STD_OUTPUT_HANDLE);
         if (GetFileType(input) != FILE_TYPE_PIPE || GetFileType(output) != FILE_TYPE_PIPE)
             return false;
+#else
+        struct stat in{}, out{};
+        if (fstat(input, &in) != 0 || fstat(output, &out) != 0 ||
+            !S_ISFIFO(in.st_mode) || !S_ISFIFO(out.st_mode))
+            return false;
+#endif
         return startThread();
     }
     ~McpServer() override
@@ -271,11 +347,15 @@ class McpServer final : private juce::Thread
         *alive = false;
         signalThreadShouldExit();
         notify();
+#if JUCE_WINDOWS
         if (auto ownedThread = ioThread.load())
             CancelSynchronousIo(ownedThread);
         stopThread(5000);
         if (auto ownedThread = ioThread.load())
             CloseHandle(ownedThread);
+#else
+        stopThread(5000); // poll/read and bounded writes observe the exit flag.
+#endif
     }
 };
 } // namespace vibera

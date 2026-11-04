@@ -2,6 +2,12 @@
 #include "McpLoopback.h"
 #if JUCE_WINDOWS
 #include <windows.h>
+#else
+#include <unistd.h>
+#include <poll.h>
+#include <signal.h>
+#include <pthread.h>
+#include <cerrno>
 #endif
 
 namespace vibera::ai
@@ -285,8 +291,83 @@ int runMcpBridge(int port, const juce::String &token)
     upstream.join();
     return 0;
 #else
-    juce::ignoreUnused(port, token);
-    return 1;
+    juce::StreamingSocket socket;
+    if (!socket.connect("127.0.0.1", port, 5000))
+        return 2;
+    if (!writeLine(socket, "{\"vibera_bridge_token\":\"" + token + "\"}"))
+        return 3;
+    // This is the dedicated relay invocation. Block SIGPIPE in its I/O
+    // threads so a disconnected parent cannot terminate it during cleanup.
+    sigset_t blocked;
+    sigemptyset(&blocked);
+    sigaddset(&blocked, SIGPIPE);
+    if (pthread_sigmask(SIG_BLOCK, &blocked, nullptr) != 0)
+        return 4;
+    std::atomic<bool> done{false};
+    std::thread upstream([&]
+    {
+        char buffer[8192];
+        while (!done.load())
+        {
+            pollfd input{STDIN_FILENO, POLLIN, 0};
+            const auto ready = poll(&input, 1, 100);
+            if (ready < 0 && errno == EINTR)
+                continue;
+            if (ready < 0 || (input.revents & (POLLERR | POLLNVAL)))
+                break;
+            if (ready == 0)
+                continue;
+            const auto got = ::read(STDIN_FILENO, buffer, sizeof(buffer));
+            if (got < 0 && errno == EINTR)
+                continue;
+            if (got <= 0)
+                break;
+            if (socket.write(buffer, int(got)) != int(got))
+                break;
+        }
+        done.store(true);
+        socket.close();
+    });
+    char buffer[8192];
+    while (!done.load())
+    {
+        const auto ready = socket.waitUntilReady(true, 100);
+        if (ready < 0)
+            break;
+        if (ready == 0)
+            continue;
+        const auto got = socket.read(buffer, sizeof(buffer), false);
+        if (got <= 0)
+            break;
+        size_t at = 0;
+        while (at < size_t(got) && !done.load())
+        {
+            pollfd output{STDOUT_FILENO, POLLOUT, 0};
+            const auto writable = poll(&output, 1, 100);
+            if (writable < 0 && errno == EINTR)
+                continue;
+            if (writable < 0 || (output.revents & (POLLERR | POLLHUP | POLLNVAL)))
+            {
+                done.store(true);
+                break;
+            }
+            if (writable == 0)
+                continue;
+            const auto written = ::write(STDOUT_FILENO, buffer + at, std::min<size_t>(512, size_t(got) - at));
+            if (written < 0 && errno == EINTR)
+                continue;
+            if (written <= 0)
+            {
+                done.store(true);
+                break;
+            }
+            at += size_t(written);
+        }
+    }
+    done.store(true);
+    socket.close();
+    upstream.join();
+    return 0;
 #endif
 }
 } // namespace vibera::ai

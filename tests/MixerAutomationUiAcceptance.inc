@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../src/NoInline.h"
 // Actual component/modal/shared-command checks. No native input or DSP qualification.
 namespace vibera
 {
-__declspec(noinline) juce::Result Studio::verifyMixerAutomationUi(const juce::File &folder)
+VIBERA_NOINLINE juce::Result Studio::verifyMixerAutomationUi(const juce::File &folder)
 {
     juce::StringArray cases;
     juce::Component::SafePointer<juce::AlertWindow> ownedDialog;

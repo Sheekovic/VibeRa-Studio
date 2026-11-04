@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include <juce_core/juce_core.h>
+#if JUCE_WINDOWS
 // Explicit test launch only. Not an application audio-device implementation.
 #include "AudioEngine.h"
 #include "../tests/SyntheticDevice.h"
@@ -191,3 +193,12 @@ class NativeMixerMeterDriver final
     }
 };
 } // namespace vibera::test
+#else
+namespace vibera::test
+{
+inline juce::Result validateNativeMeterOutput(const juce::File &, const juce::File &)
+{
+    return juce::Result::fail("Unsupported platform: native mixer meter acceptance requires Windows");
+}
+} // namespace vibera::test
+#endif

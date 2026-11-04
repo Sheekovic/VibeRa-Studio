@@ -9,7 +9,15 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#if JUCE_WINDOWS
 #include <windows.h>
+#else
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <cerrno>
+#include <cstdio>
+#endif
 
 namespace vibera::effect_chain
 {
@@ -115,15 +123,52 @@ struct PresetFileJobs::Impl
 
     static bool localAbsolute(const juce::String &input)
     {
+#if JUCE_WINDOWS
         const auto text = input.replaceCharacter('/', '\\');
         return text.length() >= 3 && text.length() <= 240 && std::wcslen(text.toWideCharPointer()) <= 240 &&
                ((text[0] >= 'A' && text[0] <= 'Z') || (text[0] >= 'a' && text[0] <= 'z')) && text[1] == ':' &&
                text[2] == '\\' && !text.substring(2).containsChar(':') &&
                juce::CharPointer_UTF8::isValidString(text.toRawUTF8(), int(text.getNumBytesAsUTF8())) &&
                juce::File(text).getFullPathName().replaceCharacter('/', '\\') == text;
+#else
+        if (!input.startsWithChar('/') || input.startsWith("//") || input.getNumBytesAsUTF8() > 4000)
+            return false;
+        const auto parts = juce::StringArray::fromTokens(input, "/", "");
+        for (const auto &part : parts)
+            if (part == "." || part == "..")
+                return false;
+        return juce::File(input).getFullPathName() == input;
+#endif
     }
+#if !JUCE_WINDOWS
+    static int openDirectory(const juce::File &root)
+    {
+        // Resolve each component through an owned descriptor. Refuse symlinks
+        // in ancestors as well as at the final directory.
+        int fd = ::open("/", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+        if (fd < 0)
+            return -1;
+        const auto parts = juce::StringArray::fromTokens(root.getFullPathName(), "/", "");
+        for (const auto &part : parts)
+        {
+            if (part.isEmpty())
+                continue;
+            const int next = openat(fd, part.toRawUTF8(), O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+            const auto error = errno;
+            ::close(fd);
+            if (next < 0)
+            {
+                errno = error;
+                return -1;
+            }
+            fd = next;
+        }
+        return fd;
+    }
+#endif
     static Error directories(const juce::File &root)
     {
+#if JUCE_WINDOWS
         // Reserve headroom for the generated same-directory UUID temporary,
         // independently of a shorter requested target. Mapped drives are not
         // local merely because their spelling begins with a drive letter.
@@ -149,6 +194,15 @@ struct PresetFileJobs::Impl
             current = parent;
         }
         return Error::unsupportedPath;
+#else
+        if (root.getFullPathName().getNumBytesAsUTF8() > 3900)
+            return Error::unsupportedPath;
+        const int fd = openDirectory(root);
+        if (fd < 0)
+            return errno == ELOOP || errno == ENOTDIR ? Error::unsupportedPath : Error::unavailableDirectory;
+        ::close(fd);
+        return Error::none;
+#endif
     }
     Error path(const juce::String &text, bool saving, bool overwrite) const
     {
@@ -166,6 +220,7 @@ struct PresetFileJobs::Impl
             return Error::unsupportedPath;
         if (const auto valid = directories(directory); valid != Error::none)
             return valid;
+#if JUCE_WINDOWS
         const auto attributes = GetFileAttributesW(file.getFullPathName().toWideCharPointer());
         if (attributes != INVALID_FILE_ATTRIBUTES)
         {
@@ -176,6 +231,18 @@ struct PresetFileJobs::Impl
         }
         else if (const auto native = GetLastError(); native != ERROR_FILE_NOT_FOUND)
             return saving ? Error::writeFailed : Error::readFailed;
+#else
+        struct stat attributes{};
+        if (lstat(file.getFullPathName().toRawUTF8(), &attributes) == 0)
+        {
+            if (!S_ISREG(attributes.st_mode))
+                return Error::unsupportedPath;
+            if (saving && !overwrite)
+                return Error::outputExists;
+        }
+        else if (errno != ENOENT)
+            return saving ? Error::writeFailed : Error::readFailed;
+#endif
         return Error::none;
     }
     explicit Impl(const juce::String &root) : directory(localAbsolute(root) ? juce::File(root) : juce::File{})
@@ -222,6 +289,7 @@ struct PresetFileJobs::Impl
     {
         return r.phase.load(std::memory_order_acquire) == Phase::cancelling;
     }
+#if JUCE_WINDOWS
     struct Temporary
     {
         Record &record;
@@ -293,11 +361,91 @@ struct PresetFileJobs::Impl
         r.fileCommitted = true; // Only after the real successful atomic rename.
         return Phase::completed;
     }
+#else
+    struct Temporary
+    {
+        Record &record;
+        int directory = -1, file = -1;
+        juce::String name;
+        bool created = false;
+        explicit Temporary(Record &r) : record(r) {}
+        ~Temporary()
+        {
+            if (file >= 0)
+                ::close(file);
+            if (created && unlinkat(directory, name.toRawUTF8(), 0) != 0)
+            {
+                record.cleanupError = errno;
+                record.temporaryRemaining = true;
+            }
+            if (directory >= 0)
+                ::close(directory);
+        }
+    };
+    Phase save(Record &r)
+    {
+        if (const auto valid = path(r.path, true, r.overwrite); valid != Error::none)
+            return fail(r, valid);
+        Temporary temporary(r);
+        temporary.directory = openDirectory(directory);
+        if (temporary.directory < 0)
+            return fail(r, Error::unavailableDirectory, errno);
+        temporary.name = ".vibra-fx-" + juce::Uuid().toString() + ".tmp";
+        r.temporaryPath = directory.getChildFile(temporary.name).getFullPathName();
+        temporary.file = openat(temporary.directory, temporary.name.toRawUTF8(),
+                                O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+        if (temporary.file < 0)
+            return fail(r, Error::writeFailed, errno);
+        temporary.created = true;
+        const auto *data = static_cast<const unsigned char *>(r.bytes->getData());
+        for (size_t at = 0; at < r.bytes->getSize();)
+        {
+            if (cancelled(r))
+                return Phase::cancelled;
+            const auto written = ::write(temporary.file, data + at,
+                                          std::min<size_t>(65536, r.bytes->getSize() - at));
+            if (written < 0 && errno == EINTR)
+                continue;
+            if (written <= 0)
+                return fail(r, Error::writeFailed, errno);
+            at += size_t(written);
+        }
+        if (cancelled(r))
+            return Phase::cancelled;
+        if (fsync(temporary.file) != 0)
+            return fail(r, Error::flushFailed, errno);
+        const int fd = temporary.file;
+        temporary.file = -1;
+        if (::close(fd) != 0)
+            return fail(r, Error::flushFailed, errno);
+        if (const auto valid = path(r.path, true, r.overwrite); valid != Error::none)
+            return fail(r, valid);
+        const auto destination = juce::File(r.path).getFileName();
+        if (!beginCommit(r.phase))
+            return Phase::cancelled;
+        // linkat is an atomic no-replace commit on the same filesystem.
+        // renameat replaces the directory entry itself, never follows a target symlink.
+        const int committed = r.overwrite
+            ? renameat(temporary.directory, temporary.name.toRawUTF8(), temporary.directory, destination.toRawUTF8())
+            : linkat(temporary.directory, temporary.name.toRawUTF8(), temporary.directory, destination.toRawUTF8(), 0);
+        if (committed != 0)
+            return fail(r, !r.overwrite && errno == EEXIST ? Error::outputExists : Error::commitFailed, errno);
+        r.fileCommitted = true;
+        if (r.overwrite)
+            temporary.created = false;
+        else if (unlinkat(temporary.directory, temporary.name.toRawUTF8(), 0) == 0)
+            temporary.created = false;
+        if (fsync(temporary.directory) != 0)
+            return fail(r, Error::flushFailed, errno);
+        return Phase::completed;
+    }
+#endif
     Phase load(Record &r)
     {
         const juce::String inputName = r.path;
         if (const auto valid = path(inputName, false, false); valid != Error::none)
             return fail(r, valid);
+#if JUCE_WINDOWS
         auto input = juce::File(inputName).createInputStream();
         if (!input || input->getStatus().failed())
             return fail(r, Error::readFailed);
@@ -319,6 +467,39 @@ struct PresetFileJobs::Impl
         char extra = 0;
         if (input->read(&extra, 1) != 0 || input->getStatus().failed())
             return fail(r, Error::readFailed);
+#else
+        Temporary input(r);
+        input.directory = openDirectory(directory);
+        if (input.directory < 0)
+            return fail(r, Error::unavailableDirectory, errno);
+        input.file = openat(input.directory, juce::File(inputName).getFileName().toRawUTF8(),
+                            O_RDONLY | O_NOFOLLOW | O_CLOEXEC | O_NONBLOCK);
+        if (input.file < 0)
+            return fail(r, Error::readFailed, errno);
+        struct stat attributes{};
+        if (fstat(input.file, &attributes) != 0 || !S_ISREG(attributes.st_mode))
+            return fail(r, Error::unsupportedPath, errno);
+        if (attributes.st_size < 0 || std::uint64_t(attributes.st_size) > maximumBytes)
+            return fail(r, Error::tooLarge);
+        juce::MemoryBlock data(size_t(attributes.st_size), false);
+        auto *bytes = static_cast<char *>(data.getData());
+        for (size_t at = 0; at < data.getSize();)
+        {
+            if (cancelled(r))
+                return Phase::cancelled;
+            const auto got = ::read(input.file, bytes + at, std::min<size_t>(65536, data.getSize() - at));
+            if (got < 0 && errno == EINTR)
+                continue;
+            if (got <= 0)
+                return fail(r, Error::readFailed, errno);
+            at += size_t(got);
+        }
+        char extra = 0;
+        ssize_t remaining;
+        do { remaining = ::read(input.file, &extra, 1); } while (remaining < 0 && errno == EINTR);
+        if (remaining != 0)
+            return fail(r, Error::readFailed, errno);
+#endif
         if (cancelled(r))
             return Phase::cancelled;
         std::unique_ptr<Chain> decoded;
@@ -435,7 +616,7 @@ juce::Result PresetFileJobs::submitSave(const juce::String &path, const Chain &c
         record->weight = record->bytes->getSize();
         record->saving = true;
         record->overwrite = overwrite;
-        record->path = path.replaceCharacter('/', '\\');
+        record->path = juce::File(path).getFullPathName();
         record->operation = juce::Uuid().toString();
         return impl->enqueue(std::move(record), operation);
     }
@@ -456,7 +637,7 @@ juce::Result PresetFileJobs::submitLoad(const juce::String &path, juce::String &
             return juce::Result::fail(errorCode(valid));
         auto record = std::make_unique<Impl::Record>();
         record->weight = maximumBytes; // Conservative fixed reservation BEFORE any file allocation.
-        record->path = path.replaceCharacter('/', '\\');
+        record->path = juce::File(path).getFullPathName();
         record->operation = juce::Uuid().toString();
         return impl->enqueue(std::move(record), operation);
     }

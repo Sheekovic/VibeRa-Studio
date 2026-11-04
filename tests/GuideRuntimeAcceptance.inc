@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../src/NoInline.h"
 // Include INSIDE namespace vibera immediately after the actual GuidePlugin.
 // Original component tests, not native graph publication/timing qualification.
 namespace test
@@ -190,7 +191,7 @@ template <typename Operation> static void refused(Operation &&operation, const c
     }
     check(rejected, "Explicit preparation failure prefix: " + juce::String(prefix));
 }
-__declspec(noinline) static Measurement discardPartial()
+VIBERA_NOINLINE static Measurement discardPartial()
 {
     auto f = std::make_unique<Fixture>();
     const std::vector<Tick> ticks{{0, true}};
@@ -205,7 +206,7 @@ __declspec(noinline) static Measurement discardPartial()
     check(f->control->hits == 1, "Discard never retriggers the partial click");
     return f->measurement;
 }
-__declspec(noinline) static Measurement adoptPartial()
+VIBERA_NOINLINE static Measurement adoptPartial()
 {
     auto f = std::make_unique<Fixture>();
     const std::vector<Tick> ticks{{0, true}};
@@ -222,7 +223,7 @@ __declspec(noinline) static Measurement adoptPartial()
     check(f->control->hits == 1, "Adopted click ends without reset or duplicate hit");
     return f->measurement;
 }
-__declspec(noinline) static Measurement differentDocument()
+VIBERA_NOINLINE static Measurement differentDocument()
 {
     auto f = std::make_unique<Fixture>();
     const std::vector<Tick> ticks{{0, true}, {24000, false}, {48000, false}, {96000, false}, {144000, true}};
@@ -236,7 +237,7 @@ __declspec(noinline) static Measurement differentDocument()
     check(f->control->hits == 5, "Adopted60BPM3/4 scope supplies exactly next three ticks/accents");
     return f->measurement;
 }
-__declspec(noinline) static Measurement leadIn()
+VIBERA_NOINLINE static Measurement leadIn()
 {
     auto f = std::make_unique<Fixture>();
     f->control->enabled = false;
@@ -274,7 +275,7 @@ __declspec(noinline) static Measurement leadIn()
     check(f->control->hits == 2 && f->control->remaining == 0, "Discard cannot restart completed lead gate");
     return f->measurement;
 }
-__declspec(noinline) static Measurement lateFailure()
+VIBERA_NOINLINE static Measurement lateFailure()
 {
     auto f = std::make_unique<Fixture>();
     const std::vector<Tick> ticks{{0, true}};
@@ -297,7 +298,7 @@ __declspec(noinline) static Measurement lateFailure()
     f->through(*f->incumbent, 1200, ticks);
     return f->measurement;
 }
-__declspec(noinline) static Measurement refusalPaths()
+VIBERA_NOINLINE static Measurement refusalPaths()
 {
     auto f = std::make_unique<Fixture>();
     const std::vector<Tick> ticks{{0, true}};
@@ -375,7 +376,7 @@ __declspec(noinline) static Measurement refusalPaths()
     f->through(*f->incumbent, 1500, {}); // Genuine reset means old tail cannot resume.
     return f->measurement;
 }
-__declspec(noinline) static Measurement genuineDeviceLifecycle()
+VIBERA_NOINLINE static Measurement genuineDeviceLifecycle()
 {
     auto f = std::make_unique<Fixture>();
     f->process(*f->incumbent, 93, {{0, true}});
@@ -398,7 +399,7 @@ __declspec(noinline) static Measurement genuineDeviceLifecycle()
     check(f->control->hits == 2, "44.1k partial click interpolation and next exact half-second tick");
     return f->measurement;
 }
-__declspec(noinline) static Measurement offlineOmission()
+VIBERA_NOINLINE static Measurement offlineOmission()
 {
     auto f = std::make_unique<Fixture>();
     f->prepare();
@@ -414,7 +415,7 @@ __declspec(noinline) static Measurement offlineOmission()
     return f->measurement;
 }
 } // namespace guideRuntimeDetail
-__declspec(noinline) void guideRuntimeTests(const juce::File &folder)
+VIBERA_NOINLINE void guideRuntimeTests(const juce::File &folder)
 {
     using namespace guideRuntimeDetail;
     check(juce::File::isAbsolutePath(folder.getFullPathName()) && folder.createDirectory().wasOk(),

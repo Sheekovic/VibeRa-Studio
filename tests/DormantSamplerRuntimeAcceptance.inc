@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../src/NoInline.h"
 // Include INSIDE namespace vibera after actual FixedSampler. No production DSP
 // members made public; all observations use existing lifetime/source/readback APIs.
 namespace test
@@ -234,7 +235,7 @@ struct Fixture
     }
 };
 
-__declspec(noinline) static Measurement discardRetry()
+VIBERA_NOINLINE static Measurement discardRetry()
 {
     auto f = std::make_unique<Fixture>();
     Fixture::noteOn(*f->input); // Queue is already owned before either private preparation.
@@ -266,7 +267,7 @@ __declspec(noinline) static Measurement discardRetry()
     return f->measurement;
 }
 
-__declspec(noinline) static Measurement nativeAdmissionRetry()
+VIBERA_NOINLINE static Measurement nativeAdmissionRetry()
 {
     auto f = std::make_unique<Fixture>();
     Fixture::noteOn(*f->input);
@@ -293,7 +294,7 @@ __declspec(noinline) static Measurement nativeAdmissionRetry()
     return f->measurement;
 }
 
-__declspec(noinline) static Measurement refusedSources()
+VIBERA_NOINLINE static Measurement refusedSources()
 {
     auto f = std::make_unique<Fixture>();
     {
@@ -336,7 +337,7 @@ __declspec(noinline) static Measurement refusedSources()
     return active->measurement;
 }
 
-__declspec(noinline) static Measurement immutableLease()
+VIBERA_NOINLINE static Measurement immutableLease()
 {
     auto f = std::make_unique<Fixture>();
     const auto before = snapshot(*f->input);
@@ -374,7 +375,7 @@ __declspec(noinline) static Measurement immutableLease()
     return f->measurement;
 }
 
-__declspec(noinline) static Measurement overlappingStale()
+VIBERA_NOINLINE static Measurement overlappingStale()
 {
     auto f = std::make_unique<Fixture>();
     Fixture::noteOn(*f->input);
@@ -406,7 +407,7 @@ __declspec(noinline) static Measurement overlappingStale()
     return f->measurement;
 }
 
-__declspec(noinline) static Measurement privateDocument()
+VIBERA_NOINLINE static Measurement privateDocument()
 {
     auto f = std::make_unique<Fixture>();
     auto scope = std::make_shared<LiveTimeline>();
@@ -422,7 +423,7 @@ __declspec(noinline) static Measurement privateDocument()
     return f->measurement;
 }
 
-__declspec(noinline) static Measurement sourceFirstWins()
+VIBERA_NOINLINE static Measurement sourceFirstWins()
 {
     auto f = std::make_unique<Fixture>();
     Fixture::noteOn(*f->input);
@@ -444,7 +445,7 @@ __declspec(noinline) static Measurement sourceFirstWins()
     return f->measurement;
 }
 
-__declspec(noinline) static Measurement overlappingBed(double rate)
+VIBERA_NOINLINE static Measurement overlappingBed(double rate)
 {
     auto f = std::make_unique<Fixture>(rate);
     f->startBed();
@@ -499,7 +500,7 @@ __declspec(noinline) static Measurement overlappingBed(double rate)
 }
 } // namespace dormantSamplerDetail
 
-__declspec(noinline) void dormantSamplerRuntimeTests(const juce::File &folder)
+VIBERA_NOINLINE void dormantSamplerRuntimeTests(const juce::File &folder)
 {
     using namespace dormantSamplerDetail;
     check(folder.isDirectory(), "Caller supplies existing strict owned acceptance output");

@@ -6966,6 +6966,11 @@ void Studio::requestProjectTransition(std::function<void(bool)> proceed)
 
 juce::Result Studio::runInstrumentOpeningTest(const juce::File &projectFile, const juce::File &output)
 {
+#if !JUCE_WINDOWS
+    juce::ignoreUnused(projectFile, output);
+    return juce::Result::fail("Native instrument window acceptance requires Windows");
+#else
+
     stopTimer();
     output.createDirectory();
     Project project;
@@ -7375,6 +7380,7 @@ juce::Result Studio::runInstrumentOpeningTest(const juce::File &projectFile, con
             "Synthetic JUCE mouse-handler and virtual audio checks; native SDK visibility/identity checked "
             "for VST3. No OS mouse input, physical hardware or listening.\n");
     return juce::Result::ok();
+#endif
 }
 juce::Result Studio::verifyMidiRecording(const juce::File &folder)
 {

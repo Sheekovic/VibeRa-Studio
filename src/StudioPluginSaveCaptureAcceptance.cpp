@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NoInline.h"
 #include "Studio.h"
 #include "../tests/SyntheticDevice.h"
 #include <juce_cryptography/juce_cryptography.h>
@@ -8,7 +9,7 @@ namespace vibera
 {
 // Original real-SDK acceptance. The supplied callback records close admission;
 // it never closes the application, replaces user work, or sends native input.
-__declspec(noinline) juce::Result Studio::verifyPluginSaveCapture(const juce::File &folder,
+VIBERA_NOINLINE juce::Result Studio::verifyPluginSaveCapture(const juce::File &folder,
                                                                   const juce::File &binary)
 {
     if (!controllerTestMode || !bool(getProperties()["viberaPluginSaveCaptureFixture"]) ||

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "NoInline.h"
 #include "Studio.h"
 #include "MixerChainWorkflowContracts.h"
 #include "EffectChain.h"
@@ -9,7 +10,7 @@ namespace vibera
 {
 // Actual shared Studio/MCP dispatch, two original SDK workers and real preset files.
 // No desktop input, playback PCM, installed-provider or listening qualification.
-__declspec(noinline) juce::Result Studio::verifyMixerChainWorkflow(const juce::File &folder,
+VIBERA_NOINLINE juce::Result Studio::verifyMixerChainWorkflow(const juce::File &folder,
                                                                    const juce::File &binary)
 {
     if (!controllerTestMode || !pluginTestSettings || !workflowTestSettings ||

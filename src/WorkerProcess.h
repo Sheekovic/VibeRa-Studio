@@ -10,7 +10,9 @@ struct WorkerLimits
     unsigned cpuPercent = 0;
     bool belowNormalPriority = false, containDescendants = false;
 };
-// Windows worker ownership is a retained kernel process object, not an executable-name lookup.
+// Retain a Windows process handle or a waitable POSIX child identity. Never use
+// executable-name lookup. Constrained Job-style providers fail closed on POSIX
+// until an equivalent resource/descendant-containment backend is available.
 class WorkerProcess
 {
     struct Impl;

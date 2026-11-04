@@ -1,7 +1,4 @@
-# Builds VibeRa Studio on GitHub's Windows runners.
-# - Every push to a tag like v0.0.74 builds and publishes a GitHub Release
-#   (portable zip + per-user installer).
-# - "Run workflow" (manual) builds the same files and keeps them as workflow artifacts.
+# Native candidates; compilation is not audio/UI acceptance. Tags create drafts.
 name: Build release
 
 on:
@@ -10,84 +7,134 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  windows:
-    runs-on: windows-2022
+  build:
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-x64
+            runner: windows-2022
+            configure: windows
+            build: release
+          - platform: linux-x64
+            runner: ubuntu-24.04
+            configure: linux
+            build: linux-release
+          - platform: macos-universal
+            runner: macos-15
+            configure: macos
+            build: macos-release
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      # JUCE and Tracktion Engine are pinned in dependencies.lock.json; cache the downloads.
-      - name: Cache dependencies
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build pkg-config libasound2-dev libjack-jackd2-dev \
+            libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxinerama-dev \
+            libxrandr-dev libxrender-dev libxi-dev libfreetype6-dev libfontconfig1-dev \
+            libgl1-mesa-dev libcurl4-openssl-dev
+
+      - name: Install macOS build tools
+        if: runner.os == 'macOS'
+        run: command -v ninja || brew install ninja
+
+      # Cache verified archives, never stale patched source trees.
+      - name: Cache dependency archives
         uses: actions/cache@v4
         with:
-          path: vendor
-          key: vendor-${{ hashFiles('dependencies.lock.json', 'patches/**') }}
+          path: vendor/archives
+          key: dependency-archives-${{ hashFiles('dependencies.lock.json') }}
 
-      - name: Fetch dependencies
+      - name: Fetch and patch pinned dependencies
         shell: pwsh
-        run: powershell -ExecutionPolicy Bypass -File scripts/fetch-dependencies.ps1
-
-      - name: Apply dependency patches
-        shell: pwsh
-        run: powershell -ExecutionPolicy Bypass -File scripts/apply-dependency-patches.ps1
+        run: ./scripts/fetch-dependencies.ps1
 
       - name: Configure
-        run: cmake --preset windows
+        run: cmake --preset ${{ matrix.configure }}
 
       - name: Build
-        run: cmake --build --preset release --target VibeRa VibeRaPluginWorker --parallel
+        run: cmake --build --preset ${{ matrix.build }} --target VibeRa VibeRaPluginWorker
 
-      - name: Assemble the app folder
+      - name: Assemble and archive native candidate
+        shell: pwsh
+        env:
+          BUILD_PLATFORM: ${{ matrix.platform }}
+          BUILD_PRESET: ${{ matrix.configure }}
+          RELEASE_TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || '' }}
+        run: |
+          python scripts/ci-package.py --platform $env:BUILD_PLATFORM --build-dir "build/$env:BUILD_PRESET" --tag "$env:RELEASE_TAG"
+          if ($LASTEXITCODE -ne 0) { throw 'Native candidate packaging failed' }
+
+      - name: Build Windows installer
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $app = 'out/VibeRa Studio'
-          New-Item -ItemType Directory -Force -Path $app | Out-Null
-          Get-ChildItem 'build/windows/VibeRa_artefacts/Release' |
-            Where-Object { $_.Extension -ne '.pdb' } |
-            Copy-Item -Destination $app -Recurse -Force
-          Copy-Item LICENSE $app
-          Copy-Item licenses (Join-Path $app 'licenses') -Recurse
-          Copy-Item examples (Join-Path $app 'Examples') -Recurse
-          if (-not (Test-Path (Join-Path $app 'VibeRa Studio.exe'))) { throw 'The build produced no VibeRa Studio.exe' }
-          if (-not (Test-Path (Join-Path $app 'VibeRa Plugin Worker.exe'))) { throw 'The build produced no plugin worker' }
+          ./scripts/make-installer.ps1 -Source 'out/stage/VibeRa Studio' -Output out/installer
+          $manifest = Get-Content -Encoding utf8 out/candidate-windows-x64.json -Raw | ConvertFrom-Json
+          Move-Item out/installer/VibeRa-Studio-Setup.exe "out/$($manifest.archiveBase)-Setup.exe"
+          python scripts/ci-package.py --record-installer "out/$($manifest.archiveBase)-Setup.exe"
+          if ($LASTEXITCODE -ne 0) { throw 'Installer checksum failed' }
 
-      - name: Package
-        id: package
-        shell: pwsh
-        run: |
-          $version = (Get-Item 'out/VibeRa Studio/VibeRa Studio.exe').VersionInfo.ProductVersion
-          $name = "VibeRa-Studio-$version-win64"
-          Compress-Archive -Path 'out/VibeRa Studio' -DestinationPath "out/$name.zip"
-          powershell -ExecutionPolicy Bypass -File scripts/make-installer.ps1 -Source 'out/VibeRa Studio' -Output out/installer
-          Move-Item out/installer/VibeRa-Studio-Setup.exe "out/$name-Setup.exe"
-          "name=$name" >> $env:GITHUB_OUTPUT
-
-      - name: Keep the build
+      - name: Keep the candidate
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.package.outputs.name }}
+          name: candidate-${{ matrix.platform }}
+          if-no-files-found: error
           path: |
             out/*.zip
+            out/*.tar.gz
             out/*-Setup.exe
+            out/*.sha256
+            out/candidate-*.json
 
-      - name: Publish the release
-        if: startsWith(github.ref, 'refs/tags/v')
+  release:
+    name: Assemble draft release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: candidate-*
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create draft prerelease
         uses: softprops/action-gh-release@v2
         with:
           name: VibeRa Studio ${{ github.ref_name }}
           generate_release_notes: true
+          draft: true
           prerelease: true
+          fail_on_unmatched_files: true
+          body: |
+            Native build candidates for Windows x64, Linux x64, and macOS (Apple Silicon and Intel).
+            Compilation and packaging do not establish audio, recording, plugin, or native UI acceptance.
+            macOS candidates are ad-hoc signed, not Developer ID signed or notarized.
+            Linux candidates target Ubuntu 24.04 and compatible systems; system audio/GUI libraries are required.
           files: |
-            out/*.zip
-            out/*-Setup.exe
+            release-assets/*.zip
+            release-assets/*.tar.gz
+            release-assets/*-Setup.exe
+            release-assets/*.sha256
+            release-assets/candidate-*.json

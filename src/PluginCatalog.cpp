@@ -5,10 +5,20 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+#if JUCE_WINDOWS
 #include <windows.h>
+#endif
 
 namespace vibera
 {
+namespace
+{
+#if JUCE_WINDOWS
+constexpr bool ignorePathCase = true;
+#else
+constexpr bool ignorePathCase = false;
+#endif
+}
 PluginCatalog::PluginCatalog(juce::File settingsFile, juce::File scanner, bool standard, int timeout)
     : Thread("VST3 isolated scan"), file(std::move(settingsFile)), scannerExecutable(std::move(scanner)),
       includeStandard(standard), timeoutMs(timeout)
@@ -39,10 +49,20 @@ PluginCatalog::~PluginCatalog()
 }
 juce::StringArray PluginCatalog::standardFolders()
 {
+#if JUCE_WINDOWS
     return {"C:/Program Files/Common Files/VST3",
             juce::File::getSpecialLocation(juce::File::userHomeDirectory)
                 .getChildFile("AppData/Local/Programs/Common/VST3")
                 .getFullPathName()};
+#elif JUCE_MAC
+    return {"/Library/Audio/Plug-Ins/VST3",
+            juce::File::getSpecialLocation(juce::File::userHomeDirectory)
+                .getChildFile("Library/Audio/Plug-Ins/VST3").getFullPathName()};
+#else
+    return {"/usr/lib/vst3", "/usr/local/lib/vst3",
+            juce::File::getSpecialLocation(juce::File::userHomeDirectory)
+                .getChildFile(".vst3").getFullPathName()};
+#endif
 }
 PluginCatalog::Snapshot PluginCatalog::snapshot() const
 {
@@ -71,7 +91,7 @@ juce::Result PluginCatalog::scan(juce::StringArray customFolders, bool retry, st
             return juce::Result::fail("Custom VST3 folders must be absolute paths up to4096 characters");
     for (int i = 0; i < customFolders.size(); ++i)
         customFolders.set(i, juce::File(customFolders[i]).getFullPathName());
-    customFolders.removeDuplicates(true);
+    customFolders.removeDuplicates(ignorePathCase);
     const juce::ScopedLock guard(lock);
     if (isThreadRunning() || current.completionState == "pending")
         return juce::Result::fail("A VST3 scan is already running");
@@ -191,7 +211,7 @@ void PluginCatalog::run()
         blocked = blacklist;
         retry = retryBlacklist;
     }
-    paths.removeDuplicates(true);
+    paths.removeDuplicates(ignorePathCase);
     auto walk = [&](auto &&self, const juce::File &directory, int depth) -> void
     {
         if (depth > 16 || threadShouldExit())
@@ -204,9 +224,13 @@ void PluginCatalog::run()
                     candidates.add(f);
                 continue;
             }
+#if JUCE_WINDOWS
             auto attributes = GetFileAttributesW(f.getFullPathName().toWideCharPointer());
             if (f.isDirectory() && attributes != INVALID_FILE_ATTRIBUTES &&
                 (attributes & FILE_ATTRIBUTE_REPARSE_POINT) == 0)
+#else
+            if (f.isDirectory() && !f.isSymbolicLink())
+#endif
                 self(self, f, depth + 1);
         }
     };
@@ -224,7 +248,7 @@ void PluginCatalog::run()
         bool skip = false;
         {
             const juce::ScopedLock guard(lock);
-            skip = !retry && blocked.contains(candidate.getFullPathName(), true);
+            skip = !retry && blocked.contains(candidate.getFullPathName(), ignorePathCase);
             progress =
                 skip ? "Blacklisted: " + candidate.getFileName() : "Scanning: " + candidate.getFileName();
         }
@@ -238,12 +262,12 @@ void PluginCatalog::run()
             const juce::ScopedLock guard(lock);
             if (scanResult.failed())
             {
-                blocked.addIfNotAlreadyThere(candidate.getFullPathName(), true);
+                blocked.addIfNotAlreadyThere(candidate.getFullPathName(), ignorePathCase);
                 failures.add(candidate.getFullPathName() + ": " + scanResult.getErrorMessage());
             }
             else
             {
-                blocked.removeString(candidate.getFullPathName(), true);
+                blocked.removeString(candidate.getFullPathName(), ignorePathCase);
                 found.insert(found.end(), result.begin(), result.end());
             }
         }

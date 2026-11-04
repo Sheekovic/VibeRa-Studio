@@ -6,10 +6,12 @@
 #include "PluginStateEncoding.h"
 #include "McpSchema.h"
 #include "../tests/SyntheticDevice.h"
+#if JUCE_WINDOWS
 #include "../tests/NativeGestureFixture.h"
 #include "../tests/MixerEffectOpeningCapture.h"
 #include <UIAutomation.h>
 #include <wrl/client.h>
+#endif
 #include <thread>
 
 namespace vibera
@@ -1272,6 +1274,11 @@ juce::var Studio::pluginControlSnapshot() const
 juce::Result Studio::verifyPluginParameters(const juce::File &folder, const juce::File &binary, bool wrapperOnly,
                                            bool controlsOnly)
 {
+#if !JUCE_WINDOWS
+    juce::ignoreUnused(folder, binary, wrapperOnly, controlsOnly);
+    return juce::Result::fail("Native plugin controls acceptance requires Windows");
+#else
+
     stopTimer();
     auto fail = [](const juce::String &message) { return juce::Result::fail(message); };
     if (folder.createDirectory().failed())
@@ -2096,10 +2103,25 @@ juce::Result Studio::verifyPluginParameters(const juce::File &folder, const juce
     }
     return folder.getChildFile("parameter-gui.txt").replaceWithText(report) ? juce::Result::ok()
                                                                             : fail("Controls report output");
+#endif
 }
+#if JUCE_WINDOWS
 #include "StudioMixerEffectOpeningAcceptance.inc"
+#else
+juce::Result Studio::verifyMixerEffectOpening(const juce::File &, const juce::File &, bool, bool)
+{
+    return juce::Result::fail("Native effect window acceptance requires Windows");
+}
+#endif
 #include "StudioNativeScalar.inc"
+#if JUCE_WINDOWS
 #include "StudioNativeScalarAcceptance.inc"
+#else
+juce::Result Studio::verifyNativeScalarHistory(const juce::File &, const juce::File &)
+{
+    return juce::Result::fail("Native scalar gesture acceptance requires Windows");
+}
+#endif
 #include "StudioPluginWrapperRouting.inc"
 #include "StudioPluginWrapperChains.inc"
 } // namespace vibera

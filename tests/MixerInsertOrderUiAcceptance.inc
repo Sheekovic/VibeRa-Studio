@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../src/NoInline.h"
 // Include once after StudioMixerControls.cpp namespace closes. Actual component
 // handlers/shared Studio services; no OS pointer input, DSP or hardware claim.
 namespace vibera
 {
-__declspec(noinline) juce::Result Studio::verifyMixerInsertOrder(const juce::File &folder)
+VIBERA_NOINLINE juce::Result Studio::verifyMixerInsertOrder(const juce::File &folder)
 {
     juce::Component::SafePointer<juce::Component> ownedMenu;
     juce::StringArray cases;

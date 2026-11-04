@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../src/NoInline.h"
 // Actual component handlers/shared commands. No OS input, DSP, hardware or listening proof.
 #include <juce_cryptography/juce_cryptography.h>
 namespace vibera
 {
-__declspec(noinline) juce::Result Studio::verifyMixerStereoUi(const juce::File &folder)
+VIBERA_NOINLINE juce::Result Studio::verifyMixerStereoUi(const juce::File &folder)
 {
     juce::StringArray cases;
     juce::Array<juce::var> captures;
