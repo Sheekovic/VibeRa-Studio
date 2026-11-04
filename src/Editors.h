@@ -2129,6 +2129,10 @@ class Studio::Editor final : public juce::Component,
                            "enabled.";
                 if (mixerControlHit(mixerStereoSwapBounds(insert.index), point))
                     return "Swap left and right stereo channels. Click to toggle; highlighted means enabled.";
+                if (mixerSendLevelHit(insert.index, point))
+                    if (const auto *route = mixerRoute(s.controller.project, s.selectedInsert, insert.index))
+                        return "Send level " + juce::String(juce::roundToInt(route->gain * 100)) +
+                               "%. Drag or wheel; Shift for fine.";
             }
         return {};
     }
@@ -3704,10 +3708,26 @@ class Studio::Editor final : public juce::Component,
                 g.fillPath(arrow);
                 if (route)
                 {
-                    const auto level = mixerSendLevelBounds(m.index);
-                    g.setColour(accent.withAlpha(.45f));
-                    g.drawEllipse(level.toFloat().reduced(1), 1.5f);
-                    label(g, juce::String(juce::roundToInt(route->gain * 100)), level, ink, 14);
+                    // Send level knob (0..200%, 100% points straight up); the value is in the tooltip.
+                    const auto level = mixerSendLevelBounds(m.index).toFloat();
+                    const auto centre = level.getCentre();
+                    const float radius = std::min(level.getWidth(), level.getHeight()) * .5f - 3.f;
+                    constexpr float startAngle = -2.3561945f, sweep = 4.7123890f;
+                    const float angle = startAngle + juce::jlimit(0.f, 1.f, float(route->gain) * .5f) * sweep;
+                    g.setColour(bg.darker(.35f));
+                    g.fillEllipse(centre.x - radius + 2, centre.y - radius + 2, (radius - 2) * 2, (radius - 2) * 2);
+                    juce::Path track, value;
+                    track.addCentredArc(centre.x, centre.y, radius, radius, 0, startAngle, startAngle + sweep, true);
+                    value.addCentredArc(centre.x, centre.y, radius, radius, 0, startAngle, angle, true);
+                    g.setColour(grid.brighter(.2f));
+                    g.strokePath(track, juce::PathStrokeType(2.f, juce::PathStrokeType::curved,
+                                                             juce::PathStrokeType::rounded));
+                    g.setColour(accent);
+                    g.strokePath(value, juce::PathStrokeType(2.f, juce::PathStrokeType::curved,
+                                                             juce::PathStrokeType::rounded));
+                    g.drawLine(centre.x + std::sin(angle) * (radius * .3f), centre.y - std::cos(angle) * (radius * .3f),
+                               centre.x + std::sin(angle) * (radius - 3.f), centre.y - std::cos(angle) * (radius - 3.f),
+                               2.f);
                 }
             }
             g.restoreState();
@@ -6705,6 +6725,8 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
             std::vector<Entry> samples, instruments, effects, patterns, automation;
             for (const auto &c : p.channels)
             {
+                if (p.warpOriginalOnly(c.id))
+                    continue;
                 if (c.instrument)
                     instruments.push_back({Kind::instrument, c.name, c.instrument->name, {}, c.id, 0});
                 else

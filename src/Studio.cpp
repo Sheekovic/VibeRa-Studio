@@ -944,6 +944,7 @@ void Studio::resized()
     if (piano)
         placeWindow(1, body);
     const auto floatArea = juce::Rectangle<int>(4, 84, getWidth() - 8, getHeight() - 113);
+    std::vector<juce::Component *> raised;
     for (int index = 0; index < 5; ++index)
         if (floatingWindows[size_t(index)] && !detachedWindows[size_t(index)])
         {
@@ -959,8 +960,14 @@ void Studio::resized()
             component->setBounds(bounds);
             component->resized();
             if (component->isVisible())
-                component->toFront(false);
+                raised.push_back(component);
         }
+    // Floating windows stay above the docked ones in the order the user last raised them:
+    // a layout pass (e.g. from the Browser) must not shuffle the Channel Rack under the Playlist.
+    std::sort(raised.begin(), raised.end(), [this](auto *a, auto *b)
+              { return getIndexOfChildComponent(a) < getIndexOfChildComponent(b); });
+    for (auto *component : raised)
+        component->toFront(false);
     repaint();
 }
 void Studio::moveWorkspaceWindow(int index, juce::Rectangle<int> bounds)

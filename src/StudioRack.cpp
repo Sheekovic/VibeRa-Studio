@@ -322,7 +322,9 @@ std::vector<Id> Studio::visibleRackChannels() const
 {
     std::vector<Id> result;
     for (const auto &channel : controller.project.channels)
-        if (rackFilter == "all" || (rackFilter == "unsorted" && channel.group == 0) ||
+        if (controller.project.warpOriginalOnly(channel.id))
+            continue;
+        else if (rackFilter == "all" || (rackFilter == "unsorted" && channel.group == 0) ||
             (rackFilter == "group" && channel.group == rackGroup))
             result.push_back(channel.id);
     return result;

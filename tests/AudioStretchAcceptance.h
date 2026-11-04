@@ -137,6 +137,8 @@ inline void tests(const juce::File &folder)
 
     // A warp apply remembers the original; a re-warp keeps it; a plain stretch ends it.
     const auto originalChannel = controller.project.audioPlacements[0].channel;
+    const auto channelsBefore = controller.project.channels.size();
+    const auto originalName = controller.project.channel(originalChannel)->name;
     apply.step = false;
     apply.warpBpm = 120;
     apply.text = warped.getFullPathName();
@@ -146,6 +148,14 @@ inline void tests(const juce::File &folder)
         require(w.warpBpm == 120 && w.warpChannel == originalChannel && w.warpOffset == 0 && w.warpDuration == 2 &&
                     controller.project.channel(originalChannel) != nullptr,
                 "The warped clip keeps its original source Channel and window");
+        const auto *fitted = controller.project.channel(w.channel);
+        require(fitted && fitted->name == originalName && controller.project.warpOriginalOnly(originalChannel) &&
+                    !controller.project.warpOriginalOnly(w.channel),
+                "A tempo fit stays one sample to the user: same name, the original hidden");
+        size_t shown = 0;
+        for (const auto &c : controller.project.channels)
+            shown += controller.project.warpOriginalOnly(c.id) ? 0 : 1;
+        require(shown == channelsBefore, "A tempo fit adds no visible sample");
     }
     const auto saved = controller.project.state();
     Project reloaded;

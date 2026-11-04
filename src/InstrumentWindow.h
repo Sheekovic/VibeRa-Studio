@@ -8,6 +8,7 @@
 #include "SamplerFilterSettings.h"
 #include "SamplerModulationPanel.h"
 #include "MixerTargetChoices.h"
+#include <set>
 #include <type_traits>
 #include <charconv>
 namespace vibera
@@ -15,7 +16,7 @@ namespace vibera
 class Studio::InstrumentWindow final : public juce::DocumentWindow
 {
     WindowChrome chrome;
-    static constexpr int samplerControlsMinimumHeight = 2131;
+    static constexpr int samplerControlsMinimumHeight = 600;
     class Controls final : public juce::Component, private juce::Timer
     {
         juce::Component::SafePointer<Studio> owner;
@@ -143,8 +144,7 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                 available ? juce::String(samplerFilterTypeName(current.sampler.filterType)) + " | " +
                                 juce::String(samplerFilterCutoffHz(values[0], rate), 1) + " Hz" +
                                 (device ? " (device rate)" : " (48 kHz reference)") + " | Q " +
-                                juce::String(samplerFilterQ(values[1]), 2) +
-                                "\nPreview source is dry; play the keyboard to audition Channel processing."
+                                juce::String(samplerFilterQ(values[1]), 2)
                           : "Sampler filtering is unavailable for an Audio Clip or native instrument.",
                 juce::dontSendNotification);
         }
@@ -173,6 +173,291 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                                         "Full porta + Porta bypass Gate. Preview source stays dry."
                                       : "Voice modes are unavailable for Audio Clips and native instruments.",
                                   juce::dontSendNotification);
+        }
+        // Familiar three-page channel settings: Sample, Envelope / instrument, Miscellaneous.
+        int page = 0;
+        std::vector<std::pair<juce::Rectangle<int>, juce::String>> sections;
+        juce::Rectangle<int> waveformArea;
+        static juce::Rectangle<int> pageTab(int index)
+        {
+            return {10 + index * 48, 9, 42, 42};
+        }
+        void setPage(int next)
+        {
+            next = juce::jlimit(0, 2, next);
+            if (next == page)
+                return;
+            rangeView.finish(true);
+            keyboard.release();
+            page = next;
+            resized();
+            timerCallback();
+        }
+        void knob(juce::Slider &slider, juce::Label &caption, const juce::String &text)
+        {
+            slider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+            slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+            slider.setPopupDisplayEnabled(true, true, this);
+            if (slider.getTooltip().isEmpty())
+                slider.setTooltip(caption.getText());
+            caption.setText(text, juce::dontSendNotification);
+            caption.setFont(juce::Font(10.5f, juce::Font::bold));
+            caption.setJustificationType(juce::Justification::centred);
+            caption.setColour(juce::Label::textColourId, muted);
+            caption.setInterceptsMouseClicks(false, false);
+        }
+        void restyle()
+        {
+            const std::array<juce::String, 13> captions{"ROOT",  "PITCH", "SMP START", "SMP END", "LOOP START",
+                                                        "LOOP END", "ATT", "DEC", "SUS", "REL", "IN", "OUT",
+                                                        "CROSSFADE"};
+            for (size_t i = 0; i < samplerSliders.size(); ++i)
+                knob(samplerSliders[i], samplerLabels[i], captions[i]);
+            samplerSliders[1].setDoubleClickReturnValue(true, 0);
+            gain.setTooltip("Channel volume");
+            pan.setTooltip("Channel panning");
+            knob(gain, gainLabel, "VOL");
+            knob(pan, panLabel, "PAN");
+            gain.setDoubleClickReturnValue(true, .7);
+            pan.setDoubleClickReturnValue(true, 0);
+            knob(filterSliders[0], filterLabels[0], "CUTOFF");
+            knob(filterSliders[1], filterLabels[1], "RES");
+            knob(voiceModeSliders[0], voiceModeLabels[0], "SLIDE");
+            knob(voiceModeSliders[1], voiceModeLabels[1], "GATE");
+            mixerLabel.setText("TRACK", juce::dontSendNotification);
+            mixerLabel.setFont(juce::Font(10.5f, juce::Font::bold));
+            mixerLabel.setJustificationType(juce::Justification::centred);
+            mixerLabel.setColour(juce::Label::textColourId, muted);
+            mixer.setTooltip("Mixer insert this Channel plays through");
+            const std::array<juce::String, 3> voiceCaptions{"Cut", "By", "Max"};
+            for (size_t i = 0; i < voiceSliders.size(); ++i)
+            {
+                voiceLabels[i].setText(voiceCaptions[i], juce::dontSendNotification);
+                voiceSliders[i].updateText();
+            }
+            filterType.setTooltip(filterType.getTooltip() + " Play the keyboard to audition Channel processing.");
+            heading.setFont(juce::Font(15.f, juce::Font::bold));
+            heading.setColour(juce::Label::textColourId, accent);
+            info.setFont(juce::Font(12.f));
+            info.setColour(juce::Label::textColourId, muted);
+            tempoInfo.setFont(juce::Font(12.f));
+            filterHint.setFont(juce::Font(11.f));
+            keyboardHint.setText("Root note: right-click a key to set it, left-click to audition",
+                                 juce::dontSendNotification);
+            hq.setButtonText("HQ interpolation");
+            keepPitch.setButtonText("Keep pitch (stretch)");
+            load.setButtonText("Load...");
+            preview.setButtonText("Preview");
+            for (auto *hidden : std::initializer_list<juce::Component *>{&showKeys, &filterHeading, &filterTypeLabel,
+                                                                         &voiceModeHeading, &voiceModeHint, &voiceHint})
+                hidden->setVisible(false);
+        }
+        void mouseDown(const juce::MouseEvent &e) override
+        {
+            for (int i = 0; i < 3; ++i)
+                if (pageTab(i).contains(e.getPosition()))
+                    setPage(i);
+        }
+        void paintPageTabs(juce::Graphics &g)
+        {
+            g.setColour(bg.darker(.15f));
+            g.fillRect(0, 0, getWidth(), 60);
+            for (int i = 0; i < 3; ++i)
+            {
+                const auto r = pageTab(i).toFloat();
+                const bool on = page == i;
+                if (on)
+                {
+                    g.setColour(accent.withAlpha(.14f));
+                    g.fillRoundedRectangle(r, 6.f);
+                }
+                g.setColour(on ? accent : ink.withAlpha(.6f));
+                const auto c = r.getCentre();
+                juce::Path icon;
+                if (i == 0) // Waveform.
+                {
+                    icon.startNewSubPath(c.x - 15, c.y);
+                    const std::array<float, 9> h{3, 9, 14, 7, 12, 5, 9, 4, 2};
+                    for (size_t k = 0; k < h.size(); ++k)
+                    {
+                        const float x = c.x - 12 + float(k) * 3.f;
+                        icon.lineTo(x, c.y - h[k]);
+                        icon.lineTo(x + 1.5f, c.y + h[k]);
+                    }
+                    icon.lineTo(c.x + 15, c.y);
+                    g.strokePath(icon, juce::PathStrokeType(1.6f));
+                }
+                else if (i == 1) // Envelope.
+                {
+                    icon.startNewSubPath(c.x - 14, c.y + 10);
+                    icon.lineTo(c.x - 6, c.y - 10);
+                    icon.lineTo(c.x + 4, c.y + 2);
+                    icon.lineTo(c.x + 14, c.y + 10);
+                    g.strokePath(icon, juce::PathStrokeType(1.8f));
+                    for (const auto p : {juce::Point<float>(c.x - 14, c.y + 10), juce::Point<float>(c.x - 6, c.y - 10),
+                                         juce::Point<float>(c.x + 4, c.y + 2), juce::Point<float>(c.x + 14, c.y + 10)})
+                        g.drawEllipse(p.x - 3, p.y - 3, 6, 6, 1.5f);
+                }
+                else // Wrench.
+                {
+                    icon.addEllipse(c.x + 2, c.y - 13, 12, 12);
+                    g.strokePath(icon, juce::PathStrokeType(2.6f));
+                    g.drawLine(c.x + 4, c.y - 3, c.x - 11, c.y + 12, 4.f);
+                    g.setColour(bg.darker(.15f));
+                    g.fillRect(c.x + 9, c.y - 15, 6.f, 6.f);
+                }
+            }
+        }
+        void paintSections(juce::Graphics &g)
+        {
+            for (const auto &[box, title] : sections)
+            {
+                g.setColour(bg.withAlpha(.55f));
+                g.fillRoundedRectangle(box.toFloat(), 5.f);
+                g.setColour(grid);
+                g.drawRoundedRectangle(box.toFloat().reduced(.5f), 5.f, 1.f);
+                if (title.isNotEmpty())
+                {
+                    g.setColour(ink);
+                    g.setFont(juce::Font(14.f, juce::Font::bold));
+                    g.drawText(title, box.getX() + 10, box.getY() + 4, box.getWidth() - 20, 20,
+                               juce::Justification::centredLeft);
+                }
+            }
+        }
+        void layoutPages()
+        {
+            const int W = getWidth(), H = getHeight();
+            sections.clear();
+            waveformArea = {};
+            auto knobAt = [](juce::Slider &s, juce::Label &l, int x, int y, int width = 64)
+            {
+                s.setBounds(x + (width - 42) / 2, y, 42, 42);
+                l.setBounds(x - 4, y + 42, width + 8, 14);
+            };
+            // Header (every page): channel name, VOL / PAN / PITCH knobs and the TRACK insert.
+            heading.setBounds(160, 8, std::max(80, W - 160 - 290), 22);
+            info.setBounds(160, 32, std::max(80, W - 160 - 290), 20);
+            mixer.setBounds(W - 92, 10, 80, 26);
+            mixerLabel.setBounds(W - 92, 40, 80, 14);
+            knobAt(samplerSliders[1], samplerLabels[1], W - 154, 3, 56);
+            knobAt(gain, gainLabel, W - 212, 3, 56);
+            knobAt(pan, panLabel, W - 270, 3, 56);
+            const int top = 68, left = 10, gap = 8;
+            const int half = (W - 2 * left - gap) / 2, right = left + half + gap;
+            std::set<juce::Component *> visible{&heading, &info, &mixer, &mixerLabel, &samplerSliders[1],
+                                                &samplerLabels[1], &gain, &gainLabel, &pan, &panLabel};
+            auto show = [&](std::initializer_list<juce::Component *> items)
+            {
+                for (auto *c : items)
+                    visible.insert(c);
+            };
+            if (page == 0)
+            {
+                sections.push_back({{left, top, half, 66}, "File"});
+                source.setBounds(left + 10, top + 30, half - 196, 26);
+                load.setBounds(left + half - 180, top + 30, 82, 26);
+                preview.setBounds(left + half - 92, top + 30, 82, 26);
+                sections.push_back({{left, top + 72, half, 66}, "Content"});
+                hq.setBounds(left + 10, top + 102, 150, 26);
+                previewProcessed.setBounds(left + half - 160, top + 102, 150, 26);
+                sections.push_back({{left, top + 144, half, 140}, "Playback"});
+                loop.setBounds(left + 10, top + 172, 140, 24);
+                pingPong.setBounds(left + 152, top + 172, 130, 24);
+                fileLoop.setBounds(left + half - 112, top + 172, 102, 24);
+                const int playKnob = (half - 20) / 3;
+                for (int k = 0; k < 3; ++k)
+                {
+                    const size_t i = k == 2 ? 12 : size_t(4 + k);
+                    knobAt(samplerSliders[i], samplerLabels[i], left + 10 + k * playKnob, top + 210, playKnob);
+                }
+                sections.push_back({{right, top, W - right - left, 144}, "Time stretching"});
+                const int tw = (W - right - left - 30) / 2;
+                setTempo.setBounds(right + 10, top + 30, tw, 26);
+                detectTempo.setBounds(right + 20 + tw, top + 30, tw, 26);
+                fitTempo.setBounds(right + 10, top + 62, tw, 26);
+                fitLength.setBounds(right + 20 + tw, top + 62, tw, 26);
+                keepPitch.setBounds(right + 10, top + 94, 2 * tw + 10, 22);
+                tempoInfo.setBounds(right + 10, top + 116, 2 * tw + 10, 22);
+                sections.push_back({{right, top + 150, W - right - left, 134}, "Precomputed effects"});
+                normalize.setBounds(right + 10, top + 178, 120, 24);
+                reverse.setBounds(right + 140, top + 178, 110, 24);
+                const int fxKnob = (W - right - left - 20) / 4;
+                const std::array<size_t, 4> fx{2, 3, 10, 11};
+                for (size_t k = 0; k < fx.size(); ++k)
+                    knobAt(samplerSliders[fx[k]], samplerLabels[fx[k]], right + 10 + int(k) * fxKnob, top + 210,
+                           fxKnob);
+                waveformArea = {left, top + 292, W - 2 * left, std::max(80, H - top - 300)};
+                sections.push_back({waveformArea, {}});
+                rangeView.setBounds(waveformArea.reduced(4));
+                show({&source, &load, &preview, &hq, &previewProcessed, &loop, &pingPong, &fileLoop,
+                      &samplerSliders[4], &samplerLabels[4], &samplerSliders[5], &samplerLabels[5],
+                      &samplerSliders[12], &samplerLabels[12], &setTempo, &detectTempo, &fitTempo, &fitLength,
+                      &keepPitch, &tempoInfo, &normalize, &reverse, &samplerSliders[2], &samplerLabels[2],
+                      &samplerSliders[3], &samplerLabels[3], &samplerSliders[10], &samplerLabels[10],
+                      &samplerSliders[11], &samplerLabels[11]});
+                if (!audioClip)
+                    show({&rangeView});
+            }
+            else
+            {
+                const int keys = std::max(70, std::min(110, H - 470));
+                keyboard.setBounds(left, H - keys - 8, W - 2 * left, keys);
+                keyboardHint.setBounds(left + 4, H - keys - 32, W - 2 * left - 8, 22);
+                sections.push_back({{left, H - keys - 36, W - 2 * left, keys + 32}, {}});
+                show({&keyboard, &keyboardHint});
+            }
+            if (page == 1)
+            {
+                const int panelWidth = juce::roundToInt((W - 2 * left) * .68f);
+                const int panelHeight = std::max(300, H - top - std::max(70, std::min(110, H - 470)) - 50);
+                modulationPanel.setBounds(left, top, panelWidth, panelHeight);
+                const int x = left + panelWidth + gap, width = W - x - left;
+                sections.push_back({{x, top, width, 150}, "Filter"});
+                filterType.setBounds(x + 10, top + 28, width - 20, 24);
+                knobAt(filterSliders[0], filterLabels[0], x + 10, top + 60, (width - 20) / 2);
+                knobAt(filterSliders[1], filterLabels[1], x + 10 + (width - 20) / 2, top + 60, (width - 20) / 2);
+                filterHint.setBounds(x + 8, top + 118, width - 16, 30);
+                sections.push_back({{x, top + 156, width, panelHeight - 156}, {}});
+                envelope.setBounds(x + 8, top + 160, width - 16, 24);
+                const int adsr = (width - 16) / 4;
+                for (int k = 0; k < 4; ++k)
+                    knobAt(samplerSliders[size_t(6 + k)], samplerLabels[size_t(6 + k)], x + 8 + k * adsr, top + 194,
+                           adsr);
+                show({&modulationPanel, &filterType, &filterSliders[0], &filterLabels[0], &filterSliders[1],
+                      &filterLabels[1], &filterHint, &envelope, &samplerSliders[6], &samplerLabels[6],
+                      &samplerSliders[7], &samplerLabels[7], &samplerSliders[8], &samplerLabels[8],
+                      &samplerSliders[9], &samplerLabels[9]});
+            }
+            if (page == 2)
+            {
+                const int third = (W - 2 * left - 2 * gap) / 3;
+                const int x1 = left, x2 = left + third + gap, x3 = left + 2 * (third + gap);
+                sections.push_back({{x1, top, third, 150}, "Polyphony"});
+                voiceLabels[2].setBounds(x1 + 10, top + 30, 40, 24);
+                voiceSliders[2].setBounds(x1 + 52, top + 30, std::min(110, third - 62), 24);
+                voiceModeToggles[0].setBounds(x1 + 10, top + 62, 80, 24);
+                voiceModeToggles[1].setBounds(x1 + 92, top + 62, 80, 24);
+                knobAt(voiceModeSliders[0], voiceModeLabels[0], x1 + 10, top + 90, 64);
+                sections.push_back({{x2, top, third, 150}, "Time"});
+                knobAt(voiceModeSliders[1], voiceModeLabels[1], x2 + 10, top + 34, 64);
+                voiceModeToggles[2].setBounds(x2 + 10, top + 106, third - 20, 24);
+                sections.push_back({{x3, top, third, 150}, "Group"});
+                voiceLabels[0].setBounds(x3 + 10, top + 30, 40, 24);
+                voiceSliders[0].setBounds(x3 + 52, top + 30, std::min(110, third - 62), 24);
+                voiceLabels[1].setBounds(x3 + 10, top + 60, 40, 24);
+                voiceSliders[1].setBounds(x3 + 52, top + 60, std::min(110, third - 62), 24);
+                cutItself.setBounds(x3 + 10, top + 94, std::min(130, third - 20), 26);
+                sections.push_back({{x1, top + 158, third, 96}, "Root note"});
+                knobAt(samplerSliders[0], samplerLabels[0], x1 + 10, top + 184, 64);
+                piano.setBounds(x1 + 90, top + 196, std::min(110, third - 100), 26);
+                show({&voiceLabels[2], &voiceSliders[2], &voiceModeToggles[0], &voiceModeToggles[1],
+                      &voiceModeSliders[0], &voiceModeLabels[0], &voiceModeSliders[1], &voiceModeLabels[1],
+                      &voiceModeToggles[2], &voiceLabels[0], &voiceSliders[0], &voiceLabels[1], &voiceSliders[1],
+                      &cutItself, &samplerSliders[0], &samplerLabels[0], &piano});
+            }
+            for (auto *child : getChildren())
+                child->setVisible(visible.count(child) > 0);
         }
         void timerCallback() override
         {
@@ -294,7 +579,7 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                                            : "  |  note release"),
                     juce::dontSendNotification);
 
-            rangeView.setVisible(!audioClip);
+            rangeView.setVisible(!audioClip && page == 0);
             rangeView.setEnabled(!audioClip && bool(sample));
             keyboard.setEnabled(!audioClip && bool(sample));
             showKeys.setEnabled(keyboard.isEnabled());
@@ -526,6 +811,7 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
         }
 
       public:
+        void showPage(int next) { setPage(next); }
         // Explicit UI projection refresh, also used by deterministic component
         // acceptance. No command, musical operation or provider interaction.
         void refreshFromProject()
@@ -1228,9 +1514,10 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                             safe->owner->loadSample(file.getResult().getFullPathName(), true, safe->channel);
                     });
             };
+            restyle();
             timerCallback();
             startTimer(200);
-            setSize(620, samplerControlsMinimumHeight);
+            setSize(840, samplerControlsMinimumHeight);
         }
         bool selectModulationTarget(int target)
         {
@@ -1241,9 +1528,9 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
             if (!current || current->instrument || current->audioClip)
                 return false;
             modulationTarget = target;
+            if (page != 1)
+                setPage(1);
             timerCallback();
-            if (auto *viewport = findParentComponentOfClass<juce::Viewport>())
-                viewport->setViewPosition(0, modulationPanel.getY());
             return true;
         }
         int currentModulationTarget() const noexcept
@@ -1301,91 +1588,18 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
         void paint(juce::Graphics &g) override
         {
             g.fillAll(panel);
-            auto r = juce::Rectangle<float>(18, 88, float(getWidth() - 36), 104);
-            g.setColour(bg);
-            g.fillRoundedRectangle(r, 4);
-            g.setColour(accent);
-            if (audioClip)
-            {
-                if (owner)
-                    if (auto *c = owner->controller.project.channel(channel))
-                        waveforms.get(c->source).drawChannels(g, r.toNearestInt(), 0, c->audioDuration, 1.f);
-                return;
-            }
+            paintPageTabs(g);
+            paintSections(g);
+            if (audioClip && page == 0 && !waveformArea.isEmpty() && owner)
+                if (auto *c = owner->controller.project.channel(channel))
+                {
+                    g.setColour(accent);
+                    waveforms.get(c->source).drawChannels(g, waveformArea.reduced(6), 0, c->audioDuration, 1.f);
+                }
         }
         void resized() override
         {
-            int width = getWidth() - 36;
-            heading.setBounds(18, 8, width, 28);
-            source.setBounds(18, 42, width, 30);
-            info.setBounds(18, 196, width, 26);
-            rangeView.setBounds(18, 88, width, 104);
-            modulationPanel.setBounds(18, 1463, width, 552);
-            keyboardHint.setBounds(18, 2023, width, 24);
-            keyboard.setBounds(18, 2051, width, 70);
-            filterHeading.setBounds(18, 1275, width, 24);
-            filterTypeLabel.setBounds(18, 1303, 145, 28);
-            filterType.setBounds(168, 1303, width - 150, 28);
-            for (size_t i = 0; i < filterSliders.size(); ++i)
-            {
-                const int y = 1339 + int(i) * 36;
-                filterLabels[i].setBounds(18, y, 145, 28);
-                filterSliders[i].setBounds(168, y, width - 150, 28);
-            }
-            filterHint.setBounds(18, 1411, width, 46);
-            int tempoWidth = (width - 18) / 4;
-            setTempo.setBounds(18, 228, tempoWidth, 28);
-            detectTempo.setBounds(24 + tempoWidth, 228, tempoWidth, 28);
-            fitTempo.setBounds(30 + 2 * tempoWidth, 228, tempoWidth, 28);
-            fitLength.setBounds(36 + 3 * tempoWidth, 228, tempoWidth, 28);
-            keepPitch.setBounds(18, 262, 120, 28);
-            tempoInfo.setBounds(144, 262, width - 126, 28);
-            gainLabel.setBounds(18, 298, 68, 28);
-            gain.setBounds(90, 298, width - 72, 28);
-            panLabel.setBounds(18, 332, 68, 28);
-            pan.setBounds(90, 332, width - 72, 28);
-            mixerLabel.setBounds(18, 368, 100, 28);
-            mixer.setBounds(120, 368, width - 102, 28);
-            const int buttonWidth = (width - 24) / 5;
-            int buttonX = 18;
-            for (auto *button : {&load, &preview, &previewProcessed, &piano, &showKeys})
-            {
-                button->setBounds(buttonX, 410, buttonWidth, 28);
-                buttonX += buttonWidth + 6;
-            }
-            const int column = (width - 24) / 3;
-            for (size_t i = 0; i < voiceSliders.size(); ++i)
-            {
-                const int x = 18 + int(i) * (column + 12);
-                voiceLabels[i].setBounds(x, 450, column, 24);
-                voiceSliders[i].setBounds(x, 478, column, 28);
-            }
-            voiceModeHeading.setBounds(18, 550, width, 22);
-            const int modeColumn = (width - 16) / 3;
-            for (size_t i = 0; i < voiceModeToggles.size(); ++i)
-                voiceModeToggles[i].setBounds(18 + int(i) * (modeColumn + 8), 576, modeColumn, 28);
-            for (size_t i = 0; i < voiceModeSliders.size(); ++i)
-            {
-                const int y = 610 + int(i) * 36;
-                voiceModeLabels[i].setBounds(18, y, 145, 28);
-                voiceModeSliders[i].setBounds(168, y, width - 150, 28);
-            }
-            voiceModeHint.setBounds(18, 680, width, 52);
-            cutItself.setBounds(18, 514, 126, 28);
-            voiceHint.setBounds(152, 514, width - 134, 28);
-            reverse.setBounds(18, 740, 110, 28);
-            normalize.setBounds(134, 740, 110, 28);
-            hq.setBounds(248, 740, 60, 28);
-            envelope.setBounds(312, 740, width - 294, 28);
-            loop.setBounds(18, 774, 190, 28);
-            pingPong.setBounds(218, 774, 150, 28);
-            fileLoop.setBounds(374, 774, std::max(110, width - 356), 28);
-            for (size_t i = 0; i < samplerSliders.size(); ++i)
-            {
-                int y = 812 + int(i) * 35;
-                samplerLabels[i].setBounds(18, y, 145, 28);
-                samplerSliders[i].setBounds(168, y, width - 150, 28);
-            }
+            layoutPages();
         }
     };
 
@@ -1404,8 +1618,8 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
         {
             viewport.setBounds(getLocalBounds());
             viewport.getViewedComponent()->setSize(
-                std::max(560, getWidth() - scrollBarThickness),
-                std::max(samplerControlsMinimumHeight, getHeight() - scrollBarThickness));
+                std::max(820, getWidth()),
+                std::max(samplerControlsMinimumHeight, getHeight()));
         }
         juce::Component *controls() const
         {
@@ -1421,6 +1635,10 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
     bool selectModulationTarget(int target)
     {
         return static_cast<Controls *>(controlsComponent())->selectModulationTarget(target);
+    }
+    void showPage(int page)
+    {
+        static_cast<Controls *>(controlsComponent())->showPage(page);
     }
     int currentModulationTarget() const
     {
@@ -1438,7 +1656,7 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
         setUsingNativeTitleBar(false);
         setTitleBarHeight(36);
         setContentOwned(new ScrollableControls(new Controls(studio, id)), true);
-        centreWithSize(660, 680);
+        centreWithSize(860, 640);
         setResizable(true, false);
         setResizeLimits(360, 260, 1400, 900);
         roundNativeWindow(*this);

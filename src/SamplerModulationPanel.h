@@ -71,6 +71,32 @@ class SamplerModulationPanel final : public juce::Component
     {
         return juce::String(s.data(), s.size());
     }
+    // Target tabs in display order (Panning first, like the familiar layout); values are targets.
+    static constexpr std::array<int, 5> tabOrder{1, 0, 2, 3, 4};
+    juce::Rectangle<int> tabBounds(size_t index) const
+    {
+        static constexpr std::array<int, 5> widths{62, 58, 50, 50, 44};
+        int x = 10;
+        for (size_t i = 0; i < index; ++i)
+            x += widths[i] + 8;
+        return {x, 4, widths[index], 24};
+    }
+    juce::Rectangle<int> envelopeBox() const
+    {
+        return {6, 34, juce::roundToInt(getWidth() * .6f) - 9, getHeight() - 58};
+    }
+    juce::Rectangle<int> lfoBox() const
+    {
+        const auto left = envelopeBox();
+        return {left.getRight() + 6, left.getY(), getWidth() - left.getRight() - 12, left.getHeight()};
+    }
+    static juce::String caption(size_t i)
+    {
+        static const std::array<const char *, 20> names{"", "", "DELAY", "ATT", "HOLD", "DEC", "SUS",
+                                                        "REL", "A TENS", "D TENS", "R TENS", "AMT", "", "",
+                                                        "", "DELAY", "ATT", "SPEED", "AMT", ""};
+        return names[i];
+    }
     void submit(size_t i, double value)
     {
         if (!updating && available && !strokeSuppressed[i] && onChange)
@@ -95,7 +121,7 @@ class SamplerModulationPanel final : public juce::Component
         addAndMakeVisible(heading);
         heading.setText("Envelopes / LFO", juce::dontSendNotification);
         heading.setFont(juce::Font(18.f));
-        addAndMakeVisible(target);
+        addChildComponent(target); // Kept for its stable ID; the tabs choose the target.
         target.setComponentID("instrument.sampler.modulation.target");
         const std::array<juce::String, 5> names{"Volume", "Pan", "Mod X / Cutoff", "Mod Y / Resonance",
                                                 "Pitch"};
@@ -115,6 +141,7 @@ class SamplerModulationPanel final : public juce::Component
         shape.addItem("Sine", 1);
         shape.addItem("Triangle", 2);
         shape.addItem("Square", 3);
+        shape.setSelectedId(syncedShape, juce::dontSendNotification);
         shape.onChange = [this] { submit(19, shape.getSelectedId() - 1); };
         shape.onContext = [this] { showContext(19); };
         for (size_t i = 0; i < samplerModulationParameters.size(); ++i)
@@ -124,7 +151,12 @@ class SamplerModulationPanel final : public juce::Component
             {
                 auto &flag = flags[i];
                 addAndMakeVisible(flag);
-                flag.setButtonText(text(p.label));
+                flag.setButtonText(i == 0                ? juce::String("Envelope")
+                                   : i == 12             ? juce::String("LFO")
+                                   : i == 1 || i == 13   ? juce::String("Tempo")
+                                   : i == 14             ? juce::String("Global")
+                                                         : text(p.label));
+                flag.setTooltip(text(p.label));
                 flag.setComponentID("instrument.sampler.modulation." + text(p.id));
                 flag.onClick = [this, i] { submit(i, flags[i].getToggleState() ? 1 : 0); };
                 flag.onContext = [this, i] { showContext(i); };
@@ -134,11 +166,16 @@ class SamplerModulationPanel final : public juce::Component
                 auto &slider = sliders[i];
                 addAndMakeVisible(slider);
                 addAndMakeVisible(labels[i]);
-                labels[i].setText(text(p.label), juce::dontSendNotification);
-                labels[i].setFont(juce::Font(12.f));
+                labels[i].setText(caption(i), juce::dontSendNotification);
+                labels[i].setFont(juce::Font(10.5f, juce::Font::bold));
+                labels[i].setJustificationType(juce::Justification::centred);
+                labels[i].setColour(juce::Label::textColourId, muted);
+                labels[i].setInterceptsMouseClicks(false, false);
                 slider.setComponentID("instrument.sampler.modulation." + text(p.id));
-                slider.setSliderStyle(juce::Slider::LinearHorizontal);
-                slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 68, 26);
+                slider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+                slider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+                slider.setPopupDisplayEnabled(true, true, nullptr);
+                slider.setTooltip(text(p.label));
                 slider.setRange(p.minimum, p.maximum, .001);
                 slider.setDoubleClickReturnValue(true, p.initial);
                 if (p.maximum == 64)
@@ -218,22 +255,51 @@ class SamplerModulationPanel final : public juce::Component
         updating = false;
         repaint();
     }
+    void mouseDown(const juce::MouseEvent &e) override
+    {
+        for (size_t i = 0; i < tabOrder.size(); ++i)
+            if (tabBounds(i).contains(e.getPosition()) && available && !updating && onTarget)
+                onTarget(tabOrder[i]);
+    }
     void paint(juce::Graphics &g) override
     {
         g.setColour(bg);
         g.fillRoundedRectangle(getLocalBounds().toFloat(), 7.f);
-        const float half = getWidth() * .5f;
-        g.setColour(accent.withAlpha(.13f));
-        g.fillRoundedRectangle(12.f, 84.f, half - 18, float(getHeight() - 96), 5.f);
-        g.fillRoundedRectangle(half + 6, 84.f, half - 18, float(getHeight() - 96), 5.f);
+        static const std::array<const char *, 5> tabNames{"Panning", "Volume", "Mod X", "Mod Y", "Pitch"};
+        for (size_t i = 0; i < tabOrder.size(); ++i)
+        {
+            const auto r = tabBounds(i);
+            const bool on = tabOrder[i] == selected;
+            if (on)
+            {
+                g.setColour(accent.withAlpha(.16f));
+                g.fillRoundedRectangle(r.toFloat(), 4.f);
+            }
+            g.setColour(on ? accent : available ? ink.withAlpha(.75f) : muted.withAlpha(.5f));
+            g.setFont(juce::Font(13.f, on ? juce::Font::bold : juce::Font::plain));
+            g.drawText(tabNames[i], r, juce::Justification::centred);
+        }
+        for (const auto box : {envelopeBox(), lfoBox()})
+        {
+            g.setColour(panel);
+            g.fillRoundedRectangle(box.toFloat(), 5.f);
+            g.setColour(grid);
+            g.drawRoundedRectangle(box.toFloat().reduced(.5f), 5.f, 1.f);
+        }
+        auto graph = [](juce::Rectangle<int> box)
+        {
+            return juce::Rectangle<float>(float(box.getX() + 10), float(box.getY() + 34), float(box.getWidth() - 20),
+                                          92.f);
+        };
+        for (const auto area : {graph(envelopeBox()), graph(lfoBox())})
+        {
+            g.setColour(bg.darker(.2f));
+            g.fillRoundedRectangle(area, 4.f);
+        }
         // Original envelope preview. Parameter controls are the editable surface.
         if (selected != 1)
         {
-            g.setColour(accent.withAlpha(.8f));
-            g.setFont(12.f);
-            g.drawText("Envelope preview", int(half + 20), 398, int(half - 46), 20,
-                       juce::Justification::centredLeft);
-            auto area = juce::Rectangle<float>(half + 20, 424, half - 46, 96);
+            const auto area = graph(envelopeBox()).reduced(6.f, 8.f);
             juce::Path line;
             const double duration = std::max(.001, current.delay + current.attack + current.hold +
                                                        current.decay + .3 + current.release);
@@ -245,6 +311,7 @@ class SamplerModulationPanel final : public juce::Component
             line.startNewSubPath(point(0, 0));
             double t = current.delay;
             line.lineTo(point(t, 0));
+            std::vector<juce::Point<float>> handles{point(t, 0)};
             auto segment = [&](double length, double start, double end, double tension)
             {
                 for (int i = 1; i <= 32; ++i)
@@ -254,40 +321,78 @@ class SamplerModulationPanel final : public juce::Component
                     line.lineTo(point(t + x * length, start + (end - start) * y));
                 }
                 t += length;
+                handles.push_back(point(t, end));
             };
             segment(current.attack, 0, 1, current.attackTension);
             segment(current.hold, 1, 1, 0);
             segment(current.decay, 1, current.sustain, current.decayTension);
             segment(.3, current.sustain, current.sustain, 0);
             segment(current.release, current.sustain, 0, current.releaseTension);
-            g.setColour(accent.withAlpha(current.enabled ? 1.f : .35f));
+            const auto colour = accent.withAlpha(current.enabled ? 1.f : .35f);
+            g.setColour(colour);
             g.strokePath(line, juce::PathStrokeType(1.8f));
+            for (const auto handle : handles)
+            {
+                g.setColour(colour.withAlpha(.35f));
+                g.fillEllipse(handle.x - 4.f, handle.y - 4.f, 8.f, 8.f);
+                g.setColour(colour);
+                g.drawEllipse(handle.x - 4.f, handle.y - 4.f, 8.f, 8.f, 1.2f);
+            }
         }
+        else
+        {
+            g.setColour(muted.withAlpha(.6f));
+            g.setFont(12.f);
+            g.drawText("Panning uses the LFO only", graph(envelopeBox()).toNearestInt(),
+                       juce::Justification::centred);
+        }
+        const auto area = graph(lfoBox()).reduced(6.f, 10.f);
+        juce::Path wave;
+        const float amount = current.lfoEnabled ? std::max(.15f, float(std::abs(current.lfoAmount))) : .6f;
+        for (int i = 0; i <= 96; ++i)
+        {
+            const float x = float(i) / 96.f, phase = x * 2.f;
+            const float f = phase - std::floor(phase);
+            const float v = current.lfoShape == 0   ? std::sin(f * juce::MathConstants<float>::twoPi)
+                            : current.lfoShape == 1 ? 1.f - 4.f * std::abs(f - .5f)
+                                                    : (f < .5f ? 1.f : -1.f);
+            const juce::Point<float> p(area.getX() + x * area.getWidth(),
+                                       area.getCentreY() - v * amount * area.getHeight() * .5f);
+            if (i == 0)
+                wave.startNewSubPath(p);
+            else
+                wave.lineTo(p);
+        }
+        g.setColour(accent.withAlpha(current.lfoEnabled ? 1.f : .35f));
+        g.strokePath(wave, juce::PathStrokeType(1.6f));
     }
     void resized() override
     {
-        const int half = getWidth() / 2;
-        heading.setBounds(16, 10, half - 24, 28);
-        target.setBounds(half + 6, 10, half - 22, 28);
-        explanation.setBounds(16, 45, getWidth() - 32, 34);
-        flags[0].setBounds(22, 92, half - 32, 26);
-        flags[1].setBounds(22, 120, half - 32, 26);
-        int row = 0;
-        for (size_t i = 2; i < 12; ++i)
+        heading.setVisible(false);
+        const auto env = envelopeBox(), lfo = lfoBox();
+        flags[0].setBounds(env.getX() + 8, env.getY() + 5, 110, 24);
+        flags[1].setBounds(env.getRight() - 84, env.getY() + 5, 78, 24);
+        auto knobRow = [this](juce::Rectangle<int> box, int y, std::initializer_list<size_t> items, int columns)
         {
-            labels[i].setBounds(22, 155 + row * 35, 98, 26);
-            sliders[i].setBounds(122, 155 + row * 35, half - 142, 26);
-            ++row;
-        }
-        for (size_t i = 12; i < 15; ++i)
-            flags[i].setBounds(half + 20, 92 + int(i - 12) * 28, half - 36, 26);
-        for (size_t i = 15; i < 19; ++i)
-        {
-            const int y = 184 + int(i - 15) * 44;
-            labels[i].setBounds(half + 20, y, 84, 28);
-            sliders[i].setBounds(half + 106, y, half - 126, 28);
-        }
-        shape.setBounds(half + 20, 364, half - 40, 28);
+            const int width = (box.getWidth() - 16) / columns;
+            int x = box.getX() + 8;
+            for (const auto i : items)
+            {
+                sliders[i].setBounds(x + (width - 40) / 2, y, 40, 40);
+                labels[i].setBounds(x, y + 40, width, 14);
+                x += width;
+            }
+        };
+        const int firstRow = env.getY() + 134;
+        knobRow(env, firstRow, {2, 3, 4, 5, 6, 7}, 6);
+        knobRow(env, firstRow + 60, {8, 9, 10, 11}, 6);
+        flags[12].setBounds(lfo.getX() + 8, lfo.getY() + 5, 70, 24);
+        shape.setBounds(lfo.getRight() - 96, lfo.getY() + 5, 88, 24);
+        knobRow(lfo, firstRow, {15, 16, 18, 17}, 4);
+        flags[13].setBounds(lfo.getX() + 10, firstRow + 64, 76, 24);
+        flags[14].setBounds(lfo.getX() + 90, firstRow + 64, 80, 24);
+        explanation.setFont(juce::Font(11.f));
+        explanation.setBounds(10, getHeight() - 22, getWidth() - 20, 18);
     }
 };
 } // namespace vibera

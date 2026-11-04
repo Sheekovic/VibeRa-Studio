@@ -366,6 +366,39 @@ class WorkspaceLook final : public juce::LookAndFeel_V4
         g.setColour(isMouseOver ? ink : muted);
         g.strokePath(chevron, juce::PathStrokeType(1.4f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
     }
+    // Original knob: dark cap, track arc, value arc (from the centre for bipolar ranges), pointer.
+    void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height, float position,
+                          float startAngle, float endAngle, juce::Slider &slider) override
+    {
+        const float side = float(std::min(width, height)) - 4.f;
+        const auto centre = juce::Rectangle<float>(float(x), float(y), float(width), float(height)).getCentre();
+        const float radius = side * .5f;
+        const bool enabled = slider.isEnabled();
+        const auto colour = enabled ? accent : muted.withAlpha(.5f);
+        const float angle = startAngle + position * (endAngle - startAngle);
+        const double minimum = slider.getMinimum(), maximum = slider.getMaximum();
+        const float origin = minimum < 0 && maximum > 0
+                                 ? startAngle + float(slider.valueToProportionOfLength(0.)) * (endAngle - startAngle)
+                                 : startAngle;
+        g.setColour(juce::Colours::black.withAlpha(.35f));
+        g.fillEllipse(centre.x - radius + 3.f, centre.y - radius + 4.f, (radius - 3.f) * 2.f, (radius - 3.f) * 2.f);
+        juce::ColourGradient cap(grid.brighter(.15f), centre.x, centre.y - radius, bg, centre.x, centre.y + radius,
+                                 false);
+        g.setGradientFill(cap);
+        g.fillEllipse(centre.x - radius + 3.f, centre.y - radius + 3.f, (radius - 3.f) * 2.f, (radius - 3.f) * 2.f);
+        juce::Path track, value;
+        track.addCentredArc(centre.x, centre.y, radius, radius, 0, startAngle, endAngle, true);
+        value.addCentredArc(centre.x, centre.y, radius, radius, 0, std::min(origin, angle), std::max(origin, angle),
+                            true);
+        const juce::PathStrokeType stroke(2.f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded);
+        g.setColour(grid.brighter(.1f));
+        g.strokePath(track, stroke);
+        g.setColour(colour);
+        g.strokePath(value, stroke);
+        const float inner = radius - 5.f;
+        g.drawLine(centre.x + std::sin(angle) * inner * .35f, centre.y - std::cos(angle) * inner * .35f,
+                   centre.x + std::sin(angle) * inner, centre.y - std::cos(angle) * inner, 2.f);
+    }
     void drawToggleButton(juce::Graphics &g, juce::ToggleButton &button, bool over, bool) override
     {
         const auto bounds = button.getLocalBounds().toFloat();

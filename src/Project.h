@@ -341,6 +341,19 @@ struct Project
     const Pattern *pattern(Id) const;
     Channel *channel(Id);
     const Channel *channel(Id) const;
+    // The original source of tempo-fitted Audio Clips that no clip plays any more: kept for
+    // re-fitting, but not shown as a separate sample (the fitted Channel stands in for it).
+    bool warpOriginalOnly(Id id) const
+    {
+        bool original = false;
+        for (const auto &clip : audioPlacements)
+        {
+            if (clip.channel == id)
+                return false;
+            original = original || (clip.warpBpm > 0 && clip.warpChannel == id);
+        }
+        return original;
+    }
     ChannelGroup *channelGroup(Id);
     const ChannelGroup *channelGroup(Id) const;
     PluginSpec *plugin(Id);

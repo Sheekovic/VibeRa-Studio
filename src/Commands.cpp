@@ -4395,7 +4395,10 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             return missing();
         Channel channel = *old;
         channel.id = next.allocate();
-        channel.name = sourceName(a.text);
+        // A tempo fit stays the same sample to the user: same name and Channel Rack place.
+        const bool fit = a.warpBpm > 0;
+        if (!fit)
+            channel.name = sourceName(a.text);
         channel.source = a.text;
         channel.audioDuration = a.length;
         const double scale = found->duration > 0 ? a.length / found->duration : 1;
@@ -4416,7 +4419,14 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         found->duration = a.length;
         found->fadeIn = a.step ? 0 : found->fadeIn * scale;
         found->fadeOut = a.step ? 0 : found->fadeOut * scale;
-        next.channels.push_back(std::move(channel));
+        if (fit)
+        {
+            const auto at = std::find_if(next.channels.begin(), next.channels.end(),
+                                         [&](const auto &c) { return c.id == oldChannel; });
+            next.channels.insert(at == next.channels.end() ? at : at + 1, std::move(channel));
+        }
+        else
+            next.channels.push_back(std::move(channel));
         if (std::none_of(next.audioPlacements.begin(), next.audioPlacements.end(), [&](const auto &clip)
                          { return clip.channel == oldChannel || (clip.warpBpm > 0 && clip.warpChannel == oldChannel); }))
             std::erase_if(next.channels, [&](const auto &c) { return c.id == oldChannel; });
