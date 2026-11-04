@@ -130,6 +130,29 @@ inline juce::Result validateChannelLoops(const Project &project, const Pattern &
     }
     return juce::Result::ok();
 }
+// A Pattern clip longer than its Pattern repeats the Pattern (the familiar Playlist
+// behavior): the clip is cut into segments, each one window of the Pattern
+// [patternOffset, patternOffset + length). Calls visit(clipPosition, length, patternOffset,
+// repeat). A clip inside its Pattern is a single segment, exactly the old source window.
+// At most maximumClipRepeats segments (the repeat index lives above note-repeat ordinals).
+inline constexpr std::uint32_t maximumClipRepeats = 32767;
+inline constexpr int clipRepeatShift = 17; // Note-repeat ordinals stay below 2^17 (budget 100000).
+template <class Visit>
+inline void forEachClipRepeat(double clipLength, double offset, double patternLength, Visit &&visit)
+{
+    if (!(patternLength > 0) || !(clipLength > 0))
+        return;
+    double position = 0;
+    for (std::uint32_t repeat = 0; repeat <= maximumClipRepeats && position < clipLength - 1.e-9; ++repeat)
+    {
+        double start = std::fmod(offset + position, patternLength);
+        if (patternLength - start < 1.e-9)
+            start = 0;
+        const double length = std::min(clipLength - position, patternLength - start);
+        visit(position, length, start, repeat);
+        position += length;
+    }
+}
 inline Id loopOccurrencePlacement(Id placement, std::uint32_t iteration) noexcept
 {
     // MCP IDs are <=1e9; larger legacy Clip IDs are admitted only if the product

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "PatternChannelLoops.h"
 #include "LiveTimeline.h"
 #include "PatternAutomation.h"
 #include "Tuning.h"
@@ -214,7 +215,9 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
                 for (const auto &clip : p.placements)
                     if (!clip.muted && !p.laneMuted(clip.lane))
                         if (const auto *part = p.pattern(clip.pattern))
-                            addControls(*part, clip.beat, clip.length, clip.offset);
+                            forEachClipRepeat(clip.length, clip.offset, part->length,
+                                              [&](double position, double length, double offset, std::uint32_t)
+                                              { addControls(*part, clip.beat + position, length, offset); });
             std::stable_sort(channel.controls.begin(), channel.controls.end(),
                              [](const auto &a, const auto &b) { return a.time < b.time; });
         }

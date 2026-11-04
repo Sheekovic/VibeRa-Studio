@@ -3336,16 +3336,27 @@ class Studio::Editor final : public juce::Component,
                         // Miniature notes come from the actual multi-channel pattern and visible source
                         // window.
                         if (p)
-                            for (auto &n : p->notes)
-                                if (n.beat >= c.offset && n.beat < c.offset + c.length)
+                            forEachClipRepeat(
+                                c.length, c.offset, p->length,
+                                [&](double position, double length, double offset, std::uint32_t repeat)
                                 {
-                                    g.setColour(channelColour(int(n.channel - 1)));
-                                    float x = r.getX() + float((n.beat - c.offset) * spacing());
-                                    float y =
-                                        r.getY() + 19 + float((72 - n.pitch) / 48.) * (r.getHeight() - 22);
-                                    g.fillRect(x, juce::jlimit(r.getY() + 19, r.getBottom() - 3, y),
-                                               float(std::max(2., n.length * spacing() - 1)), 2.f);
-                                }
+                                    if (repeat > 0)
+                                    {
+                                        // Where the Pattern starts again inside a longer clip.
+                                        g.setColour(ink.withAlpha(.18f));
+                                        g.drawVerticalLine(int(r.getX() + float(position * spacing())), r.getY() + 18,
+                                                           r.getBottom() - 2);
+                                    }
+                                    for (auto &n : p->notes)
+                                        if (n.beat >= offset && n.beat < offset + length)
+                                        {
+                                            g.setColour(channelColour(int(n.channel - 1)));
+                                            float x = r.getX() + float((position + n.beat - offset) * spacing());
+                                            float y = r.getY() + 19 + float((72 - n.pitch) / 48.) * (r.getHeight() - 22);
+                                            g.fillRect(x, juce::jlimit(r.getY() + 19, r.getBottom() - 3, y),
+                                                       float(std::max(2., std::min(n.length, offset + length - n.beat) * spacing() - 1)), 2.f);
+                                        }
+                                });
                         g.setColour(colour);
                         g.drawRoundedRectangle(r, 3, 1);
                     }

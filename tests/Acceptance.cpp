@@ -283,6 +283,7 @@ static juce::Result awaitProjection(AudioEngine &, const Project &, bool, Id);
 #include "AudioStretchAcceptance.h"
 #include "UpdaterAcceptance.h"
 #include "SamplerStretchAcceptance.h"
+#include "ClipRepeatAcceptance.h"
 #include "ArrangementAcceptance.h"
 #include "PlaylistTrackAcceptance.h"
 #include "MidiImportExtrasAcceptance.h"
@@ -4906,6 +4907,12 @@ int main(int argc, char **argv)
             require(test::prepareBuildAcceptanceAttempt(argv[2], output).wasOk(), "Owned arrangement output");
             arrangement_acceptance::tests(output);
             std::cout << "PASS arrangements " << assertions << " assertions" << std::endl;
+            return 0;
+        }
+        if (argc == 2 && juce::String(argv[1]) == "--clip-repeat-check")
+        {
+            clip_repeat_acceptance::tests();
+            std::cout << "PASS clip repeat " << assertions << " assertions" << std::endl;
             return 0;
         }
         if (argc == 3 && juce::String(argv[1]) == "--sampler-stretch-check")

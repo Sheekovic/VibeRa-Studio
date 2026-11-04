@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
 #include "Project.h"
+#include "PatternChannelLoops.h"
 #include <set>
 
 namespace vibera
@@ -61,21 +62,26 @@ inline AudibleAutomation audibleAutomation(const Project &p, bool patternMode, I
         const auto *pattern = p.pattern(clip.pattern);
         if (!pattern || pattern->automation.empty() || clip.muted || p.laneMuted(clip.lane))
             continue;
-        const double from = clip.offset, to = clip.offset + clip.length; // Pattern beats shown.
-        for (const auto &window : pattern->automation)
-        {
-            const double start = std::max(from, window.beat), end = std::min(to, window.beat + window.length);
-            if (window.muted || !(end > start + 1.e-9))
-                continue;
-            AutomationPlacement placed;
-            placed.id = next++;
-            placed.source = window.source;
-            placed.beat = clip.beat + (start - from);
-            placed.length = end - start;
-            placed.offset = window.offset + (start - window.beat);
-            placed.lane = juce::jlimit(0, 127, clip.lane);
-            result.document.placements.push_back(placed);
-        }
+        forEachClipRepeat(clip.length, clip.offset, pattern->length,
+                          [&](double position, double length, double offset, std::uint32_t)
+                          {
+                              const double from = offset, to = offset + length; // Pattern beats shown.
+                              for (const auto &window : pattern->automation)
+                              {
+                                  const double start = std::max(from, window.beat),
+                                               end = std::min(to, window.beat + window.length);
+                                  if (window.muted || !(end > start + 1.e-9))
+                                      continue;
+                                  AutomationPlacement placed;
+                                  placed.id = next++;
+                                  placed.source = window.source;
+                                  placed.beat = clip.beat + position + (start - from);
+                                  placed.length = end - start;
+                                  placed.offset = window.offset + (start - window.beat);
+                                  placed.lane = juce::jlimit(0, 127, clip.lane);
+                                  result.document.placements.push_back(placed);
+                              }
+                          });
     }
     return result;
 }

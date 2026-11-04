@@ -2353,9 +2353,11 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
     for (const auto &channel : p.channels)
         if (channel.muted)
             muted.insert(channel.id);
-    auto emit = [&](const Pattern &pattern, double start, double length, double offset, Id placement)
+    auto emit = [&](const Pattern &pattern, double start, double length, double offset, Id placement,
+                    std::uint32_t clipRepeat)
     {
-        // A placement is a source window, not an implicit repeat. Repeat with linked placements.
+        // One window of the Pattern; a longer clip calls this once per repeat (forEachClipRepeat).
+        const std::uint32_t repeatBits = clipRepeat << clipRepeatShift;
         for (const auto &occurrence : rawPatternOccurrences(p, pattern))
         {
             const auto &n = occurrence.note;
@@ -2372,7 +2374,7 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
                     result.push_back(
                         {n.channel, start + b, std::min({duration, length - b, pattern.length - offset - b}),
                          n.pitch, n.velocity, n.id, loopOccurrencePlacement(placement, occurrence.iteration),
-                         n.step, n.pan, n.fineCents, 0, n.releaseVelocity, n.modX, n.modY, n.slide,
+                         n.step, n.pan, n.fineCents, repeatBits, n.releaseVelocity, n.modX, n.modY, n.slide,
                          n.portamento, n.colourGroup});
                 continue;
             }
@@ -2392,7 +2394,7 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
                                             length - b, pattern.length - offset - b}),
                                   n.pitch, n.velocity, n.id,
                                   loopOccurrencePlacement(placement, occurrence.iteration), n.step, n.pan,
-                                  n.fineCents, ordinal, n.releaseVelocity, n.modX, n.modY, n.slide,
+                                  n.fineCents, ordinal | repeatBits, n.releaseVelocity, n.modX, n.modY, n.slide,
                                   n.portamento, n.colourGroup});
             }
         }
@@ -2400,13 +2402,15 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
     if (patternMode)
     {
         if (auto *pat = p.pattern(selectedPattern))
-            emit(*pat, 0, pat->length, 0, 0);
+            emit(*pat, 0, pat->length, 0, 0, 0);
     }
     else
         for (auto &clip : p.placements)
             if (!clip.muted && !p.laneMuted(clip.lane))
                 if (auto *pat = p.pattern(clip.pattern))
-                    emit(*pat, clip.beat, clip.length, clip.offset, clip.id);
+                    forEachClipRepeat(clip.length, clip.offset, pat->length,
+                                      [&](double position, double length, double offset, std::uint32_t repeat)
+                                      { emit(*pat, clip.beat + position, length, offset, clip.id, repeat); });
     std::stable_sort(result.begin(), result.end(), [](auto &a, auto &b) { return a.beat < b.beat; });
     return result;
 }
