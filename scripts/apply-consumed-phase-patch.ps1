@@ -11,7 +11,9 @@ $archive='77c2d0394293e81356a2a46f03d4b90e83a5dee0e71e9e386ab2489a4abbb076'
 $approved=@(
     @{path='modules/tracktion_graph/tracktion_graph/nodes/tracktion_LatencyNode.h'; originalSha256='6f5923dd8568a16947c2e62004c37c0b8d0cfc89a6f9c2f466f9fdb7e0920658'; patchedSha256='5995eed35d46e1a7356c55a97d56628ef80e772dba7d40057bb2fabd4c908845'; patchSha256='fbcd7b67c96ab9a273f5ea6e585262a662165e9d5d82265c4e077cac8782b516'}
 )
-$closedHeaderSha256='8d91ff781c8b316d04fe3ad240c9ec78a27d8b53d54bd17f2a2f9184654dc40b'
+# LP64 portability review: Range<std::int64_t> matches Tracktion callbacks and
+# internal reference comparisons; sample values, latency policy and DSP are unchanged.
+$closedHeaderSha256='b34074b16061babcc301acdfd2628d9f627bfb01cbf8c1958317b3696ee1c652'
 function Assert-NoReparse([string]$path) {
     $candidate=[IO.Path]::GetFullPath($path)
     if ($candidate -ne $root -and
