@@ -1,17 +1,49 @@
-# Native candidates; compilation is not audio/UI acceptance. Tags create drafts.
+# Native builds on Windows, Linux and macOS. Every source push to main (and every pull
+# request) compiles all three, so a platform-specific error is caught the same day.
+# Packaging runs only for manual runs and v* tags; tags create draft releases.
+# Compilation is not audio/UI acceptance.
 name: Build release
 
 on:
   push:
+    branches: [main]
     tags: ['v*']
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'cmake/**'
+      - 'patches/**'
+      - 'scripts/**'
+      - 'plugins/**'
+      - 'assets/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'dependencies.lock.json'
+      - '.github/workflows/release.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'cmake/**'
+      - 'patches/**'
+      - 'scripts/**'
+      - 'plugins/**'
+      - 'assets/**'
+      - 'CMakeLists.txt'
+      - 'CMakePresets.json'
+      - 'dependencies.lock.json'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# A newer push supersedes an older push build; manual and tag builds are never cancelled
+# by pushes (separate groups).
 concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
+  group: build-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' && !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   build:
@@ -79,6 +111,7 @@ jobs:
         run: ctest --test-dir build/${{ matrix.configure }} -C Release -R '^project_number_text$' --output-on-failure
 
       - name: Assemble and archive native candidate
+        if: (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/'))
         shell: pwsh
         env:
           BUILD_PLATFORM: ${{ matrix.platform }}
@@ -89,7 +122,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Native candidate packaging failed' }
 
       - name: Build Windows installer
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/'))
         shell: pwsh
         run: |
           ./scripts/make-installer.ps1 -Source 'out/stage/VibeRa Studio' -Output out/installer
@@ -99,6 +132,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Installer checksum failed' }
 
       - name: Keep the candidate
+        if: (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/'))
         uses: actions/upload-artifact@v4
         with:
           name: candidate-${{ matrix.platform }}
