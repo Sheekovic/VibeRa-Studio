@@ -3201,16 +3201,23 @@ class Studio::Editor final : public juce::Component,
                 // Every other bar gets a faint band so long phrases read by bar at a glance.
                 if (bar && !songMeter && int(std::round(b / barBeats())) % 2 == 1)
                 {
-                    g.setColour(ink.withAlpha(.022f));
+                    g.setColour(ink.withAlpha(type == 2 ? .045f : .022f));
                     g.fillRect(float(x), float(top), float(barBeats() * spacing()), bottom - float(top));
                 }
                 g.setColour(bar ? grid.brighter(.5f) : grid.withAlpha(beat ? .8f : .35f));
                 g.drawVerticalLine(x, float(top), bottom);
+                if (type == 2 && (bar || beat))
+                {
+                    // Ruler ticks: a tall tick per bar, a short one per beat.
+                    g.setColour(bar ? ink.withAlpha(.55f) : muted.withAlpha(.6f));
+                    g.drawVerticalLine(x, float(top - (bar ? 20 : 6)), float(top));
+                }
                 if (bar)
                 {
                     const int number = songMeter ? s.controller.project.barPosition(b + .0002).bar + 1
                                                  : int(std::round(b / barBeats())) + 1;
-                    label(g, juce::String(number), {x + 6, type == 2 ? top - 20 : 28, 32, 20}, muted, 11);
+                    label(g, juce::String(number), {x + 4, type == 2 ? top - 21 : 28, 32, 20},
+                          type == 2 ? ink.withAlpha(.85f) : muted, 11);
                 }
             }
             if (type == 1 && s.quantizerGuide && s.quantizerGuidePattern == s.selectedPattern)
@@ -3316,10 +3323,15 @@ class Studio::Editor final : public juce::Component,
                             colour = orange;
                         if (c.muted)
                             colour = colour.darker(.6f);
-                        g.setColour(colour.darker(.65f));
+                        g.setGradientFill(juce::ColourGradient(colour.darker(.35f).withMultipliedSaturation(.85f),
+                                                               r.getX(), r.getY(), colour.darker(.6f), r.getX(),
+                                                               r.getBottom(), false));
                         g.fillRoundedRectangle(r, 3);
-                        g.setColour(colour.withAlpha(.7f));
-                        g.fillRect(r.withHeight(16));
+                        g.setColour(colour.withAlpha(.92f));
+                        g.fillRoundedRectangle(r.withHeight(16), 3);
+                        g.fillRect(r.withHeight(16).withTrimmedTop(8));
+                        g.setColour(juce::Colours::black.withAlpha(.25f));
+                        g.drawHorizontalLine(int(r.getY()) + 16, r.getX(), r.getRight());
                         if (groupedClips.contains(c.id))
                         {
                             g.setColour(s.controller.clipGroupingEnabled ? ink : muted);
@@ -3400,6 +3412,24 @@ class Studio::Editor final : public juce::Component,
                         }
                         // Miniature notes come from the actual multi-channel pattern and visible source
                         // window.
+                        // Rows: one per Channel when the Pattern uses several (step patterns), else
+                        // the Pattern's pitch range.
+                        int lowPitch = 127, highPitch = 0;
+                        std::vector<Id> rowChannels;
+                        if (p)
+                            for (const auto &n : p->notes)
+                            {
+                                lowPitch = std::min(lowPitch, n.pitch), highPitch = std::max(highPitch, n.pitch);
+                                if (std::find(rowChannels.begin(), rowChannels.end(), n.channel) == rowChannels.end())
+                                    rowChannels.push_back(n.channel);
+                            }
+                        std::sort(rowChannels.begin(), rowChannels.end());
+                        const bool channelRows = rowChannels.size() > 1;
+                        const float bodyTop = r.getY() + 19.f, bodyBottom = r.getBottom() - 3.f;
+                        const int pitchRows = channelRows ? int(rowChannels.size()) : std::max(highPitch - lowPitch + 1, 1);
+                        const float rowHeight = juce::jlimit(2.f, 6.f, (bodyBottom - bodyTop) / float(std::max(pitchRows, 4)));
+                        const float rollHeight = rowHeight * float(pitchRows);
+                        const float rollTop = bodyTop + std::max(0.f, (bodyBottom - bodyTop - rollHeight) * .5f);
                         if (p)
                             forEachClipRepeat(
                                 c.length, c.offset, p->length,
@@ -3415,11 +3445,18 @@ class Studio::Editor final : public juce::Component,
                                     for (auto &n : p->notes)
                                         if (n.beat >= offset && n.beat < offset + length)
                                         {
-                                            g.setColour(channelColour(int(n.channel - 1)));
-                                            float x = r.getX() + float((position + n.beat - offset) * spacing());
-                                            float y = r.getY() + 19 + float((72 - n.pitch) / 48.) * (r.getHeight() - 22);
-                                            g.fillRect(x, juce::jlimit(r.getY() + 19, r.getBottom() - 3, y),
-                                                       float(std::max(2., std::min(n.length, offset + length - n.beat) * spacing() - 1)), 2.f);
+                                            const float x = r.getX() + float((position + n.beat - offset) * spacing());
+                                            const int rowIndex =
+                                                channelRows ? int(std::lower_bound(rowChannels.begin(), rowChannels.end(), n.channel) -
+                                                                  rowChannels.begin())
+                                                            : highPitch - n.pitch;
+                                            const float y = pitchRows <= 1 ? rollTop
+                                                          : rollTop + float(rowIndex) * (rollHeight - rowHeight) / float(pitchRows - 1);
+                                            const float w = float(std::max(2., std::min(n.length, offset + length - n.beat) * spacing() - 1));
+                                            const auto note = juce::Rectangle<float>(x, juce::jlimit(bodyTop, bodyBottom - rowHeight, y),
+                                                                                     w, std::max(2.f, rowHeight - 1.f));
+                                            g.setColour(channelColour(int(n.channel - 1)).brighter(.35f).withAlpha(n.muted ? .35f : 1.f));
+                                            g.fillRoundedRectangle(note, std::min(1.5f, note.getHeight() * .5f));
                                         }
                                 });
                         g.setColour(colour);

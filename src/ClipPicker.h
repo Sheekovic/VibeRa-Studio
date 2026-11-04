@@ -107,21 +107,34 @@ class ClipPicker final : public juce::Component, private juce::ListBoxModel
             if (const auto *p = project.pattern(id))
             {
                 g.setColour(colour.withAlpha(.85f));
+                // Same mini roll as the Playlist clips: a row per Channel for multi-Channel
+                // Patterns, else the pitch range.
                 int low = 127, high = 0;
+                std::vector<Id> channels;
                 for (const auto &n : p->notes)
                 {
                     low = std::min(low, n.pitch);
                     high = std::max(high, n.pitch);
+                    if (std::find(channels.begin(), channels.end(), n.channel) == channels.end())
+                        channels.push_back(n.channel);
                 }
+                std::sort(channels.begin(), channels.end());
+                const bool channelRows = channels.size() > 1;
+                const int rows = channelRows ? int(channels.size()) : std::max(1, high - low + 1);
+                const float rowHeight = juce::jlimit(2.f, 4.f, area.getHeight() / float(std::max(rows, 4)));
+                const float span = rowHeight * float(rows);
+                const float top = area.getY() + std::max(0.f, (area.getHeight() - span) * .5f);
                 for (const auto &n : p->notes)
                     if (n.beat < p->length)
                     {
                         const auto x = area.getX() + float(n.beat / p->length) * area.getWidth();
                         const auto w = std::max(
-                            2.f, float(std::min(n.length, p->length - n.beat) / p->length) * area.getWidth());
-                        const auto y =
-                            area.getBottom() - 3 - float(n.pitch - low) / float(std::max(1, high - low)) * 14;
-                        g.fillRect(x, y, std::min(w, area.getRight() - x), 2.f);
+                            2.f, float(std::min(n.length, p->length - n.beat) / p->length) * area.getWidth() - 1.f);
+                        const int row = channelRows ? int(std::lower_bound(channels.begin(), channels.end(), n.channel) -
+                                                          channels.begin())
+                                                    : high - n.pitch;
+                        const auto y = rows <= 1 ? top : top + float(row) * (span - rowHeight) / float(rows - 1);
+                        g.fillRoundedRectangle(x, y, std::min(w, area.getRight() - x), std::max(2.f, rowHeight - 1.f), 1.f);
                     }
                 if (p->notes.empty())
                     label(g, "Empty Pattern", area.toNearestInt(), muted, 10);
