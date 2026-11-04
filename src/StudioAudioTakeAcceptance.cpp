@@ -472,7 +472,7 @@ juce::Result Studio::verifyAudioTake(const juce::File &folder)
             if (std::abs(controller.project.audioPlacements.back().beat - 7.5) > 1.e-9)
                 return fail("the recovered take should be placed at beat 7.5");
         }
-        audioTakeIndex = {};
+        audioTakeIndex = juce::File{};
     }
     // Esc cancels a capturing take and leaves nothing behind.
     {

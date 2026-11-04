@@ -6096,7 +6096,7 @@ juce::Result Studio::newProject(bool demo, bool discardChanges)
     }
     selectedPattern = controller.project.patterns.front().id;
     selectedChannel = demo ? controller.project.channels.back().id : controller.project.channels.front().id;
-    projectFile = {};
+    projectFile = juce::File{};
     controller.deliverPendingNotifications();
     needsRebuild = !deferredReplacement;
     if (deferredReplacement)

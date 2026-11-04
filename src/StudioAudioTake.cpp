@@ -1274,7 +1274,7 @@ void Studio::finishAudioTake()
                 audioTake.code = "audioTake.split";
                 audioTake.message = split.getErrorMessage() + " (the recording is kept at " +
                                     audioTake.file.getFullPathName() + ")";
-                audioTake.file = {};
+                audioTake.file = juce::File{};
                 status = audioTake.message;
                 return;
             }
@@ -1313,7 +1313,7 @@ void Studio::finishAudioTake()
                 audioTake.message = "Nothing was recorded inside the punch range (Playlist time selection)" + gap;
                 for (const auto &file : audioTake.files)
                     file.deleteFile();
-                audioTake.file = {};
+                audioTake.file = juce::File{};
                 audioTake.files.clear();
                 status = audioTake.message;
                 return;
@@ -1343,7 +1343,7 @@ void Studio::finishAudioTake()
         audioTake.message = result.error.fromFirstOccurrenceOf(": ", false, false) + gap;
         break;
     }
-    audioTake.file = {};
+    audioTake.file = juce::File{};
     status = audioTake.message;
 }
 

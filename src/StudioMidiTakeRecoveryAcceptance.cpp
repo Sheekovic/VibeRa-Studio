@@ -212,7 +212,7 @@ juce::Result Studio::verifyMidiTakeRecovery(const juce::File &folder)
                 check(project.validate().wasOk(), "Genuine missing-effect project validates");
             }
             controller.replace(project);
-            projectFile = {};
+            projectFile = juce::File{};
             selectedPattern = pattern;
             selectedChannel = project.channels.front().id;
             patternMode = !song;

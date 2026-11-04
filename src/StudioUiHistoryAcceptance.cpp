@@ -244,7 +244,7 @@ juce::Result Studio::verifyUiHistoryRecovery(const juce::File &folder)
                 part.notes = {{project.allocate(), target, 0, .25, 60, .2f, true},
                               {project.allocate(), target, .25, .25, 60, .6f, true}};
             controller.replace(project);
-            projectFile = {};
+            projectFile = juce::File{};
             selectedPattern = project.patterns.front().id;
             selectedChannel = target;
             selectedChannels = {target};
