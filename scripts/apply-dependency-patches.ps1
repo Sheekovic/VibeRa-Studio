@@ -21,9 +21,18 @@ foreach ($entry in $manifest.files) {
     if ($hash -eq $entry.patchedSha256) {continue}
     if ($hash -ne $entry.originalSha256) {throw "Vendor file differs from both pinned and patched sources; preserved: $($entry.path)"}
     Push-Location $root
-    try { & git -c "safe.directory=$root" apply --directory=$sourceRelative $patch }
+    # This family pins CRLF source/output bytes, while its patch text is LF.
+    # Runners commonly use autocrlf=input: apply then succeeds but emits LF,
+    # violating patchedSha256. Select the pinned conversion per invocation.
+    try {
+        & git -c "safe.directory=$root" -c core.autocrlf=true apply --verbose --directory=$sourceRelative $patch
+        $patchExitCode=$LASTEXITCODE
+    }
     finally { Pop-Location }
-    if ($LASTEXITCODE -ne 0 -or (Get-FileHash -LiteralPath $target).Hash.ToLowerInvariant() -ne $entry.patchedSha256) {throw "Local dependency patch failed: $($entry.path)"}
+    $patchedHash=(Get-FileHash -LiteralPath $target).Hash.ToLowerInvariant()
+    if ($patchExitCode -ne 0 -or $patchedHash -ne $entry.patchedSha256) {
+        throw "Local dependency patch failed: $($entry.path); git exit=$patchExitCode; expected=$($entry.patchedSha256); actual=$patchedHash"
+    }
 }
 Write-Output 'Verified pinned JUCE VST3 metadata/sample-event local patch.'
 & (Join-Path $PSScriptRoot 'apply-mixer-send-patch.ps1')
