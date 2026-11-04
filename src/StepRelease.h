@@ -3,6 +3,7 @@
 #include "StepVelocity.h"
 #include "NoteRelease.h"
 #include "synth/SynthRegistry.h"
+#include "NativeInstruments.h"
 
 namespace vibera
 {
@@ -27,7 +28,7 @@ inline const char *noteReleaseAudioResponse(const Channel &channel)
         return "ignored";
     const auto xml = juce::parseXML(channel.instrument->descriptor);
     juce::PluginDescription type;
-    return xml && type.loadFromXml(*xml) && synth::isNativeDescription(type) ? "ignored"
+    return xml && type.loadFromXml(*xml) && isNativeInstrument(type) ? "ignored"
                                                                              : "instrument_defined";
 }
 // CONTROL-only. Gesture previews use their immutable opening Project; all

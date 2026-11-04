@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "synth/SynthRegistry.h"
+#include "NativeInstruments.h"
 #pragma once
 #include "Studio.h"
 #include "effects/NativeEffectsRegistry.h"
@@ -61,7 +62,7 @@ class PluginPage final : public juce::Component, private juce::ListBoxModel, pri
             return;
         auto &type = types[size_t(row)];
         g.fillAll(selected ? grid : panel);
-        const auto category = synth::isNativeDescription(type) ? juce::String("VibeRa instrument  ") : effects::isNativeDescription(type)
+        const auto category = isNativeInstrument(type) ? juce::String("VibeRa instrument  ") : effects::isNativeDescription(type)
                                   ? juce::String("VibeRa effect  ")
                                   : juce::String(type.isInstrument ? "VST3 instrument  " : "VST3 effect  ");
         label(g, category + type.name, {8, 0, w - 16, h}, ink, 13);
@@ -116,7 +117,8 @@ class PluginPage final : public juce::Component, private juce::ListBoxModel, pri
         // Built-in instruments/effects are local picker entries. Scanning and its persisted
         // catalogue remain exclusively about external VST3 plugins.
         auto nextTypes = effects::nativeDescriptions();
-        nextTypes.insert(nextTypes.begin(), synth::nativeDescription());
+        const auto instruments = nativeInstrumentDescriptions();
+        nextTypes.insert(nextTypes.begin(), instruments.begin(), instruments.end());
         const auto nativeCount = nextTypes.size();
         nextTypes.insert(nextTypes.end(), snapshot.plugins.begin(), snapshot.plugins.end());
         const bool changedTypes =

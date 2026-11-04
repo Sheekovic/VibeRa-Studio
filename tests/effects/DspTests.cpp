@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../../src/drums/DrumSynth.h"
 #include "dsp/EffectsEngine.h"
 #include "AllocationGuard.h"
 #include <functional>
@@ -749,6 +750,49 @@ void studioOracles()
         const double early = measuredHz(window(2000, 14000), 0, 48000), late = measuredHz(window(44000, 56000), 0, 48000);
         require(std::abs(early - late) > 1 && std::abs(early - 1000) < 12 && std::abs(late - 1000) < 12,
                 "Wow bends the pitch by a few cents and back (" + std::to_string(early) + ", " + std::to_string(late) + ")");
+    }
+
+    // Drum Synth DSP: every drum sounds and decays, Tune raises the kick's body, Decay
+    // lengthens it, the master level scales it, and silence follows the decay.
+    {
+        using namespace vibera::drums;
+        const auto &specs = parameterSpecs();
+        std::array<float, parameterCount> values{};
+        for (int i = 0; i < parameterCount; ++i)
+            values[size_t(i)] = specs[size_t(i)].initial;
+        const auto hit = [&](int drum, const std::array<float, parameterCount> &v, float master, int frames)
+        {
+            vibera::drums::Engine engine;
+            engine.prepare(48000);
+            engine.noteOn(padNote(drum), 1.f, v);
+            std::vector<float> l(size_t(frames), 0.f), r(size_t(frames), 0.f);
+            const auto before = effects_test::allocations;
+            {
+                effects_test::CallbackScope scope;
+                engine.render(l.data(), r.data(), frames, master);
+            }
+            require(effects_test::allocations == before, "Drum Synth rendering allocates nothing");
+            return l;
+        };
+        for (int drum = 0; drum < drumCount; ++drum)
+        {
+            const auto out = hit(drum, values, 0, 96000);
+            const double early = rmsOf(out, 0, 2400), late = rmsOf(out, 90000, 96000);
+            require(early > 1e-3 && late < 1e-6, std::string("Drum ") + drumName(drum) + " sounds then ends");
+        }
+        auto tuned = values;
+        tuned[0] = 12;
+        const auto low = hit(kick, values, 0, 24000), high = hit(kick, tuned, 0, 24000);
+        const double lowHz = measuredHz(std::vector<float>(low.begin() + 7200, low.begin() + 16800), 0, 48000);
+        const double highHz = measuredHz(std::vector<float>(high.begin() + 7200, high.begin() + 16800), 0, 48000);
+        require(std::abs(highHz / lowHz - 2) < .12, "Kick Tune +12 doubles its body pitch (" + std::to_string(lowHz) + ", " +
+                                                        std::to_string(highHz) + ")");
+        auto longer = values;
+        longer[1] = 1.5f;
+        require(rmsOf(hit(kick, longer, 0, 48000), 24000, 48000) > 4 * rmsOf(hit(kick, values, 0, 48000), 24000, 48000),
+                "Kick Decay lengthens the tail");
+        const double loud = rmsOf(hit(snare, values, -6, 9600), 0, 9600), quiet = rmsOf(hit(snare, values, -18, 9600), 0, 9600);
+        require(std::abs(quiet / loud - .251) < .02, "Master level -12 dB scales the output");
     }
 
 }

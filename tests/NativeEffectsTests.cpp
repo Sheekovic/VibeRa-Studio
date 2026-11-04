@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "effects/NativeEffects.h"
+#include "drums/DrumSynthPlugin.h"
+#include "NativeInstruments.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <chrono>
 #include <cstdlib>
@@ -579,6 +581,90 @@ void editors(const juce::File &output)
     }
 }
 } // namespace
+// VibeRa Drum Synth: registry, MIDI and pad triggering without callback allocations,
+// the closed hat choking the open hat, validated state round trip, and its editor.
+void drumSynth(const juce::File &output)
+{
+    using namespace vibera::drums;
+    const auto description = nativeDescription();
+    require(vibera::drums::isNativeDescription(description) && vibera::isNativeInstrument(description) &&
+                !vibera::effects::isNativeDescription(description),
+            "Drum Synth is a registered built-in instrument");
+    require(vibera::nativeInstrumentDescriptions().size() == 2, "Two built-in instruments are listed");
+    DrumSynthPlugin plugin;
+    require(plugin.getParameters().size() == parameterCount, "Drum Synth exposes every parameter");
+    plugin.setRateAndBufferSizeDetails(48000, 512);
+    plugin.prepareToPlay(48000, 512);
+    juce::AudioBuffer<float> buffer(2, 512);
+    juce::MidiBuffer midi;
+    const auto rms = [&](int from, int to)
+    {
+        double sum = 0;
+        for (int i = from; i < to; ++i)
+            sum += double(buffer.getSample(0, i)) * buffer.getSample(0, i);
+        return std::sqrt(sum / std::max(1, to - from));
+    };
+    for (int drum = 0; drum < drumCount; ++drum)
+    {
+        midi.clear();
+        midi.addEvent(juce::MidiMessage::noteOn(10, padNote(drum), juce::uint8(110)), 64);
+        plugin.reset();
+        {
+            native_effects_test::CallbackScope scope;
+            plugin.processBlock(buffer, midi);
+        }
+        require(rms(0, 64) == 0 && rms(64, 512) > 1e-3, juce::String("Drum Synth plays ") + drumName(drum) + " at its MIDI offset");
+        double peak = 0;
+        for (int i = 0; i < 512; ++i)
+            peak = std::max(peak, double(std::abs(buffer.getSample(0, i))));
+        require(peak <= 1.0, "Drum Synth output stays within full scale");
+    }
+    require(native_effects_test::allocations == 0, "Drum Synth processing allocates nothing");
+    // Choke: an open hat rings, then a closed hat cuts it.
+    plugin.reset();
+    midi.clear();
+    midi.addEvent(juce::MidiMessage::noteOn(10, padNote(openHat), juce::uint8(120)), 0);
+    plugin.processBlock(buffer, midi);
+    midi.clear();
+    plugin.processBlock(buffer, midi);
+    require(plugin.drumLevel(openHat) > .1f, "Open hat rings");
+    midi.addEvent(juce::MidiMessage::noteOn(10, padNote(closedHat), juce::uint8(120)), 0);
+    plugin.processBlock(buffer, midi);
+    require(plugin.drumLevel(openHat) == 0.f, "A closed hat chokes the open hat");
+    // Editor pads trigger through the lock-free request.
+    plugin.reset();
+    midi.clear();
+    plugin.auditionPad(kick);
+    plugin.processBlock(buffer, midi);
+    require(rms(0, 512) > 1e-3, "An editor pad plays its drum");
+    // State: change a value, save, change again, restore.
+    auto *decay = plugin.parameter(kick * parametersPerDrum + 1);
+    decay->setValueNotifyingHost(.8f);
+    juce::MemoryBlock state;
+    plugin.getStateInformation(state);
+    decay->setValueNotifyingHost(.1f);
+    require(plugin.restoreState(state.getData(), int(state.getSize())) && std::abs(decay->getValue() - .8f) < 1e-6f,
+            "Drum Synth state round trip restores parameters");
+    juce::MemoryBlock broken(state);
+    static_cast<char *>(broken.getData())[broken.getSize() / 2] ^= 0x5a;
+    const float before = decay->getValue();
+    plugin.restoreState(broken.getData(), int(broken.getSize()));
+    require(decay->getValue() == before, "A corrupted state changes nothing");
+    // Editor: symmetric pads and knobs, captured for review.
+    std::unique_ptr<juce::AudioProcessorEditor> editor(plugin.createEditor());
+    require(editor != nullptr, "Drum Synth has an editor");
+    plugin.auditionPad(snare);
+    plugin.processBlock(buffer, midi);
+    if (auto *drums = dynamic_cast<DrumSynthEditor *>(editor.get()))
+        drums->selectDrum(snare);
+    const auto image = editor->createComponentSnapshot(editor->getLocalBounds());
+    auto stream = output.getChildFile("drum-synth.png").createOutputStream();
+    require(stream && stream->setPosition(0), "Cannot create the Drum Synth image");
+    stream->truncate();
+    require(juce::PNGImageFormat().writeImageToStream(image, *stream), "Cannot encode the Drum Synth image");
+    editor.reset();
+    plugin.releaseResources();
+}
 int main(int argc, char **argv)
 {
     const juce::ScopedJuceInitialiser_GUI initialise;
@@ -593,6 +679,7 @@ int main(int argc, char **argv)
         eventsAndRealtime();
         flushDoesNotAdvanceAudio();
         editors(output);
+        drumSynth(output);
         auto *receipt = new juce::DynamicObject();
         receipt->setProperty("passed", true);
         receipt->setProperty("fixedEffectCount", int(catalogueEntries().size()));

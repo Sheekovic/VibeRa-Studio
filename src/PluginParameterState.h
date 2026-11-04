@@ -5,6 +5,7 @@
 #include "PluginProtocol.h"
 #include "synth/SynthState.h"
 #include "effects/NativeEffectsRegistry.h"
+#include "drums/DrumSynth.h"
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <charconv>
 #include <cmath>
@@ -117,8 +118,16 @@ inline juce::Result rewritePluginParameterStates(const juce::String &freshAfter,
             return juce::Result::fail("parameterHistory.xml");
         auto xml = juce::AudioProcessor::getXmlFromBinary(binary.getData(), int(binary.getSize()));
         if (!xml || (!xml->hasTagName("VST3PluginState") && !xml->hasTagName("VIBERA_NATIVE_EFFECT") &&
-                     !xml->hasTagName("VIBERA_SYNTHESIZER")))
+                     !xml->hasTagName("VIBERA_SYNTHESIZER") && !xml->hasTagName("VIBERA_DRUM_SYNTH")))
             return juce::Result::fail("parameterHistory.xml");
+        if (xml->hasTagName("VIBERA_DRUM_SYNTH"))
+        {
+            if (xml->getNumAttributes() != 1 || xml->getStringAttribute("schemaVersion") != "1")
+                return juce::Result::fail("parameterHistory.nativeType");
+            for (const auto &edit : edits)
+                if (edit.id < drums::parameterBaseId || edit.id - drums::parameterBaseId >= std::uint32_t(drums::parameterCount))
+                    return juce::Result::fail("parameterHistory.nativeParameters");
+        }
         if (xml->hasTagName("VIBERA_SYNTHESIZER"))
         {
             synth::Values normalized;

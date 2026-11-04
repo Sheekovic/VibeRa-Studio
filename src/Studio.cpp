@@ -25,6 +25,7 @@
 #include "Settings.h"
 #include "RepeatMidiBudget.h"
 #include "effects/NativeEffectsRegistry.h"
+#include "NativeInstruments.h"
 #include "InstrumentWindow.h"
 #include "WorkspaceTiling.h"
 #include "CoProducerDock.h"
@@ -9370,20 +9371,21 @@ juce::Result PluginPage::verifyDiscoveryControls(const juce::File &output, const
     const auto project = owner->controller.project.state();
     const auto revision = owner->controller.revision;
     auto nativeTypes = effects::nativeDescriptions();
-    nativeTypes.insert(nativeTypes.begin(), synth::nativeDescription());
+    const auto instruments = nativeInstrumentDescriptions();
+    nativeTypes.insert(nativeTypes.begin(), instruments.begin(), instruments.end());
     const auto nativeCount = nativeTypes.size();
     const auto pickerMatches = [&](const auto &visible, const PluginCatalog::Snapshot &catalogue)
     {
         if (visible.size() != nativeCount + catalogue.plugins.size())
             return false;
         for (size_t index = 0; index < nativeCount; ++index)
-            if (!(index == 0 ? synth::isNativeDescription(visible[index])
+            if (!(index < instruments.size() ? isNativeInstrument(visible[index])
                             : effects::isNativeDescription(visible[index])) ||
                 visible[index].createXml()->toString() != nativeTypes[index].createXml()->toString())
                 return false;
         for (size_t index = 0; index < catalogue.plugins.size(); ++index)
             if (effects::isNativeDescription(catalogue.plugins[index]) ||
-                synth::isNativeDescription(catalogue.plugins[index]) ||
+                isNativeInstrument(catalogue.plugins[index]) ||
                 visible[nativeCount + index].createXml()->toString() !=
                     catalogue.plugins[index].createXml()->toString())
                 return false;

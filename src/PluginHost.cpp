@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "synth/SynthRegistry.h"
+#include "NativeInstruments.h"
 #include "PluginHost.h"
 #include "effects/NativeEffectsRegistry.h"
 #include "PluginDryHistory.h"
@@ -530,11 +531,11 @@ juce::Result PluginHost::start(const PluginSpec &spec, double rate, int block, b
     juce::PluginDescription description;
     auto xml = juce::XmlDocument::parse(spec.descriptor);
     if (!xml || !description.loadFromXml(*xml) ||
-        (description.pluginFormatName != "VST3" && (!effects::isNativeDescription(description) && !synth::isNativeDescription(description))))
+        (description.pluginFormatName != "VST3" && (!effects::isNativeDescription(description) && !isNativeInstrument(description))))
         return juce::Result::fail("Invalid effect or VST3 descriptor");
     if (description.isInstrument && buses.auxiliaryChannels != 0)
         return juce::Result::fail("Auxiliary input on instruments is not supported");
-    if ((!effects::isNativeDescription(description) && !synth::isNativeDescription(description)) && !juce::File(description.fileOrIdentifier).exists())
+    if ((!effects::isNativeDescription(description) && !isNativeInstrument(description)) && !juce::File(description.fileOrIdentifier).exists())
         return juce::Result::fail("Missing VST3: " + spec.name);
     auto exe = pluginWorkerExecutable();
     if (!exe.existsAsFile())

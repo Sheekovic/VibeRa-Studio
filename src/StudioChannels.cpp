@@ -2,6 +2,7 @@
 #include "Studio.h"
 #include <map>
 #include "synth/SynthRegistry.h"
+#include "NativeInstruments.h"
 #include "Tuning.h"
 #include "SliceDetect.h"
 #include "ChannelManagement.h"
@@ -160,8 +161,9 @@ juce::Result Studio::cancelChannelEdit(const juce::String &id)
 }
 std::optional<juce::PluginDescription> Studio::instrumentByIdentifier(const juce::String &identifier) const
 {
-    if (synth::nativeDescription().createIdentifierString() == identifier)
-        return synth::nativeDescription();
+    for (const auto &native : nativeInstrumentDescriptions())
+        if (native.createIdentifierString() == identifier)
+            return native;
     for (const auto &d : plugins.snapshot().plugins)
         if (d.isInstrument && d.createIdentifierString() == identifier)
             return d;
@@ -197,7 +199,8 @@ void Studio::addInstrumentItems(juce::PopupMenu &menu, Id replace)
         target.addItem(item);
     };
     menu.addSectionHeader("VibeRa");
-    add(menu, synth::nativeDescription());
+    for (const auto &native : nativeInstrumentDescriptions())
+        add(menu, native);
     // Scanned instruments: an all-plugins list, then one submenu per category.
     auto list = plugins.snapshot().plugins;
     std::erase_if(list, [](const auto &d) { return !d.isInstrument; });

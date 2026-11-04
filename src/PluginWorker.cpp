@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "synth/SynthPlugin.h"
+#include "drums/DrumSynthPlugin.h"
+#include "NativeInstruments.h"
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "PluginProtocol.h"
 #include "PluginWrapperView.h"
@@ -393,7 +395,7 @@ class WorkerApp final : public juce::JUCEApplication,
             return nativeVst3BusesMatch(*plugin, requested);
         // Validate the owned processor itself. A native instance has no SDK
         // component or cached external arrangement to consult.
-        if (dynamic_cast<synth::SynthPlugin *>(plugin.get()))
+        if (dynamic_cast<synth::SynthPlugin *>(plugin.get()) || dynamic_cast<drums::DrumSynthPlugin *>(plugin.get()))
             return requested.inputBuses.isEmpty() && requested.outputBuses.size() == 1 &&
                    requested.outputBuses[0] == juce::AudioChannelSet::stereo() &&
                    plugin->getBusesLayout() == requested;
@@ -1038,13 +1040,15 @@ class WorkerApp final : public juce::JUCEApplication,
         if (description.pluginFormatName == "VibeRa")
         {
             if (bool(shared->instrument) != description.isInstrument ||
-                (!effects::isNativeDescription(description) && !synth::isNativeDescription(description)))
+                (!effects::isNativeDescription(description) && !isNativeInstrument(description)))
             {
                 fail("Invalid registered native effect descriptor");
                 return;
             }
             if (synth::isNativeDescription(description))
                 plugin = std::make_unique<synth::SynthPlugin>();
+            else if (drums::isNativeDescription(description))
+                plugin = std::make_unique<drums::DrumSynthPlugin>();
             else
                 plugin = effects::createNativeEffect(description);
             nativeEffect = dynamic_cast<NativeProcessor *>(plugin.get());

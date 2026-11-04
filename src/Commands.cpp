@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "synth/SynthRegistry.h"
+#include "NativeInstruments.h"
+#include "NativeInstruments.h"
 #include "Commands.h"
 #include "ScoreTools.h"
 #include "Arrangements.h"
@@ -2627,7 +2629,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             auto xml = juce::XmlDocument::parse(a.text);
             juce::PluginDescription type;
             if (!xml || !type.loadFromXml(*xml) ||
-                (type.pluginFormatName != "VST3" && (!effects::isNativeDescription(type) && !synth::isNativeDescription(type))) || type.isInstrument)
+                (type.pluginFormatName != "VST3" && (!effects::isNativeDescription(type) && !isNativeInstrument(type))) || type.isInstrument)
                 return juce::Result::fail("effects.invalidReplacementDescriptor: Choose an available effect");
             PluginSpec *target = nullptr;
             for (auto &row : next.mixer)
@@ -2666,7 +2668,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             auto xml = juce::XmlDocument::parse(a.text);
             juce::PluginDescription type;
             if (!xml || !type.loadFromXml(*xml) ||
-                (type.pluginFormatName != "VST3" && (!effects::isNativeDescription(type) && !synth::isNativeDescription(type))))
+                (type.pluginFormatName != "VST3" && (!effects::isNativeDescription(type) && !isNativeInstrument(type))))
                 return missing();
             const bool instrument = id != "plugin.effect.insert";
             if (instrument != type.isInstrument)

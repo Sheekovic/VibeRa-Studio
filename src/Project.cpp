@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "synth/SynthRegistry.h"
+#include "NativeInstruments.h"
 #include "Project.h"
 #include "Arrangements.h"
 #include "NoteTiming.h"
@@ -2237,7 +2238,7 @@ juce::Result Project::validate() const
         juce::PluginDescription type;
         return xml && type.loadFromXml(*xml) &&
                (type.pluginFormatName == "VST3" ||
-                (instrument ? synth::isNativeDescription(type) : effects::isNativeDescription(type))) &&
+                (instrument ? isNativeInstrument(type) : effects::isNativeDescription(type))) &&
                (!plugin.detector || !type.isInstrument) && validPluginStateEncoding(plugin.state);
     };
     for (auto &c : channels)
