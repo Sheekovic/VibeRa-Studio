@@ -20,6 +20,7 @@
   <a class="brand" href="#top"><img src="img/icon.png" alt=""><span>VibeRa Studio</span></a>
   <nav>
     <a href="#features">Features</a>
+    <a href="#new">What's new</a>
     <a href="#microtonal">Maqam</a>
     <a href="#download">Download</a>
     <a href="#roadmap">Roadmap</a>
@@ -83,21 +84,25 @@
     <article class="card"><div class="ico">&#9638;</div><h3>Compose</h3>
       <p>Step sequencer and Piano Roll with slides, portamento, chords, arpeggios, strumming, humanize and scale snapping.</p></article>
     <article class="card"><div class="ico">&#9776;</div><h3>Arrange</h3>
-      <p>Playlist with coloured tracks, mute and solo, collapsible groups, markers, multiple arrangements, tempo and time-signature changes.</p></article>
+      <p>Playlist with coloured tracks, instrument and audio tracks, track lock and height, markers, multiple arrangements, tempo curves and time-signature changes.</p></article>
     <article class="card"><div class="ico">&#9881;</div><h3>VibeRa Synth</h3>
-      <p>An original instrument with 77 presets, from synthesized basses to recorded pianos, strings, brass and guitars.</p></article>
+      <p>An original instrument with more than 75 presets, wavetable oscillators and 16-voice unison, from synthesized basses to recorded pianos, strings, brass and guitars.</p></article>
     <article class="card"><div class="ico">&#9673;</div><h3>Sampler</h3>
-      <p>Envelopes, filters, LFOs, pitch bend, time stretching, loops and automatic slicing to Channels.</p></article>
+      <p>A three-page channel window with envelopes, LFOs, filter, time stretching, loops and precomputed effects, plus Drum Pads and automatic slicing to Channels.</p></article>
     <article class="card"><div class="ico">&#9711;</div><h3>Record</h3>
-      <p>Audio recording with loop takes, comping, punch-in, several inputs at once and crash-safe takes. MIDI recording too.</p></article>
+      <p>Audio recording with loop takes, comping, punch-in and several inputs at once. MIDI overdub or replace, step recording and automation recording.</p></article>
     <article class="card"><div class="ico">&#9636;</div><h3>Mix</h3>
-      <p>Full Mixer with routing, sends, sidechains, automation, latency compensation and 25 built-in effects.</p></article>
+      <p>Full Mixer with routing, sends, sidechains, automation, latency compensation and 33 built-in effects, from a studio reverb and multiband to a maximizer and spectrum analyzer.</p></article>
     <article class="card"><div class="ico">&#9883;</div><h3>VST3 plugins</h3>
       <p>Instruments and effects run in a protected process, so a crashing plugin cannot take your session down.</p></article>
     <article class="card"><div class="ico">&#9654;</div><h3>Perform live</h3>
       <p>Launch Patterns from pads or a MIDI controller, with launch quantum and scenes.</p></article>
     <article class="card"><div class="ico">&#8681;</div><h3>Export</h3>
-      <p>WAV, FLAC, OGG and MP3 at 44.1 or 48 kHz, 16, 24 or 32-bit, or one file per Mixer insert.</p></article>
+      <p>WAV, FLAC, OGG and MP3 at 44.1 or 48 kHz, 16, 24 or 32-bit, or one file per Mixer insert, with effect latency lined up from the first sample.</p></article>
+    <article class="card"><div class="ico">&#10003;</div><h3>Never lose work</h3>
+      <p>Autosave every two minutes, five rotating backups of every save, and recovery after a crash.</p></article>
+    <article class="card"><div class="ico">&#8635;</div><h3>Bring your projects</h3>
+      <p>Open .flp project files and MIDI files, and drag samples straight from the Browser.</p></article>
   </div>
 </section>
 
@@ -106,6 +111,22 @@
   <h2 class="section-title">A studio that feels like home</h2>
   <p class="section-sub">Dark, focused and fast. Choose your colours and font, or switch to high contrast.</p>
   <figure class="frame"><img src="img/screenshot.png" alt="VibeRa Studio workspace with Playlist, Piano Roll, Channel Rack and Mixer" loading="lazy"></figure>
+</section>
+
+<!-- SAMPLER -->
+<section class="section split">
+  <figure class="frame"><img src="img/sampler.png" alt="VibeRa sampler channel window with envelope, LFO, filter and keyboard" loading="lazy"></figure>
+  <div>
+    <h2 class="section-title left">A sampler channel that feels familiar</h2>
+    <p>Every sample Channel opens a compact window with three pages: the sample itself, its envelopes
+      and LFOs, and everything else. Knobs, not endless sliders.</p>
+    <ul class="ticks">
+      <li>Sample page: trim, loop points, fades, stretch to the tempo</li>
+      <li>Envelope page: Panning, Volume, Mod X, Mod Y and Pitch envelopes and LFOs</li>
+      <li>Filter, polyphony, glide, gate and cut groups</li>
+      <li>Root note keyboard to audition and retune</li>
+    </ul>
+  </div>
 </section>
 
 <!-- MICROTONAL -->
@@ -120,6 +141,7 @@
       <li>Snap to maqam with real quarter tones</li>
       <li>Scala (<code>.scl</code>) scales of any size</li>
       <li>Pitch-correction effect with maqam targets</li>
+      <li>MPE and MTS-ESP tuning for plugin instruments</li>
     </ul>
   </div>
   <div class="keys" id="keys" aria-hidden="true"></div>
@@ -133,14 +155,43 @@
   <p class="muted center">Prefer to build it yourself? See the <a href="https://github.com/Sheekovic/VibeRa-Studio#getting-started">build guide</a>.</p>
 </section>
 
+<!-- WHAT'S NEW -->
+<section id="new" class="section">
+  <h2 class="section-title">What's new</h2>
+  <p class="section-sub">VibeRa grows every week. Here is what landed recently.</p>
+  <div class="news">
+    <article class="news-item"><time datetime="2026-11-04">4 November 2026</time>
+      <ul>
+        <li>New sampler channel window with Sample, Envelope and Misc pages</li>
+        <li>Instrument tracks and audio tracks in the Playlist</li>
+        <li>Pattern automation: record knob moves inside a Pattern and they play wherever it is placed</li>
+        <li>Autosave, rotating backups and crash recovery</li>
+        <li>Fit audio clips to the project tempo without adding a new sample</li>
+        <li>Browser view of everything in the current project</li>
+        <li>Mixer send knobs and sharper exports with latent effects</li>
+      </ul>
+    </article>
+    <article class="news-item"><time datetime="2026-11-03">3 November 2026</time>
+      <ul>
+        <li>Studio Reverb, multiband, maximizer, de-esser, transient shaper and spectrum analyzer</li>
+        <li>Wavetable oscillators with 16-voice unison in VibeRa Synth</li>
+        <li>Drum Pads and a chord progression tool</li>
+        <li>Audio clips that follow tempo changes, and shaped tempo curves</li>
+        <li>MPE and MTS-ESP microtuning for plugin instruments</li>
+        <li>Open .flp project files</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
 <!-- ROADMAP -->
 <section id="roadmap" class="section">
   <h2 class="section-title">Where we are going</h2>
   <p class="section-sub">The goal: a complete, professional studio that belongs to everyone.</p>
   <div class="timeline">
-    <div class="step done"><b>Now</b><span>Pattern workflow, Piano Roll, Playlist, Mixer, VST3, audio and MIDI recording, VibeRa Synth, maqam tuning</span></div>
-    <div class="step next"><b>Next</b><span>Warping audio to tempo, tempo curves, MPE / MTS-ESP microtuning for plugins</span></div>
-    <div class="step later"><b>Later</b><span>More original instruments and effects, deeper real-world hardware and accessibility testing</span></div>
+    <div class="step done"><b>Now</b><span>Pattern workflow, Piano Roll, Playlist, Mixer, VST3, audio and MIDI recording, VibeRa Synth, maqam tuning, tempo warping and curves, MPE / MTS-ESP</span></div>
+    <div class="step next"><b>Next</b><span>Linux and macOS builds (in progress), more polish on familiar workflows, more original instruments</span></div>
+    <div class="step later"><b>Later</b><span>More original effects and sounds, deeper real-world hardware and accessibility testing</span></div>
   </div>
 </section>
 

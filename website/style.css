@@ -181,6 +181,13 @@ h1 { font-size: clamp(40px, 6vw, 72px); line-height: 1.02; margin: 0 0 22px; let
 
 .contribute { padding-bottom: 20px; }
 
+/* What's new */
+.news { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; max-width: 1000px; margin: 0 auto; }
+.news-item { background: var(--panel); border: 1px solid rgba(66, 90, 104, .5); border-radius: var(--radius); padding: 22px 24px; }
+.news-item:first-child { border-color: rgba(41, 215, 197, .55); }
+.news-item time { display: block; font-weight: 700; font-size: 18px; color: var(--accent); margin-bottom: 10px; }
+.news-item ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; color: #c4d3da; }
+
 footer { margin-top: 100px; padding: 36px clamp(16px, 4vw, 48px); border-top: 1px solid rgba(44, 62, 72, .6); text-align: center; color: var(--ink); }
 footer img { width: 20px; height: 20px; display: inline-block; vertical-align: -4px; margin-right: 6px; }
 
