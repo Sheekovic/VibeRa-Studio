@@ -254,7 +254,7 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
         eventFrames_ = 0;
         return;
     }
-    if (effect_ == EffectId::beatGate)
+    if (effect_ == EffectId::beatGate || effect_ == EffectId::pump)
     {
         // Lock-free host time read (the worker's play head is atomic scalars).
         bool hasPosition = false, playing = false;
@@ -319,8 +319,10 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
         }
         captureWrite_.store(write, std::memory_order_release);
     }
-    if (effect_ == EffectId::beatGate)
+    if (effect_ == EffectId::beatGate || effect_ == EffectId::pump)
         beat_.store(engine_.beatPosition(), std::memory_order_relaxed);
+    else if (effect_ == EffectId::loFi)
+        beat_.store(engine_.wobblePhase(), std::memory_order_relaxed); // Wow phase 0..1 for the visual.
     else if (effect_ == EffectId::pitchCorrect)
     {
         detectedHz_.store(engine_.tuneDetectedHz(), std::memory_order_relaxed);

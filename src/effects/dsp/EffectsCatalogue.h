@@ -143,6 +143,23 @@ inline constexpr ParameterSpec beatGate[] = {
     {"half-time", "Half-time", 0, 1, 0, "", 1, 1},
     {"cycle", "Half-time cycle: 0 1 beat, 1 2 beats, 2 4 beats", 0, 2, 1, "", 1, 1},
     {"mix", "Mix", 0, 1, 1, ""}};
+inline constexpr ParameterSpec pump[] = {
+    {"rate", "Rate: 0 1 bar, 1 1/2 bar, 2 1/4, 3 1/8, 4 1/16", 0, 4, 2, "", 1, 1},
+    {"depth", "Depth", 0, 1, .8f, ""},
+    {"release", "Release (fraction of the cycle)", .05f, 1, .6f, ""},
+    {"curve", "Curve", -1, 1, .4f, ""},
+    {"hold", "Hold (fraction of the cycle)", 0, .5f, .05f, ""},
+    {"offset", "Offset (fraction of the cycle)", 0, 1, 0, ""},
+    {"smooth", "Smoothing", 0, 20, 2, "ms", .5f},
+    {"mix", "Mix", 0, 1, 1, ""}};
+inline constexpr ParameterSpec loFi[] = {{"wow", "Wow", 0, 1, .3f, ""},
+                                         {"flutter", "Flutter", 0, 1, .2f, ""},
+                                         {"noise", "Hiss", 0, 1, .15f, ""},
+                                         {"crackle", "Crackle", 0, 1, .2f, ""},
+                                         {"tone", "Tone", 1000, 20000, 6000, "Hz", .3f},
+                                         {"age", "Age (saturation)", 0, 1, .3f, ""},
+                                         {"width", "Width", 0, 1, .8f, ""},
+                                         {"mix", "Mix", 0, 1, 1, ""}};
 inline constexpr ParameterSpec analyzer[] = {{"slope", "Display slope", 0, 6, 3, "dB/oct"},
                                              {"falloff", "Falloff", 0, 1, .5f, ""}};
 template <std::size_t N>
@@ -186,7 +203,9 @@ inline constexpr std::array effects = {
     entry(EffectId::maximizer, "maximizer", "Maximizer", "Dynamics", maximizer),
     entry(EffectId::studioReverb, "studio-reverb", "Studio Reverb", "Time", studioReverb),
     entry(EffectId::spectrumAnalyzer, "spectrum-analyzer", "Spectrum Analyzer", "Utility", analyzer),
-    entry(EffectId::beatGate, "beat-gate", "Beat Gate", "Time", beatGate)};
+    entry(EffectId::beatGate, "beat-gate", "Beat Gate", "Time", beatGate),
+    entry(EffectId::pump, "pump", "Pump", "Dynamics", pump),
+    entry(EffectId::loFi, "lo-fi", "Lo-fi", "Distortion", loFi)};
 static_assert(effects.size() == static_cast<std::size_t>(EffectId::count));
 } // namespace catalogue
 inline std::span<const EffectSpec> catalogueEntries() noexcept

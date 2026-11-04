@@ -8,6 +8,7 @@
 #include "StudioEffects.h"
 #include "Vocoder.h"
 #include "BeatGate.h"
+#include "GrooveEffects.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -22,6 +23,8 @@ class Engine
     Vocoder vocoder;
     StudioEffects studio;
     BeatGate beat;
+    Pump pump;
+    LoFi loFi;
     EffectId selected = EffectId::balance;
     bool prepared = false;
     bool configured = false;
@@ -30,7 +33,9 @@ class Engine
     // Fixed added delay of an effect (only Tune delays its output).
     int latencySamples(EffectId effect) const noexcept
     {
-        return effect == EffectId::pitchCorrect ? tune.latencySamples() : studio.latencySamples(effect);
+        return effect == EffectId::pitchCorrect ? tune.latencySamples()
+               : effect == EffectId::loFi       ? loFi.latencySamples()
+                                                : studio.latencySamples(effect);
     }
     void prepare(double sampleRate)
     {
@@ -43,6 +48,8 @@ class Engine
         vocoder.prepare(sampleRate);
         studio.prepare(sampleRate);
         beat.prepare(sampleRate);
+        pump.prepare(sampleRate);
+        loFi.prepare(sampleRate);
         prepared = true;
         selected = EffectId::balance;
         configured = false;
@@ -56,14 +63,18 @@ class Engine
         vocoder.reset();
         studio.reset();
         beat.reset();
+        pump.reset();
+        loFi.reset();
     }
     // Host time for tempo-synced effects (Beat Gate), once per block before process().
     void setTransport(bool hasPosition, bool playing, double ppq, double bpm) noexcept
     {
         beat.setTransport(hasPosition, playing, ppq, bpm);
+        pump.setTransport(hasPosition, playing, ppq, bpm);
     }
     // Display readback (relaxed copies are taken by the plugin instance after each block).
-    double beatPosition() const noexcept { return beat.beatPosition(); }
+    double beatPosition() const noexcept { return selected == EffectId::pump ? pump.beatPosition() : beat.beatPosition(); }
+    double wobblePhase() const noexcept { return loFi.wobblePhase(); }
     double tuneDetectedHz() const noexcept { return tune.detectedHz(); }
     double tuneTargetHz() const noexcept { return tune.targetHz(); }
     // Last gain reduction (dB) of the selected dynamics processor, for editor meters.
@@ -99,6 +110,10 @@ class Engine
             vocoder.setParameters(values);
         else if (effect == EffectId::beatGate)
             beat.setParameters(values);
+        else if (effect == EffectId::pump)
+            pump.setParameters(values);
+        else if (effect == EffectId::loFi)
+            loFi.setParameters(values);
         else
             studio.setParameters(effect, values);
         return true;
@@ -123,6 +138,10 @@ class Engine
                 vocoder.process(l, r);
             else if (selected == EffectId::beatGate)
                 beat.process(l, r);
+            else if (selected == EffectId::pump)
+                pump.process(l, r);
+            else if (selected == EffectId::loFi)
+                loFi.process(l, r);
             else
                 studio.process(l, r);
             left[i] = std::isfinite(l) ? l : 0.0f;

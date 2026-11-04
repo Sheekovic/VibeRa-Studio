@@ -42,6 +42,8 @@ enum class EffectId
     studioReverb,
     spectrumAnalyzer,
     beatGate,
+    pump,
+    loFi,
     count
 };
 inline constexpr std::size_t maximumParameters = 12;

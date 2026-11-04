@@ -78,6 +78,13 @@ Mixing and mastering processors:
   slice of each hold segment), hold (0 1/2, 1 1, 2 2 beats), half-time (on/off; plays each cycle at
   half speed, one octave down), cycle (0 1, 1 2, 2 4 beats), mix. Follows the song beat while the
   transport plays; when stopped it keeps its own clock at the last tempo.
+- Pump (`pump`): tempo-synced volume shape ("sidechain pumping" without a sidechain). rate
+  (0 1 bar, 1 1/2 bar, 2 1/4, 3 1/8, 4 1/16), depth (drop to 1 - depth), release and hold
+  (fractions of the cycle), curve (-1 slow .. 1 fast recovery), offset (cycle phase),
+  smoothing (ms), mix. Follows the song beat while playing.
+- Lo-fi (`lo-fi`): wow and flutter (tape pitch wobble, about 15 and 3 cents), hiss and
+  crackle (follow the input level, so silence stays silent), tone (low-pass Hz), age
+  (saturation), width, mix. A small fixed delay is reported as latency.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

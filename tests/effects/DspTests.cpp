@@ -668,6 +668,89 @@ void studioOracles()
         hosted.process(l2.data(), r2.data(), 4000);
         require(rmsOf(l2, 1000, 4000) > .17, "A seek back to beat 0 reopens the gate");
     }
+    // Pump at the free-running 120 BPM clock: one cycle per beat (24000 samples), depth 0.8.
+    {
+        constexpr int beat = 24000;
+        const auto pumpValues = defaultValues(EffectId::pump); // 1/4, depth .8, release .6, hold .05.
+        const auto pumped = renderEffect(EffectId::pump, pumpValues, sine(500), 2 * beat);
+        const double full = .25 / std::sqrt(2.);
+        const double trough = rmsOf(pumped.left, 200, 1000) / full;   // Inside the hold.
+        const double middle = rmsOf(pumped.left, 9000, 10000) / full; // Recovering.
+        const double recovered = rmsOf(pumped.left, 19000, 23000) / full;
+        require(std::abs(trough - .2) < .03, "Pump drops to 1 - depth on the beat (" + std::to_string(trough) + ")");
+        require(middle > trough + .1 && middle < recovered - .05, "Pump recovers through the release");
+        require(std::abs(recovered - 1) < .02, "Pump is fully open after the release");
+        require(std::abs(rmsOf(pumped.left, beat + 200, beat + 1000) / full - .2) < .03, "Pump repeats every beat");
+        auto dryPump = pumpValues;
+        dryPump[7] = 0;
+        require(std::abs(rmsOf(renderEffect(EffectId::pump, dryPump, sine(500), beat).left, 200, 1000) / full - 1) < .01,
+                "Pump mix 0 is dry");
+        Engine hosted;
+        hosted.prepare(48000);
+        require(hosted.setParameters(EffectId::pump, pumpValues), "Pump parameters accepted");
+        std::vector<float> l(4000), r(4000);
+        for (int i = 0; i < 4000; ++i)
+            l[size_t(i)] = r[size_t(i)] = sine(500)(i);
+        hosted.setTransport(true, true, .9, 120); // Late in the cycle: open.
+        hosted.process(l.data(), r.data(), 4000);
+        require(rmsOf(l, 500, 2000) / full > .95, "Pump follows the host beat position");
+    }
+
+    // Lo-fi: mix 0 is the input delayed by the reported latency; the tone darkens highs;
+    // hiss and crackle add a bounded floor to silence; the wobble moves the pitch.
+    {
+        auto clean = defaultValues(EffectId::loFi);
+        clean[7] = 0;
+        Engine probe;
+        probe.prepare(48000);
+        const int latency = probe.latencySamples(EffectId::loFi);
+        require(latency > 0 && latency < 400, "Lo-fi reports its base delay as latency");
+        const auto dry = renderEffect(EffectId::loFi, clean, sine(500), 24000);
+        double aligned = 0;
+        for (int i = 2000; i < 20000; ++i)
+            aligned = std::max(aligned, double(std::abs(dry.left[size_t(i)] - sine(500)(i - latency))));
+        require(aligned < 1e-5, "Lo-fi mix 0 is the dry signal delayed by exactly the latency");
+
+        auto dark = defaultValues(EffectId::loFi);
+        dark[0] = dark[1] = dark[2] = dark[3] = dark[5] = 0;
+        dark[4] = 1000;
+        dark[6] = 1;
+        const double high = rmsOf(renderEffect(EffectId::loFi, dark, sine(8000), 24000).left, 4000, 24000) / (.25 / std::sqrt(2.));
+        const double low = rmsOf(renderEffect(EffectId::loFi, dark, sine(200), 24000).left, 4000, 24000) / (.25 / std::sqrt(2.));
+        require(high < .1 && low > .9, "Lo-fi tone at 1 kHz keeps lows and removes highs (" + std::to_string(low) + ", " +
+                                           std::to_string(high) + ")");
+
+        // Hiss and crackle ride on the audio: compare the same quiet input with and without them.
+        auto quiet = dark;
+        quiet[4] = 20000;
+        auto noisy = quiet;
+        noisy[2] = 1;
+        noisy[3] = 1;
+        const auto plain = renderEffect(EffectId::loFi, quiet, sine(300, .2), 48000);
+        const auto withNoise = renderEffect(EffectId::loFi, noisy, sine(300, .2), 48000);
+        double added = 0, addedPeak = 0;
+        for (int i = 0; i < 48000; ++i)
+        {
+            const double d = withNoise.left[size_t(i)] - plain.left[size_t(i)];
+            added += d * d;
+            addedPeak = std::max(addedPeak, std::abs(d));
+        }
+        added = std::sqrt(added / 48000);
+        require(added > 1e-4 && addedPeak < .5, "Hiss and crackle add a bounded noise layer under the audio");
+        const auto silent = renderEffect(EffectId::loFi, noisy, [](int) { return 0.f; }, 24000);
+        require(std::all_of(silent.left.begin(), silent.left.end(), [](float x) { return x == 0; }),
+                "A silent channel stays silent (noise follows the input)");
+
+        auto wobble = dark;
+        wobble[0] = 1;
+        wobble[4] = 20000;
+        const auto bent = renderEffect(EffectId::loFi, wobble, sine(1000), 96000);
+        const auto window = [&](int from, int to) { return std::vector<float>(bent.left.begin() + from, bent.left.begin() + to); };
+        const double early = measuredHz(window(2000, 14000), 0, 48000), late = measuredHz(window(44000, 56000), 0, 48000);
+        require(std::abs(early - late) > 1 && std::abs(early - 1000) < 12 && std::abs(late - 1000) < 12,
+                "Wow bends the pitch by a few cents and back (" + std::to_string(early) + ", " + std::to_string(late) + ")");
+    }
+
 }
 int main()
 {

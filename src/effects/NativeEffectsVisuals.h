@@ -5,6 +5,7 @@
 // stereo field, a scale) and moves with the actual audio (scope, level dot, playhead).
 // Curves are display models of the controls; the DSP itself is in effects/dsp.
 #include "dsp/BeatGate.h"
+#include "dsp/GrooveEffects.h"
 #include "dsp/EffectsCatalogue.h"
 #include "dsp/PitchCorrect.h"
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -632,6 +633,59 @@ inline void paint(juce::Graphics &g, juce::Rectangle<float> plot, EffectId id, c
         lane(lanes.removeFromTop(laneHeight), "Stutter", stutter > 0, hold, beat, std::min(stutter, hold));
         lanes.removeFromTop(6.f);
         lane(lanes.removeFromTop(laneHeight), "Half-time", half, cycle, beat, cycle);
+        return;
+    }
+    case EffectId::pump:
+    {
+        // One cycle of the volume shape with the live playhead, then the live waveform.
+        const double cycle = Pump::cycleBeats(int(std::lround(v[0])));
+        auto top = plot.withHeight(plot.getHeight() * .62f);
+        caption(g, top, p, "VOLUME SHAPE", juce::String(Pump::cycleName(int(std::lround(v[0])))) + "  /  depth " +
+                                                juce::String(int(std::lround(v[1] * 100))) + "%");
+        top = top.withTrimmedTop(18.f);
+        g.setColour(p.plate.brighter(.06f));
+        g.fillRoundedRectangle(top, 6.f);
+        const auto yOf = [&](float gain) { return top.getBottom() - 6.f - gain * (top.getHeight() - 12.f); };
+        juce::Path line, fill;
+        for (int x = 0; x <= int(top.getWidth()); ++x)
+        {
+            const double phase = 2. * x / top.getWidth() - v[5]; // Two cycles.
+            const float y = yOf(Pump::shape(phase, v[1], v[2], v[3], v[4]));
+            if (x == 0)
+            {
+                line.startNewSubPath(top.getX(), y);
+                fill.startNewSubPath(top.getX(), top.getBottom());
+                fill.lineTo(top.getX(), y);
+            }
+            line.lineTo(top.getX() + float(x), y);
+            fill.lineTo(top.getX() + float(x), y);
+        }
+        fill.lineTo(top.getRight(), top.getBottom());
+        fill.closeSubPath();
+        g.setColour(p.accent.withAlpha(.2f));
+        g.fillPath(fill);
+        g.setColour(p.accent);
+        g.strokePath(line, juce::PathStrokeType(2.4f));
+        const double phase = std::fmod(live.beat / cycle, 2.);
+        const float x = top.getX() + float((phase < 0 ? phase + 2 : phase) / 2.) * top.getWidth();
+        g.setColour(p.warm);
+        g.fillRoundedRectangle(x - 1.5f, top.getY(), 3.f, top.getHeight(), 1.5f);
+        scope(g, plot.withTrimmedTop(top.getBottom() - plot.getY() + 8.f), live, p, p.accent);
+        return;
+    }
+    case EffectId::loFi:
+    {
+        // Tape wobble (wow + flutter) with the live phase, tone and noise readouts, waveform.
+        const float wow = v[0], flutter = v[1];
+        lfo(g, plot, p, live, LoFi::wowHz, std::max(.08f, std::min(1.f, wow + flutter * .4f)),
+            [wow, flutter](double t)
+            {
+                const double s = wow * std::sin(t * juce::MathConstants<double>::twoPi) +
+                                 flutter * .35 * std::sin(t * juce::MathConstants<double>::twoPi * LoFi::flutterHz / LoFi::wowHz);
+                return float(s / std::max(.05, double(wow + flutter * .35f)));
+            },
+            "TAPE WOBBLE  /  TONE " + juce::String(int(v[4] / 100) / 10.f, 1) + " kHz  /  HISS " +
+                juce::String(int(std::lround(v[2] * 100))) + "%  /  CRACKLE " + juce::String(int(std::lround(v[3] * 100))) + "%");
         return;
     }
     case EffectId::spectrumAnalyzer: case EffectId::parametricEq: case EffectId::count:

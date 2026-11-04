@@ -261,6 +261,8 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
                                     : id == "hold"    ? holds[juce::jlimit(0, 2, i)]
                                                       : cycles[juce::jlimit(0, 2, i)]);
             };
+        else if (spec.id == EffectId::pump && id == "rate")
+            row->slider.textFromValueFunction = [](double v) { return juce::String(Pump::cycleName(int(std::lround(v)))); };
         else if (p.interval == 1 && p.minimum == 0 && p.maximum == 1)
             row->slider.textFromValueFunction = [](double v) { return juce::String(v >= .5 ? "On" : "Off"); };
         if (row->slider.textFromValueFunction)
