@@ -575,7 +575,6 @@ class AudioEngine
     class RenderWorker;
     std::unique_ptr<RenderWorker> worker;
     std::unique_ptr<te::Edit> renderEdit;
-    int renderOutputLatency = 0; // Native latency of the Master chain in the render (samples).
     double tempo = 120;
     TempoMap tempoMap; // Projected Song map (base tempo in Pattern mode); CONTROL thread only.
     std::shared_ptr<GuideControl> guide = std::make_shared<GuideControl>();

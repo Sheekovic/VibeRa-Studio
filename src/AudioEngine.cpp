@@ -1952,11 +1952,6 @@ AudioEngine::buildEdit(const Project &project, bool patternMode, Id selectedPatt
                 return {};
             auto *effect = dynamic_cast<RemoteEffect *>(remote.get());
             effect->configure(host, spec.bypass || m.effectsBypassed, liveTimeline, spec.id, spec.wet);
-            // Offline Master effects delay the whole render by their native latency (offline
-            // workers add no transport delay, and the Master chain is outside the latency the
-            // renderer drops); the render worker trims it from the start.
-            if (role == te::Edit::forRendering && m.index == 0 && host && !(spec.bypass || m.effectsBypassed))
-                renderOutputLatency += std::max(0, host->declaredLatency().nativeSamples);
             if (spec.detector)
             {
                 const auto *before =
@@ -4060,20 +4055,23 @@ class AudioEngine::RenderWorker final : public juce::Thread
         return std::any_of(hosts.begin(), hosts.end(),
                            [](auto &host) { return !host->alive() || host->deliveryFailed(); });
     }
-    int tailMode = 0, bitDepth = 24, trimSamples = 0;
+    int tailMode = 0, bitDepth = 24;
+    // Pre-roll: the render starts two blocks before the Song (silence) and that part is
+    // removed afterwards. A plugin's first processed block in a render comes out late by its
+    // native latency and is realigned from the next block, which left a jump inside the
+    // first block of every export with a latent effect; the pre-roll absorbs it.
+    int prerollSamples = 0;
     double songSeconds = 0, sampleRate = 48000;
     RenderWorker(te::Edit &edit, const juce::File &file, double rate, int bits, int block, double endSeconds,
-                 std::vector<std::shared_ptr<PluginHost>> plugins = {}, int tail = 0, int trim = 0)
+                 std::vector<std::shared_ptr<PluginHost>> plugins = {}, int tail = 0)
         : juce::Thread("VibeRa WAV render"), target(file), temporary(file), hosts(std::move(plugins))
     {
         tailMode = std::clamp(tail, 0, 2);
-        trimSamples = std::clamp(trim, 0, int(rate * 2));
         bitDepth = bits;
         sampleRate = rate;
         songSeconds = endSeconds;
         if (tailMode != 0)
             endSeconds += 8.; // Render room for reverb/delay tails; trimmed or wrapped afterwards.
-        endSeconds += trimSamples / rate; // The output delay removed from the start afterwards.
         for (const auto *track : te::getAudioTracks(edit))
             for (auto *plugin : track->pluginList.getPlugins())
                 if (auto *sampler = dynamic_cast<FixedSampler *>(plugin))
@@ -4085,7 +4083,8 @@ class AudioEngine::RenderWorker final : public juce::Thread
         params.sampleRateForAudio = rate;
         params.bitDepth = bits;
         params.blockSizeForAudio = block;
-        params.time = {seconds(0), seconds(endSeconds)};
+        prerollSamples = 2 * block;
+        params.time = {seconds(-prerollSamples / rate), seconds(endSeconds)};
         params.canRenderInMono = false;
         params.useMasterPlugins = true;
         params.ditheringEnabled = false;
@@ -4103,7 +4102,7 @@ class AudioEngine::RenderWorker final : public juce::Thread
                 break;
             }
         }
-        if (completed && (tailMode != 0 || trimSamples > 0))
+        if (completed && (tailMode != 0 || prerollSamples > 0))
             completed = applyTail();
         done = true;
     }
@@ -4120,12 +4119,11 @@ class AudioEngine::RenderWorker final : public juce::Thread
         juce::AudioBuffer<float> pcm(channels, frames);
         reader->read(&pcm, 0, frames, 0, true, true);
         reader.reset();
-        if (trimSamples > 0)
+        if (prerollSamples > 0)
         {
-            // Plugin delay compensation of the whole output: drop the leading delay.
-            frames = std::max(0, frames - trimSamples);
+            frames = std::max(0, frames - prerollSamples);
             for (int c = 0; c < channels; ++c)
-                std::memmove(pcm.getWritePointer(c), pcm.getReadPointer(c) + trimSamples, size_t(frames) * sizeof(float));
+                std::memmove(pcm.getWritePointer(c), pcm.getReadPointer(c) + prerollSamples, size_t(frames) * sizeof(float));
         }
         const int songEnd = std::min(frames, int(std::lround(songSeconds * sampleRate)));
         int keep = frames;
@@ -4188,7 +4186,7 @@ juce::Result AudioEngine::renderSync(const Project &p, const juce::File &file, d
         while (job.task->runJob() != juce::ThreadPoolJob::jobHasFinished)
         {
         }
-        job.completed = true;
+        job.completed = job.prerollSamples > 0 ? job.applyTail() : true;
         return job.commit();
     };
     try
@@ -4220,7 +4218,6 @@ juce::Result AudioEngine::startRender(const Project &p, const juce::File &file, 
     renderRate = rate;
     renderBlock = 512;
     auto firstHost = ownedHosts.size();
-    renderOutputLatency = 0;
     renderEdit = buildEdit(p, false, p.patterns.front().id, te::Edit::forRendering, error);
     if (!renderEdit)
         return juce::Result::fail(error);
@@ -4228,8 +4225,7 @@ juce::Result AudioEngine::startRender(const Project &p, const juce::File &file, 
     worker =
         std::make_unique<RenderWorker>(*renderEdit, file, rate, bits, 512, p.songSeconds(p.endBeat()),
                                        std::vector<std::shared_ptr<PluginHost>>(
-                                           ownedHosts.begin() + std::ptrdiff_t(firstHost), ownedHosts.end()), tail,
-                                       renderOutputLatency);
+                                           ownedHosts.begin() + std::ptrdiff_t(firstHost), ownedHosts.end()), tail);
     worker->startThread();
     preparation[1].reset();
     return juce::Result::ok();
