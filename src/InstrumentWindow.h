@@ -66,7 +66,13 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
         juce::TextButton setTempo{"Set tempo..."}, detectTempo{"Detect tempo"}, fitTempo{"Fit to tempo"},
             fitLength{"Fit length..."};
         juce::Label tempoInfo;
-        juce::ToggleButton keepPitch{"Keep pitch"};
+        juce::ToggleButton keepPitch{"Keep pitch"}; // Replaced on screen by the Mode list (kept for its state).
+        // Time stretching: PITCH (cents), MUL (length x), TIME (beats, 0 = off) and Mode.
+        std::array<juce::Slider, 3> stretchKnobs;
+        std::array<juce::Label, 3> stretchLabels;
+        const std::array<juce::String, 3> stretchActions{"stretchPitch", "timeMul", "timeBeats"};
+        juce::ComboBox stretchMode;
+        juce::Label stretchModeLabel;
         bool detecting = false;
         juce::String tempoOperation, tempoError;
         juce::ToggleButton reverse{"Reverse"}, normalize{"Normalize"}, envelope{"Volume envelope"};
@@ -225,6 +231,13 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
             knob(filterSliders[1], filterLabels[1], "RES");
             knob(voiceModeSliders[0], voiceModeLabels[0], "SLIDE");
             knob(voiceModeSliders[1], voiceModeLabels[1], "GATE");
+            const std::array<juce::String, 3> stretchCaptions{"PITCH", "MUL", "TIME"};
+            for (size_t i = 0; i < stretchKnobs.size(); ++i)
+                knob(stretchKnobs[i], stretchLabels[i], stretchCaptions[i]);
+            stretchModeLabel.setText("MODE", juce::dontSendNotification);
+            stretchModeLabel.setFont(juce::FontOptions(10.5f, juce::Font::bold));
+            stretchModeLabel.setJustificationType(juce::Justification::centred);
+            stretchModeLabel.setColour(juce::Label::textColourId, muted);
             mixerLabel.setText("TRACK", juce::dontSendNotification);
             mixerLabel.setFont(juce::Font(10.5f, juce::Font::bold));
             mixerLabel.setJustificationType(juce::Justification::centred);
@@ -362,7 +375,7 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                 sections.push_back({{left, top + 72, half, 66}, "Content"});
                 hq.setBounds(left + 10, top + 102, 150, 26);
                 previewProcessed.setBounds(left + half - 160, top + 102, 150, 26);
-                sections.push_back({{left, top + 144, half, 140}, "Playback"});
+                sections.push_back({{left, top + 144, half, 148}, "Playback"});
                 loop.setBounds(left + 10, top + 172, 140, 24);
                 pingPong.setBounds(left + 152, top + 172, 130, 24);
                 fileLoop.setBounds(left + half - 112, top + 172, 102, 24);
@@ -370,31 +383,36 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                 for (int k = 0; k < 3; ++k)
                 {
                     const size_t i = k == 2 ? 12 : size_t(4 + k);
-                    knobAt(samplerSliders[i], samplerLabels[i], left + 10 + k * playKnob, top + 210, playKnob);
+                    knobAt(samplerSliders[i], samplerLabels[i], left + 10 + k * playKnob, top + 218, playKnob);
                 }
-                sections.push_back({{right, top, W - right - left, 144}, "Time stretching"});
-                const int tw = (W - right - left - 30) / 2;
-                setTempo.setBounds(right + 10, top + 30, tw, 26);
-                detectTempo.setBounds(right + 20 + tw, top + 30, tw, 26);
-                fitTempo.setBounds(right + 10, top + 62, tw, 26);
-                fitLength.setBounds(right + 20 + tw, top + 62, tw, 26);
-                keepPitch.setBounds(right + 10, top + 94, 2 * tw + 10, 22);
-                tempoInfo.setBounds(right + 10, top + 116, 2 * tw + 10, 22);
-                sections.push_back({{right, top + 150, W - right - left, 134}, "Precomputed effects"});
-                normalize.setBounds(right + 10, top + 178, 120, 24);
-                reverse.setBounds(right + 140, top + 178, 110, 24);
+                sections.push_back({{right, top, W - right - left, 152}, "Time stretching"});
+                const int sw = W - right - left - 20, column = sw / 4;
+                for (int k = 0; k < 3; ++k)
+                    knobAt(stretchKnobs[size_t(k)], stretchLabels[size_t(k)], right + 10 + k * column, top + 26, column);
+                stretchModeLabel.setBounds(right + 10 + 3 * column, top + 30, column, 14);
+                stretchMode.setBounds(right + 14 + 3 * column, top + 50, column - 8, 24);
+                const int bw = (sw - 18) / 4;
+                setTempo.setBounds(right + 10, top + 90, bw, 26);
+                detectTempo.setBounds(right + 16 + bw, top + 90, bw, 26);
+                fitTempo.setBounds(right + 22 + 2 * bw, top + 90, bw, 26);
+                fitLength.setBounds(right + 28 + 3 * bw, top + 90, bw, 26);
+                tempoInfo.setBounds(right + 10, top + 122, sw, 22);
+                sections.push_back({{right, top + 158, W - right - left, 134}, "Precomputed effects"});
+                normalize.setBounds(right + 10, top + 186, 120, 24);
+                reverse.setBounds(right + 140, top + 186, 110, 24);
                 const int fxKnob = (W - right - left - 20) / 4;
                 const std::array<size_t, 4> fx{2, 3, 10, 11};
                 for (size_t k = 0; k < fx.size(); ++k)
-                    knobAt(samplerSliders[fx[k]], samplerLabels[fx[k]], right + 10 + int(k) * fxKnob, top + 210,
+                    knobAt(samplerSliders[fx[k]], samplerLabels[fx[k]], right + 10 + int(k) * fxKnob, top + 218,
                            fxKnob);
-                waveformArea = {left, top + 292, W - 2 * left, std::max(80, H - top - 300)};
+                waveformArea = {left, top + 300, W - 2 * left, std::max(80, H - top - 308)};
                 sections.push_back({waveformArea, {}});
                 rangeView.setBounds(waveformArea.reduced(4));
                 show({&source, &load, &preview, &hq, &previewProcessed, &loop, &pingPong, &fileLoop,
                       &samplerSliders[4], &samplerLabels[4], &samplerSliders[5], &samplerLabels[5],
                       &samplerSliders[12], &samplerLabels[12], &setTempo, &detectTempo, &fitTempo, &fitLength,
-                      &keepPitch, &tempoInfo, &normalize, &reverse, &samplerSliders[2], &samplerLabels[2],
+                      &stretchKnobs[0], &stretchLabels[0], &stretchKnobs[1], &stretchLabels[1], &stretchKnobs[2],
+                      &stretchLabels[2], &stretchMode, &stretchModeLabel, &tempoInfo, &normalize, &reverse, &samplerSliders[2], &samplerLabels[2],
                       &samplerSliders[3], &samplerLabels[3], &samplerSliders[10], &samplerLabels[10],
                       &samplerSliders[11], &samplerLabels[11]});
                 if (!audioClip)
@@ -490,11 +508,25 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
             fitTempo.setButtonText(c->sampler.fitTempo ? "Unfit tempo" : "Fit to tempo");
             keepPitch.setEnabled(setTempo.isEnabled() && !c->audioClip);
             keepPitch.setToggleState(c->sampler.stretch, juce::dontSendNotification);
+            {
+                const std::array<double, 3> shown{c->sampler.stretchPitch, c->sampler.timeMul, c->sampler.timeBeats};
+                for (size_t i = 0; i < stretchKnobs.size(); ++i)
+                {
+                    if (!stretchKnobs[i].isMouseButtonDown())
+                        stretchKnobs[i].setValue(shown[i], juce::dontSendNotification);
+                    stretchKnobs[i].setEnabled(!c->audioClip);
+                    stretchLabels[i].setEnabled(!c->audioClip);
+                }
+                stretchMode.setSelectedId(c->sampler.stretch ? 2 : 1, juce::dontSendNotification);
+                stretchMode.setEnabled(!c->audioClip);
+            }
             if (!detecting)
                 tempoInfo.setText(tempoError.isNotEmpty() ? tempoError : c->sampler.sourceTempo > 0
-                                      ? "Source " + juce::String(c->sampler.sourceTempo, 2) +
-                                            " BPM | Resample (changes pitch)"
-                                      : "Source tempo unknown | Resample (changes pitch)",
+                                      ? "Source " + juce::String(c->sampler.sourceTempo, 2) + " BPM" +
+                                            (c->sampler.fitTempo ? " | fitted" : "") +
+                                            (c->sampler.stretch ? " | Stretch keeps pitch" : " | Resample changes pitch")
+                                      : juce::String("Source tempo unknown") +
+                                            (c->sampler.stretch ? " | Stretch keeps pitch" : " | Resample changes pitch"),
                                   juce::dontSendNotification);
             audioClip = c->audioClip;
             load.setEnabled(!audioClip);
@@ -1167,6 +1199,66 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
                 args.length = prepared->fileLoopEnd;
                 args.enabled = true;
                 owner->command("channel.sampler.loopPoints", args);
+                timerCallback();
+            };
+            for (size_t i = 0; i < stretchKnobs.size(); ++i)
+            {
+                auto &knob = stretchKnobs[i];
+                addAndMakeVisible(knob);
+                addAndMakeVisible(stretchLabels[i]);
+                knob.setComponentID("instrument.sampler." + stretchActions[i]);
+                if (i == 0)
+                {
+                    knob.setRange(-1200, 1200, 1);
+                    knob.setDoubleClickReturnValue(true, 0);
+                    knob.textFromValueFunction = [](double v)
+                    { return (v > 0 ? "+" : "") + juce::String(v / 100., 2) + " st"; };
+                    knob.setTooltip("PITCH: in Stretch mode, transpose without changing the length; in Resample "
+                                    "mode, detune like playback speed. 100 cents per semitone.");
+                }
+                else if (i == 1)
+                {
+                    knob.setRange(.25, 4, .001);
+                    knob.setSkewFactorFromMidPoint(1.);
+                    knob.setDoubleClickReturnValue(true, 1);
+                    knob.textFromValueFunction = [](double v) { return juce::String(v * 100., 0) + "%"; };
+                    knob.setTooltip("MUL: multiply the sample length (100% = unchanged). Resample also changes the "
+                                    "pitch; Stretch keeps it.");
+                }
+                else
+                {
+                    knob.setRange(0, 64, .25);
+                    knob.setSkewFactorFromMidPoint(4.);
+                    knob.setDoubleClickReturnValue(true, 0);
+                    knob.textFromValueFunction = [](double v)
+                    { return v <= 0 ? juce::String("Off") : juce::String(v, v < 1 ? 2 : 1) + " beats"; };
+                    knob.setTooltip("TIME: set the sample length in beats at the project tempo (Off keeps the "
+                                    "length; MUL still applies).");
+                }
+                knob.onValueChange = [this, i] { change("channel.sampler." + stretchActions[i], stretchKnobs[i].getValue()); };
+                knob.onDragStart = [this] { dragBlocked = !beginControlGesture("Sampler time stretching"); };
+                knob.onDragEnd = [this]
+                {
+                    if (!dragBlocked)
+                        finishControlGesture(false);
+                    dragBlocked = false;
+                };
+            }
+            addAndMakeVisible(stretchMode);
+            addAndMakeVisible(stretchModeLabel);
+            stretchMode.setComponentID("instrument.sampler.stretchMode");
+            stretchMode.addItem("Resample", 1);
+            stretchMode.addItem("Stretch (keep pitch)", 2);
+            stretchMode.setTooltip("Resample: length and pitch change together. Stretch: the length changes and "
+                                   "the pitch stays (PITCH transposes on its own).");
+            stretchMode.onChange = [this]
+            {
+                if (updating || !owner || stretchMode.getSelectedId() == 0)
+                    return;
+                CommandArgs args;
+                args.channel = channel;
+                args.enabled = stretchMode.getSelectedId() == 2;
+                owner->command("channel.sampler.stretch", args);
                 timerCallback();
             };
             keepPitch.setComponentID("instrument.sampler.stretch");

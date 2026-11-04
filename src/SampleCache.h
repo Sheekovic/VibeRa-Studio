@@ -25,6 +25,11 @@ class SampleCache
     static constexpr const char *stretchPending = "Preparing time-stretched sample...";
     static juce::String preparationKey(const Project &, const Channel &);
     static constexpr const char *stretchMarker = "|stretch=";
+    // "|shape=f:<fit rate>;b:<beats>;t:<tempo>;m:<mul>;p:<cents>;s:<0 resample|1 stretch>":
+    // the length is resolved from the source (TIME beats at the tempo, else the source
+    // length divided by the tempo-fit rate), multiplied by MUL; Stretch keeps the pitch and
+    // transposes by p cents, Resample changes the pitch with the length.
+    static constexpr const char *shapeMarker = "|shape=";
     struct Statistics
     {
         std::uint64_t preparations = 0, hits = 0;

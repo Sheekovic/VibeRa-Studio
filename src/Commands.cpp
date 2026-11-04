@@ -528,6 +528,9 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.sampler.fitTempo", "Fit sample to project tempo", Scope::rack, true, true, "command"},
         {"channel.sampler.stretch", "Keep pitch when fitting tempo (time stretch)", Scope::rack, true, true,
          "command"},
+        {"channel.sampler.stretchPitch", "Sampler time stretching PITCH (cents)", Scope::rack, true, true, "command"},
+        {"channel.sampler.timeMul", "Sampler time stretching MUL (length multiplier)", Scope::rack, true, true, "command"},
+        {"channel.sampler.timeBeats", "Sampler time stretching TIME (beats, 0 = off)", Scope::rack, true, true, "command"},
         {"channel.sampler.hqInterpolation", "Sampler HQ (Hermite) interpolation", Scope::rack, true, true,
          "command"},
         {"channel.sampler.tempo", "Set and fit sample tempo", Scope::sampler, true, true, "command"},
@@ -2909,6 +2912,12 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 s.fitTempo = a.enabled;
             if (id == "channel.sampler.stretch")
                 s.stretch = a.enabled;
+            if (id == "channel.sampler.stretchPitch")
+                s.stretchPitch = a.value;
+            if (id == "channel.sampler.timeMul")
+                s.timeMul = a.value;
+            if (id == "channel.sampler.timeBeats")
+                s.timeBeats = a.value;
             if (id == "channel.sampler.hqInterpolation")
                 s.hqInterpolation = a.enabled;
             if (id == "channel.sampler.tempo")

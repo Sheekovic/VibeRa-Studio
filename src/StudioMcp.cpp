@@ -3831,6 +3831,9 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             prepared && prepared->fileLoopEnd >= 0 ? juce::var(prepared->fileLoopEnd) : juce::var{});
         set(sampler, "stretch", channel.sampler.stretch);
         set(sampler, "hqInterpolation", channel.sampler.hqInterpolation);
+        set(sampler, "stretchPitch", channel.sampler.stretchPitch);
+        set(sampler, "timeMul", channel.sampler.timeMul);
+        set(sampler, "timeBeats", channel.sampler.timeBeats);
         set(sampler, "loopStart", channel.sampler.loopStart);
         set(sampler, "loopEnd", channel.sampler.loopEnd);
         set(sampler, "envelope", channel.sampler.envelope);

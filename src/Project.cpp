@@ -571,6 +571,12 @@ juce::ValueTree Project::state() const
             set(sampler, "loopCrossfade", c.sampler.loopCrossfade);
         if (c.sampler.stretch)
             set(sampler, "stretch", true);
+        if (c.sampler.stretchPitch != 0)
+            set(sampler, "stretchPitch", c.sampler.stretchPitch);
+        if (c.sampler.timeMul != 1)
+            set(sampler, "timeMul", c.sampler.timeMul);
+        if (c.sampler.timeBeats != 0)
+            set(sampler, "timeBeats", c.sampler.timeBeats);
         if (c.sampler.hqInterpolation)
             set(sampler, "hqInterpolation", true);
         if (c.sampler.mono || c.sampler.portamento || c.sampler.fullPortamento ||
@@ -1442,6 +1448,15 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             else if (sampler.hasProperty("loop") || sampler.hasProperty("pingPong") ||
                      sampler.hasProperty("loopStart") || sampler.hasProperty("loopEnd"))
                 return juce::Result::fail("Sampler loop settings require project version 7");
+            for (const auto *field : {"stretchPitch", "timeMul", "timeBeats"})
+                if (sampler.hasProperty(field))
+                {
+                    if (fileVersion < 56)
+                        return juce::Result::fail("samplerStretch.version: Time stretching needs project version 56");
+                    const auto value = exactNumber(sampler[field]);
+                    const juce::String name(field);
+                    (name == "stretchPitch" ? settings.stretchPitch : name == "timeMul" ? settings.timeMul : settings.timeBeats) = value;
+                }
             for (const auto *field : {"stretch", "hqInterpolation"})
                 if (sampler.hasProperty(field))
                 {

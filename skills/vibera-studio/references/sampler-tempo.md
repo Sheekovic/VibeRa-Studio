@@ -96,3 +96,19 @@ re-preparation). It has no effect while Fit is off. Read back `stretch` in Chann
 sampler state. Very short sources the stretcher cannot analyse fall back to
 resampling the length. Quality is the stretcher default preset; no listening
 qualification is claimed.
+
+## Time stretching (PITCH / MUL / TIME / Mode)
+
+The Sample page Time stretching section mirrors the familiar layout. Commands take
+`args {channel, value}` and are one Undo each; read back in `vibera_state` channels[].sampler.
+
+- `channel.sampler.stretch` (`enabled`): Mode. false = Resample (length and pitch change together),
+  true = Stretch (the length changes, the pitch stays).
+- `channel.sampler.stretchPitch` (cents, -1200..1200): Stretch transposes without changing the
+  length; Resample detunes in real time like playback speed.
+- `channel.sampler.timeMul` (0.25..4): multiplies the length.
+- `channel.sampler.timeBeats` (0..256 quarter-note beats, 0 = off): sets the length at the project
+  tempo (MUL still multiplies it). Without TIME, tempo fit (`fitTempo`) sets the length.
+
+Any length change, or PITCH in Stretch mode, plays a prepared copy of the source (the file and
+shared PCM are unchanged); while it is prepared the Channel reports the stretch as pending.

@@ -12,6 +12,13 @@ juce::String SampleCache::preparationKey(const Project &project, const Channel &
     if (channel.instrument)
         return "builtin:bass";
     const auto &s = channel.sampler;
+    if (s.lengthShaped() && project.tempo > 0)
+    {
+        const double fit = s.fitTempo && s.sourceTempo > 0 ? project.tempo / s.sourceTempo : 1.;
+        return channel.source + shapeMarker + "f:" + juce::String(fit, 6) + ";b:" + juce::String(s.timeBeats, 6) +
+               ";t:" + juce::String(project.tempo, 6) + ";m:" + juce::String(s.timeMul, 6) +
+               ";p:" + juce::String(s.stretch ? s.stretchPitch : 0., 3) + ";s:" + (s.stretch ? "1" : "0");
+    }
     if (!s.fitTempo || !s.stretch || !(s.sourceTempo > 0) || !(project.tempo > 0))
         return channel.source;
     const double rate = project.tempo / s.sourceTempo; // Playback speed the stretch replaces.
@@ -21,9 +28,15 @@ juce::String SampleCache::preparationKey(const Project &project, const Channel &
 }
 namespace
 {
-// Pitch-preserving offline stretch to round(length / rate) frames. Short sources
-// that the stretcher cannot analyse fall back to linear resampling of the length.
+// Offline copy at outputFrames: Stretch keeps the pitch (and transposes by cents),
+// Resample changes the pitch with the length. Short sources that the stretcher cannot
+// analyse fall back to linear resampling of the length.
+std::shared_ptr<Sample> shaped(const Sample &base, int outputFrames, double cents, bool keepPitch);
 std::shared_ptr<Sample> stretched(const Sample &base, double rate)
+{
+    return shaped(base, std::max(2, int(std::lround(base.data.getNumSamples() / rate))), 0, true);
+}
+std::shared_ptr<Sample> shaped(const Sample &base, int outputFrames, double cents, bool keepPitch)
 {
     auto out = std::make_shared<Sample>();
     out->sampleRate = base.sampleRate;
@@ -32,13 +45,15 @@ std::shared_ptr<Sample> stretched(const Sample &base, double rate)
     out->fileLoopStart = base.fileLoopStart;
     out->fileLoopEnd = base.fileLoopEnd;
     const int inputFrames = base.data.getNumSamples();
-    const int outputFrames = std::max(2, int(std::lround(inputFrames / rate)));
+    outputFrames = std::max(2, outputFrames);
     out->data.setSize(2, outputFrames);
     signalsmith::stretch::SignalsmithStretch<float> stretcher(0x56494245); // Deterministic.
     stretcher.presetDefault(2, float(base.sampleRate));
+    if (keepPitch && cents != 0)
+        stretcher.setTransposeSemitones(float(cents / 100.));
     const float *inputs[2] = {base.data.getReadPointer(0), base.data.getReadPointer(1)};
     float *outputs[2] = {out->data.getWritePointer(0), out->data.getWritePointer(1)};
-    if (!stretcher.exact(inputs, inputFrames, outputs, outputFrames))
+    if (!keepPitch || !stretcher.exact(inputs, inputFrames, outputs, outputFrames))
         for (int c = 0; c < 2; ++c)
             for (int i = 0; i < outputFrames; ++i)
             {
@@ -58,6 +73,72 @@ std::shared_ptr<Sample> stretched(const Sample &base, double rate)
 } // namespace
 juce::Result SampleCache::prepare(const juce::String &requested, std::shared_ptr<const Sample> &result)
 {
+    if (requested.contains(shapeMarker))
+    {
+        const auto source = requested.upToFirstOccurrenceOf(shapeMarker, false, false);
+        std::map<juce::String, double> field;
+        juce::StringArray parts;
+        parts.addTokens(requested.fromFirstOccurrenceOf(shapeMarker, false, false), ";", {});
+        for (const auto &part : parts)
+            field[part.upToFirstOccurrenceOf(":", false, false)] = part.fromFirstOccurrenceOf(":", false, false).getDoubleValue();
+        const double fit = field["f"], beats = field["b"], tempo = field["t"], mul = field["m"], cents = field["p"];
+        const bool keepPitch = field["s"] != 0;
+        if (!(fit >= .05 && fit <= 20) || !(tempo >= 10 && tempo <= 999) || !(mul >= .25 && mul <= 4) ||
+            !(beats >= 0 && beats <= 256) || !(std::abs(cents) <= 1200))
+            return juce::Result::fail("samplerStretch.invalidShape: Time stretching settings are out of range");
+        std::shared_ptr<const Sample> base;
+        if (auto ready = prepare(source, base); ready.failed())
+            return ready;
+        if (auto it = entries.find(requested); it != entries.end() && it->second.base == base)
+        {
+            it->second.used = ++clock;
+            ++hits;
+            result = it->second.sample;
+            return juce::Result::ok();
+        }
+        const double sourceSeconds = base->data.getNumSamples() / base->sampleRate;
+        const double seconds = (beats > 0 ? beats * 60. / tempo : sourceSeconds / fit) * mul;
+        if (seconds > 120)
+            return juce::Result::fail("samplerStretch.tooLong: Stretched sample would exceed 120 seconds");
+        if (!(seconds >= .005) || seconds / sourceSeconds > 64 || sourceSeconds / seconds > 64)
+            return juce::Result::fail("samplerStretch.invalidRatio: Time stretching changes the length more than 64x");
+        const int frames = int(std::lround(seconds * base->sampleRate));
+        auto job = stretchJobs.find(requested);
+        if (job != stretchJobs.end() && job->second->base != base)
+        {
+            job->second->worker.join();
+            stretchJobs.erase(job);
+            job = stretchJobs.end();
+        }
+        if (job == stretchJobs.end())
+        {
+            if (stretchJobs.size() >= maximumStretchJobs)
+                return juce::Result::fail(stretchPending);
+            auto created = std::make_unique<StretchJob>();
+            created->base = base;
+            auto *raw = created.get();
+            created->worker = std::thread([raw, frames, cents, keepPitch] {
+                raw->output = shaped(*raw->base, frames, cents, keepPitch);
+                raw->done.store(true, std::memory_order_release);
+            });
+            stretchJobs.emplace(requested, std::move(created));
+            return juce::Result::fail(stretchPending);
+        }
+        if (!job->second->done.load(std::memory_order_acquire))
+            return juce::Result::fail(stretchPending);
+        job->second->worker.join();
+        std::shared_ptr<const Sample> sample = std::move(job->second->output);
+        stretchJobs.erase(job);
+        const auto sampleBytes = std::size_t(sample->data.getNumSamples()) * 2 * sizeof(float);
+        if (auto old = entries.find(requested); old != entries.end())
+            bytes -= old->second.bytes;
+        entries[requested] = {sample, 0, 0, ++clock, sampleBytes, base};
+        bytes += sampleBytes;
+        ++preparations;
+        result = std::move(sample);
+        trim();
+        return juce::Result::ok();
+    }
     if (requested.contains(stretchMarker))
     {
         const auto source = requested.upToFirstOccurrenceOf(stretchMarker, false, false);

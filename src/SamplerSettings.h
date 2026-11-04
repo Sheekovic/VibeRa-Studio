@@ -17,6 +17,13 @@ struct SamplerSettings
     // With fitTempo, keep pitch: playback uses a prepared time-stretched copy of
     // the source instead of resampling. Ignored while fitTempo is off.
     bool stretch = false;
+    // Time stretching (familiar PITCH / MUL / TIME with the Mode above: Resample when
+    // stretch is false, Stretch when true). PITCH is cents; in Stretch mode it transposes
+    // without changing the length, in Resample mode it detunes like playback speed. MUL
+    // multiplies the length; TIME (quarter-note beats, 0 = off) sets it. Any length change
+    // or Stretch-mode PITCH plays a prepared copy of the source (SampleCache); the file and
+    // the shared PCM stay unchanged.
+    double stretchPitch = 0, timeMul = 1, timeBeats = 0;
     bool reverse = false, envelope = false;
     bool normalize = false; // Whole loaded stereo source peak; file and PCM stay immutable.
     bool loop = false, pingPong = false;
@@ -38,6 +45,8 @@ struct SamplerSettings
     double slideTime = .06; // Seconds,0..10. No exact FL glide curve/default claim.
     double gateBeats = 0;   // Quarter-note beats,0..64;0 disables the automatic gate.
     bool operator==(const SamplerSettings &) const = default;
+    // A prepared copy carries the length (and Stretch-mode PITCH); see SampleCache.
+    bool lengthShaped() const noexcept { return timeMul != 1 || timeBeats > 0 || (stretch && stretchPitch != 0); }
     bool valid() const noexcept
     {
         for (size_t target = 0; target < modulation.size(); ++target)
@@ -50,6 +59,8 @@ struct SamplerSettings
                std::isfinite(filterCutoff) && filterCutoff >= 0 && filterCutoff <= 1 &&
                std::isfinite(filterResonance) && filterResonance >= 0 && filterResonance <= 1 && cut >= 0 &&
                cut <= 99 && cutBy >= 0 && cutBy <= 99 && maxPoly >= 0 && maxPoly <= 99 &&
+               std::isfinite(stretchPitch) && std::abs(stretchPitch) <= 1200 && std::isfinite(timeMul) &&
+               timeMul >= .25 && timeMul <= 4 && std::isfinite(timeBeats) && timeBeats >= 0 && timeBeats <= 256 &&
                std::isfinite(sourceTempo) &&
                (sourceTempo == 0 || (sourceTempo >= 20 && sourceTempo <= 400)) &&
                (!fitTempo || sourceTempo > 0) && root >= -1 && root <= 127 && std::isfinite(cents) &&
@@ -67,8 +78,8 @@ struct PreparedSamplerSettings
     double tuning = 1;
     double tempo = 120;
     explicit PreparedSamplerSettings(const SamplerSettings &s = {}, double projectTempo = 120)
-        : values(s), tuning(std::pow(2., s.cents / 1200.) *
-                            (s.fitTempo && !s.stretch ? projectTempo / s.sourceTempo : 1.)),
+        : values(s), tuning(std::pow(2., (s.cents + (s.stretch ? 0. : s.stretchPitch)) / 1200.) *
+                            (s.fitTempo && !s.stretch && !s.lengthShaped() ? projectTempo / s.sourceTempo : 1.)),
           tempo(projectTempo)
     {
     }
