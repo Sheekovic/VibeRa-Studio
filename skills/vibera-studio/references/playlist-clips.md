@@ -43,6 +43,8 @@
   colour, mute, lock, group, height, instrument Channel, audio).
 - **Snap:** the Playlist offers None, 1/16, 1/8, 1/6 T, 1/4 (step), 1/3 T, 1/2, Beat, Bar and
   2 bars and Line (pointer edits follow the visible grid lines, finer when zoomed in;
-  `{"editor":2,"action":"snap","line":true}`, read `state.snapLine`); Alt bypasses snap while dragging. Set it with `vibera_editor`
+  `{"editor":2,"action":"snap","line":true}`, read `state.snapLine`) and Markers (a moved clip's start, a resized end or a placed clip lands
+  on the nearest marker or the Song start, bars without markers; `"markers":true`, read
+  `state.snapMarkers`); Alt bypasses snap while dragging. Set it with `vibera_editor`
   `{"editor":2,"action":"snap","snap":<beats>}` (shared with the Piano roll) and read
   `state.snap`.

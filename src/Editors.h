@@ -991,8 +991,29 @@ class Studio::Editor final : public juce::Component,
     }
     double snap(double v, const juce::ModifierKeys &m) const
     {
-        const double step = s.snapLine && (type == 1 || type == 2) ? gridDivision() : s.snap;
+        const double step = s.snapLine && (type == 1 || type == 2) ? gridDivision()
+                            : markerSnap()                          ? barBeats() // Distances: whole bars.
+                                                                    : s.snap;
         return m.isAltDown() || step == 0 ? v : std::round(v / step) * step;
+    }
+    bool markerSnap() const
+    {
+        return type == 2 && s.snapMarkers;
+    }
+    // A Song position: in Markers snap it lands on the nearest marker (or the Song start; with
+    // no markers, the nearest bar); otherwise the ordinary grid.
+    double snapPosition(double beat, const juce::ModifierKeys &m) const
+    {
+        if (!markerSnap() || m.isAltDown())
+            return snap(beat, m);
+        const auto &markers = s.controller.project.markers;
+        if (markers.empty())
+            return std::max(0., std::round(beat / barBeats()) * barBeats());
+        double best = 0;
+        for (const auto &marker : markers)
+            if (std::abs(marker.beat - beat) < std::abs(best - beat))
+                best = marker.beat;
+        return best;
     }
     int pitch(float y) const
     {
@@ -1264,7 +1285,7 @@ class Studio::Editor final : public juce::Component,
             position.y < gridTop() || position.y >= getHeight() - scrollBarThickness ||
             !pickerPayload(description, s.controller.projectIdentity, args))
             return false;
-        args.beat = snap(beatAt(float(position.x)), juce::ModifierKeys::getCurrentModifiersRealtime());
+        args.beat = snapPosition(beatAt(float(position.x)), juce::ModifierKeys::getCurrentModifiersRealtime());
         args.lane = laneAtY(position.y);
         return placeSources(std::move(args));
     }
@@ -1446,7 +1467,7 @@ class Studio::Editor final : public juce::Component,
             // Familiar snap set: steps (1/4 beat), triplets and finer divisions; ids follow playlistSnapValues.
             playlistSnap.addItemList({"Snap: None", "Snap: 1/4", "Snap: 1/2", "Snap: Beat", "Snap: Bar",
                                       "Snap: 1/16", "Snap: 1/8", "Snap: 1/6 T",
-                                      "Snap: 1/3 T", "Snap: 2 bars", "Snap: Line"},
+                                      "Snap: 1/3 T", "Snap: 2 bars", "Snap: Line", "Snap: Markers"},
                                      1);
             playlistSnap.setSelectedId(2, juce::dontSendNotification);
             playlistSnap.onChange = [this]
@@ -1454,7 +1475,8 @@ class Studio::Editor final : public juce::Component,
                 const auto values = playlistSnapValues();
                 const int id = playlistSnap.getSelectedId();
                 s.snapLine = id == int(values.size()) + 1;
-                if (!s.snapLine)
+                s.snapMarkers = id == int(values.size()) + 2;
+                if (!s.snapLine && !s.snapMarkers)
                     s.snap = values[size_t(juce::jlimit(0, int(values.size()) - 1, id - 1))];
                 s.refresh();
             };
@@ -2771,9 +2793,9 @@ class Studio::Editor final : public juce::Component,
         if (type == 2)
         {
             const auto values = playlistSnapValues();
-            int chosen = s.snapLine ? int(values.size()) + 1 : 5;
+            int chosen = s.snapLine ? int(values.size()) + 1 : s.snapMarkers ? int(values.size()) + 2 : 5;
             for (size_t i = 0; i < values.size(); ++i)
-                if (!s.snapLine && std::abs(values[i] - s.snap) < 1.e-9)
+                if (!s.snapLine && !s.snapMarkers && std::abs(values[i] - s.snap) < 1.e-9)
                 {
                     chosen = int(i) + 1;
                     break;
@@ -5032,7 +5054,7 @@ class Studio::Editor final : public juce::Component,
                                     if (safe && n)
                                     {
                                         safe->s.snap = n == 1 ? 0 : n == 2 ? .25 : n == 3 ? .5 : 1.;
-                                        safe->s.snapLine = false;
+                                        safe->s.snapLine = safe->s.snapMarkers = false;
                                         safe->s.refresh();
                                     }
                                 });
@@ -5608,7 +5630,7 @@ class Studio::Editor final : public juce::Component,
             CommandArgs a;
             a.pattern = s.selectedPattern;
             a.channel = s.selectedChannel;
-            a.beat = snap(beatAt(e.x), e.mods);
+            a.beat = snapPosition(beatAt(e.x), e.mods);
             if (type == 1)
             {
                 a.pitch = pitch(e.y);
@@ -5973,7 +5995,7 @@ class Studio::Editor final : public juce::Component,
             CommandArgs a;
             a.pattern = s.selectedPattern;
             a.channel = s.selectedChannel;
-            a.beat = snap(beatAt(e.x), e.mods);
+            a.beat = snapPosition(beatAt(e.x), e.mods);
             if (type == 1)
             {
                 a.pitch = pitch(e.y);
@@ -6116,6 +6138,15 @@ class Studio::Editor final : public juce::Component,
         const auto previousBeat = lastBeat, previousLength = lastLength;
         const auto previousLane = lastLane;
         double d = snap((e.x - origin.x) / spacing(), e.mods);
+        if (anchor && markerSnap() && !e.mods.isAltDown())
+        {
+            // Markers snap: the moved clip's start (or resized end) lands on a marker.
+            const double raw = (e.x - origin.x) / spacing();
+            const double from = resizing ? anchor->beat + anchor->length - lastLength : anchor->beat - lastBeat;
+            d = snapPosition(from + raw, e.mods) - from;
+            if (resizing && from + d <= anchor->beat)
+                d = lastLength; // Never shorter than nothing: keep the current end.
+        }
         if (resizing)
         {
             a.length = d - lastLength;
@@ -6807,7 +6838,7 @@ class Studio::Editor final : public juce::Component,
         if (type == 2)
         {
             // Anywhere over the Playlist places the clip; above the grid it lands on the top lane.
-            s.importAudioClip(juce::File(files[0]), snap(beatAt(std::max(x, leftEdge())), modifiers),
+            s.importAudioClip(juce::File(files[0]), snapPosition(beatAt(std::max(x, leftEdge())), modifiers),
                               laneAtY(std::max(y, gridTop())));
             return;
         }

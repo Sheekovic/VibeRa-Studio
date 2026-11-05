@@ -529,7 +529,7 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     snapChoice.setSelectedId(2, juce::dontSendNotification);
     snapChoice.onChange = [this]
     {
-        snapLine = false;
+        snapLine = snapMarkers = false;
         snap = snapChoice.getSelectedId() == 1   ? 0
                : snapChoice.getSelectedId() == 2 ? .25
                : snapChoice.getSelectedId() == 3 ? .5
