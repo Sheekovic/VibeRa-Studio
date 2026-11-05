@@ -4010,9 +4010,31 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     n.step = false;
                 }
         if (id == "notes.velocity")
+        {
+            // args.text picks the lane property (default velocity); args.value is the 0..1 lane
+            // level (Pan and Fine pitch centred at .5).
+            const int target = a.text.isEmpty() ? 0 : noteLaneTargets().indexOf(a.text);
+            if (target < 0 || !std::isfinite(a.value) || a.value < 0 || a.value > 1)
+                return juce::Result::fail("noteLane.invalidValue: Target velocity/release/pan/modX/modY/fine, "
+                                          "level 0..1");
+            if (target >= 2)
+                for (const auto &n : pat->notes)
+                    if (chosen(n.id))
+                        if (const auto *owner = next.channel(n.channel); owner && owner->instrument)
+                            return juce::Result::fail("noteLane.unsupportedTarget: Pan, Mod X/Y and Fine pitch "
+                                                      "are sampler note properties (not plugin instruments)");
             for (auto &n : pat->notes)
                 if (chosen(n.id))
-                    n.velocity = float(a.value);
+                    switch (target)
+                    {
+                    case 1: n.releaseVelocity = a.value; break;
+                    case 2: n.pan = a.value * 2 - 1; break;
+                    case 3: n.modX = a.value; break;
+                    case 4: n.modY = a.value; break;
+                    case 5: n.fineCents = (a.value * 2 - 1) * 100; break;
+                    default: n.velocity = float(a.value);
+                    }
+        }
         if (id == "notes.stretch")
         {
             NoteStretchPlan plan;

@@ -3333,11 +3333,17 @@ class Studio::Editor final : public juce::Component,
                 g.setColour(grid);
                 g.drawHorizontalLine(noteBottom(), 0, float(getWidth()));
                 const bool compactVelocity = velocityHeight() < 54;
-                label(g, compactVelocity ? "Vel" : "Velocity",
-                      {5, noteBottom() + 2, compactVelocity ? 24 : 55, 14}, muted, 10);
+                // Event editor target: click the name to choose the property.
+                const juce::StringArray full{"Velocity", "Release", "Pan", "Mod X", "Mod Y", "Fine"};
+                const juce::StringArray compact{"Vel", "Rel", "Pan", "ModX", "ModY", "Fine"};
+                const juce::StringArray tops{"127", "127", "R", "100", "100", "+100"};
+                const juce::StringArray bottoms{"0", "0", "L", "0", "0", "-100"};
+                const int target = juce::jlimit(0, 5, s.pianoLaneTarget);
+                label(g, (compactVelocity ? compact : full)[target] + " v",
+                      {5, noteBottom() + 2, compactVelocity ? 34 : 55, 14}, muted, 10);
                 if (velocityHeight() >= 42)
-                    label(g, "127", {30, velocityBase() - 27, 28, 12}, muted, 10);
-                label(g, "0", {40, std::max(noteBottom() + 16, velocityBase() - 9), 18, 12}, muted, 10);
+                    label(g, tops[target], {30, velocityBase() - 27, 28, 12}, muted, 10);
+                label(g, bottoms[target], {34, std::max(noteBottom() + 16, velocityBase() - 9), 24, 12}, muted, 10);
             }
             else
             {
@@ -3818,11 +3824,20 @@ class Studio::Editor final : public juce::Component,
                                             .withMultipliedAlpha(appearance.repeated() ? .52f
                                                                  : appearance.dormant  ? .28f
                                                                                        : 1.f));
-                            g.fillRect(x, velocityBase() - n.velocity * velocityScale(), 3.f,
-                                       n.velocity * velocityScale());
+                            const auto level = float(noteLaneValue(n, s.pianoLaneTarget));
+                            if (s.pianoLaneTarget == 2 || s.pianoLaneTarget == 5)
+                            {
+                                // Centred property: a bar from the middle line up or down.
+                                const float mid = velocityBase() - .5f * velocityScale();
+                                const float y = velocityBase() - level * velocityScale();
+                                g.fillRect(x, std::min(mid, y), 3.f, std::max(1.f, std::abs(mid - y)));
+                            }
+                            else
+                                g.fillRect(x, velocityBase() - level * velocityScale(), 3.f,
+                                           level * velocityScale());
                         }
             // Recorded controllers of the Channel as dots in the velocity lane (bend centred).
-            if (type == 1 && velocityHeight() > 0)
+            if (type == 1 && velocityHeight() > 0 && s.pianoLaneTarget == 0)
                 if (const auto *part = pattern())
                     for (const auto &control : part->controllers)
                         if (control.channel == s.selectedChannel)
@@ -5910,16 +5925,34 @@ class Studio::Editor final : public juce::Component,
                 }
                 else if (const auto note = velocityLaneNote(e.position.x))
                 {
-                    // Alt+click a note's velocity bar: back to the default level.
+                    // Alt+click a note's lane bar: back to the target's default level.
                     CommandArgs a;
                     a.pattern = p->id;
                     a.ids = {note->id};
-                    a.value = .78;
+                    a.text = noteLaneTargets()[s.pianoLaneTarget];
+                    a.value = noteLaneDefault(s.pianoLaneTarget);
                     s.command("notes.velocity", a);
                 }
                 else
                     s.status = "Alt+click a controller point (CC, bend, pressure, program) to edit it";
             }
+            return;
+        }
+        if (type == 1 && velocityHeight() > 0 && e.y >= noteBottom() && e.x < leftEdge())
+        {
+            juce::PopupMenu targets;
+            const juce::StringArray titles{"Velocity", "Release velocity", "Pan", "Mod X", "Mod Y", "Fine pitch"};
+            for (int i = 0; i < titles.size(); ++i)
+                targets.addItem(i + 1, titles[i], true, s.pianoLaneTarget == i);
+            auto safe = juce::Component::SafePointer<Editor>(this);
+            targets.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(this).withMousePosition(),
+                                  [safe](int chosen)
+                                  {
+                                      if (!safe || chosen <= 0)
+                                          return;
+                                      safe->s.pianoLaneTarget = chosen - 1;
+                                      safe->repaint();
+                                  });
             return;
         }
         if (type == 1 && velocityHeight() > 0 && e.y >= noteBottom())
@@ -5936,7 +5969,8 @@ class Studio::Editor final : public juce::Component,
                         nearest = n;
                         d = std::abs(n.beat - beatAt(e.x));
                     }
-                velocityPaintLevel = juce::jlimit(.01, 1., (velocityBase() - e.y) / double(velocityScale()));
+                velocityPaintLevel = juce::jlimit(s.pianoLaneTarget == 0 ? .01 : 0., 1.,
+                                                  (velocityBase() - e.y) / double(velocityScale()));
                 if (e.mods.isLeftButtonDown())
                 {
                     s.controller.beginGesture();
@@ -5948,6 +5982,7 @@ class Studio::Editor final : public juce::Component,
                     a.pattern = p->id;
                     a.ids = selected(list, nearest->id) ? list : std::vector<Id>{nearest->id};
                     a.value = velocityPaintLevel;
+                    a.text = noteLaneTargets()[s.pianoLaneTarget];
                     s.command("notes.velocity", a);
                 }
             }
@@ -6181,8 +6216,10 @@ class Studio::Editor final : public juce::Component,
                     a.ids = {note->id};
                     a.value = e.mods.isShiftDown()
                                   ? velocityPaintLevel
-                                  : juce::jlimit(.01, 1., (velocityBase() - e.position.y) / double(velocityScale()));
-                    if (std::abs(note->velocity - a.value) > 1.e-4)
+                                  : juce::jlimit(s.pianoLaneTarget == 0 ? .01 : 0., 1.,
+                                                 (velocityBase() - e.position.y) / double(velocityScale()));
+                    a.text = noteLaneTargets()[s.pianoLaneTarget];
+                    if (std::abs(noteLaneValue(*note, s.pianoLaneTarget) - a.value) > 1.e-4)
                         s.command("notes.velocity", a);
                 }
             return;
@@ -7175,7 +7212,9 @@ class Studio::Editor final : public juce::Component,
                         CommandArgs a;
                         a.pattern = p->id;
                         a.ids = selected(s.selectedNotes, id) ? s.selectedNotes : std::vector<Id>{id};
-                        a.value = juce::jlimit(.01, 1., n.velocity + wheel.deltaY * .3);
+                        a.text = noteLaneTargets()[s.pianoLaneTarget];
+                        a.value = juce::jlimit(s.pianoLaneTarget == 0 ? .01 : 0., 1.,
+                                               noteLaneValue(n, s.pianoLaneTarget) + wheel.deltaY * .3);
                         s.command("notes.velocity", a);
                         return;
                     }

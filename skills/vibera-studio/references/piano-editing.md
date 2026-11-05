@@ -81,3 +81,9 @@
   them a new group; `notes.ungroup` (Alt+G) clears it. Clicking one grouped note selects the
   whole group; duplicated or pasted grouped notes form new groups. Saved per note as `group`;
   read back as `noteGroup` (0 = none) in `vibera_inspect` notes. Piano roll menu > Edit.
+- Event editor target: `vibera_editor` `{editor:1, action:"laneTarget", target}` (velocity,
+  release, pan, modX, modY, fine; UI: click the lane name under the keyboard) chooses what the
+  lane under the notes shows and paints; read back as `state.pianoLaneTarget`. `notes.velocity`
+  takes `text` = that target and `value` = the 0..1 lane level (pan/fine centred at .5:
+  pan -1..1, fine -100..100 cents). Pan, Mod X/Y and Fine pitch are refused for plugin
+  instrument notes (`noteLane.unsupportedTarget`). Controller dots show on the Velocity target only.

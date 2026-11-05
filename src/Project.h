@@ -32,6 +32,26 @@ struct Note
     int colourGroup = 0;                    // Per-note voice group0..15 (UI1..16), not a DAW Channel/group.
     Id group = 0; // Note group (Shift+G): clicking one note selects the whole group; 0 = none.
 };
+// Piano roll event editor target (FL "Target control"): the note property the lane under the
+// notes shows and paints. Lane values are normalised 0..1; Pan and Fine pitch are centred.
+inline const juce::StringArray &noteLaneTargets()
+{
+    static const juce::StringArray names{"velocity", "release", "pan", "modX", "modY", "fine"};
+    return names;
+}
+inline double noteLaneValue(const Note &n, int target)
+{
+    switch (target)
+    {
+    case 1: return n.releaseVelocity;
+    case 2: return (n.pan + 1) / 2;
+    case 3: return n.modX;
+    case 4: return n.modY;
+    case 5: return (n.fineCents + 100) / 200;
+    default: return n.velocity;
+    }
+}
+inline double noteLaneDefault(int target) { return target == 0 ? .78 : target == 1 ? 0. : .5; }
 struct Channel
 {
     Id id = 0;

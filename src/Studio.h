@@ -488,6 +488,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result newFromTemplate(const juce::String &name, bool discardChanges);
     juce::Result saveAsTemplate(const juce::String &name, std::function<void(juce::Result)> completion = {});
     void promptSaveTemplate();
+    int pianoLaneTarget = 0; // Index into noteLaneTargets(): what the Piano roll event lane edits.
     static juce::Result templateFileName(const juce::String &name, juce::String &legal);
     void saveProfile();
     juce::String macroConfigurationGeneration() const;
