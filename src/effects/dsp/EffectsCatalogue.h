@@ -79,6 +79,11 @@ inline constexpr ParameterSpec frequencyShifter[] = {{"shift", "Shift", -2000, 2
                                                     {"stereo", "Right offset", -200, 200, 0, "Hz"},
                                                     {"feedback", "Feedback", 0, .9f, 0, ""},
                                                     {"mix", "Mix", 0, 1, 1, ""}};
+inline constexpr ParameterSpec waveshaper[] = {{"shape", "Shape (soft hard fold tube rectify)", 0, 4, 0, ""},
+                                              {"drive", "Drive", 0, 36, 12, "dB"},
+                                              {"bias", "Bias", -1, 1, 0, ""},
+                                              {"output", "Output", -36, 12, -6, "dB"},
+                                              {"mix", "Mix", 0, 1, 1, ""}};
 inline constexpr ParameterSpec tremolo[] = {{"rate", "Rate", .05f, 20, 4, "Hz", .4f},
                                             {"depth", "Depth", 0, 1, .5f, ""},
                                             {"shape", "Shape: sine to square", 0, 1, 0, ""}};
@@ -216,7 +221,8 @@ inline constexpr std::array effects = {
     entry(EffectId::pump, "pump", "Pump", "Dynamics", pump),
     entry(EffectId::loFi, "lo-fi", "Lo-fi", "Distortion", loFi),
     entry(EffectId::formant, "formant", "Formant Filter", "EQ", formant),
-    entry(EffectId::frequencyShifter, "frequency-shifter", "Frequency Shifter", "Modulation", frequencyShifter)};
+    entry(EffectId::frequencyShifter, "frequency-shifter", "Frequency Shifter", "Modulation", frequencyShifter),
+    entry(EffectId::waveshaper, "waveshaper", "Waveshaper", "Distortion", waveshaper)};
 static_assert(effects.size() == static_cast<std::size_t>(EffectId::count));
 } // namespace catalogue
 inline std::span<const EffectSpec> catalogueEntries() noexcept

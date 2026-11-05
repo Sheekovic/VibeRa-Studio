@@ -157,6 +157,74 @@ class Formant
     std::array<std::array<std::array<float, 4>, 2>, 3> state{};
 };
 
+// Waveshaper: drive into a transfer curve that morphs between five shapes (soft tanh, hard
+// clip, sine fold, asymmetric tube, full-wave rectify), with a bias for asymmetry. A 10 Hz
+// DC blocker removes the offset the bias and rectification add. Each sample averages the
+// curve at the sample and at the midpoint to the previous one: a light alias reduction,
+// not true oversampling.
+class Waveshaper
+{
+  public:
+    static float curve(float shape, float x) noexcept
+    {
+        const auto one = [](int k, float v) noexcept
+        {
+            switch (k)
+            {
+            case 0: return std::tanh(v);
+            case 1: return std::clamp(v, -1.f, 1.f);
+            case 2: return std::sin(v * 1.5707963f);
+            case 3: return v >= 0 ? std::tanh(v) : std::tanh(1.8f * v) / 1.8f + .2f * std::tanh(v);
+            default: return std::min(1.f, std::abs(v)) * 2.f - 1.f;
+            }
+        };
+        const float s = std::clamp(shape, 0.f, 4.f);
+        const int a = std::min(3, int(s));
+        const float t = s - float(a);
+        return one(a, x) + (one(a + 1, x) - one(a, x)) * t;
+    }
+    void prepare(double sampleRate)
+    {
+        dcCoefficient = float(std::exp(-2 * std::numbers::pi * 10. / sampleRate));
+        reset();
+    }
+    void reset() noexcept
+    {
+        previous[0] = previous[1] = 0;
+        dcIn[0] = dcIn[1] = dcOut[0] = dcOut[1] = 0;
+    }
+    void setParameters(const Values &v) noexcept
+    {
+        shape = std::clamp(v[0], 0.f, 4.f);
+        drive = std::pow(10.f, std::clamp(v[1], 0.f, 36.f) / 20.f);
+        bias = std::clamp(v[2], -1.f, 1.f);
+        output = std::pow(10.f, std::clamp(v[3], -36.f, 12.f) / 20.f);
+        mix = std::clamp(v[4], 0.f, 1.f);
+        rest = curve(shape, bias); // Output at silence: removed so silence stays silent.
+    }
+    void process(float &left, float &right) noexcept
+    {
+        float *io[2]{&left, &right};
+        for (int c = 0; c < 2; ++c)
+        {
+            const float dry = *io[c];
+            // 2x: the midpoint with the previous sample, then the sample itself.
+            const float mid = .5f * (previous[c] + dry);
+            previous[c] = dry;
+            const float shaped = .5f * (curve(shape, mid * drive + bias) + curve(shape, dry * drive + bias)) - rest;
+            // DC blocker: y = x - x[n-1] + R y[n-1].
+            const float y = shaped - dcIn[c] + dcCoefficient * dcOut[c];
+            dcIn[c] = shaped;
+            dcOut[c] = std::isfinite(y) ? y : 0.f;
+            *io[c] = dry + (dcOut[c] * output - dry) * mix;
+        }
+    }
+
+  private:
+    float shape = 0, drive = 4, bias = 0, output = .5f, mix = 1, dcCoefficient = .999f, rest = 0;
+    float previous[2]{}, dcIn[2]{}, dcOut[2]{};
+};
+
 // Frequency shifter: every frequency moves by the same number of Hz (single sideband), so
 // harmonic sounds turn metallic or detuned. An analytic signal from two all-pass chains
 // (90-degree pair over about 20 Hz..20 kHz at 44.1-48 kHz) is mixed with a quadrature

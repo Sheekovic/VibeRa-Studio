@@ -92,6 +92,10 @@ Mixing and mastering processors:
 - Frequency Shifter (`frequency-shifter`): single-sideband shift of every frequency by `shift`
   Hz (-2000..2000; harmonics become inharmonic), `stereo` offsets the right channel (-200..200
   Hz), feedback 0..0.9 re-shifts the output, mix. The window shows 220 Hz harmonics moving.
+- Waveshaper (`waveshaper`): drive (0..36 dB) into a curve that morphs with `shape` 0..4
+  (soft, hard, fold, tube, rectify), `bias` -1..1 for asymmetry (silence stays silent, a 10 Hz
+  DC blocker removes offsets), output and mix. The window draws the transfer curve with the
+  live input dot.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

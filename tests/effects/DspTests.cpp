@@ -823,6 +823,58 @@ void studioOracles()
                 "Frequency shifter feedback stays bounded");
     }
 
+    // Waveshaper: more drive adds harmonics, hard clip bounds the level, rectify doubles the
+    // frequency, the DC blocker removes the bias offset and mix 0 is dry.
+    {
+        const auto harmonics = [&](float shape, float driveDb)
+        {
+            auto v = defaultValues(EffectId::waveshaper);
+            v[0] = shape;
+            v[1] = driveDb;
+            v[3] = 0;
+            const auto out = renderEffect(EffectId::waveshaper, v, sine(200, .5), 48000);
+            double third = 0, fundamental = 0;
+            for (int i = 8000; i < 40000; ++i)
+            {
+                const double t = i / 48000.;
+                fundamental += out.left[size_t(i)] * std::sin(2 * std::numbers::pi * 200 * t);
+                third += out.left[size_t(i)] * std::sin(2 * std::numbers::pi * 600 * t);
+            }
+            return std::abs(third) / std::max(1e-9, std::abs(fundamental));
+        };
+        require(harmonics(0, 24) > 4 * harmonics(0, 0) && harmonics(0, 24) > .05, "Waveshaper drive adds harmonics");
+        auto hard = defaultValues(EffectId::waveshaper);
+        hard[0] = 1;
+        hard[1] = 36;
+        hard[3] = 0;
+        const auto clipped = renderEffect(EffectId::waveshaper, hard, sine(200, 1), 24000);
+        double peak = 0;
+        for (int i = 4000; i < 24000; ++i)
+            peak = std::max(peak, double(std::abs(clipped.left[size_t(i)])));
+        require(peak < 1.6 && peak > .8, "Hard clip bounds the level (" + std::to_string(peak) + ")");
+        auto rect = defaultValues(EffectId::waveshaper);
+        rect[0] = 4;
+        rect[1] = 0;
+        const auto doubled = renderEffect(EffectId::waveshaper, rect, sine(200, .5), 48000);
+        const double hz = measuredHz(std::vector<float>(doubled.left.begin() + 8000, doubled.left.begin() + 40000), 0, 48000);
+        require(std::abs(hz - 400) < 4, "Rectify doubles the frequency (" + std::to_string(hz) + ")");
+        auto biased = defaultValues(EffectId::waveshaper);
+        biased[2] = .8f;
+        const auto offset = renderEffect(EffectId::waveshaper, biased, sine(300, .3), 96000);
+        double mean = 0;
+        for (int i = 48000; i < 96000; ++i)
+            mean += offset.left[size_t(i)];
+        mean /= 48000;
+        require(std::abs(mean) < .01, "The DC blocker removes the bias offset (" + std::to_string(mean) + ")");
+        auto dryValues = defaultValues(EffectId::waveshaper);
+        dryValues[4] = 0;
+        const auto dry = renderEffect(EffectId::waveshaper, dryValues, sine(500), 4000);
+        double worst = 0;
+        for (int i = 0; i < 4000; ++i)
+            worst = std::max(worst, double(std::abs(dry.left[size_t(i)] - sine(500)(i))));
+        require(worst < 1e-6, "Waveshaper mix 0 is the dry input");
+    }
+
     // Drum Synth DSP: every drum sounds and decays, Tune raises the kick's body, Decay
     // lengthens it, the master level scales it, and silence follows the decay.
     {

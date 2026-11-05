@@ -688,6 +688,43 @@ inline void paint(juce::Graphics &g, juce::Rectangle<float> plot, EffectId id, c
                 juce::String(int(std::lround(v[2] * 100))) + "%  /  CRACKLE " + juce::String(int(std::lround(v[3] * 100))) + "%");
         return;
     }
+    case EffectId::waveshaper:
+    {
+        // The transfer curve (input -1..1 across, output up) with the live input peak as a dot,
+        // and the live waveform on the right.
+        const auto side = std::min(plot.getWidth() * .42f, plot.getHeight());
+        auto square = plot.withWidth(side).withHeight(side).withCentre({plot.getX() + side * .5f + 4.f, plot.getCentreY()});
+        g.setColour(p.plate.brighter(.06f));
+        g.fillRoundedRectangle(square, 6.f);
+        g.setColour(p.grid.withAlpha(.6f));
+        g.drawHorizontalLine(int(square.getCentreY()), square.getX(), square.getRight());
+        g.drawVerticalLine(int(square.getCentreX()), square.getY(), square.getBottom());
+        const float driveGain = std::pow(10.f, v[1] / 20.f);
+        const auto xOf = [&](float x) { return square.getCentreX() + x * square.getWidth() * .46f; };
+        const auto yOf = [&](float y) { return square.getCentreY() - juce::jlimit(-1.1f, 1.1f, y) * square.getHeight() * .42f; };
+        juce::Path line;
+        for (int i = 0; i <= 120; ++i)
+        {
+            const float x = -1.f + 2.f * float(i) / 120.f;
+            const auto pt = juce::Point<float>(xOf(x), yOf(Waveshaper::curve(v[0], x * driveGain + v[2])));
+            if (i == 0)
+                line.startNewSubPath(pt);
+            else
+                line.lineTo(pt);
+        }
+        g.setColour(p.accent);
+        g.strokePath(line, juce::PathStrokeType(2.4f, juce::PathStrokeType::curved));
+        const float in = juce::jlimit(0.f, 1.f, live.inputPeak);
+        const auto dot = juce::Point<float>(xOf(in), yOf(Waveshaper::curve(v[0], in * driveGain + v[2])));
+        g.setColour(p.warm);
+        g.fillEllipse(dot.x - 5.f, dot.y - 5.f, 10.f, 10.f);
+        static const char *names[]{"SOFT", "HARD", "FOLD", "TUBE", "RECTIFY"};
+        auto right = plot.withTrimmedLeft(side + 18.f);
+        caption(g, right, p, "SHAPE", names[juce::jlimit(0, 4, int(std::lround(v[0])))] + juce::String("  /  DRIVE ") +
+                                          juce::String(v[1], 1) + " dB");
+        scope(g, right.withTrimmedTop(22.f), live, p, p.accent);
+        return;
+    }
     case EffectId::frequencyShifter:
     {
         // Harmonics of a 220 Hz tone (muted) and where the shift moves them (accent): equal
