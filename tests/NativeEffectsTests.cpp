@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "effects/NativeEffects.h"
+#include <juce_audio_formats/juce_audio_formats.h>
 #include "drums/DrumSynthPlugin.h"
 #include "NativeInstruments.h"
 #include <juce_audio_processors/juce_audio_processors.h>
@@ -666,6 +667,49 @@ void drumSynth(const juce::File &output)
     editor.reset();
     plugin.releaseResources();
 }
+// Convolution Reverb: a WAV impulse loads, its path survives a state round trip into a new
+// instance, a missing file keeps its path, and other effects refuse impulses.
+void impulseFiles(const juce::File &output)
+{
+    const auto wav = output.getChildFile("impulse-test.wav");
+    {
+        wav.deleteFile();
+        juce::WavAudioFormat format;
+        std::unique_ptr<juce::AudioFormatWriter> writer(
+            format.createWriterFor(wav.createOutputStream().release(), 44100, 1, 24, {}, 0));
+        require(writer != nullptr, "Cannot write the test impulse");
+        juce::AudioBuffer<float> pcm(1, 4410);
+        pcm.clear();
+        pcm.setSample(0, 0, .9f);
+        pcm.setSample(0, 2000, -.4f);
+        require(writer->writeFromAudioSampleBuffer(pcm, 0, 4410), "Cannot write the test impulse samples");
+    }
+    NativeEffectInstance source(EffectId::convolution);
+    source.prepareToPlay(48000, 256);
+    require(source.loadImpulse(wav).wasOk() && source.impulsePath() == wav.getFullPathName(), "Impulse file loads");
+    juce::MemoryBlock state;
+    source.getStateInformation(state);
+    NativeEffectInstance restored(EffectId::convolution);
+    restored.prepareToPlay(48000, 256);
+    require(restored.restoreState(state.getData(), int(state.getSize())) && restored.impulsePath() == wav.getFullPathName(),
+            "Impulse path survives a state round trip");
+    NativeEffectInstance missing(EffectId::convolution);
+    juce::MemoryBlock moved;
+    {
+        auto xml = juce::AudioProcessor::getXmlFromBinary(state.getData(), int(state.getSize()));
+        xml->setAttribute("impulse", output.getChildFile("no-such-impulse.wav").getFullPathName());
+        juce::AudioProcessor::copyXmlToBinary(*xml, moved);
+    }
+    require(missing.restoreState(moved.getData(), int(moved.getSize())) &&
+                missing.impulsePath().endsWith("no-such-impulse.wav"),
+            "A missing impulse keeps its path");
+    NativeEffectInstance other(EffectId::delay);
+    require(other.loadImpulse(wav).failed(), "Other effects refuse impulse files");
+    source.releaseResources();
+    restored.releaseResources();
+    wav.deleteFile();
+}
+
 int main(int argc, char **argv)
 {
     const juce::ScopedJuceInitialiser_GUI initialise;
@@ -680,6 +724,7 @@ int main(int argc, char **argv)
         eventsAndRealtime();
         flushDoesNotAdvanceAudio();
         editors(output);
+        impulseFiles(output);
         drumSynth(output);
         auto *receipt = new juce::DynamicObject();
         receipt->setProperty("passed", true);

@@ -84,7 +84,7 @@ inline constexpr ParameterSpec waveshaper[] = {{"shape", "Shape (soft hard fold 
                                               {"bias", "Bias", -1, 1, 0, ""},
                                               {"output", "Output", -36, 12, -6, "dB"},
                                               {"mix", "Mix", 0, 1, 1, ""}};
-inline constexpr ParameterSpec convolution[] = {{"space", "Space: 0 Room, 1 Studio, 2 Hall, 3 Plate", 0, 3, 1, "", 1, 1},
+inline constexpr ParameterSpec convolution[] = {{"space", "Space: 0 Room, 1 Studio, 2 Hall, 3 Plate, 4 File", 0, 4, 1, "", 1, 1},
                                                {"predelay", "Pre-delay", 0, 200, 10, "ms"},
                                                {"lowcut", "Low cut", 20, 1000, 120, "Hz", .4f},
                                                {"highcut", "High cut", 1000, 20000, 12000, "Hz", .4f},

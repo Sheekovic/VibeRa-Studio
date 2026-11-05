@@ -692,10 +692,12 @@ inline void paint(juce::Graphics &g, juce::Rectangle<float> plot, EffectId id, c
     {
         // The chosen space's impulse envelope (pre-delay, early reflections, decay to -60 dB)
         // over a time axis, then the live waveform.
-        const int space = juce::jlimit(0, 3, int(std::lround(v[0])));
+        const int chosen = juce::jlimit(0, 4, int(std::lround(v[0])));
+        const int space = chosen == 4 ? 1 : chosen; // File: drawn with a generic envelope.
         auto top = plot.withHeight(plot.getHeight() * .62f);
-        caption(g, top, p, juce::String(ConvolutionReverb::names[space]).toUpperCase() + "  /  RT60 " +
-                               juce::String(ConvolutionReverb::rt60[space], 1) + " s",
+        caption(g, top, p, chosen == 4 ? juce::String("FILE  /  LOADED IMPULSE")
+                                       : juce::String(ConvolutionReverb::names[space]).toUpperCase() + "  /  RT60 " +
+                                             juce::String(ConvolutionReverb::rt60[space], 1) + " s",
                 "PRE " + juce::String(int(std::lround(v[1]))) + " ms  /  MIX " + juce::String(int(std::lround(v[5] * 100))) + "%");
         top = top.withTrimmedTop(18.f);
         g.setColour(p.plate.brighter(.06f));

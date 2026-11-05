@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "NativeEffects.h"
 #include "NativeEffectsEditor.h"
+#include <juce_audio_formats/juce_audio_formats.h>
 
 #include <algorithm>
 #include <cmath>
@@ -210,6 +211,8 @@ void NativeEffectInstance::prepareToPlay(double rate, int)
 {
     prepared_ = false;
     engine_.prepare(rate, effect_);
+    preparedRate_ = rate;
+    publishImpulse();
     setLatencySamples(engine_.latencySamples(effect_)); // The host compensates Tune's delay.
     engine_.setParameters(effect_, nativeValues());
     eventCount_ = 0;
@@ -378,11 +381,59 @@ double NativeEffectInstance::getTailLengthSeconds() const
         return .5;
     return 0;
 }
+juce::Result NativeEffectInstance::loadImpulse(const juce::File &file)
+{
+    if (effect_ != EffectId::convolution)
+        return juce::Result::fail("Only the Convolution Reverb loads impulse files");
+    juce::AudioFormatManager formats;
+    formats.registerBasicFormats();
+    std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(file));
+    if (!reader || reader->sampleRate < 8000 || reader->lengthInSamples < 16)
+        return juce::Result::fail("Cannot read an impulse from " + file.getFileName());
+    const auto frames = int(std::min<juce::int64>(reader->lengthInSamples,
+                                                  juce::int64(reader->sampleRate * ConvolutionReverb::maximumSeconds)));
+    juce::AudioBuffer<float> pcm(2, frames);
+    reader->read(&pcm, 0, frames, 0, true, reader->numChannels > 1);
+    if (reader->numChannels < 2)
+        pcm.copyFrom(1, 0, pcm, 0, 0, frames);
+    if (pcm.getMagnitude(0, frames) <= 0)
+        return juce::Result::fail(file.getFileName() + " is silent");
+    for (int c = 0; c < 2; ++c)
+        impulseRaw_[size_t(c)].assign(pcm.getReadPointer(c), pcm.getReadPointer(c) + frames);
+    impulseRate_ = reader->sampleRate;
+    impulsePath_ = file.getFullPathName();
+    publishImpulse();
+    return juce::Result::ok();
+}
+void NativeEffectInstance::publishImpulse()
+{
+    if (effect_ != EffectId::convolution || impulseRaw_[0].empty() || preparedRate_ <= 0)
+        return;
+    // Linear resampling to the prepared rate (message thread / prepare only).
+    std::array<std::vector<float>, 2> ir;
+    const double ratio = impulseRate_ / preparedRate_;
+    const auto frames = size_t(double(impulseRaw_[0].size()) / ratio);
+    for (int c = 0; c < 2; ++c)
+    {
+        const auto &source = impulseRaw_[size_t(c)];
+        auto &target = ir[size_t(c)];
+        target.resize(frames);
+        for (size_t i = 0; i < frames; ++i)
+        {
+            const double at = double(i) * ratio;
+            const auto i0 = std::min(source.size() - 1, size_t(at)), i1 = std::min(source.size() - 1, i0 + 1);
+            target[i] = float(source[i0] + (source[i1] - source[i0]) * (at - double(i0)));
+        }
+    }
+    engine_.setUserImpulse(std::move(ir));
+}
 void NativeEffectInstance::getStateInformation(juce::MemoryBlock &destination)
 {
     juce::XmlElement xml("VIBERA_NATIVE_EFFECT");
     xml.setAttribute("schemaVersion", 1);
     xml.setAttribute("effect", spec_.slug);
+    if (effect_ == EffectId::convolution && impulsePath_.isNotEmpty())
+        xml.setAttribute("impulse", impulsePath_);
     for (std::size_t i = 0; i < spec_.parameterCount; ++i)
     {
         auto *node = xml.createNewChildElement("PARAM");
@@ -401,7 +452,9 @@ bool NativeEffectInstance::restoreState(const void *data, int bytes)
     if (!data || bytes < 8 || bytes > 1024 * 1024)
         return refuse();
     const auto xml = getXmlFromBinary(data, bytes);
-    if (!xml || !xml->hasTagName("VIBERA_NATIVE_EFFECT") || xml->getNumAttributes() != 2 ||
+    const bool impulse = effect_ == EffectId::convolution && xml && xml->hasAttribute("impulse") &&
+                         juce::File::isAbsolutePath(xml->getStringAttribute("impulse"));
+    if (!xml || !xml->hasTagName("VIBERA_NATIVE_EFFECT") || xml->getNumAttributes() != (impulse ? 3 : 2) ||
         xml->getStringAttribute("schemaVersion") != "1" || xml->getStringAttribute("effect") != spec_.slug)
         return refuse();
     Values candidate{};
@@ -455,6 +508,13 @@ bool NativeEffectInstance::restoreState(const void *data, int bytes)
     // is a host control operation; sample-offset events remain DSP-thread owned.
     for (std::size_t i = 0; i < spec_.parameterCount; ++i)
         parameters_[i]->setValue(candidate[i]);
+    // A missing impulse file keeps its path (saved again) and plays the Studio space.
+    if (impulse)
+    {
+        const juce::File file(xml->getStringAttribute("impulse"));
+        if (loadImpulse(file).failed())
+            impulsePath_ = file.getFullPathName();
+    }
     restoreAccepted_.store(true, std::memory_order_relaxed);
     return true;
 }

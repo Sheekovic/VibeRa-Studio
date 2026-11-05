@@ -42,6 +42,9 @@ class NativeEffectsEditor final : public juce::AudioProcessorEditor, private juc
     float shownReduction_ = 0;
     void paintDisplay(juce::Graphics &);
     juce::Label brand_, heading_, subtitle_, footer_;
+    juce::TextButton loadImpulse_{"Load IR file..."};
+    std::unique_ptr<juce::FileChooser> impulseChooser_;
+    void refreshSubtitle();
     std::vector<std::unique_ptr<Row>> rows_;
     void timerCallback() override;
 

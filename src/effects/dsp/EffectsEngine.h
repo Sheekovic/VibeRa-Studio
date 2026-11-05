@@ -96,6 +96,9 @@ class Engine
     double wobblePhase() const noexcept { return loFi.wobblePhase(); }
     double tuneDetectedHz() const noexcept { return tune.detectedHz(); }
     double tuneTargetHz() const noexcept { return tune.targetHz(); }
+    // Convolution "File" space: message thread only (see ConvolutionReverb::setUserImpulse).
+    bool setUserImpulse(std::array<std::vector<float>, 2> ir) { return convolution.setUserImpulse(std::move(ir)); }
+    bool hasUserImpulse() const noexcept { return convolution.hasUserImpulse(); }
     // Last gain reduction (dB) of the selected dynamics processor, for editor meters.
     float gainReductionDb() const noexcept { return studio.gainReductionDb(); }
     // Bad automation values are refused before changing the active DSP settings.

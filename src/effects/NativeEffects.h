@@ -57,6 +57,10 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     double beatPosition() const noexcept { return beat_.load(std::memory_order_relaxed); }
     double detectedHz() const noexcept { return detectedHz_.load(std::memory_order_relaxed); }
     double targetHz() const noexcept { return targetHz_.load(std::memory_order_relaxed); }
+    // Convolution Reverb "File" space (message thread): reads a WAV/AIFF/FLAC impulse (first
+    // 2.6 s, mono or stereo), keeps its path in the state and builds it at the prepared rate.
+    juce::Result loadImpulse(const juce::File &);
+    juce::String impulsePath() const { return impulsePath_; }
 
     void fillInPluginDescription(juce::PluginDescription &) const override;
     const juce::String getName() const override;
@@ -108,6 +112,11 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     std::size_t eventCount_ = 0;
     int eventFrames_ = 0;
     bool prepared_ = false;
+    double preparedRate_ = 0;
+    juce::String impulsePath_;
+    std::array<std::vector<float>, 2> impulseRaw_; // At impulseRate_, for rebuilding on prepare.
+    double impulseRate_ = 0;
+    void publishImpulse();
     std::atomic<bool> restoreAccepted_{true};
     // Negative sentinel means no actual native output block since preparation.
     // Existing DSP peak stores replace it; zero then means genuine silence.

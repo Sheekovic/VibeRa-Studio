@@ -935,6 +935,36 @@ void studioOracles()
             peak = std::max(peak, double(std::abs(twice.left[i])));
         }
         require(peak > .01 && peak < 8 && linear < 1e-4 * std::max(1., peak), "Convolution is linear and bounded");
+
+        // A loaded impulse (File space): two taps come back at their times and sign.
+        Engine loaded;
+        loaded.prepare(48000, EffectId::convolution);
+        std::array<std::vector<float>, 2> taps{std::vector<float>(2000), std::vector<float>(2000)};
+        for (auto &channel : taps)
+        {
+            channel[0] = 1;
+            channel[1000] = -.5f;
+        }
+        require(loaded.setUserImpulse(taps) && loaded.hasUserImpulse(), "A user impulse is accepted");
+        auto file = defaultValues(EffectId::convolution);
+        file[0] = 4;
+        file[1] = 0;
+        file[2] = 20;
+        file[3] = 20000;
+        file[5] = 1;
+        require(loaded.setParameters(EffectId::convolution, file), "File space parameters accepted");
+        std::vector<float> l(4096), r(4096);
+        l[0] = r[0] = 1;
+        const auto before = effects_test::allocations;
+        for (int at = 0; at < 4096; at += 256)
+        {
+            effects_test::CallbackScope scope;
+            loaded.process(l.data() + at, r.data() + at, 256);
+        }
+        require(effects_test::allocations == before, "File space processing allocates nothing");
+        const float first = l[512], second = l[1512];
+        require(first > .3f && second < 0 && std::abs(second / first + .5f) < .15f,
+                "The loaded taps return at 512 and 1512 samples (" + std::to_string(first) + ", " + std::to_string(second) + ")");
     }
 
     // Drum Synth DSP: every drum sounds and decays, Tune raises the kick's body, Decay

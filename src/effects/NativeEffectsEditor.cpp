@@ -174,9 +174,36 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
     heading_.setText(instance.getName(), juce::dontSendNotification);
     heading_.setFont(juce::FontOptions(30.f, juce::Font::bold));
     heading_.setColour(juce::Label::textColourId, foreground);
-    subtitle_.setText(juce::String(spec.category).toUpperCase() + "   /   STEREO" +
-                          (spec.id == EffectId::limiter ? "   /   ZERO LOOKAHEAD" : ""),
-                      juce::dontSendNotification);
+    refreshSubtitle();
+    if (spec.id == EffectId::convolution)
+    {
+        loadImpulse_.setComponentID("nativeEffects.loadImpulse");
+        loadImpulse_.setTooltip("Load a WAV / AIFF / FLAC impulse response, then set Space to File (4)");
+        loadImpulse_.onClick = [this]
+        {
+            impulseChooser_ = std::make_unique<juce::FileChooser>("Load impulse response", juce::File{}, "*.wav;*.aif;*.aiff;*.flac");
+            juce::Component::SafePointer<NativeEffectsEditor> safe(this);
+            impulseChooser_->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                                         [safe](const juce::FileChooser &chooser)
+                                         {
+                                             if (!safe || !chooser.getResult().existsAsFile())
+                                                 return;
+                                             const auto loaded = safe->instance_.loadImpulse(chooser.getResult());
+                                             if (loaded.wasOk())
+                                                 if (auto *space = safe->instance_.getHostedParameter(0))
+                                                 {
+                                                     // Select the File space (4 of 0..4) as one host gesture.
+                                                     space->beginChangeGesture();
+                                                     space->setValueNotifyingHost(1.f);
+                                                     space->endChangeGesture();
+                                                 }
+                                             safe->refreshSubtitle();
+                                             if (loaded.failed())
+                                                 safe->subtitle_.setText(loaded.getErrorMessage(), juce::dontSendNotification);
+                                         });
+        };
+        addAndMakeVisible(loadImpulse_);
+    }
     subtitle_.setFont(juce::FontOptions(12.f));
     subtitle_.setColour(juce::Label::textColourId, secondary);
     footer_.setFont(juce::FontOptions(11.f));
@@ -239,6 +266,9 @@ NativeEffectsEditor::NativeEffectsEditor(NativeEffectInstance &instance)
                 static const char *modes[]{"Low pass", "High pass", "Band pass"};
                 return juce::String(modes[juce::jlimit(0, 2, int(std::lround(v)))]);
             };
+        else if (spec.id == EffectId::convolution && id == "space")
+            row->slider.textFromValueFunction = [](double v)
+            { return juce::String(ConvolutionReverb::names[juce::jlimit(0, 4, int(std::lround(v)))]); };
         else if (spec.id == EffectId::studioReverb && id == "type")
             row->slider.textFromValueFunction = [](double v)
             {
@@ -569,11 +599,23 @@ void NativeEffectsEditor::paintDisplay(juce::Graphics &g)
         g.drawText("GR " + juce::String(shownReduction_, 1) + " dB", badge, juce::Justification::centred);
     }
 }
+void NativeEffectsEditor::refreshSubtitle()
+{
+    const auto &spec = effectSpec(instance_.effectId());
+    auto text = juce::String(spec.category).toUpperCase() + "   /   STEREO" +
+                (spec.id == EffectId::limiter ? "   /   ZERO LOOKAHEAD" : "");
+    if (spec.id == EffectId::convolution)
+        text << "   /   IR: "
+             << (instance_.impulsePath().isEmpty() ? juce::String("built-in spaces")
+                                                    : juce::File(instance_.impulsePath()).getFileName());
+    subtitle_.setText(text, juce::dontSendNotification);
+}
 void NativeEffectsEditor::resized()
 {
     brand_.setBounds(24, 12, getWidth() - 130, 22);
     heading_.setBounds(22, 36, getWidth() - 120, 44);
-    subtitle_.setBounds(24, 82, getWidth() - 48, 24);
+    subtitle_.setBounds(24, 82, getWidth() - 48 - (loadImpulse_.isVisible() ? 170 : 0), 24);
+    loadImpulse_.setBounds(getWidth() - 24 - 160, 80, 160, 28);
     outputMeter_.setBounds(24, getHeight() - 112, getWidth() - 48, 76);
     footer_.setBounds(24, getHeight() - 28, getWidth() - 48, 20);
     auto area =

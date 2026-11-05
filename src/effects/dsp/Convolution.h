@@ -3,9 +3,11 @@
 #include "EffectsTypes.h"
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cmath>
 #include <complex>
 #include <cstdint>
+#include <memory>
 #include <numbers>
 #include <vector>
 
@@ -17,6 +19,8 @@ namespace vibera::effects
 // 512-sample blocks, so the wet path is 512 samples late; the dry path is delayed to match
 // and the delay is reported as latency. All IR spectra are built in prepare(); switching the
 // space, pre-delay, tone, width or mix in the audio callback only selects or scales.
+// Space 4 ("File") uses an impulse loaded on the message thread (setUserImpulse): its spectra
+// are built there and published atomically; replaced ones stay alive until release/prepare.
 class ConvolutionReverb
 {
   public:
@@ -24,7 +28,8 @@ class ConvolutionReverb
     static constexpr double rt60[spaces]{.7, 1.3, 2.4, 1.9};        // Seconds.
     static constexpr double brightness[spaces]{.55, .7, .5, .95};   // High-frequency survival.
     static constexpr double earlyMs[spaces]{9, 15, 28, 0};          // First reflection (Plate: none).
-    static constexpr const char *names[spaces]{"Room", "Studio", "Hall", "Plate"};
+    static constexpr const char *names[spaces + 1]{"Room", "Studio", "Hall", "Plate", "File"};
+    static constexpr double maximumSeconds = 2.6;
 
     int latencySamples() const noexcept { return active ? block : 0; }
     // Releases the IRs (other effects of an Engine never pay for them).
@@ -36,7 +41,29 @@ class ConvolutionReverb
         twiddles = {};
         bitReverse = {};
         predelayLine = {};
+        user.store(nullptr, std::memory_order_release);
+        userOwned.clear();
     }
+    // Message thread only: `ir` is stereo at the prepared rate (longer impulses are cut to the
+    // built-in maximum); its energy is normalised like the built-ins.
+    bool setUserImpulse(std::array<std::vector<float>, 2> ir)
+    {
+        if (!active || ir[0].empty() || ir[1].size() != ir[0].size())
+            return false;
+        const auto limit = std::min(ir[0].size(), size_t(maxPartitions) * block);
+        for (auto &channel : ir)
+            channel.resize(limit);
+        normalise(ir);
+        auto made = std::make_unique<UserImpulse>();
+        made->partitions = int((limit + block - 1) / block);
+        for (int c = 0; c < 2; ++c)
+            made->spectra[size_t(c)] = transform(ir[size_t(c)], made->partitions);
+        user.store(made.get(), std::memory_order_release);
+        userOwned.push_back(std::move(made));
+        return true;
+    }
+    void clearUserImpulse() noexcept { user.store(nullptr, std::memory_order_release); }
+    bool hasUserImpulse() const noexcept { return user.load(std::memory_order_acquire) != nullptr; }
     void prepare(double sampleRate)
     {
         rate = sampleRate;
@@ -64,24 +91,13 @@ class ConvolutionReverb
             partitions[size_t(s)] = count;
             maxPartitions = std::max(maxPartitions, count);
             for (int c = 0; c < 2; ++c)
-            {
-                auto &target = spectra[size_t(s)][size_t(c)];
-                target.assign(size_t(count) * bins, {});
-                std::vector<std::complex<float>> frame(fftSize);
-                for (int p = 0; p < count; ++p)
-                {
-                    std::fill(frame.begin(), frame.end(), std::complex<float>{});
-                    for (int i = 0; i < block; ++i)
-                        if (const auto at = size_t(p) * block + size_t(i); at < ir[size_t(c)].size())
-                            frame[size_t(i)] = ir[size_t(c)][at];
-                    fft(frame.data(), false);
-                    std::copy(frame.begin(), frame.begin() + bins, target.begin() + std::ptrdiff_t(p) * bins);
-                }
-            }
+                spectra[size_t(s)][size_t(c)] = transform(ir[size_t(c)], count);
         }
         for (auto &channel : history)
             channel.assign(size_t(maxPartitions) * bins, {});
         predelayLine.assign(size_t(rate * .2) + 2, {});
+        user.store(nullptr, std::memory_order_release);
+        userOwned.clear();
         reset();
     }
     void reset() noexcept
@@ -103,7 +119,7 @@ class ConvolutionReverb
     }
     void setParameters(const Values &v) noexcept
     {
-        space = std::clamp(int(std::lround(v[0])), 0, spaces - 1);
+        space = std::clamp(int(std::lround(v[0])), 0, spaces);
         predelay = predelayLine.empty() ? 0
                                         : std::clamp(int(std::lround(double(v[1]) / 1000. * rate)), 0,
                                                      int(predelayLine.size()) - 2);
@@ -149,6 +165,38 @@ class ConvolutionReverb
     }
 
   private:
+    struct UserImpulse
+    {
+        std::array<std::vector<std::complex<float>>, 2> spectra;
+        int partitions = 0;
+    };
+    std::vector<std::complex<float>> transform(const std::vector<float> &ir, int count) const
+    {
+        std::vector<std::complex<float>> target(size_t(count) * bins);
+        std::vector<std::complex<float>> frame(fftSize);
+        for (int p = 0; p < count; ++p)
+        {
+            std::fill(frame.begin(), frame.end(), std::complex<float>{});
+            for (int i = 0; i < block; ++i)
+                if (const auto at = size_t(p) * block + size_t(i); at < ir.size())
+                    frame[size_t(i)] = ir[at];
+            fft(frame.data(), false);
+            std::copy(frame.begin(), frame.begin() + bins, target.begin() + std::ptrdiff_t(p) * bins);
+        }
+        return target;
+    }
+    static void normalise(std::array<std::vector<float>, 2> &ir)
+    {
+        for (auto &channel : ir)
+        {
+            double energy = 0;
+            for (float x : channel)
+                energy += double(x) * x;
+            const float scale = float(.6 / std::sqrt(std::max(1e-12, energy))); // Comparable loudness.
+            for (auto &x : channel)
+                x *= scale;
+        }
+    }
     void fft(std::complex<float> *data, bool inverse) const noexcept
     {
         for (int i = 0; i < fftSize; ++i)
@@ -178,7 +226,10 @@ class ConvolutionReverb
     {
         newest = (newest + 1) % maxPartitions;
         filled = std::min(filled + 1, maxPartitions);
-        const int count = std::min(filled, partitions[size_t(space)]);
+        // Space 4 uses the loaded impulse (Studio until one is loaded).
+        const auto *loaded = space == spaces ? user.load(std::memory_order_acquire) : nullptr;
+        const int chosen = space == spaces ? 1 : space;
+        const int count = std::min(filled, loaded ? loaded->partitions : partitions[size_t(chosen)]);
         for (int c = 0; c < 2; ++c)
         {
             auto *frame = scratch.data();
@@ -193,7 +244,7 @@ class ConvolutionReverb
             std::copy(frame, frame + bins, slot);
             auto *sum = accumulator.data();
             std::fill(sum, sum + bins, std::complex<float>{});
-            const auto *ir = spectra[size_t(space)][size_t(c)].data();
+            const auto *ir = loaded ? loaded->spectra[size_t(c)].data() : spectra[size_t(chosen)][size_t(c)].data();
             for (int p = 0; p < count; ++p)
             {
                 const auto *x = history[size_t(c)].data() +
@@ -214,7 +265,7 @@ class ConvolutionReverb
     }
     std::array<std::vector<float>, 2> impulse(int s) const
     {
-        const int length = int(rate * std::min(2.6, rt60[s] * 1.1));
+        const int length = int(rate * std::min(maximumSeconds, rt60[s] * 1.1));
         std::array<std::vector<float>, 2> ir{std::vector<float>(size_t(length)), std::vector<float>(size_t(length))};
         std::uint32_t seed = 0x5eed1234u + std::uint32_t(s) * 977u;
         const auto noise = [&seed]
@@ -226,7 +277,6 @@ class ConvolutionReverb
         for (int c = 0; c < 2; ++c)
         {
             float low = 0;
-            double energy = 0;
             for (int i = 0; i < length; ++i)
             {
                 // Darkening tail: a one-pole low-pass that closes as the tail ages.
@@ -244,12 +294,8 @@ class ConvolutionReverb
                     if (at < length)
                         ir[size_t(c)][size_t(at)] += float((tap % 2 ? -.6 : .7) * std::pow(.72, tap));
                 }
-            for (float x : ir[size_t(c)])
-                energy += double(x) * x;
-            const float scale = float(.6 / std::sqrt(std::max(1e-12, energy))); // Comparable loudness.
-            for (auto &x : ir[size_t(c)])
-                x *= scale;
         }
+        normalise(ir);
         return ir;
     }
 
@@ -267,5 +313,7 @@ class ConvolutionReverb
     std::vector<std::complex<float>> twiddles;
     std::vector<int> bitReverse;
     std::vector<std::array<float, 2>> predelayLine;
+    std::atomic<const UserImpulse *> user{nullptr};
+    std::vector<std::unique_ptr<UserImpulse>> userOwned; // Message thread; never freed in the callback.
 };
 } // namespace vibera::effects
