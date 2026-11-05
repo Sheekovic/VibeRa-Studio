@@ -47,6 +47,7 @@ enum class EffectId
     formant,
     frequencyShifter,
     waveshaper,
+    convolution,
     count
 };
 inline constexpr std::size_t maximumParameters = 12;

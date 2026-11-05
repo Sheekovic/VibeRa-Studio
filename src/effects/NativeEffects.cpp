@@ -209,7 +209,7 @@ const juce::String NativeEffectInstance::getName() const
 void NativeEffectInstance::prepareToPlay(double rate, int)
 {
     prepared_ = false;
-    engine_.prepare(rate);
+    engine_.prepare(rate, effect_);
     setLatencySamples(engine_.latencySamples(effect_)); // The host compensates Tune's delay.
     engine_.setParameters(effect_, nativeValues());
     eventCount_ = 0;

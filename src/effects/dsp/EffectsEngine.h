@@ -9,6 +9,7 @@
 #include "Vocoder.h"
 #include "BeatGate.h"
 #include "GrooveEffects.h"
+#include "Convolution.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -28,6 +29,7 @@ class Engine
     Formant formant;
     FrequencyShifter frequencyShifter;
     Waveshaper waveshaper;
+    ConvolutionReverb convolution;
     EffectId selected = EffectId::balance;
     bool prepared = false;
     bool configured = false;
@@ -38,9 +40,12 @@ class Engine
     {
         return effect == EffectId::pitchCorrect ? tune.latencySamples()
                : effect == EffectId::loFi       ? loFi.latencySamples()
+               : effect == EffectId::convolution ? convolution.latencySamples()
                                                 : studio.latencySamples(effect);
     }
-    void prepare(double sampleRate)
+    // `only` names the instance's effect so large per-effect resources (Convolution IRs) are
+    // built only when needed; EffectId::count prepares everything (tests, generic hosts).
+    void prepare(double sampleRate, EffectId only = EffectId::count)
     {
         if (!std::isfinite(sampleRate) || sampleRate < 8000 || sampleRate > 384000)
             throw std::invalid_argument("VibeRa Effects requires a sample rate from 8 to 384 kHz");
@@ -56,6 +61,10 @@ class Engine
         formant.prepare(sampleRate);
         frequencyShifter.prepare(sampleRate);
         waveshaper.prepare(sampleRate);
+        if (only == EffectId::convolution || only == EffectId::count)
+            convolution.prepare(sampleRate);
+        else
+            convolution.release();
         prepared = true;
         selected = EffectId::balance;
         configured = false;
@@ -74,6 +83,7 @@ class Engine
         formant.reset();
         frequencyShifter.reset();
         waveshaper.reset();
+        convolution.reset();
     }
     // Host time for tempo-synced effects (Beat Gate), once per block before process().
     void setTransport(bool hasPosition, bool playing, double ppq, double bpm) noexcept
@@ -129,6 +139,8 @@ class Engine
             frequencyShifter.setParameters(values);
         else if (effect == EffectId::waveshaper)
             waveshaper.setParameters(values);
+        else if (effect == EffectId::convolution)
+            convolution.setParameters(values);
         else
             studio.setParameters(effect, values);
         return true;
@@ -163,6 +175,8 @@ class Engine
                 frequencyShifter.process(l, r);
             else if (selected == EffectId::waveshaper)
                 waveshaper.process(l, r);
+            else if (selected == EffectId::convolution)
+                convolution.process(l, r);
             else
                 studio.process(l, r);
             left[i] = std::isfinite(l) ? l : 0.0f;

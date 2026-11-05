@@ -96,6 +96,11 @@ Mixing and mastering processors:
   (soft, hard, fold, tube, rectify), `bias` -1..1 for asymmetry (silence stays silent, a 10 Hz
   DC blocker removes offsets), output and mix. The window draws the transfer curve with the
   live input dot.
+- Convolution Reverb (`convolution`): FFT convolution with one of four built-in stereo impulse
+  responses (`space` 0 Room 0.7 s, 1 Studio 1.3 s, 2 Hall 2.4 s, 3 Plate 1.9 s; generated, no
+  recorded IRs), pre-delay 0..200 ms, low/high cut on the wet path, width, mix. Reports 512
+  samples of latency (dry aligned); IRs are built only for instances of this effect. Loading
+  user IR files is not available yet.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

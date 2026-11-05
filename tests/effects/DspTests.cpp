@@ -462,7 +462,7 @@ Rendered renderEffect(EffectId effect, Values values, const std::function<float(
                       double rate = 48000)
 {
     Engine engine;
-    engine.prepare(rate);
+    engine.prepare(rate, effect);
     require(engine.setParameters(effect, values), "Studio effect parameters accepted");
     Rendered out{std::vector<float>(size_t(count)), std::vector<float>(size_t(count))};
     for (int i = 0; i < count; ++i)
@@ -873,6 +873,68 @@ void studioOracles()
         for (int i = 0; i < 4000; ++i)
             worst = std::max(worst, double(std::abs(dry.left[size_t(i)] - sine(500)(i))));
         require(worst < 1e-6, "Waveshaper mix 0 is the dry input");
+    }
+
+    // Convolution reverb: 512 samples of reported latency (mix 0 is the input delayed by
+    // exactly that), an impulse rings out with a decaying tail (Hall longer than Room),
+    // pre-delay moves the onset, the output is linear in the input and finite.
+    {
+        Engine probe;
+        probe.prepare(48000, EffectId::convolution);
+        require(probe.latencySamples(EffectId::convolution) == 512, "Convolution reports its block latency");
+        Engine other;
+        other.prepare(48000, EffectId::gate);
+        require(other.latencySamples(EffectId::convolution) == 0, "Other effects do not build convolution IRs");
+        auto dryValues = defaultValues(EffectId::convolution);
+        dryValues[5] = 0;
+        const auto dry = renderEffect(EffectId::convolution, dryValues, sine(500), 8000);
+        double aligned = 0;
+        for (int i = 600; i < 8000; ++i)
+            aligned = std::max(aligned, double(std::abs(dry.left[size_t(i)] - sine(500)(i - 512))));
+        require(aligned < 1e-6, "Convolution mix 0 is the input delayed by the latency");
+        const auto ring = [&](int space, float predelayMs)
+        {
+            auto v = defaultValues(EffectId::convolution);
+            v[0] = float(space);
+            v[1] = predelayMs;
+            v[2] = 20;
+            v[3] = 20000;
+            v[5] = 1;
+            return renderEffect(EffectId::convolution, v, [](int i) { return i == 0 ? 1.f : 0.f; }, 48000 * 3);
+        };
+        const auto energy = [](const std::vector<float> &x, double from, double to)
+        {
+            double e = 0;
+            for (int i = int(from * 48000); i < int(to * 48000) && i < int(x.size()); ++i)
+                e += double(x[size_t(i)]) * x[size_t(i)];
+            return e;
+        };
+        const auto hall = ring(2, 0), room = ring(0, 0);
+        require(energy(hall.left, .05, .3) > 0 && energy(hall.left, .05, .3) > 30 * energy(hall.left, 1.6, 1.9),
+                "The Hall tail decays");
+        require(energy(hall.left, 1.0, 1.3) > 100 * energy(room.left, 1.0, 1.3) + 1e-12, "Hall rings longer than Room");
+        require(energy(room.left, 0, 512 / 48000.) < 1e-12, "Nothing comes out before the latency");
+        const auto onset = [](const std::vector<float> &x)
+        {
+            for (size_t i = 0; i < x.size(); ++i)
+                if (std::abs(x[i]) > 1e-4)
+                    return int(i);
+            return -1;
+        };
+        const int plain = onset(room.left), late = onset(ring(0, 100).left);
+        require(plain >= 512 && late - plain > 4700 && late - plain < 4900,
+                "Pre-delay moves the onset by 100 ms (" + std::to_string(plain) + ", " + std::to_string(late) + ")");
+        auto v = defaultValues(EffectId::convolution);
+        v[5] = 1;
+        const auto once = renderEffect(EffectId::convolution, v, sine(300, .25), 24000);
+        const auto twice = renderEffect(EffectId::convolution, v, sine(300, .5), 24000);
+        double linear = 0, peak = 0;
+        for (size_t i = 0; i < once.left.size(); ++i)
+        {
+            linear = std::max(linear, double(std::abs(twice.left[i] - 2 * once.left[i])));
+            peak = std::max(peak, double(std::abs(twice.left[i])));
+        }
+        require(peak > .01 && peak < 8 && linear < 1e-4 * std::max(1., peak), "Convolution is linear and bounded");
     }
 
     // Drum Synth DSP: every drum sounds and decays, Tune raises the kick's body, Decay

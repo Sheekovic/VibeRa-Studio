@@ -688,6 +688,49 @@ inline void paint(juce::Graphics &g, juce::Rectangle<float> plot, EffectId id, c
                 juce::String(int(std::lround(v[2] * 100))) + "%  /  CRACKLE " + juce::String(int(std::lround(v[3] * 100))) + "%");
         return;
     }
+    case EffectId::convolution:
+    {
+        // The chosen space's impulse envelope (pre-delay, early reflections, decay to -60 dB)
+        // over a time axis, then the live waveform.
+        const int space = juce::jlimit(0, 3, int(std::lround(v[0])));
+        auto top = plot.withHeight(plot.getHeight() * .62f);
+        caption(g, top, p, juce::String(ConvolutionReverb::names[space]).toUpperCase() + "  /  RT60 " +
+                               juce::String(ConvolutionReverb::rt60[space], 1) + " s",
+                "PRE " + juce::String(int(std::lround(v[1]))) + " ms  /  MIX " + juce::String(int(std::lround(v[5] * 100))) + "%");
+        top = top.withTrimmedTop(18.f);
+        g.setColour(p.plate.brighter(.06f));
+        g.fillRoundedRectangle(top, 6.f);
+        const double span = 3.0, pre = v[1] / 1000.;
+        const auto xOf = [&](double t) { return top.getX() + 6.f + float(t / span) * (top.getWidth() - 12.f); };
+        juce::Path fill;
+        fill.startNewSubPath(xOf(0), top.getBottom());
+        for (int x = 0; x <= int(top.getWidth()) - 12; x += 2)
+        {
+            const double t = span * x / (top.getWidth() - 12.);
+            const double level = t < pre ? 0. : std::exp(-6.907755 * (t - pre) / ConvolutionReverb::rt60[space]);
+            fill.lineTo(xOf(t), top.getBottom() - float(level) * top.getHeight() * .85f);
+        }
+        fill.lineTo(top.getRight() - 6.f, top.getBottom());
+        fill.closeSubPath();
+        g.setColour(p.accent.withAlpha(.3f));
+        g.fillPath(fill);
+        g.setColour(p.accent);
+        g.strokePath(fill, juce::PathStrokeType(1.6f));
+        if (ConvolutionReverb::earlyMs[space] > 0)
+            for (int tap = 0; tap < 6; ++tap)
+            {
+                const double t = pre + (ConvolutionReverb::earlyMs[space] * (1 + tap * .55)) / 1000.;
+                g.setColour(p.warm);
+                g.fillRect(xOf(t) - 1.f, top.getBottom() - top.getHeight() * .85f * float(std::pow(.72, tap)), 2.f,
+                           top.getHeight() * .85f * float(std::pow(.72, tap)));
+            }
+        g.setColour(p.muted);
+        g.setFont(juce::FontOptions(10.f));
+        for (int s = 1; s <= 2; ++s)
+            g.drawText(juce::String(s) + " s", int(xOf(s)) - 12, int(top.getBottom()) - 13, 24, 12, juce::Justification::centred);
+        scope(g, plot.withTrimmedTop(top.getBottom() - plot.getY() + 8.f), live, p, p.accent);
+        return;
+    }
     case EffectId::waveshaper:
     {
         // The transfer curve (input -1..1 across, output up) with the live input peak as a dot,
