@@ -4465,6 +4465,38 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "rack.linkSequential")
+    {
+        // Each selected Channel (Rack order) goes to the next insert from the selected one.
+        std::vector<int> inserts;
+        for (const auto &insert : controller.project.mixer)
+            if (insert.index > 0 && insert.index >= std::max(1, selectedInsert))
+                inserts.push_back(insert.index);
+        std::sort(inserts.begin(), inserts.end());
+        std::vector<Id> channels;
+        for (const auto &channel : controller.project.channels)
+            if (selected(selectedChannels, channel.id))
+                channels.push_back(channel.id);
+        if (channels.empty() || channels.size() > inserts.size())
+        {
+            status = channels.empty() ? "Select Channels first"
+                                      : "Not enough Mixer inserts after the selected one";
+            repaint();
+            return false;
+        }
+        std::vector<CommandArgs> assignments;
+        for (size_t i = 0; i < channels.size(); ++i)
+        {
+            CommandArgs link;
+            link.channel = channels[i];
+            link.mixer = inserts[i];
+            assignments.push_back(link);
+        }
+        const auto result = applyRoutingSequence(assignments, "Link Channels to Mixer inserts");
+        status = result.wasOk() ? (routingPending() ? routingPendingStatus : routingReadyStatus) : result.getErrorMessage();
+        repaint();
+        return result.wasOk();
+    }
     if (action == "rack.zip" || action == "rack.unzipAll")
     {
         if (action == "rack.zip")

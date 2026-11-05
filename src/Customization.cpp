@@ -175,6 +175,8 @@ Customization Customization::familiarDefaults()
     add("pattern.clone", Scope::patterns, 'C', juce::ModifierKeys::altModifier);
     add("rack.graph", Scope::rack, 'K', ctrl);
     add("rack.zip", Scope::rack, 'Z', juce::ModifierKeys::altModifier);
+    add("rack.linkSequential", Scope::rack, 'L', ctrl | shift);
+    add("rack.linkSequential", Scope::mixer, 'L', ctrl | shift);
     add("rack.unzipAll", Scope::rack, 'U', juce::ModifierKeys::altModifier);
     add("channel.clone", Scope::rack, 'C', juce::ModifierKeys::altModifier);
     add("channel.delete", Scope::rack, juce::KeyPress::deleteKey, juce::ModifierKeys::altModifier);

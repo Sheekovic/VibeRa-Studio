@@ -311,3 +311,9 @@ readback, not permission to migrate a warm worker between device epochs. A
 processed or mismatched worker follows the capture/replacement policy above.
 Poll the operation and `audio.pluginSourceState`; an open editor alone does not
 prove active audio. This development behavior is not in qualified0.0.63.
+
+## Link Channels to consecutive inserts
+
+`rack.linkSequential` (Ctrl+Shift+L in the Rack or Mixer) routes the selected Channels, in Rack
+order, to the selected insert and the inserts after it (one routing plan). It refuses when
+there are fewer inserts than Channels.
