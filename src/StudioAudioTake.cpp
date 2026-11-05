@@ -774,6 +774,8 @@ juce::Result Studio::editAudioClip(Id clip, const juce::String &edit, double val
                                     [&](const auto &p) { return p.id == clip; });
     if (found == controller.project.audioPlacements.end())
         return juce::Result::fail("Select an Audio Clip to edit");
+    if (edit == "pitch" && (!std::isfinite(value) || value == 0 || std::abs(value) > 24))
+        return juce::Result::fail("Pitch is -24..24 semitones (nonzero)");
     const auto *source = controller.project.channel(found->channel);
     if (!source)
         return juce::Result::fail("The clip has no source");

@@ -196,6 +196,9 @@ Customization Customization::familiarDefaults()
     add("tool.slice", Scope::playlist, 'C');
     add("tool.slip", Scope::playlist, 'S');
     add("clip.group", Scope::playlist, 'G', shift);
+    add("clip.pitchDown", Scope::playlist, '7', 0);
+    add("clip.pitchUp", Scope::playlist, '8', 0);
+    add("clip.reverse", Scope::playlist, '9', 0);
     add("clip.ungroup", Scope::playlist, 'G', juce::ModifierKeys::altModifier);
     add("tool.mute", Scope::playlist, 'T');
     add("piano.toolMute", Scope::piano, 'T');

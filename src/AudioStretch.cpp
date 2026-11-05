@@ -55,8 +55,11 @@ juce::Result editAudioFile(const juce::File &source, double offsetSeconds, doubl
                            const juce::String &operation, double value, double fadeIn, double fadeOut,
                            const juce::File &target)
 {
-    if (operation != "reverse" && operation != "normalize" && operation != "gain" && operation != "consolidate")
-        return juce::Result::fail("Clip edits: reverse, normalize, gain or consolidate");
+    if (operation != "reverse" && operation != "normalize" && operation != "gain" && operation != "consolidate" &&
+        operation != "pitch")
+        return juce::Result::fail("Clip edits: reverse, normalize, gain, pitch or consolidate");
+    if (operation == "pitch" && (!std::isfinite(value) || value == 0 || std::abs(value) > 24))
+        return juce::Result::fail("Pitch is -24..24 semitones (nonzero)");
     if (!std::isfinite(value) || (operation == "gain" && std::abs(value) > 48) ||
         (operation == "normalize" && (value > 0 || value < -48)))
         return juce::Result::fail("Gain is +/-48 dB; normalize targets -48..0 dBFS");
@@ -75,6 +78,24 @@ juce::Result editAudioFile(const juce::File &source, double offsetSeconds, doubl
     reader->read(&pcm, 0, frames, start, true, channels > 1);
     if (operation == "reverse")
         pcm.reverse(0, frames);
+    else if (operation == "pitch")
+    {
+        if (frames < 4096)
+            return juce::Result::fail("The clip is too short to pitch (under 0.1 s)");
+        juce::AudioBuffer<float> shifted(channels, frames);
+        signalsmith::stretch::SignalsmithStretch<float> stretch;
+        stretch.presetDefault(channels, float(rate));
+        stretch.setTransposeSemitones(float(value));
+        auto in = std::vector<float *>(static_cast<size_t>(channels)), out = in;
+        for (int c = 0; c < channels; ++c)
+        {
+            in[size_t(c)] = pcm.getWritePointer(c);
+            out[size_t(c)] = shifted.getWritePointer(c);
+        }
+        if (!stretch.exact(in, frames, out, frames))
+            return juce::Result::fail("The pitch engine refused this clip");
+        pcm = std::move(shifted);
+    }
     else if (operation == "gain")
         pcm.applyGain(juce::Decibels::decibelsToGain(float(value)));
     else if (operation == "normalize")

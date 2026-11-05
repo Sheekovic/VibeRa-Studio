@@ -5683,6 +5683,8 @@ class Studio::Editor final : public juce::Component,
                     editAudio.addItem(32, "Gain +3 dB");
                     editAudio.addItem(33, "Gain -3 dB");
                     editAudio.addItem(34, "Consolidate (bake window and fades)");
+                    editAudio.addItem(37, "Pitch one semitone down    7");
+                    editAudio.addItem(38, "Pitch one semitone up    8");
                     m.addItem(40, "Align first transient to the grid (1/16)");
                     juce::PopupMenu tempo;
                     tempo.addItem(41, "Detect tempo");
@@ -5797,6 +5799,12 @@ class Studio::Editor final : public juce::Component,
                                                 }), true);
                                         }
                                         safe->s.repaint();
+                                        return;
+                                    }
+                                    if (n == 37 || n == 38)
+                                    {
+                                        if (auto r = safe->s.editAudioClip(id, "pitch", n == 37 ? -1. : 1.); r.failed())
+                                            safe->s.status = r.getErrorMessage();
                                         return;
                                     }
                                     if (n >= 30 && n <= 34)

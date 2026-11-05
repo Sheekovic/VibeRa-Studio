@@ -4382,6 +4382,26 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         status = result.wasOk() ? "Ready" : result.getErrorMessage();
         return result.wasOk();
     }
+    if (action == "clip.pitchDown" || action == "clip.pitchUp" || action == "clip.reverse")
+    {
+        // The first selected Audio Clip; the offline job runs one clip at a time.
+        const auto selection = effectiveClipSelection();
+        const auto clip = std::find_if(controller.project.audioPlacements.begin(), controller.project.audioPlacements.end(),
+                                       [&](const auto &p)
+                                       { return std::find(selection.begin(), selection.end(), p.id) != selection.end(); });
+        if (clip == controller.project.audioPlacements.end())
+        {
+            status = "Select an Audio Clip first";
+            repaint();
+            return false;
+        }
+        const auto started = action == "clip.reverse" ? editAudioClip(clip->id, "reverse", 0)
+                                                      : editAudioClip(clip->id, "pitch", action == "clip.pitchUp" ? 1. : -1.);
+        if (started.failed())
+            status = started.getErrorMessage();
+        repaint();
+        return started.wasOk();
+    }
     if (action == "clip.group" || action == "clip.ungroup")
     {
         a.ids = selectedClips;

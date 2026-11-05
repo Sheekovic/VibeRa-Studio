@@ -10,7 +10,8 @@ namespace vibera
 juce::Result stretchAudioFile(const juce::File &source, double offsetSeconds, double durationSeconds, double ratio,
                               const juce::File &target);
 // Offline sample edits of a source window into a new 24-bit WAV: "reverse", "normalize"
-// (peak to `value` dBFS), "gain" (`value` dB) or "consolidate" (the window with fades
+// (peak to `value` dBFS), "gain" (`value` dB), "pitch" (`value` semitones -24..24, length
+// kept, Signalsmith) or "consolidate" (the window with fades
 // `fadeIn`/`fadeOut` seconds baked in, matching the clip's sine-shaped fades).
 juce::Result editAudioFile(const juce::File &source, double offsetSeconds, double durationSeconds,
                            const juce::String &operation, double value, double fadeIn, double fadeOut,

@@ -77,3 +77,8 @@
   selection, Ctrl+Alt+Up/Down extends it (`track.selectPrevious/Next`, `track.extendPrevious/Next`);
   Shift+Ctrl+B clones the selected tracks with their clips (`track.cloneSelected`, one Undo).
   Read `state.selectedTracks`.
+- Audio Clip pitch: `vibera_project` `editClip` with `edit: "pitch"` and `value` semitones
+  (-24..24, nonzero) renders a pitch-shifted copy of the clip window at the same length and
+  points the clip at it (job, one Undo). Keys on the selected Audio Clip: 7 pitch down, 8 pitch
+  up, 9 reverse (actions `clip.pitchDown`/`clip.pitchUp`/`clip.reverse`, first selected clip,
+  one offline job at a time); also the clip menu > Edit sample.
