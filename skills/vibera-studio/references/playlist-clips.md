@@ -54,3 +54,8 @@
 - **Keys:** Shift+Up/Down move the selected clips one track (`clip.trackUp`/`clip.trackDown`);
   Home / End put the playhead at the start / the end of the Song (Pattern end in Pattern mode)
   (`transport.home`/`transport.end`).
+- **Track header:** Shift+wheel moves the track up/down; Alt+click its bottom divider resets
+  its height; the right-click menu adds Clips on this track (select all, mute/unmute all,
+  merge Pattern clips, consolidate to audio), Auto name (`track.autoName`), Reset name and
+  colour (`track.reset`) and Clone track (`track.clone`: the track and copies of its clips
+  right below). Alt+T adds a time marker at the playhead (`marker.addAtPlayhead`).

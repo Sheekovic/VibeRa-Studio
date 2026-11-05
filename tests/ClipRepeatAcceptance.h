@@ -249,6 +249,27 @@ inline void tests()
             require(pattern_management::renderClipsProject(song, {}, only, start).failed(),
                     "Rendering nothing fails");
         }
+        {
+            // Track clone / auto name / reset.
+            CommandArgs clone;
+            clone.lane = 2;
+            require(controller.execute("track.clone", clone).wasOk(), "Clone a track");
+            int onClone = 0;
+            for (const auto &c : controller.project.placements)
+                onClone += c.lane == 3 && c.id != first && c.id != second;
+            require(onClone == 2, "The cloned track holds new copies of both clips, right below");
+            controller.undoEdit();
+            require(controller.project.placements.size() == 2, "Clone is one Undo step");
+            CommandArgs name;
+            name.lane = 2;
+            require(controller.execute("track.autoName", name).wasOk() && controller.project.track(2) &&
+                        controller.project.track(2)->name == controller.project.pattern(pattern.id)->name,
+                    "Auto name uses the first Pattern clip's name");
+            require(controller.execute("track.reset", name).wasOk() && !controller.project.track(2),
+                    "Reset clears the name and colour (default track)");
+            name.lane = 40;
+            require(controller.execute("track.autoName", name).failed(), "An empty track has nothing to name it after");
+        }
         CommandArgs empty;
         empty.beat = 4;
         require(controller.execute("clip.paste", empty).failed(), "Paste with nothing copied fails");

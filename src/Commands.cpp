@@ -486,6 +486,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"clip.trackUp", "Move clips up one track", Scope::playlist, false, true, "action"},
         {"clip.trackDown", "Move clips down one track", Scope::playlist, false, true, "action"},
         {"transport.home", "Playhead to the start", Scope::global, false, true, "action"},
+        {"marker.addAtPlayhead", "Add time marker at the playhead", Scope::playlist, false, true, "action"},
         {"transport.end", "Playhead to the end of the Song", Scope::global, false, true, "action"},
         {"clip.nudgeRight", "Nudge clips right", Scope::playlist, false, true, "action"},
         {"notes.transposeUp", "Transpose up", Scope::piano, false, true, "action"},
@@ -801,6 +802,9 @@ const std::vector<CommandInfo> &commandRegistry()
         {"track.insert", "Insert Playlist track", Scope::playlist, true, true, "command"},
         {"track.delete", "Delete Playlist track", Scope::playlist, true, true, "command"},
         {"track.move", "Move Playlist track", Scope::playlist, true, true, "command"},
+        {"track.clone", "Clone Playlist track (with its clips)", Scope::playlist, true, true, "command"},
+        {"track.autoName", "Auto name Playlist track from its first clip", Scope::playlist, true, true, "command"},
+        {"track.reset", "Reset Playlist track name and colour", Scope::playlist, true, true, "command"},
         {"marker.next", "Jump to next marker", Scope::playlist, false, true, "action"},
         {"marker.previous", "Jump to previous marker", Scope::playlist, false, true, "action"},
         {"marker.selectSection", "Select section between markers", Scope::playlist, false, true, "action"},
@@ -5363,6 +5367,79 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             std::erase_if(next.automation.placements, [&](auto &c) { return c.lane == a.lane; });
             std::erase_if(next.tracks, [&](auto &t) { return t.lane == a.lane; });
             remap([&](int lane) { return lane > a.lane ? lane - 1 : lane; });
+        }
+        else if (id == "track.clone")
+        {
+            // A copy of the track and its clips right below it; later tracks move down.
+            if (occupied(127) || next.track(127))
+                return juce::Result::fail("The last track (128) is in use: nothing can move down");
+            std::optional<PlaylistTrack> settings;
+            if (const auto *t = next.track(a.lane))
+                settings = *t;
+            std::vector<Placement> patterns;
+            std::vector<AudioPlacement> audio;
+            std::vector<AutomationPlacement> automation;
+            for (const auto &c : next.placements)
+                if (c.lane == a.lane)
+                    patterns.push_back(c);
+            for (const auto &c : next.audioPlacements)
+                if (c.lane == a.lane)
+                    audio.push_back(c);
+            for (const auto &c : next.automation.placements)
+                if (c.lane == a.lane)
+                    automation.push_back(c);
+            remap([&](int lane) { return lane > a.lane ? lane + 1 : lane; });
+            for (auto c : patterns)
+                c.id = next.allocate(), c.lane = a.lane + 1, next.placements.push_back(c);
+            for (auto c : audio)
+                c.id = next.allocate(), c.lane = a.lane + 1, next.audioPlacements.push_back(c);
+            for (auto c : automation)
+                c.id = next.allocate(), c.lane = a.lane + 1, next.automation.placements.push_back(c);
+            if (settings)
+            {
+                auto copy = *settings;
+                copy.lane = a.lane + 1;
+                copy.groupedAbove = false;
+                copy.collapsed = false;
+                if (copy.name.isNotEmpty())
+                    copy.name = (copy.name + " 2").substring(0, 128);
+                next.tracks.push_back(copy);
+            }
+        }
+        else if (id == "track.autoName")
+        {
+            // Name and colour after the earliest Pattern clip (else audio clip source) on the track.
+            const Placement *first = nullptr;
+            for (const auto &c : next.placements)
+                if (c.lane == a.lane && (!first || c.beat < first->beat))
+                    first = &c;
+            juce::String name;
+            juce::uint32 colour = 0;
+            if (first)
+                if (const auto *p = next.pattern(first->pattern))
+                    name = p->name, colour = p->colour;
+            if (name.isEmpty())
+            {
+                const AudioPlacement *audio = nullptr;
+                for (const auto &c : next.audioPlacements)
+                    if (c.lane == a.lane && (!audio || c.beat < audio->beat))
+                        audio = &c;
+                if (audio)
+                    if (const auto *ch = next.channel(audio->channel))
+                        name = ch->name;
+            }
+            if (name.isEmpty())
+                return juce::Result::fail("This track has no Pattern or audio clip to name it after");
+            auto &t = entry(a.lane);
+            t.name = name.trim().substring(0, 128);
+            if (colour && (colour >> 24) == 255)
+                t.colour = colour;
+        }
+        else if (id == "track.reset")
+        {
+            auto &t = entry(a.lane);
+            t.name = {};
+            t.colour = 0;
         }
         else if (id == "track.move")
         {

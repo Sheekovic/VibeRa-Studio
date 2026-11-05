@@ -4209,6 +4209,18 @@ class Studio::Editor final : public juce::Component,
         }
         menu.addSubMenu("Colour", colours);
         menu.addSeparator();
+        {
+            juce::PopupMenu clipsMenu;
+            clipsMenu.addItem(40, "Select all clips on this track");
+            clipsMenu.addItem(41, "Mute all clips");
+            clipsMenu.addItem(42, "Unmute all clips");
+            clipsMenu.addItem(43, "Merge Pattern clips");
+            clipsMenu.addItem(44, "Consolidate track (render to audio)");
+            menu.addSubMenu("Clips on this track", clipsMenu);
+            menu.addItem(45, "Auto name (from first clip)");
+            menu.addItem(46, "Reset name and colour", info && (info->name.isNotEmpty() || info->colour != 0));
+            menu.addItem(47, "Clone track");
+        }
         menu.addItem(3, "Insert track above");
         menu.addItem(4, "Delete track (and its clips)");
         menu.addItem(5, "Move track up", lane > 0);
@@ -4260,6 +4272,48 @@ class Studio::Editor final : public juce::Component,
                                    run("track.mute", [&](CommandArgs &a) { a.enabled = !safe->s.controller.project.laneMuted(lane); });
                                else if (chosen == 2)
                                    safe->renameTrack(lane);
+                               else if (chosen >= 40 && chosen <= 44)
+                               {
+                                   // Clip operations on this track reuse the ordinary clip commands.
+                                   const auto &project = safe->s.controller.project;
+                                   std::vector<Id> ids, patternIds;
+                                   for (const auto &c : project.placements)
+                                       if (c.lane == lane)
+                                           ids.push_back(c.id), patternIds.push_back(c.id);
+                                   for (const auto &c : project.audioPlacements)
+                                       if (c.lane == lane)
+                                           ids.push_back(c.id);
+                                   std::vector<Id> withAutomation = ids;
+                                   for (const auto &c : project.automation.placements)
+                                       if (c.lane == lane)
+                                           withAutomation.push_back(c.id);
+                                   CommandArgs a;
+                                   a.grouping = false;
+                                   if (chosen == 40)
+                                       safe->s.selectItems(true, withAutomation);
+                                   else if (chosen == 41 || chosen == 42)
+                                   {
+                                       a.ids = withAutomation;
+                                       a.enabled = chosen == 41;
+                                       safe->s.command("clip.mute", a);
+                                   }
+                                   else if (chosen == 43)
+                                   {
+                                       a.ids = patternIds;
+                                       safe->s.command("clip.merge", a);
+                                   }
+                                   else if (const auto started = safe->s.renderClipsToAudio(ids); started.failed())
+                                       safe->s.status = started.getErrorMessage();
+                                   else
+                                       safe->s.status = "Rendering track to audio";
+                                   safe->repaint();
+                               }
+                               else if (chosen == 45)
+                                   run("track.autoName", [](CommandArgs &) {});
+                               else if (chosen == 46)
+                                   run("track.reset", [](CommandArgs &) {});
+                               else if (chosen == 47)
+                                   run("track.clone", [](CommandArgs &) {});
                                else if (chosen == 3)
                                    run("track.insert", [](CommandArgs &) {});
                                else if (chosen == 4)
@@ -5090,6 +5144,14 @@ class Studio::Editor final : public juce::Component,
         {
             // Bottom edge of a header: drag to resize that track (one Undo step).
             const int row = rowAtY(e.y);
+            if (e.mods.isLeftButtonDown() && e.mods.isAltDown() && rowTop(row) + rowPixels(row) - e.y <= 4)
+            {
+                CommandArgs a; // Alt+click a track divider: back to the default height.
+                a.lane = laneAtRow(row);
+                a.value = 1;
+                s.command("track.height", a);
+                return;
+            }
             if (e.mods.isLeftButtonDown() && !e.mods.isPopupMenu() && rowTop(row) + rowPixels(row) - e.y <= 4)
             {
                 trackResizeLane = laneAtRow(row);
@@ -6737,6 +6799,17 @@ class Studio::Editor final : public juce::Component,
             if (e.mods.isCtrlDown())
             {
                 setZoom(zoom * (wheel.deltaY > 0 ? 1.1 : .9), e.x);
+                repaint();
+                return;
+            }
+            if (type == 2 && e.mods.isShiftDown() && wheel.deltaY != 0 && e.x < leftEdge() && e.x >= pickerWidth() &&
+                e.y >= gridTop())
+            {
+                // Shift+wheel over a track header moves that track up or down.
+                CommandArgs a;
+                a.lane = laneAtY(int(e.y));
+                a.value = wheel.deltaY > 0 ? -1 : 1;
+                s.command("track.move", a);
                 repaint();
                 return;
             }

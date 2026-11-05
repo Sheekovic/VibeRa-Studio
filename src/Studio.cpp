@@ -4697,6 +4697,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command("clip.move", a);
         return status == "Ready";
     }
+    if (action == "marker.addAtPlayhead")
+    {
+        CommandArgs marker;
+        marker.beat = std::max(0., audio.positionBeat());
+        marker.text = "Marker";
+        command("marker.add", marker);
+        return status == "Ready";
+    }
     if (action == "transport.home" || action == "transport.end")
     {
         double beat = 0;

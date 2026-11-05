@@ -228,6 +228,7 @@ Customization Customization::familiarDefaults()
     add("clip.trackUp", Scope::playlist, juce::KeyPress::upKey, shift);
     add("clip.trackDown", Scope::playlist, juce::KeyPress::downKey, shift);
     add("transport.home", Scope::global, juce::KeyPress::homeKey);
+    add("marker.addAtPlayhead", Scope::playlist, 'T', juce::ModifierKeys::altModifier);
     add("transport.end", Scope::global, juce::KeyPress::endKey);
     add("notes.transposeUp", Scope::piano, juce::KeyPress::upKey, shift);
     add("notes.transposeDown", Scope::piano, juce::KeyPress::downKey, shift);
