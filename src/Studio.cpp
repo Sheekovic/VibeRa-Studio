@@ -4521,6 +4521,40 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
             flipSpareState(selectedChannel);
         return true;
     }
+    if (action == "track.selectPrevious" || action == "track.selectNext" || action == "track.extendPrevious" ||
+        action == "track.extendNext")
+    {
+        const bool up = action.endsWith("Previous");
+        if (!selectedTracks.empty())
+            trackCursor = juce::jlimit(0, 127, trackCursor + (up ? -1 : 1));
+        if (!action.startsWith("track.extend"))
+            selectedTracks.clear();
+        selectedTracks.insert(trackCursor);
+        status = "Track " + juce::String(trackCursor + 1) + " selected (" + juce::String(int(selectedTracks.size())) + ")";
+        if (windows[2])
+            windows[2]->repaint();
+        return true;
+    }
+    if (action == "track.cloneSelected")
+    {
+        if (selectedTracks.empty())
+        {
+            status = "Select tracks first (Ctrl+Up/Down or click a track name)";
+            return false;
+        }
+        // Bottom-up so the lanes still to clone keep their positions; one Undo step.
+        controller.beginGesture();
+        for (auto lane = selectedTracks.rbegin(); lane != selectedTracks.rend(); ++lane)
+        {
+            CommandArgs clone;
+            clone.lane = *lane;
+            command("track.clone", clone);
+        }
+        const auto finished = controller.endGestureChecked("Clone selected tracks");
+        status = finished.wasOk() ? juce::String(int(selectedTracks.size())) + " track(s) cloned" : finished.getErrorMessage();
+        repaint();
+        return finished.wasOk();
+    }
     if (action == "rack.linkSequential")
     {
         // Each selected Channel (Rack order) goes to the next insert from the selected one.

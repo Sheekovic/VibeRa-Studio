@@ -73,3 +73,7 @@
   row) sounds it. P / B / other tools leave it.
 - **Clip focus:** the picker type (Pat / Audio / Auto; `vibera_picker` `type`) is drawn on top of
   stacked clips and is the type a click picks where clips overlap.
+- **Track selector:** click a track name to select it (Ctrl adds); Ctrl+Up/Down moves the
+  selection, Ctrl+Alt+Up/Down extends it (`track.selectPrevious/Next`, `track.extendPrevious/Next`);
+  Shift+Ctrl+B clones the selected tracks with their clips (`track.cloneSelected`, one Undo).
+  Read `state.selectedTracks`.

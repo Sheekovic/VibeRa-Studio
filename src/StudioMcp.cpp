@@ -3665,6 +3665,12 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "mixerMeterWave", mixerMeterWave);
     set(state, "pianoGridHighlights", pianoGridHighlights);
     {
+        juce::Array<juce::var> tracks;
+        for (const auto lane : selectedTracks)
+            tracks.add(lane);
+        set(state, "selectedTracks", tracks);
+    }
+    {
         auto labels = obj();
         if (const auto *labelled = controller.project.channel(selectedChannel))
             for (const auto &[keyPitch, text] : labelled->keyLabels)

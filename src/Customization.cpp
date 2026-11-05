@@ -231,6 +231,11 @@ Customization Customization::familiarDefaults()
     add("clip.nudgeLeft", Scope::playlist, juce::KeyPress::leftKey, shift);
     add("clip.nudgeRight", Scope::playlist, juce::KeyPress::rightKey, shift);
     add("clip.trackUp", Scope::playlist, juce::KeyPress::upKey, shift);
+    add("track.selectPrevious", Scope::playlist, juce::KeyPress::upKey, ctrl);
+    add("track.selectNext", Scope::playlist, juce::KeyPress::downKey, ctrl);
+    add("track.extendPrevious", Scope::playlist, juce::KeyPress::upKey, ctrl | juce::ModifierKeys::altModifier);
+    add("track.extendNext", Scope::playlist, juce::KeyPress::downKey, ctrl | juce::ModifierKeys::altModifier);
+    add("track.cloneSelected", Scope::playlist, 'B', ctrl | shift);
     add("playlist.stretchMode", Scope::playlist, 'M', shift);
     add("clip.trackDown", Scope::playlist, juce::KeyPress::downKey, shift);
     add("transport.home", Scope::global, juce::KeyPress::homeKey);

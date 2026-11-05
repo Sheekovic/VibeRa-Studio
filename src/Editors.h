@@ -3326,6 +3326,11 @@ class Studio::Editor final : public juce::Component,
                     g.setColour(panel.brighter(.04f));
                     g.fillRoundedRectangle(header, 4.f);
                     const int rowLane = laneAtRow(row + laneOffset);
+                    if (s.selectedTracks.contains(rowLane))
+                    {
+                        g.setColour(accent.withAlpha(.9f));
+                        g.drawRoundedRectangle(header.reduced(.5f), 4.f, 1.6f);
+                    }
                     const auto *trackInfo = s.controller.project.track(rowLane);
                     g.setColour(trackInfo && trackInfo->colour ? juce::Colour(trackInfo->colour)
                                                                : channelColour(rowLane));
@@ -5442,6 +5447,21 @@ class Studio::Editor final : public juce::Component,
                 const auto *info = s.controller.project.track(trackResizeLane);
                 trackResizeStart = info ? info->height : 1.;
                 s.controller.beginGesture();
+                return;
+            }
+            if (e.mods.isLeftButtonDown() && !e.mods.isPopupMenu() && e.x >= pickerWidth() + 26)
+            {
+                // Track selector: click a track name to select it (Ctrl adds / removes).
+                const int lane = laneAtY(e.y);
+                if (e.mods.isCtrlDown())
+                {
+                    if (!s.selectedTracks.erase(lane))
+                        s.selectedTracks.insert(lane);
+                }
+                else
+                    s.selectedTracks = {lane};
+                s.trackCursor = lane;
+                repaint();
                 return;
             }
             // The LED at the start of the header mutes; right-click opens the track menu.
