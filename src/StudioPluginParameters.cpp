@@ -2251,7 +2251,7 @@ void Studio::admitPluginWrapperRequest(Id plugin, const std::shared_ptr<PluginHo
             }
             return; // The existing catalogue/automation job owns actual completion and history.
         }
-        if (intent.action >= PluginWrapperAction::channelOn && intent.action <= PluginWrapperAction::channelTrack)
+        if (intent.action >= PluginWrapperAction::channelOn && intent.action <= PluginWrapperAction::channelRange)
         {
             // The owning instrument Channel's ON / volume / pan / Mixer track, through the
             // canonical Channel commands (Undo, routing coordinator).
@@ -2273,6 +2273,10 @@ void Studio::admitPluginWrapperRequest(Id plugin, const std::shared_ptr<PluginHo
                     commandId = "channel.gain", a.value = intent.value * 1.25;
                 else if (intent.action == PluginWrapperAction::channelPan)
                     commandId = "channel.pan", a.value = intent.value * 2. - 1.;
+                else if (intent.action == PluginWrapperAction::channelPitch)
+                    commandId = "channel.pitch", a.value = intent.value * 2. - 1.;
+                else if (intent.action == PluginWrapperAction::channelRange)
+                    commandId = "channel.pitchRange", a.value = double(intent.parameter);
                 else
                     commandId = "channel.mixer", a.mixer = int(intent.parameter);
                 if (commandId == "channel.mixer")
@@ -2466,6 +2470,8 @@ void Studio::servicePluginWrapperRequests()
                     strip.gain = juce::jlimit(0.f, 1.f, channel.gain / 1.25f);
                     strip.pan = juce::jlimit(0.f, 1.f, (channel.pan + 1.f) * .5f);
                     strip.track = channel.mixer;
+                    strip.pitch = juce::jlimit(0.f, 1.f, (channel.pitchBend + 1.f) * .5f);
+                    strip.range = channel.pitchRange;
                 }
             for (const auto &insert : controller.project.mixer)
                 strip.maxTrack = std::max(strip.maxTrack, insert.index);

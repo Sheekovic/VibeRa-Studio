@@ -105,7 +105,7 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
             if (independentReady() && !state.instrument)
                 admit({PluginWrapperAction::mix, 0, 0, float(mix.getValue()), false});
         };
-        for (auto *knob : {&channelPan, &channelVol})
+        for (auto *knob : {&channelPan, &channelVol, &channelPitch})
         {
             addChildComponent(*knob);
             knob->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
@@ -113,7 +113,7 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
             knob->setRange(0, 1, .001);
             knob->setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff70c2b5));
             knob->setChangeNotificationOnlyOnRelease(true);
-            knob->setDoubleClickReturnValue(true, knob == &channelPan ? .5 : .78 / 1.25);
+            knob->setDoubleClickReturnValue(true, knob == &channelVol ? .78 / 1.25 : .5);
         }
         channelPan.setTooltip("Channel pan (double-click: centre)");
         channelVol.setTooltip("Channel volume (double-click: default)");
@@ -121,6 +121,26 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
         {
             if (independentReady() && state.channel.present)
                 admit({PluginWrapperAction::channelPan, 0, 0, float(channelPan.getValue()), false});
+        };
+        channelPitch.setTooltip("Channel pitch: pitch bend sent with every note (double-click: centre)");
+        channelPitch.onValueChange = [this]
+        {
+            if (independentReady() && state.channel.present)
+                admit({PluginWrapperAction::channelPitch, 0, 0, float(channelPitch.getValue()), false});
+        };
+        addChildComponent(rangeButton);
+        rangeButton.setTooltip("Pitch RANGE in semitones (set the plugin's bend range to match)");
+        rangeButton.onClick = [this]
+        {
+            juce::PopupMenu menu;
+            for (int semitones : {1, 2, 3, 5, 7, 12, 24, 48})
+                menu.addItem(semitones, juce::String(semitones) + " semitones", true, state.channel.range == semitones);
+            menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&rangeButton),
+                               [safe = juce::Component::SafePointer<PluginWrapperViewComponent>(this)](int chosen)
+                               {
+                                   if (safe && chosen > 0 && safe->independentReady() && safe->state.channel.present)
+                                       safe->admit({PluginWrapperAction::channelRange, std::uint32_t(chosen), 0, 0.f, false});
+                               });
         };
         channelVol.onValueChange = [this]
         {
@@ -362,6 +382,7 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
         {
             const bool strip = next.channel.present;
             for (juce::Component *c : std::initializer_list<juce::Component *>{&channelOn, &channelPan, &channelVol,
+                                                                               &channelPitch, &rangeButton,
                                                                                &trackDown, &trackUp, &trackLabel})
                 if (c->isVisible() != strip)
                 {
@@ -373,6 +394,9 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
                 channelPan.setValue(next.channel.pan, juce::dontSendNotification);
             if (!channelVol.isMouseButtonDown())
                 channelVol.setValue(next.channel.gain, juce::dontSendNotification);
+            if (!channelPitch.isMouseButtonDown())
+                channelPitch.setValue(next.channel.pitch, juce::dontSendNotification);
+            rangeButton.setButtonText(juce::String(next.channel.range) + " st");
             trackLabel.setText("TRACK " + juce::String(next.channel.track), juce::dontSendNotification);
         }
         std::uint32_t selectedId = 0, selectedGeneration = 0;
@@ -530,9 +554,9 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
         {
             g.setColour(juce::Colour(0xffb8c7cf));
             g.setFont(juce::Font(juce::FontOptions(11.f, juce::Font::bold)));
-            for (auto *knob : {&channelPan, &channelVol})
-                g.drawText(knob == &channelPan ? "PAN" : "VOL", knob->getRight() + 2, knob->getY(), 28, knob->getHeight(),
-                           juce::Justification::centredLeft);
+            for (auto *knob : {&channelPan, &channelVol, &channelPitch})
+                g.drawText(knob == &channelPan ? "PAN" : knob == &channelVol ? "VOL" : "PITCH", knob->getRight() + 2,
+                           knob->getY(), 36, knob->getHeight(), juce::Justification::centredLeft);
         }
     }
 
@@ -552,6 +576,10 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
             toolbar.removeFromLeft(30); // "PAN" label (painted).
             channelVol.setBounds(toolbar.removeFromLeft(32));
             toolbar.removeFromLeft(30); // "VOL" label (painted).
+            channelPitch.setBounds(toolbar.removeFromLeft(32));
+            toolbar.removeFromLeft(38); // "PITCH" label (painted).
+            rangeButton.setBounds(toolbar.removeFromLeft(48));
+            toolbar.removeFromLeft(6);
             toolbar.removeFromLeft(6);
             trackDown.setBounds(toolbar.removeFromLeft(22));
             trackLabel.setBounds(toolbar.removeFromLeft(70));
@@ -678,7 +706,8 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
     juce::ToggleButton bypass{"Bypass"}, notifications{"Native parameter notifications"};
     // Instrument Channel strip (familiar wrapper header): ON, PAN, VOL and the Mixer TRACK.
     juce::ToggleButton channelOn{"ON"};
-    juce::Slider channelPan, channelVol;
+    juce::Slider channelPan, channelVol, channelPitch;
+    juce::TextButton rangeButton;
     juce::TextButton trackDown{"<"}, trackUp{">"};
     juce::Label trackLabel;
     juce::Label status, feedbackLabel, settingsHeading, mixLabel, parameterLabel, unavailable, ioHeading,

@@ -60,6 +60,8 @@ struct Channel
     juce::uint32 colour = 0;    // Opaque display colour; zero follows the theme palette.
     juce::String icon = "none"; // Stable original icon ID, independent of source/plugin identity.
     bool muteLocked = false;    // Protect the current score mute from automatic solo/bulk changes.
+    float pitchBend = 0;        // Plugin instrument Channel PITCH: MIDI pitch bend -1..1 sent with its notes.
+    int pitchRange = 2;         // RANGE shown with PITCH, semitones at full bend (1..48).
 };
 struct ChannelGroup
 {

@@ -5,6 +5,7 @@
 #include "../src/PatternAutomation.h"
 #include "../src/Commands.h"
 #include "../src/PatternManagement.h"
+#include "../src/LiveTimeline.h"
 
 // A Pattern clip longer than its Pattern repeats the Pattern (familiar Playlist behavior).
 namespace clip_repeat_acceptance
@@ -457,6 +458,38 @@ inline void tests()
             merge2.target = 0;
             require(controller.execute("arrangement.merge", merge2).failed(), "Merging the open arrangement fails");
             controller.undoEdit();
+        }
+        {
+            // Channel PITCH / RANGE (plugin pitch bend): command, save/load, validation.
+            CommandArgs pitchArgs;
+            pitchArgs.channel = kick;
+            pitchArgs.value = -.5;
+            require(controller.execute("channel.pitch", pitchArgs).wasOk(), "Set Channel pitch");
+            pitchArgs.value = 12;
+            require(controller.execute("channel.pitchRange", pitchArgs).wasOk(), "Set Channel pitch range");
+            Project reloaded;
+            require(Project::parse(controller.project.state(), reloaded).wasOk() &&
+                        reloaded.channel(kick)->pitchBend == -.5f && reloaded.channel(kick)->pitchRange == 12,
+                    "Pitch and range survive save and load");
+            pitchArgs.value = 2;
+            require(controller.execute("channel.pitch", pitchArgs).failed(), "Pitch beyond full bend is refused");
+            controller.undoEdit();
+            controller.undoEdit();
+            require(controller.project.channel(kick)->pitchBend == 0, "Pitch edits undo");
+            // Playback: a plugin instrument Channel with PITCH gets the bend at each note start.
+            auto live = controller.project;
+            auto *instrumentChannel = live.channel(kick);
+            instrumentChannel->instrument = PluginSpec{};
+            instrumentChannel->instrument->id = live.allocate();
+            instrumentChannel->pitchBend = .5f;
+            const auto document = compileLiveDocument(live, true, pattern.id, 1);
+            int bends = 0;
+            if (document)
+                for (const auto &channelRow : document->channels)
+                    if (channelRow.id == kick)
+                        for (const auto &control : channelRow.controls)
+                            bends += (control.bytes[0] & 0xf0) == 0xe0 && (control.bytes[1] | (control.bytes[2] << 7)) == 12288;
+            require(bends == 2, "Each of the two kick notes carries the +0.5 pitch bend (12288)");
         }
         CommandArgs empty;
         empty.beat = 4;

@@ -298,7 +298,9 @@ class EditorWindow final : public juce::DocumentWindow
                          mailbox.channelGain.load(std::memory_order_acquire),
                          mailbox.channelPan.load(std::memory_order_acquire),
                          mailbox.channelTrack.load(std::memory_order_acquire),
-                         mailbox.channelMaxTrack.load(std::memory_order_acquire)};
+                         mailbox.channelMaxTrack.load(std::memory_order_acquire),
+                         mailbox.channelPitch.load(std::memory_order_acquire),
+                         mailbox.channelRange.load(std::memory_order_acquire)};
         wrapper->update(state, parameters, feedback);
         wrapper->updateRouting(io, buses);
         mailbox.view.store(wrapper->selectedView(), std::memory_order_release);

@@ -218,6 +218,15 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
                             forEachClipRepeat(clip.length, clip.offset, part->length,
                                               [&](double position, double length, double offset, std::uint32_t)
                                               { addControls(*part, clip.beat + position, length, offset); });
+            if (c.instrument && c.pitchBend != 0)
+            {
+                // Channel PITCH: the plugin gets the bend with every note start (so it also holds
+                // when playback starts mid-song). Pattern pitch-bend events still follow.
+                const int raw = juce::jlimit(0, 16383, juce::roundToInt(8192 + c.pitchBend * 8191));
+                for (const auto &n : channel.notes)
+                    channel.controls.push_back({n.start, {std::uint8_t(0xe0 | (n.colourGroup & 15)),
+                                                          std::uint8_t(raw & 127), std::uint8_t(raw >> 7)}});
+            }
             std::stable_sort(channel.controls.begin(), channel.controls.end(),
                              [](const auto &a, const auto &b) { return a.time < b.time; });
         }

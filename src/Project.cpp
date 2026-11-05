@@ -509,6 +509,10 @@ juce::ValueTree Project::state() const
             set(t, "icon", c.icon);
         if (c.muteLocked)
             set(t, "muteLocked", true);
+        if (c.pitchBend != 0)
+            set(t, "pitchBend", double(c.pitchBend));
+        if (c.pitchRange != 2)
+            set(t, "pitchRange", c.pitchRange);
         if (c.group != 0)
             set(t, "group", juce::int64(c.group));
         set(t, "source", c.source);
@@ -1245,6 +1249,20 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 (fileVersion < 28 && bool(locked)))
                 return juce::Result::fail("Invalid or unsupported Channel mute lock");
             p.channels.back().muteLocked = bool(locked);
+        }
+        if (c.hasProperty("pitchBend"))
+        {
+            const auto bend = exactNumber(c["pitchBend"]);
+            if (!std::isfinite(bend) || std::abs(bend) > 1)
+                return juce::Result::fail("Invalid Channel pitch bend");
+            p.channels.back().pitchBend = float(bend);
+        }
+        if (c.hasProperty("pitchRange"))
+        {
+            const auto range = exactNumber(c["pitchRange"]);
+            if (!std::isfinite(range) || range < 1 || range > 48 || std::floor(range) != range)
+                return juce::Result::fail("Invalid Channel pitch range");
+            p.channels.back().pitchRange = int(range);
         }
         auto sampler = c.getChildWithName("SAMPLER");
         int samplerChildren = 0;
@@ -2154,7 +2172,8 @@ juce::Result Project::validate() const
         if (!validChannelColour(c.colour) || !validChannelIcon(c.icon))
             return fail("Invalid Channel appearance");
         if (!unique(c.id) || !inserts.count(c.mixer) || !std::isfinite(c.gain) || c.gain < 0 || c.gain > 2 ||
-            !std::isfinite(c.pan) || std::abs(c.pan) > 1 || c.source.isEmpty())
+            !std::isfinite(c.pan) || std::abs(c.pan) > 1 || c.source.isEmpty() || !std::isfinite(c.pitchBend) ||
+            std::abs(c.pitchBend) > 1 || c.pitchRange < 1 || c.pitchRange > 48)
             return fail("Invalid Channel state");
         if (!c.sampler.valid())
             return fail("Invalid sampler settings");

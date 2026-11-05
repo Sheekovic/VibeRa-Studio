@@ -35,7 +35,9 @@ enum class PluginWrapperAction : int
     channelOn = 16,    // value 1 on, 0 muted
     channelGain = 17,  // value 0..1 = volume 0..125%
     channelPan = 18,   // value 0..1 = pan -1..1
-    channelTrack = 19  // parameter = Mixer insert index, value 0
+    channelTrack = 19, // parameter = Mixer insert index, value 0
+    channelPitch = 20, // value 0..1 = pitch bend -1..1
+    channelRange = 21  // parameter = semitones 1..48, value 0
 };
 // The instrument Channel that owns the plugin, as published by the application.
 struct PluginWrapperChannel
@@ -43,6 +45,8 @@ struct PluginWrapperChannel
     bool present = false, on = true;
     float gain = .78f, pan = 0;
     int track = 0, maxTrack = 0;
+    float pitch = .5f; // 0..1 = bend -1..1
+    int range = 2;
     bool operator==(const PluginWrapperChannel &) const = default;
 };
 struct PluginWrapperIntent
@@ -71,7 +75,7 @@ inline bool pluginWrapperParameterAction(PluginWrapperAction action) noexcept
 inline bool pluginWrapperIntentValid(const PluginWrapperIntent &intent) noexcept
 {
     const auto action = int(intent.action);
-    return action >= int(PluginWrapperAction::bypass) && action <= int(PluginWrapperAction::channelTrack) &&
+    return action >= int(PluginWrapperAction::bypass) && action <= int(PluginWrapperAction::channelRange) &&
            std::isfinite(intent.value) && intent.value >= 0 && intent.value <= 1 &&
            ((intent.action != PluginWrapperAction::bypass &&
              intent.action != PluginWrapperAction::notifications && intent.action != PluginWrapperAction::channelOn) ||
@@ -82,6 +86,8 @@ inline bool pluginWrapperIntentValid(const PluginWrapperIntent &intent) noexcept
             (intent.value == 0 && intent.parameter == 0 && intent.generation == 0)) &&
            (intent.action != PluginWrapperAction::channelTrack ||
             (intent.value == 0 && intent.generation == 0 && intent.parameter <= 100000)) &&
+           (intent.action != PluginWrapperAction::channelRange ||
+            (intent.value == 0 && intent.generation == 0 && intent.parameter >= 1 && intent.parameter <= 48)) &&
            (intent.action != PluginWrapperAction::audioIo || intent.io.valid());
 }
 struct PluginWrapperRequest
@@ -128,6 +134,8 @@ struct PluginWrapperMailbox
     std::atomic<bool> channelPresent{false}, channelOn{true};
     std::atomic<float> channelGain{.78f}, channelPan{0};
     std::atomic<int> channelTrack{0}, channelMaxTrack{0};
+    std::atomic<float> channelPitch{.5f};
+    std::atomic<int> channelRange{2};
 
     static std::uint64_t pack(float value, bool gestureOpen) noexcept
     {

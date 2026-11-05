@@ -537,6 +537,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"rack.colourSpread", "Colour selected Channels (random / gradient)", Scope::rack, true, true, "command"},
         {"channel.mixer", "Assign Mixer insert", Scope::rack, true, true, "command"},
         {"channel.gain", "Channel volume", Scope::rack, true, true, "command"},
+        {"channel.pitch", "Channel pitch (plugin pitch bend -1..1)", Scope::rack, true, true, "command"},
+        {"channel.pitchRange", "Channel pitch range (semitones)", Scope::rack, true, true, "command"},
         {"channel.pan", "Channel pan", Scope::rack, true, true, "command"},
         {"channel.sampler.sourceTempo", "Set sample tempo", Scope::rack, true, true, "command"},
         {"channel.sampler.fitTempo", "Fit sample to project tempo", Scope::rack, true, true, "command"},
@@ -2978,6 +2980,18 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 return applied;
         if (id == "channel.gain")
             ch->gain = float(a.value);
+        if (id == "channel.pitch")
+        {
+            if (!std::isfinite(a.value) || std::abs(a.value) > 1)
+                return juce::Result::fail("Channel pitch is -1..1 (pitch bend)");
+            ch->pitchBend = float(a.value);
+        }
+        if (id == "channel.pitchRange")
+        {
+            if (!std::isfinite(a.value) || a.value < 1 || a.value > 48 || std::floor(a.value) != a.value)
+                return juce::Result::fail("Channel pitch range is 1..48 semitones");
+            ch->pitchRange = int(a.value);
+        }
         if (id == "channel.pan")
             ch->pan = float(a.value);
         if (id.startsWith("channel.sampler."))

@@ -279,7 +279,7 @@ bool Studio::routingStructuralCommand(const juce::String &id, const CommandArgs 
     }
     if (id.startsWith("notes.") || id.startsWith("steps.") || id.startsWith("rack.") ||
         id.startsWith("pattern.") || id.startsWith("automation.") || id.startsWith("plugin.binding.") ||
-        id.startsWith("channel.sampler.") || id == "project.swing" || id == "channel.gain" ||
+        id.startsWith("channel.sampler.") || id == "project.swing" || id == "channel.gain" || id == "channel.pitch" || id == "channel.pitchRange" ||
         id == "channel.pan" || id == "channel.mute" || id == "channel.rename" || id == "channel.colour" ||
         id == "channel.solo" || id == "channel.unsolo" || id == "channel.swingMix" ||
         id == "channel.muteLock" || id == "channel.properties" || id == "channel.truncateSwing" ||

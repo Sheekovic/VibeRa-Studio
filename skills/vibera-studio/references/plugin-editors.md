@@ -67,3 +67,9 @@ the Mixer TRACK with < / > arrows. Each change runs the ordinary Channel command
 the Mixer track can be set while the window stays open. Routing changes (Channel to insert,
 sends) no longer refuse because a plugin window is open: idle windows close for the routing
 job and reopen when it finishes.
+
+PITCH (`channel.pitch`, `args.channel`, `args.value` -1..1) sends that MIDI pitch bend to a
+plugin instrument with every note start (so it holds when playback starts mid-song; Pattern
+pitch-bend events still follow). RANGE (`channel.pitchRange`, 1..48 semitones, default 2) is
+the bend span shown with it; set the plugin's own bend range to match (a VST3 plugin decides its
+range). Both are saved with the project and undoable; samplers keep their own pitch controls.

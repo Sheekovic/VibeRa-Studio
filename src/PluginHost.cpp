@@ -925,6 +925,8 @@ void PluginHost::publishWrapperChannel(const PluginWrapperChannel &channel)
     mailbox.channelPan.store(channel.pan, std::memory_order_release);
     mailbox.channelTrack.store(channel.track, std::memory_order_release);
     mailbox.channelMaxTrack.store(channel.maxTrack, std::memory_order_release);
+    mailbox.channelPitch.store(channel.pitch, std::memory_order_release);
+    mailbox.channelRange.store(channel.range, std::memory_order_release);
     mailbox.channelPresent.store(channel.present, std::memory_order_release);
 }
 PluginWrapperState PluginHost::wrapperState() const
