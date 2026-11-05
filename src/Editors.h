@@ -683,6 +683,7 @@ class Studio::Editor final : public juce::Component,
     bool selecting = false, dragging = false, erasing = false, resizing = false, paintMode = false;
     bool resizingLeft = false;
     bool velocityPainting = false;
+    std::map<int, std::deque<float>> meterWaves; // Mixer Meter-wave history per insert (newest last).
     bool playToolPlaying = false, playToolPreviewing = false; // "Play selected" (Y) gestures. // Velocity lane drag (Shift: one level for every crossed note).
     double velocityPaintLevel = .78; // Piano roll: dragging a note's start (option "Allow resizing from left").
     juce::Point<float> origin, lastErasePoint;
@@ -3943,6 +3944,24 @@ class Studio::Editor final : public juce::Component,
                         if (!textBounds.isEmpty())
                             label(g, juce::String(db), textBounds, muted, 11.f);
                     }
+                    if (s.mixerMeterWave)
+                    {
+                        // Meter-wave: the level history scrolls up; each row's width is its peak.
+                        auto &wave = meterWaves[m.index];
+                        wave.push_back(std::max(meter.display[0], meter.display[1]));
+                        while (int(wave.size()) > std::max(1, h))
+                            wave.pop_front();
+                        g.setColour(grid);
+                        g.fillRect(x + 7, 100, 12, h);
+                        for (size_t row = 0; row < wave.size(); ++row)
+                        {
+                            const float level = juce::jlimit(0.f, 1.f, (juce::Decibels::gainToDecibels(wave[row], -60.f) + 60.f) / 60.f);
+                            const float width = 12.f * level;
+                            g.setColour(level > .9f ? orange : accent);
+                            g.fillRect(float(x + 7) + (12.f - width) * .5f, float(100 + h - int(wave.size()) + int(row)), width, 1.f);
+                        }
+                    }
+                    else
                     for (int ch = 0; ch < 2; ++ch)
                     {
                         const int mx = x + 7 + ch * 7;

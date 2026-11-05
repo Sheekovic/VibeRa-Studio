@@ -3662,6 +3662,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "snapMarkers", snapMarkers);
     set(state, "audioStretchMode", audioStretchMode);
     set(state, "pianoStamp", pianoStamp);
+    set(state, "mixerMeterWave", mixerMeterWave);
     {
         juce::Array<juce::var> spares;
         for (const auto &[id, xml] : spareStates)

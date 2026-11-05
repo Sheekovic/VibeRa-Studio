@@ -231,7 +231,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::String pianoStamp;
     bool pianoResizeLeft = false;
     bool pianoDrumPaint = false;
-    bool pianoPlayTool = false; // Piano roll "Play selected" (Y): hold a note to hear it.
+    bool pianoPlayTool = false;
+    bool mixerMeterWave = false; // Mixer "Meter-wave view" (Alt+W): scrolling level waveforms. // Piano roll "Play selected" (Y): hold a note to hear it.
     std::set<Id> zippedChannels; // Channel Rack compact rows (view only; Alt+Z zip, Alt+U unzip all). // Piano roll "Paint drum sequencer" tool (N): snap-length notes, click mutes. // Piano roll "Allow resizing from left" (Ctrl+Alt+Home). // Chord Stamp: a chord shape name; drawing a note places the whole chord. // Playlist Stretch (Shift+M): an audio clip's right edge stretches it. // "Markers" snap (Playlist): positions land on Playlist markers. // "Line" snap: pointer edits follow the visible grid lines (zoom dependent). // Playlist page-scrolls to keep the Song playhead in view.
     double snap = .25;
     std::vector<Id> selectedNotes, selectedClips;

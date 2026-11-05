@@ -4485,6 +4485,16 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "mixer.meterWave")
+    {
+        mixerMeterWave = !mixerMeterWave;
+        status = mixerMeterWave ? "Meter-wave view on" : "Meter-wave view off";
+        for (auto &w : windows)
+            if (w)
+                w->repaint();
+        repaint();
+        return true;
+    }
     if (action == "channel.spareStore" || action == "channel.spareFlip")
     {
         if (!controller.project.channel(selectedChannel))

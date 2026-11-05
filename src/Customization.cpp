@@ -177,6 +177,7 @@ Customization Customization::familiarDefaults()
     add("rack.zip", Scope::rack, 'Z', juce::ModifierKeys::altModifier);
     add("rack.linkSequential", Scope::rack, 'L', ctrl | shift);
     add("rack.linkSequential", Scope::mixer, 'L', ctrl | shift);
+    add("mixer.meterWave", Scope::mixer, 'W', juce::ModifierKeys::altModifier);
     add("rack.unzipAll", Scope::rack, 'U', juce::ModifierKeys::altModifier);
     add("channel.clone", Scope::rack, 'C', juce::ModifierKeys::altModifier);
     add("channel.delete", Scope::rack, juce::KeyPress::deleteKey, juce::ModifierKeys::altModifier);

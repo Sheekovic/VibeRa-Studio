@@ -140,3 +140,8 @@ playback and export. Read `delayMs` on the mixer rows. UI: insert menu > Track d
 
 `mixer.insert.create` takes `args.value` 1..32 to add several inserts in one Undo step (insert
 menu > Add multiple inserts...).
+
+## Meter-wave view
+
+`mixer.meterWave` (Alt+W in the Mixer) toggles each insert's peak meters into a scrolling level
+waveform (newest at the bottom, width = peak). View only; read `state.mixerMeterWave`.
