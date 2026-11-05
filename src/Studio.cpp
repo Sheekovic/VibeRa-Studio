@@ -4388,6 +4388,45 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return status == "Ready";
     }
+    if (action == "rack.assignFreeInserts")
+    {
+        // Each selected Channel (Rack order) gets its own unused Mixer insert, lowest first,
+        // as one routing plan and one Undo step.
+        std::vector<Id> targets;
+        for (const auto &channel : controller.project.channels)
+            if (std::find(selectedChannels.begin(), selectedChannels.end(), channel.id) != selectedChannels.end() &&
+                !channel.audioClip)
+                targets.push_back(channel.id);
+        if (targets.empty() && controller.project.channel(selectedChannel))
+            targets.push_back(selectedChannel);
+        std::vector<int> free;
+        for (const auto &insert : controller.project.mixer)
+            if (insert.index > 0 &&
+                std::none_of(controller.project.channels.begin(), controller.project.channels.end(),
+                             [&](const auto &channel) { return channel.mixer == insert.index; }))
+                free.push_back(insert.index);
+        std::sort(free.begin(), free.end());
+        if (targets.empty() || free.size() < targets.size())
+        {
+            status = "rack.assignFree.insufficient: " + juce::String(int(free.size())) + " free Mixer insert(s) for " +
+                     juce::String(int(targets.size())) + " Channel(s); add inserts in the Mixer first";
+            repaint();
+            return false;
+        }
+        std::vector<CommandArgs> assignments;
+        for (size_t i = 0; i < targets.size(); ++i)
+        {
+            CommandArgs assignment;
+            assignment.channel = targets[i];
+            assignment.mixer = free[i];
+            assignments.push_back(assignment);
+        }
+        const auto result = applyRoutingSequence(assignments, "Assign Channels to free Mixer inserts");
+        status = result.wasOk() ? "Assigned " + juce::String(int(targets.size())) + " Channel(s) to free Mixer inserts"
+                                : result.getErrorMessage();
+        repaint();
+        return result.wasOk();
+    }
     if (action == "channel.mixer")
     {
         if (focus == Scope::mixer)

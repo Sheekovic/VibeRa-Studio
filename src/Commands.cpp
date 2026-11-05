@@ -535,6 +535,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"rack.properties", "Selected Channel colour / icon", Scope::rack, true, true, "command"},
         {"rack.sort", "Sort selected Channels", Scope::rack, true, true, "command"},
         {"rack.transpose", "Transpose selected Channels (notes in every Pattern)", Scope::rack, true, true, "command"},
+        {"rack.assignFreeInserts", "Assign selected Channels to free Mixer inserts (one each)", Scope::rack, false, true, "action"},
         {"rack.zip", "Zip selected Channels (compact rows)", Scope::rack, false, true, "action"},
         {"rack.linkSequential", "Link selected Channels to consecutive Mixer inserts", Scope::global, false, true, "action"},
         {"rack.unzipAll", "Unzip all Channels", Scope::rack, false, true, "action"},

@@ -66,3 +66,8 @@ arbitrary semantic control. Legacy MCP gaps are deferred, not waived.
   -127..127, nonzero; one Undo) moves their notes in every Pattern; refuses when a note would
   leave 0..127 or the Channels have no notes. UI: Channel Rack options menu > Transpose selected
   Channels... (semitones dialog, `vibera_dialog` field `semitones`).
+- Assign selected to free Mixer inserts: action `rack.assignFreeInserts` (select Channels first
+  with `vibera_rack` select) gives each selected Channel, in Rack order, its own unused insert
+  (lowest index first) as one routing plan and one Undo; refuses with
+  `rack.assignFree.insufficient` when there are fewer free inserts than Channels. UI: Channel
+  Rack options menu.

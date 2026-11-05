@@ -484,6 +484,7 @@ void Studio::rackGroupMenu(juce::Component *anchor)
     menu.addItem(6, "Select all visible Channels");
     menu.addItem(28, "Select unused Channels");
     menu.addItem(33, "Transpose selected Channels...", !selectedChannels.empty());
+    menu.addItem(34, "Assign selected to free Mixer inserts", !selectedChannels.empty());
     menu.addItem(31, "Zip selected Channels    Alt+Z", !selectedChannels.empty());
     menu.addItem(32, "Unzip all    Alt+U", !zippedChannels.empty());
     menu.addItem(7, "Deselect Channels", !selectedChannels.empty());
@@ -562,6 +563,12 @@ void Studio::rackGroupMenu(juce::Component *anchor)
                 }
                 safe->selectRackChannels(unused);
                 safe->status = juce::String(int(unused.size())) + " unused Channel(s) selected";
+            }
+            if (action == 34)
+            {
+                safe->focus = Scope::rack;
+                safe->performAction("rack.assignFreeInserts");
+                return;
             }
             if (action == 33)
             {
