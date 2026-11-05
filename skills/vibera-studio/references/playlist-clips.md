@@ -59,3 +59,7 @@
   merge Pattern clips, consolidate to audio), Auto name (`track.autoName`), Reset name and
   colour (`track.reset`) and Clone track (`track.clone`: the track and copies of its clips
   right below). Alt+T adds a time marker at the playhead (`marker.addAtPlayhead`).
+- **Stretch mode** (`playlist.stretchMode`, Shift+M, Playlist menu; `state.audioStretchMode`):
+  dragging an audio clip's right edge previews the ratio and, on release, stretches the clip
+  to that length keeping pitch (a new file in `Stretched/`, one Undo step when it is ready).
+  With the mode off the right edge resizes (trims) as before.

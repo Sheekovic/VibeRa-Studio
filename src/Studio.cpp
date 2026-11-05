@@ -3892,7 +3892,8 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         return true;
     if (action.startsWith("browser."))
         return browser->viewAction(action);
-    if (action.startsWith("playlist.") && action != "playlist.grouping")
+    if (action.startsWith("playlist.") && action != "playlist.grouping" && action != "playlist.follow" &&
+        action != "playlist.stretchMode")
     {
         if (focus != Scope::playlist)
             return false;
@@ -4455,6 +4456,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     {
         a.ids = effectiveClipSelection();
         command(action, a);
+        return true;
+    }
+    if (action == "playlist.stretchMode")
+    {
+        audioStretchMode = !audioStretchMode;
+        status = audioStretchMode ? "Stretch on: drag an audio clip's right edge to stretch it (keeps pitch)"
+                                  : "Stretch off: the right edge resizes audio clips";
+        repaint();
         return true;
     }
     if (action == "playlist.follow")

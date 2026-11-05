@@ -641,6 +641,8 @@ class Studio::Editor final : public juce::Component,
     Id trimmingAudio = 0;
     Id trimmingAutomation = 0;
     Id trimmingPattern = 0; // Pattern clip left-edge trim (start moves, end stays).
+    Id stretchingAudio = 0; // Stretch mode: right-edge drag previews, release stretches (keeps pitch).
+    double stretchToBeat = 0;
     double patternTrimBeat = 0, patternTrimOffset = 0, patternTrimLength = 0;
     double automationTrimBeat = 0, automationTrimOffset = 0, automationTrimLength = 0;
     double trimStartBeat = 0, trimStartOffset = 0, trimStartDuration = 0;
@@ -1508,6 +1510,7 @@ class Studio::Editor final : public juce::Component,
                 menu.addItem(9, "Ungroup Clips (Alt+G)", !s.selectedClips.empty());
                 menu.addItem(10, "Enable Clip grouping", true, s.controller.clipGroupingEnabled);
                 menu.addItem(16, "Auto-scroll with the playhead", true, s.followPlayhead);
+                menu.addItem(17, "Stretch audio clips by dragging (Shift+M)", true, s.audioStretchMode);
                 menu.addSeparator();
                 {
                     juce::PopupMenu arrangementsMenu;
@@ -1572,9 +1575,9 @@ class Studio::Editor final : public juce::Component,
                                                                  : "marker.selectSection");
                             return;
                         }
-                        if (result == 16)
+                        if (result == 16 || result == 17)
                         {
-                            safe->s.performAction("playlist.follow");
+                            safe->s.performAction(result == 16 ? "playlist.follow" : "playlist.stretchMode");
                             return;
                         }
                         if (result == 8 || result == 9 || result == 10)
@@ -3565,6 +3568,20 @@ class Studio::Editor final : public juce::Component,
                         g.setColour(colour);
                         g.drawRoundedRectangle(r, 3, 1);
                     }
+                if (type == 2 && stretchingAudio)
+                    for (const auto &c : playlistClips())
+                        if (c.id == stretchingAudio)
+                        {
+                            auto r = cr(c);
+                            r.setRight(float(leftEdge() + (stretchToBeat - scroll) * spacing()));
+                            g.setColour(orange.withAlpha(.16f));
+                            g.fillRoundedRectangle(r, 3);
+                            g.setColour(orange);
+                            g.drawRoundedRectangle(r, 3, 1.5f);
+                            const double ratio = (stretchToBeat - c.beat) / std::max(1. / 64, c.length);
+                            label(g, "Stretch x" + juce::String(ratio, 2),
+                                  {int(r.getRight()) - 96, int(r.getY()) + 18, 92, 16}, ink, 11);
+                        }
                 if (s.liveTakePattern() == s.selectedPattern)
                 {
                     if (type == 1)
@@ -5622,6 +5639,7 @@ class Studio::Editor final : public juce::Component,
         trimmingAudio = 0;
         trimmingAutomation = 0;
         trimmingPattern = 0;
+        stretchingAudio = 0;
         if (id)
         {
             if (!selected(type == 2 ? s.effectiveClipSelection() : list, id))
@@ -5666,6 +5684,12 @@ class Studio::Editor final : public juce::Component,
                     if (c.id == id)
                     {
                         resizing = e.x >= cr(c).getRight() - 7;
+                        if (resizing && s.audioStretchMode && audioClip(id))
+                        {
+                            stretchingAudio = id;
+                            stretchToBeat = c.beat + c.length;
+                            list = {id};
+                        }
                         if (!e.mods.isShiftDown() && e.x <= cr(c).getX() + 7)
                         {
                             if (const auto *clip = automationClip(id))
@@ -6159,6 +6183,13 @@ class Studio::Editor final : public juce::Component,
             }
             return;
         }
+        if (type == 2 && stretchingAudio)
+        {
+            if (const auto *clip = audioClip(stretchingAudio))
+                stretchToBeat = std::max(clip->beat + 1. / 16, snapPosition(beatAt(e.position.x), e.mods));
+            repaint();
+            return;
+        }
         if (type == 2 && trimmingPattern)
         {
             const auto delta = juce::jlimit(-std::min(patternTrimBeat, patternTrimOffset), patternTrimLength - 1. / 64,
@@ -6257,6 +6288,26 @@ class Studio::Editor final : public juce::Component,
     void mouseUp(const juce::MouseEvent &e) override
     {
         rulerScrubbing = false;
+        if (stretchingAudio)
+        {
+            const auto id = std::exchange(stretchingAudio, Id{});
+            if (dragging)
+                finishUiGesture(s, "Edit selection");
+            dragging = resizing = false;
+            if (const auto *clip = audioClip(id))
+            {
+                const auto &p = s.controller.project;
+                const double ratio = (p.songSeconds(stretchToBeat) - p.songSeconds(clip->beat)) / clip->duration;
+                if (std::abs(ratio - 1) > 1.e-3)
+                {
+                    const auto started = s.stretchAudioClip(id, ratio);
+                    if (started.failed())
+                        s.status = started.getErrorMessage();
+                }
+            }
+            repaint();
+            return;
+        }
         if (trackResizeLane >= 0)
         {
             trackResizeLane = -1;

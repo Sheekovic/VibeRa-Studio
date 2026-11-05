@@ -3634,6 +3634,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "snap", snap);
     set(state, "snapLine", snapLine);
     set(state, "snapMarkers", snapMarkers);
+    set(state, "audioStretchMode", audioStretchMode);
     {
         // Playlist tracks with non-default settings (lanes without an entry use the defaults).
         juce::Array<juce::var> tracks;

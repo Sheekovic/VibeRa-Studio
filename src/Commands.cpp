@@ -472,6 +472,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tool.zoom", "Zoom region tool", Scope::playlist, false, true, "action"},
         {"playlist.zoomIn", "Playlist zoom in", Scope::playlist, false, true, "action"},
         {"playlist.follow", "Auto-scroll the Playlist with the playhead", Scope::playlist, false, true, "action"},
+        {"playlist.stretchMode", "Stretch audio clips by dragging their right edge", Scope::playlist, false, true, "action"},
         {"playlist.zoomOut", "Playlist zoom out", Scope::playlist, false, true, "action"},
         {"playlist.zoom1", "Playlist quick zoom 1", Scope::playlist, false, true, "action"},
         {"playlist.zoom2", "Playlist quick zoom 2", Scope::playlist, false, true, "action"},
