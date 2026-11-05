@@ -141,6 +141,8 @@ void Studio::midiFileMenu()
         edit.addItem(46, "Rotate left    Shift+Ctrl+Left");
         edit.addItem(47, "Rotate right    Shift+Ctrl+Right");
         edit.addItem(48, "Discard lengths    Shift+D");
+        edit.addItem(54, "Allow resizing from left    Ctrl+Alt+Home", true, pianoResizeLeft);
+        sel.addItem(55, "Select time around selection    Ctrl+Enter", !selectedNotes.empty());
         juce::PopupMenu limit;
         limit.addItem(49, "C4..B5 (low)");
         limit.addItem(50, "C5..B6 (middle)");
@@ -286,6 +288,12 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result == 54 || result == 55)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction(result == 54 ? "piano.resizeLeft" : "selection.timeAround");
                 return;
             }
             if (result >= 40 && result <= 53)

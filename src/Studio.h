@@ -228,7 +228,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool snapLine = false;
     bool snapMarkers = false;
     bool audioStretchMode = false;
-    juce::String pianoStamp; // Chord Stamp: a chord shape name; drawing a note places the whole chord. // Playlist Stretch (Shift+M): an audio clip's right edge stretches it. // "Markers" snap (Playlist): positions land on Playlist markers. // "Line" snap: pointer edits follow the visible grid lines (zoom dependent). // Playlist page-scrolls to keep the Song playhead in view.
+    juce::String pianoStamp;
+    bool pianoResizeLeft = false; // Piano roll "Allow resizing from left" (Ctrl+Alt+Home). // Chord Stamp: a chord shape name; drawing a note places the whole chord. // Playlist Stretch (Shift+M): an audio clip's right edge stretches it. // "Markers" snap (Playlist): positions land on Playlist markers. // "Line" snap: pointer edits follow the visible grid lines (zoom dependent). // Playlist page-scrolls to keep the Song playhead in view.
     double snap = .25;
     std::vector<Id> selectedNotes, selectedClips;
     std::vector<Id> selectedChannels; // Bulk Rack targets; active/MIDI target stays selectedChannel.

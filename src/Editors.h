@@ -484,6 +484,12 @@ class Studio::Editor final : public juce::Component,
         horizontalBar.repaint();
         repaint();
     }
+    void setTimeSelection(double start, double end)
+    {
+        timeStart = start;
+        timeEnd = end;
+        repaint();
+    }
     // The ruler time selection (Piano roll / Playlist editors), when there is one.
     std::optional<std::pair<double, double>> timeSelection() const
     {
@@ -661,6 +667,7 @@ class Studio::Editor final : public juce::Component,
     double automationTrimBeat = 0, automationTrimOffset = 0, automationTrimLength = 0;
     double trimStartBeat = 0, trimStartOffset = 0, trimStartDuration = 0;
     bool selecting = false, dragging = false, erasing = false, resizing = false, paintMode = false;
+    bool resizingLeft = false; // Piano roll: dragging a note's start (option "Allow resizing from left").
     juce::Point<float> origin, lastErasePoint;
     juce::Rectangle<float> rectangle;
     int gridTop() const
@@ -1249,6 +1256,11 @@ class Studio::Editor final : public juce::Component,
         o->setProperty("gridLeft", leftEdge());
         o->setProperty("pixelsPerBeat", spacing());
         o->setProperty("scrollBeat", scroll);
+        if (type == 1)
+        {
+            o->setProperty("topPitch", topPitch); // A pitch row spans gridTop + (topPitch - pitch) * rowHeight.
+            o->setProperty("rowHeight", height());
+        }
         return juce::var(o);
     }
     bool isPickerShown() const
@@ -5695,6 +5707,8 @@ class Studio::Editor final : public juce::Component,
                             const auto bounds = pressedOccurrence ? nr(pressedOccurrence->note) : nr(n);
                             resizing = (!pressedOccurrence || !pressedOccurrence->clippedEnd) &&
                                        e.x >= bounds.getRight() - (bounds.getWidth() > 10 ? 6 : 2);
+                            resizingLeft = !resizing && s.pianoResizeLeft && !e.mods.isShiftDown() &&
+                                           bounds.getWidth() > 10 && e.x <= bounds.getX() + 6;
                             noteLength = n.length;
                         }
             }
@@ -6290,6 +6304,13 @@ class Studio::Editor final : public juce::Component,
             a.length = d - lastLength;
             lastLength = d;
         }
+        else if (resizingLeft && type == 1)
+        {
+            // The start moves, the end stays.
+            a.beat = d - lastBeat;
+            a.length = -(d - lastBeat);
+            lastBeat = d;
+        }
         else
         {
             a.beat = d - lastBeat;
@@ -6611,12 +6632,22 @@ class Studio::Editor final : public juce::Component,
         if (dragging || erasing)
             finishUiGesture(s, type == 0 ? "Edit steps" : type == 3 ? "Mixer volume" : "Edit selection");
         dragging = erasing = false;
+        resizingLeft = false;
         repaint();
     }
     void mouseMove(const juce::MouseEvent &e) override
     {
         // Playlist clip edges show a resize cursor (right edge: length, left edge: trim start).
         auto cursor = juce::MouseCursor::NormalCursor;
+        if (type == 1 && e.y >= gridTop() && e.x >= leftEdge())
+            if (const auto occurrence = pianoHit(e.position))
+            {
+                // Note edges: the end resizes; the start too with "Allow resizing from left".
+                const auto r = nr(occurrence->note);
+                if ((e.position.x >= r.getRight() - 6 && r.getWidth() > 10) ||
+                    (s.pianoResizeLeft && r.getWidth() > 10 && e.position.x <= r.getX() + 6))
+                    cursor = juce::MouseCursor::LeftRightResizeCursor;
+            }
         if (type == 2 && e.y >= gridTop() && e.x < leftEdge() && e.x >= pickerWidth())
         {
             const int row = rowAtY(e.y);

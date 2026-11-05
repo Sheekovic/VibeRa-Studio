@@ -3921,7 +3921,7 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         return pianoNoteModes(request)["completionState"].toString() != "failed";
     }
     if (action.startsWith("piano.") && action != "piano.toolMute" && action != "piano.toolSlice" &&
-        action != "piano.exportMidi")
+        action != "piano.exportMidi" && action != "piano.resizeLeft")
     {
         static_cast<Editor *>(windows[1]->getContentComponent())->viewAction(action);
         return true;
@@ -4615,6 +4615,30 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         selectItems(false, chosenNotes);
         status = juce::String(int(chosenNotes.size())) + " note(s) selected";
         repaint();
+        return true;
+    }
+    if (action == "piano.resizeLeft")
+    {
+        pianoResizeLeft = !pianoResizeLeft;
+        status = pianoResizeLeft ? "Resizing notes from the left: on" : "Resizing notes from the left: off";
+        repaint();
+        return true;
+    }
+    if (action == "selection.timeAround")
+    {
+        const auto *part = controller.project.pattern(selectedPattern);
+        double start = 1.e18, end = -1.e18;
+        if (part)
+            for (const auto &n : part->notes)
+                if (selected(selectedNotes, n.id))
+                    start = std::min(start, n.beat), end = std::max(end, n.beat + n.length);
+        if (!(end > start))
+        {
+            status = "Select notes first";
+            repaint();
+            return false;
+        }
+        static_cast<Editor *>(windows[1]->getContentComponent())->setTimeSelection(start, end);
         return true;
     }
     if (action == "selection.invert")

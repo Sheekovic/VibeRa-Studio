@@ -24,3 +24,8 @@
   Piano roll ruler selection): `notes.insertSpace` / `notes.deleteSpace` with `args.beat`,
   `args.length` (and `args.enabled` to slice on insert) act on the Channel's notes and
   controller events in the Pattern.
+- **Resizing from the left** (`piano.resizeLeft` toggles, Ctrl+Alt+Home; Piano roll menu > Edit):
+  dragging a note's start moves it while the end stays. Note edges show a resize cursor.
+- **Select time around selection** (`selection.timeAround`, Ctrl+Enter) sets the ruler time
+  selection to the selected notes' span. `editors[1].timeline` also reports `topPitch` and
+  `rowHeight` (row y = rulerBottom + (topPitch - pitch) * rowHeight).
