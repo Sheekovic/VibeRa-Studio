@@ -977,6 +977,10 @@ class Studio::Editor final : public juce::Component,
     {
         return std::max(0., (x - leftEdge()) / spacing() + scroll);
     }
+    std::array<double, 10> playlistSnapValues() const
+    {
+        return {0, .25, .5, 1, barBeats(), .0625, .125, 1. / 6, 1. / 3, 2 * barBeats()};
+    }
     double snap(double v, const juce::ModifierKeys &m) const
     {
         return m.isAltDown() || s.snap == 0 ? v : std::round(v / s.snap) * s.snap;
@@ -1430,12 +1434,16 @@ class Studio::Editor final : public juce::Component,
                  std::initializer_list<juce::Component *>{&playlistMenu, &playlistGrouping, &playlistSnap,
                                                           &playlistZoomOut, &playlistZoomIn, &playlistFit})
                 addAndMakeVisible(control);
-            playlistSnap.addItemList({"Snap: None", "Snap: 1/4", "Snap: 1/2", "Snap: Beat", "Snap: Bar"}, 1);
+            // Familiar snap set: steps (1/4 beat), triplets and finer divisions; ids follow playlistSnapValues.
+            playlistSnap.addItemList({"Snap: None", "Snap: 1/4", "Snap: 1/2", "Snap: Beat", "Snap: Bar",
+                                      "Snap: 1/16", "Snap: 1/8", "Snap: 1/6 T",
+                                      "Snap: 1/3 T", "Snap: 2 bars"},
+                                     1);
             playlistSnap.setSelectedId(2, juce::dontSendNotification);
             playlistSnap.onChange = [this]
             {
-                const double values[]{0, .25, .5, 1, barBeats()};
-                s.snap = values[juce::jlimit(0, 4, playlistSnap.getSelectedId() - 1)];
+                const auto values = playlistSnapValues();
+                s.snap = values[size_t(juce::jlimit(0, int(values.size()) - 1, playlistSnap.getSelectedId() - 1))];
                 s.refresh();
             };
             playlistZoomOut.onClick = [this] { viewAction("playlist.zoomOut"); };
@@ -2749,12 +2757,17 @@ class Studio::Editor final : public juce::Component,
             playlistGrouping.setEnabled(!s.controller.hasGesture());
         }
         if (type == 2)
-            playlistSnap.setSelectedId(s.snap == 0     ? 1
-                                       : s.snap == .25 ? 2
-                                       : s.snap == .5  ? 3
-                                       : s.snap == 1   ? 4
-                                                       : 5,
-                                       juce::dontSendNotification);
+        {
+            const auto values = playlistSnapValues();
+            int chosen = 5;
+            for (size_t i = 0; i < values.size(); ++i)
+                if (std::abs(values[i] - s.snap) < 1.e-9)
+                {
+                    chosen = int(i) + 1;
+                    break;
+                }
+            playlistSnap.setSelectedId(chosen, juce::dontSendNotification);
+        }
         if (type == 0)
         {
             int count = pattern() ? stepSequenceSize(*pattern()) : 16;

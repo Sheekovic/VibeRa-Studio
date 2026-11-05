@@ -41,3 +41,7 @@
 - **Track height:** drag the bottom edge of a track header (or `track.height`, `args.lane`,
   `args.value` .5..3). `state.playlistTracks` lists tracks with non-default settings (name,
   colour, mute, lock, group, height, instrument Channel, audio).
+- **Snap:** the Playlist offers None, 1/16, 1/8, 1/6 T, 1/4 (step), 1/3 T, 1/2, Beat, Bar and
+  2 bars; Alt bypasses snap while dragging. Set it with `vibera_editor`
+  `{"editor":2,"action":"snap","snap":<beats>}` (shared with the Piano roll) and read
+  `state.snap`.
