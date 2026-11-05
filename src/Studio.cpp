@@ -4534,6 +4534,23 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         selectItems(false, pasted);
         return true;
     }
+    if (action == "notes.insertSpaceAction" || action == "notes.insertSpaceSliced" ||
+        action == "notes.deleteSpaceAction")
+    {
+        const auto range = static_cast<Editor *>(windows[1]->getContentComponent())->timeSelection();
+        if (!range)
+        {
+            status = "Select time on the Piano roll ruler first (Ctrl+drag)";
+            repaint();
+            return false;
+        }
+        a.ids.clear();
+        a.beat = range->first;
+        a.length = range->second - range->first;
+        a.enabled = action == "notes.insertSpaceSliced";
+        command(action == "notes.deleteSpaceAction" ? "notes.deleteSpace" : "notes.insertSpace", a);
+        return status == "Ready";
+    }
     if (action == "notes.rotateLeft" || action == "notes.rotateRight" || action == "notes.discardLengthsAction")
     {
         a.ids = selectedNotes;

@@ -336,6 +336,18 @@ inline void tests()
             require(controller.execute("notes.flam", tool).wasOk() && kickBeats().size() == 4,
                     "Flam adds a grace note before each note");
             controller.undoEdit();
+            CommandArgs space;
+            space.pattern = pattern.id;
+            space.channel = kick;
+            space.beat = 1;
+            space.length = 2;
+            space.enabled = false;
+            require(controller.execute("notes.insertSpace", space).wasOk() && kickBeats() == std::vector<double>{0, 4},
+                    "Insert space moves the Channel's later notes by the space");
+            controller.undoEdit();
+            require(controller.execute("notes.deleteSpace", space).wasOk() && kickBeats() == std::vector<double>{0},
+                    "Delete space removes the note inside the range");
+            controller.undoEdit();
             flip.text = "sideways";
             require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
         }

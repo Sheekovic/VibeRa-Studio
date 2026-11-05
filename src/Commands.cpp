@@ -725,6 +725,11 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.paste", "Paste notes", Scope::piano, true, true, "command"},
         {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},
         {"notes.rotate", "Rotate notes (wrap within their bars)", Scope::piano, true, true, "command"},
+        {"notes.insertSpace", "Insert space in the Channel part", Scope::piano, true, true, "command"},
+        {"notes.deleteSpace", "Delete space in the Channel part", Scope::piano, true, true, "command"},
+        {"notes.insertSpaceAction", "Insert space (time selection)", Scope::piano, false, true, "action"},
+        {"notes.insertSpaceSliced", "Slice and insert space (time selection)", Scope::piano, false, true, "action"},
+        {"notes.deleteSpaceAction", "Delete space (time selection)", Scope::piano, false, true, "action"},
         {"notes.discardLengths", "Discard note lengths", Scope::piano, true, true, "command"},
         {"notes.limit", "Limit notes to a key range", Scope::piano, true, true, "command"},
         {"notes.flam", "Flam notes", Scope::piano, true, true, "command"},
@@ -4077,6 +4082,62 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     n.beat = std::max(0., start + end - (n.beat + n.length));
                 else
                     n.pitch = juce::jlimit(0, 127, low + high - n.pitch);
+            }
+        }
+        if (id == "notes.insertSpace" || id == "notes.deleteSpace")
+        {
+            // The Channel's notes and controller events: [beat, beat + length) is inserted
+            // (later events move later; args.enabled slices notes crossing the start) or
+            // deleted (events inside are removed, notes crossing it are cut, later ones close up).
+            if (!ch || ch->audioClip)
+                return juce::Result::fail("Select a playable Channel");
+            if (!std::isfinite(a.beat) || !std::isfinite(a.length) || a.beat < 0 || a.length < 1. / 64 ||
+                a.beat + a.length > 100000)
+                return juce::Result::fail("Select a time range on the Piano roll ruler first (Ctrl+drag)");
+            const double start = a.beat, end = a.beat + a.length;
+            auto &notes = pat->notes;
+            if (id == "notes.insertSpace")
+            {
+                std::vector<Note> tails;
+                for (auto &n : notes)
+                {
+                    if (n.channel != a.channel)
+                        continue;
+                    if (n.beat >= start - 1.e-9)
+                        n.beat += a.length;
+                    else if (a.enabled && n.beat + n.length > start + 1.e-9)
+                    {
+                        auto tail = n;
+                        tail.id = next.allocate();
+                        tail.beat = end;
+                        tail.length = n.beat + n.length - start;
+                        n.length = start - n.beat;
+                        tails.push_back(tail);
+                    }
+                }
+                notes.insert(notes.end(), tails.begin(), tails.end());
+                for (auto &c : pat->controllers)
+                    if (c.channel == a.channel && c.beat >= start - 1.e-9)
+                        c.beat += a.length;
+            }
+            else
+            {
+                std::erase_if(notes, [&](const auto &n)
+                              { return n.channel == a.channel && n.beat >= start - 1.e-9 && n.beat < end - 1.e-9; });
+                for (auto &n : notes)
+                {
+                    if (n.channel != a.channel)
+                        continue;
+                    if (n.beat < start && n.beat + n.length > start)
+                        n.length = std::max(1. / 64, start - n.beat + std::max(0., n.beat + n.length - end));
+                    else if (n.beat >= end - 1.e-9)
+                        n.beat -= a.length;
+                }
+                std::erase_if(pat->controllers, [&](const auto &c)
+                              { return c.channel == a.channel && c.beat >= start - 1.e-9 && c.beat < end - 1.e-9; });
+                for (auto &c : pat->controllers)
+                    if (c.channel == a.channel && c.beat >= end - 1.e-9)
+                        c.beat -= a.length;
             }
         }
         if (id == "notes.rotate" || id == "notes.discardLengths" || id == "notes.limit" || id == "notes.flam")

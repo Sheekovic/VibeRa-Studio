@@ -20,3 +20,7 @@
   adds a softer grace note before each note). Alt+M / Alt+Shift+M mute / unmute.
 - **Select:** Shift+R one more at random, Shift+O odd (off-beat) steps, and menu Select muted,
   overlapping (all but the lowest), stacked (exact duplicates).
+- **Insert / delete space** (Ctrl+Ins, Ctrl+Alt+Ins slices crossing notes, Ctrl+Del; uses the
+  Piano roll ruler selection): `notes.insertSpace` / `notes.deleteSpace` with `args.beat`,
+  `args.length` (and `args.enabled` to slice on insert) act on the Channel's notes and
+  controller events in the Pattern.

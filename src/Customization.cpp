@@ -247,6 +247,9 @@ Customization Customization::familiarDefaults()
     add("notes.paste", Scope::piano, 'V', ctrl);
     add("selection.invert", Scope::piano, 'I', shift);
     add("notes.rotateLeft", Scope::piano, juce::KeyPress::leftKey, ctrl | shift);
+    add("notes.insertSpaceAction", Scope::piano, juce::KeyPress::insertKey, ctrl);
+    add("notes.insertSpaceSliced", Scope::piano, juce::KeyPress::insertKey, ctrl | juce::ModifierKeys::altModifier);
+    add("notes.deleteSpaceAction", Scope::piano, juce::KeyPress::deleteKey, ctrl);
     add("notes.rotateRight", Scope::piano, juce::KeyPress::rightKey, ctrl | shift);
     add("notes.discardLengthsAction", Scope::piano, 'D', shift);
     add("notes.mute", Scope::piano, 'M', juce::ModifierKeys::altModifier);

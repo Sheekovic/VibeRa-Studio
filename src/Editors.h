@@ -484,6 +484,13 @@ class Studio::Editor final : public juce::Component,
         horizontalBar.repaint();
         repaint();
     }
+    // The ruler time selection (Piano roll / Playlist editors), when there is one.
+    std::optional<std::pair<double, double>> timeSelection() const
+    {
+        if (!hasTimeSelection())
+            return std::nullopt;
+        return std::pair{timeStart, timeEnd};
+    }
     // Piano roll paste position: the start of the leftmost visible bar (familiar Ctrl+V).
     double pasteBeat() const
     {
