@@ -154,6 +154,13 @@ void Studio::midiFileMenu()
         edit.addSubMenu("Flam", flam);
         menu.addSubMenu("Edit", edit);
     }
+    {
+        juce::PopupMenu randomize;
+        randomize.addItem(56, "Sparse (1/8 steps)");
+        randomize.addItem(57, "Medium (1/8 steps)");
+        randomize.addItem(58, "Dense (1/16 steps)");
+        menu.addSubMenu("Randomize (replaces this Channel's part, guide scale or C major)", randomize);
+    }
     menu.addItem(17, "Flip horizontally (reverse in time)");
     menu.addItem(18, "Flip vertically (mirror pitches)");
     // Composition tools act on the selection, or the whole Channel part without one.
@@ -288,6 +295,20 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result >= 56 && result <= 58)
+            {
+                safe->focus = Scope::piano;
+                auto args = noteTargets;
+                args.ids.clear();
+                const auto &guide = safe->pianoGuide;
+                args.text = guide.name.isNotEmpty() && !guide.maqam ? guide.name : juce::String("major");
+                args.pitch = 60 + (guide.name.isNotEmpty() && !guide.maqam ? guide.root : 0);
+                args.length = result == 58 ? .25 : .5;
+                args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
+                args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
+                safe->command("notes.randomize", args);
                 return;
             }
             if (result == 54 || result == 55)

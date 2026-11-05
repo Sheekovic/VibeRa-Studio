@@ -31,3 +31,7 @@
   `rowHeight` (row y = rulerBottom + (topPitch - pitch) * rowHeight).
 - **Paint drum sequencer** (`tool.drumPaint`, N): paints notes the length of the snap; clicking
   an existing note mutes / unmutes it instead of moving it. P (Draw) and B (Paint) leave it.
+- **Randomize** (`notes.randomize`: `args.text` scale name from the scale list, `args.pitch`
+  root/lowest note, `args.length` step, `args.value` density 0..1, `args.seed`): replaces the
+  Channel part with random in-scale notes over the Pattern (one Undo). Menu > Randomize uses
+  the Piano roll scale guide, or C major.

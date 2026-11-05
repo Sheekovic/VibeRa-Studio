@@ -727,6 +727,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.cut", "Cut notes", Scope::piano, false, true, "action"},
         {"notes.paste", "Paste notes", Scope::piano, true, true, "command"},
         {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},
+        {"notes.randomize", "Randomize: generate notes in a scale", Scope::piano, true, true, "command"},
         {"notes.rotate", "Rotate notes (wrap within their bars)", Scope::piano, true, true, "command"},
         {"notes.insertSpace", "Insert space in the Channel part", Scope::piano, true, true, "command"},
         {"notes.deleteSpace", "Delete space in the Channel part", Scope::piano, true, true, "command"},
@@ -4217,6 +4218,47 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 }
                 pat->notes.insert(pat->notes.end(), graces.begin(), graces.end());
             }
+        }
+        if (id == "notes.randomize")
+        {
+            // Replace the Channel part with random notes over the Pattern: args.text scale,
+            // args.pitch root (lowest note), args.length grid step, args.value density 0..1,
+            // args.seed. Notes stay inside one octave above the root plus its top note.
+            if (!ch || ch->audioClip)
+                return juce::Result::fail("Select a playable Channel");
+            const auto &scales = score::scaleShapes();
+            const auto shape = std::find_if(scales.begin(), scales.end(),
+                                            [&](const auto &s2) { return a.text == s2.name; });
+            if (shape == scales.end())
+                return juce::Result::fail("Unknown scale: " + a.text);
+            if (!std::isfinite(a.length) || a.length < 1. / 16 || a.length > 4)
+                return juce::Result::fail("Randomize step is 1/16..4 beats");
+            if (!std::isfinite(a.value) || a.value <= 0 || a.value > 1)
+                return juce::Result::fail("Randomize density is 0..1");
+            if (a.pitch < 0 || a.pitch > 115)
+                return juce::Result::fail("Randomize root is 0..115");
+            const double span = std::max(a.length, pat->length > 0 ? pat->length : 4.);
+            if (span / a.length > 4096)
+                return juce::Result::fail("Too many steps to randomize");
+            std::vector<int> pitches;
+            for (int octave = 0; octave < 2; ++octave)
+                for (int interval : shape->intervals)
+                    if (octave == 0 || interval == 0)
+                        pitches.push_back(a.pitch + octave * 12 + interval);
+            std::erase_if(pat->notes, [&](const auto &n) { return n.channel == a.channel; });
+            juce::Random random(juce::int64(a.seed.value_or(1)));
+            for (double beat = 0; beat < span - 1.e-9; beat += a.length)
+                if (random.nextFloat() < float(a.value))
+                {
+                    Note n;
+                    n.id = next.allocate();
+                    n.channel = a.channel;
+                    n.beat = beat;
+                    n.length = a.length * (random.nextFloat() < .25f ? 2 : 1);
+                    n.pitch = pitches[size_t(random.nextInt(int(pitches.size())))];
+                    n.velocity = .55 + .4 * random.nextFloat();
+                    pat->notes.push_back(n);
+                }
         }
         if (id == "notes.paste")
         {

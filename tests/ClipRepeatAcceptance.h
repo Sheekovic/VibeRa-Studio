@@ -348,6 +348,36 @@ inline void tests()
             require(controller.execute("notes.deleteSpace", space).wasOk() && kickBeats() == std::vector<double>{0},
                     "Delete space removes the note inside the range");
             controller.undoEdit();
+            CommandArgs randomize;
+            randomize.pattern = pattern.id;
+            randomize.channel = snare;
+            randomize.text = "major";
+            randomize.pitch = 60;
+            randomize.length = .25;
+            randomize.value = .7;
+            randomize.seed = 42;
+            auto snareNotes = [&]
+            {
+                std::vector<std::pair<double, int>> list;
+                for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                    if (n.channel == snare)
+                        list.push_back({n.beat, n.pitch});
+                std::sort(list.begin(), list.end());
+                return list;
+            };
+            require(controller.execute("notes.randomize", randomize).wasOk(), "Randomize the snare part");
+            const auto first = snareNotes();
+            bool inScale = !first.empty();
+            for (const auto &[beat, pitchValue] : first)
+                inScale = inScale && std::set<int>{0, 2, 4, 5, 7, 9, 11}.contains(pitchValue % 12) && pitchValue >= 60 &&
+                          pitchValue <= 72;
+            require(inScale, "Random notes stay in C major from C5 to C6");
+            controller.undoEdit();
+            require(controller.execute("notes.randomize", randomize).wasOk() && snareNotes() == first,
+                    "The same seed gives the same notes");
+            controller.undoEdit();
+            randomize.text = "nonsense";
+            require(controller.execute("notes.randomize", randomize).failed(), "An unknown scale is refused");
             flip.text = "sideways";
             require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
         }
