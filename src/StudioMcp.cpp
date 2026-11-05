@@ -3586,6 +3586,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "tilePrimaryEditor", tilePrimaryEditor);
     set(state, "playing", audio.playing());
     set(state, "patternMode", patternMode);
+    set(state, "playlistFollowPlayhead", followPlayhead);
     set(state, "recordArmed", recordArmed);
     set(state, "recordingTake", midiTaking);
     set(state, "recording", midiTakeState());

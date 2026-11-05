@@ -4456,6 +4456,13 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "playlist.follow")
+    {
+        followPlayhead = !followPlayhead;
+        status = followPlayhead ? "Playlist auto-scroll on" : "Playlist auto-scroll off";
+        repaint();
+        return true;
+    }
     if (action == "clip.render")
     {
         const auto started = renderClipsToAudio(effectiveClipSelection());
@@ -5670,6 +5677,9 @@ void Studio::timerCallback()
     audio.setMidiTarget(selectedChannel);
     click.setToggleState(audio.metronome(), juce::dontSendNotification);
     countIn.setToggleState(audio.countInBars() > 0, juce::dontSendNotification);
+    if (windows[2])
+        if (auto *playlist = dynamic_cast<Editor *>(windows[2]->getContentComponent()))
+            playlist->followPlayhead();
     play.setButtonText(audio.playing() ? "Pause" : "Play");
     play.setToggleState(audio.playing(), juce::dontSendNotification);
     loopButton.setToggleState(audio.looping(), juce::dontSendNotification);

@@ -471,6 +471,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tool.delete", "Delete clips tool", Scope::playlist, false, true, "action"},
         {"tool.zoom", "Zoom region tool", Scope::playlist, false, true, "action"},
         {"playlist.zoomIn", "Playlist zoom in", Scope::playlist, false, true, "action"},
+        {"playlist.follow", "Auto-scroll the Playlist with the playhead", Scope::playlist, false, true, "action"},
         {"playlist.zoomOut", "Playlist zoom out", Scope::playlist, false, true, "action"},
         {"playlist.zoom1", "Playlist quick zoom 1", Scope::playlist, false, true, "action"},
         {"playlist.zoom2", "Playlist quick zoom 2", Scope::playlist, false, true, "action"},

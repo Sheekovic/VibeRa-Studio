@@ -35,3 +35,6 @@
   windows, repeats, mixer and the tempo in force at their start) into `Rendered/` beside the
   project, the WAV is placed at their start on the first free track and the originals are
   muted. Poll `vibera_state` until the audio clip appears.
+- **Auto-scroll** (`playlist.follow` toggles; Playlist menu > Auto-scroll with the playhead;
+  on by default, read `state.playlistFollowPlayhead`): during Song playback the Playlist
+  page-scrolls when the playhead leaves the view, never during a pointer gesture.

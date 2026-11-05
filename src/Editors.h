@@ -466,6 +466,22 @@ class Studio::Editor final : public juce::Component,
     {
         return timeEnd - timeStart > 1.e-8;
     }
+  public:
+    // Song playback auto-scroll: when the playhead leaves the visible range, the next page
+    // starts at the playhead (a jump back, e.g. a loop, scrolls back too).
+    void followPlayhead()
+    {
+        if (type != 2 || !s.followPlayhead || s.patternMode || !s.audio.playing() || !isShowing() ||
+            isMouseButtonDown(true) || rulerScrubbing)
+            return;
+        const double beat = std::max(0., s.audio.positionBeat()), span = viewBeats();
+        if (beat >= scroll && beat < scroll + span * .98)
+            return;
+        scroll = std::max(0., beat - span * .02);
+        horizontalBar.repaint();
+        repaint();
+    }
+  private:
     // Playlist ruler right-click menu (familiar timeline actions at the clicked beat).
     void rulerMenu(double beat)
     {
@@ -1446,6 +1462,7 @@ class Studio::Editor final : public juce::Component,
                 menu.addItem(8, "Group Clips (Shift+G)", s.effectiveClipSelection().size() > 1);
                 menu.addItem(9, "Ungroup Clips (Alt+G)", !s.selectedClips.empty());
                 menu.addItem(10, "Enable Clip grouping", true, s.controller.clipGroupingEnabled);
+                menu.addItem(16, "Auto-scroll with the playhead", true, s.followPlayhead);
                 menu.addSeparator();
                 {
                     juce::PopupMenu arrangementsMenu;
@@ -1508,6 +1525,11 @@ class Studio::Editor final : public juce::Component,
                             safe->s.performAction(result == 13   ? "marker.next"
                                                   : result == 14 ? "marker.previous"
                                                                  : "marker.selectSection");
+                            return;
+                        }
+                        if (result == 16)
+                        {
+                            safe->s.performAction("playlist.follow");
                             return;
                         }
                         if (result == 8 || result == 9 || result == 10)
