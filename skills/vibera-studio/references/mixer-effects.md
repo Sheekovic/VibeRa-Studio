@@ -212,3 +212,7 @@ in the configured chain preset directory. Flip effect chain with spare state (`m
 saves the current chain, loads and applies the spare (one Undo step) and keeps the saved one as
 the new spare. Needs a chain preset directory (insert menu > Chain preset directory...). Read
 `state.spareStateInserts` and `state.spareStateBusy`.
+
+Insert menu > Add insert from chain preset... creates a new insert and opens the chain preset
+chooser to load and apply a saved chain onto it (familiar "Add from state"). MCP: run
+`mixer.insert.create`, then `vibera_mixerchain` `loadApply` on the new insert.

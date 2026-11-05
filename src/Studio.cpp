@@ -7122,6 +7122,7 @@ void Studio::effectMenu(int index)
     menu.addItem(10011, "Track delay..." + (insert->delayMs > 0 ? " (" + juce::String(insert->delayMs, 1) + " ms)" : juce::String()));
     menu.addItem(10008, "Create insert", !mixerChainBusy());
     menu.addItem(10012, "Add multiple inserts...", !mixerChainBusy());
+    menu.addItem(10015, "Add insert from chain preset...", !mixerChainBusy());
     menu.addItem(10013, "Store effect chain in spare state", !mixerChainBusy() && !insert->effects.empty());
     menu.addItem(10014, "Flip effect chain with spare state", !mixerChainBusy() && effectSpares.contains(index));
     juce::PopupMenu deleteMenu;
@@ -7263,6 +7264,22 @@ void Studio::effectMenu(int index)
                            if (selected == 10010)
                            {
                                safe->openMixerEq(index);
+                               return;
+                           }
+                           if (selected == 10015)
+                           {
+                               // Familiar "Add from state": a new insert, then load a chain preset onto it.
+                               std::set<int> before;
+                               for (const auto &row : safe->controller.project.mixer)
+                                   before.insert(row.index);
+                               safe->command("mixer.insert.create", {});
+                               for (const auto &row : safe->controller.project.mixer)
+                                   if (!before.contains(row.index))
+                                   {
+                                       safe->selectedInsert = row.index;
+                                       safe->chooseMixerChainFile("loadApply", row.index);
+                                   }
+                               safe->repaint();
                                return;
                            }
                            if (selected == 10013 || selected == 10014)
