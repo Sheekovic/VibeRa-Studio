@@ -454,6 +454,8 @@ class Studio::Editor final : public juce::Component,
     int savedTopPitch = 72;
     bool timeSelecting = false, timeSelectionAdd = false;
     bool rulerScrubbing = false; // Playlist ruler: left-drag moves the playhead continuously.
+    int trackResizeLane = -1; // Playlist: dragging a track header's bottom edge sets its height.
+    double trackResizeStart = 1;
     bool pitchSelecting = false, pitchSelectionAdd = false;
     int pitchAnchor = 60, pitchFirst = 60, pitchLast = 60;
     double timeAnchor = 0, timeStart = 0, timeEnd = 0;
@@ -5031,6 +5033,16 @@ class Studio::Editor final : public juce::Component,
         }
         if (type == 2 && e.x < leftEdge() && e.x >= pickerWidth() && e.y >= gridTop())
         {
+            // Bottom edge of a header: drag to resize that track (one Undo step).
+            const int row = rowAtY(e.y);
+            if (e.mods.isLeftButtonDown() && !e.mods.isPopupMenu() && rowTop(row) + rowPixels(row) - e.y <= 4)
+            {
+                trackResizeLane = laneAtRow(row);
+                const auto *info = s.controller.project.track(trackResizeLane);
+                trackResizeStart = info ? info->height : 1.;
+                s.controller.beginGesture();
+                return;
+            }
             // The LED at the start of the header mutes; right-click opens the track menu.
             if (e.mods.isPopupMenu() || e.x < pickerWidth() + 26)
                 trackMenu(laneAtY(e.y), e.mods);
@@ -5615,6 +5627,20 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseDrag(const juce::MouseEvent &e) override
     {
+        if (trackResizeLane >= 0)
+        {
+            const double next = juce::jlimit(.5, 3., std::round((trackResizeStart + double(e.getDistanceFromDragStartY()) /
+                                                                                   std::max(12, laneHeight())) * 20.) / 20.);
+            const auto *info = s.controller.project.track(trackResizeLane);
+            if (std::abs((info ? info->height : 1.) - next) > 1.e-9)
+            {
+                CommandArgs a;
+                a.lane = trackResizeLane;
+                a.value = next;
+                s.command("track.height", a);
+            }
+            return;
+        }
         if (rulerScrubbing)
         {
             s.audio.seekBeat(beatAt(juce::jlimit(float(leftEdge()), float(getWidth() - rightInset()), e.position.x)));
@@ -6105,6 +6131,13 @@ class Studio::Editor final : public juce::Component,
     void mouseUp(const juce::MouseEvent &e) override
     {
         rulerScrubbing = false;
+        if (trackResizeLane >= 0)
+        {
+            trackResizeLane = -1;
+            finishUiGesture(s, "Track height");
+            repaint();
+            return;
+        }
         if (mixerStereo)
         {
             const auto result = finishMixerStereo(true);
@@ -6369,6 +6402,12 @@ class Studio::Editor final : public juce::Component,
     {
         // Playlist clip edges show a resize cursor (right edge: length, left edge: trim start).
         auto cursor = juce::MouseCursor::NormalCursor;
+        if (type == 2 && e.y >= gridTop() && e.x < leftEdge() && e.x >= pickerWidth())
+        {
+            const int row = rowAtY(e.y);
+            if (rowTop(row) + rowPixels(row) - e.y <= 4)
+                cursor = juce::MouseCursor::UpDownResizeCursor;
+        }
         if (type == 2 && e.y >= gridTop() && e.x >= leftEdge())
             if (const Id id = hit(e.position))
                 for (const auto &c : playlistClips())

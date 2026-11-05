@@ -38,3 +38,6 @@
 - **Auto-scroll** (`playlist.follow` toggles; Playlist menu > Auto-scroll with the playhead;
   on by default, read `state.playlistFollowPlayhead`): during Song playback the Playlist
   page-scrolls when the playhead leaves the view, never during a pointer gesture.
+- **Track height:** drag the bottom edge of a track header (or `track.height`, `args.lane`,
+  `args.value` .5..3). `state.playlistTracks` lists tracks with non-default settings (name,
+  colour, mute, lock, group, height, instrument Channel, audio).

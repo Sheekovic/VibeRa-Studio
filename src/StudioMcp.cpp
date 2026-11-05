@@ -3587,6 +3587,26 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "playing", audio.playing());
     set(state, "patternMode", patternMode);
     set(state, "playlistFollowPlayhead", followPlayhead);
+    {
+        // Playlist tracks with non-default settings (lanes without an entry use the defaults).
+        juce::Array<juce::var> tracks;
+        for (const auto &track : controller.project.tracks)
+        {
+            auto row = obj();
+            set(row, "lane", track.lane);
+            set(row, "name", track.name);
+            set(row, "colour", juce::String::toHexString(int(track.colour)));
+            set(row, "muted", track.muted);
+            set(row, "groupedAbove", track.groupedAbove);
+            set(row, "collapsed", track.collapsed);
+            set(row, "locked", track.locked);
+            set(row, "height", track.height);
+            set(row, "channel", juce::int64(track.channel));
+            set(row, "audio", track.audio);
+            tracks.add(row);
+        }
+        set(state, "playlistTracks", tracks);
+    }
     set(state, "recordArmed", recordArmed);
     set(state, "recordingTake", midiTaking);
     set(state, "recording", midiTakeState());
