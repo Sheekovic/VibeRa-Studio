@@ -45,6 +45,7 @@ enum class EffectId
     pump,
     loFi,
     formant,
+    frequencyShifter,
     count
 };
 inline constexpr std::size_t maximumParameters = 12;

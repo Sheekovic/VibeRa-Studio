@@ -157,6 +157,88 @@ class Formant
     std::array<std::array<std::array<float, 4>, 2>, 3> state{};
 };
 
+// Frequency shifter: every frequency moves by the same number of Hz (single sideband), so
+// harmonic sounds turn metallic or detuned. An analytic signal from two all-pass chains
+// (90-degree pair over about 20 Hz..20 kHz at 44.1-48 kHz) is mixed with a quadrature
+// oscillator. Optional feedback re-shifts the output; the right channel can be offset.
+class FrequencyShifter
+{
+  public:
+    void prepare(double sampleRate)
+    {
+        rate = sampleRate;
+        reset();
+    }
+    void reset() noexcept
+    {
+        for (auto &channel : channels)
+            channel = {};
+        phase[0] = phase[1] = 0;
+    }
+    void setParameters(const Values &v) noexcept
+    {
+        shift[0] = std::clamp(double(v[0]), -2000., 2000.);
+        shift[1] = std::clamp(shift[0] + double(v[1]), -2200., 2200.);
+        feedback = std::clamp(v[2], 0.f, .9f);
+        mix = std::clamp(v[3], 0.f, 1.f);
+    }
+    void process(float &left, float &right) noexcept
+    {
+        float *io[2]{&left, &right};
+        for (int c = 0; c < 2; ++c)
+        {
+            auto &ch = channels[size_t(c)];
+            const float dry = *io[c];
+            const float in = dry + feedback * ch.last;
+            // Two all-pass chains whose outputs stay 90 degrees apart (A delayed one sample).
+            float a = in, b = in;
+            for (int i = 0; i < 4; ++i)
+            {
+                a = allpass(ch.a[size_t(i)], coefficientsA[i] * coefficientsA[i], a);
+                b = allpass(ch.b[size_t(i)], coefficientsB[i] * coefficientsB[i], b);
+            }
+            // Chain A one sample late is the real part, chain B the imaginary part.
+            const float real = ch.delayedA;
+            ch.delayedA = a;
+            const float out = float(real * std::cos(phase[c]) + b * std::sin(phase[c])); // Upper sideband.
+            ch.last = std::isfinite(out) ? out : 0.f;
+            phase[c] += 2 * std::numbers::pi * shift[c] / rate;
+            if (phase[c] > std::numbers::pi)
+                phase[c] -= 2 * std::numbers::pi;
+            else if (phase[c] < -std::numbers::pi)
+                phase[c] += 2 * std::numbers::pi;
+            *io[c] = dry + (ch.last - dry) * mix;
+        }
+    }
+
+  private:
+    struct Section
+    {
+        float x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    };
+    struct Channel
+    {
+        std::array<Section, 4> a{}, b{};
+        float delayedA = 0, last = 0;
+    };
+    // y[n] = c (x[n] + y[n-2]) - x[n-2]: a second-order all-pass in z^2.
+    static float allpass(Section &s, float c, float x) noexcept
+    {
+        const float y = c * (x + s.y2) - s.x2;
+        s.x2 = s.x1;
+        s.x1 = x;
+        s.y2 = s.y1;
+        s.y1 = std::isfinite(y) ? y : 0.f;
+        return s.y1;
+    }
+    // Published wideband 90-degree all-pass pair coefficients (used squared).
+    static constexpr float coefficientsA[4]{.6923878f, .9360654322959f, .9882295226860f, .9987488452737f};
+    static constexpr float coefficientsB[4]{.4021921162426f, .8561710882420f, .9722909545651f, .9952884791278f};
+    double rate = 48000, shift[2]{100, 100}, phase[2]{0, 0};
+    float feedback = 0, mix = 1;
+    std::array<Channel, 2> channels{};
+};
+
 // Lo-fi: tape wow (slow) and flutter (fast) pitch wobble through a modulated delay, hiss and
 // vinyl crackle, a darker tone, gentle saturation ("age") and a narrower stereo image. The
 // wobble needs a fixed base delay, reported to the host as latency (dry path included).

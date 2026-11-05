@@ -75,6 +75,10 @@ inline constexpr ParameterSpec formant[] = {{"vowel", "Vowel (A E I O U)", 0, 4,
                                            {"resonance", "Resonance", 1, 20, 8, "", .5f},
                                            {"mix", "Mix", 0, 1, 1, ""},
                                            {"output", "Output", -12, 18, 6, "dB"}};
+inline constexpr ParameterSpec frequencyShifter[] = {{"shift", "Shift", -2000, 2000, 100, "Hz"},
+                                                    {"stereo", "Right offset", -200, 200, 0, "Hz"},
+                                                    {"feedback", "Feedback", 0, .9f, 0, ""},
+                                                    {"mix", "Mix", 0, 1, 1, ""}};
 inline constexpr ParameterSpec tremolo[] = {{"rate", "Rate", .05f, 20, 4, "Hz", .4f},
                                             {"depth", "Depth", 0, 1, .5f, ""},
                                             {"shape", "Shape: sine to square", 0, 1, 0, ""}};
@@ -211,7 +215,8 @@ inline constexpr std::array effects = {
     entry(EffectId::beatGate, "beat-gate", "Beat Gate", "Time", beatGate),
     entry(EffectId::pump, "pump", "Pump", "Dynamics", pump),
     entry(EffectId::loFi, "lo-fi", "Lo-fi", "Distortion", loFi),
-    entry(EffectId::formant, "formant", "Formant Filter", "EQ", formant)};
+    entry(EffectId::formant, "formant", "Formant Filter", "EQ", formant),
+    entry(EffectId::frequencyShifter, "frequency-shifter", "Frequency Shifter", "Modulation", frequencyShifter)};
 static_assert(effects.size() == static_cast<std::size_t>(EffectId::count));
 } // namespace catalogue
 inline std::span<const EffectSpec> catalogueEntries() noexcept

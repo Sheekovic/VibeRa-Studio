@@ -688,6 +688,38 @@ inline void paint(juce::Graphics &g, juce::Rectangle<float> plot, EffectId id, c
                 juce::String(int(std::lround(v[2] * 100))) + "%  /  CRACKLE " + juce::String(int(std::lround(v[3] * 100))) + "%");
         return;
     }
+    case EffectId::frequencyShifter:
+    {
+        // Harmonics of a 220 Hz tone (muted) and where the shift moves them (accent): equal
+        // Hz steps, so the shifted partials stop being harmonic. Live waveform underneath.
+        auto top = plot.withHeight(plot.getHeight() * .62f);
+        const double s = v[0];
+        caption(g, top, p, "PARTIALS  220 Hz x 1..8",
+                (s >= 0 ? "+" : "") + juce::String(int(std::lround(s))) + " Hz" +
+                    (std::abs(v[1]) > .5f ? "  /  R " + juce::String((s + v[1]) >= 0 ? "+" : "") +
+                                                juce::String(int(std::lround(s + v[1]))) + " Hz"
+                                          : juce::String()));
+        top = top.withTrimmedTop(18.f);
+        g.setColour(p.plate.brighter(.06f));
+        g.fillRoundedRectangle(top, 6.f);
+        const auto xOf = [&](double hz) { return top.getX() + 8.f + float(std::log(std::max(20., hz) / 20.) / std::log(200.)) * (top.getWidth() - 16.f); };
+        for (int h = 1; h <= 8; ++h)
+        {
+            const double f = 220. * h, to = f + s;
+            const float height = top.getHeight() * (.85f - .07f * float(h));
+            g.setColour(p.muted.withAlpha(.6f));
+            g.fillRect(xOf(f) - 1.f, top.getBottom() - height, 2.f, height);
+            if (to > 20)
+            {
+                g.setColour(p.accent);
+                g.fillRoundedRectangle(xOf(to) - 2.f, top.getBottom() - height * .9f, 4.f, height * .9f, 2.f);
+                g.setColour(p.warm.withAlpha(.7f));
+                g.drawArrow(juce::Line<float>(xOf(f), top.getBottom() - height - 4.f, xOf(to), top.getBottom() - height - 4.f), 1.2f, 6.f, 6.f);
+            }
+        }
+        scope(g, plot.withTrimmedTop(top.getBottom() - plot.getY() + 8.f), live, p, p.accent);
+        return;
+    }
     case EffectId::formant:
     {
         // The three formant bands of the current vowel, summed, over the frequency grid.

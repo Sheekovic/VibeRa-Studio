@@ -172,7 +172,8 @@ void registryAndParameters()
             parameter->setValue(2);
             require(parameter->getValue() == 1, "Native scalar upper bound failed");
             parameter->setValue(initial);
-            if (juce::String(spec.parameters[i].unit) == "Hz" && spec.parameters[i].minimum < .1f)
+            if (juce::String(spec.parameters[i].unit) == "Hz" && spec.parameters[i].minimum > 0 &&
+                spec.parameters[i].minimum < .1f) // Low positive rates; signed shifts are not rates.
             {
                 const auto lowValue = normalized(spec.parameters[i], spec.parameters[i].minimum);
                 const auto text = parameter->getText(lowValue, 64);

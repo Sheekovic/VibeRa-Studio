@@ -89,6 +89,9 @@ Mixing and mastering processors:
   `vowel` 0..4 morphs A E I O U continuously, `shift` moves the formants -12..12 semitones,
   `resonance` (Q 1..20), mix and output (-12..18 dB, default +6 to make up the band-pass level).
   The window draws the summed response with the F1-F3 markers and the nearest vowel.
+- Frequency Shifter (`frequency-shifter`): single-sideband shift of every frequency by `shift`
+  Hz (-2000..2000; harmonics become inharmonic), `stereo` offsets the right channel (-200..200
+  Hz), feedback 0..0.9 re-shifts the output, mix. The window shows 220 Hz harmonics moving.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

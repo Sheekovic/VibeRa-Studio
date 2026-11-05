@@ -783,6 +783,46 @@ void studioOracles()
                 "Formant output stays finite at maximum resonance");
     }
 
+    // Frequency shifter: a 1 kHz tone comes out at 1 kHz + shift (single sideband: the
+    // mirror image at 1 kHz - shift stays small), the right offset moves only the right
+    // channel, mix 0 is dry and feedback stays bounded.
+    {
+        auto v = defaultValues(EffectId::frequencyShifter);
+        v[0] = 150;
+        const auto up = renderEffect(EffectId::frequencyShifter, v, sine(1000), 48000);
+        const auto part = [](const std::vector<float> &x) { return std::vector<float>(x.begin() + 8000, x.begin() + 40000); };
+        const double hz = measuredHz(part(up.left), 0, 48000);
+        require(std::abs(hz - 1150) < 3, "Frequency shifter moves 1 kHz to 1150 Hz (" + std::to_string(hz) + ")");
+        // Sideband suppression: correlate with the image frequency.
+        double image = 0, wanted = 0;
+        for (int i = 8000; i < 40000; ++i)
+        {
+            const double t = i / 48000.;
+            image += up.left[size_t(i)] * std::sin(2 * std::numbers::pi * 850 * t);
+            wanted += up.left[size_t(i)] * std::sin(2 * std::numbers::pi * 1150 * t);
+        }
+        const double imageLevel = std::abs(image) / 16000, rms = rmsOf(up.left, 8000, 40000);
+        require(imageLevel < .02 * rms * std::sqrt(2.) + 1e-3 && rms > .1,
+                "The mirror sideband is suppressed (" + std::to_string(imageLevel) + " vs " + std::to_string(rms) + ")");
+        v[1] = -200; // Right: 150 - 200 = -50 Hz.
+        const auto split = renderEffect(EffectId::frequencyShifter, v, sine(1000), 48000);
+        const double rightHz = measuredHz(part(split.right), 0, 48000), leftHz = measuredHz(part(split.left), 0, 48000);
+        require(std::abs(rightHz - 950) < 3 && std::abs(leftHz - 1150) < 3,
+                "The right offset shifts only the right channel (" + std::to_string(leftHz) + ", " + std::to_string(rightHz) + ")");
+        auto dryValues = defaultValues(EffectId::frequencyShifter);
+        dryValues[3] = 0;
+        const auto dry = renderEffect(EffectId::frequencyShifter, dryValues, sine(500), 4000);
+        double worst = 0;
+        for (int i = 0; i < 4000; ++i)
+            worst = std::max(worst, double(std::abs(dry.left[size_t(i)] - sine(500)(i))));
+        require(worst < 1e-6, "Frequency shifter mix 0 is the dry input");
+        auto loop = defaultValues(EffectId::frequencyShifter);
+        loop[2] = .9f;
+        const auto fed = renderEffect(EffectId::frequencyShifter, loop, sine(300, 1), 96000);
+        require(std::all_of(fed.left.begin(), fed.left.end(), [](float x) { return std::isfinite(x) && std::abs(x) < 32; }),
+                "Frequency shifter feedback stays bounded");
+    }
+
     // Drum Synth DSP: every drum sounds and decays, Tune raises the kick's body, Decay
     // lengthens it, the master level scales it, and silence follows the decay.
     {
