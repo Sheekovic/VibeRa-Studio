@@ -4677,6 +4677,21 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
+    if (action == "selection.timePrevious" || action == "selection.timeNext")
+    {
+        auto *piano = static_cast<Editor *>(windows[1]->getContentComponent());
+        const auto range = piano->timeSelection();
+        if (!range)
+        {
+            status = "Select time on the Piano roll ruler first (Ctrl+drag)";
+            repaint();
+            return false;
+        }
+        const double width = range->second - range->first;
+        const double start = action.endsWith("Next") ? range->first + width : std::max(0., range->first - width);
+        piano->setTimeSelection(start, start + width);
+        return true;
+    }
     if (action == "selection.timeAround")
     {
         const auto *part = controller.project.pattern(selectedPattern);

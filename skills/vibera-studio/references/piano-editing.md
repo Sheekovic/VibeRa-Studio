@@ -35,3 +35,9 @@
   root/lowest note, `args.length` step, `args.value` density 0..1, `args.seed`): replaces the
   Channel part with random in-scale notes over the Pattern (one Undo). Menu > Randomize uses
   the Piano roll scale guide, or C major.
+- **Velocity lane:** drag paints the velocity of each note under the pointer; Shift+drag gives
+  every crossed note the starting level; Alt+click a note's bar resets it to 0.78 (Alt+click a
+  controller point still edits that point). One Undo per drag. `editors[1].timeline` reports
+  `velocityBase` / `velocityScale` and `timeSelection`.
+- **Time selection:** Ctrl+Left / Ctrl+Right (`selection.timePrevious` / `selection.timeNext`)
+  move it by its own width.

@@ -747,6 +747,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"piano.resizeLeft", "Allow resizing notes from the left", Scope::piano, false, true, "action"},
         {"tool.drumPaint", "Paint drum sequencer tool", Scope::piano, false, true, "action"},
         {"selection.timeAround", "Select time around the selected notes", Scope::piano, false, true, "action"},
+        {"selection.timePrevious", "Select previous time (shift the time selection left)", Scope::piano, false, true, "action"},
+        {"selection.timeNext", "Select next time (shift the time selection right)", Scope::piano, false, true, "action"},
         {"selection.odd", "Select odd (off-beat) notes", Scope::piano, false, true, "action"},
         {"selection.muted", "Select muted notes", Scope::piano, false, true, "action"},
         {"selection.overlapping", "Select overlapping notes", Scope::piano, false, true, "action"},

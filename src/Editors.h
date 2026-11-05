@@ -497,6 +497,20 @@ class Studio::Editor final : public juce::Component,
             return std::nullopt;
         return std::pair{timeStart, timeEnd};
     }
+    // The editable note whose start is nearest to x (within 0.3 beat) in the velocity lane.
+    std::optional<Note> velocityLaneNote(float x) const
+    {
+        std::optional<Note> nearest;
+        double d = .3;
+        const auto &view = pianoView();
+        for (auto i = view.rbegin(); i != view.rend(); ++i)
+            if (const auto &n = i->note; canEdit(n) && std::abs(n.beat - beatAt(x)) < d)
+            {
+                nearest = n;
+                d = std::abs(n.beat - beatAt(x));
+            }
+        return nearest;
+    }
     // Piano roll paste position: the start of the leftmost visible bar (familiar Ctrl+V).
     double pasteBeat() const
     {
@@ -667,7 +681,9 @@ class Studio::Editor final : public juce::Component,
     double automationTrimBeat = 0, automationTrimOffset = 0, automationTrimLength = 0;
     double trimStartBeat = 0, trimStartOffset = 0, trimStartDuration = 0;
     bool selecting = false, dragging = false, erasing = false, resizing = false, paintMode = false;
-    bool resizingLeft = false; // Piano roll: dragging a note's start (option "Allow resizing from left").
+    bool resizingLeft = false;
+    bool velocityPainting = false; // Velocity lane drag (Shift: one level for every crossed note).
+    double velocityPaintLevel = .78; // Piano roll: dragging a note's start (option "Allow resizing from left").
     juce::Point<float> origin, lastErasePoint;
     juce::Rectangle<float> rectangle;
     int gridTop() const
@@ -1291,10 +1307,14 @@ class Studio::Editor final : public juce::Component,
         o->setProperty("gridLeft", leftEdge());
         o->setProperty("pixelsPerBeat", spacing());
         o->setProperty("scrollBeat", scroll);
+        if (hasTimeSelection())
+            o->setProperty("timeSelection", juce::Array<juce::var>{timeStart, timeEnd});
         if (type == 1)
         {
             o->setProperty("topPitch", topPitch); // A pitch row spans gridTop + (topPitch - pitch) * rowHeight.
             o->setProperty("rowHeight", height());
+            o->setProperty("velocityBase", velocityBase()); // Level v sits at velocityBase - v * velocityScale.
+            o->setProperty("velocityScale", double(velocityScale()));
         }
         return juce::var(o);
     }
@@ -5654,6 +5674,15 @@ class Studio::Editor final : public juce::Component,
                     a.value = nearest->type == 1 ? level * 2 - 1 : level;
                     s.command(e.mods.isPopupMenu() ? "notes.controller.delete" : "notes.controller.set", a);
                 }
+                else if (const auto note = velocityLaneNote(e.position.x))
+                {
+                    // Alt+click a note's velocity bar: back to the default level.
+                    CommandArgs a;
+                    a.pattern = p->id;
+                    a.ids = {note->id};
+                    a.value = .78;
+                    s.command("notes.velocity", a);
+                }
                 else
                     s.status = "Alt+click a controller point (CC, bend, pressure, program) to edit it";
             }
@@ -5673,12 +5702,18 @@ class Studio::Editor final : public juce::Component,
                         nearest = n;
                         d = std::abs(n.beat - beatAt(e.x));
                     }
+                velocityPaintLevel = juce::jlimit(.01, 1., (velocityBase() - e.y) / double(velocityScale()));
+                if (e.mods.isLeftButtonDown())
+                {
+                    s.controller.beginGesture();
+                    velocityPainting = true;
+                }
                 if (nearest)
                 {
                     CommandArgs a;
                     a.pattern = p->id;
                     a.ids = selected(list, nearest->id) ? list : std::vector<Id>{nearest->id};
-                    a.value = juce::jlimit(.01, 1., (velocityBase() - e.y) / double(velocityScale()));
+                    a.value = velocityPaintLevel;
                     s.command("notes.velocity", a);
                 }
             }
@@ -5889,6 +5924,23 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseDrag(const juce::MouseEvent &e) override
     {
+        if (velocityPainting)
+        {
+            // Paint: the note under the pointer takes the pointer height (Shift: the start height).
+            if (auto *p = pattern())
+                if (const auto note = velocityLaneNote(e.position.x))
+                {
+                    CommandArgs a;
+                    a.pattern = p->id;
+                    a.ids = {note->id};
+                    a.value = e.mods.isShiftDown()
+                                  ? velocityPaintLevel
+                                  : juce::jlimit(.01, 1., (velocityBase() - e.position.y) / double(velocityScale()));
+                    if (std::abs(note->velocity - a.value) > 1.e-4)
+                        s.command("notes.velocity", a);
+                }
+            return;
+        }
         if (trackResizeLane >= 0)
         {
             const double next = juce::jlimit(.5, 3., std::round((trackResizeStart + double(e.getDistanceFromDragStartY()) /
@@ -6418,6 +6470,12 @@ class Studio::Editor final : public juce::Component,
         rulerScrubbing = false;
         if (std::exchange(rackPreviewing, false))
             s.previewNote(-1);
+        if (std::exchange(velocityPainting, false))
+        {
+            finishUiGesture(s, "Edit velocity");
+            repaint();
+            return;
+        }
         if (stretchingAudio)
         {
             const auto id = std::exchange(stretchingAudio, Id{});

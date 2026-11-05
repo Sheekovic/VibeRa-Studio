@@ -263,6 +263,8 @@ Customization Customization::familiarDefaults()
     add("tool.drumPaint", Scope::piano, 'N');
     add("piano.resizeLeft", Scope::piano, juce::KeyPress::homeKey, ctrl | juce::ModifierKeys::altModifier);
     add("selection.timeAround", Scope::piano, juce::KeyPress::returnKey, ctrl);
+    add("selection.timePrevious", Scope::piano, juce::KeyPress::leftKey, ctrl);
+    add("selection.timeNext", Scope::piano, juce::KeyPress::rightKey, ctrl);
     add("selection.invert", Scope::playlist, 'I', shift);
     add("notes.delete", Scope::piano, juce::KeyPress::deleteKey);
     add("clip.duplicate", Scope::playlist, 'B', ctrl);
