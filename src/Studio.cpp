@@ -4688,6 +4688,35 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action.startsWith("notes.") ? "notes.move" : "clip.move", a);
         return true;
     }
+    if (action == "clip.trackUp" || action == "clip.trackDown")
+    {
+        a.ids = effectiveClipSelection();
+        if (a.ids.empty())
+            return false;
+        a.lane = action.endsWith("Up") ? -1 : 1;
+        command("clip.move", a);
+        return status == "Ready";
+    }
+    if (action == "transport.home" || action == "transport.end")
+    {
+        double beat = 0;
+        if (action == "transport.end" && !patternMode)
+        {
+            const auto &p = controller.project;
+            for (const auto &c : p.placements)
+                beat = std::max(beat, c.beat + c.length);
+            for (const auto &c : p.audioPlacements)
+                beat = std::max(beat, p.audioEndBeat(c.beat, c.duration));
+            for (const auto &c : p.automation.placements)
+                beat = std::max(beat, c.beat + c.length);
+        }
+        else if (action == "transport.end")
+            if (const auto *p = controller.project.pattern(selectedPattern))
+                beat = p->length;
+        audio.seekBeat(beat);
+        repaint();
+        return true;
+    }
     if (action == "notes.transposeUp" || action == "notes.transposeDown" || action == "notes.octaveUp" ||
         action == "notes.octaveDown")
     {

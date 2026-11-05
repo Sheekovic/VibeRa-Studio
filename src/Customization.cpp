@@ -225,6 +225,10 @@ Customization Customization::familiarDefaults()
     add("notes.nudgeRight", Scope::piano, juce::KeyPress::rightKey, shift);
     add("clip.nudgeLeft", Scope::playlist, juce::KeyPress::leftKey, shift);
     add("clip.nudgeRight", Scope::playlist, juce::KeyPress::rightKey, shift);
+    add("clip.trackUp", Scope::playlist, juce::KeyPress::upKey, shift);
+    add("clip.trackDown", Scope::playlist, juce::KeyPress::downKey, shift);
+    add("transport.home", Scope::global, juce::KeyPress::homeKey);
+    add("transport.end", Scope::global, juce::KeyPress::endKey);
     add("notes.transposeUp", Scope::piano, juce::KeyPress::upKey, shift);
     add("notes.transposeDown", Scope::piano, juce::KeyPress::downKey, shift);
     add("notes.octaveUp", Scope::piano, juce::KeyPress::upKey, ctrl);

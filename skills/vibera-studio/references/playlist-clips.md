@@ -51,3 +51,6 @@
 - **Vertical zoom:** Alt+wheel over the Playlist scales every track's height
   (`editors[2].timeline.laneHeight`); double-click a track name to rename it.
   `vibera_pointer` phase `wheel` (with `deltaY`, `alt`/`ctrl`/`shift`) runs one wheel step.
+- **Keys:** Shift+Up/Down move the selected clips one track (`clip.trackUp`/`clip.trackDown`);
+  Home / End put the playhead at the start / the end of the Song (Pattern end in Pattern mode)
+  (`transport.home`/`transport.end`).
