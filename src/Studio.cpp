@@ -4291,13 +4291,19 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
-    if (action == "tool.draw" || action == "tool.paint")
+    if (action == "tool.draw" || action == "tool.paint" || action == "tool.drumPaint")
     {
+        if (action == "tool.drumPaint")
+            focus = Scope::piano;
         int i = int(focus) - 1;
         if (i >= 0 && i < 4)
             dynamic_cast<Editor *>(windows[size_t(i)]->getContentComponent())
-                ->setPaintMode(action == "tool.paint");
-        status = action == "tool.paint" ? "Paint" : "Draw";
+                ->setPaintMode(action != "tool.draw");
+        if (focus == Scope::piano)
+            pianoDrumPaint = action == "tool.drumPaint";
+        status = action == "tool.drumPaint" ? "Paint drum sequencer: click notes to mute/unmute"
+                 : action == "tool.paint"   ? "Paint"
+                                            : "Draw";
         repaint();
         return true;
     }
@@ -6858,6 +6864,7 @@ void Studio::effectMenu(int index)
     menu.addItem(10010, "EQ (3-band)...");
     menu.addItem(10011, "Track delay..." + (insert->delayMs > 0 ? " (" + juce::String(insert->delayMs, 1) + " ms)" : juce::String()));
     menu.addItem(10008, "Create insert", !mixerChainBusy());
+    menu.addItem(10012, "Add multiple inserts...", !mixerChainBusy());
     juce::PopupMenu deleteMenu;
     deleteMenu.addItem(10009, "Delete unused insert (refuse references)...", index != 0 && !mixerChainBusy());
     std::map<int, int> deleteDestinations;
@@ -6997,6 +7004,25 @@ void Studio::effectMenu(int index)
                            if (selected == 10010)
                            {
                                safe->openMixerEq(index);
+                               return;
+                           }
+                           if (selected == 10012)
+                           {
+                               auto *box = new juce::AlertWindow("Add multiple inserts", "How many Mixer inserts (1..32)?",
+                                                                 juce::MessageBoxIconType::NoIcon);
+                               box->addTextEditor("count", "4");
+                               box->addButton("Add", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                               box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                               box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                                              [safe, box](int ok)
+                                                              {
+                                                                  if (!safe || ok != 1)
+                                                                      return;
+                                                                  CommandArgs a;
+                                                                  a.value = box->getTextEditorContents("count").getIntValue();
+                                                                  safe->command("mixer.insert.create", a);
+                                                              }),
+                                                    true);
                                return;
                            }
                            if (selected == 10011)

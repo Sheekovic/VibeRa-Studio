@@ -256,6 +256,7 @@ Customization Customization::familiarDefaults()
     add("notes.unmute", Scope::piano, 'M', juce::ModifierKeys::altModifier | shift);
     add("selection.random", Scope::piano, 'R', shift);
     add("selection.odd", Scope::piano, 'O', shift);
+    add("tool.drumPaint", Scope::piano, 'N');
     add("piano.resizeLeft", Scope::piano, juce::KeyPress::homeKey, ctrl | juce::ModifierKeys::altModifier);
     add("selection.timeAround", Scope::piano, juce::KeyPress::returnKey, ctrl);
     add("selection.invert", Scope::playlist, 'I', shift);

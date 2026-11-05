@@ -5664,6 +5664,20 @@ class Studio::Editor final : public juce::Component,
                 return;
             }
         }
+        if (type == 1 && id && paintMode && s.pianoDrumPaint && e.mods.isLeftButtonDown() && !e.mods.isCtrlDown())
+            if (auto *p = pattern())
+                for (const auto &n : p->notes)
+                    if (n.id == id)
+                    {
+                        // Drum paint: clicking a note toggles its mute instead of moving it.
+                        CommandArgs a;
+                        a.pattern = p->id;
+                        a.channel = s.selectedChannel;
+                        a.ids = {id};
+                        s.command(n.muted ? "notes.unmute" : "notes.mute", a);
+                        repaint();
+                        return;
+                    }
         s.controller.beginGesture();
         dragging = true;
         resizing = false;
@@ -5762,7 +5776,7 @@ class Studio::Editor final : public juce::Component,
             if (type == 1)
             {
                 a.pitch = pitch(e.y);
-                a.length = noteLength;
+                a.length = s.pianoDrumPaint && paintMode ? (s.snap > 0 ? s.snap : .25) : noteLength;
                 a.value = .8;
                 fillNoteInsertion(a);
                 const auto previousId = s.controller.project.nextId;
@@ -6144,7 +6158,7 @@ class Studio::Editor final : public juce::Component,
             if (type == 1)
             {
                 a.pitch = pitch(e.y);
-                a.length = noteLength;
+                a.length = s.pianoDrumPaint ? (s.snap > 0 ? s.snap : .25) : noteLength;
                 a.value = .8;
                 fillNoteInsertion(a);
                 bool exists = false;

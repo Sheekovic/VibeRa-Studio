@@ -137,3 +137,6 @@ double-click: flat band; right-click: reset all; one Undo per drag).
 `mixer.delay` (`args.mixer`, `args.value` 0..500 ms) delays an insert's audio after its EQ
 (a time offset for alignment, not an echo); saved with the project, one Undo step, applied in
 playback and export. Read `delayMs` on the mixer rows. UI: insert menu > Track delay...
+
+`mixer.insert.create` takes `args.value` 1..32 to add several inserts in one Undo step (insert
+menu > Add multiple inserts...).

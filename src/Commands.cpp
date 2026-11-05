@@ -741,6 +741,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.discardLengthsAction", "Discard note lengths (snap)", Scope::piano, false, true, "action"},
         {"selection.random", "Select one more note at random", Scope::piano, false, true, "action"},
         {"piano.resizeLeft", "Allow resizing notes from the left", Scope::piano, false, true, "action"},
+        {"tool.drumPaint", "Paint drum sequencer tool", Scope::piano, false, true, "action"},
         {"selection.timeAround", "Select time around the selected notes", Scope::piano, false, true, "action"},
         {"selection.odd", "Select odd (off-beat) notes", Scope::piano, false, true, "action"},
         {"selection.muted", "Select muted notes", Scope::piano, false, true, "action"},
@@ -5268,11 +5269,18 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
     {
         if (id == "mixer.insert.create")
         {
-            Id reserved = std::max(next.nextId, mixerInsertNextId);
-            for (const auto &row : next.mixer)
-                reserved = std::max(reserved, Id(row.index) + 1);
-            if (auto result = createMixerInsert(next, reserved, a.text); result.failed())
-                return result;
+            // args.value: how many inserts to add (default 1, at most 32), one Undo step.
+            const int count = a.value == 0 ? 1 : int(a.value);
+            if (!std::isfinite(a.value) || a.value != std::floor(a.value) || count < 1 || count > 32)
+                return juce::Result::fail("mixer.insert.invalidCount: Add 1..32 inserts at once");
+            for (int i = 0; i < count; ++i)
+            {
+                Id reserved = std::max(next.nextId, mixerInsertNextId);
+                for (const auto &row : next.mixer)
+                    reserved = std::max(reserved, Id(row.index) + 1);
+                if (auto result = createMixerInsert(next, reserved, a.text); result.failed())
+                    return result;
+            }
         }
         else if (auto result =
                      deleteMixerInsert(next, a.mixer, a.mixerDelete.value_or(MixerInsertDeletePolicy{}));

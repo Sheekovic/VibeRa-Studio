@@ -29,3 +29,5 @@
 - **Select time around selection** (`selection.timeAround`, Ctrl+Enter) sets the ruler time
   selection to the selected notes' span. `editors[1].timeline` also reports `topPitch` and
   `rowHeight` (row y = rulerBottom + (topPitch - pitch) * rowHeight).
+- **Paint drum sequencer** (`tool.drumPaint`, N): paints notes the length of the snap; clicking
+  an existing note mutes / unmutes it instead of moving it. P (Draw) and B (Paint) leave it.
