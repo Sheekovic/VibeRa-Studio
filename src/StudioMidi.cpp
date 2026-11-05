@@ -171,6 +171,17 @@ void Studio::midiFileMenu()
         randomize.addItem(57, "Medium (1/8 steps)");
         randomize.addItem(58, "Dense (1/16 steps)");
         menu.addSubMenu("Randomize (replaces this Channel's part, guide scale or C major)", randomize);
+        juce::PopupMenu riff;
+        riff.addItem(41000, "Steady 1/8 riff");
+        riff.addItem(41001, "Busy 1/8 riff");
+        riff.addItem(41002, "Sparse 1/4 riff");
+        menu.addSubMenu("Riff machine (replaces this Channel's part)", riff);
+        juce::PopupMenu claw;
+        claw.addItem(41010, "Gate 1/16: x.");
+        claw.addItem(41011, "Gate 1/16: xx.x");
+        claw.addItem(41012, "Gate 1/8: x.x..x.");
+        claw.addItem(41013, "Gate 1/16: x..x..x.");
+        menu.addSubMenu("Claw machine (slice into a rhythm)", claw);
     }
     {
         juce::PopupMenu lfo;
@@ -319,6 +330,30 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result >= 41000 && result < 41020)
+            {
+                safe->focus = Scope::piano;
+                auto args = noteTargets;
+                if (result < 41010)
+                {
+                    args.ids.clear();
+                    const auto &guide = safe->pianoGuide;
+                    args.text = guide.name.isNotEmpty() && !guide.maqam ? guide.name : juce::String("minor");
+                    args.pitch = 60 + (guide.name.isNotEmpty() && !guide.maqam ? guide.root : 0);
+                    args.length = result == 41002 ? 1. : .5;
+                    args.value = result == 41000 ? .6 : result == 41001 ? .85 : .5;
+                    args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
+                    safe->command("notes.riff", args);
+                }
+                else
+                {
+                    const char *rhythms[]{"x.", "xx.x", "x.x..x.", "x..x..x."};
+                    args.text = rhythms[result - 41010];
+                    args.length = result == 41012 ? .5 : .25;
+                    safe->command("notes.claw", args);
+                }
                 return;
             }
             if (result >= 40000 && result < 40040)

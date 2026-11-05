@@ -736,6 +736,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},
         {"notes.controller.lfo", "LFO tool: write an LFO-shaped controller lane", Scope::piano, true, true, "command"},
         {"notes.randomize", "Randomize: generate notes in a scale", Scope::piano, true, true, "command"},
+        {"notes.claw", "Claw machine: slice notes into steps and keep a rhythm", Scope::piano, true, true, "command"},
+        {"notes.riff", "Riff machine: generate a stepwise riff in a scale", Scope::piano, true, true, "command"},
         {"notes.rotate", "Rotate notes (wrap within their bars)", Scope::piano, true, true, "command"},
         {"notes.articulate", "Articulate: note lengths as a share of the gap to the next note", Scope::piano, true, true, "command"},
         {"notes.scaleLevels", "Scale levels: multiply / offset / invert velocities", Scope::piano, true, true, "command"},
@@ -4323,6 +4325,99 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     graces.push_back(grace);
                 }
                 pat->notes.insert(pat->notes.end(), graces.begin(), graces.end());
+            }
+        }
+        if (id == "notes.claw")
+        {
+            // Cut each note (selection or Channel part) into args.length steps and keep only the
+            // steps whose index matches the rhythm in args.text ('x' keep, '.' drop, repeating).
+            std::vector<size_t> targets;
+            for (size_t i = 0; i < pat->notes.size(); ++i)
+                if (a.ids.empty() ? pat->notes[i].channel == a.channel : chosen(pat->notes[i].id))
+                    targets.push_back(i);
+            if (targets.empty())
+                return juce::Result::fail("No notes to claw");
+            if (!std::isfinite(a.length) || a.length < 1. / 32 || a.length > 4)
+                return juce::Result::fail("Claw step is 1/32..4 beats");
+            const auto rhythm = a.text.isEmpty() ? juce::String("x.") : a.text;
+            if (rhythm.length() > 64 || !rhythm.containsOnly("x.") || !rhythm.containsChar('x'))
+                return juce::Result::fail("Claw rhythm uses x (keep) and . (drop), at most 64 steps");
+            std::vector<Note> pieces;
+            std::set<Id> removed;
+            for (auto i : targets)
+            {
+                const auto source = pat->notes[i];
+                removed.insert(source.id);
+                int step = 0;
+                for (double start = source.beat; start < source.beat + source.length - 1.e-9; start += a.length, ++step)
+                    if (rhythm[step % rhythm.length()] == 'x')
+                    {
+                        auto piece = source;
+                        piece.id = next.allocate();
+                        piece.beat = start;
+                        piece.length = std::min(a.length, source.beat + source.length - start);
+                        pieces.push_back(piece);
+                    }
+                if (pieces.size() > 100000)
+                    return juce::Result::fail("Claw would make too many notes");
+            }
+            std::erase_if(pat->notes, [&](const auto &n) { return removed.contains(n.id); });
+            pat->notes.insert(pat->notes.end(), pieces.begin(), pieces.end());
+        }
+        if (id == "notes.riff")
+        {
+            // Replace the Channel part with a riff over the Pattern: a seeded rhythm on an
+            // args.length grid (density args.value) and a melody that moves mostly by scale steps
+            // (args.text scale, args.pitch root), returning to the root at each bar start.
+            if (!ch || ch->audioClip)
+                return juce::Result::fail("Select a playable Channel");
+            const auto &scales = score::scaleShapes();
+            const auto shape = std::find_if(scales.begin(), scales.end(), [&](const auto &s2) { return a.text == s2.name; });
+            if (shape == scales.end())
+                return juce::Result::fail("Unknown scale: " + a.text);
+            if (!std::isfinite(a.length) || a.length < 1. / 8 || a.length > 2 || !std::isfinite(a.value) || a.value <= 0 ||
+                a.value > 1 || a.pitch < 12 || a.pitch > 108)
+                return juce::Result::fail("Riff step is 1/8..2 beats, density 0..1, root 12..108");
+            const double span = pat->length > 0 ? pat->length : 4.;
+            const double bar = next.numerator * 4. / std::max(1, next.denominator);
+            std::vector<int> ladder; // Scale degrees across two octaves around the root.
+            for (int octave = -1; octave <= 1; ++octave)
+                for (int interval : shape->intervals)
+                    ladder.push_back(a.pitch + octave * 12 + interval);
+            std::sort(ladder.begin(), ladder.end());
+            const int rootIndex = int(std::find(ladder.begin(), ladder.end(), a.pitch) - ladder.begin());
+            std::erase_if(pat->notes, [&](const auto &n) { return n.channel == a.channel; });
+            juce::Random random(juce::int64(a.seed.value_or(1)));
+            // One bar of rhythm, repeated (riffs repeat); the first step always plays.
+            std::vector<bool> rhythm;
+            for (double beat = 0; beat < bar - 1.e-9; beat += a.length)
+                rhythm.push_back(rhythm.empty() || random.nextFloat() < float(a.value));
+            int index = rootIndex;
+            int step = 0;
+            for (double beat = 0; beat < span - 1.e-9; beat += a.length, ++step)
+            {
+                const auto inBar = size_t(step) % rhythm.size();
+                if (inBar == 0)
+                    index = rootIndex;
+                if (!rhythm[inBar])
+                    continue;
+                if (inBar != 0)
+                {
+                    const float r = random.nextFloat();
+                    const int move = r < .35f ? 1 : r < .7f ? -1 : r < .85f ? 2 : r < .95f ? -2 : 0;
+                    index = juce::jlimit(0, int(ladder.size()) - 1, index + move);
+                }
+                Note n;
+                n.id = next.allocate();
+                n.channel = a.channel;
+                n.beat = beat;
+                size_t following = inBar + 1;
+                while (following < rhythm.size() && !rhythm[following])
+                    ++following;
+                n.length = std::max(a.length * .5, a.length * double(following - inBar) * .9);
+                n.pitch = juce::jlimit(0, 127, ladder[size_t(index)]);
+                n.velocity = inBar == 0 ? .9 : .65 + .2 * random.nextFloat();
+                pat->notes.push_back(n);
             }
         }
         if (id == "notes.randomize")

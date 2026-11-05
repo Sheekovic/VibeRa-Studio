@@ -50,3 +50,8 @@
   beats 1/4..64, `args.value` depth 0..1, `args.offset` centre): replaces the Channel's events
   of that lane over the Pattern with one point per 1/16 beat (one Undo). Menu > LFO tool writes
   CC 1 (mod wheel).
+- **Claw machine** (`notes.claw`: `args.length` step 1/32..4 beats, `args.text` rhythm of `x`
+  keep / `.` drop, repeating): cuts each note into steps and keeps the rhythm's steps.
+- **Riff machine** (`notes.riff`: `args.text` scale, `args.pitch` root, `args.length` grid,
+  `args.value` density, `args.seed`): replaces the Channel part with a riff that repeats a
+  one-bar rhythm, starts each bar on the root and moves mostly by scale steps.

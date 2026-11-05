@@ -428,6 +428,42 @@ inline void tests()
             controller.undoEdit();
             lfo.length = .1;
             require(controller.execute("notes.controller.lfo", lfo).failed(), "Too short an LFO period is refused");
+            {
+                // Claw: a 1-beat note at 1/4 steps with "x." keeps steps 0 and 2.
+                auto clawProject = controller.project;
+                auto *clawPattern = clawProject.pattern(pattern.id);
+                for (auto &n : clawPattern->notes)
+                    if (n.channel == kick)
+                        n.length = 1;
+                controller.replace(clawProject);
+                CommandArgs claw;
+                claw.pattern = pattern.id;
+                claw.channel = kick;
+                claw.text = "x.";
+                claw.length = .25;
+                require(controller.execute("notes.claw", claw).wasOk(), "Claw machine");
+                require(kickBeats() == std::vector<double>{0, .5, 2, 2.5}, "Claw keeps every other 1/4 step");
+                controller.undoEdit();
+                CommandArgs riffArgs;
+                riffArgs.pattern = pattern.id;
+                riffArgs.channel = snare;
+                riffArgs.text = "minor";
+                riffArgs.pitch = 60;
+                riffArgs.length = .5;
+                riffArgs.value = .7;
+                riffArgs.seed = 7;
+                require(controller.execute("notes.riff", riffArgs).wasOk(), "Riff machine");
+                bool rootsOnBars = false, inScale = true;
+                for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                    if (n.channel == snare)
+                    {
+                        if (n.beat == 0)
+                            rootsOnBars = n.pitch == 60;
+                        inScale = inScale && std::set<int>{0, 2, 3, 5, 7, 8, 10}.contains(((n.pitch - 60) % 12 + 12) % 12);
+                    }
+                require(rootsOnBars && inScale, "The riff starts on the root and stays in C minor");
+                controller.undoEdit();
+            }
             flip.text = "sideways";
             require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
         }
