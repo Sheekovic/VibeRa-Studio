@@ -402,6 +402,32 @@ inline void tests()
                 if (n.channel == kick)
                     require(std::abs(n.velocity - .1) < 1e-6, "Inverting 0.8 then halving gives 0.1");
             controller.undoEdit();
+            CommandArgs lfo;
+            lfo.pattern = pattern.id;
+            lfo.channel = kick;
+            lfo.text = "cc";
+            lfo.pitch = 1;
+            lfo.target = 2; // square
+            lfo.length = 1;
+            lfo.value = 1;
+            lfo.offset = .5;
+            require(controller.execute("notes.controller.lfo", lfo).wasOk(), "LFO tool writes a CC lane");
+            int points = 0;
+            double atQuarter = -1, atThreeQuarters = -1;
+            for (const auto &c : controller.project.pattern(pattern.id)->controllers)
+                if (c.channel == kick && c.type == 0 && c.number == 1)
+                {
+                    ++points;
+                    if (std::abs(c.beat - .25) < 1e-9)
+                        atQuarter = c.value;
+                    if (std::abs(c.beat - .75) < 1e-9)
+                        atThreeQuarters = c.value;
+                }
+            require(points == 64 && atQuarter == 1 && atThreeQuarters == 0,
+                    "A 1-beat square LFO over 4 beats: 64 points, high then low");
+            controller.undoEdit();
+            lfo.length = .1;
+            require(controller.execute("notes.controller.lfo", lfo).failed(), "Too short an LFO period is refused");
             flip.text = "sideways";
             require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
         }

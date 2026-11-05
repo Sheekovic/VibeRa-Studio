@@ -172,6 +172,19 @@ void Studio::midiFileMenu()
         randomize.addItem(58, "Dense (1/16 steps)");
         menu.addSubMenu("Randomize (replaces this Channel's part, guide scale or C major)", randomize);
     }
+    {
+        juce::PopupMenu lfo;
+        const char *shapes[]{"Sine", "Triangle", "Square", "Saw"};
+        for (int shape = 0; shape < 4; ++shape)
+        {
+            juce::PopupMenu periods;
+            periods.addItem(40000 + shape * 10 + 0, "1 beat");
+            periods.addItem(40000 + shape * 10 + 1, "1 bar");
+            periods.addItem(40000 + shape * 10 + 2, "2 bars");
+            lfo.addSubMenu(shapes[shape], periods);
+        }
+        menu.addSubMenu("LFO tool (CC 1 mod wheel, replaces that lane)", lfo);
+    }
     menu.addItem(17, "Flip horizontally (reverse in time)");
     menu.addItem(18, "Flip vertically (mirror pitches)");
     // Composition tools act on the selection, or the whole Channel part without one.
@@ -306,6 +319,23 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result >= 40000 && result < 40040)
+            {
+                safe->focus = Scope::piano;
+                auto args = noteTargets;
+                args.ids.clear();
+                args.text = "cc";
+                args.pitch = 1;
+                args.target = Id((result - 40000) / 10);
+                const int period = (result - 40000) % 10;
+                const auto *part = safe->controller.project.pattern(args.pattern);
+                const double bar = part ? patternBarBeats(safe->controller.project, *part) : 4.;
+                args.length = period == 0 ? 1. : period == 1 ? bar : 2 * bar;
+                args.value = .8;
+                args.offset = .5;
+                safe->command("notes.controller.lfo", args);
                 return;
             }
             if (result >= 60 && result <= 66)

@@ -734,6 +734,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.cut", "Cut notes", Scope::piano, false, true, "action"},
         {"notes.paste", "Paste notes", Scope::piano, true, true, "command"},
         {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},
+        {"notes.controller.lfo", "LFO tool: write an LFO-shaped controller lane", Scope::piano, true, true, "command"},
         {"notes.randomize", "Randomize: generate notes in a scale", Scope::piano, true, true, "command"},
         {"notes.rotate", "Rotate notes (wrap within their bars)", Scope::piano, true, true, "command"},
         {"notes.articulate", "Articulate: note lengths as a share of the gap to the next note", Scope::piano, true, true, "command"},
@@ -4050,7 +4051,46 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 else
                     c.value = value;
             };
-            if (id == "notes.controller.add")
+            if (id == "notes.controller.lfo")
+            {
+                // Replace this Channel's events of one lane (args.text cc / pitchBend / pressure;
+                // CC number args.pitch) over the Pattern with an LFO: shape args.target (0 sine,
+                // 1 triangle, 2 square, 3 saw), period args.length beats, depth args.value 0..1
+                // around centre args.offset, one point per 1/16 beat.
+                const juce::StringArray types{"cc", "pitchBend", "pressure"};
+                const int type = types.indexOf(a.text.isEmpty() ? juce::String("cc") : a.text);
+                if (!ch || type < 0 || (type == 0 && (a.pitch < 0 || a.pitch > 127)) || a.target > 3 ||
+                    !std::isfinite(a.length) || a.length < .25 || a.length > 64 || !std::isfinite(a.value) ||
+                    a.value <= 0 || a.value > 1 || !valid(type, a.offset))
+                    return juce::Result::fail("LFO needs a cc/pitchBend/pressure lane, shape 0..3, period 1/4..64 "
+                                              "beats, depth 0..1 and a centre inside the lane range");
+                const double span = pat->length > 0 ? pat->length : 4.;
+                if (span / .0625 > 8192)
+                    return juce::Result::fail("The Pattern is too long for an LFO lane");
+                std::erase_if(pat->controllers, [&](const auto &c)
+                              { return c.channel == ch->id && c.type == type && (type != 0 || c.number == a.pitch); });
+                constexpr double tau = 6.283185307179586;
+                const double low = type == 1 ? -1. : 0.;
+                for (double beat = 0; beat < span - 1.e-9; beat += .0625)
+                {
+                    const double phase = std::fmod(beat / a.length, 1.);
+                    const double wave = a.target == 0   ? std::sin(tau * phase)
+                                        : a.target == 1 ? 1. - 4. * std::abs(phase - .5)
+                                        : a.target == 2 ? (phase < .5 ? 1. : -1.)
+                                                        : 2. * phase - 1.;
+                    ControllerEvent c;
+                    c.id = next.allocate();
+                    c.channel = ch->id;
+                    c.beat = beat;
+                    c.type = type;
+                    c.number = type == 0 ? a.pitch : 0;
+                    apply(c, juce::jlimit(low, 1., a.offset + wave * a.value * (type == 1 ? 1. : .5)));
+                    pat->controllers.push_back(c);
+                }
+                std::stable_sort(pat->controllers.begin(), pat->controllers.end(),
+                                 [](const auto &x, const auto &y) { return x.beat < y.beat; });
+            }
+            else if (id == "notes.controller.add")
             {
                 const juce::StringArray types{"cc", "pitchBend", "pressure", "program"};
                 const int type = types.indexOf(a.text.isEmpty() ? juce::String("cc") : a.text);

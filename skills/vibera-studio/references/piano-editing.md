@@ -45,3 +45,8 @@
   to the next note start (staccato 25%, portato 50%, tenuto 90%; Quick legato is 100%).
 - **Scale levels** (`notes.scaleLevels`): velocity x `args.value` (0..4) + `args.offset`
   (-1..1), inverted first when `args.enabled`. Menu > Edit > Scale levels.
+- **LFO tool** (`notes.controller.lfo`: `args.text` cc / pitchBend / pressure, `args.pitch` CC
+  number, `args.target` shape 0 sine / 1 triangle / 2 square / 3 saw, `args.length` period
+  beats 1/4..64, `args.value` depth 0..1, `args.offset` centre): replaces the Channel's events
+  of that lane over the Pattern with one point per 1/16 beat (one Undo). Menu > LFO tool writes
+  CC 1 (mod wheel).
