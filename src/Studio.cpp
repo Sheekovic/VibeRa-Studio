@@ -4467,6 +4467,16 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "channel.spareStore" || action == "channel.spareFlip")
+    {
+        if (!controller.project.channel(selectedChannel))
+            return false;
+        if (action == "channel.spareStore")
+            storeSpareState(selectedChannel);
+        else
+            flipSpareState(selectedChannel);
+        return true;
+    }
     if (action == "rack.linkSequential")
     {
         // Each selected Channel (Rack order) goes to the next insert from the selected one.
@@ -6863,6 +6873,59 @@ void Studio::confirmMixerInsertDeletion(int index, std::optional<int> replacemen
             }
             safe->command("mixer.insert.delete", args);
         });
+}
+void Studio::storeSpareState(Id channel)
+{
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    status = "Capturing spare state...";
+    captureChannelPreset(channel,
+                         [safe, channel](juce::Result result, juce::String xml)
+                         {
+                             if (!safe)
+                                 return;
+                             if (result.wasOk())
+                                 safe->spareStates[channel] = xml;
+                             safe->status = result.wasOk() ? "Stored in spare state" : result.getErrorMessage();
+                             safe->repaint();
+                         });
+}
+void Studio::flipSpareState(Id channel)
+{
+    const auto spare = spareStates.find(channel);
+    if (spare == spareStates.end())
+    {
+        status = "Store a spare state first";
+        repaint();
+        return;
+    }
+    // Capture the current state, apply the spare (one Undo step), keep the captured one as spare.
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    const auto wanted = spare->second;
+    status = "Flipping with spare state...";
+    captureChannelPreset(channel,
+                         [safe, channel, wanted](juce::Result result, juce::String current)
+                         {
+                             if (!safe)
+                                 return;
+                             if (result.failed())
+                             {
+                                 safe->status = result.getErrorMessage();
+                                 return;
+                             }
+                             const auto file = juce::File::getSpecialLocation(juce::File::tempDirectory)
+                                                   .getChildFile("vibera-spare-" + juce::Uuid().toString() + ".vibch");
+                             if (!file.replaceWithText(wanted))
+                             {
+                                 safe->status = "Spare state could not be staged";
+                                 return;
+                             }
+                             const auto applied = safe->applyChannelPresetFile(channel, file);
+                             file.deleteFile();
+                             if (applied.wasOk())
+                                 safe->spareStates[channel] = current;
+                             safe->status = applied.wasOk() ? "Flipped with spare state" : applied.getErrorMessage();
+                             safe->repaint();
+                         });
 }
 void Studio::openMixerEq(int index)
 {

@@ -3663,6 +3663,12 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "audioStretchMode", audioStretchMode);
     set(state, "pianoStamp", pianoStamp);
     {
+        juce::Array<juce::var> spares;
+        for (const auto &[id, xml] : spareStates)
+            spares.add(juce::int64(id));
+        set(state, "spareStateChannels", spares);
+    }
+    {
         juce::Array<juce::var> zipped;
         for (auto id : zippedChannels)
             zipped.add(juce::int64(id));

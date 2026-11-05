@@ -538,6 +538,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.mixer", "Assign Mixer insert", Scope::rack, true, true, "command"},
         {"channel.gain", "Channel volume", Scope::rack, true, true, "command"},
         {"channel.pitch", "Channel pitch (plugin pitch bend -1..1)", Scope::rack, true, true, "command"},
+        {"channel.spareStore", "Store in spare state", Scope::rack, false, true, "action"},
+        {"channel.spareFlip", "Flip with spare state", Scope::rack, false, true, "action"},
         {"channel.pitchRange", "Channel pitch range (semitones)", Scope::rack, true, true, "command"},
         {"channel.pan", "Channel pan", Scope::rack, true, true, "command"},
         {"channel.sampler.sourceTempo", "Set sample tempo", Scope::rack, true, true, "command"},

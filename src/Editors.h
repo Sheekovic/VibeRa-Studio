@@ -4783,6 +4783,8 @@ class Studio::Editor final : public juce::Component,
                     }
                     m.addItem(4, "Cut itself", !c.audioClip && !c.instrument);
                     m.addItem(5, "Name / colour / icon...    F2 / middle-click");
+                    m.addItem(6, "Store in spare state");
+                    m.addItem(7, "Flip with spare state", s.spareStates.contains(c.id));
                     m.addSeparator();
                     s.addStepFillItems(m, {c.id}, s.selectedPattern);
                     s.addChannelLoopItems(m, c.id, s.selectedPattern);
@@ -4812,6 +4814,10 @@ class Studio::Editor final : public juce::Component,
                                             safe->s.pluginMenu(id);
                                         if (action == 5)
                                             safe->s.channelPropertiesDialog({id});
+                                        if (action == 6)
+                                            safe->s.storeSpareState(id);
+                                        if (action == 7)
+                                            safe->s.flipSpareState(id);
                                         if (action == 4)
                                         {
                                             CommandArgs args;

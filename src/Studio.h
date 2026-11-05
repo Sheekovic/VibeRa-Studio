@@ -389,6 +389,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Shared UI/MCP preset services; capture is asynchronous for instruments.
     void captureChannelPreset(Id channel, std::function<void(juce::Result, juce::String)> done);
     juce::Result applyChannelPresetFile(Id channel, const juce::File &);
+    // Spare state (familiar wrapper menu): a captured Channel preset kept for this session.
+    std::map<Id, juce::String> spareStates;
+    void storeSpareState(Id channel);
+    void flipSpareState(Id channel);
     void loadChannelPreset(Id channel);
     juce::Result verifyChannelManagement(const juce::File &, const juce::File &fixture = {});
     juce::Result verifyLiveBurn(const juce::File &);

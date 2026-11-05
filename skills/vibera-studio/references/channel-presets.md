@@ -37,3 +37,12 @@ MCP file jobs: `vibera_project` `{"action":"savePreset","channel":3,"path":"C:/x
 poll `{"action":"job","operation":...}` while pending) and
 `{"action":"loadPreset","channel":2,"path":"C:/x/pad.vibch"}` (one Undo step; a
 missing sample is looked up beside the preset file).
+
+## Spare state
+
+Channel right-click > Store in spare state (`channel.spareStore`, selected Channel) captures the
+Channel's preset, including a plugin instrument's native state, for this session. Flip with
+spare state (`channel.spareFlip`) captures the current state, applies the spare as one Undo step
+and keeps the captured one as the new spare, so repeated flips A/B two sounds. Read
+`state.spareStateChannels`. Spare states are not saved with the project. Mixer effect slots use
+chain copy/paste for the same purpose.
