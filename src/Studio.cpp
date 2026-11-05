@@ -4480,6 +4480,87 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return started.wasOk();
     }
+    if (action == "notes.copy" || action == "notes.cut")
+    {
+        const auto *part = controller.project.pattern(selectedPattern);
+        auto board = std::make_shared<NoteClipboard>();
+        board->origin = 1.e18;
+        if (part)
+            for (const auto &n : part->notes)
+                if (selectedNotes.empty() ? n.channel == selectedChannel : selected(selectedNotes, n.id))
+                    board->notes.push_back(n), board->origin = std::min(board->origin, n.beat);
+        if (board->notes.empty())
+        {
+            status = "No notes to copy";
+            repaint();
+            return false;
+        }
+        noteClipboard = board;
+        if (action == "notes.cut")
+        {
+            CommandArgs cut;
+            cut.pattern = selectedPattern;
+            cut.channel = selectedChannel;
+            for (const auto &n : board->notes)
+                cut.ids.push_back(n.id);
+            command("notes.delete", cut);
+        }
+        else
+            status = juce::String(int(board->notes.size())) + " note(s) copied";
+        repaint();
+        return true;
+    }
+    if (action == "notes.paste")
+    {
+        if (!noteClipboard || noteClipboard->notes.empty())
+        {
+            status = "Copy or cut notes first (Ctrl+C / Ctrl+X)";
+            repaint();
+            return false;
+        }
+        a.noteClipboard = noteClipboard;
+        a.ids.clear();
+        // Pattern mode: at the playhead (snapped); Song mode: at the copied positions.
+        const double playhead = std::max(0., audio.positionBeat());
+        a.beat = patternMode ? (snap > 0 ? std::floor(playhead / snap + 1.e-9) * snap : playhead)
+                             : noteClipboard->origin;
+        const auto firstNew = controller.project.nextId;
+        command(action, a);
+        if (status != "Ready")
+            return false;
+        std::vector<Id> pasted;
+        if (const auto *part = controller.project.pattern(selectedPattern))
+            for (const auto &n : part->notes)
+                if (n.id >= firstNew)
+                    pasted.push_back(n.id);
+        selectItems(false, pasted);
+        return true;
+    }
+    if (action == "selection.invert")
+    {
+        const bool clips = focus == Scope::playlist;
+        std::vector<Id> inverted;
+        if (clips)
+        {
+            const auto &p = controller.project;
+            for (const auto &c : p.placements)
+                if (!selected(selectedClips, c.id))
+                    inverted.push_back(c.id);
+            for (const auto &c : p.audioPlacements)
+                if (!selected(selectedClips, c.id))
+                    inverted.push_back(c.id);
+            for (const auto &c : p.automation.placements)
+                if (!selected(selectedClips, c.id))
+                    inverted.push_back(c.id);
+        }
+        else if (const auto *part = controller.project.pattern(selectedPattern))
+            for (const auto &n : part->notes)
+                if (n.channel == selectedChannel && !selected(selectedNotes, n.id))
+                    inverted.push_back(n.id);
+        selectItems(clips, inverted);
+        repaint();
+        return true;
+    }
     if (action == "clip.copy" || action == "clip.cut")
     {
         const auto ids = effectiveClipSelection();

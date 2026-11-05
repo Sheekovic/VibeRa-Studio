@@ -242,6 +242,11 @@ Customization Customization::familiarDefaults()
     add("notes.chop", Scope::piano, 'U', ctrl);
     add("notes.glue", Scope::piano, 'G', ctrl);
     add("notes.duplicate", Scope::piano, 'B', ctrl);
+    add("notes.copy", Scope::piano, 'C', ctrl);
+    add("notes.cut", Scope::piano, 'X', ctrl);
+    add("notes.paste", Scope::piano, 'V', ctrl);
+    add("selection.invert", Scope::piano, 'I', shift);
+    add("selection.invert", Scope::playlist, 'I', shift);
     add("notes.delete", Scope::piano, juce::KeyPress::deleteKey);
     add("clip.duplicate", Scope::playlist, 'B', ctrl);
     add("clip.merge", Scope::playlist, 'G', ctrl);

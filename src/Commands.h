@@ -90,9 +90,16 @@ struct ClipClipboard
     double origin = 0;
     bool empty() const noexcept { return patterns.empty() && audio.empty() && automation.empty(); }
 };
+// Copied Piano roll notes (Ctrl+C / Ctrl+X); origin is the earliest start.
+struct NoteClipboard
+{
+    std::vector<Note> notes;
+    double origin = 0;
+};
 struct CommandArgs
 {
     std::shared_ptr<const ClipClipboard> clipboard; // clip.paste only.
+    std::shared_ptr<const NoteClipboard> noteClipboard; // notes.paste only.
     Id target = 0, channel = 0, pattern = 0;
     double beat = 0, length = .25, value = 0;
     int pitch = 60, lane = 0, mixer = 0;

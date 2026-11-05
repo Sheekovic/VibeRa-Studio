@@ -1272,6 +1272,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
 
     Id clipboardPattern = 0, clipboardChannel = 0;
     std::shared_ptr<const ClipClipboard> clipClipboard; // Playlist Ctrl+C / Ctrl+X.
+    std::shared_ptr<const NoteClipboard> noteClipboard; // Piano roll Ctrl+C / Ctrl+X.
     void timerCallback() override;
     void chooseSave();
     void chooseOpen();

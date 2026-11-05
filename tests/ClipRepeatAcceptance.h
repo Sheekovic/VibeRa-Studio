@@ -270,6 +270,41 @@ inline void tests()
             name.lane = 40;
             require(controller.execute("track.autoName", name).failed(), "An empty track has nothing to name it after");
         }
+        {
+            // Piano roll: paste notes onto another Channel at a beat, flip in time and pitch.
+            const auto *source = controller.project.pattern(pattern.id);
+            std::vector<Id> kicks;
+            for (const auto &n : source->notes)
+                if (n.channel == kick)
+                    kicks.push_back(n.id);
+            CommandArgs paste;
+            paste.pattern = pattern.id;
+            paste.channel = snare;
+            paste.ids = kicks;
+            paste.beat = 8;
+            require(controller.execute("notes.paste", paste).wasOk(), "Paste notes");
+            std::vector<double> pasted;
+            for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                if (n.channel == snare && n.beat >= 8)
+                    pasted.push_back(n.beat);
+            std::sort(pasted.begin(), pasted.end());
+            require(pasted == std::vector<double>{8, 10}, "Pasted notes keep spacing from the paste beat, on the target Channel");
+            controller.undoEdit();
+            CommandArgs flip;
+            flip.pattern = pattern.id;
+            flip.channel = kick;
+            flip.text = "horizontal";
+            require(controller.execute("notes.flip", flip).wasOk(), "Flip the Channel part in time");
+            std::vector<double> flipped;
+            for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                if (n.channel == kick)
+                    flipped.push_back(n.beat);
+            std::sort(flipped.begin(), flipped.end());
+            require(flipped == std::vector<double>{0, 2}, "Kicks at 0 and 2 (length 1/4) mirror within 0..2.25");
+            controller.undoEdit();
+            flip.text = "sideways";
+            require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
+        }
         CommandArgs empty;
         empty.beat = 4;
         require(controller.execute("clip.paste", empty).failed(), "Paste with nothing copied fails");

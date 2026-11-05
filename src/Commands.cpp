@@ -720,6 +720,11 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.colourGroup", "Set note colour voice group", Scope::piano, true, false, "command"},
         {"notes.move", "Move / resize notes", Scope::piano, true, true, "command"},
         {"notes.delete", "Delete notes", Scope::piano, true, true, "command"},
+        {"notes.copy", "Copy notes", Scope::piano, false, true, "action"},
+        {"notes.cut", "Cut notes", Scope::piano, false, true, "action"},
+        {"notes.paste", "Paste notes", Scope::piano, true, true, "command"},
+        {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},
+        {"selection.invert", "Invert selection", Scope::global, false, true, "action"},
         {"notes.duplicate", "Duplicate notes", Scope::piano, true, true, "command"},
         {"notes.velocity", "Note velocity", Scope::piano, true, true, "command"},
         {"notes.slice", "Slice notes", Scope::piano, true, true, "command"},
@@ -4031,6 +4036,65 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 std::erase_if(pat->controllers, [&](const auto &c) { return c.id == a.target; });
                 if (pat->controllers.size() == before)
                     return missing();
+            }
+        }
+        if (id == "notes.flip")
+        {
+            // Mirror the selection (or the Channel part) in time within its span, or in pitch
+            // around the middle of its range.
+            if (a.text != "horizontal" && a.text != "vertical")
+                return juce::Result::fail("Flip is horizontal or vertical");
+            std::vector<size_t> targets;
+            for (size_t i = 0; i < pat->notes.size(); ++i)
+                if (a.ids.empty() ? pat->notes[i].channel == a.channel : chosen(pat->notes[i].id))
+                    targets.push_back(i);
+            if (targets.empty())
+                return juce::Result::fail("No notes to flip");
+            double start = 1.e18, end = -1.e18;
+            int low = 127, high = 0;
+            for (auto i : targets)
+            {
+                const auto &n = pat->notes[i];
+                start = std::min(start, n.beat), end = std::max(end, n.beat + n.length);
+                low = std::min(low, n.pitch), high = std::max(high, n.pitch);
+            }
+            for (auto i : targets)
+            {
+                auto &n = pat->notes[i];
+                if (a.text == "horizontal")
+                    n.beat = std::max(0., start + end - (n.beat + n.length));
+                else
+                    n.pitch = juce::jlimit(0, 127, low + high - n.pitch);
+            }
+        }
+        if (id == "notes.paste")
+        {
+            // Pasted notes keep their spacing; the earliest lands at args.beat, on this Channel.
+            if (!ch || ch->audioClip)
+                return juce::Result::fail("Select a playable Channel to paste notes into");
+            auto board = a.noteClipboard;
+            if (!board || board->notes.empty())
+            {
+                auto copied = std::make_shared<NoteClipboard>();
+                copied->origin = 1.e18;
+                for (const auto &n : pat->notes)
+                    if (chosen(n.id))
+                        copied->notes.push_back(n), copied->origin = std::min(copied->origin, n.beat);
+                board = copied;
+            }
+            if (!board || board->notes.empty())
+                return juce::Result::fail("Copy or cut notes first (Ctrl+C / Ctrl+X)");
+            if (!std::isfinite(a.beat) || a.beat < 0 || a.beat > 100000)
+                return juce::Result::fail("Paste position is 0..100000 beats");
+            if (pat->notes.size() + board->notes.size() > 100000)
+                return juce::Result::fail("The Pattern would exceed 100000 notes");
+            const double shift = a.beat - board->origin;
+            for (auto copy : board->notes)
+            {
+                copy.id = next.allocate();
+                copy.channel = a.channel;
+                copy.beat = std::max(0., copy.beat + shift);
+                pat->notes.push_back(copy);
             }
         }
         if (id == "notes.clearControllers")

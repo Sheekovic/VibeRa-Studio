@@ -120,6 +120,8 @@ void Studio::midiFileMenu()
                                                   [&](const auto &c) { return c.channel == selectedChannel; });
         menu.addItem(16, "Clear recorded controllers (CC, pitch bend, pressure)", controls);
     }
+    menu.addItem(17, "Flip horizontally (reverse in time)");
+    menu.addItem(18, "Flip vertically (mirror pitches)");
     // Composition tools act on the selection, or the whole Channel part without one.
     menu.addSeparator();
     {
@@ -252,6 +254,14 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result == 17 || result == 18)
+            {
+                safe->focus = Scope::piano;
+                auto args = noteTargets;
+                args.text = result == 17 ? "horizontal" : "vertical";
+                safe->command("notes.flip", args);
                 return;
             }
             if (result == 16)
