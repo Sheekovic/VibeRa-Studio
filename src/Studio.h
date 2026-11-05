@@ -1114,6 +1114,12 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::ComboBox snapChoice;
     ToolbarButton patternOptions{"Pattern menu"};
     juce::Slider tempo;
+    // Tap tempo: the average interval of the last taps (2 s apart starts over) sets the
+    // tempo; one tapping session is one Undo step.
+    juce::TextButton tapTempoButton{"Tap"};
+    std::vector<double> tapTimes;
+    bool tapGesture = false;
+    void tapTempo();
     juce::Label title, deviceLabel;
     juce::ThreadPool midiFileJobs{1};
     // CONTROL owns sessions; bounded worker jobs own immutable prepared PCM only.

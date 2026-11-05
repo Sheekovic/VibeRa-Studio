@@ -187,6 +187,9 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
         a.value = tempo.getValue();
         command("project.tempo", a);
     };
+    tapTempoButton.setTooltip("Tap tempo: click in time with the music (two taps or more)");
+    tapTempoButton.onClick = [this] { tapTempo(); };
+    addAndMakeVisible(tapTempoButton);
     play.onClick = [this]
     {
         if (automationRecordingActive() && audio.playing())
@@ -831,6 +834,7 @@ void Studio::resized()
     place(loopButton, 34);
     const bool compact = getWidth() < 1250;
     place(tempo, compact ? 100 : 118);
+    place(tapTempoButton, 36);
     place(patterns, compact ? 100 : 146);
     place(patternOptions, 28);
     place(newPattern, 30);
@@ -4280,6 +4284,11 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         }
         return true;
     }
+    if (action == "project.tapTempo")
+    {
+        tapTempo();
+        return true;
+    }
     if (action == "project.saveTemplate")
     {
         promptSaveTemplate();
@@ -6636,6 +6645,42 @@ void Studio::chooseOpen()
             safe->requestProjectTransition([safe, file](bool discard)
                 { if (safe) (void)safe->openProjectFile(file, discard); });
         });
+}
+
+void Studio::tapTempo()
+{
+    const double now = juce::Time::getMillisecondCounterHiRes() / 1000.;
+    if (!tapTimes.empty() && now - tapTimes.back() > 2.)
+        tapTimes.clear();
+    tapTimes.push_back(now);
+    if (tapTimes.size() > 9)
+        tapTimes.erase(tapTimes.begin());
+    if (tapTimes.size() < 2)
+    {
+        status = "Tap tempo: keep tapping";
+        repaint();
+        return;
+    }
+    const double bpm = 60. * double(tapTimes.size() - 1) / (tapTimes.back() - tapTimes.front());
+    if (!tapGesture)
+        tapGesture = controller.beginGesture();
+    CommandArgs a;
+    a.value = std::round(juce::jlimit(20., 400., bpm) * 100.) / 100.;
+    command("project.tempo", a);
+    if (status == "Ready")
+        status = "Tap tempo: " + juce::String(a.value, 2) + " BPM";
+    repaint();
+    // Two seconds after the last tap the session ends (one Undo step).
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    juce::Timer::callAfterDelay(2100, [safe, now]
+                                {
+                                    if (!safe || safe->tapTimes.empty() || safe->tapTimes.back() != now)
+                                        return;
+                                    safe->tapTimes.clear();
+                                    if (std::exchange(safe->tapGesture, false))
+                                        if (auto ended = safe->controller.endGestureChecked("Tap tempo"); ended.failed())
+                                            safe->status = ended.getErrorMessage();
+                                });
 }
 
 juce::Array<juce::File> Studio::projectTemplates() const

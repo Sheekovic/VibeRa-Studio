@@ -264,3 +264,11 @@ performance.scene3` launches it and stops the other launched Patterns;
   for a file); `empty`/`demo` keep their meaning; an unknown name is `unavailable_target`.
 - UI: Tools menu > New from template / Save as template... (command `project.saveTemplate`
   opens the name dialog; answer it in test mode with `vibera_dialog`).
+
+## Tap tempo
+
+- Action `project.tapTempo` (toolbar "Tap" button next to the tempo): each call is a tap; from
+  the second tap the tempo becomes 60 x (taps - 1) / (time from the first to the last of the
+  last nine taps), rounded to 0.01 BPM and clamped to 20..400. A pause over 2 s starts a new
+  session; one session is one Undo step (it ends 2.1 s after the last tap). Over MCP the
+  measured interval includes each call's own latency.
