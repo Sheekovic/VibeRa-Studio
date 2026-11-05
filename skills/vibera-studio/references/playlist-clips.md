@@ -68,3 +68,6 @@
 - **Merge with** (Arrangements menu; `arrangement.merge`, `args.target` stored arrangement,
   `args.beat` position, `args.enabled` insert = move later material right first): adds copies
   of that arrangement's clips and markers to the open one (the source stays). One Undo.
+- **Play selected** (`tool.play`, Y in the Playlist and Piano roll): in the Playlist, holding the
+  mouse plays from that point and releasing stops; in the Piano roll, holding a note (or a
+  row) sounds it. P / B / other tools leave it.

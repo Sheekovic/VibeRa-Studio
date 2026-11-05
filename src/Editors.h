@@ -682,7 +682,8 @@ class Studio::Editor final : public juce::Component,
     double trimStartBeat = 0, trimStartOffset = 0, trimStartDuration = 0;
     bool selecting = false, dragging = false, erasing = false, resizing = false, paintMode = false;
     bool resizingLeft = false;
-    bool velocityPainting = false; // Velocity lane drag (Shift: one level for every crossed note).
+    bool velocityPainting = false;
+    bool playToolPlaying = false, playToolPreviewing = false; // "Play selected" (Y) gestures. // Velocity lane drag (Shift: one level for every crossed note).
     double velocityPaintLevel = .78; // Piano roll: dragging a note's start (option "Allow resizing from left").
     juce::Point<float> origin, lastErasePoint;
     juce::Rectangle<float> rectangle;
@@ -2808,7 +2809,7 @@ class Studio::Editor final : public juce::Component,
     {
         if (pointerGestureActive())
             cancelPointerGesture();
-        playlistTool = juce::jlimit(0, 7, value);
+        playlistTool = juce::jlimit(0, 8, value); // 8: Play selected (no toolbar button).
         paintMode = value == 1;
         for (int index = 0; index < int(playlistTools.size()); ++index)
             playlistTools[size_t(index)].setToggleState(index == value, juce::dontSendNotification);
@@ -5379,6 +5380,26 @@ class Studio::Editor final : public juce::Component,
         }
         if (e.x < leftEdge())
             return;
+        if (e.mods.isLeftButtonDown() && e.y >= gridTop() &&
+            ((type == 2 && playlistTool == 8) ||
+             (type == 1 && s.pianoPlayTool && !noteSliceTool && !noteMuteTool && e.y < noteBottom())))
+        {
+            // Play selected (Y): Playlist plays from the click while held; Piano roll sounds the note.
+            if (type == 2)
+            {
+                s.audio.seekBeat(std::max(0., beatAt(e.x)));
+                if (!s.audio.playing())
+                    s.play.onClick();
+                playToolPlaying = true;
+            }
+            else
+            {
+                const auto hitNote = pianoHit(e.position);
+                s.previewNote(hitNote ? hitNote->note.pitch : pitch(e.y));
+                playToolPreviewing = true;
+            }
+            return;
+        }
         if (type == 1 && noteSliceTool && e.y < noteBottom() && e.mods.isLeftButtonDown() &&
             !e.mods.isCtrlDown())
         {
@@ -6011,6 +6032,14 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseDrag(const juce::MouseEvent &e) override
     {
+        if (playToolPreviewing)
+        {
+            const auto hitNote = pianoHit(e.position);
+            s.previewNote(hitNote ? hitNote->note.pitch : pitch(e.y));
+            return;
+        }
+        if (playToolPlaying)
+            return;
         if (velocityPainting)
         {
             // Paint: the note under the pointer takes the pointer height (Shift: the start height).
@@ -6557,6 +6586,17 @@ class Studio::Editor final : public juce::Component,
         rulerScrubbing = false;
         if (std::exchange(rackPreviewing, false))
             s.previewNote(-1);
+        if (std::exchange(playToolPreviewing, false))
+        {
+            s.previewNote(-1);
+            return;
+        }
+        if (std::exchange(playToolPlaying, false))
+        {
+            if (s.audio.playing())
+                s.performAction("transport.stop");
+            return;
+        }
         if (std::exchange(velocityPainting, false))
         {
             finishUiGesture(s, "Edit velocity");

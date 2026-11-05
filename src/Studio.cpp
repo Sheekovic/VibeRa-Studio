@@ -4293,8 +4293,26 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
+    if (action == "tool.play")
+    {
+        if (focus == Scope::playlist)
+            static_cast<Editor *>(windows[2]->getContentComponent())->setPlaylistTool(8);
+        else if (focus == Scope::piano)
+        {
+            static_cast<Editor *>(windows[1]->getContentComponent())->setPaintMode(false);
+            pianoPlayTool = true;
+            pianoDrumPaint = false;
+        }
+        else
+            return false;
+        status = focus == Scope::playlist ? "Play selected: hold on the Playlist to play from there"
+                                          : "Play selected: hold a note to hear it";
+        repaint();
+        return true;
+    }
     if (action == "tool.draw" || action == "tool.paint" || action == "tool.drumPaint")
     {
+        pianoPlayTool = false;
         if (action == "tool.drumPaint")
             focus = Scope::piano;
         int i = int(focus) - 1;
