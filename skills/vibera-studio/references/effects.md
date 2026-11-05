@@ -85,6 +85,10 @@ Mixing and mastering processors:
 - Lo-fi (`lo-fi`): wow and flutter (tape pitch wobble, about 15 and 3 cents), hiss and
   crackle (follow the input level, so silence stays silent), tone (low-pass Hz), age
   (saturation), width, mix. A small fixed delay is reported as latency.
+- Formant Filter (`formant`): three resonant band-passes on the formants of a sung vowel;
+  `vowel` 0..4 morphs A E I O U continuously, `shift` moves the formants -12..12 semitones,
+  `resonance` (Q 1..20), mix and output (-12..18 dB, default +6 to make up the band-pass level).
+  The window draws the summed response with the F1-F3 markers and the nearest vowel.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

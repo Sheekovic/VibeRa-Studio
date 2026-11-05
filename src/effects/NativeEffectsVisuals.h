@@ -688,6 +688,35 @@ inline void paint(juce::Graphics &g, juce::Rectangle<float> plot, EffectId id, c
                 juce::String(int(std::lround(v[2] * 100))) + "%  /  CRACKLE " + juce::String(int(std::lround(v[3] * 100))) + "%");
         return;
     }
+    case EffectId::formant:
+    {
+        // The three formant bands of the current vowel, summed, over the frequency grid.
+        double hz[3], level[3];
+        Formant::formants(v[0], v[1], hz, level);
+        const double out = std::pow(10., v[4] / 20.), mix = v[3];
+        responseCurve(g, plot, p, 30.f, [&](double f)
+                      {
+                          double sum = 0;
+                          for (int i = 0; i < 3; ++i)
+                              sum += level[i] * std::pow(10., biquadDb(2, hz[i], v[2], 0, f, fs) / 20.);
+                          return 20 * std::log10(std::max(1e-6, mix * sum * out + (1 - mix)));
+                      });
+        static const char *names[]{"A", "E", "I", "O", "U"};
+        const int nearest = juce::jlimit(0, 4, int(std::lround(v[0])));
+        g.setColour(p.warm);
+        g.setFont(juce::FontOptions(26.f, juce::Font::bold));
+        g.drawText(names[nearest], plot.withTrimmedLeft(plot.getWidth() - 60.f).withHeight(36.f).toNearestInt(),
+                   juce::Justification::centred);
+        for (int i = 0; i < 3; ++i)
+        {
+            const float x = xOfHz(plot, hz[i]);
+            g.setColour(p.warm.withAlpha(.7f));
+            g.drawVerticalLine(int(x), plot.getY() + 4.f, plot.getBottom() - 16.f);
+            g.setFont(juce::FontOptions(10.f));
+            g.drawText("F" + juce::String(i + 1), int(x) + 3, int(plot.getY()) + 4, 24, 12, juce::Justification::centredLeft);
+        }
+        return;
+    }
     case EffectId::spectrumAnalyzer: case EffectId::parametricEq: case EffectId::count:
         return; // Drawn by the editor itself.
     }

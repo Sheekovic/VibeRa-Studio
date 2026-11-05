@@ -25,6 +25,7 @@ class Engine
     BeatGate beat;
     Pump pump;
     LoFi loFi;
+    Formant formant;
     EffectId selected = EffectId::balance;
     bool prepared = false;
     bool configured = false;
@@ -50,6 +51,7 @@ class Engine
         beat.prepare(sampleRate);
         pump.prepare(sampleRate);
         loFi.prepare(sampleRate);
+        formant.prepare(sampleRate);
         prepared = true;
         selected = EffectId::balance;
         configured = false;
@@ -65,6 +67,7 @@ class Engine
         beat.reset();
         pump.reset();
         loFi.reset();
+        formant.reset();
     }
     // Host time for tempo-synced effects (Beat Gate), once per block before process().
     void setTransport(bool hasPosition, bool playing, double ppq, double bpm) noexcept
@@ -114,6 +117,8 @@ class Engine
             pump.setParameters(values);
         else if (effect == EffectId::loFi)
             loFi.setParameters(values);
+        else if (effect == EffectId::formant)
+            formant.setParameters(values);
         else
             studio.setParameters(effect, values);
         return true;
@@ -142,6 +147,8 @@ class Engine
                 pump.process(l, r);
             else if (selected == EffectId::loFi)
                 loFi.process(l, r);
+            else if (selected == EffectId::formant)
+                formant.process(l, r);
             else
                 studio.process(l, r);
             left[i] = std::isfinite(l) ? l : 0.0f;

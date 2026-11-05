@@ -2,6 +2,7 @@
 #pragma once
 #include "EffectsTypes.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <numbers>
@@ -76,6 +77,84 @@ class Pump
   private:
     double rate = 48000, tempo = 120, beat = 0, cycle = 1;
     float depth = .8f, release = .6f, curve = .4f, hold = .05f, offset = 0, slew = 1, mix = 1, gain = 1;
+};
+
+// Formant filter: the input through three resonant band-passes placed on the formants of a
+// sung vowel (A E I O U, morphing continuously), optionally shifted, like a "talking" filter.
+// Coefficients change only in setParameters; processing is allocation-free.
+class Formant
+{
+  public:
+    // Formant frequencies (Hz) and relative levels of the five vowels (adult voice, rounded
+    // textbook values), interpolated for a fractional vowel and shifted by `shift` semitones.
+    static void formants(float vowel, float shift, double (&hz)[3], double (&level)[3]) noexcept
+    {
+        static constexpr double table[5][3]{{800, 1150, 2900}, {400, 1700, 2600}, {300, 2300, 3000},
+                                            {450, 800, 2830}, {325, 700, 2530}};
+        static constexpr double levels[5][3]{{1, .5, .12}, {1, .35, .18}, {1, .2, .16}, {1, .3, .05}, {1, .16, .04}};
+        const float v = std::clamp(vowel, 0.f, 4.f);
+        const int a = std::min(3, int(v));
+        const double t = v - a, ratio = std::pow(2., double(shift) / 12.);
+        for (int i = 0; i < 3; ++i)
+        {
+            hz[i] = (table[a][i] + (table[a + 1][i] - table[a][i]) * t) * ratio;
+            level[i] = levels[a][i] + (levels[a + 1][i] - levels[a][i]) * t;
+        }
+    }
+    void prepare(double sampleRate)
+    {
+        rate = sampleRate;
+        reset();
+    }
+    void reset() noexcept
+    {
+        for (auto &band : state)
+            for (auto &channel : band)
+                channel = {0, 0, 0, 0};
+    }
+    void setParameters(const Values &v) noexcept
+    {
+        double hz[3], level[3];
+        formants(v[0], v[1], hz, level);
+        const double q = std::clamp(double(v[2]), 1., 20.);
+        for (int i = 0; i < 3; ++i)
+        {
+            // RBJ band-pass (0 dB peak), scaled by the formant level.
+            const double w = 2 * std::numbers::pi * std::clamp(hz[i], 40., rate * .45) / rate;
+            const double alpha = std::sin(w) / (2 * q), a0 = 1 + alpha;
+            gains[i] = float(level[i]);
+            b0[i] = float(alpha / a0);
+            a1[i] = float(-2 * std::cos(w) / a0);
+            a2[i] = float((1 - alpha) / a0);
+        }
+        mix = std::clamp(v[3], 0.f, 1.f);
+        output = std::pow(10.f, std::clamp(v[4], -12.f, 18.f) / 20.f);
+    }
+    void process(float &left, float &right) noexcept
+    {
+        float wet[2]{0, 0};
+        const float dry[2]{left, right};
+        for (int i = 0; i < 3; ++i)
+            for (int c = 0; c < 2; ++c)
+            {
+                // Direct form I: y = b0 x - b0 x[n-2] - a1 y[n-1] - a2 y[n-2].
+                auto &s = state[size_t(i)][size_t(c)];
+                const float y = b0[i] * (dry[c] - s[1]) - a1[i] * s[2] - a2[i] * s[3];
+                s[1] = s[0];
+                s[0] = dry[c];
+                s[3] = s[2];
+                s[2] = std::isfinite(y) ? y : 0.f;
+                wet[c] += s[2] * gains[i];
+            }
+        left = (dry[0] + (wet[0] * output - dry[0]) * mix);
+        right = (dry[1] + (wet[1] * output - dry[1]) * mix);
+    }
+
+  private:
+    double rate = 48000;
+    float b0[3]{}, a1[3]{}, a2[3]{}, gains[3]{};
+    float mix = 1, output = 1;
+    std::array<std::array<std::array<float, 4>, 2>, 3> state{};
 };
 
 // Lo-fi: tape wow (slow) and flutter (fast) pitch wobble through a modulated delay, hiss and

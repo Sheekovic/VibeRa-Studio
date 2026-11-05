@@ -752,6 +752,37 @@ void studioOracles()
                 "Wow bends the pitch by a few cents and back (" + std::to_string(early) + ", " + std::to_string(late) + ")");
     }
 
+    // Formant filter: each vowel passes its own formant region (A around 800 Hz, I around
+    // 2300 Hz), the shift moves the formants, mix 0 is the dry input and the output is finite.
+    {
+        const auto level = [&](float vowel, float shift, double hz)
+        {
+            auto v = defaultValues(EffectId::formant);
+            v[0] = vowel;
+            v[1] = shift;
+            return rmsOf(renderEffect(EffectId::formant, v, sine(hz), 24000).left, 4000, 24000);
+        };
+        const double a800 = level(0, 0, 800), a2300 = level(0, 0, 2300), i800 = level(2, 0, 800), i2300 = level(2, 0, 2300);
+        require(a800 > 2 * a2300 && i2300 > 2 * i800,
+                "Formant vowels A and I favour their own regions (" + std::to_string(a800) + ", " + std::to_string(a2300) +
+                    ", " + std::to_string(i800) + ", " + std::to_string(i2300) + ")");
+        require(level(0, 12, 1600) > 2 * level(0, 0, 1600) * .5 && level(0, 12, 1600) > level(0, 12, 400),
+                "An octave formant shift moves A's first formant towards 1.6 kHz");
+        auto dryValues = defaultValues(EffectId::formant);
+        dryValues[3] = 0;
+        const auto dry = renderEffect(EffectId::formant, dryValues, sine(500), 4000);
+        double worst = 0;
+        for (int i = 0; i < 4000; ++i)
+            worst = std::max(worst, double(std::abs(dry.left[size_t(i)] - sine(500)(i))));
+        require(worst < 1e-6, "Formant mix 0 is the dry input");
+        auto loud = defaultValues(EffectId::formant);
+        loud[2] = 20;
+        loud[4] = 18;
+        const auto hot = renderEffect(EffectId::formant, loud, sine(800, 1), 24000);
+        require(std::all_of(hot.left.begin(), hot.left.end(), [](float x) { return std::isfinite(x) && std::abs(x) < 64; }),
+                "Formant output stays finite at maximum resonance");
+    }
+
     // Drum Synth DSP: every drum sounds and decays, Tune raises the kick's body, Decay
     // lengthens it, the master level scales it, and silence follows the decay.
     {

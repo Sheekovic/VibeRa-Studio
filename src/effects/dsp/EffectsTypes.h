@@ -44,6 +44,7 @@ enum class EffectId
     beatGate,
     pump,
     loFi,
+    formant,
     count
 };
 inline constexpr std::size_t maximumParameters = 12;
