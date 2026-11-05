@@ -62,3 +62,7 @@ Save/export are separate asynchronous vibera_project jobs: poll actual terminal
 results, then reopen/check membership and inspect the actual WAV. A request being
 accepted never proves file completion. Third-party editor widgets remain outside
 arbitrary semantic control. Legacy MCP gaps are deferred, not waived.
+- Transpose selected Channels: `rack.transpose` (`ids` Channel IDs, `value` whole semitones
+  -127..127, nonzero; one Undo) moves their notes in every Pattern; refuses when a note would
+  leave 0..127 or the Channels have no notes. UI: Channel Rack options menu > Transpose selected
+  Channels... (semitones dialog, `vibera_dialog` field `semitones`).

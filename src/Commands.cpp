@@ -534,6 +534,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.properties", "Channel name / colour / icon", Scope::rack, true, true, "command"},
         {"rack.properties", "Selected Channel colour / icon", Scope::rack, true, true, "command"},
         {"rack.sort", "Sort selected Channels", Scope::rack, true, true, "command"},
+        {"rack.transpose", "Transpose selected Channels (notes in every Pattern)", Scope::rack, true, true, "command"},
         {"rack.zip", "Zip selected Channels (compact rows)", Scope::rack, false, true, "action"},
         {"rack.linkSequential", "Link selected Channels to consecutive Mixer inserts", Scope::global, false, true, "action"},
         {"rack.unzipAll", "Unzip all Channels", Scope::rack, false, true, "action"},
@@ -3471,6 +3472,30 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             }
         if (!found)
             return juce::Result::fail("The selected Pattern Channels have no notes to transpose");
+    }
+    else if (id == "rack.transpose")
+    {
+        // args.ids Channels, args.value semitones: their notes in every Pattern move together.
+        if (a.ids.empty() || std::set<Id>(a.ids.begin(), a.ids.end()).size() != a.ids.size() ||
+            std::any_of(a.ids.begin(), a.ids.end(), [&](Id channel) { return !next.channel(channel); }))
+            return juce::Result::fail("rack.transpose.invalidTarget: Select existing, distinct Channels");
+        if (!std::isfinite(a.value) || std::floor(a.value) != a.value || a.value < -127 || a.value > 127 ||
+            a.value == 0)
+            return juce::Result::fail("rack.transpose.invalidValue: A whole, nonzero number of semitones -127..127");
+        const std::set<Id> chosenChannels(a.ids.begin(), a.ids.end());
+        bool found = false;
+        for (auto &pattern : next.patterns)
+            for (auto &note : pattern.notes)
+                if (chosenChannels.contains(note.channel))
+                {
+                    found = true;
+                    const int pitch = note.pitch + int(a.value);
+                    if (pitch < 0 || pitch > 127)
+                        return juce::Result::fail("rack.transpose.outOfRange: A note would leave MIDI pitches 0..127");
+                    note.pitch = pitch;
+                }
+        if (!found)
+            return juce::Result::fail("rack.transpose.noNotes: The selected Channels have no notes");
     }
     else if (id == "pattern.rename" || id == "pattern.properties")
     {

@@ -483,6 +483,7 @@ void Studio::rackGroupMenu(juce::Component *anchor)
     menu.addSeparator();
     menu.addItem(6, "Select all visible Channels");
     menu.addItem(28, "Select unused Channels");
+    menu.addItem(33, "Transpose selected Channels...", !selectedChannels.empty());
     menu.addItem(31, "Zip selected Channels    Alt+Z", !selectedChannels.empty());
     menu.addItem(32, "Unzip all    Alt+U", !zippedChannels.empty());
     menu.addItem(7, "Deselect Channels", !selectedChannels.empty());
@@ -561,6 +562,29 @@ void Studio::rackGroupMenu(juce::Component *anchor)
                 }
                 safe->selectRackChannels(unused);
                 safe->status = juce::String(int(unused.size())) + " unused Channel(s) selected";
+            }
+            if (action == 33)
+            {
+                auto *box = new juce::AlertWindow("Transpose selected Channels",
+                                                  "Semitones (-127..127; 12 = one octave up). Moves their notes in "
+                                                  "every Pattern.",
+                                                  juce::MessageBoxIconType::NoIcon);
+                box->addTextEditor("semitones", "12");
+                box->addButton("OK", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                               [safe, box, channels](int ok)
+                                               {
+                                                   if (!safe || ok != 1)
+                                                       return;
+                                                   CommandArgs args;
+                                                   args.ids = channels;
+                                                   args.value = box->getTextEditorContents("semitones")
+                                                                    .trim().getIntValue();
+                                                   safe->command("rack.transpose", args);
+                                               }),
+                                     true);
+                return;
             }
             if (action >= 21 && action <= 25)
             {
