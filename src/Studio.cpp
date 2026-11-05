@@ -4581,7 +4581,7 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
-    if (action == "clip.merge")
+    if (action == "clip.merge" || action == "clip.mergeSimilar")
     {
         a.ids = effectiveClipSelection();
         command(action, a);

@@ -284,6 +284,7 @@ Customization Customization::familiarDefaults()
     add("notes.delete", Scope::piano, juce::KeyPress::deleteKey);
     add("clip.duplicate", Scope::playlist, 'B', ctrl);
     add("clip.merge", Scope::playlist, 'G', ctrl);
+    add("clip.mergeSimilar", Scope::playlist, 'G', ctrl | shift);
     add("clip.copy", Scope::playlist, 'C', ctrl);
     add("clip.cut", Scope::playlist, 'X', ctrl);
     add("clip.paste", Scope::playlist, 'V', ctrl);

@@ -82,3 +82,7 @@
   points the clip at it (job, one Undo). Keys on the selected Audio Clip: 7 pitch down, 8 pitch
   up, 9 reverse (actions `clip.pitchDown`/`clip.pitchUp`/`clip.reverse`, first selected clip,
   one offline job at a time); also the clip menu > Edit sample.
+- Merge similar Pattern clips: `clip.mergeSimilar` (`ids`: the selected stack, two or more
+  Pattern clips; Shift+Ctrl+G; clip menu) merges them like `clip.merge` into one new Pattern
+  ("Merged xN") and replaces every other repeat of the same stack (same Patterns, tracks,
+  windows, mute and spacing, any time) with a clip of it. One Undo.

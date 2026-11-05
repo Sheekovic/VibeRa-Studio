@@ -898,6 +898,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"time.insert", "Insert space (time selection)", Scope::playlist, true, true, "command"},
         {"time.delete", "Delete space (time selection)", Scope::playlist, true, true, "command"},
         {"time.insertSliced", "Insert space and slice clips (time selection)", Scope::playlist, false, true, "action"},
+        {"clip.mergeSimilar", "Merge similar Pattern clips (the selected stack and its repeats)", Scope::playlist, true, true, "command"},
         {"clip.merge", "Merge Pattern clips", Scope::playlist, true, true, "command"},
         {"clip.slice", "Slice clips at beat", Scope::playlist, true, true, "command"},
         {"clip.slip", "Slip source content", Scope::playlist, true, true, "command"},
@@ -5554,7 +5555,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             next.patterns.push_back(std::move(part));
         }
     }
-    else if (id == "clip.merge")
+    else if (id == "clip.merge" || id == "clip.mergeSimilar")
     {
         // The selected Pattern clips become one new Pattern holding what actually plays in
         // them (Channel loops, clip repeats and windows rendered into plain notes), placed
@@ -5619,6 +5620,47 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             removed.insert(clip.id);
         std::erase_if(next.placements, [&](const auto &p) { return removed.contains(p.id); });
         next.placements.push_back({next.allocate(), merged.id, clips.front().lane, start, merged.length, 0, false});
+        if (id == "clip.mergeSimilar")
+        {
+            // Every other repeat of the same stack (same Patterns, tracks, windows, mute and
+            // spacing, at any time) is replaced by a clip of the merged Pattern too.
+            const auto same = [](const Placement &x, const Placement &y)
+            {
+                return x.pattern == y.pattern && x.lane == y.lane && std::abs(x.length - y.length) < 1.e-9 &&
+                       std::abs(x.offset - y.offset) < 1.e-9 && x.muted == y.muted;
+            };
+            std::vector<double> starts;
+            for (const auto &candidate : next.placements)
+                if (same(candidate, clips.front()))
+                    starts.push_back(candidate.beat);
+            std::sort(starts.begin(), starts.end());
+            int repeats = 0;
+            for (const double at : starts)
+            {
+                std::vector<Id> members;
+                for (const auto &clip : clips)
+                {
+                    const double beat = at + clip.beat - start;
+                    const auto found = std::find_if(next.placements.begin(), next.placements.end(),
+                                                    [&](const auto &p)
+                                                    {
+                                                        return std::abs(p.beat - beat) < 1.e-9 && same(p, clip) &&
+                                                               std::find(members.begin(), members.end(), p.id) ==
+                                                                   members.end();
+                                                    });
+                    if (found == next.placements.end())
+                        break;
+                    members.push_back(found->id);
+                }
+                if (members.size() != clips.size())
+                    continue;
+                std::erase_if(next.placements, [&](const auto &p)
+                              { return std::find(members.begin(), members.end(), p.id) != members.end(); });
+                next.placements.push_back({next.allocate(), merged.id, clips.front().lane, at, merged.length, 0, false});
+                ++repeats;
+            }
+            merged.name = "Merged x" + juce::String(repeats + 1);
+        }
         next.patterns.push_back(std::move(merged));
     }
     else if (id == "clip.unique")

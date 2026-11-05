@@ -5621,6 +5621,7 @@ class Studio::Editor final : public juce::Component,
                     m.addItem(68, "Rename / colour Pattern...");
                     m.addItem(60, "Split by channel");
                     m.addItem(61, "Merge selected Pattern clips (Ctrl+G)", s.selectedClips.size() >= 2);
+                    m.addItem(70, "Merge similar Pattern clips (Shift+Ctrl+G)", s.selectedClips.size() >= 2);
                 }
                 {
                     juce::PopupMenu chop;
@@ -5707,10 +5708,10 @@ class Studio::Editor final : public juce::Component,
                                         safe->s.command("clip.delete", a);
                                     if (n == 60)
                                         safe->s.command("clip.splitChannels", a);
-                                    if (n == 61)
+                                    if (n == 61 || n == 70)
                                     {
                                         a.ids = safe->s.effectiveClipSelection();
-                                        safe->s.command("clip.merge", a);
+                                        safe->s.command(n == 61 ? "clip.merge" : "clip.mergeSimilar", a);
                                     }
                                     if (n >= 62 && n <= 65)
                                     {
