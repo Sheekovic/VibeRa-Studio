@@ -4284,6 +4284,16 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         }
         return true;
     }
+    if (action == "mixer.selectChannelsRouted" || action == "mixer.selectRoutedHere" || action == "mixer.selectRoutedFrom")
+    {
+        const auto selected = selectRoutedFor(selectedInsert, action == "mixer.selectChannelsRouted" ? 0
+                                                              : action == "mixer.selectRoutedHere"   ? 1
+                                                                                                     : 2);
+        if (selected.failed())
+            status = selected.getErrorMessage();
+        repaint();
+        return selected.wasOk();
+    }
     if (action == "mixer.insert.fromChainPreset")
     {
         addInsertFromChainPreset();
@@ -6652,6 +6662,44 @@ void Studio::chooseOpen()
         });
 }
 
+juce::Result Studio::selectRoutedFor(int insert, int kind)
+{
+    const auto *row = mixerInsert(controller.project, insert);
+    if (!row)
+        return juce::Result::fail("Select an existing Mixer track");
+    if (kind == 0)
+    {
+        std::vector<Id> channels;
+        for (const auto &channel : controller.project.channels)
+            if (channel.mixer == insert)
+                channels.push_back(channel.id);
+        if (channels.empty())
+            return juce::Result::fail("No Channel is routed to " + row->name);
+        auto selected = selectRackChannels(channels);
+        if (selected.wasOk())
+            status = juce::String(int(channels.size())) + " Channel(s) routed to " + row->name + " selected";
+        return selected;
+    }
+    std::vector<int> tracks;
+    for (const auto &other : controller.project.mixer)
+        if (kind == 1 ? std::any_of(other.routes.begin(), other.routes.end(),
+                                    [&](const auto &route) { return route.target == insert; }) && other.index != insert
+                      : std::any_of(row->routes.begin(), row->routes.end(),
+                                    [&](const auto &route) { return route.target == other.index; }))
+            tracks.push_back(other.index);
+    if (tracks.empty())
+        return juce::Result::fail(kind == 1 ? "No Mixer track is routed to " + row->name
+                                            : row->name + " is not routed to another track");
+    MixerSelection next;
+    if (auto prepared = MixerSelection::prepare(controller.project, controller.projectIdentity, mixerSelection, tracks,
+                                                "replace", tracks.front(), next);
+        prepared.failed())
+        return prepared;
+    mixerSelection = next;
+    status = juce::String(int(tracks.size())) + " Mixer track(s) selected";
+    refresh();
+    return juce::Result::ok();
+}
 void Studio::addInsertFromChainPreset()
 {
     // Familiar "Add from state": a new insert, then a chain preset loaded onto it.
@@ -7586,6 +7634,12 @@ void Studio::effectMenu(int index)
     menu.addItem(1, "Browse / insert VST3 effect...");
     menu.addItem(10010, "EQ (3-band)...");
     menu.addItem(10011, "Track delay..." + (insert->delayMs > 0 ? " (" + juce::String(insert->delayMs, 1) + " ms)" : juce::String()));
+    juce::PopupMenu selectMenu;
+    selectMenu.addItem(10020, "Channels routed to this track    Alt+L");
+    selectMenu.addItem(10021, "Tracks routed to this one");
+    selectMenu.addItem(10022, "Tracks this one is routed to");
+    menu.addSubMenu("Select", selectMenu);
+    menu.addItem(10023, "Reset track (controls, name, colour; keeps effects)");
     juce::PopupMenu dockMenu;
     dockMenu.addItem(10016, "Left", true, insert->dock == -1);
     dockMenu.addItem(10017, "Middle", true, insert->dock == 0);
@@ -7766,6 +7820,20 @@ void Studio::effectMenu(int index)
                                                                   safe->command("mixer.insert.create", a);
                                                               }),
                                                     true);
+                               return;
+                           }
+                           if (selected >= 10020 && selected <= 10022)
+                           {
+                               if (auto chosen = safe->selectRoutedFor(index, selected - 10020); chosen.failed())
+                                   safe->status = chosen.getErrorMessage();
+                               safe->repaint();
+                               return;
+                           }
+                           if (selected == 10023)
+                           {
+                               CommandArgs a;
+                               a.mixer = index;
+                               safe->command("mixer.reset", a);
                                return;
                            }
                            if (selected >= 10016 && selected <= 10018)

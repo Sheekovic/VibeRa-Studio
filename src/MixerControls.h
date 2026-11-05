@@ -135,6 +135,21 @@ inline juce::Result applyMixerControl(Project &project, const juce::String &id, 
     }
     else if (id == "mixer.eqReset")
         it->eq = {};
+    else if (id == "mixer.reset")
+    {
+        // Familiar "Reset track": controls, name and colour back to new-track defaults; the
+        // effect chain and routing stay.
+        it->name = it->index == 0 ? juce::String("Master") : "Insert " + juce::String(it->index);
+        it->colour = 0;
+        it->gain = .8f;
+        it->pan = 0;
+        it->muted = false;
+        it->stereoSeparation = 0;
+        it->phaseInverted = it->stereoSwapped = false;
+        it->eq = {};
+        it->delayMs = 0;
+        it->dock = 0;
+    }
     else if (id == "mixer.dock")
     {
         if (a.value != -1 && a.value != 0 && a.value != 1)

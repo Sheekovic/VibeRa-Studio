@@ -340,6 +340,10 @@ const std::vector<CommandInfo> &commandRegistry()
         {"mixer.delay", "Mixer track delay (ms)", Scope::mixer, true, true, "command"},
         {"mixer.insert.fromChainPreset", "Add insert from chain preset (file chooser)", Scope::mixer, false, true, "action"},
         {"mixer.dock", "Dock Mixer track left / middle / right", Scope::mixer, true, true, "command"},
+        {"mixer.reset", "Reset Mixer track controls, name and colour (keeps effects and routing)", Scope::mixer, true, true, "command"},
+        {"mixer.selectChannelsRouted", "Select the Channels routed to the selected Mixer track", Scope::mixer, false, true, "action"},
+        {"mixer.selectRoutedHere", "Select the Mixer tracks routed to the selected track", Scope::mixer, false, true, "action"},
+        {"mixer.selectRoutedFrom", "Select the Mixer tracks the selected track is routed to", Scope::mixer, false, true, "action"},
         {"mixer.meterWave", "Meter-wave view (level waveforms instead of peak meters)", Scope::mixer, false, true, "action"},
         {"mixer.phaseInvert", "Invert Mixer polarity", Scope::mixer, true, true, "command"},
         {"mixer.stereoSwap", "Swap Mixer stereo channels", Scope::mixer, true, true, "command"},
@@ -5778,7 +5782,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             return result;
     }
     else if (id == "mixer.stereoSeparation" || id == "mixer.phaseInvert" || id == "mixer.stereoSwap" ||
-             id == "mixer.eq" || id == "mixer.eqReset" || id == "mixer.delay" || id == "mixer.dock" || id == "mixer.gain" || id == "mixer.pan" || id == "mixer.mute" || id == "mixer.rename" ||
+             id == "mixer.eq" || id == "mixer.eqReset" || id == "mixer.delay" || id == "mixer.dock" || id == "mixer.reset" || id == "mixer.gain" || id == "mixer.pan" || id == "mixer.mute" || id == "mixer.rename" ||
              id == "mixer.colour" || id == "mixer.solo" || id == "mixer.soloConnected" ||
              id == "mixer.unsolo" || id == "mixer.unmuteAll")
     {

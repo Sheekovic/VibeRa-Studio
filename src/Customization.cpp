@@ -157,6 +157,7 @@ Customization Customization::familiarDefaults()
     add("mixer.rename", Scope::mixer, juce::KeyPress::F2Key);
     add("mixer.selectAll", Scope::mixer, 'A', ctrl);
     add("mixer.group.create", Scope::mixer, 'G', juce::ModifierKeys::altModifier);
+    add("mixer.selectChannelsRouted", Scope::mixer, 'L', juce::ModifierKeys::altModifier);
     add("mixer.moveLeft", Scope::mixer, juce::KeyPress::leftKey, juce::ModifierKeys::altModifier);
     add("mixer.moveRight", Scope::mixer, juce::KeyPress::rightKey, juce::ModifierKeys::altModifier);
     add("view.plugins", Scope::global, juce::KeyPress::F8Key);

@@ -149,3 +149,9 @@ waveform (newest at the bottom, width = peak). View only; read `state.mixerMeter
   track in the left, middle or right section of the Mixer (insert right-click > Dock to). Layout
   only: routing, IDs and `mixerOrder` storage order are unchanged; `vibera_inspect` mixer rows
   report `dock` as left/middle/right.
+- Select (Mixer track menu > Select, acting on the selected insert): actions
+  `mixer.selectChannelsRouted` (Alt+L: Channels whose Mixer track is it, Rack selection),
+  `mixer.selectRoutedHere` (tracks routed to it) and `mixer.selectRoutedFrom` (tracks it routes
+  to) replace the selection and refuse when there is nothing to select.
+- Reset track: `mixer.reset` (`mixer`; one Undo) puts name, colour, volume, pan, mute, stereo,
+  phase/swap, EQ, track delay and dock back to defaults; effects and routing stay.
