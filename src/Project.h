@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include "MixerEq.h"
 #include <juce_audio_utils/juce_audio_utils.h>
 #include <vector>
 #include <cstdint>
@@ -142,6 +143,7 @@ struct MixerInsert
     bool effectsBypassed = false; // Effective slot bypass override, individual flags/state retained.
     float stereoSeparation = 0; // -1 subtract opposite channel;0 original;+1 mono.
     bool phaseInverted = false, stereoSwapped = false;
+    MixerEqSettings eq; // Integrated 3-band EQ after the effect slots (flat by default).
     MixerInsert(int i=0, juce::String n={}, float g=.8f, float p=0, bool m=false,
                 std::vector<PluginSpec> fx={})
         : index(i), name(std::move(n)), gain(g), pan(p), muted(m), effects(std::move(fx))

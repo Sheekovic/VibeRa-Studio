@@ -284,6 +284,7 @@ static juce::Result awaitProjection(AudioEngine &, const Project &, bool, Id);
 #include "UpdaterAcceptance.h"
 #include "SamplerStretchAcceptance.h"
 #include "ClipRepeatAcceptance.h"
+#include "../src/MixerEqEditor.h"
 #include "ArrangementAcceptance.h"
 #include "PlaylistTrackAcceptance.h"
 #include "MidiImportExtrasAcceptance.h"
@@ -4907,6 +4908,22 @@ int main(int argc, char **argv)
             require(test::prepareBuildAcceptanceAttempt(argv[2], output).wasOk(), "Owned arrangement output");
             arrangement_acceptance::tests(output);
             std::cout << "PASS arrangements " << assertions << " assertions" << std::endl;
+            return 0;
+        }
+        if (argc == 3 && juce::String(argv[1]) == "--mixer-eq-snapshot")
+        {
+            // Draws the Mixer EQ editor with a sample curve to a PNG for visual review.
+            vibera::MixerEqSettings settings;
+            settings.gain = {4.5f, -3.f, 6.f};
+            settings.freq = {120.f, 900.f, 7000.f};
+            vibera::MixerEqEditor editor;
+            editor.read = [settings] { return settings; };
+            const auto image = editor.createComponentSnapshot(editor.getLocalBounds());
+            const juce::File target{juce::String(argv[2])};
+            target.deleteFile();
+            juce::FileOutputStream out(target);
+            require(out.openedOk() && juce::PNGImageFormat{}.writeImageToStream(image, out), "EQ editor PNG");
+            std::cout << "PASS mixer eq snapshot" << std::endl;
             return 0;
         }
         if (argc == 2 && juce::String(argv[1]) == "--clip-repeat-check")

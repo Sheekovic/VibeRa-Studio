@@ -464,6 +464,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result verifyMixerEffectSlots(const juce::File &output);
     juce::Result verifyMixerChainControlsUi();
     void pluginMenu(Id);
+    void openMixerEq(int index); // Integrated 3-band EQ editor window for a Mixer insert.
     void effectMenu(int insert);
     juce::var mixerChainOperation(const juce::var &, juce::String *admittedOperation = nullptr);
     juce::var mixerChainReadback(const juce::String &operation = {}) const;

@@ -721,6 +721,13 @@ juce::ValueTree Project::state() const
         set(t, "gain", double(m.gain));
         set(t, "pan", double(m.pan));
         if (m.stereoSeparation != 0) set(t, "stereoSeparation", double(m.stereoSeparation));
+        if (!(m.eq == MixerEqSettings{}))
+        {
+            juce::StringArray values;
+            for (int band = 0; band < 3; ++band)
+                values.add(juce::String(m.eq.gain[size_t(band)], 3)), values.add(juce::String(m.eq.freq[size_t(band)], 2));
+            set(t, "eq", values.joinIntoString(","));
+        }
         if (m.phaseInverted) set(t, "phaseInverted", true);
         if (m.stereoSwapped) set(t, "stereoSwapped", true);
         set(t, "muted", m.muted);
@@ -1698,6 +1705,21 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             return juce::Result::fail("Mixer insert index must be an exact nonnegative integer");
         p.mixer.push_back({int(e["index"]), e["name"].toString(), float(exactNumber(e["gain"])),
                            float(exactNumber(e["pan"])), bool(e["muted"])});
+        if (e.hasProperty("eq"))
+        {
+            // Six numbers: gain dB and frequency Hz for the low, mid and high bands.
+            auto values = juce::StringArray::fromTokens(e["eq"].toString(), ",", "");
+            if (values.size() != 6)
+                return juce::Result::fail("Invalid Mixer EQ encoding");
+            for (int band = 0; band < 3; ++band)
+            {
+                const auto gainDb = values[band * 2].getFloatValue(), hz = values[band * 2 + 1].getFloatValue();
+                if (!MixerEqSettings::valid(gainDb, hz))
+                    return juce::Result::fail("Invalid Mixer EQ band");
+                p.mixer.back().eq.gain[size_t(band)] = gainDb;
+                p.mixer.back().eq.freq[size_t(band)] = hz;
+            }
+        }
         if (e.hasProperty("stereoSeparation"))
         {
             const auto amount = exactNumber(e["stereoSeparation"]);
@@ -2073,6 +2095,8 @@ juce::Result Project::validate() const
         if (m.index < 0 || !inserts.insert(m.index).second || !std::isfinite(m.gain) || m.gain < 0 ||
             m.gain > 2 || !std::isfinite(m.pan) || std::abs(m.pan) > 1 ||
             !std::isfinite(m.stereoSeparation) || std::abs(m.stereoSeparation) > 1 ||
+            !MixerEqSettings::valid(m.eq.gain[0], m.eq.freq[0]) || !MixerEqSettings::valid(m.eq.gain[1], m.eq.freq[1]) ||
+            !MixerEqSettings::valid(m.eq.gain[2], m.eq.freq[2]) ||
             (m.colour != 0 && (m.colour >> 24) != 255))
             return fail("Invalid mixer state");
     if (!inserts.count(0))

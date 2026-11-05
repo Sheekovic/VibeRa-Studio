@@ -120,6 +120,21 @@ inline juce::Result applyMixerControl(Project &project, const juce::String &id, 
             return juce::Result::fail("mixer.stereo.invalidValue: Separation requires a finite fraction -1..1");
         it->stereoSeparation = float(a.value);
     }
+    else if (id == "mixer.eq")
+    {
+        // args.target band (0 low shelf, 1 mid peak, 2 high shelf), args.value gain dB,
+        // args.offset frequency Hz (0 keeps the current frequency).
+        if (a.target > 2)
+            return juce::Result::fail("mixer.eq.invalidBand: Band is 0 (low), 1 (mid) or 2 (high)");
+        const auto band = size_t(a.target);
+        const float hz = a.offset > 0 ? float(a.offset) : it->eq.freq[band];
+        if (!MixerEqSettings::valid(float(a.value), hz))
+            return juce::Result::fail("mixer.eq.invalidValue: Gain is -18..18 dB and frequency 20..20000 Hz");
+        it->eq.gain[band] = float(a.value);
+        it->eq.freq[band] = hz;
+    }
+    else if (id == "mixer.eqReset")
+        it->eq = {};
     else if (id == "mixer.phaseInvert") it->phaseInverted = a.enabled;
     else if (id == "mixer.stereoSwap") it->stereoSwapped = a.enabled;
     else if (id == "mixer.pan" || id == "mixer.gain")

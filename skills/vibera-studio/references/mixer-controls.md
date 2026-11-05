@@ -121,3 +121,13 @@ semantic values. Clicking below a capped fader selects the insert without a
 document/history edit. Use semantic commands, not screen coordinates. Overload
 operations above are under development; verify exact connected discovery and
 current receipts. Observable native-editor completion remains unfinished.
+
+## Integrated EQ
+
+Every insert has a 3-band EQ after its effect slots and before stereo, pan and fader: a low
+shelf, a mid peak and a high shelf. `mixer.eq` sets one band (`args.mixer`, `args.target` band
+0/1/2, `args.value` gain dB -18..18, `args.offset` frequency Hz 20..20000, 0 keeps it);
+`mixer.eqReset` flattens it. Each is one Undo step; it is saved with the project and applies
+in playback and export. Read `vibera_state` mixer rows `eq` (gainDb, frequencyHz per band).
+UI: insert menu > EQ (3-band)... opens a curve editor (drag a band: frequency and gain;
+double-click: flat band; right-click: reset all; one Undo per drag).

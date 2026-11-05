@@ -20,6 +20,7 @@
 #include "SwingCommands.h"
 #include "Quantizer.h"
 #include "Editors.h"
+#include "MixerEqEditor.h"
 #include "ChannelColourPicker.h"
 #include "DetachedWindow.h"
 #include "Settings.h"
@@ -6769,6 +6770,58 @@ void Studio::confirmMixerInsertDeletion(int index, std::optional<int> replacemen
             safe->command("mixer.insert.delete", args);
         });
 }
+void Studio::openMixerEq(int index)
+{
+    const auto *insert = mixerInsert(controller.project, index);
+    if (!insert)
+        return;
+    auto editor = std::make_unique<MixerEqEditor>();
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    const auto identity = controller.projectIdentity;
+    editor->read = [safe, index]
+    {
+        const auto *row = safe ? mixerInsert(safe->controller.project, index) : nullptr;
+        return row ? row->eq : MixerEqSettings{};
+    };
+    editor->apply = [safe, index, identity](int band, float gainDb, float hz)
+    {
+        if (!safe || safe->controller.projectIdentity != identity)
+            return;
+        CommandArgs a;
+        a.mixer = index;
+        a.target = Id(band);
+        a.value = gainDb;
+        a.offset = hz;
+        safe->command("mixer.eq", a);
+    };
+    editor->beginGesture = [safe]
+    {
+        if (safe)
+            safe->controller.beginGesture();
+    };
+    editor->endGesture = [safe]
+    {
+        if (safe)
+            reportHistoryResult(*safe, safe->controller.endGestureChecked("Mixer EQ"));
+    };
+    editor->reset = [safe, index, identity]
+    {
+        if (!safe || safe->controller.projectIdentity != identity)
+            return;
+        CommandArgs a;
+        a.mixer = index;
+        safe->command("mixer.eqReset", a);
+    };
+    juce::DialogWindow::LaunchOptions options;
+    options.dialogTitle = "EQ - " + (insert->name.isNotEmpty() ? insert->name : "Insert " + juce::String(index));
+    options.content.setOwned(editor.release());
+    options.componentToCentreAround = this;
+    options.useNativeTitleBar = true;
+    options.resizable = false;
+    options.escapeKeyTriggersCloseButton = true;
+    options.dialogBackgroundColour = panel;
+    options.launchAsync();
+}
 void Studio::effectMenu(int index)
 {
     auto insert = std::find_if(controller.project.mixer.begin(), controller.project.mixer.end(),
@@ -6778,6 +6831,7 @@ void Studio::effectMenu(int index)
     selectedInsert = index;
     juce::PopupMenu menu;
     menu.addItem(1, "Browse / insert VST3 effect...");
+    menu.addItem(10010, "EQ (3-band)...");
     menu.addItem(10008, "Create insert", !mixerChainBusy());
     juce::PopupMenu deleteMenu;
     deleteMenu.addItem(10009, "Delete unused insert (refuse references)...", index != 0 && !mixerChainBusy());
@@ -6913,6 +6967,11 @@ void Studio::effectMenu(int index)
                            if (selected == 10008)
                            {
                                safe->command("mixer.insert.create", {});
+                               return;
+                           }
+                           if (selected == 10010)
+                           {
+                               safe->openMixerEq(index);
                                return;
                            }
                            if (selected == 10009 || deleteDestinations.contains(selected))

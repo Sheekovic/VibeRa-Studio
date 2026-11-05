@@ -2113,6 +2113,17 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 }
                 set(row, "automationTargets", automationTargets);
                 set(row, "stereoSeparation", m.stereoSeparation);
+                {
+                    juce::Array<juce::var> bands;
+                    for (int band = 0; band < 3; ++band)
+                    {
+                        auto item = obj();
+                        set(item, "gainDb", m.eq.gain[size_t(band)]);
+                        set(item, "frequencyHz", m.eq.freq[size_t(band)]);
+                        bands.add(item);
+                    }
+                    set(row, "eq", bands);
+                }
                 set(row, "phaseInverted", m.phaseInverted);
                 set(row, "stereoSwapped", m.stereoSwapped);
                 set(row, "stereoTargetScope", "post-effects pre-pan/fader, saved target; five-ms ramp is not acknowledged");

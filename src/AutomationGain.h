@@ -5,6 +5,7 @@
 #include "MixerMeter.h"
 #include "PreparedBalance.h"
 #include "PreparedStereo.h"
+#include "MixerEq.h"
 #include <tracktion_engine/tracktion_engine.h>
 
 namespace vibera
@@ -23,6 +24,7 @@ class AutomationGain final : public tracktion::Plugin
         MixerMeter meter;
         dsp::PreparedBalance balance;
         dsp::PreparedStereo stereo;
+        MixerEqProcessor eq;
         double activeRate = 0;
         int insert = 0;
         tracktion::PanLaw law = tracktion::PanLawLinear;
@@ -38,6 +40,7 @@ class AutomationGain final : public tracktion::Plugin
     tracktion::PanLaw panLaw = tracktion::PanLawLinear;
     float initialPan = 0;
     dsp::PreparedStereo::Target initialStereo;
+    MixerEqSettings initialEq;
     bool configured = false;
     void detachRuntime() noexcept
     {
@@ -135,6 +138,7 @@ class AutomationGain final : public tracktion::Plugin
         panLaw = law;
         initialPan = owner.pan;
         initialStereo = {owner.stereoSeparation, owner.phaseInverted, owner.stereoSwapped};
+        initialEq = owner.eq;
         runtime->manual.setCurrentAndTargetValue(owner.gain);
         runtime->mute.setCurrentAndTargetValue(owner.muted ? 0.f : 1.f);
         runtime->reportedGain = owner.gain;
@@ -166,6 +170,7 @@ class AutomationGain final : public tracktion::Plugin
         // controls, including edits not yet consumed by a callback.
         float pan = initialPan;
         auto stereo = initialStereo;
+        auto eqSettings = initialEq;
         if (auto next = timeline->acquire(); next.document)
         {
             const auto &controls = next.document->mixer;
@@ -178,8 +183,10 @@ class AutomationGain final : public tracktion::Plugin
                 runtime->reportedGain = owner->gain;
                 pan = owner->pan;
                 stereo = {owner->stereoSeparation, owner->phaseInverted, owner->stereoSwapped};
+                eqSettings = owner->eq;
             }
         }
+        runtime->eq.prepare(info.sampleRate, eqSettings);
         if (!runtime->stereo.prepare(info.sampleRate, stereo))
             throw std::logic_error("automationGain.runtime.invalidStereo: Valid stereo preparation required");
         runtime->meter.reset();
@@ -236,6 +243,15 @@ class AutomationGain final : public tracktion::Plugin
         runtime->mute.setTargetValue(owner->muted ? 0.f : 1.f);
         runtime->balance.setManualTarget(1, owner->pan, fc.destBuffer->getNumChannels());
         runtime->stereo.setTarget({owner->stereoSeparation, owner->phaseInverted, owner->stereoSwapped});
+        runtime->eq.setTarget(owner->eq);
+        {
+            // Integrated EQ: post-effects, before the stereo image, pan and fader stages.
+            std::array<float *, 8> channels{};
+            const int count = std::min(fc.destBuffer->getNumChannels(), 8);
+            for (int ch = 0; ch < count; ++ch)
+                channels[size_t(ch)] = fc.destBuffer->getWritePointer(ch, fc.bufferStartSample);
+            runtime->eq.process(channels.data(), count, fc.bufferNumSamples);
+        }
         const auto *curve = (fc.isPlaying || fc.isRendering)
                                 ? doc.automation.find({AutomationParameter::mixerGain, insert, 0})
                                 : nullptr;

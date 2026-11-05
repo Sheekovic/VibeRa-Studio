@@ -67,7 +67,7 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
                                     p.automationDefaults()))
         return {};
     for (const auto &m : p.mixer)
-        result->mixer.push_back({m.index, m.gain, m.muted, m.pan, m.stereoSeparation, m.phaseInverted, m.stereoSwapped});
+        result->mixer.push_back({m.index, m.gain, m.muted, m.pan, m.stereoSeparation, m.phaseInverted, m.stereoSwapped, m.eq});
     std::sort(result->mixer.begin(), result->mixer.end(),
               [](const auto &a, const auto &b) { return a.index < b.index; });
     for (const auto &m : p.mixer)

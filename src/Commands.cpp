@@ -333,6 +333,8 @@ const std::vector<CommandInfo> &commandRegistry()
          "gap:semantic adapter and end-to-end qualification pending"},
         {"mixer.pan", "Mixer pan", Scope::mixer, true, true, "command"},
         {"mixer.stereoSeparation", "Mixer stereo separation", Scope::mixer, true, true, "command"},
+        {"mixer.eq", "Mixer EQ band (gain / frequency)", Scope::mixer, true, true, "command"},
+        {"mixer.eqReset", "Reset Mixer EQ", Scope::mixer, true, true, "command"},
         {"mixer.phaseInvert", "Invert Mixer polarity", Scope::mixer, true, true, "command"},
         {"mixer.stereoSwap", "Swap Mixer stereo channels", Scope::mixer, true, true, "command"},
         {"mixer.chain.copy", "Copy selected Mixer effect chain", Scope::mixer, false, true,
@@ -5294,7 +5296,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             return result;
     }
     else if (id == "mixer.stereoSeparation" || id == "mixer.phaseInvert" || id == "mixer.stereoSwap" ||
-             id == "mixer.gain" || id == "mixer.pan" || id == "mixer.mute" || id == "mixer.rename" ||
+             id == "mixer.eq" || id == "mixer.eqReset" || id == "mixer.gain" || id == "mixer.pan" || id == "mixer.mute" || id == "mixer.rename" ||
              id == "mixer.colour" || id == "mixer.solo" || id == "mixer.soloConnected" ||
              id == "mixer.unsolo" || id == "mixer.unmuteAll")
     {

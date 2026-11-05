@@ -351,6 +351,39 @@ inline void tests()
             flip.text = "sideways";
             require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
         }
+        {
+            // Mixer integrated EQ: DSP gain, command + Undo, save/load.
+            MixerEqSettings boost;
+            boost.gain[0] = 12;
+            MixerEqProcessor eq;
+            eq.prepare(48000, boost);
+            std::vector<float> wave(48000);
+            for (size_t i = 0; i < wave.size(); ++i)
+                wave[i] = .1f * float(std::sin(2 * 3.14159265358979 * 20 * double(i) / 48000));
+            float *channels[]{wave.data()};
+            eq.process(channels, 1, int(wave.size()));
+            float peak = 0;
+            for (size_t i = 24000; i < wave.size(); ++i)
+                peak = std::max(peak, std::abs(wave[i]));
+            require(peak > .35f && peak < .45f, "A +12 dB low shelf raises 20 Hz about four times");
+            require(std::abs(MixerEqProcessor::responseDb(boost, 10000) ) < .5f, "The low shelf leaves 10 kHz flat");
+            CommandArgs band;
+            band.mixer = 0;
+            band.target = 1;
+            band.value = -6;
+            band.offset = 2000;
+            require(controller.execute("mixer.eq", band).wasOk(), "Set the Master mid band");
+            const auto &master = controller.project.mixer.front();
+            require(master.eq.gain[1] == -6 && master.eq.freq[1] == 2000, "The mid band reads back");
+            Project reloaded;
+            require(Project::parse(controller.project.state(), reloaded).wasOk() &&
+                        reloaded.mixer.front().eq == controller.project.mixer.front().eq,
+                    "Mixer EQ survives save and load");
+            band.value = 30;
+            require(controller.execute("mixer.eq", band).failed(), "EQ gain beyond 18 dB is refused");
+            controller.undoEdit();
+            require(controller.project.mixer.front().eq == MixerEqSettings{}, "EQ edit is one Undo step");
+        }
         CommandArgs empty;
         empty.beat = 4;
         require(controller.execute("clip.paste", empty).failed(), "Paste with nothing copied fails");
