@@ -483,6 +483,8 @@ void Studio::rackGroupMenu(juce::Component *anchor)
     menu.addSeparator();
     menu.addItem(6, "Select all visible Channels");
     menu.addItem(28, "Select unused Channels");
+    menu.addItem(31, "Zip selected Channels    Alt+Z", !selectedChannels.empty());
+    menu.addItem(32, "Unzip all    Alt+U", !zippedChannels.empty());
     menu.addItem(7, "Deselect Channels", !selectedChannels.empty());
     juce::PopupMenu fill;
     addStepFillItems(fill, selectedChannels, selectedPattern);
@@ -529,6 +531,8 @@ void Studio::rackGroupMenu(juce::Component *anchor)
             }
             if (action == 20)
                 safe->channelPropertiesDialog(channels);
+            if (action == 31 || action == 32)
+                safe->performAction(action == 31 ? "rack.zip" : "rack.unzipAll");
             if (action == 29 || action == 30)
             {
                 CommandArgs args;

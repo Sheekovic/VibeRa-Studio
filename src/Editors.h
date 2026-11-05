@@ -869,14 +869,49 @@ class Studio::Editor final : public juce::Component,
     {
         if (type != 0)
             return {};
-        const int footer = 44 + (int(s.visibleRackChannels().size()) - rackOffset) * rackRowHeight();
+        const int footer = rackRowTop(int(s.visibleRackChannels().size()));
         if (footer < 44 || footer + 30 > rackContentBottom())
             return {};
         return {34, footer + 3, std::max(60, stepStart() - 44), 24};
     }
     int rackRows() const
     {
-        return std::max(1, (rackContentBottom() - 44) / rackRowHeight());
+        // Rows that fit from rackOffset (zipped Channels take a thin row).
+        int rows = 0, y = 44;
+        const int count = int(s.visibleRackChannels().size());
+        while (rackOffset + rows < count && y + rackRowPixels(rackOffset + rows) <= rackContentBottom())
+            y += rackRowPixels(rackOffset + rows++);
+        if (rackOffset + rows >= count)
+            rows += std::max(0, (rackContentBottom() - y) / rackRowHeight());
+        return std::max(1, rows);
+    }
+    bool rackRowZipped(int row) const
+    {
+        const auto *channel = s.rackChannelAt(row);
+        return channel && s.zippedChannels.contains(channel->id);
+    }
+    int rackRowPixels(int row) const
+    {
+        return rackRowZipped(row) ? 14 : rackRowHeight();
+    }
+    int rackRowTop(int row) const
+    {
+        int y = 44;
+        for (int r = rackOffset; r < row; ++r)
+            y += rackRowPixels(r);
+        return y;
+    }
+    int rackRowAt(int y) const
+    {
+        if (y < 44)
+            return rackOffset + (y - 44) / rackRowHeight(); // As before: integer division toward zero.
+        int row = rackOffset, top = 44;
+        const int count = int(s.visibleRackChannels().size());
+        while (row < count && top + rackRowPixels(row) <= y)
+            top += rackRowPixels(row++);
+        if (row >= count)
+            row += (y - top) / rackRowHeight();
+        return row;
     }
     // Playlist rows can differ in height (track.height); these place rows from laneOffset.
     int rowPixels(int row) const
@@ -1194,7 +1229,7 @@ class Studio::Editor final : public juce::Component,
     void step(const juce::MouseEvent &e)
     {
         auto *p = pattern();
-        int row = (e.y - 44) / rackRowHeight() + rackOffset;
+        int row = rackRowAt(int(e.y));
         auto *channel = s.rackChannelAt(row);
         if (!p || e.y < 44 || row >= rackOffset + rackRows() || !channel || e.x < stepStart())
             return;
@@ -2908,12 +2943,24 @@ class Studio::Editor final : public juce::Component,
             for (size_t i = 0; i < visibleChannels.size(); ++i)
             {
                 auto &c = *project.channel(visibleChannels[i]);
-                int y = 44 + (int(i) - rackOffset) * rackRowHeight();
-                if (y + 32 > rackContentBottom())
-                    break;
                 if (int(i) < rackOffset)
                     continue;
+                int y = rackRowTop(int(i));
                 auto colour = c.colour ? juce::Colour(c.colour) : channelColour(int(c.id - 1));
+                if (s.zippedChannels.contains(c.id))
+                {
+                    // Zipped: a thin strip with the name (right-click unzips).
+                    if (y + 14 > rackContentBottom())
+                        break;
+                    g.setColour(selected(s.selectedChannels, c.id) ? grid : bg.brighter(.02f));
+                    g.fillRoundedRectangle(8.f, float(y + 1), float(getWidth() - 16), 12.f, 3);
+                    g.setColour(colour.withAlpha(.8f));
+                    g.fillRoundedRectangle(9.f, float(y + 3), 4.f, 8.f, 2);
+                    label(g, c.name + "  (zipped)", {38, y, stepStart() - 44, 14}, c.muted ? muted : ink.withAlpha(.8f), 9);
+                    continue;
+                }
+                if (y + 32 > rackContentBottom())
+                    break;
                 g.setColour(selected(s.selectedChannels, c.id) ? grid : bg.brighter(.02f));
                 g.fillRoundedRectangle(8.f, float(y), float(getWidth() - 16), 32.f, 3);
                 g.setColour(selected(s.selectedChannels, c.id) ? colour : colour.darker(.65f));
@@ -3039,7 +3086,7 @@ class Studio::Editor final : public juce::Component,
                     }
                 }
             }
-            const int footer = 44 + (int(visibleChannels.size()) - rackOffset) * rackRowHeight();
+            const int footer = rackRowTop(int(visibleChannels.size()));
             if (const auto plus = rackPlusBounds(); !plus.isEmpty())
             {
                 // FL-style add button under the Channels: opens the instrument picker.
@@ -4543,8 +4590,18 @@ class Studio::Editor final : public juce::Component,
                 s.showInstrumentMenu();
                 return;
             }
-            int row = (e.y - 44) / rackRowHeight() + rackOffset;
+            int row = rackRowAt(int(e.y));
             auto *targetChannel = s.rackChannelAt(row);
+            if (targetChannel && s.zippedChannels.contains(targetChannel->id) && e.y >= 44)
+            {
+                if (e.mods.isPopupMenu())
+                    s.zippedChannels.erase(targetChannel->id);
+                else
+                    s.selectRackChannels({targetChannel->id}, e.mods.isShiftDown() ? "add" : "replace",
+                                         targetChannel->id);
+                repaint();
+                return;
+            }
             if (e.y >= 44 && !targetChannel && e.mods.isRightButtonDown() &&
                 !(s.rackGraphVisible && e.y >= rackContentBottom()))
             {
@@ -5947,7 +6004,7 @@ class Studio::Editor final : public juce::Component,
 
         if (type == 0 && rackSelecting)
         {
-            const int row = (int(e.y) - 44) / rackRowHeight() + rackOffset;
+            const int row = rackRowAt(int(int(e.y)));
             if (e.y >= 44 && row < rackOffset + rackRows() && s.rackChannelAt(row))
             {
                 std::vector<Id> ids;
@@ -6921,7 +6978,7 @@ class Studio::Editor final : public juce::Component,
                 e.x < rackLabelWidth() - 36 && e.y >= 44 && e.y < rackContentBottom() &&
                 std::abs(wheel.deltaY) > 0)
             {
-                if (auto *channel = s.rackChannelAt((e.y - 44) / rackRowHeight() + rackOffset))
+                if (auto *channel = s.rackChannelAt(rackRowAt(int(e.y))))
                 {
                     CommandArgs args;
                     args.ids = {channel->id};
@@ -7056,7 +7113,7 @@ class Studio::Editor final : public juce::Component,
                                       juce::ModifierKeys::getCurrentModifiersRealtime());
             return;
         }
-        int row = (d.localPosition.y - 44) / rackRowHeight() + rackOffset;
+        int row = rackRowAt(int(d.localPosition.y));
         const bool overGraph = s.rackGraphVisible && d.localPosition.y >= rackContentBottom();
         bool replace = !overGraph && d.localPosition.y >= 44 && row >= 0 && s.rackChannelAt(row) != nullptr &&
                        d.localPosition.x < stepStart();
@@ -7090,7 +7147,7 @@ class Studio::Editor final : public juce::Component,
         if (juce::File(files[0]).hasFileExtension("mid;midi"))
         {
             Id target = s.selectedChannel;
-            const int row = (y - 44) / rackRowHeight() + rackOffset;
+            const int row = rackRowAt(int(y));
             if (type == 0 && y >= 44 && s.rackChannelAt(row))
                 target = s.rackChannelAt(row)->id;
             s.importMidiFile(juce::File(files[0]), s.selectedPattern, target,
@@ -7099,7 +7156,7 @@ class Studio::Editor final : public juce::Component,
         }
         if (type != 0)
             return;
-        int row = (y - 44) / rackRowHeight() + rackOffset;
+        int row = rackRowAt(int(y));
         const bool overGraph = s.rackGraphVisible && y >= rackContentBottom();
         bool replace = !overGraph && y >= 44 && s.rackChannelAt(row) != nullptr && x < stepStart();
         if (replace)

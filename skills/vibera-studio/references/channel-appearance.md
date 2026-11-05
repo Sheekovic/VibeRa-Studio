@@ -104,3 +104,9 @@ Undo step. In the Rack options menu: Random / Gradient colours for selected Chan
 Select unused Channels (no notes, steps, loops or Playlist audio clips in any Pattern).
 Ctrl+click a Channel button previews its sound; Shift+wheel over the Rack title steps
 through Patterns.
+
+## Zip (compact rows)
+
+`rack.zip` (Alt+Z) shows the selected Channels as thin rows; right-click a zipped row to unzip
+it, `rack.unzipAll` (Alt+U) unzips all. View only (not saved, no Undo); zipped Channels still
+play. Read `state.zippedChannels`.

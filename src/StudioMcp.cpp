@@ -3663,6 +3663,12 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "audioStretchMode", audioStretchMode);
     set(state, "pianoStamp", pianoStamp);
     {
+        juce::Array<juce::var> zipped;
+        for (auto id : zippedChannels)
+            zipped.add(juce::int64(id));
+        set(state, "zippedChannels", zipped);
+    }
+    {
         // Playlist tracks with non-default settings (lanes without an entry use the defaults).
         juce::Array<juce::var> tracks;
         for (const auto &track : controller.project.tracks)

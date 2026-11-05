@@ -4465,6 +4465,21 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "rack.zip" || action == "rack.unzipAll")
+    {
+        if (action == "rack.zip")
+            for (auto id : selectedChannels)
+                zippedChannels.insert(id);
+        else
+            zippedChannels.clear();
+        status = action == "rack.zip" ? juce::String(int(selectedChannels.size())) + " Channel(s) zipped (right-click to unzip)"
+                                      : "All Channels unzipped";
+        repaint();
+        for (auto &w : windows)
+            if (w)
+                w->repaint();
+        return true;
+    }
     if (action == "playlist.stretchMode")
     {
         audioStretchMode = !audioStretchMode;

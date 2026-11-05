@@ -531,6 +531,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.properties", "Channel name / colour / icon", Scope::rack, true, true, "command"},
         {"rack.properties", "Selected Channel colour / icon", Scope::rack, true, true, "command"},
         {"rack.sort", "Sort selected Channels", Scope::rack, true, true, "command"},
+        {"rack.zip", "Zip selected Channels (compact rows)", Scope::rack, false, true, "action"},
+        {"rack.unzipAll", "Unzip all Channels", Scope::rack, false, true, "action"},
         {"rack.colourSpread", "Colour selected Channels (random / gradient)", Scope::rack, true, true, "command"},
         {"channel.mixer", "Assign Mixer insert", Scope::rack, true, true, "command"},
         {"channel.gain", "Channel volume", Scope::rack, true, true, "command"},
