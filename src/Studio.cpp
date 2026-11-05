@@ -3423,6 +3423,16 @@ void Studio::toolsMenu()
     menu.addItem(204, "Find missing samples..." +
                           (missingCount ? " (" + juce::String(missingCount) + " missing)" : juce::String()),
                  missingCount > 0);
+    juce::PopupMenu templates;
+    const auto templateFiles = projectTemplates();
+    for (int i = 0; i < std::min(30, templateFiles.size()); ++i)
+        templates.addItem(260 + i, templateFiles[i].getFileNameWithoutExtension());
+    if (templateFiles.isEmpty())
+        templates.addItem(259, "(no templates yet: Save as template...)", false);
+    templates.addSeparator();
+    templates.addItem(227, "Open templates folder", templatesFolder().isDirectory());
+    menu.addSubMenu("New from template", templates);
+    menu.addItem(226, "Save as template...");
     // Save keeps five backups per project; autosave covers unexpected closes.
     menu.addItem(224, "Open project backups folder", profileFile().getSiblingFile("backups").isDirectory());
     menu.addItem(225, updatePhase == "available" ? "Update available: " + (availableUpdate ? availableUpdate->name : juce::String()) + "..."
@@ -3461,6 +3471,32 @@ void Studio::toolsMenu()
                                           "automation.plugin.init.remove"}[choice - 300],
                         operation, code);
                 }
+                return;
+            }
+            if (choice == 226)
+                return safe->promptSaveTemplate();
+            if (choice == 227)
+            {
+                safe->templatesFolder().startAsProcess();
+                return;
+            }
+            if (choice >= 260 && choice < 290)
+            {
+                const auto files = safe->projectTemplates();
+                if (choice - 260 >= files.size())
+                    return;
+                const auto name = files[choice - 260].getFileNameWithoutExtension();
+                safe->requestProjectTransition(
+                    [safe, name](bool discard)
+                    {
+                        if (!safe)
+                            return;
+                        if (auto opened = safe->newFromTemplate(name, discard); opened.failed())
+                        {
+                            safe->status = opened.getErrorMessage();
+                            safe->repaint();
+                        }
+                    });
                 return;
             }
             if (choice == 224)
@@ -4221,6 +4257,11 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "project.export")
     {
         chooseExport();
+        return true;
+    }
+    if (action == "project.saveTemplate")
+    {
+        promptSaveTemplate();
         return true;
     }
     if (action == "project.new")
@@ -6512,6 +6553,90 @@ void Studio::chooseOpen()
             safe->requestProjectTransition([safe, file](bool discard)
                 { if (safe) (void)safe->openProjectFile(file, discard); });
         });
+}
+
+juce::Array<juce::File> Studio::projectTemplates() const
+{
+    auto files = templatesFolder().findChildFiles(juce::File::findFiles, false, "*.vibra");
+    std::sort(files.begin(), files.end(), [](const juce::File &a, const juce::File &b)
+              { return a.getFileName().compareNatural(b.getFileName()) < 0; });
+    return files;
+}
+
+juce::Result Studio::templateFileName(const juce::String &name, juce::String &legal)
+{
+    legal = name.trim();
+    if (legal.isEmpty() || legal.length() > 64 || juce::File::createLegalFileName(legal) != legal)
+        return juce::Result::fail("template.invalidName: Use 1..64 characters without \\ / : * ? \" < > |");
+    return juce::Result::ok();
+}
+
+juce::Result Studio::newFromTemplate(const juce::String &name, bool discardChanges)
+{
+    juce::String legal;
+    if (auto valid = templateFileName(name, legal); valid.failed())
+        return valid;
+    const auto file = templatesFolder().getChildFile(legal + ".vibra");
+    if (!file.existsAsFile())
+        return juce::Result::fail("template.missing: No template named " + legal);
+    auto result = openProjectFile(file, discardChanges);
+    if (result.failed())
+        return result;
+    projectFile = juce::File{}; // A new, untitled project: Save asks for its own file.
+    status = "New project from template " + legal;
+    refresh();
+    return result;
+}
+
+juce::Result Studio::saveAsTemplate(const juce::String &name, std::function<void(juce::Result)> completion)
+{
+    juce::String legal;
+    if (auto valid = templateFileName(name, legal); valid.failed())
+        return valid;
+    if (auto result = finishRackEditsChecked(); result.failed())
+        return result;
+    const auto file = templatesFolder().getChildFile(legal + ".vibra");
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    withPluginState(
+        [safe, file, completion](juce::Result result, Project snapshot)
+        {
+            if (!safe)
+                return;
+            if (result.wasOk() && !file.getParentDirectory().createDirectory())
+                result = juce::Result::fail("Could not create " + file.getParentDirectory().getFullPathName());
+            if (result.wasOk())
+                result = saveProject(snapshot, file);
+            safe->status = result.wasOk() ? "Saved template " + file.getFileNameWithoutExtension()
+                                          : result.getErrorMessage();
+            safe->repaint();
+            if (completion)
+                completion(result);
+        });
+    return juce::Result::ok();
+}
+
+void Studio::promptSaveTemplate()
+{
+    auto *box = new juce::AlertWindow("Save as template", "Template name (File > New from template)",
+                                      juce::MessageBoxIconType::NoIcon);
+    box->addTextEditor("name", projectFile == juce::File{} ? juce::String("My template")
+                                                           : projectFile.getFileNameWithoutExtension());
+    box->addButton("Save", 1, juce::KeyPress(juce::KeyPress::returnKey));
+    box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                   [safe, box](int ok)
+                                   {
+                                       if (!safe || ok != 1)
+                                           return;
+                                       if (auto started = safe->saveAsTemplate(box->getTextEditorContents("name"));
+                                           started.failed())
+                                       {
+                                           safe->status = started.getErrorMessage();
+                                           safe->repaint();
+                                       }
+                                   }),
+                         true);
 }
 
 juce::Result Studio::openProjectFile(const juce::File &file, bool discardChanges)

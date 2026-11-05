@@ -274,6 +274,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"piano.selectColour", "Select current note colour", Scope::piano, false, true, "action"},
         {"piano.noteProperties", "Note Properties", Scope::piano, false, true, "action"},
         {"project.new", "New project", Scope::global, false, true, "vibera_project"},
+        {"project.saveTemplate", "Save as template (File > New from template)", Scope::global, false, true, "action"},
         {"project.demo", "Load demonstration project", Scope::global, false, true, "vibera_project"},
         {"project.open", "Open project", Scope::global, false, true, "vibera_project"},
         {"project.save", "Save project", Scope::global, false, true, "vibera_project"},

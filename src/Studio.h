@@ -480,6 +480,15 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result newProject(bool demo = false, bool discardChanges = false);
     void runMacro(const juce::String &);
     juce::File profileFile() const;
+    // Project templates (File > New from template): .vibra files in the profile's templates
+    // folder. A template opens as a new, untitled project; Save as template writes the current
+    // project (fresh plugin state) there without changing the project's own file.
+    juce::File templatesFolder() const { return profileFile().getSiblingFile("templates"); }
+    juce::Array<juce::File> projectTemplates() const;
+    juce::Result newFromTemplate(const juce::String &name, bool discardChanges);
+    juce::Result saveAsTemplate(const juce::String &name, std::function<void(juce::Result)> completion = {});
+    void promptSaveTemplate();
+    static juce::Result templateFileName(const juce::String &name, juce::String &legal);
     void saveProfile();
     juce::String macroConfigurationGeneration() const;
     juce::Result changeMacro(MacroConfigurationChange, const Macro &, const juce::String &id,

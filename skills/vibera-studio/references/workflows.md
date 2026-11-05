@@ -253,3 +253,14 @@ lists `pads` (pad, pattern, quantum) beside `launched`. `performance.saveScene`
 {value: 1..8, ids: Pattern IDs} stores a scene (project v52); `vibera_command
 performance.scene3` launches it and stops the other launched Patterns;
 `performance.stopAll` stops everything.
+
+## Project templates
+
+- `vibera_project` `templates` lists the user's templates (`.vibra` files in the profile's
+  `templates` folder). `saveTemplate` with `template` (name, 1..64 legal file-name characters)
+  writes the current project with fresh plugin state and returns a job; it overwrites a
+  template of the same name and never changes the project's own file or dirty state.
+- `new` with `template` set to a template name opens it as a new, untitled project (Save asks
+  for a file); `empty`/`demo` keep their meaning; an unknown name is `unavailable_target`.
+- UI: Tools menu > New from template / Save as template... (command `project.saveTemplate`
+  opens the name dialog; answer it in test mode with `vibera_dialog`).
