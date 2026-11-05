@@ -166,3 +166,11 @@ See [Song MIDI automation recording](mixer-automation-recording.md) for the shar
 recorder, target admission, source clock, history/cancel, retained failures and
 current Pattern/native-parameter/overdub limitations. This is an internal Mixer
 increment, not completion of the whole automation/controller checklist.
+
+Channel volume / pan automation: `automation.create` (and link/init) take
+`automationControl` `channelGain` (linear 0..2, the Channel volume range) or `channelPan`
+(-1..1) with `channel` = stable Channel ID. Playback and export follow the curve at block rate
+(smoothed by the Channel balance stage) while playing or rendering; stopped, the Channel's own
+value applies. Actions `channel.automateVolume` / `channel.automatePan` (and right-click Volume /
+Pan in a plugin instrument's channel window > Create automation clip) create a clip over the
+Song on the first free Playlist track from the current value.

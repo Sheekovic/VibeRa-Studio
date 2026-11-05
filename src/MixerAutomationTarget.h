@@ -11,13 +11,16 @@ enum class MixerAutomationControl : unsigned
 {
     gain = 0,
     pan = 1,
+    channelGain = 2, // Channel (Rack) volume/pan: owner is the stable Channel ID.
+    channelPan = 3,
     stereoSeparation = 5,
     send = 6
 };
 inline bool validMixerAutomationControl(MixerAutomationControl control) noexcept
 {
     return control == MixerAutomationControl::gain || control == MixerAutomationControl::pan ||
-           control == MixerAutomationControl::stereoSeparation || control == MixerAutomationControl::send;
+           control == MixerAutomationControl::stereoSeparation || control == MixerAutomationControl::send ||
+           control == MixerAutomationControl::channelGain || control == MixerAutomationControl::channelPan;
 }
 inline const char *mixerAutomationControlName(MixerAutomationControl control) noexcept
 {
@@ -31,6 +34,10 @@ inline const char *mixerAutomationControlName(MixerAutomationControl control) no
         return "stereoSeparation";
     case MixerAutomationControl::send:
         return "send";
+    case MixerAutomationControl::channelGain:
+        return "channelGain";
+    case MixerAutomationControl::channelPan:
+        return "channelPan";
     }
     return "unsupported";
 }
@@ -45,6 +52,10 @@ inline std::optional<MixerAutomationControl> parseMixerAutomationControl(const j
         return MixerAutomationControl::pan;
     if (text == "stereoSeparation")
         return MixerAutomationControl::stereoSeparation;
+    if (text == "channelGain")
+        return MixerAutomationControl::channelGain;
+    if (text == "channelPan")
+        return MixerAutomationControl::channelPan;
     if (text == "send")
         return MixerAutomationControl::send;
     return {};
@@ -71,11 +82,28 @@ struct MixerAutomationTarget
 // CONTROL-only shared resolver. No row/ordinal, selected-target fallback or DSP access.
 inline juce::Result resolveMixerAutomationTarget(const Project &project, int insert,
                                                  MixerAutomationControl control, MixerAutomationTarget &out,
-                                                 std::optional<int> sendTarget = {})
+                                                 std::optional<int> sendTarget = {}, std::int64_t channel = 0)
 {
     if (!validMixerAutomationControl(control))
         return juce::Result::fail(
-            "automation.unsupportedTarget: Supported Mixer targets are gain, pan, stereoSeparation and send");
+            "automation.unsupportedTarget: Supported targets are gain, pan, stereoSeparation, send, channelGain and channelPan");
+    if (control == MixerAutomationControl::channelGain || control == MixerAutomationControl::channelPan)
+    {
+        // Channel Rack volume (linear0..2 like the Rack knob range) or pan (-1..1).
+        const auto *owner = project.channel(Id(channel));
+        if (!owner || sendTarget)
+            return juce::Result::fail("automation.missingTarget: An existing Channel ID is required");
+        MixerAutomationTarget value;
+        value.key = {static_cast<AutomationParameter>(unsigned(control)), channel, 0};
+        const bool gain = control == MixerAutomationControl::channelGain;
+        value.minimum = gain ? 0.f : -1.f;
+        value.maximum = gain ? 2.f : 1.f;
+        value.manual = gain ? owner->gain : owner->pan;
+        value.name = owner->name + (gain ? " - Volume" : " - Pan");
+        value.units = gain ? "linearGain" : "bipolarPan";
+        out = std::move(value);
+        return juce::Result::ok();
+    }
     if ((control == MixerAutomationControl::send) != sendTarget.has_value())
         return juce::Result::fail(
             "automation.invalidArguments: Send automation requires its exact destination only");

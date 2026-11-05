@@ -1147,6 +1147,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result routeSelectedTo(int target, bool only);
     // Mixer track menu > Create submix: a new insert fed only by the selected tracks.
     juce::Result createSubmix();
+    // "Create automation clip" for a Channel's volume (pan false) or pan: an automation clip
+    // over the Song on the first free Playlist track, starting at the current value.
+    juce::Result createChannelAutomation(Id channel, bool pan);
     std::shared_ptr<std::function<void(int)>> pendingChainChooser; // Keeps the settle-wait alive.
     juce::Label title, deviceLabel;
     juce::ThreadPool midiFileJobs{1};

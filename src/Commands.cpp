@@ -341,6 +341,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"mixer.insert.fromChainPreset", "Add insert from chain preset (file chooser)", Scope::mixer, false, true, "action"},
         {"mixer.dock", "Dock Mixer track left / middle / right", Scope::mixer, true, true, "command"},
         {"mixer.reset", "Reset Mixer track controls, name and colour (keeps effects and routing)", Scope::mixer, true, true, "command"},
+        {"channel.automateVolume", "Create automation clip: selected Channel volume", Scope::rack, false, true, "action"},
+        {"channel.automatePan", "Create automation clip: selected Channel pan", Scope::rack, false, true, "action"},
         {"mixer.routeSelectedHere", "Route the selected Mixer tracks to the active track", Scope::mixer, false, true, "action"},
         {"mixer.routeSelectedHereOnly", "Route the selected Mixer tracks only to the active track", Scope::mixer, false, true, "action"},
         {"mixer.createSubmix", "Create a submix track fed only by the selected Mixer tracks", Scope::mixer, false, true, "action"},

@@ -4294,6 +4294,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return selected.wasOk();
     }
+    if (action == "channel.automateVolume" || action == "channel.automatePan")
+    {
+        const auto made = createChannelAutomation(selectedChannel, action == "channel.automatePan");
+        if (made.failed())
+            status = made.getErrorMessage();
+        repaint();
+        return made.wasOk();
+    }
     if (action == "mixer.routeSelectedHere" || action == "mixer.routeSelectedHereOnly" || action == "mixer.createSubmix")
     {
         const auto started = action == "mixer.createSubmix"
@@ -6822,6 +6830,31 @@ juce::Result Studio::createSubmix()
                                                                     juce::String(int(sources.size())) + " track(s)");
                        }},
                       {});
+    return juce::Result::ok();
+}
+juce::Result Studio::createChannelAutomation(Id channel, bool pan)
+{
+    if (!controller.project.channel(channel))
+        return juce::Result::fail("Choose an existing Channel");
+    int lane = -1;
+    double end = 4;
+    for (const auto &p : controller.project.placements)
+        lane = std::max(lane, p.lane), end = std::max(end, p.beat + p.length);
+    for (const auto &p : controller.project.audioPlacements)
+        lane = std::max(lane, p.lane);
+    for (const auto &p : controller.project.automation.placements)
+        lane = std::max(lane, p.lane);
+    CommandArgs a;
+    a.channel = channel;
+    a.automationControl = pan ? MixerAutomationControl::channelPan : MixerAutomationControl::channelGain;
+    a.beat = 0;
+    a.length = end;
+    a.lane = std::min(127, lane + 1);
+    command("automation.create", a);
+    if (status != "Ready")
+        return juce::Result::fail(status);
+    status = juce::String(pan ? "Pan" : "Volume") + " automation clip created on Playlist track " + juce::String(a.lane + 1);
+    repaint();
     return juce::Result::ok();
 }
 std::vector<int> Studio::unusedMixerInserts() const

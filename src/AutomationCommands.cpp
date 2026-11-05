@@ -45,7 +45,7 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
     if (mixerTarget)
         if (auto resolved = resolveMixerAutomationTarget(
                 project, a.mixer, a.automationControl.value_or(MixerAutomationControl::gain), mixer,
-                a.automationSendTarget);
+                a.automationSendTarget, std::int64_t(a.channel));
             resolved.failed())
             return resolved;
     const bool native = id.startsWith("automation.plugin.");

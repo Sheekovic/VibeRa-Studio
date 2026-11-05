@@ -173,6 +173,18 @@ class ChannelBalance final : public tracktion::Plugin
             {
                 runtime->gain = owner->gain;
                 runtime->pan = owner->pan;
+                // Channel volume/pan automation (block-rate target, smoothed by the balance).
+                if (fc.isPlaying || fc.isRendering)
+                {
+                    const auto &doc = *next.document;
+                    const double seconds = fc.editTime.getStart().inSeconds() +
+                                           .5 * fc.bufferNumSamples / std::max(1., runtime->activeRate);
+                    const double beat = doc.tempoMap.beatAt(seconds);
+                    if (const auto *curve = doc.automation.find({AutomationParameter::channelGain, std::int64_t(channel), 0}))
+                        runtime->gain = curve->valueAt(beat);
+                    if (const auto *curve = doc.automation.find({AutomationParameter::channelPan, std::int64_t(channel), 0}))
+                        runtime->pan = curve->valueAt(beat);
+                }
             }
         // No document pin survives a callback on an inactive clip track. A
         // bounded acquisition miss retains its last target, never drops PCM.

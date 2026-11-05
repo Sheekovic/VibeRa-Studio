@@ -2367,6 +2367,8 @@ juce::Result Project::validate() const
             key.kind == AutomationParameter::mixerStereoSeparation)
             return key.parameter == 0 && key.owner >= 0 && key.owner <= std::numeric_limits<int>::max() &&
                    inserts.contains(int(key.owner));
+        if (key.kind == AutomationParameter::channelGain || key.kind == AutomationParameter::channelPan)
+            return key.parameter == 0 && key.owner > 0 && channel(Id(key.owner)) != nullptr;
         if (key.kind == AutomationParameter::mixerSend)
         {
             if (key.owner <= 0 || key.owner > std::numeric_limits<int>::max() ||

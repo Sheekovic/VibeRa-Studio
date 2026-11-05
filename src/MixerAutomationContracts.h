@@ -16,7 +16,8 @@ inline juce::var mixerAutomationArguments(const juce::String &id)
 {
     auto schema = juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{
       "mixer":{"type":"integer","minimum":0,"maximum":2147483647,"default":0,"description":"Existing stable Mixer ID, never display row; omitted retains legacy Master0."},
-      "automationControl":{"type":"string","enum":["gain","pan","stereoSeparation","send"],"default":"gain","description":"Shared canonical target. gain uses linear0..2,1 unity. pan and separation use -1..1,0 centre/identity. Source points stay normalized0..1. Send uses linear0..2 and requires automationSendTarget; Channel targets remain unsupported."},
+      "automationControl":{"type":"string","enum":["gain","pan","stereoSeparation","send","channelGain","channelPan"],"default":"gain","description":"Shared canonical target. gain uses linear0..2,1 unity. pan and separation use -1..1,0 centre/identity. Source points stay normalized0..1. Send uses linear0..2 and requires automationSendTarget. channelGain (linear0..2) and channelPan (-1..1) automate a Channel Rack volume/pan and require channel."},
+      "channel":{"type":"integer","minimum":1,"description":"Required only for channelGain/channelPan: the stable Channel ID."},
       "automationSendTarget":{"type":"integer","minimum":0,"maximum":2147483647,"description":"Required only for automationControl=send. Existing stable destination Mixer ID,0=Master. mixer is existing non-Master source; an exact enabled route is required. target still means Automation source ID. Omitted for every other control."}},"required":[]})");
     auto *properties = schema["properties"].getDynamicObject();
     juce::Array<juce::var> required;

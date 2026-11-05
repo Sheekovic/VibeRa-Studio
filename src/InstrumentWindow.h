@@ -851,6 +851,20 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
         {
             timerCallback();
         }
+        struct AutomationMenuListener final : juce::MouseListener
+        {
+            std::function<void(juce::Component *)> open;
+            void mouseDown(const juce::MouseEvent &e) override
+            {
+                if (e.mods.isPopupMenu() && open)
+                {
+                    auto *target = e.eventComponent;
+                    while (target && !dynamic_cast<juce::Slider *>(target))
+                        target = target->getParentComponent();
+                    open(target ? target : e.eventComponent);
+                }
+            }
+        } automationMenu;
         Controls(Studio &studio, Id id)
             : owner(&studio), channel(id), viewIdentity(studio.controller.projectIdentity),
               mixerTargets(studio.controller.project, studio.controller.projectIdentity, id)
@@ -1557,6 +1571,27 @@ class Studio::InstrumentWindow final : public juce::DocumentWindow
             }
             gain.onValueChange = [this] { change("channel.gain", gain.getValue()); };
             pan.onValueChange = [this] { change("channel.pan", pan.getValue()); };
+            // Right-click Volume / Pan: Create automation clip (familiar control menu).
+            automationMenu.open = [this](juce::Component *source)
+            {
+                if (!owner)
+                    return;
+                juce::PopupMenu menu;
+                menu.addItem(1, "Create automation clip");
+                auto safe = juce::Component::SafePointer<Controls>(this);
+                const bool panTarget = source == &pan;
+                menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(source),
+                                   [safe, panTarget](int chosen)
+                                   {
+                                       if (!safe || chosen != 1 || !safe->owner)
+                                           return;
+                                       if (auto made = safe->owner->createChannelAutomation(safe->channel, panTarget);
+                                           made.failed())
+                                           safe->historyError(made.getErrorMessage());
+                                   });
+            };
+            gain.addMouseListener(&automationMenu, true);
+            pan.addMouseListener(&automationMenu, true);
             for (const auto& choice : mixerTargets.items())
                 mixer.addItem(choice.name, choice.ordinal);
             mixer.onChange = [this]
