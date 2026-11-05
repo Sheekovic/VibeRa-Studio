@@ -120,6 +120,14 @@ void Studio::midiFileMenu()
                                                   [&](const auto &c) { return c.channel == selectedChannel; });
         menu.addItem(16, "Clear recorded controllers (CC, pitch bend, pressure)", controls);
     }
+    {
+        juce::PopupMenu stamp;
+        stamp.addItem(19, "Off (single notes)", true, pianoStamp.isEmpty());
+        const auto &shapes = score::chordShapes();
+        for (size_t i = 0; i < shapes.size(); ++i)
+            stamp.addItem(900 + int(i), shapes[i].name, true, pianoStamp == shapes[i].name);
+        menu.addSubMenu("Chord stamp (draw places a chord)", stamp);
+    }
     menu.addItem(17, "Flip horizontally (reverse in time)");
     menu.addItem(18, "Flip vertically (mirror pitches)");
     // Composition tools act on the selection, or the whole Channel part without one.
@@ -254,6 +262,15 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result == 19 || (result >= 900 && result < 1000))
+            {
+                safe->pianoStamp = result == 19 ? juce::String()
+                                                : juce::String(score::chordShapes()[size_t(result - 900)].name);
+                safe->status = safe->pianoStamp.isEmpty() ? "Chord stamp off"
+                                                          : "Chord stamp: " + safe->pianoStamp + " (draw to place)";
+                safe->repaint();
                 return;
             }
             if (result == 17 || result == 18)

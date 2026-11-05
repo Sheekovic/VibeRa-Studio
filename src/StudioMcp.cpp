@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "ScoreTools.h"
 #include "Studio.h"
 #include "VideoPlayer.h"
 #include "MidiScore.h"
@@ -184,7 +185,7 @@ juce::var Studio::mcpTools()
       {"name":"vibera_command","description":"Execute an undoable document edit, undo or redo on this owned instance. Optional revision rejects stale edits.","inputSchema":{"type":"object","properties":{"command":{"type":"string"},"args":{"type":"object"},"revision":{"type":"integer","minimum":0}},"required":["command"],"additionalProperties":false}},
       {"name":"vibera_select","description":"Select existing Pattern/Channel/editor scope or an already loaded project plugin UI. Plugin requests are separate from Pattern/Channel selection; no discovery, plugin loading, parameter writes or filesystem access.","inputSchema":{"type":"object","properties":{"pattern":{"type":"integer"},"channel":{"type":"integer"},"scope":{"type":"integer","minimum":0,"maximum":8},"plugin":{"type":"integer","minimum":1,"maximum":1000000000},"pluginView":{"type":"string","enum":["controls","native","closeNative"]},"parameter":{"type":"integer","minimum":0,"maximum":4294967295},"lastTweaked":{"type":"boolean"},"instance":{"type":"string","maxLength":100}},"additionalProperties":false}},
       {"name":"vibera_transport","description":"Play, stop, seek, set whole-Pattern/Song looping or switch mode through shared application actions. previewNote (stopped transport only) plays one note on a Channel through every current setting, like the sampler Preview processed button; pitch defaults to the sampler root (60 when Auto). State is not listening evidence.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["play","stop","seek","pattern","song","loop","previewNote"]},"channel":{"type":"integer","minimum":1},"pitch":{"type":"integer","minimum":0,"maximum":127},"seconds":{"type":"number","minimum":0.05,"maximum":4,"default":1.5},"beat":{"type":"number","minimum":0},"enabled":{"type":"boolean","default":true,"description":"For action loop: idempotently enable/disable entire current Pattern or Song looping. No recording take may be active when changing it."},"range":{"type":["array","null"],"items":{"type":"number","minimum":0},"minItems":2,"maxItems":2,"description":"For action loop: set the Playlist time selection [startBeat, endBeat] (null clears it). In Song mode looping plays only the selection; it is also the audio punch range."}},"required":["action"],"additionalProperties":false}},
-      {"name":"vibera_editor","description":"Show, hide or maximize a native JUCE editor: 0 Rack, 1 Piano, 2 Playlist, 3 Mixer.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":3},"action":{"type":"string","enum":["show","hide","maximize","detach","dock","grouping","snap"]},"enabled":{"type":"boolean","default":true,"description":"Only editor2/action grouping: temporarily enable/disable group targeting; retain membership. Refused during active gestures."},"snap":{"type":"number","minimum":0,"maximum":32,"description":"Only action snap: the shared Piano roll/Playlist grid in beats (0 = none; e.g. 0.25 step, 1/3 triplet, 4 bar). Read back as state.snap."},"line":{"type":"boolean","description":"Only action snap: true snaps pointer edits to the visible grid lines (zoom dependent) instead of snap; read back as state.snapLine."},"markers":{"type":"boolean","description":"Only action snap: true snaps Playlist positions to markers (distances to bars); read back as state.snapMarkers."}},"required":["editor","action"],"additionalProperties":false}},
+      {"name":"vibera_editor","description":"Show, hide or maximize a native JUCE editor: 0 Rack, 1 Piano, 2 Playlist, 3 Mixer.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":3},"action":{"type":"string","enum":["show","hide","maximize","detach","dock","grouping","snap","stamp"]},"chord":{"type":"string","description":"Only action stamp: a Chordify shape name (e.g. major, minor) so drawing a Piano roll note places that chord; empty turns the stamp off. Read back as state.pianoStamp."},"enabled":{"type":"boolean","default":true,"description":"Only editor2/action grouping: temporarily enable/disable group targeting; retain membership. Refused during active gestures."},"snap":{"type":"number","minimum":0,"maximum":32,"description":"Only action snap: the shared Piano roll/Playlist grid in beats (0 = none; e.g. 0.25 step, 1/3 triplet, 4 bar). Read back as state.snap."},"line":{"type":"boolean","description":"Only action snap: true snaps pointer edits to the visible grid lines (zoom dependent) instead of snap; read back as state.snapLine."},"markers":{"type":"boolean","description":"Only action snap: true snaps Playlist positions to markers (distances to bars); read back as state.snapMarkers."}},"required":["editor","action"],"additionalProperties":false}},
       {"name":"vibera_update","description":"In-app updates from the project's GitHub Releases. status reads the phase (idle, checking, upToDate, available, downloading, ready, installing, failed), the current version, the newest available release with its notes and installable asset, download progress and the update settings. check starts a background check (poll status; completes as upToDate, available or failed) without opening dialogs. Downloading and installing need the user's approval in the app (Tools > Check for updates), so they are not MCP actions.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["status","check"]}},"required":["action"],"additionalProperties":false}},
       {"name":"vibera_snapshot","description":"Capture this instance as a bounded JUCE component PNG including the header. With channel: that local Channel's settings window instead (opened if needed) (page 0 Sample, 1 Envelope, 2 Miscellaneous). Not native PrintWindow, physical input or listening evidence.","inputSchema":{"type":"object","properties":{"channel":{"type":"integer","minimum":1},"page":{"type":"integer","minimum":0,"maximum":2}},"additionalProperties":false}},
       {"name":"vibera_key","description":"Run an allowed contextual shortcut through the real JUCE handler. File/dialog/macro commands and held typing-performance input are excluded. Not OS keyboard input.","inputSchema":{"type":"object","properties":{"key":{"type":"integer","minimum":1,"maximum":65535},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["key"],"additionalProperties":false}},
@@ -3222,6 +3223,19 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         auto action = args["action"].toString();
         if (args.hasProperty("enabled") && action != "grouping")
             throw McpFailure("invalid_arguments", "enabled is only valid for action grouping");
+        if (args.hasProperty("chord") != (action == "stamp"))
+            throw McpFailure("invalid_arguments", "chord is required for, and only valid with, action stamp");
+        if (action == "stamp")
+        {
+            const auto chord = args["chord"].toString();
+            const auto &shapes = score::chordShapes();
+            if (chord.isNotEmpty() && std::none_of(shapes.begin(), shapes.end(),
+                                                   [&](const auto &shape) { return chord == shape.name; }))
+                throw McpFailure("invalid_arguments", "Unknown chord shape: " + chord);
+            pianoStamp = chord;
+            refresh();
+            return textResult(mcpCall("vibera_state", obj())["structuredContent"]);
+        }
         if ((args.hasProperty("line") || args.hasProperty("markers")) && action != "snap")
             throw McpFailure("invalid_arguments", "line and markers are only valid with action snap");
         const bool lineMode = action == "snap" && bool(args.getProperty("line", false));
@@ -3635,6 +3649,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "snapLine", snapLine);
     set(state, "snapMarkers", snapMarkers);
     set(state, "audioStretchMode", audioStretchMode);
+    set(state, "pianoStamp", pianoStamp);
     {
         // Playlist tracks with non-default settings (lanes without an entry use the defaults).
         juce::Array<juce::var> tracks;

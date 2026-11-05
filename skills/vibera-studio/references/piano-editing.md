@@ -8,3 +8,7 @@
 - **Flip** (`notes.flip`, `args.text` = `horizontal` | `vertical`; Piano roll menu): mirrors
   the selection or Channel part in time within its span, or in pitch around its range.
 - **Invert selection** (`selection.invert`, Shift+I in the Piano roll and Playlist).
+- **Chord stamp** (Piano roll menu > Chord stamp; MCP `vibera_editor`
+  `{"editor":1,"action":"stamp","chord":"minor"}`, `""` turns it off, read `state.pianoStamp`):
+  drawing a note places that chord with the clicked note as its root, as one Undo step.
+  Shapes are the Chordify list. Without the UI, use `notes.add` then `notes.chordify`.

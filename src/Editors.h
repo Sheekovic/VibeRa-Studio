@@ -5742,7 +5742,24 @@ class Studio::Editor final : public juce::Component,
                 s.command("notes.add", a);
                 if (s.controller.project.nextId != previousId)
                     if (auto *p = pattern(); p && !p->notes.empty())
+                    {
                         list = {p->notes.back().id};
+                        if (s.pianoStamp.isNotEmpty())
+                        {
+                            CommandArgs chord;
+                            chord.pattern = p->id;
+                            chord.channel = s.selectedChannel;
+                            chord.ids = list;
+                            chord.text = s.pianoStamp;
+                            chord.value = 0;
+                            s.command("notes.chordify", chord);
+                            list.clear();
+                            if (auto *after = pattern())
+                                for (const auto &n : after->notes)
+                                    if (n.id >= previousId)
+                                        list.push_back(n.id);
+                        }
+                    }
             }
             else
             {
