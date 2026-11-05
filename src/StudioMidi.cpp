@@ -155,6 +155,8 @@ void Studio::midiFileMenu()
         edit.addItem(54, "Allow resizing from left    Ctrl+Alt+Home", true, pianoResizeLeft);
         const bool timeRange =
             static_cast<Editor *>(windows[1]->getContentComponent())->timeSelection().has_value();
+        edit.addItem(74, "Group selected notes    Shift+G", selectedNotes.size() >= 2);
+        edit.addItem(75, "Ungroup selected notes    Alt+G", !selectedNotes.empty());
         edit.addItem(70, "Insert space    Ctrl+Ins", timeRange);
         edit.addItem(71, "Slice & insert space", timeRange);
         edit.addItem(72, "Delete space    Ctrl+Del", timeRange);
@@ -424,6 +426,12 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if (result == 74 || result == 75)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction(result == 74 ? "notes.group" : "notes.ungroup");
                 return;
             }
             if (result >= 70 && result <= 73)

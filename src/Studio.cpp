@@ -5131,7 +5131,7 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         return true;
     }
     if (action == "notes.mute" || action == "notes.unmute" || action == "notes.legato" ||
-        action == "notes.chop" || action == "notes.glue")
+        action == "notes.chop" || action == "notes.glue" || action == "notes.group" || action == "notes.ungroup")
     {
         a.length = snap > 0 ? snap : .25;
         command(action, a);

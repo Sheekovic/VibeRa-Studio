@@ -682,6 +682,8 @@ juce::ValueTree Project::state() const
                 set(e, "portamento", n.portamento);
             if (n.colourGroup != 0)
                 set(e, "colourGroup", n.colourGroup);
+            if (n.group != 0)
+                set(e, "group", juce::int64(n.group));
             if (n.modY != .5)
                 set(e, "modY", n.modY);
             t.appendChild(e, nullptr);
@@ -1723,6 +1725,14 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                                  exactNumber(n["length"]), int(n["pitch"]), float(exactNumber(n["velocity"])),
                                  bool(n["step"]), bool(n["muted"]), pan, fine, shift, int(repeat), release,
                                  modX, modY, slide, portamento, int(group)});
+            if (n.hasProperty("group"))
+            {
+                const double noteGroup = exactNumber(n["group"]);
+                if (!std::isfinite(noteGroup) || noteGroup < 1 || noteGroup > 9.e15 ||
+                    std::floor(noteGroup) != noteGroup)
+                    return juce::Result::fail("noteGroup.invalidValue: Exact positive note group ID required");
+                pat.notes.back().group = Id(juce::int64(noteGroup));
+            }
         }
         if (fileVersion >= 30)
             refreshAutomaticPatternLength(p, pat);
@@ -2260,7 +2270,8 @@ juce::Result Project::validate() const
             return fail(
                 "patternExtent.invalidMeter: Inherit both meter fields or use a supported time signature");
         for (auto &n : p.notes)
-            if (!unique(n.id) || !channel(n.channel) || channel(n.channel)->audioClip ||
+            if ((maxId = std::max(maxId, n.group), !unique(n.id)) || !channel(n.channel) ||
+                channel(n.channel)->audioClip ||
                 !std::isfinite(n.beat) || n.beat < 0 || !std::isfinite(n.length) || n.length <= 0 ||
                 n.pitch < 0 || n.pitch > 127 || !std::isfinite(n.velocity) || n.velocity < 0 ||
                 n.velocity > 1 || !std::isfinite(n.pan) || std::abs(n.pan) > 1 ||

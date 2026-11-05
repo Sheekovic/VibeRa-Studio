@@ -77,3 +77,7 @@
   are cut at it, controller events outside are removed and nothing moves. UI: Piano roll menu >
   Edit > Trim selection (needs a ruler time selection; action `notes.trimAction`), next to
   Insert space / Slice & insert space / Delete space.
+- Note groups: `notes.group` (`pattern`, `channel`, `ids` of two or more notes; Shift+G) gives
+  them a new group; `notes.ungroup` (Alt+G) clears it. Clicking one grouped note selects the
+  whole group; duplicated or pasted grouped notes form new groups. Saved per note as `group`;
+  read back as `noteGroup` (0 = none) in `vibera_inspect` notes. Piano roll menu > Edit.

@@ -1998,6 +1998,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 set(row, "slide", n.slide);
                 set(row, "portamento", n.portamento);
                 set(row, "colourGroup", n.colourGroup);
+                set(row, "noteGroup", juce::int64(n.group));
                 set(row, "midiChannel", n.colourGroup + 1);
                 set(row, "transitionSupported",
                     controller.project.channel(n.channel) &&
@@ -2060,6 +2061,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 set(row, "slide", n.slide);
                 set(row, "portamento", n.portamento);
                 set(row, "colourGroup", n.colourGroup);
+                set(row, "noteGroup", juce::int64(n.group));
                 set(row, "midiChannel", n.colourGroup + 1);
                 set(row, "transitionSupported",
                     controller.project.channel(n.channel) &&

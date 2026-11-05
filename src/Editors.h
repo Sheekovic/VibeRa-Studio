@@ -896,6 +896,21 @@ class Studio::Editor final : public juce::Component,
                          { return s.controller.project.mixer[a].dock < s.controller.project.mixer[b].dock; });
         return order;
     }
+    // Adds every note that shares a note group with a selected note (current Pattern).
+    void expandNoteGroups(std::vector<Id> &list) const
+    {
+        const auto *p = s.controller.project.pattern(s.selectedPattern);
+        if (!p)
+            return;
+        std::set<Id> groups;
+        for (const auto &n : p->notes)
+            if (n.group != 0 && selected(list, n.id))
+                groups.insert(n.group);
+        if (!groups.empty())
+            for (const auto &n : p->notes)
+                if (groups.contains(n.group) && !selected(list, n.id))
+                    list.push_back(n.id);
+    }
     int mixerWidth() const
     {
         // Retain every insert; use existing horizontal scrolling instead of tiny labels/targets.
@@ -5999,7 +6014,11 @@ class Studio::Editor final : public juce::Component,
         if (id)
         {
             if (!selected(type == 2 ? s.effectiveClipSelection() : list, id))
+            {
                 list = {id};
+                if (type == 1)
+                    expandNoteGroups(list);
+            }
             if (e.mods.isShiftDown())
             {
                 CommandArgs a;

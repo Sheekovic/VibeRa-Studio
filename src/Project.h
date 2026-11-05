@@ -30,6 +30,7 @@ struct Note
     double modX = .5, modY = .5;   // Local sampler cutoff/resonance offsets; .5 is neutral.
     bool slide = false, portamento = false; // Independent local-sampler source note modes.
     int colourGroup = 0;                    // Per-note voice group0..15 (UI1..16), not a DAW Channel/group.
+    Id group = 0; // Note group (Shift+G): clicking one note selects the whole group; 0 = none.
 };
 struct Channel
 {

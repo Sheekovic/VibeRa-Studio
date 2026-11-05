@@ -799,6 +799,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.legato", "Quick legato", Scope::piano, true, true, "command"},
         {"notes.chop", "Quick chop", Scope::piano, true, true, "command"},
         {"notes.glue", "Glue", Scope::piano, true, true, "command"},
+        {"notes.group", "Group selected notes (click one selects all)", Scope::piano, true, true, "command"},
+        {"notes.ungroup", "Ungroup selected notes", Scope::piano, true, true, "command"},
         {"notes.chordify", "Chordify selection", Scope::piano, true, true, "command"},
         {"notes.clearControllers", "Clear recorded controllers", Scope::piano, true, true, "command"},
         {"notes.controller.add", "Add a controller event", Scope::piano, true, true, "command"},
@@ -4046,6 +4048,22 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             }
             pat->notes.insert(pat->notes.end(), copies.begin(), copies.end());
         }
+        if (id == "notes.group" || id == "notes.ungroup")
+        {
+            if (a.ids.empty() || std::set<Id>(a.ids.begin(), a.ids.end()).size() != a.ids.size())
+                return juce::Result::fail("noteGroup.invalidTarget: Select distinct notes first");
+            if (id == "notes.group" && a.ids.size() < 2)
+                return juce::Result::fail("noteGroup.invalidTarget: Select at least two notes to group");
+            size_t found = 0;
+            for (const auto &note : pat->notes)
+                found += chosen(note.id) ? 1 : 0;
+            if (found != a.ids.size())
+                return juce::Result::fail("noteGroup.invalidTarget: Every note must exist in the Pattern");
+            const Id group = id == "notes.group" ? next.allocate() : 0;
+            for (auto &note : pat->notes)
+                if (chosen(note.id))
+                    note.group = group;
+        }
         if (id == "notes.mute" || id == "notes.unmute")
         {
             if (!ch || ch->audioClip)
@@ -4528,8 +4546,16 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             if (pat->notes.size() + board->notes.size() > 100000)
                 return juce::Result::fail("The Pattern would exceed 100000 notes");
             const double shift = a.beat - board->origin;
+            std::map<Id, Id> regrouped;
             for (auto copy : board->notes)
             {
+                if (copy.group != 0)
+                {
+                    auto [slot, fresh] = regrouped.try_emplace(copy.group, 0);
+                    if (fresh)
+                        slot->second = next.allocate();
+                    copy.group = slot->second;
+                }
                 copy.id = next.allocate();
                 copy.channel = a.channel;
                 copy.beat = std::max(0., copy.beat + shift);
@@ -4717,10 +4743,18 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         if (id == "notes.duplicate")
         {
             std::vector<Note> copies;
+            std::map<Id, Id> regrouped;
             for (auto &n : pat->notes)
                 if (chosen(n.id))
                 {
                     auto copy = n;
+                    if (copy.group != 0)
+                    {
+                        auto [slot, fresh] = regrouped.try_emplace(copy.group, 0);
+                        if (fresh)
+                            slot->second = next.allocate();
+                        copy.group = slot->second;
+                    }
                     copy.id = next.allocate();
                     copy.beat += a.beat;
                     copies.push_back(copy);
