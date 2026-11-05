@@ -2173,6 +2173,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                     }
                     set(row, "eq", bands);
                     set(row, "delayMs", m.delayMs);
+                    set(row, "dock", m.dock == 0 ? "middle" : m.dock < 0 ? "left" : "right");
                 }
                 set(row, "phaseInverted", m.phaseInverted);
                 set(row, "stereoSwapped", m.stereoSwapped);

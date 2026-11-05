@@ -145,3 +145,7 @@ menu > Add multiple inserts...).
 
 `mixer.meterWave` (Alt+W in the Mixer) toggles each insert's peak meters into a scrolling level
 waveform (newest at the bottom, width = peak). View only; read `state.mixerMeterWave`.
+- Docking: `mixer.dock` (`mixer` insert, `value` -1 left / 0 middle / 1 right; one Undo) shows the
+  track in the left, middle or right section of the Mixer (insert right-click > Dock to). Layout
+  only: routing, IDs and `mixerOrder` storage order are unchanged; `vibera_inspect` mixer rows
+  report `dock` as left/middle/right.

@@ -7252,6 +7252,11 @@ void Studio::effectMenu(int index)
     menu.addItem(1, "Browse / insert VST3 effect...");
     menu.addItem(10010, "EQ (3-band)...");
     menu.addItem(10011, "Track delay..." + (insert->delayMs > 0 ? " (" + juce::String(insert->delayMs, 1) + " ms)" : juce::String()));
+    juce::PopupMenu dockMenu;
+    dockMenu.addItem(10016, "Left", true, insert->dock == -1);
+    dockMenu.addItem(10017, "Middle", true, insert->dock == 0);
+    dockMenu.addItem(10018, "Right", true, insert->dock == 1);
+    menu.addSubMenu("Dock to", dockMenu);
     menu.addItem(10008, "Create insert", !mixerChainBusy());
     menu.addItem(10012, "Add multiple inserts...", !mixerChainBusy());
     menu.addItem(10015, "Add insert from chain preset...", !mixerChainBusy());
@@ -7438,6 +7443,14 @@ void Studio::effectMenu(int index)
                                                                   safe->command("mixer.insert.create", a);
                                                               }),
                                                     true);
+                               return;
+                           }
+                           if (selected >= 10016 && selected <= 10018)
+                           {
+                               CommandArgs a;
+                               a.mixer = index;
+                               a.value = selected - 10017;
+                               safe->command("mixer.dock", a);
                                return;
                            }
                            if (selected == 10011)

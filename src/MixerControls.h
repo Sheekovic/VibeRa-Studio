@@ -135,6 +135,12 @@ inline juce::Result applyMixerControl(Project &project, const juce::String &id, 
     }
     else if (id == "mixer.eqReset")
         it->eq = {};
+    else if (id == "mixer.dock")
+    {
+        if (a.value != -1 && a.value != 0 && a.value != 1)
+            return juce::Result::fail("mixer.dock.invalidValue: Dock is -1 (left), 0 (middle) or 1 (right)");
+        it->dock = int(a.value);
+    }
     else if (id == "mixer.delay")
     {
         if (!std::isfinite(a.value) || a.value < 0 || a.value > 500)

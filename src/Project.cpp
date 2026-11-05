@@ -734,6 +734,8 @@ juce::ValueTree Project::state() const
         if (m.stereoSeparation != 0) set(t, "stereoSeparation", double(m.stereoSeparation));
         if (m.delayMs != 0)
             set(t, "delayMs", double(m.delayMs));
+        if (m.dock != 0)
+            set(t, "dock", m.dock);
         if (!(m.eq == MixerEqSettings{}))
         {
             juce::StringArray values;
@@ -1743,6 +1745,13 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             return juce::Result::fail("Mixer insert index must be an exact nonnegative integer");
         p.mixer.push_back({int(e["index"]), e["name"].toString(), float(exactNumber(e["gain"])),
                            float(exactNumber(e["pan"])), bool(e["muted"])});
+        if (e.hasProperty("dock"))
+        {
+            const auto dock = exactNumber(e["dock"]);
+            if (dock != -1 && dock != 0 && dock != 1)
+                return juce::Result::fail("Invalid Mixer docking");
+            p.mixer.back().dock = int(dock);
+        }
         if (e.hasProperty("delayMs"))
         {
             const auto ms = exactNumber(e["delayMs"]);
@@ -2142,7 +2151,7 @@ juce::Result Project::validate() const
             !std::isfinite(m.stereoSeparation) || std::abs(m.stereoSeparation) > 1 ||
             !MixerEqSettings::valid(m.eq.gain[0], m.eq.freq[0]) || !MixerEqSettings::valid(m.eq.gain[1], m.eq.freq[1]) ||
             !MixerEqSettings::valid(m.eq.gain[2], m.eq.freq[2]) || !std::isfinite(m.delayMs) || m.delayMs < 0 ||
-            m.delayMs > 500 ||
+            m.delayMs > 500 || m.dock < -1 || m.dock > 1 ||
             (m.colour != 0 && (m.colour >> 24) != 255))
             return fail("Invalid mixer state");
     if (!inserts.count(0))

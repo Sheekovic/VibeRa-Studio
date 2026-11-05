@@ -885,6 +885,17 @@ class Studio::Editor final : public juce::Component,
                 safe->repaint();
             });
     }
+    // Display order of the Mixer strips: left-docked, middle, then right-docked tracks, each in
+    // their stored order (docking is layout only; routing and IDs are unchanged).
+    std::vector<size_t> mixerOrder() const
+    {
+        std::vector<size_t> order(s.controller.project.mixer.size());
+        for (size_t i = 0; i < order.size(); ++i)
+            order[i] = i;
+        std::stable_sort(order.begin(), order.end(), [this](size_t a, size_t b)
+                         { return s.controller.project.mixer[a].dock < s.controller.project.mixer[b].dock; });
+        return order;
+    }
     int mixerWidth() const
     {
         // Retain every insert; use existing horizontal scrolling instead of tiny labels/targets.
@@ -2269,8 +2280,9 @@ class Studio::Editor final : public juce::Component,
     }
     juce::Rectangle<int> mixerRouteButtonBounds(int insert) const
     {
-        for (size_t i = 0; i < s.controller.project.mixer.size(); ++i)
-            if (s.controller.project.mixer[i].index == insert)
+        const auto order = mixerOrder();
+        for (size_t i = 0; i < order.size(); ++i)
+            if (s.controller.project.mixer[order[i]].index == insert)
                 return {14 + int(i) * mixerWidth() - int(mixerScroll), getHeight() - 42, 26, 27};
         return {};
     }
@@ -3858,9 +3870,17 @@ class Studio::Editor final : public juce::Component,
             int position = 0;
             g.saveState();
             g.reduceClipRegion(0, 30, mixerStripWidth() - 12, getHeight() - 40);
-            for (auto &m : project.mixer)
+            int previousDock = -2;
+            for (const auto ordered : mixerOrder())
             {
+                auto &m = project.mixer[ordered];
                 int x = 6 + position++ * width - int(mixerScroll);
+                if (previousDock != -2 && m.dock != previousDock)
+                {
+                    g.setColour(accent.withAlpha(.7f)); // Boundary between docked sections.
+                    g.fillRect(x - 3, 30, 2, getHeight() - 40);
+                }
+                previousDock = m.dock;
                 if (x + width < 0 || x >= mixerStripWidth() - 12)
                     continue;
                 auto colour = m.colour != 0  ? juce::Colour(m.colour)
@@ -5101,7 +5121,7 @@ class Studio::Editor final : public juce::Component,
             int width = mixerWidth();
             auto position = juce::jlimit(0, int(s.controller.project.mixer.size()) - 1,
                                          (e.x - 6 + int(mixerScroll)) / width);
-            const int destination = s.controller.project.mixer[size_t(position)].index;
+            const int destination = s.controller.project.mixer[mixerOrder()[size_t(position)]].index;
             if (e.y >= getHeight() - 44)
             {
                 const int source = s.selectedInsert;
