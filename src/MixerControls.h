@@ -135,6 +135,12 @@ inline juce::Result applyMixerControl(Project &project, const juce::String &id, 
     }
     else if (id == "mixer.eqReset")
         it->eq = {};
+    else if (id == "mixer.delay")
+    {
+        if (!std::isfinite(a.value) || a.value < 0 || a.value > 500)
+            return juce::Result::fail("mixer.delay.invalidValue: Track delay is 0..500 ms");
+        it->delayMs = float(a.value);
+    }
     else if (id == "mixer.phaseInvert") it->phaseInverted = a.enabled;
     else if (id == "mixer.stereoSwap") it->stereoSwapped = a.enabled;
     else if (id == "mixer.pan" || id == "mixer.gain")

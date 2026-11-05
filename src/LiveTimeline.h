@@ -89,6 +89,7 @@ struct LiveDocument
         float pan = 0, stereoSeparation = 0;
         bool phaseInverted = false, stereoSwapped = false;
         MixerEqSettings eq;
+        float delayMs = 0;
     };
     std::vector<MixerControl> mixer; // Prepared stable identity lookup; no ValueTree access in DSP.
     struct MixerSendControl { int source=0,target=0;float gain=1; };

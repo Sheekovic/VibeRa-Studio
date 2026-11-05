@@ -25,6 +25,8 @@ class AutomationGain final : public tracktion::Plugin
         dsp::PreparedBalance balance;
         dsp::PreparedStereo stereo;
         MixerEqProcessor eq;
+        std::vector<float> delayLine; // 2 x capacity, allocated in initialise only.
+        int delayCapacity = 0, delayWrite = 0;
         double activeRate = 0;
         int insert = 0;
         tracktion::PanLaw law = tracktion::PanLawLinear;
@@ -187,6 +189,9 @@ class AutomationGain final : public tracktion::Plugin
             }
         }
         runtime->eq.prepare(info.sampleRate, eqSettings);
+        runtime->delayCapacity = int(info.sampleRate * .5) + 2;
+        runtime->delayLine.assign(size_t(runtime->delayCapacity) * 2, 0.f);
+        runtime->delayWrite = 0;
         if (!runtime->stereo.prepare(info.sampleRate, stereo))
             throw std::logic_error("automationGain.runtime.invalidStereo: Valid stereo preparation required");
         runtime->meter.reset();
@@ -251,6 +256,22 @@ class AutomationGain final : public tracktion::Plugin
             for (int ch = 0; ch < count; ++ch)
                 channels[size_t(ch)] = fc.destBuffer->getWritePointer(ch, fc.bufferStartSample);
             runtime->eq.process(channels.data(), count, fc.bufferNumSamples);
+            // Track delay: read `delay` samples behind the write head (fixed prepared line).
+            const int capacity = runtime->delayCapacity;
+            const int delay = juce::jlimit(0, std::max(0, capacity - 2),
+                                           int(std::lround(owner->delayMs * .001 * runtime->activeRate)));
+            if (capacity > 0)
+                for (int frame = 0; frame < fc.bufferNumSamples; ++frame)
+                {
+                    const int read = (runtime->delayWrite - delay + capacity) % capacity;
+                    for (int ch = 0; ch < std::min(count, 2); ++ch)
+                    {
+                        float *line = runtime->delayLine.data() + size_t(ch) * size_t(capacity);
+                        line[runtime->delayWrite] = channels[size_t(ch)][frame];
+                        channels[size_t(ch)][frame] = line[read];
+                    }
+                    runtime->delayWrite = (runtime->delayWrite + 1) % capacity;
+                }
         }
         const auto *curve = (fc.isPlaying || fc.isRendering)
                                 ? doc.automation.find({AutomationParameter::mixerGain, insert, 0})

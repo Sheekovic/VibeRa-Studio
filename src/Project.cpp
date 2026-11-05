@@ -721,6 +721,8 @@ juce::ValueTree Project::state() const
         set(t, "gain", double(m.gain));
         set(t, "pan", double(m.pan));
         if (m.stereoSeparation != 0) set(t, "stereoSeparation", double(m.stereoSeparation));
+        if (m.delayMs != 0)
+            set(t, "delayMs", double(m.delayMs));
         if (!(m.eq == MixerEqSettings{}))
         {
             juce::StringArray values;
@@ -1705,6 +1707,13 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             return juce::Result::fail("Mixer insert index must be an exact nonnegative integer");
         p.mixer.push_back({int(e["index"]), e["name"].toString(), float(exactNumber(e["gain"])),
                            float(exactNumber(e["pan"])), bool(e["muted"])});
+        if (e.hasProperty("delayMs"))
+        {
+            const auto ms = exactNumber(e["delayMs"]);
+            if (!std::isfinite(ms) || ms < 0 || ms > 500)
+                return juce::Result::fail("Invalid Mixer track delay");
+            p.mixer.back().delayMs = float(ms);
+        }
         if (e.hasProperty("eq"))
         {
             // Six numbers: gain dB and frequency Hz for the low, mid and high bands.
@@ -2096,7 +2105,8 @@ juce::Result Project::validate() const
             m.gain > 2 || !std::isfinite(m.pan) || std::abs(m.pan) > 1 ||
             !std::isfinite(m.stereoSeparation) || std::abs(m.stereoSeparation) > 1 ||
             !MixerEqSettings::valid(m.eq.gain[0], m.eq.freq[0]) || !MixerEqSettings::valid(m.eq.gain[1], m.eq.freq[1]) ||
-            !MixerEqSettings::valid(m.eq.gain[2], m.eq.freq[2]) ||
+            !MixerEqSettings::valid(m.eq.gain[2], m.eq.freq[2]) || !std::isfinite(m.delayMs) || m.delayMs < 0 ||
+            m.delayMs > 500 ||
             (m.colour != 0 && (m.colour >> 24) != 255))
             return fail("Invalid mixer state");
     if (!inserts.count(0))

@@ -144,6 +144,7 @@ struct MixerInsert
     float stereoSeparation = 0; // -1 subtract opposite channel;0 original;+1 mono.
     bool phaseInverted = false, stereoSwapped = false;
     MixerEqSettings eq; // Integrated 3-band EQ after the effect slots (flat by default).
+    float delayMs = 0;  // Track delay: a time offset 0..500 ms after the EQ (alignment, not an echo).
     MixerInsert(int i=0, juce::String n={}, float g=.8f, float p=0, bool m=false,
                 std::vector<PluginSpec> fx={})
         : index(i), name(std::move(n)), gain(g), pan(p), muted(m), effects(std::move(fx))

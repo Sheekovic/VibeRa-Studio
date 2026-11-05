@@ -131,3 +131,9 @@ shelf, a mid peak and a high shelf. `mixer.eq` sets one band (`args.mixer`, `arg
 in playback and export. Read `vibera_state` mixer rows `eq` (gainDb, frequencyHz per band).
 UI: insert menu > EQ (3-band)... opens a curve editor (drag a band: frequency and gain;
 double-click: flat band; right-click: reset all; one Undo per drag).
+
+## Track delay
+
+`mixer.delay` (`args.mixer`, `args.value` 0..500 ms) delays an insert's audio after its EQ
+(a time offset for alignment, not an echo); saved with the project, one Undo step, applied in
+playback and export. Read `delayMs` on the mixer rows. UI: insert menu > Track delay...

@@ -6856,6 +6856,7 @@ void Studio::effectMenu(int index)
     juce::PopupMenu menu;
     menu.addItem(1, "Browse / insert VST3 effect...");
     menu.addItem(10010, "EQ (3-band)...");
+    menu.addItem(10011, "Track delay..." + (insert->delayMs > 0 ? " (" + juce::String(insert->delayMs, 1) + " ms)" : juce::String()));
     menu.addItem(10008, "Create insert", !mixerChainBusy());
     juce::PopupMenu deleteMenu;
     deleteMenu.addItem(10009, "Delete unused insert (refuse references)...", index != 0 && !mixerChainBusy());
@@ -6996,6 +6997,27 @@ void Studio::effectMenu(int index)
                            if (selected == 10010)
                            {
                                safe->openMixerEq(index);
+                               return;
+                           }
+                           if (selected == 10011)
+                           {
+                               const auto *row = mixerInsert(safe->controller.project, index);
+                               auto *box = new juce::AlertWindow("Track delay", "Time offset in milliseconds (0..500)",
+                                                                 juce::MessageBoxIconType::NoIcon);
+                               box->addTextEditor("ms", juce::String(row ? row->delayMs : 0.f, 2));
+                               box->addButton("OK", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                               box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                               box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                                              [safe, box, index](int ok)
+                                                              {
+                                                                  if (!safe || ok != 1)
+                                                                      return;
+                                                                  CommandArgs a;
+                                                                  a.mixer = index;
+                                                                  a.value = box->getTextEditorContents("ms").getDoubleValue();
+                                                                  safe->command("mixer.delay", a);
+                                                              }),
+                                                    true);
                                return;
                            }
                            if (selected == 10009 || deleteDestinations.contains(selected))

@@ -2123,6 +2123,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                         bands.add(item);
                     }
                     set(row, "eq", bands);
+                    set(row, "delayMs", m.delayMs);
                 }
                 set(row, "phaseInverted", m.phaseInverted);
                 set(row, "stereoSwapped", m.stereoSwapped);
