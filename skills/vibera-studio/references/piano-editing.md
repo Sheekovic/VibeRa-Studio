@@ -69,3 +69,6 @@
   per system, sharps, ledger lines and note values from the lengths (whole, half, quarter,
   eighth, sixteenth). A readable lead sheet, not engraved notation: no beams, rests, ties or
   key signatures.
+- Test mode: `vibera_dialog` (`state`, `submit` with `fields` and `button`) reads and answers the
+  open modal dialog in-process (e.g. Rename key: field `label`, button `OK`); it refuses outside
+  test mode and never sends OS input.

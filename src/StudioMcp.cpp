@@ -219,6 +219,8 @@ juce::var Studio::mcpTools()
             R"({"name":"vibera_stretch","description":"Shared nondestructive Piano Roll selection stretch. Begin captures explicit notes and their earliest onset anchor. Update sets an absolute time/duration ratio against the unchanged source. Commit is one canonical edit; cancel/expiry leaves source/history/audio untouched. Poll actual completion and planned notes. Source-dependent ratio limits are returned. Score scaling does not time-stretch audio files.","inputSchema":{"type":"object","additionalProperties":false,"properties":{"action":{"type":"string","enum":["state","begin","update","commit","cancel"]},"ids":{"type":"array","minItems":1,"maxItems":100000,"uniqueItems":true,"items":{"type":"integer","minimum":1,"maximum":1000000000}},"ratio":{"type":"number","minimum":0.000001,"maximum":1000000,"description":"Absolute duration/onset scale about the returned anchor, not incremental; limits depend on the selected source."},"leaseMs":{"type":"integer","minimum":250,"maximum":120000,"default":30000},"operation":{"type":"string","maxLength":100},"offset":{"type":"integer","minimum":0,"default":0},"limit":{"type":"integer","minimum":1,"maximum":512,"default":64}},"required":["action"]}})");
         tools.getArray()->add(definition);
     }
+    tools.getArray()->add(juce::JSON::parse(
+            R"({"name":"vibera_dialog","description":"Test mode only: read or answer the app's open modal JUCE dialog in-process (no OS input). state lists its title, text fields and buttons; submit sets fields by name and presses the named button through its real handler.","inputSchema":{"type":"object","additionalProperties":false,"properties":{"action":{"type":"string","enum":["state","submit"]},"fields":{"type":"object"},"button":{"type":"string","maxLength":64}},"required":["action"]}})"));
     {
         auto definition = juce::JSON::parse(
             R"({"name":"vibera_slice","description":"Shared Piano Roll cut-line preview/session. Begin captures the current Pattern/Channel; update validates a musical line and returns planned targets without mutating score/audio/history. Commit executes canonical notes.slice once; cancel/lease expiry leaves the source unchanged. Local actions preempt remote preview. Poll state for actual terminal outcomes and actual created right-note IDs; no pointer simulation. Empty IDs target the active part unless line.allChannels explicitly includes ghosts. Preview is not a completed edit.","inputSchema":{"type":"object","additionalProperties":false,"properties":{"action":{"type":"string","enum":["state","begin","update","commit","cancel"]},"operation":{"type":"string","maxLength":100},"leaseMs":{"type":"integer","minimum":250,"maximum":120000,"default":30000},"ids":{"type":"array","maxItems":100000,"uniqueItems":true,"items":{"type":"integer","minimum":1,"maximum":1000000000}},"offset":{"type":"integer","minimum":0,"default":0},"limit":{"type":"integer","minimum":1,"maximum":512,"default":64}},"required":["action"]}})");
@@ -820,6 +822,53 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             throw McpFailure("validation_failed", result.getErrorMessage());
         return textResult(
             noteStretchState(integer(args, "offset", 0, 0, 1000000), integer(args, "limit", 64, 1, 512)));
+    }
+    if (name == "vibera_dialog")
+    {
+        if (!controllerTestMode)
+            throw McpFailure("unavailable_operation", "vibera_dialog exists only in test mode");
+        auto *alert = dynamic_cast<juce::AlertWindow *>(juce::Component::getCurrentlyModalComponent());
+        auto response = obj();
+        set(response, "open", alert != nullptr);
+        if (!alert)
+        {
+            if (args["action"].toString() == "submit")
+                throw McpFailure("unavailable_target", "No modal dialog is open");
+            return textResult(response);
+        }
+        juce::Array<juce::var> fields, buttons;
+        for (auto *child : alert->getChildren())
+        {
+            if (auto *editor = dynamic_cast<juce::TextEditor *>(child))
+            {
+                auto row = obj();
+                set(row, "name", editor->getName());
+                set(row, "text", editor->getText());
+                fields.add(row);
+            }
+            if (auto *button = dynamic_cast<juce::Button *>(child))
+                buttons.add(button->getButtonText());
+        }
+        set(response, "title", alert->getName());
+        set(response, "fields", fields);
+        set(response, "buttons", buttons);
+        if (args["action"].toString() == "submit")
+        {
+            if (const auto *values = args["fields"].getDynamicObject())
+                for (const auto &field : values->getProperties())
+                {
+                    auto *editor = alert->getTextEditor(field.name.toString());
+                    if (!editor)
+                        throw McpFailure("invalid_arguments", "No dialog field named " + field.name.toString());
+                    editor->setText(field.value.toString(), juce::sendNotification);
+                }
+            auto *button = alert->getButton(args["button"].toString());
+            if (!button)
+                throw McpFailure("invalid_arguments", "No dialog button named " + args["button"].toString());
+            button->triggerClick();
+            set(response, "submitted", true);
+        }
+        return textResult(response);
     }
     if (name == "vibera_slice")
     {
