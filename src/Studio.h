@@ -224,7 +224,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     Id selectedPattern = 0, selectedChannel = 0;
     Scope focus = Scope::rack;
     bool patternMode = true;
-    bool followPlayhead = true; // Playlist page-scrolls to keep the Song playhead in view.
+    bool followPlayhead = true;
+    bool snapLine = false; // "Line" snap: pointer edits follow the visible grid lines (zoom dependent). // Playlist page-scrolls to keep the Song playhead in view.
     double snap = .25;
     std::vector<Id> selectedNotes, selectedClips;
     std::vector<Id> selectedChannels; // Bulk Rack targets; active/MIDI target stays selectedChannel.

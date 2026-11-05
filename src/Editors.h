@@ -981,9 +981,18 @@ class Studio::Editor final : public juce::Component,
     {
         return {0, .25, .5, 1, barBeats(), .0625, .125, 1. / 6, 1. / 3, 2 * barBeats()};
     }
+    // The drawn grid step: the Playlist shows sub-beat lines once zoomed in far enough.
+    double gridDivision() const
+    {
+        double division = type == 1 ? .25 : spacing() >= 64 ? .25 : spacing() >= 32 ? .5 : 1.;
+        while (division * spacing() < 8.)
+            division *= 2.;
+        return division;
+    }
     double snap(double v, const juce::ModifierKeys &m) const
     {
-        return m.isAltDown() || s.snap == 0 ? v : std::round(v / s.snap) * s.snap;
+        const double step = s.snapLine && (type == 1 || type == 2) ? gridDivision() : s.snap;
+        return m.isAltDown() || step == 0 ? v : std::round(v / step) * step;
     }
     int pitch(float y) const
     {
@@ -1437,13 +1446,16 @@ class Studio::Editor final : public juce::Component,
             // Familiar snap set: steps (1/4 beat), triplets and finer divisions; ids follow playlistSnapValues.
             playlistSnap.addItemList({"Snap: None", "Snap: 1/4", "Snap: 1/2", "Snap: Beat", "Snap: Bar",
                                       "Snap: 1/16", "Snap: 1/8", "Snap: 1/6 T",
-                                      "Snap: 1/3 T", "Snap: 2 bars"},
+                                      "Snap: 1/3 T", "Snap: 2 bars", "Snap: Line"},
                                      1);
             playlistSnap.setSelectedId(2, juce::dontSendNotification);
             playlistSnap.onChange = [this]
             {
                 const auto values = playlistSnapValues();
-                s.snap = values[size_t(juce::jlimit(0, int(values.size()) - 1, playlistSnap.getSelectedId() - 1))];
+                const int id = playlistSnap.getSelectedId();
+                s.snapLine = id == int(values.size()) + 1;
+                if (!s.snapLine)
+                    s.snap = values[size_t(juce::jlimit(0, int(values.size()) - 1, id - 1))];
                 s.refresh();
             };
             playlistZoomOut.onClick = [this] { viewAction("playlist.zoomOut"); };
@@ -2759,9 +2771,9 @@ class Studio::Editor final : public juce::Component,
         if (type == 2)
         {
             const auto values = playlistSnapValues();
-            int chosen = 5;
+            int chosen = s.snapLine ? int(values.size()) + 1 : 5;
             for (size_t i = 0; i < values.size(); ++i)
-                if (std::abs(values[i] - s.snap) < 1.e-9)
+                if (!s.snapLine && std::abs(values[i] - s.snap) < 1.e-9)
                 {
                     chosen = int(i) + 1;
                     break;
@@ -3245,9 +3257,7 @@ class Studio::Editor final : public juce::Component,
                     g.drawHorizontalLine(y, float(left), float(getWidth()));
                 }
             }
-            double division = type == 1 ? .25 : 1.;
-            while (division * spacing() < 8.)
-                division *= 2.;
+            const double division = gridDivision();
             for (double b = std::floor(scroll / division) * division;
                  b < (getWidth() - left) / spacing() + scroll; b += division)
             {
@@ -5022,6 +5032,7 @@ class Studio::Editor final : public juce::Component,
                                     if (safe && n)
                                     {
                                         safe->s.snap = n == 1 ? 0 : n == 2 ? .25 : n == 3 ? .5 : 1.;
+                                        safe->s.snapLine = false;
                                         safe->s.refresh();
                                     }
                                 });
