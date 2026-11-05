@@ -5074,6 +5074,8 @@ class Studio::Editor final : public juce::Component,
                     chop.addItem(65, "Snap step");
                     m.addSubMenu("Chop into", chop);
                     m.addItem(66, "Select all similar clips");
+                    if (!automationClip(id))
+                        m.addItem(69, "Render to audio clip (consolidate)");
                     m.addItem(67, "Quick quantize start times (Ctrl+Q)");
                 }
                 m.addItem(3, automationClip(id) ? "Automation source / targets"
@@ -5189,6 +5191,8 @@ class Studio::Editor final : public juce::Component,
                                                 safe->s.performAction("pattern.renameDialog", nullptr);
                                                 break;
                                             }
+                                    if (n == 69)
+                                        safe->s.performAction("clip.render", nullptr);
                                     if (n == 67)
                                         safe->s.performAction("clip.quantize", nullptr);
                                     if (n == 4)

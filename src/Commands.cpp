@@ -813,6 +813,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"clip.paste", "Paste clips at the playhead", Scope::playlist, true, true, "command"},
         {"clip.chop", "Chop clips into bars or beats", Scope::playlist, true, true, "command"},
         {"clip.trimStart", "Trim Pattern clip start", Scope::playlist, true, true, "command"},
+        {"clip.render", "Render selected clips to audio", Scope::playlist, false, true, "action"},
         {"clip.quantize", "Quick quantize clip start times", Scope::playlist, true, true, "command"},
         {"time.insert", "Insert space (time selection)", Scope::playlist, true, true, "command"},
         {"time.delete", "Delete space (time selection)", Scope::playlist, true, true, "command"},

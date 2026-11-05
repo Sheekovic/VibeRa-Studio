@@ -106,4 +106,42 @@ inline juce::Result renderProject(const Project &source, Id pattern, Project &ou
     out.automation.placements.clear();
     return juce::Result::ok();
 }
+// Render project for "Render selected clips to audio": only the chosen Pattern and audio
+// clips, moved so the earliest starts the render at 0 (the tempo and meter in force there
+// become the render's own). `start` returns that Song beat.
+inline juce::Result renderClipsProject(const Project &source, const std::vector<Id> &ids, Project &out,
+                                       double &start)
+{
+    const auto chosen = [&](Id id) { return std::find(ids.begin(), ids.end(), id) != ids.end(); };
+    start = 1.e18;
+    for (const auto &c : source.placements)
+        if (chosen(c.id))
+            start = std::min(start, c.beat);
+    for (const auto &c : source.audioPlacements)
+        if (chosen(c.id))
+            start = std::min(start, c.beat);
+    if (start > 1.e17)
+        return juce::Result::fail("clipRender.noClips: Select Pattern or audio clips to render");
+    out = source;
+    out.tempo = source.songTempo().bpmAt(start);
+    const auto bar = source.barPosition(start);
+    out.numerator = bar.numerator;
+    out.denominator = bar.denominator;
+    std::erase_if(out.placements, [&](const auto &c) { return !chosen(c.id); });
+    std::erase_if(out.audioPlacements, [&](const auto &c) { return !chosen(c.id); });
+    for (auto &c : out.placements)
+        c.beat -= start, c.muted = false;
+    for (auto &c : out.audioPlacements)
+        c.beat -= start, c.muted = false;
+    std::erase_if(out.tempoChanges, [&](const auto &t) { return t.beat <= start + 1.e-9; });
+    for (auto &t : out.tempoChanges)
+        t.beat -= start;
+    std::erase_if(out.meterChanges, [&](const auto &m) { return m.beat <= start + 1.e-9; });
+    for (auto &m : out.meterChanges)
+        m.beat -= start;
+    out.markers.clear();
+    out.clipGroups.clear();
+    out.automation.placements.clear();
+    return juce::Result::ok();
+}
 } // namespace vibera::pattern_management

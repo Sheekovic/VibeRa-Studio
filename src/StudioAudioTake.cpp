@@ -370,6 +370,7 @@ void Studio::finishExportStep(juce::Result rendered)
         status = result.getErrorMessage();
         completeMcpOperation(mcpExportOperation, result);
         mcpExportOperation.clear();
+        completeRenderClip(result);
     };
     if (rendered.failed())
         return fail(rendered);
@@ -432,6 +433,7 @@ void Studio::finishExportStep(juce::Result rendered)
                                       : "Exported " + juce::File(exportOutputs[0]).getFileName();
     completeMcpOperation(mcpExportOperation, juce::Result::ok());
     mcpExportOperation.clear();
+    completeRenderClip(juce::Result::ok()); // Render-to-clip requests place their audio clip now.
 }
 
 void Studio::pollExportEncoding()

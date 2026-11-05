@@ -1202,12 +1202,15 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
         juce::String project;
         double beat = 0;
         int lane = 0;
+        std::vector<Id> muteAfter; // Render selected clips: the originals are muted once placed.
     };
     std::optional<RenderClipRequest> renderClip;
     juce::Result renderPatternToClip(Id pattern);
+    juce::Result renderClipsToAudio(std::vector<Id> clips);
+    void completeRenderClip(const juce::Result &rendered); // Places (or drops) a pending renderClip.
     void withPluginState(std::function<void(juce::Result, Project)>, const std::vector<Id> *only = nullptr);
     void saveTo(const juce::File &, std::function<void(juce::Result)> completion = {});
-    void exportTo(const juce::File &, Id patternOnly = 0, bool stems = false);
+    void exportTo(const juce::File &, Id patternOnly = 0, bool stems = false, std::vector<Id> clipsOnly = {});
     // Export queue: each step renders a WAV through the shared render worker, then (for
     // FLAC/OGG targets) encodes it on a worker thread. Stems queue one step per Mixer insert
     // that a Channel feeds, rendered with that insert soloed with its connections.

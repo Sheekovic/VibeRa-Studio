@@ -30,3 +30,8 @@
   Pattern clip's left edge moves its start and source window while the end stays; it cannot
   start before the Pattern start. Clip edges show a resize cursor. Clip menu > Rename /
   colour Pattern opens the Pattern properties.
+- **Render to audio clip** (`clip.render`, a UI action over the current clip selection; clip
+  menu > Render to audio clip): the selected Pattern and audio clips render together (their
+  windows, repeats, mixer and the tempo in force at their start) into `Rendered/` beside the
+  project, the WAV is placed at their start on the first free track and the originals are
+  muted. Poll `vibera_state` until the audio clip appears.

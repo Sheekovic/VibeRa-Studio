@@ -3285,6 +3285,48 @@ juce::Result Studio::renderPatternToClip(Id patternId)
     exportTo(file, patternId);
     return juce::Result::ok();
 }
+juce::Result Studio::renderClipsToAudio(std::vector<Id> clips)
+{
+    // Selected Pattern and audio clips render together (windows, repeats, mixer and tempo)
+    // into one WAV that is placed at their start on the first free track below the Song;
+    // the originals are then muted (Undo restores them).
+    std::erase_if(clips, [&](Id id)
+                  {
+                      const auto &p = controller.project;
+                      return std::none_of(p.placements.begin(), p.placements.end(), [&](const auto &c) { return c.id == id; }) &&
+                             std::none_of(p.audioPlacements.begin(), p.audioPlacements.end(),
+                                          [&](const auto &c) { return c.id == id; });
+                  });
+    if (clips.empty())
+        return juce::Result::fail("clipRender.noClips: Select Pattern or audio clips to render");
+    if (afterPluginState || pendingExport || audio.rendering() || renderClip || exportBusy())
+        return juce::Result::fail("Finish the active save/export first");
+    Project probe;
+    double start = 0;
+    if (auto r = pattern_management::renderClipsProject(controller.project, clips, probe, start); r.failed())
+        return r;
+    const auto folder = (projectFile == juce::File{}
+                             ? juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
+                                   .getChildFile("VibeRa Studio")
+                             : projectFile.getParentDirectory())
+                            .getChildFile("Rendered");
+    if (!folder.createDirectory())
+        return juce::Result::fail("clipRender.folder: Cannot create " + folder.getFullPathName());
+    juce::String name = "Clips";
+    for (const auto &c : controller.project.placements)
+        if (c.id == clips.front())
+            if (const auto *p = controller.project.pattern(c.pattern))
+                name = p->name;
+    const auto file = folder.getChildFile(juce::File::createLegalFileName(name) + " render.wav").getNonexistentSibling();
+    int lane = 0;
+    for (const auto &clip : controller.project.placements)
+        lane = std::max(lane, clip.lane + 1);
+    for (const auto &clip : controller.project.audioPlacements)
+        lane = std::max(lane, clip.lane + 1);
+    renderClip = RenderClipRequest{file, controller.projectIdentity, start, std::min(lane, 127), clips};
+    exportTo(file, 0, false, clips);
+    return juce::Result::ok();
+}
 void Studio::deletePattern()
 {
     const auto *pattern = controller.project.pattern(selectedPattern);
@@ -4413,6 +4455,13 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         a.ids = effectiveClipSelection();
         command(action, a);
         return true;
+    }
+    if (action == "clip.render")
+    {
+        const auto started = renderClipsToAudio(effectiveClipSelection());
+        status = started.wasOk() ? "Rendering clips to audio" : started.getErrorMessage();
+        repaint();
+        return started.wasOk();
     }
     if (action == "clip.copy" || action == "clip.cut")
     {
@@ -5661,17 +5710,35 @@ void Studio::timerCallback()
         completeMcpOperation(mcpExportOperation, r);
         mcpExportOperation.clear();
         renderWasActive = false;
-        if (auto request = std::exchange(renderClip, std::nullopt))
-        {
-            if (r.wasOk() && request->project == controller.projectIdentity && request->file.existsAsFile())
-                importAudioClip(request->file, request->beat, request->lane); // Async import, own Undo step.
-            else if (r.wasOk())
-                status = "Rendered " + request->file.getFileName() + "; project changed, clip not placed";
-        }
+        completeRenderClip(r);
     }
     for (auto &w : windows)
         if (w && w->isVisible())
             w->getContentComponent()->repaint();
+    repaint();
+}
+void Studio::completeRenderClip(const juce::Result &r)
+{
+    {
+        if (auto request = std::exchange(renderClip, std::nullopt))
+        {
+            if (r.wasOk() && request->project == controller.projectIdentity && request->file.existsAsFile())
+            {
+                importAudioClip(request->file, request->beat, request->lane); // Async import, own Undo step.
+                if (!request->muteAfter.empty())
+                {
+                    CommandArgs mute;
+                    mute.ids = request->muteAfter;
+                    mute.enabled = true;
+                    mute.grouping = false;
+                    command("clip.mute", mute);
+                    status = "Rendered " + request->file.getFileName() + "; original clips muted";
+                }
+            }
+            else if (r.wasOk())
+                status = "Rendered " + request->file.getFileName() + "; project changed, clip not placed";
+        }
+    }
     repaint();
 }
 void Studio::importAudioClip(const juce::File &file, double beat, int lane)
@@ -6215,7 +6282,7 @@ juce::Result Studio::newProject(bool demo, bool discardChanges)
     refresh();
     return juce::Result::ok();
 }
-void Studio::exportTo(const juce::File &file, Id patternOnly, bool stems)
+void Studio::exportTo(const juce::File &file, Id patternOnly, bool stems, std::vector<Id> clipsOnly)
 {
     if (!audio.rendering() && !pendingExport && !exportBusy())
         exportCancelRequested = false; // A cancel never carries over to a new export.
@@ -6245,7 +6312,7 @@ void Studio::exportTo(const juce::File &file, Id patternOnly, bool stems)
     }
     auto safe = juce::Component::SafePointer<Studio>(this);
     withPluginState(
-        [safe, file, patternOnly, stems](juce::Result result, Project snapshot)
+        [safe, file, patternOnly, stems, clipsOnly](juce::Result result, Project snapshot)
         {
             if (!safe)
                 return;
@@ -6255,6 +6322,14 @@ void Studio::exportTo(const juce::File &file, Id patternOnly, bool stems)
                 result = pattern_management::renderProject(snapshot, patternOnly, single);
                 if (result.wasOk())
                     snapshot = std::move(single);
+            }
+            if (result.wasOk() && !clipsOnly.empty())
+            {
+                Project only;
+                double start = 0;
+                result = pattern_management::renderClipsProject(snapshot, clipsOnly, only, start);
+                if (result.wasOk())
+                    snapshot = std::move(only);
             }
             if (result.wasOk())
                 result = safe->queueExport(snapshot, file, stems);

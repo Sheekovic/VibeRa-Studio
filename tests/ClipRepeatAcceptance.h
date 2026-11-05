@@ -4,6 +4,7 @@
 #include "../src/PatternChannelLoops.h"
 #include "../src/PatternAutomation.h"
 #include "../src/Commands.h"
+#include "../src/PatternManagement.h"
 
 // A Pattern clip longer than its Pattern repeats the Pattern (familiar Playlist behavior).
 namespace clip_repeat_acceptance
@@ -233,6 +234,21 @@ inline void tests()
         trim.beat = 7;
         require(controller.execute("clip.trimStart", trim).failed(),
                 "A Pattern clip cannot start before its Pattern start");
+        {
+            // Render selected clips: only those clips, moved to start at 0, unmuted.
+            auto song = controller.project;
+            song.tempoChanges.push_back({song.allocate(), 4, 90, false});
+            Project only;
+            double start = 0;
+            require(pattern_management::renderClipsProject(song, {second}, only, start).wasOk() && start == 8,
+                    "Render clips starts at the earliest selected clip");
+            require(only.placements.size() == 1 && only.placements.front().beat == 0 && only.markers.empty(),
+                    "Only the selected clip is rendered, from beat 0");
+            require(std::abs(only.tempo - 90) < 1e-9 && only.tempoChanges.empty(),
+                    "The tempo in force at the clip start becomes the render tempo");
+            require(pattern_management::renderClipsProject(song, {}, only, start).failed(),
+                    "Rendering nothing fails");
+        }
         CommandArgs empty;
         empty.beat = 4;
         require(controller.execute("clip.paste", empty).failed(), "Paste with nothing copied fails");
