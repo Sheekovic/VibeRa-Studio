@@ -22,6 +22,7 @@
 #include "Editors.h"
 #include "MixerEqEditor.h"
 #include "MidiClipboard.h"
+#include "ScoreSheet.h"
 #include "ChannelColourPicker.h"
 #include "DetachedWindow.h"
 #include "Settings.h"
@@ -4651,6 +4652,26 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
+    if (action == "notes.exportScore")
+    {
+        chooser = std::make_unique<juce::FileChooser>("Export as score sheet (PDF)",
+                                                      juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
+                                                          .getChildFile("score.pdf"),
+                                                      "*.pdf");
+        auto safe = juce::Component::SafePointer<Studio>(this);
+        chooser->launchAsync(juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles |
+                                 juce::FileBrowserComponent::warnAboutOverwriting,
+                             [safe](const juce::FileChooser &choice)
+                             {
+                                 if (!safe || choice.getResult() == juce::File{})
+                                     return;
+                                 if (const auto written = safe->exportScoreSheet(choice.getResult().withFileExtension("pdf"));
+                                     written.failed())
+                                     safe->status = written.getErrorMessage();
+                                 safe->repaint();
+                             });
+        return true;
+    }
     if (action == "notes.pasteMidiClipboard")
     {
         const juce::File file(juce::String(midi_clipboard::firstMidiFile().c_str()));
@@ -7077,6 +7098,27 @@ void Studio::serviceEffectSpare()
         effectSpareJob.reset();
     }
     repaint();
+}
+juce::Result Studio::exportScoreSheet(const juce::File &file)
+{
+    const auto *part = controller.project.pattern(selectedPattern);
+    const auto *channel = controller.project.channel(selectedChannel);
+    if (!part || !channel)
+        return juce::Result::fail("Select a Pattern and Channel");
+    std::vector<score_sheet::NoteIn> notes;
+    for (const auto &n : part->notes)
+        if (n.channel == selectedChannel && !n.muted)
+            notes.push_back({n.beat, n.length, n.pitch});
+    if (notes.empty())
+        return juce::Result::fail("This Channel has no notes in the Pattern");
+    int pages = 0;
+    const auto pdf = score_sheet::render(notes, patternNumerator(controller.project, *part),
+                                         patternDenominator(controller.project, *part), controller.project.tempo,
+                                         part->name + " - " + channel->name, pages);
+    if (!file.replaceWithData(pdf.getData(), pdf.getSize()))
+        return juce::Result::fail("Could not write " + file.getFullPathName());
+    status = "Score sheet exported (" + juce::String(pages) + (pages == 1 ? " page)" : " pages)");
+    return juce::Result::ok();
 }
 void Studio::serviceMidiClipboard()
 {

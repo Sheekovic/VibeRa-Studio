@@ -64,3 +64,8 @@
   Shift+Ctrl+V): copy exports the Channel part to a .mid file and puts that file on the system
   clipboard (Windows file list) for other apps; paste imports the first .mid/.midi file on the
   clipboard into the current Channel (replacing its part, like MIDI import). Windows only.
+- **Export as score sheet (PDF)** (Piano roll menu; `notes.exportScore` opens a save chooser):
+  the selected Channel's unmuted notes on a grand staff (treble from middle C up), four bars
+  per system, sharps, ledger lines and note values from the lengths (whole, half, quarter,
+  eighth, sixteenth). A readable lead sheet, not engraved notation: no beams, rests, ties or
+  key signatures.

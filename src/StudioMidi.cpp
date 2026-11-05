@@ -196,6 +196,7 @@ void Studio::midiFileMenu()
         }
         menu.addSubMenu("LFO tool (CC 1 mod wheel, replaces that lane)", lfo);
     }
+    menu.addItem(69, "Export as score sheet (PDF)...");
     menu.addItem(67, "Copy to MIDI clipboard");
     menu.addItem(68, "Paste from MIDI clipboard    Shift+Ctrl+V");
     menu.addItem(17, "Flip horizontally (reverse in time)");
@@ -373,6 +374,12 @@ void Studio::midiFileMenu()
                 args.value = .8;
                 args.offset = .5;
                 safe->command("notes.controller.lfo", args);
+                return;
+            }
+            if (result == 69)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction("notes.exportScore");
                 return;
             }
             if (result == 67 || result == 68)

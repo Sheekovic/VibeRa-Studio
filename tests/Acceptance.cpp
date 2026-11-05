@@ -285,6 +285,7 @@ static juce::Result awaitProjection(AudioEngine &, const Project &, bool, Id);
 #include "SamplerStretchAcceptance.h"
 #include "ClipRepeatAcceptance.h"
 #include "../src/MixerEqEditor.h"
+#include "../src/ScoreSheet.h"
 #include "ArrangementAcceptance.h"
 #include "PlaylistTrackAcceptance.h"
 #include "MidiImportExtrasAcceptance.h"
@@ -4908,6 +4909,31 @@ int main(int argc, char **argv)
             require(test::prepareBuildAcceptanceAttempt(argv[2], output).wasOk(), "Owned arrangement output");
             arrangement_acceptance::tests(output);
             std::cout << "PASS arrangements " << assertions << " assertions" << std::endl;
+            return 0;
+        }
+        if (argc == 3 && juce::String(argv[1]) == "--score-sheet")
+        {
+            // A C major scale in mixed values plus a low bass line, for visual review.
+            std::vector<vibera::score_sheet::NoteIn> notes;
+            const int scale[]{60, 62, 64, 65, 67, 69, 71, 72};
+            const double lengths[]{1, .5, .5, 1, .25, .25, .5, 2};
+            double beat = 0;
+            for (int i = 0; i < 8; ++i)
+            {
+                notes.push_back({beat, lengths[i], scale[i]});
+                beat += lengths[i];
+            }
+            notes.push_back({8, 4, 43});
+            notes.push_back({12, 2, 48});
+            notes.push_back({14, 1, 54});
+            int pages = 0;
+            const auto pdf = vibera::score_sheet::render(notes, 4, 4, 120, "Test score", pages);
+            const juce::File target{juce::String(argv[2])};
+            require(target.replaceWithData(pdf.getData(), pdf.getSize()) && pages == 1, "Score sheet PDF");
+            const auto text = juce::String::fromUTF8(static_cast<const char *>(pdf.getData()), int(pdf.getSize()));
+            require(text.startsWith("%PDF-1.4") && text.contains("/Type /Catalog") && text.trimEnd().endsWith("%%EOF"),
+                    "A complete PDF document");
+            std::cout << "PASS score sheet " << assertions << " assertions" << std::endl;
             return 0;
         }
         if (argc == 3 && juce::String(argv[1]) == "--mixer-eq-snapshot")
