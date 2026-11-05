@@ -1136,6 +1136,17 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     std::vector<int> unusedMixerInserts() const;
     void trimUnusedInserts();
     std::shared_ptr<std::function<void(int)>> pendingTrim;
+    // Runs structural Mixer steps one after another, each once the previous audio work has
+    // settled (each its own Undo step). A step may queue more steps.
+    void queueSettledSteps(std::vector<std::function<void()>> steps, juce::String finished);
+    std::deque<std::function<void()>> settledSteps;
+    juce::String settledFinished;
+    bool settledRunning = false;
+    void runSettledSteps(int patience);
+    // Mixer track menu > Routing: the selected tracks (not Master or `target`) to `target`.
+    juce::Result routeSelectedTo(int target, bool only);
+    // Mixer track menu > Create submix: a new insert fed only by the selected tracks.
+    juce::Result createSubmix();
     std::shared_ptr<std::function<void(int)>> pendingChainChooser; // Keeps the settle-wait alive.
     juce::Label title, deviceLabel;
     juce::ThreadPool midiFileJobs{1};

@@ -317,3 +317,11 @@ prove active audio. This development behavior is not in qualified0.0.63.
 `rack.linkSequential` (Ctrl+Shift+L in the Rack or Mixer) routes the selected Channels, in Rack
 order, to the selected insert and the inserts after it (one routing plan). It refuses when
 there are fewer inserts than Channels.
+
+Selected-track routing (Mixer track menu > Routing; the Mixer selection, e.g. `vibera_mixer
+selectMany`, and the active track): `mixer.routeSelectedHere` adds a route from each selected
+track (not Master or the active one) to the active track; `mixer.routeSelectedHereOnly` makes
+it their only destination; `mixer.createSubmix` creates an insert named "Submix" and routes the
+selected tracks only to it. Steps run one after another once each structural change settles
+(one Undo step each); the status ends with "Routed N track(s) to ..." or "Submix created from
+N track(s)".

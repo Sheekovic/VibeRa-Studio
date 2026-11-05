@@ -4294,6 +4294,16 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return selected.wasOk();
     }
+    if (action == "mixer.routeSelectedHere" || action == "mixer.routeSelectedHereOnly" || action == "mixer.createSubmix")
+    {
+        const auto started = action == "mixer.createSubmix"
+                                 ? createSubmix()
+                                 : routeSelectedTo(selectedInsert, action == "mixer.routeSelectedHereOnly");
+        if (started.failed())
+            status = started.getErrorMessage();
+        repaint();
+        return started.wasOk();
+    }
     if (action == "mixer.trimUnused")
     {
         trimUnusedInserts();
@@ -6705,6 +6715,115 @@ juce::Result Studio::selectRoutedFor(int insert, int kind)
     refresh();
     return juce::Result::ok();
 }
+void Studio::queueSettledSteps(std::vector<std::function<void()>> steps, juce::String finished)
+{
+    for (auto &step : steps)
+        settledSteps.push_back(std::move(step));
+    if (finished.isNotEmpty())
+        settledFinished = finished;
+    if (!settledRunning)
+    {
+        settledRunning = true;
+        runSettledSteps(100);
+    }
+}
+void Studio::runSettledSteps(int patience)
+{
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    if (mixerChainBusy() || afterPluginState || routingPending())
+    {
+        if (patience > 0)
+            juce::Timer::callAfterDelay(100, [safe, patience] { if (safe) safe->runSettledSteps(patience - 1); });
+        else
+        {
+            settledSteps.clear();
+            settledRunning = false;
+            status = "Stopped: the previous Mixer change did not settle";
+            repaint();
+        }
+        return;
+    }
+    if (settledSteps.empty())
+    {
+        settledRunning = false;
+        if (settledFinished.isNotEmpty() && (status == "Ready" || status.startsWith("Mixer structural")))
+            status = settledFinished;
+        settledFinished = {};
+        repaint();
+        return;
+    }
+    auto step = std::move(settledSteps.front());
+    settledSteps.pop_front();
+    step();
+    juce::Timer::callAfterDelay(100, [safe] { if (safe) safe->runSettledSteps(100); });
+}
+juce::Result Studio::routeSelectedTo(int target, bool only)
+{
+    if (!mixerInsert(controller.project, target))
+        return juce::Result::fail("Choose an existing Mixer track");
+    std::vector<int> sources;
+    for (int id : mixerSelection.ids)
+        if (id != 0 && id != target && mixerInsert(controller.project, id))
+            sources.push_back(id);
+    if (sources.empty())
+        return juce::Result::fail("Select the Mixer tracks to route first (Ctrl+click their names)");
+    std::vector<std::function<void()>> steps;
+    for (int source : sources)
+        steps.push_back([this, source, target, only]
+                        {
+                            CommandArgs a;
+                            a.mixer = source;
+                            a.target = target;
+                            a.enabled = true;
+                            command(only ? "mixer.routeOnly" : "mixer.route", a);
+                        });
+    queueSettledSteps(std::move(steps), "Routed " + juce::String(int(sources.size())) + " track(s) to " +
+                                            mixerInsert(controller.project, target)->name);
+    return juce::Result::ok();
+}
+juce::Result Studio::createSubmix()
+{
+    std::vector<int> sources;
+    for (int id : mixerSelection.ids)
+        if (id != 0 && mixerInsert(controller.project, id))
+            sources.push_back(id);
+    if (sources.empty())
+        return juce::Result::fail("Select the Mixer tracks to group into a submix first");
+    std::set<int> before;
+    for (const auto &row : controller.project.mixer)
+        before.insert(row.index);
+    queueSettledSteps({[this] { command("mixer.insert.create", {}); },
+                       [this, before, sources]
+                       {
+                           int created = -1;
+                           for (const auto &row : controller.project.mixer)
+                               if (!before.contains(row.index))
+                                   created = row.index;
+                           if (created < 0)
+                           {
+                               status = "The submix track was not created";
+                               return;
+                           }
+                           CommandArgs name;
+                           name.mixer = created;
+                           name.text = "Submix";
+                           command("mixer.rename", name);
+                           std::vector<std::function<void()>> routes;
+                           for (int source : sources)
+                               routes.push_back([this, source, created]
+                                                {
+                                                    CommandArgs a;
+                                                    a.mixer = source;
+                                                    a.target = created;
+                                                    a.enabled = true;
+                                                    command("mixer.routeOnly", a);
+                                                });
+                           queueSettledSteps(std::move(routes), "Submix created from " +
+                                                                    juce::String(int(sources.size())) + " track(s)");
+                       }},
+                      {});
+    return juce::Result::ok();
+}
 std::vector<int> Studio::unusedMixerInserts() const
 {
     std::vector<int> unused;
@@ -7704,6 +7823,14 @@ void Studio::effectMenu(int index)
     selectMenu.addItem(10021, "Tracks routed to this one");
     selectMenu.addItem(10022, "Tracks this one is routed to");
     menu.addSubMenu("Select", selectMenu);
+    juce::PopupMenu routing;
+    const bool others = std::any_of(mixerSelection.ids.begin(), mixerSelection.ids.end(),
+                                    [index](int id) { return id != 0 && id != index; });
+    routing.addItem(10025, "Route selected tracks to this track", others);
+    routing.addItem(10026, "Route selected tracks to this track only", others);
+    routing.addItem(10027, "Create submix from selected tracks...",
+                    std::any_of(mixerSelection.ids.begin(), mixerSelection.ids.end(), [](int id) { return id != 0; }));
+    menu.addSubMenu("Routing", routing);
     menu.addItem(10023, "Reset track (controls, name, colour; keeps effects)");
     menu.addItem(10024, "Trim unused tracks (" + juce::String(int(unusedMixerInserts().size())) + ")",
                  !mixerChainBusy() && !unusedMixerInserts().empty());
@@ -7893,6 +8020,15 @@ void Studio::effectMenu(int index)
                            {
                                if (auto chosen = safe->selectRoutedFor(index, selected - 10020); chosen.failed())
                                    safe->status = chosen.getErrorMessage();
+                               safe->repaint();
+                               return;
+                           }
+                           if (selected >= 10025 && selected <= 10027)
+                           {
+                               const auto started = selected == 10027 ? safe->createSubmix()
+                                                                      : safe->routeSelectedTo(index, selected == 10026);
+                               if (started.failed())
+                                   safe->status = started.getErrorMessage();
                                safe->repaint();
                                return;
                            }
