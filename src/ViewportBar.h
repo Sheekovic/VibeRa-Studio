@@ -23,6 +23,8 @@ class ViewportBar final : public juce::Component, public juce::SettableTooltipCl
     bool allowZoom = true;
     std::function<std::array<double, 3>()> read;
     std::function<void(double, double)> change;
+    // Optional overview drawn under the thumb (the Playlist draws its clips: a song overview).
+    std::function<void(juce::Graphics &, juce::Rectangle<float>)> background;
     explicit ViewportBar(bool v) : vertical(v)
     {
         setMouseCursor(juce::MouseCursor::PointingHandCursor);
@@ -33,8 +35,20 @@ class ViewportBar final : public juce::Component, public juce::SettableTooltipCl
         if (!read)
             return;
         auto r = thumb();
-        g.setColour(muted.withAlpha(isMouseOverOrDragging() ? .85f : .6f));
-        g.fillRoundedRectangle(r, 3);
+        if (background)
+        {
+            background(g, getLocalBounds().toFloat());
+            // With an overview the thumb is a frame, so the clips under it stay visible.
+            g.setColour(ink.withAlpha(isMouseOverOrDragging() ? .16f : .09f));
+            g.fillRoundedRectangle(r.expanded(0, 2), 3);
+            g.setColour(ink.withAlpha(isMouseOverOrDragging() ? .7f : .45f));
+            g.drawRoundedRectangle(r.expanded(0, 2).reduced(.5f), 3, 1.f);
+        }
+        else
+        {
+            g.setColour(muted.withAlpha(isMouseOverOrDragging() ? .85f : .6f));
+            g.fillRoundedRectangle(r, 3);
+        }
         if (!allowZoom)
             return;
         g.setColour(muted);

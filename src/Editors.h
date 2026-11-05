@@ -1310,6 +1310,30 @@ class Studio::Editor final : public juce::Component,
             addAndMakeVisible(verticalBar);
             horizontalBar.allowZoom = type == 2;
             verticalBar.allowZoom = false;
+            if (type == 2)
+                horizontalBar.background = [this](juce::Graphics &g, juce::Rectangle<float> area)
+                {
+                    // Song overview: every clip as a sliver at its time, tracks stacked top to bottom.
+                    const double total = std::max(1., domain());
+                    int lanes = 1;
+                    for (const auto &c : playlistClips())
+                        lanes = std::max(lanes, c.lane + 1);
+                    const float rowHeight = std::max(1.f, (area.getHeight() - 2.f) / float(lanes));
+                    for (const auto &c : playlistClips())
+                    {
+                        const auto *p = s.controller.project.pattern(c.pattern);
+                        const auto *a = audioClip(c.id);
+                        const auto *source = a ? s.controller.project.channel(a->channel) : nullptr;
+                        auto colour = p && p->colour ? juce::Colour(p->colour)
+                                                     : channelColour(source ? int(source->id % 8) : p ? int(p->id % 8) : 0);
+                        if (automationClip(c.id))
+                            colour = accent;
+                        const float x = area.getX() + float(c.beat / total) * area.getWidth();
+                        const float w = std::max(1.f, float(c.length / total) * area.getWidth() - .5f);
+                        g.setColour(colour.withAlpha(c.muted ? .3f : .85f));
+                        g.fillRect(x, area.getY() + 1.f + rowHeight * float(c.lane), w, std::max(1.f, rowHeight - (rowHeight > 2 ? .5f : 0.f)));
+                    }
+                };
             horizontalBar.read = [this]
             {
                 if (type == 0)
@@ -3213,6 +3237,13 @@ class Studio::Editor final : public juce::Component,
                     // Ruler ticks: a tall tick per bar, a short one per beat.
                     g.setColour(bar ? ink.withAlpha(.55f) : muted.withAlpha(.6f));
                     g.drawVerticalLine(x, float(top - (bar ? 20 : 6)), float(top));
+                    if (!bar && spacing() >= 34)
+                    {
+                        const auto position = s.controller.project.barPosition(b + .0002);
+                        const int beatNumber = int(std::floor(position.beatInBar + .0002)) + 1;
+                        label(g, juce::String(position.bar + 1) + "." + juce::String(beatNumber),
+                              {x + 3, top - 19, 34, 14}, muted.withAlpha(.8f), 9);
+                    }
                 }
                 if (bar)
                 {
