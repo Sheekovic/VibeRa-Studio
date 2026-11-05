@@ -341,6 +341,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"mixer.insert.fromChainPreset", "Add insert from chain preset (file chooser)", Scope::mixer, false, true, "action"},
         {"mixer.dock", "Dock Mixer track left / middle / right", Scope::mixer, true, true, "command"},
         {"mixer.reset", "Reset Mixer track controls, name and colour (keeps effects and routing)", Scope::mixer, true, true, "command"},
+        {"mixer.trimUnused", "Trim unused Mixer tracks (no Channel, route, effect, automation or group)", Scope::mixer, false, true, "action"},
         {"mixer.selectChannelsRouted", "Select the Channels routed to the selected Mixer track", Scope::mixer, false, true, "action"},
         {"mixer.selectRoutedHere", "Select the Mixer tracks routed to the selected track", Scope::mixer, false, true, "action"},
         {"mixer.selectRoutedFrom", "Select the Mixer tracks the selected track is routed to", Scope::mixer, false, true, "action"},

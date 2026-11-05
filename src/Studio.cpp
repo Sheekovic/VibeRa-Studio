@@ -4294,6 +4294,11 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return selected.wasOk();
     }
+    if (action == "mixer.trimUnused")
+    {
+        trimUnusedInserts();
+        return true;
+    }
     if (action == "mixer.insert.fromChainPreset")
     {
         addInsertFromChainPreset();
@@ -6700,6 +6705,66 @@ juce::Result Studio::selectRoutedFor(int insert, int kind)
     refresh();
     return juce::Result::ok();
 }
+std::vector<int> Studio::unusedMixerInserts() const
+{
+    std::vector<int> unused;
+    for (const auto &row : controller.project.mixer)
+    {
+        if (row.index == 0 || !row.effects.empty())
+            continue;
+        auto candidate = controller.project;
+        if (deleteMixerInsert(candidate, row.index, MixerInsertDeletePolicy{}).wasOk())
+            unused.push_back(row.index);
+    }
+    return unused;
+}
+void Studio::trimUnusedInserts()
+{
+    const auto targets = unusedMixerInserts();
+    if (targets.empty())
+    {
+        status = "No unused Mixer tracks to trim";
+        repaint();
+        return;
+    }
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    auto step = std::make_shared<std::function<void(int)>>();
+    auto remaining = std::make_shared<std::vector<int>>(targets.rbegin(), targets.rend()); // Highest first.
+    auto removed = std::make_shared<int>(0);
+    *step = [safe, remaining, removed, weak = std::weak_ptr<std::function<void(int)>>(step)](int patience)
+    {
+        if (!safe)
+            return;
+        const bool busy = safe->mixerChainBusy() || safe->afterPluginState || safe->routingPending();
+        if (busy && patience > 0)
+        {
+            if (auto next = weak.lock())
+                juce::Timer::callAfterDelay(100, [next, patience] { (*next)(patience - 1); });
+            return;
+        }
+        // Skip tracks that became used meanwhile; stop on a refusal.
+        while (!remaining->empty())
+        {
+            const int insert = remaining->front();
+            remaining->erase(remaining->begin());
+            auto candidate = safe->controller.project;
+            if (!mixerInsert(candidate, insert) ||
+                deleteMixerInsert(candidate, insert, MixerInsertDeletePolicy{}).failed())
+                continue;
+            CommandArgs args;
+            args.mixer = insert;
+            safe->command("mixer.insert.delete", args);
+            ++*removed;
+            if (auto next = weak.lock())
+                juce::Timer::callAfterDelay(100, [next] { (*next)(100); });
+            return;
+        }
+        safe->status = "Trimmed " + juce::String(*removed) + " unused Mixer track(s)";
+        safe->repaint();
+    };
+    pendingTrim = step;
+    (*step)(100);
+}
 void Studio::addInsertFromChainPreset()
 {
     // Familiar "Add from state": a new insert, then a chain preset loaded onto it.
@@ -7640,6 +7705,8 @@ void Studio::effectMenu(int index)
     selectMenu.addItem(10022, "Tracks this one is routed to");
     menu.addSubMenu("Select", selectMenu);
     menu.addItem(10023, "Reset track (controls, name, colour; keeps effects)");
+    menu.addItem(10024, "Trim unused tracks (" + juce::String(int(unusedMixerInserts().size())) + ")",
+                 !mixerChainBusy() && !unusedMixerInserts().empty());
     juce::PopupMenu dockMenu;
     dockMenu.addItem(10016, "Left", true, insert->dock == -1);
     dockMenu.addItem(10017, "Middle", true, insert->dock == 0);
@@ -7827,6 +7894,11 @@ void Studio::effectMenu(int index)
                                if (auto chosen = safe->selectRoutedFor(index, selected - 10020); chosen.failed())
                                    safe->status = chosen.getErrorMessage();
                                safe->repaint();
+                               return;
+                           }
+                           if (selected == 10024)
+                           {
+                               safe->trimUnusedInserts();
                                return;
                            }
                            if (selected == 10023)

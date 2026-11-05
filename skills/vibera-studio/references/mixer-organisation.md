@@ -176,3 +176,10 @@ playback is active. Refusals preserve canonical data/history; post-publication
 activation failure retains the undoable intended change and reports recovery.
 Current source/runtime qualification is recorded in STATUS/VERIFICATION, not
 established by this guide. Full Mixer/DAW and legacy MCP consolidation remain open.
+
+Trim unused tracks: action `mixer.trimUnused` (Mixer track menu > Trim unused tracks (N))
+deletes, highest index first, every insert that the ordinary `mixer.insert.delete` accepts with
+its default policy and that has no effects (no Channel, incoming route, automation or group
+reference; Master stays). Each deletion runs through the normal insert lifecycle after the
+previous one settles, so it is one Undo step per track. Status ends with
+"Trimmed N unused Mixer track(s)".

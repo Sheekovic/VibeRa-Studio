@@ -1130,6 +1130,12 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Mixer track menu > Select: 0 Channels routed to `insert`, 1 tracks routed to it,
     // 2 tracks it is routed to (Mixer or Rack selection replaced).
     juce::Result selectRoutedFor(int insert, int kind);
+    // Mixer "Trim unused tracks": deletes every insert the ordinary delete accepts with its
+    // default policy (no Channel, incoming route, effect, automation or group reference),
+    // one at a time through the normal insert lifecycle (one Undo step per track).
+    std::vector<int> unusedMixerInserts() const;
+    void trimUnusedInserts();
+    std::shared_ptr<std::function<void(int)>> pendingTrim;
     std::shared_ptr<std::function<void(int)>> pendingChainChooser; // Keeps the settle-wait alive.
     juce::Label title, deviceLabel;
     juce::ThreadPool midiFileJobs{1};
