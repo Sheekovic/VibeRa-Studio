@@ -395,6 +395,18 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     std::map<Id, juce::String> spareStates;
     void storeSpareState(Id channel);
     void flipSpareState(Id channel);
+    // Effect chain spare state per Mixer insert, kept as chain preset files in the configured
+    // chain preset directory; stored / flipped through the chain save + load-and-apply jobs.
+    struct EffectSpareJob
+    {
+        int insert = 0, stage = 0; // 1 store, 2 save current (flip), 3 apply spare (flip)
+        juce::String operation;
+        juce::File spare, next;
+    };
+    std::optional<EffectSpareJob> effectSpareJob;
+    std::set<int> effectSpares;
+    juce::Result startEffectSpare(int insert, bool flip);
+    void serviceEffectSpare();
     void loadChannelPreset(Id channel);
     juce::Result verifyChannelManagement(const juce::File &, const juce::File &fixture = {});
     juce::Result verifyLiveBurn(const juce::File &);

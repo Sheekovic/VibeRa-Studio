@@ -203,3 +203,12 @@ and the existing `bypassBlend` (0 wet,1 dry). These separate scalar snapshots ar
 not a coherent combined audio-frame receipt. Do not infer heard output or graph
 adoption. Host mixing, actual graph live/offline/native latency, chain transitions,
 installed providers, native desktop interaction and listening require their own acceptance.
+
+## Effect chain spare state
+
+Insert menu > Store effect chain in spare state (`mixer.spareStore`, selected insert) saves the
+insert's whole chain (every effect's native state, wet/dry and bypass) as a chain preset file
+in the configured chain preset directory. Flip effect chain with spare state (`mixer.spareFlip`)
+saves the current chain, loads and applies the spare (one Undo step) and keeps the saved one as
+the new spare. Needs a chain preset directory (insert menu > Chain preset directory...). Read
+`state.spareStateInserts` and `state.spareStateBusy`.

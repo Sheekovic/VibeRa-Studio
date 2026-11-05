@@ -4495,6 +4495,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
+    if (action == "mixer.spareStore" || action == "mixer.spareFlip")
+    {
+        const auto started = startEffectSpare(selectedInsert, action == "mixer.spareFlip");
+        if (started.failed())
+            status = started.getErrorMessage();
+        repaint();
+        return started.wasOk();
+    }
     if (action == "channel.spareStore" || action == "channel.spareFlip")
     {
         if (!controller.project.channel(selectedChannel))
@@ -6021,6 +6029,7 @@ void Studio::timerCallback()
     if (windows[2])
         if (auto *playlist = dynamic_cast<Editor *>(windows[2]->getContentComponent()))
             playlist->followPlayhead();
+    serviceEffectSpare();
     play.setButtonText(audio.playing() ? "Pause" : "Play");
     play.setToggleState(audio.playing(), juce::dontSendNotification);
     loopButton.setToggleState(audio.looping(), juce::dontSendNotification);
@@ -6902,6 +6911,91 @@ void Studio::confirmMixerInsertDeletion(int index, std::optional<int> replacemen
             safe->command("mixer.insert.delete", args);
         });
 }
+juce::Result Studio::startEffectSpare(int insert, bool flip)
+{
+    if (effectSpareJob || mixerChainBusy())
+        return juce::Result::fail("Effect chain work is active; wait for it to finish");
+    const juce::File directory(mixerChains && mixerChains->files ? mixerChains->files->configuredDirectory() : juce::String{});
+    if (directory == juce::File{} || !directory.isDirectory())
+        return juce::Result::fail("Choose a chain preset directory first (insert menu > Chain preset directory...)");
+    if (flip && !effectSpares.contains(insert))
+        return juce::Result::fail("Store this insert's chain in spare state first");
+    EffectSpareJob job;
+    job.insert = insert;
+    job.stage = flip ? 2 : 1;
+    job.spare = directory.getChildFile("vibera-spare-insert-" + juce::String(insert) + ".vibfx");
+    job.next = directory.getChildFile("vibera-spare-insert-" + juce::String(insert) + "-next.vibfx");
+    auto args = chain_workflow_detail::object();
+    chain_workflow_detail::put(args, "action", "save");
+    chain_workflow_detail::put(args, "mixer", insert);
+    chain_workflow_detail::put(args, "projectIdentity", controller.projectIdentity);
+    chain_workflow_detail::put(args, "revision", juce::int64(controller.revision));
+    chain_workflow_detail::put(args, "path", (flip ? job.next : job.spare).getFullPathName());
+    chain_workflow_detail::put(args, "overwrite", true);
+    const auto outcome = mixerChainOperation(args);
+    job.operation = outcome["operation"].toString();
+    const auto state = outcome["completionState"].toString();
+    if (state == "failed" || job.operation.isEmpty())
+        return juce::Result::fail(outcome["message"].toString());
+    effectSpareJob = job;
+    status = flip ? "Flipping effect chain with spare state..." : "Storing effect chain in spare state...";
+    serviceEffectSpare();
+    return juce::Result::ok();
+}
+void Studio::serviceEffectSpare()
+{
+    if (!effectSpareJob)
+        return;
+    auto &job = *effectSpareJob;
+    auto query = chain_workflow_detail::object();
+    chain_workflow_detail::put(query, "action", "job");
+    chain_workflow_detail::put(query, "operation", job.operation);
+    const auto outcome = mixerChainOperation(query);
+    const auto state = outcome["completionState"].toString();
+    if (state == "pending")
+        return;
+    if (state != "completed")
+    {
+        status = "Spare state: " + outcome["message"].toString();
+        effectSpareJob.reset();
+        repaint();
+        return;
+    }
+    if (job.stage == 1)
+    {
+        effectSpares.insert(job.insert);
+        status = "Effect chain stored in spare state";
+        effectSpareJob.reset();
+    }
+    else if (job.stage == 2)
+    {
+        // The current chain is saved; now load and apply the spare (one Undo step).
+        auto args = chain_workflow_detail::object();
+        chain_workflow_detail::put(args, "action", "loadApply");
+        chain_workflow_detail::put(args, "mixer", job.insert);
+        chain_workflow_detail::put(args, "projectIdentity", controller.projectIdentity);
+        chain_workflow_detail::put(args, "revision", juce::int64(controller.revision));
+        chain_workflow_detail::put(args, "path", job.spare.getFullPathName());
+        const auto applied = mixerChainOperation(args);
+        job.operation = applied["operation"].toString();
+        if (applied["completionState"].toString() == "failed" || job.operation.isEmpty())
+        {
+            status = "Spare state: " + applied["message"].toString();
+            effectSpareJob.reset();
+        }
+        else
+            job.stage = 3;
+    }
+    else
+    {
+        // The spare is applied; the saved previous chain becomes the new spare.
+        job.spare.deleteFile();
+        job.next.moveFileTo(job.spare);
+        status = "Effect chain flipped with spare state";
+        effectSpareJob.reset();
+    }
+    repaint();
+}
 void Studio::storeSpareState(Id channel)
 {
     auto safe = juce::Component::SafePointer<Studio>(this);
@@ -7020,6 +7114,8 @@ void Studio::effectMenu(int index)
     menu.addItem(10011, "Track delay..." + (insert->delayMs > 0 ? " (" + juce::String(insert->delayMs, 1) + " ms)" : juce::String()));
     menu.addItem(10008, "Create insert", !mixerChainBusy());
     menu.addItem(10012, "Add multiple inserts...", !mixerChainBusy());
+    menu.addItem(10013, "Store effect chain in spare state", !mixerChainBusy() && !insert->effects.empty());
+    menu.addItem(10014, "Flip effect chain with spare state", !mixerChainBusy() && effectSpares.contains(index));
     juce::PopupMenu deleteMenu;
     deleteMenu.addItem(10009, "Delete unused insert (refuse references)...", index != 0 && !mixerChainBusy());
     std::map<int, int> deleteDestinations;
@@ -7159,6 +7255,13 @@ void Studio::effectMenu(int index)
                            if (selected == 10010)
                            {
                                safe->openMixerEq(index);
+                               return;
+                           }
+                           if (selected == 10013 || selected == 10014)
+                           {
+                               if (const auto started = safe->startEffectSpare(index, selected == 10014); started.failed())
+                                   safe->status = started.getErrorMessage();
+                               safe->repaint();
                                return;
                            }
                            if (selected == 10012)

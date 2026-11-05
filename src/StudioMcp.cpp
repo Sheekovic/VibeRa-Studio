@@ -3668,6 +3668,11 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         for (const auto &[id, xml] : spareStates)
             spares.add(juce::int64(id));
         set(state, "spareStateChannels", spares);
+        juce::Array<juce::var> effectSpareInserts;
+        for (const auto insert : effectSpares)
+            effectSpareInserts.add(insert);
+        set(state, "spareStateInserts", effectSpareInserts);
+        set(state, "spareStateBusy", effectSpareJob.has_value());
     }
     {
         juce::Array<juce::var> zipped;
