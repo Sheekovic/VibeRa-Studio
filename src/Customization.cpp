@@ -254,6 +254,7 @@ Customization Customization::familiarDefaults()
     add("notes.legato", Scope::piano, 'L', ctrl);
     add("notes.chop", Scope::piano, 'U', ctrl);
     add("notes.glue", Scope::piano, 'G', ctrl);
+    add("notes.insertControllerValue", Scope::piano, 'I', ctrl);
     add("notes.group", Scope::piano, 'G', shift);
     add("notes.ungroup", Scope::piano, 'G', juce::ModifierKeys::altModifier);
     add("notes.duplicate", Scope::piano, 'B', ctrl);

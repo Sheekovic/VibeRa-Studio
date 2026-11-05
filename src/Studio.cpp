@@ -4259,6 +4259,27 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         chooseExport();
         return true;
     }
+    if (action == "notes.insertControllerValue")
+    {
+        // The lane of the Channel's most recently added event in this Pattern (pitch bend when none).
+        int type = 1, number = 0;
+        Id newest = 0;
+        if (const auto *part = controller.project.pattern(selectedPattern))
+            for (const auto &c : part->controllers)
+                if (c.channel == selectedChannel && c.type <= 2 && c.id > newest)
+                {
+                    newest = c.id;
+                    type = c.type;
+                    number = c.type == 0 ? c.number : 0;
+                }
+        if (auto inserted = insertControllerValue(type, number); inserted.failed())
+        {
+            status = inserted.getErrorMessage();
+            repaint();
+            return false;
+        }
+        return true;
+    }
     if (action == "project.saveTemplate")
     {
         promptSaveTemplate();
@@ -7306,6 +7327,36 @@ juce::Result Studio::exportScoreSheet(const juce::File &file)
         return juce::Result::fail("Could not write " + file.getFullPathName());
     status = "Score sheet exported (" + juce::String(pages) + (pages == 1 ? " page)" : " pages)");
     return juce::Result::ok();
+}
+juce::Result Studio::insertControllerValue(int type, int number)
+{
+    const auto *part = controller.project.pattern(selectedPattern);
+    const auto *channel = controller.project.channel(selectedChannel);
+    if (!part || !channel || channel->audioClip)
+        return juce::Result::fail("Select a Pattern and a playable Channel");
+    if (type < 0 || type > 2 || number < 0 || number > 127)
+        return juce::Result::fail("Controller lane is CC 0..127, pitch bend or pressure");
+    const double span = part->length > 0 ? part->length : 4.;
+    double beat = std::fmod(std::max(0., audio.positionBeat()), span);
+    beat = std::floor(beat * 960. + .5) / 960.;
+    double value = type == 1 ? double(channel->pitchBend) : 0.;
+    double latest = -1;
+    for (const auto &c : part->controllers)
+        if (c.channel == channel->id && c.type == type && (type != 0 || c.number == number) && c.beat <= beat + 1.e-9 &&
+            c.beat >= latest)
+        {
+            latest = c.beat;
+            value = c.value;
+        }
+    CommandArgs a;
+    a.pattern = part->id;
+    a.channel = channel->id;
+    a.text = type == 0 ? "cc" : type == 1 ? "pitchBend" : "pressure";
+    a.pitch = number;
+    a.beat = beat;
+    a.value = value;
+    command("notes.controller.add", a);
+    return status == "Ready" ? juce::Result::ok() : juce::Result::fail(status);
 }
 void Studio::serviceMidiClipboard()
 {

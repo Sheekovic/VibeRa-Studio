@@ -93,3 +93,8 @@
   0..1; bend -1..1 maps to 0..1). Link it with `automation.link` or a control's automation menu
   ("Link to existing source"). UI: Piano roll menu > Edit > Turn into automation clip (one item
   per lane with events; placed at the Pattern's first clip on the first free lane).
+- Insert current controller value: action `notes.insertControllerValue` (Ctrl+I) adds an event
+  at the playhead (Pattern time, 1/960 beat) in the lane of the Channel's most recently added
+  event (pitch bend when none), holding the lane's value there (previous event, else the
+  Channel's pitch bend or 0). Piano roll menu > Edit > Insert current controller value picks
+  the lane (CC with events, Pitch bend, Pressure).

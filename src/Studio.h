@@ -488,6 +488,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result newFromTemplate(const juce::String &name, bool discardChanges);
     juce::Result saveAsTemplate(const juce::String &name, std::function<void(juce::Result)> completion = {});
     void promptSaveTemplate();
+    // Piano roll "Insert current controller value": an event at the playhead (Pattern time)
+    // holding the lane's value there. type 0 CC `number`, 1 pitch bend, 2 pressure.
+    juce::Result insertControllerValue(int type, int number);
     int pianoLaneTarget = 0; // Index into noteLaneTargets(): what the Piano roll event lane edits.
     static juce::Result templateFileName(const juce::String &name, juce::String &legal);
     void saveProfile();

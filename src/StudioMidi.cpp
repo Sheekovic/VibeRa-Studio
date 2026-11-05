@@ -173,6 +173,21 @@ void Studio::midiFileMenu()
                                                                      " (" + juce::String(count) + " events)");
             }
             edit.addSubMenu("Turn into automation clip", toAutomation, toAutomation.getNumItems() > 0);
+            // Insert current controller value: an event at the playhead holding the lane's
+            // value there (the previous event, or the Channel's pitch bend / zero).
+            juce::PopupMenu insertValue;
+            if (const auto *part = controller.project.pattern(selectedPattern))
+            {
+                std::set<int> ccs;
+                for (const auto &c : part->controllers)
+                    if (c.channel == selectedChannel && c.type == 0 && c.number >= 0 && c.number <= 127)
+                        ccs.insert(c.number);
+                for (int cc : ccs)
+                    insertValue.addItem(42300 + cc, "CC " + juce::String(cc));
+            }
+            insertValue.addItem(42501, "Pitch bend");
+            insertValue.addItem(42502, "Pressure");
+            edit.addSubMenu("Insert current controller value at the playhead", insertValue);
         }
         edit.addItem(75, "Ungroup selected notes    Alt+G", !selectedNotes.empty());
         edit.addItem(70, "Insert space    Ctrl+Ins", timeRange);
@@ -444,6 +459,13 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if ((result >= 42300 && result <= 42427) || result == 42501 || result == 42502)
+            {
+                const int type = result <= 42427 ? 0 : result == 42501 ? 1 : 2;
+                if (auto inserted = safe->insertControllerValue(type, type == 0 ? result - 42300 : 0); inserted.failed())
+                    safe->status = inserted.getErrorMessage();
                 return;
             }
             if ((result >= 42000 && result <= 42127) || result == 42201 || result == 42202)

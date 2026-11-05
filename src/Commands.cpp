@@ -803,6 +803,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.glue", "Glue", Scope::piano, true, true, "command"},
         {"notes.group", "Group selected notes (click one selects all)", Scope::piano, true, true, "command"},
         {"notes.toAutomation", "Turn a controller lane into an automation clip", Scope::piano, true, true, "command"},
+        {"notes.insertControllerValue", "Insert current controller value at the playhead (last edited lane)", Scope::piano, false, true, "action"},
         {"notes.ungroup", "Ungroup selected notes", Scope::piano, true, true, "command"},
         {"notes.chordify", "Chordify selection", Scope::piano, true, true, "command"},
         {"notes.clearControllers", "Clear recorded controllers", Scope::piano, true, true, "command"},
