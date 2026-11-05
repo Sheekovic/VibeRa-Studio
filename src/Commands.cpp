@@ -755,6 +755,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.insertSpaceAction", "Insert space (time selection)", Scope::piano, false, true, "action"},
         {"notes.insertSpaceSliced", "Slice and insert space (time selection)", Scope::piano, false, true, "action"},
         {"notes.deleteSpaceAction", "Delete space (time selection)", Scope::piano, false, true, "action"},
+        {"notes.trim", "Trim the Channel part to a time range", Scope::piano, true, true, "command"},
+        {"notes.trimAction", "Trim selection (keep only the time selection)", Scope::piano, false, true, "action"},
         {"notes.discardLengths", "Discard note lengths", Scope::piano, true, true, "command"},
         {"notes.limit", "Limit notes to a key range", Scope::piano, true, true, "command"},
         {"notes.flam", "Flam notes", Scope::piano, true, true, "command"},
@@ -4183,7 +4185,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     n.pitch = juce::jlimit(0, 127, low + high - n.pitch);
             }
         }
-        if (id == "notes.insertSpace" || id == "notes.deleteSpace")
+        if (id == "notes.insertSpace" || id == "notes.deleteSpace" || id == "notes.trim")
         {
             // The Channel's notes and controller events: [beat, beat + length) is inserted
             // (later events move later; args.enabled slices notes crossing the start) or
@@ -4195,7 +4197,25 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 return juce::Result::fail("Select a time range on the Piano roll ruler first (Ctrl+drag)");
             const double start = a.beat, end = a.beat + a.length;
             auto &notes = pat->notes;
-            if (id == "notes.insertSpace")
+            if (id == "notes.trim")
+            {
+                // Keep only [start, end): notes outside are removed, notes crossing an edge are
+                // cut at it, and the Channel's controller events outside are removed. Nothing moves.
+                std::erase_if(notes, [&](const auto &n)
+                              { return n.channel == a.channel &&
+                                       (n.beat >= end - 1.e-9 || n.beat + n.length <= start + 1.e-9); });
+                for (auto &n : notes)
+                {
+                    if (n.channel != a.channel)
+                        continue;
+                    const double noteEnd = std::min(end, n.beat + n.length);
+                    n.beat = std::max(start, n.beat);
+                    n.length = std::max(1. / 64, noteEnd - n.beat);
+                }
+                std::erase_if(pat->controllers, [&](const auto &c)
+                              { return c.channel == a.channel && (c.beat < start - 1.e-9 || c.beat >= end - 1.e-9); });
+            }
+            else if (id == "notes.insertSpace")
             {
                 std::vector<Note> tails;
                 for (auto &n : notes)

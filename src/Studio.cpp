@@ -4780,7 +4780,7 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         return true;
     }
     if (action == "notes.insertSpaceAction" || action == "notes.insertSpaceSliced" ||
-        action == "notes.deleteSpaceAction")
+        action == "notes.deleteSpaceAction" || action == "notes.trimAction")
     {
         const auto range = static_cast<Editor *>(windows[1]->getContentComponent())->timeSelection();
         if (!range)
@@ -4793,7 +4793,10 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         a.beat = range->first;
         a.length = range->second - range->first;
         a.enabled = action == "notes.insertSpaceSliced";
-        command(action == "notes.deleteSpaceAction" ? "notes.deleteSpace" : "notes.insertSpace", a);
+        command(action == "notes.deleteSpaceAction" ? "notes.deleteSpace"
+                : action == "notes.trimAction"      ? "notes.trim"
+                                                    : "notes.insertSpace",
+                a);
         return status == "Ready";
     }
     if (action == "notes.rotateLeft" || action == "notes.rotateRight" || action == "notes.discardLengthsAction")

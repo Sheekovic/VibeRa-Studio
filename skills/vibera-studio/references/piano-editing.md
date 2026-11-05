@@ -72,3 +72,8 @@
 - Test mode: `vibera_dialog` (`state`, `submit` with `fields` and `button`) reads and answers the
   open modal dialog in-process (e.g. Rename key: field `label`, button `OK`); it refuses outside
   test mode and never sends OS input.
+- Trim selection: `notes.trim` (`pattern`, `channel`, `beat`, `length`; one Undo) keeps only
+  `[beat, beat+length)` of the Channel part: notes outside are removed, notes crossing an edge
+  are cut at it, controller events outside are removed and nothing moves. UI: Piano roll menu >
+  Edit > Trim selection (needs a ruler time selection; action `notes.trimAction`), next to
+  Insert space / Slice & insert space / Delete space.

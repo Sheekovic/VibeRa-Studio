@@ -153,6 +153,12 @@ void Studio::midiFileMenu()
         levels.addItem(66, "Invert velocities");
         edit.addSubMenu("Scale levels", levels);
         edit.addItem(54, "Allow resizing from left    Ctrl+Alt+Home", true, pianoResizeLeft);
+        const bool timeRange =
+            static_cast<Editor *>(windows[1]->getContentComponent())->timeSelection().has_value();
+        edit.addItem(70, "Insert space    Ctrl+Ins", timeRange);
+        edit.addItem(71, "Slice & insert space", timeRange);
+        edit.addItem(72, "Delete space    Ctrl+Del", timeRange);
+        edit.addItem(73, "Trim selection (keep only the time selection)", timeRange);
         sel.addItem(55, "Select time around selection    Ctrl+Enter", !selectedNotes.empty());
         juce::PopupMenu limit;
         limit.addItem(49, "C4..B5 (low)");
@@ -418,6 +424,13 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if (result >= 70 && result <= 73)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction(juce::StringArray{"notes.insertSpaceAction", "notes.insertSpaceSliced",
+                                                      "notes.deleteSpaceAction", "notes.trimAction"}[result - 70]);
                 return;
             }
             if (result == 54 || result == 55)
