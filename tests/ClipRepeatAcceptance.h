@@ -302,6 +302,40 @@ inline void tests()
             std::sort(flipped.begin(), flipped.end());
             require(flipped == std::vector<double>{0, 2}, "Kicks at 0 and 2 (length 1/4) mirror within 0..2.25");
             controller.undoEdit();
+            auto kickBeats = [&]
+            {
+                std::vector<double> beats;
+                for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                    if (n.channel == kick)
+                        beats.push_back(n.beat);
+                std::sort(beats.begin(), beats.end());
+                return beats;
+            };
+            CommandArgs tool;
+            tool.pattern = pattern.id;
+            tool.channel = kick;
+            tool.beat = -.25;
+            require(controller.execute("notes.rotate", tool).wasOk() && kickBeats() == std::vector<double>{1.75, 3.75},
+                    "Rotating left by a step wraps the note at 0 to the bar end");
+            controller.undoEdit();
+            tool.length = 1;
+            require(controller.execute("notes.discardLengths", tool).wasOk(), "Discard lengths");
+            for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                if (n.channel == kick)
+                    require(n.length == 1, "Discard lengths sets every note to the given length");
+            controller.undoEdit();
+            tool.pitch = 72;
+            tool.value = 95;
+            require(controller.execute("notes.limit", tool).wasOk(), "Limit to a range");
+            for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                if (n.channel == kick)
+                    require(n.pitch == 72, "Limit folds C5 up an octave into C6..B7");
+            controller.undoEdit();
+            tool.length = 1. / 32;
+            tool.value = .5;
+            require(controller.execute("notes.flam", tool).wasOk() && kickBeats().size() == 4,
+                    "Flam adds a grace note before each note");
+            controller.undoEdit();
             flip.text = "sideways";
             require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
         }

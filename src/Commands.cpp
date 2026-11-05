@@ -724,6 +724,18 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.cut", "Cut notes", Scope::piano, false, true, "action"},
         {"notes.paste", "Paste notes", Scope::piano, true, true, "command"},
         {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},
+        {"notes.rotate", "Rotate notes (wrap within their bars)", Scope::piano, true, true, "command"},
+        {"notes.discardLengths", "Discard note lengths", Scope::piano, true, true, "command"},
+        {"notes.limit", "Limit notes to a key range", Scope::piano, true, true, "command"},
+        {"notes.flam", "Flam notes", Scope::piano, true, true, "command"},
+        {"notes.rotateLeft", "Rotate notes left", Scope::piano, false, true, "action"},
+        {"notes.rotateRight", "Rotate notes right", Scope::piano, false, true, "action"},
+        {"notes.discardLengthsAction", "Discard note lengths (snap)", Scope::piano, false, true, "action"},
+        {"selection.random", "Select one more note at random", Scope::piano, false, true, "action"},
+        {"selection.odd", "Select odd (off-beat) notes", Scope::piano, false, true, "action"},
+        {"selection.muted", "Select muted notes", Scope::piano, false, true, "action"},
+        {"selection.overlapping", "Select overlapping notes", Scope::piano, false, true, "action"},
+        {"selection.stacked", "Select stacked notes", Scope::piano, false, true, "action"},
         {"selection.invert", "Invert selection", Scope::global, false, true, "action"},
         {"notes.duplicate", "Duplicate notes", Scope::piano, true, true, "command"},
         {"notes.velocity", "Note velocity", Scope::piano, true, true, "command"},
@@ -4065,6 +4077,78 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     n.beat = std::max(0., start + end - (n.beat + n.length));
                 else
                     n.pitch = juce::jlimit(0, 127, low + high - n.pitch);
+            }
+        }
+        if (id == "notes.rotate" || id == "notes.discardLengths" || id == "notes.limit" || id == "notes.flam")
+        {
+            std::vector<size_t> targets;
+            for (size_t i = 0; i < pat->notes.size(); ++i)
+                if (a.ids.empty() ? pat->notes[i].channel == a.channel : chosen(pat->notes[i].id))
+                    targets.push_back(i);
+            if (targets.empty())
+                return juce::Result::fail("No notes to edit");
+            if (id == "notes.rotate")
+            {
+                // Move by args.beat; notes leaving the span of whole bars they occupy wrap around.
+                const double bar = next.numerator * 4. / std::max(1, next.denominator);
+                if (!std::isfinite(a.beat) || std::abs(a.beat) < 1.e-9 || std::abs(a.beat) > 64)
+                    return juce::Result::fail("Rotate by a non-zero step of at most 64 beats");
+                double start = 1.e18, end = -1.e18;
+                for (auto i : targets)
+                    start = std::min(start, pat->notes[i].beat), end = std::max(end, pat->notes[i].beat);
+                const double from = std::floor(start / bar + 1.e-9) * bar;
+                const double span = std::max(bar, std::ceil((end + 1.e-9) / bar) * bar - from);
+                for (auto i : targets)
+                {
+                    auto &n = pat->notes[i];
+                    double rel = std::fmod(n.beat - from + a.beat, span);
+                    if (rel < 0)
+                        rel += span;
+                    n.beat = from + rel;
+                }
+            }
+            else if (id == "notes.discardLengths")
+            {
+                if (!std::isfinite(a.length) || a.length < 1. / 64 || a.length > 64)
+                    return juce::Result::fail("Note length is 1/64..64 beats");
+                for (auto i : targets)
+                    pat->notes[i].length = a.length;
+            }
+            else if (id == "notes.limit")
+            {
+                // Fold notes by octaves into [args.pitch, args.value].
+                const int low = a.pitch, high = int(a.value);
+                if (low < 0 || high > 127 || high - low < 11)
+                    return juce::Result::fail("The range must span at least an octave within 0..127");
+                for (auto i : targets)
+                {
+                    auto &n = pat->notes[i];
+                    while (n.pitch < low)
+                        n.pitch += 12;
+                    while (n.pitch > high)
+                        n.pitch -= 12;
+                }
+            }
+            else
+            {
+                // Flam: a softer grace note args.length beats before each note.
+                if (!std::isfinite(a.length) || a.length < 1. / 128 || a.length > 1)
+                    return juce::Result::fail("Flam offset is 1/128..1 beat");
+                if (!std::isfinite(a.value) || a.value <= 0 || a.value > 1)
+                    return juce::Result::fail("Flam velocity is 0..1 of the main note");
+                if (pat->notes.size() + targets.size() > 100000)
+                    return juce::Result::fail("The Pattern would exceed 100000 notes");
+                std::vector<Note> graces;
+                for (auto i : targets)
+                {
+                    auto grace = pat->notes[i];
+                    grace.id = next.allocate();
+                    grace.beat = std::max(0., grace.beat - a.length);
+                    grace.length = std::min(grace.length, a.length);
+                    grace.velocity = juce::jlimit(.01, 1., grace.velocity * a.value);
+                    graces.push_back(grace);
+                }
+                pat->notes.insert(pat->notes.end(), graces.begin(), graces.end());
             }
         }
         if (id == "notes.paste")

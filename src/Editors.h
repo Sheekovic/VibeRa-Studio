@@ -484,6 +484,12 @@ class Studio::Editor final : public juce::Component,
         horizontalBar.repaint();
         repaint();
     }
+    // Piano roll paste position: the start of the leftmost visible bar (familiar Ctrl+V).
+    double pasteBeat() const
+    {
+        const double bar = std::max(.25, barBeats());
+        return std::max(0., std::floor(scroll / bar + 1.e-9) * bar);
+    }
   private:
     // Playlist ruler right-click menu (familiar timeline actions at the clicked beat).
     void rulerMenu(double beat)

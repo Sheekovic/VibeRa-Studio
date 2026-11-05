@@ -128,6 +128,30 @@ void Studio::midiFileMenu()
             stamp.addItem(900 + int(i), shapes[i].name, true, pianoStamp == shapes[i].name);
         menu.addSubMenu("Chord stamp (draw places a chord)", stamp);
     }
+    {
+        juce::PopupMenu sel;
+        sel.addItem(40, "Select one more at random    Shift+R");
+        sel.addItem(41, "Select odd (off-beat)    Shift+O");
+        sel.addItem(42, "Select muted");
+        sel.addItem(43, "Select overlapping notes");
+        sel.addItem(44, "Select stacked notes");
+        sel.addItem(45, "Invert selection    Shift+I");
+        menu.addSubMenu("Select", sel);
+        juce::PopupMenu edit;
+        edit.addItem(46, "Rotate left    Shift+Ctrl+Left");
+        edit.addItem(47, "Rotate right    Shift+Ctrl+Right");
+        edit.addItem(48, "Discard lengths    Shift+D");
+        juce::PopupMenu limit;
+        limit.addItem(49, "C4..B5 (low)");
+        limit.addItem(50, "C5..B6 (middle)");
+        limit.addItem(51, "C6..B7 (high)");
+        edit.addSubMenu("Limit to range", limit);
+        juce::PopupMenu flam;
+        flam.addItem(52, "Tight (1/64 beat)");
+        flam.addItem(53, "Loose (1/32 beat)");
+        edit.addSubMenu("Flam", flam);
+        menu.addSubMenu("Edit", edit);
+    }
     menu.addItem(17, "Flip horizontally (reverse in time)");
     menu.addItem(18, "Flip vertically (mirror pitches)");
     // Composition tools act on the selection, or the whole Channel part without one.
@@ -262,6 +286,32 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result >= 40 && result <= 53)
+            {
+                safe->focus = Scope::piano;
+                const char *actions[]{"selection.random", "selection.odd", "selection.muted", "selection.overlapping",
+                                      "selection.stacked", "selection.invert", "notes.rotateLeft", "notes.rotateRight",
+                                      "notes.discardLengthsAction"};
+                if (result <= 48)
+                {
+                    safe->performAction(actions[result - 40]);
+                    return;
+                }
+                auto args = noteTargets;
+                if (result <= 51)
+                {
+                    args.pitch = 48 + (result - 49) * 12;
+                    args.value = args.pitch + 23;
+                    safe->command("notes.limit", args);
+                }
+                else
+                {
+                    args.length = result == 52 ? 1. / 64 : 1. / 32;
+                    args.value = .6;
+                    safe->command("notes.flam", args);
+                }
                 return;
             }
             if (result == 19 || (result >= 900 && result < 1000))

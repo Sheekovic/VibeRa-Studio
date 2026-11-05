@@ -246,6 +246,13 @@ Customization Customization::familiarDefaults()
     add("notes.cut", Scope::piano, 'X', ctrl);
     add("notes.paste", Scope::piano, 'V', ctrl);
     add("selection.invert", Scope::piano, 'I', shift);
+    add("notes.rotateLeft", Scope::piano, juce::KeyPress::leftKey, ctrl | shift);
+    add("notes.rotateRight", Scope::piano, juce::KeyPress::rightKey, ctrl | shift);
+    add("notes.discardLengthsAction", Scope::piano, 'D', shift);
+    add("notes.mute", Scope::piano, 'M', juce::ModifierKeys::altModifier);
+    add("notes.unmute", Scope::piano, 'M', juce::ModifierKeys::altModifier | shift);
+    add("selection.random", Scope::piano, 'R', shift);
+    add("selection.odd", Scope::piano, 'O', shift);
     add("selection.invert", Scope::playlist, 'I', shift);
     add("notes.delete", Scope::piano, juce::KeyPress::deleteKey);
     add("clip.duplicate", Scope::playlist, 'B', ctrl);

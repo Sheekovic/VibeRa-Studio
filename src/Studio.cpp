@@ -4520,10 +4520,8 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         }
         a.noteClipboard = noteClipboard;
         a.ids.clear();
-        // Pattern mode: at the playhead (snapped); Song mode: at the copied positions.
-        const double playhead = std::max(0., audio.positionBeat());
-        a.beat = patternMode ? (snap > 0 ? std::floor(playhead / snap + 1.e-9) * snap : playhead)
-                             : noteClipboard->origin;
+        // Familiar Ctrl+V: from the start of the leftmost visible bar in the Piano roll.
+        a.beat = static_cast<Editor *>(windows[1]->getContentComponent())->pasteBeat();
         const auto firstNew = controller.project.nextId;
         command(action, a);
         if (status != "Ready")
@@ -4534,6 +4532,71 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
                 if (n.id >= firstNew)
                     pasted.push_back(n.id);
         selectItems(false, pasted);
+        return true;
+    }
+    if (action == "notes.rotateLeft" || action == "notes.rotateRight" || action == "notes.discardLengthsAction")
+    {
+        a.ids = selectedNotes;
+        if (action == "notes.discardLengthsAction")
+        {
+            a.length = snap > 0 ? snap : .25;
+            command("notes.discardLengths", a);
+        }
+        else
+        {
+            a.beat = (action.endsWith("Left") ? -1 : 1) * (snap > 0 ? snap : .25);
+            command("notes.rotate", a);
+        }
+        return status == "Ready";
+    }
+    if (action == "selection.random" || action == "selection.odd" || action == "selection.muted" ||
+        action == "selection.overlapping" || action == "selection.stacked")
+    {
+        const auto *part = controller.project.pattern(selectedPattern);
+        if (!part)
+            return false;
+        std::vector<const Note *> mine;
+        for (const auto &n : part->notes)
+            if (n.channel == selectedChannel)
+                mine.push_back(&n);
+        std::vector<Id> chosenNotes;
+        if (action == "selection.random")
+        {
+            chosenNotes = selectedNotes;
+            std::vector<Id> rest;
+            for (const auto *n : mine)
+                if (!selected(selectedNotes, n->id))
+                    rest.push_back(n->id);
+            if (!rest.empty())
+                chosenNotes.push_back(rest[size_t(juce::Random::getSystemRandom().nextInt(int(rest.size())))]);
+        }
+        else
+            for (const auto *n : mine)
+            {
+                bool pick = false;
+                if (action == "selection.odd")
+                {
+                    // Notes on the off (even-numbered) steps, the ones swing moves.
+                    const double step = n->beat / .25;
+                    pick = std::abs(step - std::round(step)) < 1.e-6 && (long long)(std::llround(step)) % 2 == 1;
+                }
+                else if (action == "selection.muted")
+                    pick = n->muted;
+                else
+                    for (const auto *other : mine)
+                        if (other != n && other->pitch < n->pitch + (action == "selection.stacked" ? 1 : 0) &&
+                            (action == "selection.stacked"
+                                 ? other->pitch == n->pitch && std::abs(other->beat - n->beat) < 1.e-9 &&
+                                       std::abs(other->length - n->length) < 1.e-9 && other->id < n->id
+                                 : other->beat < n->beat + n->length - 1.e-9 &&
+                                       n->beat < other->beat + other->length - 1.e-9))
+                            pick = true; // All but the lowest (or first) of each overlap.
+                if (pick)
+                    chosenNotes.push_back(n->id);
+            }
+        selectItems(false, chosenNotes);
+        status = juce::String(int(chosenNotes.size())) + " note(s) selected";
+        repaint();
         return true;
     }
     if (action == "selection.invert")
