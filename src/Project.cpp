@@ -513,6 +513,13 @@ juce::ValueTree Project::state() const
             set(t, "pitchBend", double(c.pitchBend));
         if (c.pitchRange != 2)
             set(t, "pitchRange", c.pitchRange);
+        if (!c.keyLabels.empty())
+        {
+            juce::StringArray labels;
+            for (const auto &[pitch, label] : c.keyLabels)
+                labels.add(juce::String(pitch) + "=" + label);
+            set(t, "keyLabels", labels.joinIntoString(";"));
+        }
         if (c.group != 0)
             set(t, "group", juce::int64(c.group));
         set(t, "source", c.source);
@@ -1263,6 +1270,17 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             if (!std::isfinite(range) || range < 1 || range > 48 || std::floor(range) != range)
                 return juce::Result::fail("Invalid Channel pitch range");
             p.channels.back().pitchRange = int(range);
+        }
+        if (c.hasProperty("keyLabels"))
+        {
+            for (const auto &entry : juce::StringArray::fromTokens(c["keyLabels"].toString(), ";", ""))
+            {
+                const int pitch = entry.upToFirstOccurrenceOf("=", false, false).getIntValue();
+                const auto label = entry.fromFirstOccurrenceOf("=", false, false);
+                if (!entry.containsChar('=') || pitch < 0 || pitch > 127 || label.isEmpty() || label.length() > 32)
+                    return juce::Result::fail("Invalid Channel key label");
+                p.channels.back().keyLabels[pitch] = label;
+            }
         }
         auto sampler = c.getChildWithName("SAMPLER");
         int samplerChildren = 0;

@@ -3257,6 +3257,17 @@ class Studio::Editor final : public juce::Component,
                         g.setColour(juce::Colours::white.withAlpha(.07f));
                         g.fillRect(key.getRight() - 4.f, key.getY() + 1.f, 2.f, key.getHeight() - 2.f);
                     }
+                    // Key labels (drum maps): the Channel's names drawn on their keys.
+                    if (const auto *labelled = s.controller.project.channel(s.selectedChannel); labelled && h >= 7.f)
+                        for (const auto &[labelPitch, text] : labelled->keyLabels)
+                            if (labelPitch <= topPitch + 1 && labelPitch >= lowest)
+                            {
+                                const bool blackKey = juce::MidiMessage::isMidiNoteBlack(labelPitch);
+                                g.setColour(blackKey ? juce::Colours::white.withAlpha(.9f) : themeColour(0xff2b3640));
+                                g.setFont(juce::Font(vibera::uiFont, juce::jlimit(8.f, 11.f, h - 1.f), juce::Font::bold));
+                                g.drawText(text, juce::Rectangle<float>(3.f, rowTop(labelPitch), (blackKey ? blackWidth : keyWidth) - 6.f, h),
+                                           juce::Justification::centredLeft, true);
+                            }
                     // Guide marks on the keys: a dot per degree, a half-flat sign for quarter tones.
                     for (int p = topPitch + 1; p >= lowest && s.pianoGuide.name.isNotEmpty(); --p)
                     {
@@ -4948,6 +4959,33 @@ class Studio::Editor final : public juce::Component,
                 panPitch = topPitch;
                 panZoom = verticalZoom;
                 panAnchor = pitch(e.y);
+                return;
+            }
+            if (type == 1 && e.x < leftEdge() && e.y >= gridTop() && e.y < noteBottom() && e.mods.isPopupMenu())
+            {
+                // Right-click a key: rename it (Channel key label, e.g. a drum map).
+                const int key = pitch(e.y);
+                const auto *labelled = s.controller.project.channel(s.selectedChannel);
+                const auto current = labelled && labelled->keyLabels.count(key) ? labelled->keyLabels.at(key) : juce::String();
+                auto *box = new juce::AlertWindow("Rename key", juce::MidiMessage::getMidiNoteName(key, true, true, 5),
+                                                  juce::MessageBoxIconType::NoIcon);
+                box->addTextEditor("label", current);
+                box->addButton("OK", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                juce::Component::SafePointer<Editor> safe(this);
+                box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                               [safe, box, key](int ok)
+                                               {
+                                                   if (!safe || ok != 1)
+                                                       return;
+                                                   CommandArgs a;
+                                                   a.channel = safe->s.selectedChannel;
+                                                   a.pitch = key;
+                                                   a.text = box->getTextEditorContents("label");
+                                                   safe->s.command("channel.keyLabel", a);
+                                                   safe->repaint();
+                                               }),
+                                     true);
                 return;
             }
             if (e.x < leftEdge() && e.y >= gridTop() && e.y < noteBottom() && e.mods.isLeftButtonDown())

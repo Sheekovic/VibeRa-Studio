@@ -538,6 +538,22 @@ inline void tests()
             controller.undoEdit();
             controller.undoEdit();
             require(controller.project.channel(kick)->pitchBend == 0, "Pitch edits undo");
+            CommandArgs label;
+            label.channel = kick;
+            label.pitch = 36;
+            label.text = "Kick";
+            require(controller.execute("channel.keyLabel", label).wasOk(), "Name a key");
+            Project labelled;
+            require(Project::parse(controller.project.state(), labelled).wasOk() &&
+                        labelled.channel(kick)->keyLabels.at(36) == "Kick",
+                    "Key labels survive save and load");
+            label.text = "Bad;name";
+            require(controller.execute("channel.keyLabel", label).failed(), "Separators in key labels are refused");
+            label.text = "";
+            require(controller.execute("channel.keyLabel", label).wasOk() && controller.project.channel(kick)->keyLabels.empty(),
+                    "An empty label removes the name");
+            controller.undoEdit();
+            controller.undoEdit();
             // Playback: a plugin instrument Channel with PITCH gets the bend at each note start.
             auto live = controller.project;
             auto *instrumentChannel = live.channel(kick);

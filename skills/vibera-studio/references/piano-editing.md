@@ -57,3 +57,6 @@
   one-bar rhythm, starts each bar on the root and moves mostly by scale steps.
 - **Note grid highlights** (`view.noteGridHighlights`, Alt+B): toggles the black-key row shading
   of the grid (on by default); off shows even rows with thin lines. Read `state.pianoGridHighlights`.
+- **Key labels** (right-click a Piano roll key; `channel.keyLabel`, `args.channel`, `args.pitch`,
+  `args.text` at most 32 characters, empty removes): names keys for the Channel (drum maps),
+  drawn on the keyboard and saved with the project. Read `state.keyLabels` (selected Channel).

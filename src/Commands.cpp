@@ -544,6 +544,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"mixer.spareStore", "Store the selected insert's effect chain in spare state", Scope::mixer, false, true, "action"},
         {"mixer.spareFlip", "Flip the selected insert's effect chain with spare state", Scope::mixer, false, true, "action"},
         {"channel.pitchRange", "Channel pitch range (semitones)", Scope::rack, true, true, "command"},
+        {"channel.keyLabel", "Rename a Piano roll key (drum map label)", Scope::piano, true, true, "command"},
         {"channel.pan", "Channel pan", Scope::rack, true, true, "command"},
         {"channel.sampler.sourceTempo", "Set sample tempo", Scope::rack, true, true, "command"},
         {"channel.sampler.fitTempo", "Fit sample to project tempo", Scope::rack, true, true, "command"},
@@ -2995,6 +2996,16 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             if (!std::isfinite(a.value) || std::abs(a.value) > 1)
                 return juce::Result::fail("Channel pitch is -1..1 (pitch bend)");
             ch->pitchBend = float(a.value);
+        }
+        if (id == "channel.keyLabel")
+        {
+            const auto label = a.text.trim();
+            if (a.pitch < 0 || a.pitch > 127 || label.length() > 32 || label.containsAnyOf(";=\n\r"))
+                return juce::Result::fail("A key label is at most 32 characters (no ; or =) on pitch 0..127");
+            if (label.isEmpty())
+                ch->keyLabels.erase(a.pitch);
+            else
+                ch->keyLabels[a.pitch] = label;
         }
         if (id == "channel.pitchRange")
         {

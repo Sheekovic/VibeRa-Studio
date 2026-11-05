@@ -62,6 +62,7 @@ struct Channel
     bool muteLocked = false;    // Protect the current score mute from automatic solo/bulk changes.
     float pitchBend = 0;        // Plugin instrument Channel PITCH: MIDI pitch bend -1..1 sent with its notes.
     int pitchRange = 2;         // RANGE shown with PITCH, semitones at full bend (1..48).
+    std::map<int, juce::String> keyLabels; // Piano roll key names (drum maps), pitch -> at most 32 chars.
 };
 struct ChannelGroup
 {
