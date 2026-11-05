@@ -4255,6 +4255,18 @@ class Studio::Editor final : public juce::Component,
                                        }),
                              true);
     }
+    // The lanes of `lane`'s track group (its first track and the grouped tracks below).
+    std::vector<int> trackGroupLanes(int lane) const
+    {
+        const auto &project = s.controller.project;
+        int head = lane;
+        while (head > 0 && project.track(head) && project.track(head)->groupedAbove)
+            --head;
+        std::vector<int> lanes{head};
+        for (int next = head + 1; next < 128 && project.track(next) && project.track(next)->groupedAbove; ++next)
+            lanes.push_back(next);
+        return lanes;
+    }
     void trackMenu(int lane, const juce::ModifierKeys &mods)
     {
         const auto *info = s.controller.project.track(lane);
@@ -4268,6 +4280,25 @@ class Studio::Editor final : public juce::Component,
         };
         if (!mods.isPopupMenu() && mods.isCtrlDown())
             return run("track.solo", [](CommandArgs &) {}); // Ctrl+click the LED: solo (again: unsolo).
+        if (!mods.isPopupMenu() && mods.isShiftDown())
+            return run("track.lock", [&](CommandArgs &a) { a.enabled = !(info && info->locked); }); // Shift: lock.
+        if (!mods.isPopupMenu() && mods.isAltDown())
+        {
+            // Alt+click the LED: mute / unmute the whole track group (one Undo step).
+            const auto members = trackGroupLanes(lane);
+            const bool mute = !(info && info->muted);
+            s.controller.beginGesture();
+            for (const int member : members)
+            {
+                CommandArgs a;
+                a.lane = member;
+                a.enabled = mute;
+                s.command("track.mute", a);
+            }
+            finishUiGesture(s, mute ? "Mute track group" : "Unmute track group");
+            repaint();
+            return;
+        }
         if (!mods.isPopupMenu())
             return run("track.mute", [&](CommandArgs &a) { a.enabled = !(info && info->muted); });
         juce::PopupMenu menu, colours;
@@ -4281,7 +4312,8 @@ class Studio::Editor final : public juce::Component,
         const auto *headInfo = s.controller.project.track(head);
         menu.addItem(8, "Group with track above", lane > 0, info && info->groupedAbove);
         menu.addItem(9, headInfo && headInfo->collapsed ? "Expand group" : "Collapse group", inGroup);
-        menu.addItem(10, "Lock track (protect its clips)", true, info && info->locked);
+        menu.addItem(10, "Lock track (protect its clips)    Shift+click LED", true, info && info->locked);
+        menu.addItem(48, "Auto color group (this track's colour)", inGroup || (info && info->groupedAbove));
         {
             juce::PopupMenu heights;
             const double current = info ? info->height : 1.;
@@ -4416,6 +4448,21 @@ class Studio::Editor final : public juce::Component,
                                        safe->s.status = started.getErrorMessage();
                                    else
                                        safe->s.status = "Rendering track to audio";
+                                   safe->repaint();
+                               }
+                               else if (chosen == 48)
+                               {
+                                   const auto *t = safe->s.controller.project.track(lane);
+                                   const double colour = t ? double(t->colour) : 0.;
+                                   safe->s.controller.beginGesture();
+                                   for (const int member : safe->trackGroupLanes(lane))
+                                   {
+                                       CommandArgs a;
+                                       a.lane = member;
+                                       a.value = colour;
+                                       safe->s.command("track.colour", a);
+                                   }
+                                   finishUiGesture(safe->s, "Auto color group");
                                    safe->repaint();
                                }
                                else if (chosen == 45)

@@ -63,3 +63,5 @@
   dragging an audio clip's right edge previews the ratio and, on release, stretches the clip
   to that length keeping pitch (a new file in `Stretched/`, one Undo step when it is ready).
   With the mode off the right edge resizes (trims) as before.
+- **Track LED:** click mutes, Ctrl+click solos, Shift+click locks, Alt+click mutes the whole
+  track group (one Undo). Track menu > Auto color group gives the group this track's colour.
