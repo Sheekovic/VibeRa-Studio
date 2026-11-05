@@ -163,3 +163,9 @@ incumbent model and drains already admitted closes; an editor already closed is
 not reopened by cancellation. Active parameter gestures or editor requests still
 refuse admission. Replace, reorder and other Apply actions retain their explicit
 close-editors prerequisite; this is not universal automatic editor closure.
+
+Add insert from chain preset: action `mixer.insert.fromChainPreset` (Mixer effect menu > Add
+insert from chain preset...) creates a new insert, waits for that structural change to commit
+(up to about 10 s) and then opens the chain file chooser for the new insert (loadApply). It
+refuses before creating anything when no chain preset directory is configured. The chooser is
+native; automation can pick the file in its list with UI Automation (owned process only).

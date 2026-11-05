@@ -4284,6 +4284,11 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         }
         return true;
     }
+    if (action == "mixer.insert.fromChainPreset")
+    {
+        addInsertFromChainPreset();
+        return true;
+    }
     if (action == "project.tapTempo")
     {
         tapTempo();
@@ -6647,6 +6652,52 @@ void Studio::chooseOpen()
         });
 }
 
+void Studio::addInsertFromChainPreset()
+{
+    // Familiar "Add from state": a new insert, then a chain preset loaded onto it.
+    if (!mixerChains || !mixerChains->files)
+    {
+        status = "Choose the chain preset directory first";
+        repaint();
+        return;
+    }
+    std::set<int> before;
+    for (const auto &row : controller.project.mixer)
+        before.insert(row.index);
+    command("mixer.insert.create", {});
+    // Creating the insert is structural and commits asynchronously: wait (up to about 10 s)
+    // for the new insert to exist and the audio work to settle, then open the chooser for it.
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    auto attempt = std::make_shared<std::function<void(int)>>();
+    *attempt = [safe, before, weak = std::weak_ptr<std::function<void(int)>>(attempt)](int left)
+    {
+        if (!safe)
+            return;
+        int created = -1;
+        for (const auto &row : safe->controller.project.mixer)
+            if (!before.contains(row.index))
+                created = row.index;
+        const bool busy = safe->mixerChainBusy() || safe->afterPluginState || safe->routingPending();
+        if ((created < 0 || busy) && left > 0)
+        {
+            if (auto next = weak.lock())
+                juce::Timer::callAfterDelay(100, [next, left] { (*next)(left - 1); });
+            return;
+        }
+        if (created < 0)
+        {
+            safe->status = "The new insert was not created; nothing to load the chain onto";
+            safe->repaint();
+            return;
+        }
+        safe->selectedInsert = created;
+        safe->chooseMixerChainFile("loadApply", created);
+        safe->repaint();
+    };
+    pendingChainChooser = attempt;
+    (*attempt)(100);
+    repaint();
+}
 void Studio::tapTempo()
 {
     const double now = juce::Time::getMillisecondCounterHiRes() / 1000.;
@@ -7688,18 +7739,7 @@ void Studio::effectMenu(int index)
                            }
                            if (selected == 10015)
                            {
-                               // Familiar "Add from state": a new insert, then load a chain preset onto it.
-                               std::set<int> before;
-                               for (const auto &row : safe->controller.project.mixer)
-                                   before.insert(row.index);
-                               safe->command("mixer.insert.create", {});
-                               for (const auto &row : safe->controller.project.mixer)
-                                   if (!before.contains(row.index))
-                                   {
-                                       safe->selectedInsert = row.index;
-                                       safe->chooseMixerChainFile("loadApply", row.index);
-                                   }
-                               safe->repaint();
+                               safe->addInsertFromChainPreset();
                                return;
                            }
                            if (selected == 10013 || selected == 10014)

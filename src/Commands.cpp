@@ -338,6 +338,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"mixer.eq", "Mixer EQ band (gain / frequency)", Scope::mixer, true, true, "command"},
         {"mixer.eqReset", "Reset Mixer EQ", Scope::mixer, true, true, "command"},
         {"mixer.delay", "Mixer track delay (ms)", Scope::mixer, true, true, "command"},
+        {"mixer.insert.fromChainPreset", "Add insert from chain preset (file chooser)", Scope::mixer, false, true, "action"},
         {"mixer.dock", "Dock Mixer track left / middle / right", Scope::mixer, true, true, "command"},
         {"mixer.meterWave", "Meter-wave view (level waveforms instead of peak meters)", Scope::mixer, false, true, "action"},
         {"mixer.phaseInvert", "Invert Mixer polarity", Scope::mixer, true, true, "command"},

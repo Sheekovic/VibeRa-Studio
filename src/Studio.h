@@ -1125,6 +1125,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     std::vector<double> tapTimes;
     bool tapGesture = false;
     void tapTempo();
+    // Mixer "Add insert from chain preset...": a new insert, then the chain file chooser for it.
+    void addInsertFromChainPreset();
+    std::shared_ptr<std::function<void(int)>> pendingChainChooser; // Keeps the settle-wait alive.
     juce::Label title, deviceLabel;
     juce::ThreadPool midiFileJobs{1};
     // CONTROL owns sessions; bounded worker jobs own immutable prepared PCM only.

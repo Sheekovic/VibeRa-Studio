@@ -1332,6 +1332,9 @@ juce::Result AudioEngine::preparePlugins(const Project &project, bool offline)
     }
     if (!offline && (hasProjection || deferredHostProjection))
         candidate->reuse = currentHosts;
+    // A requested restart (recovery or a state reload) never reuses the running worker.
+    if (!offline && recoveryPlugin)
+        candidate->reuse.erase(recoveryPlugin->id);
     if (!offline && (fullProjectionController || preparingDeferredNativeAccess))
         for (const auto &spec : candidate->specs)
         {
