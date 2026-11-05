@@ -141,6 +141,17 @@ void Studio::midiFileMenu()
         edit.addItem(46, "Rotate left    Shift+Ctrl+Left");
         edit.addItem(47, "Rotate right    Shift+Ctrl+Right");
         edit.addItem(48, "Discard lengths    Shift+D");
+        juce::PopupMenu articulate;
+        articulate.addItem(60, "Staccato (25%)");
+        articulate.addItem(61, "Portato (50%)");
+        articulate.addItem(62, "Tenuto (90%)");
+        edit.addSubMenu("Articulate", articulate);
+        juce::PopupMenu levels;
+        levels.addItem(63, "Softer (velocity x 0.8)");
+        levels.addItem(64, "Louder (velocity x 1.2)");
+        levels.addItem(65, "Compress toward 0.7");
+        levels.addItem(66, "Invert velocities");
+        edit.addSubMenu("Scale levels", levels);
         edit.addItem(54, "Allow resizing from left    Ctrl+Alt+Home", true, pianoResizeLeft);
         sel.addItem(55, "Select time around selection    Ctrl+Enter", !selectedNotes.empty());
         juce::PopupMenu limit;
@@ -295,6 +306,24 @@ void Studio::midiFileMenu()
                     safe->performAction("piano.toolMute");
                 else
                     safe->command(result == 12 ? "notes.mute" : "notes.unmute", noteTargets);
+                return;
+            }
+            if (result >= 60 && result <= 66)
+            {
+                safe->focus = Scope::piano;
+                auto args = noteTargets;
+                if (result <= 62)
+                {
+                    args.value = result == 60 ? .25 : result == 61 ? .5 : .9;
+                    safe->command("notes.articulate", args);
+                }
+                else
+                {
+                    args.value = result == 63 ? .8 : result == 64 ? 1.2 : result == 65 ? .5 : 1.;
+                    args.offset = result == 65 ? .35 : 0.;
+                    args.enabled = result == 66;
+                    safe->command("notes.scaleLevels", args);
+                }
                 return;
             }
             if (result >= 56 && result <= 58)

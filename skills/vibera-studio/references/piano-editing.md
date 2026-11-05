@@ -41,3 +41,7 @@
   `velocityBase` / `velocityScale` and `timeSelection`.
 - **Time selection:** Ctrl+Left / Ctrl+Right (`selection.timePrevious` / `selection.timeNext`)
   move it by its own width.
+- **Articulate** (`notes.articulate`, `args.value` 0.05..1): each note lasts that share of the gap
+  to the next note start (staccato 25%, portato 50%, tenuto 90%; Quick legato is 100%).
+- **Scale levels** (`notes.scaleLevels`): velocity x `args.value` (0..4) + `args.offset`
+  (-1..1), inverted first when `args.enabled`. Menu > Edit > Scale levels.

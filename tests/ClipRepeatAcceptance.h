@@ -378,6 +378,29 @@ inline void tests()
             controller.undoEdit();
             randomize.text = "nonsense";
             require(controller.execute("notes.randomize", randomize).failed(), "An unknown scale is refused");
+            CommandArgs artic;
+            artic.pattern = pattern.id;
+            artic.channel = kick;
+            artic.value = .5;
+            require(controller.execute("notes.articulate", artic).wasOk(), "Articulate");
+            std::vector<double> lengths;
+            for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                if (n.channel == kick)
+                    lengths.push_back(n.length);
+            std::sort(lengths.begin(), lengths.end());
+            require(lengths == std::vector<double>{1, 1}, "Kicks at 0 and 2 (Pattern 4) last half their gaps");
+            controller.undoEdit();
+            CommandArgs levels;
+            levels.pattern = pattern.id;
+            levels.channel = kick;
+            levels.value = .5;
+            levels.offset = 0;
+            levels.enabled = true;
+            require(controller.execute("notes.scaleLevels", levels).wasOk(), "Scale levels");
+            for (const auto &n : controller.project.pattern(pattern.id)->notes)
+                if (n.channel == kick)
+                    require(std::abs(n.velocity - .1) < 1e-6, "Inverting 0.8 then halving gives 0.1");
+            controller.undoEdit();
             flip.text = "sideways";
             require(controller.execute("notes.flip", flip).failed(), "Unknown flip direction fails");
         }

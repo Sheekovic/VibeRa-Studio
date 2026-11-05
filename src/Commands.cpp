@@ -732,6 +732,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},
         {"notes.randomize", "Randomize: generate notes in a scale", Scope::piano, true, true, "command"},
         {"notes.rotate", "Rotate notes (wrap within their bars)", Scope::piano, true, true, "command"},
+        {"notes.articulate", "Articulate: note lengths as a share of the gap to the next note", Scope::piano, true, true, "command"},
+        {"notes.scaleLevels", "Scale levels: multiply / offset / invert velocities", Scope::piano, true, true, "command"},
         {"notes.insertSpace", "Insert space in the Channel part", Scope::piano, true, true, "command"},
         {"notes.deleteSpace", "Delete space in the Channel part", Scope::piano, true, true, "command"},
         {"notes.insertSpaceAction", "Insert space (time selection)", Scope::piano, false, true, "action"},
@@ -4150,6 +4152,47 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 for (auto &c : pat->controllers)
                     if (c.channel == a.channel && c.beat >= end - 1.e-9)
                         c.beat -= a.length;
+            }
+        }
+        if (id == "notes.articulate" || id == "notes.scaleLevels")
+        {
+            std::vector<size_t> targets;
+            for (size_t i = 0; i < pat->notes.size(); ++i)
+                if (a.ids.empty() ? pat->notes[i].channel == a.channel : chosen(pat->notes[i].id))
+                    targets.push_back(i);
+            if (targets.empty())
+                return juce::Result::fail("No notes to edit");
+            if (id == "notes.articulate")
+            {
+                // Each note lasts args.value (0.05..1) of the time to the next later note start
+                // of the same Channel; the last keeps its gap to the Pattern end (at least a step).
+                if (!std::isfinite(a.value) || a.value < .05 || a.value > 1)
+                    return juce::Result::fail("Articulation is 5..100% of the gap");
+                std::vector<double> starts;
+                for (auto i : targets)
+                    starts.push_back(pat->notes[i].beat);
+                std::sort(starts.begin(), starts.end());
+                const double end = std::max(pat->length, starts.back() + .25);
+                for (auto i : targets)
+                {
+                    auto &n = pat->notes[i];
+                    const auto after = std::upper_bound(starts.begin(), starts.end(), n.beat + 1.e-9);
+                    const double gap = (after == starts.end() ? end : *after) - n.beat;
+                    n.length = std::max(1. / 64, gap * a.value);
+                }
+            }
+            else
+            {
+                // velocity' = velocity * args.value + args.offset, inverted first when args.enabled.
+                if (!std::isfinite(a.value) || a.value < 0 || a.value > 4 || !std::isfinite(a.offset) ||
+                    std::abs(a.offset) > 1)
+                    return juce::Result::fail("Scale is 0..4 and offset -1..1");
+                for (auto i : targets)
+                {
+                    auto &n = pat->notes[i];
+                    const double base = a.enabled ? 1. - n.velocity : n.velocity;
+                    n.velocity = juce::jlimit(.01, 1., base * a.value + a.offset);
+                }
             }
         }
         if (id == "notes.rotate" || id == "notes.discardLengths" || id == "notes.limit" || id == "notes.flam")
