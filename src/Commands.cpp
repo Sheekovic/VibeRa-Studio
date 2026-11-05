@@ -802,6 +802,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.chop", "Quick chop", Scope::piano, true, true, "command"},
         {"notes.glue", "Glue", Scope::piano, true, true, "command"},
         {"notes.group", "Group selected notes (click one selects all)", Scope::piano, true, true, "command"},
+        {"notes.toAutomation", "Turn a controller lane into an automation clip", Scope::piano, true, true, "command"},
         {"notes.ungroup", "Ungroup selected notes", Scope::piano, true, true, "command"},
         {"notes.chordify", "Chordify selection", Scope::piano, true, true, "command"},
         {"notes.clearControllers", "Clear recorded controllers", Scope::piano, true, true, "command"},
@@ -4099,6 +4100,58 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 copies.push_back(right);
             }
             pat->notes.insert(pat->notes.end(), copies.begin(), copies.end());
+        }
+        if (id == "notes.toAutomation")
+        {
+            // The Channel's controller lane in this Pattern (args.text cc / pitchBend / pressure,
+            // CC number args.pitch) becomes an unlinked automation clip (link it from a control's
+            // automation menu) at args.beat on Playlist lane args.lane. Values keep their steps.
+            const juce::StringArray types{"cc", "pitchBend", "pressure"};
+            const int type = types.indexOf(a.text.isEmpty() ? juce::String("cc") : a.text);
+            if (!ch || ch->audioClip || type < 0 || (type == 0 && (a.pitch < 0 || a.pitch > 127)) ||
+                !std::isfinite(a.beat) || a.beat < 0 || a.beat > 1000000 || a.lane < 0 || a.lane > 127)
+                return juce::Result::fail("noteAutomation.invalidArguments: Channel, cc/pitchBend/pressure lane, "
+                                          "beat >= 0 and Playlist lane 0..127 required");
+            std::vector<ControllerEvent> events;
+            for (const auto &c : pat->controllers)
+                if (c.channel == ch->id && c.type == type && (type != 0 || c.number == a.pitch))
+                    events.push_back(c);
+            if (events.empty())
+                return juce::Result::fail("noteAutomation.empty: This Channel has no events in that lane");
+            std::stable_sort(events.begin(), events.end(), [](const auto &x, const auto &y) { return x.beat < y.beat; });
+            AutomationSource source;
+            source.id = next.allocate();
+            source.length = std::max(.25, std::max(pat->length, events.back().beat + .25));
+            source.name = (ch->name + (type == 0   ? " CC " + juce::String(a.pitch)
+                                       : type == 1 ? juce::String(" Pitch bend")
+                                                   : juce::String(" Pressure")))
+                              .toStdString();
+            for (const auto &event : events)
+            {
+                const float value = float(juce::jlimit(0., 1., type == 1 ? (event.value + 1) / 2 : event.value));
+                if (!source.points.empty() && std::abs(source.points.back().beat - event.beat) < 1.e-9)
+                    source.points.back().value = value; // The later event at one beat wins.
+                else
+                    source.points.push_back({next.allocate(), std::min(event.beat, source.length), value,
+                                             source.points.empty() ? AutomationShape::single : AutomationShape::hold, 0});
+            }
+            // Sources span 0..length: hold the first value from 0 and the last to the end.
+            if (source.points.front().beat > 1.e-9)
+                source.points.insert(source.points.begin(),
+                                     {next.allocate(), 0., source.points.front().value, AutomationShape::single, 0});
+            else
+                source.points.front().beat = 0;
+            source.points[1 < source.points.size() ? 1 : 0].incoming = source.points.size() > 1
+                                                                          ? AutomationShape::hold
+                                                                          : AutomationShape::single;
+            if (source.points.back().beat < source.length - 1.e-9)
+                source.points.push_back({next.allocate(), source.length, source.points.back().value, AutomationShape::hold, 0});
+            else
+                source.points.back().beat = source.length;
+            if (source.points.size() > 100000)
+                return juce::Result::fail("noteAutomation.limit: Too many events for one clip");
+            next.automation.placements.push_back({next.allocate(), source.id, a.beat, source.length, 0, a.lane, false});
+            next.automation.sources.push_back(std::move(source));
         }
         if (id == "notes.group" || id == "notes.ungroup")
         {

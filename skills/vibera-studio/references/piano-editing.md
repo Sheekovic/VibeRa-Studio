@@ -87,3 +87,9 @@
   takes `text` = that target and `value` = the 0..1 lane level (pan/fine centred at .5:
   pan -1..1, fine -100..100 cents). Pan, Mod X/Y and Fine pitch are refused for plugin
   instrument notes (`noteLane.unsupportedTarget`). Controller dots show on the Velocity target only.
+- Turn into automation clip: `notes.toAutomation` (`pattern`, `channel`, `text` cc / pitchBend /
+  pressure, `pitch` CC number, `beat` Playlist start, `lane` 0..127; one Undo) turns the
+  Channel's controller lane in that Pattern into an unlinked automation clip (stepped values,
+  0..1; bend -1..1 maps to 0..1). Link it with `automation.link` or a control's automation menu
+  ("Link to existing source"). UI: Piano roll menu > Edit > Turn into automation clip (one item
+  per lane with events; placed at the Pattern's first clip on the first free lane).

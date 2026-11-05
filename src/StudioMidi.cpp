@@ -156,6 +156,24 @@ void Studio::midiFileMenu()
         const bool timeRange =
             static_cast<Editor *>(windows[1]->getContentComponent())->timeSelection().has_value();
         edit.addItem(74, "Group selected notes    Shift+G", selectedNotes.size() >= 2);
+        {
+            juce::PopupMenu toAutomation;
+            if (const auto *part = controller.project.pattern(selectedPattern))
+            {
+                std::map<std::pair<int, int>, int> lanes;
+                for (const auto &c : part->controllers)
+                    if (c.channel == selectedChannel && c.type <= 2)
+                        ++lanes[{c.type, c.type == 0 ? c.number : 0}];
+                for (const auto &[lane, count] : lanes)
+                    if (lane.first == 0 && lane.second >= 0 && lane.second <= 127)
+                        toAutomation.addItem(42000 + lane.second, "CC " + juce::String(lane.second) + " (" +
+                                                                       juce::String(count) + " events)");
+                    else if (lane.first > 0)
+                        toAutomation.addItem(42200 + lane.first, juce::String(lane.first == 1 ? "Pitch bend" : "Pressure") +
+                                                                     " (" + juce::String(count) + " events)");
+            }
+            edit.addSubMenu("Turn into automation clip", toAutomation, toAutomation.getNumItems() > 0);
+        }
         edit.addItem(75, "Ungroup selected notes    Alt+G", !selectedNotes.empty());
         edit.addItem(70, "Insert space    Ctrl+Ins", timeRange);
         edit.addItem(71, "Slice & insert space", timeRange);
@@ -426,6 +444,35 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if ((result >= 42000 && result <= 42127) || result == 42201 || result == 42202)
+            {
+                // At the Pattern's first Playlist clip (or the Song start), on the first free lane.
+                auto &project = safe->controller.project;
+                CommandArgs a;
+                a.pattern = safe->selectedPattern;
+                a.channel = safe->selectedChannel;
+                a.text = result < 42200 ? "cc" : result == 42201 ? "pitchBend" : "pressure";
+                a.pitch = result < 42200 ? result - 42000 : 0;
+                a.beat = 1.e18;
+                int lane = -1;
+                for (const auto &p : project.placements)
+                {
+                    lane = std::max(lane, p.lane);
+                    if (p.pattern == a.pattern)
+                        a.beat = std::min(a.beat, p.beat);
+                }
+                for (const auto &p : project.audioPlacements)
+                    lane = std::max(lane, p.lane);
+                for (const auto &p : project.automation.placements)
+                    lane = std::max(lane, p.lane);
+                if (a.beat > 1.e17)
+                    a.beat = 0;
+                a.lane = std::min(127, lane + 1);
+                safe->command("notes.toAutomation", a);
+                if (safe->status == "Ready")
+                    safe->status = "Automation clip created: link it from a control's automation menu";
                 return;
             }
             if (result == 74 || result == 75)
