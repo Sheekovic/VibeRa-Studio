@@ -107,7 +107,9 @@ Mixing and mastering processors:
   every plugin's state, adds the file to that effect's state and restarts it from there (plugin
   state, no Undo step); then set space 4 by parameter. It needs an active audio projection: in
   `--mcp-test` (no device) it is refused with `effectImpulse.notPrepared` and nothing changes.
-  The success path has not yet been run with a real audio device.
+  Verified 2026-11-05 with a real device (the effect restarts and its captured state carries
+  the file) and through the effect window's button in a real window (owned-window UI
+  Automation and dialog messages; Space switches to File).
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);
