@@ -299,6 +299,7 @@ class ClipPicker final : public juce::Component, private juce::ListBoxModel
     }
 
   public:
+    int focusKind() const noexcept { return kind; } // 0 Pattern, 1 audio, 2 automation (clip focus).
     std::function<void(int, Id)> choose;
     static juce::PopupMenu automationSourceMenu(const std::vector<Id> &ids)
     {

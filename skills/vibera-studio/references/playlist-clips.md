@@ -71,3 +71,5 @@
 - **Play selected** (`tool.play`, Y in the Playlist and Piano roll): in the Playlist, holding the
   mouse plays from that point and releasing stops; in the Piano roll, holding a note (or a
   row) sounds it. P / B / other tools leave it.
+- **Clip focus:** the picker type (Pat / Audio / Auto; `vibera_picker` `type`) is drawn on top of
+  stacked clips and is the type a click picks where clips overlap.

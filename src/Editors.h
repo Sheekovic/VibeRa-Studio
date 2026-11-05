@@ -301,12 +301,21 @@ class Studio::Editor final : public juce::Component,
     }
     std::vector<Placement> playlistClips() const
     {
-        auto clips = s.controller.project.placements;
+        // Clip focus: the type chosen in the picker (Pat / Audio / Auto) is drawn last, so it
+        // sits on top of stacked clips and is the one a click picks.
+        std::array<std::vector<Placement>, 3> kinds;
+        kinds[0] = s.controller.project.placements;
         for (const auto &audio : s.controller.project.audioPlacements)
-            clips.push_back({audio.id, 0, audio.lane, audio.beat,
-                             audio.duration * s.controller.project.tempo / 60., 0, audio.muted});
+            kinds[1].push_back({audio.id, 0, audio.lane, audio.beat,
+                                audio.duration * s.controller.project.tempo / 60., 0, audio.muted});
         for (const auto &clip : s.controller.project.automation.placements)
-            clips.push_back({clip.id, 0, clip.lane, clip.beat, clip.length, clip.offset, clip.muted});
+            kinds[2].push_back({clip.id, 0, clip.lane, clip.beat, clip.length, clip.offset, clip.muted});
+        const int focus = picker ? juce::jlimit(0, 2, picker->focusKind()) : 2;
+        std::vector<Placement> clips;
+        for (int k = 0; k < 3; ++k)
+            if (k != focus)
+                clips.insert(clips.end(), kinds[size_t(k)].begin(), kinds[size_t(k)].end());
+        clips.insert(clips.end(), kinds[size_t(focus)].begin(), kinds[size_t(focus)].end());
         return clips;
     }
     const AudioPlacement *audioClip(Id id) const
