@@ -701,7 +701,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     int autoTileMode = 0, tilePrimaryEditor = 2;
     std::array<bool, 5> floatingWindows{};
     std::array<juce::Rectangle<int>, 5> floatingBounds;
-    float browserWidth = 228, rackWidth = 450, mixerHeight = 280, playlistRatio = .52f;
+    // Docked layout: a left column (Channel Rack over Piano roll, rackWidth wide, the Rack taking
+    // playlistRatio of its height) beside the Playlist over the Mixer (mixerHeight).
+    float browserWidth = 228, rackWidth = 450, mixerHeight = 280, playlistRatio = .28f;
     bool browserShown = true;
     WorkspaceLook look;
     std::unique_ptr<juce::Drawable> brand;

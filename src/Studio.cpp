@@ -916,40 +916,42 @@ void Studio::resized()
         if (!floatingWindows[size_t(index)])
             windows[size_t(index)]->setBounds(bounds);
     };
+    // Default docking: the Channel Rack over the Piano roll on the left, the Playlist over the
+    // Mixer on the right (each column takes the whole height when the other is hidden).
+    const bool leftColumn = rack || piano, rightColumn = playlist || mixer;
+    auto leftArea = body, rightArea = body;
+    if (leftColumn && rightColumn)
+    {
+        const int w = juce::jlimit(330, std::max(330, int(body.getWidth() * .55f)), int(rackWidth));
+        leftArea = body.removeFromLeft(w);
+        rackSplit->setBounds(body.removeFromLeft(7));
+        rackSplit->setVisible(!floatingWindows[0] && !floatingWindows[1]);
+        rightArea = body;
+    }
     if (mixer)
     {
-        int h =
-            playlist || piano || rack
-                ? (getHeight() < 800 ? 32 : juce::jlimit(240, int(body.getHeight() * .38f), int(mixerHeight)))
-                : body.getHeight();
-        placeWindow(3, body.removeFromBottom(h));
-        if (playlist || piano || rack)
+        const int h = playlist ? (getHeight() < 800 ? 32 : juce::jlimit(200, int(rightArea.getHeight() * .5f), int(mixerHeight)))
+                               : rightArea.getHeight();
+        placeWindow(3, rightArea.removeFromBottom(h));
+        if (playlist)
         {
-            mixerSplit->setBounds(body.removeFromBottom(7));
+            mixerSplit->setBounds(rightArea.removeFromBottom(7));
             mixerSplit->setVisible(!floatingWindows[3]);
         }
     }
     if (playlist)
-    {
-        int h = piano || rack ? int((body.getHeight() - 7) * playlistRatio) : body.getHeight();
-        placeWindow(2, body.removeFromTop(h));
-        if (piano || rack)
-        {
-            arrangementSplit->setBounds(body.removeFromTop(7));
-            arrangementSplit->setVisible(!floatingWindows[2]);
-        }
-    }
+        placeWindow(2, rightArea);
     if (rack && piano)
     {
-        int w = juce::jlimit(330, std::max(330, int(body.getWidth() * .48f)), int(rackWidth));
-        placeWindow(0, body.removeFromRight(w));
-        rackSplit->setBounds(body.removeFromRight(7));
-        rackSplit->setVisible(!floatingWindows[0] && !floatingWindows[1]);
+        const int h = int((leftArea.getHeight() - 7) * playlistRatio);
+        placeWindow(0, leftArea.removeFromTop(std::max(120, h)));
+        arrangementSplit->setBounds(leftArea.removeFromTop(7));
+        arrangementSplit->setVisible(!floatingWindows[0] && !floatingWindows[1]);
     }
     else if (rack)
-        placeWindow(0, body);
+        placeWindow(0, leftArea);
     if (piano)
-        placeWindow(1, body);
+        placeWindow(1, leftArea);
     const auto floatArea = juce::Rectangle<int>(4, 84, getWidth() - 8, getHeight() - 113);
     std::vector<juce::Component *> raised;
     for (int index = 0; index < 5; ++index)

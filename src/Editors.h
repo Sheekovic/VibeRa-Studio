@@ -7480,13 +7480,11 @@ class Studio::Splitter final : public juce::Component
     {
         if (kind == 0)
             s.browserWidth = juce::jlimit(180.f, 360.f, initial + e.getDistanceFromDragStartX());
-        if (kind == 1)
-            s.playlistRatio =
-                juce::jlimit(.25f, .75f,
-                             initial + e.getDistanceFromDragStartY() /
-                                           float(std::max(1, s.workspace.getHeight() - int(s.mixerHeight))));
-        if (kind == 2)
-            s.rackWidth = juce::jlimit(330.f, 700.f, initial - e.getDistanceFromDragStartX());
+        if (kind == 1) // Between the Channel Rack and the Piano roll in the left column.
+            s.playlistRatio = juce::jlimit(.12f, .8f, initial + e.getDistanceFromDragStartY() /
+                                                                    float(std::max(1, s.workspace.getHeight())));
+        if (kind == 2) // Between the left column and the Playlist / Mixer column.
+            s.rackWidth = juce::jlimit(330.f, 900.f, initial + e.getDistanceFromDragStartX());
         if (kind == 3)
             s.mixerHeight = juce::jlimit(168.f, 360.f, initial - e.getDistanceFromDragStartY());
         if (kind == 4) // CoProducer dock on the right: dragging left widens it.
