@@ -58,3 +58,12 @@ binding is invalidated by replacement. MCP clients follow the same admission
 rules: wait for the matching worker, request `openEditor`, handle explicit `busy`,
 then poll an accepted job. A validated `closeEditor` also cancels a queued opening
 intent for that target; physical close can still fail busy, so verify actual state.
+
+## Instrument Channel strip in the plugin window
+
+A plugin instrument's window shows its Channel strip in the header: ON (mute), PAN, VOL and
+the Mixer TRACK with < / > arrows. Each change runs the ordinary Channel command (`channel.mute`,
+`channel.pan`, `channel.gain`, `channel.mixer` through the routing coordinator) with Undo, so
+the Mixer track can be set while the window stays open. Routing changes (Channel to insert,
+sends) no longer refuse because a plugin window is open: idle windows close for the routing
+job and reopen when it finishes.

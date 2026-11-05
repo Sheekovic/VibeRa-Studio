@@ -30,7 +30,20 @@ enum class PluginWrapperAction : int
     chainPaste = 12,
     chainLoad = 13,
     chainDirectory = 14,
-    sidechain = 15
+    sidechain = 15,
+    // Instrument Channel strip in the wrapper (familiar ON / PAN / VOL / TRACK header).
+    channelOn = 16,    // value 1 on, 0 muted
+    channelGain = 17,  // value 0..1 = volume 0..125%
+    channelPan = 18,   // value 0..1 = pan -1..1
+    channelTrack = 19  // parameter = Mixer insert index, value 0
+};
+// The instrument Channel that owns the plugin, as published by the application.
+struct PluginWrapperChannel
+{
+    bool present = false, on = true;
+    float gain = .78f, pan = 0;
+    int track = 0, maxTrack = 0;
+    bool operator==(const PluginWrapperChannel &) const = default;
 };
 struct PluginWrapperIntent
 {
@@ -47,6 +60,7 @@ struct PluginWrapperState
     PluginWrapperView view = PluginWrapperView::plugin;
     bool notifications = true;
     std::uint64_t lastTweakedSelection = 0;
+    PluginWrapperChannel channel{};
     bool operator==(const PluginWrapperState &) const = default;
 };
 inline bool pluginWrapperParameterAction(PluginWrapperAction action) noexcept
@@ -57,15 +71,17 @@ inline bool pluginWrapperParameterAction(PluginWrapperAction action) noexcept
 inline bool pluginWrapperIntentValid(const PluginWrapperIntent &intent) noexcept
 {
     const auto action = int(intent.action);
-    return action >= int(PluginWrapperAction::bypass) && action <= int(PluginWrapperAction::sidechain) &&
+    return action >= int(PluginWrapperAction::bypass) && action <= int(PluginWrapperAction::channelTrack) &&
            std::isfinite(intent.value) && intent.value >= 0 && intent.value <= 1 &&
            ((intent.action != PluginWrapperAction::bypass &&
-             intent.action != PluginWrapperAction::notifications) ||
+             intent.action != PluginWrapperAction::notifications && intent.action != PluginWrapperAction::channelOn) ||
             intent.value == 0 || intent.value == 1) &&
            (!pluginWrapperParameterAction(intent.action) || intent.generation != 0) &&
            (!intent.gestureOpen || intent.action == PluginWrapperAction::parameter) &&
-           (intent.action < PluginWrapperAction::chainCopy ||
+           (intent.action < PluginWrapperAction::chainCopy || intent.action > PluginWrapperAction::sidechain ||
             (intent.value == 0 && intent.parameter == 0 && intent.generation == 0)) &&
+           (intent.action != PluginWrapperAction::channelTrack ||
+            (intent.value == 0 && intent.generation == 0 && intent.parameter <= 100000)) &&
            (intent.action != PluginWrapperAction::audioIo || intent.io.valid());
 }
 struct PluginWrapperRequest
@@ -108,6 +124,10 @@ struct PluginWrapperMailbox
     std::atomic<std::uint64_t> selection{0}; // Actual displayed generation:32/native-ID:32.
     // CONTROL-published completed native gesture; never another consumer of the DSP gesture queue.
     std::atomic<std::uint64_t> lastTweakedSelection{0};
+    // CONTROL-published instrument Channel strip (read by the worker GUI).
+    std::atomic<bool> channelPresent{false}, channelOn{true};
+    std::atomic<float> channelGain{.78f}, channelPan{0};
+    std::atomic<int> channelTrack{0}, channelMaxTrack{0};
 
     static std::uint64_t pack(float value, bool gestureOpen) noexcept
     {

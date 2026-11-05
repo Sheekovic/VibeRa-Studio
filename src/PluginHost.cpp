@@ -916,6 +916,17 @@ void PluginHost::publishWrapperState(bool ready, bool bypassed, float mix, std::
     mailbox.lastTweakedSelection.store(lastTweakedSelection, std::memory_order_release);
     mailbox.ready.store(ready && alive(), std::memory_order_release);
 }
+void PluginHost::publishWrapperChannel(const PluginWrapperChannel &channel)
+{
+    if (!impl->shared) return;
+    auto &mailbox = impl->shared->wrapperControl;
+    mailbox.channelOn.store(channel.on, std::memory_order_release);
+    mailbox.channelGain.store(channel.gain, std::memory_order_release);
+    mailbox.channelPan.store(channel.pan, std::memory_order_release);
+    mailbox.channelTrack.store(channel.track, std::memory_order_release);
+    mailbox.channelMaxTrack.store(channel.maxTrack, std::memory_order_release);
+    mailbox.channelPresent.store(channel.present, std::memory_order_release);
+}
 PluginWrapperState PluginHost::wrapperState() const
 {
     if (!impl->shared || !alive()) return {};

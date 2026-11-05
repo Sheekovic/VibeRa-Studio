@@ -2251,6 +2251,47 @@ void Studio::admitPluginWrapperRequest(Id plugin, const std::shared_ptr<PluginHo
             }
             return; // The existing catalogue/automation job owns actual completion and history.
         }
+        if (intent.action >= PluginWrapperAction::channelOn && intent.action <= PluginWrapperAction::channelTrack)
+        {
+            // The owning instrument Channel's ON / volume / pan / Mixer track, through the
+            // canonical Channel commands (Undo, routing coordinator).
+            const Channel *owner = nullptr;
+            for (const auto &channel : controller.project.channels)
+                if (channel.instrument && channel.instrument->id == plugin)
+                    owner = &channel;
+            bool applied = false;
+            if (owner)
+            {
+                CommandArgs a;
+                a.channel = owner->id;
+                a.ids = {owner->id};
+                const auto id = owner->id;
+                juce::String commandId;
+                if (intent.action == PluginWrapperAction::channelOn)
+                    commandId = "channel.mute", a.enabled = intent.value == 0;
+                else if (intent.action == PluginWrapperAction::channelGain)
+                    commandId = "channel.gain", a.value = intent.value * 1.25;
+                else if (intent.action == PluginWrapperAction::channelPan)
+                    commandId = "channel.pan", a.value = intent.value * 2. - 1.;
+                else
+                    commandId = "channel.mixer", a.mixer = int(intent.parameter);
+                if (commandId == "channel.mixer")
+                    applied = applyRoutingSequence({a}, "Channel Mixer track").wasOk();
+                else
+                {
+                    command(commandId, a);
+                    applied = status == "Ready";
+                }
+                if (const auto *after = controller.project.channel(id); applied && after)
+                    applied = commandId == "channel.mixer" ? after->mixer == int(intent.parameter) || routingPending() : true;
+            }
+            host->completeWrapperRequest(request.serial,
+                                         applied ? PluginWrapperOutcome::completed : PluginWrapperOutcome::failed, {},
+                                         applied ? juce::String{} : juce::String("wrapper.channelRefused"),
+                                         applied ? "Channel updated" : (owner ? status : juce::String("No instrument Channel")));
+            pluginWrapperPending.reset();
+            return;
+        }
         auto args = juce::var(new juce::DynamicObject);
         args.getDynamicObject()->setProperty("target", juce::int64(plugin));
         args.getDynamicObject()->setProperty(
@@ -2415,6 +2456,21 @@ void Studio::servicePluginWrapperRequests()
         const auto lastSelection =
             lastGesture ? (std::uint64_t(lastGesture->generation) << 32) | lastGesture->id : 0;
         host->publishWrapperState(host->alive(), spec->bypass, spec->wet, lastSelection);
+        {
+            PluginWrapperChannel strip;
+            for (const auto &channel : controller.project.channels)
+                if (channel.instrument && channel.instrument->id == runtime.plugin)
+                {
+                    strip.present = true;
+                    strip.on = !channel.muted;
+                    strip.gain = juce::jlimit(0.f, 1.f, channel.gain / 1.25f);
+                    strip.pan = juce::jlimit(0.f, 1.f, (channel.pan + 1.f) * .5f);
+                    strip.track = channel.mixer;
+                }
+            for (const auto &insert : controller.project.mixer)
+                strip.maxTrack = std::max(strip.maxTrack, insert.index);
+            host->publishWrapperChannel(strip);
+        }
         if (!pluginWrapperPending)
         {
             PluginWrapperRequest request;

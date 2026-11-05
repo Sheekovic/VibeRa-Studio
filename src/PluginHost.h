@@ -239,6 +239,7 @@ class PluginHost
     bool completeWrapperRequest(unsigned serial, PluginWrapperOutcome, const juce::String &operation,
                                 const juce::String &code, const juce::String &message);
     void publishWrapperState(bool ready, bool bypassed, float mix, std::uint64_t lastTweakedSelection = 0);
+    void publishWrapperChannel(const PluginWrapperChannel &channel);
     PluginWrapperState wrapperState() const;
     std::uint64_t wrapperSelection() const;
     PluginNativeMeterReading nativeOutputMeter() const noexcept; // CONTROL telemetry; no audio freshness claim.

@@ -40,6 +40,7 @@ struct Studio::MixerChainWorkflow
         bool insertHistory = false;
         bool fullCapture = false, routingHistory = false, scalarHistory = false, ioHistory = false;
         bool structuralHistory = false;
+        bool reopenEditors = false; // Routing-only Apply: windows it closed reopen afterwards.
         juce::String structuralCommand;
         CommandArgs structuralArguments;
         Id sidechainTarget = 0;
@@ -845,8 +846,21 @@ void Studio::serviceMixerChainApply() noexcept
                 ? "Unchanged structural command; no model, history or audio work"
                 : "Mixer structural change applied through canonical history and actual audio activation";
         status = next->message;
+        std::vector<Id> reopen;
+        if (a.reopenEditors)
+            for (const auto &pin : a.sourcePins)
+                if (pin.closeWanted)
+                    reopen.push_back(pin.id);
         w.receipts[a.index].swap(next);
         w.active.reset(); // CONTROL only, after actual capture/file/preparation drain.
+        if (!reopen.empty())
+            juce::MessageManager::callAsync([safe = juce::Component::SafePointer<Studio>(this), reopen]
+                                            {
+                                                if (safe)
+                                                    for (const auto plugin : reopen)
+                                                        if (safe->controller.project.plugin(plugin))
+                                                            safe->openPluginEditorUI(plugin, true);
+                                            });
     };
     try
     {
@@ -1469,9 +1483,18 @@ try
             }
             // Append and main-I/O changes own editor closure on their same
             // structural job. Capture pins become final after the actual ACK.
+            // Routing-only changes (Channel -> insert, sends) change no plugin state: idle plugin
+            // windows close for the structural job and reopen after it (familiar: assign the
+            // Mixer track while the plugin window is open).
+            const bool routeOnly =
+                structural && (mixerStructuralCommandDispatch == "channel.mixer" ||
+                               mixerStructuralCommandDispatch == "mixer.route" ||
+                               mixerStructuralCommandDispatch == "mixer.routeOnly" ||
+                               mixerStructuralCommandDispatch == "mixer.send");
             const bool closeEditors =
                 structural && (mixerStructuralCommandDispatch == "plugin.effect.insert" ||
-                               mixerStructuralCommandDispatch == "plugin.io");
+                               mixerStructuralCommandDispatch == "plugin.io" || routeOnly);
+            pending->reopenEditors = routeOnly;
             for (const auto &runtime : audio.pluginRuntimeStates())
             {
                 const auto *spec = controller.project.plugin(runtime.plugin);

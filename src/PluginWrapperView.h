@@ -105,6 +105,56 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
             if (independentReady() && !state.instrument)
                 admit({PluginWrapperAction::mix, 0, 0, float(mix.getValue()), false});
         };
+        for (auto *knob : {&channelPan, &channelVol})
+        {
+            addChildComponent(*knob);
+            knob->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+            knob->setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+            knob->setRange(0, 1, .001);
+            knob->setColour(juce::Slider::rotarySliderFillColourId, juce::Colour(0xff70c2b5));
+            knob->setChangeNotificationOnlyOnRelease(true);
+            knob->setDoubleClickReturnValue(true, knob == &channelPan ? .5 : .78 / 1.25);
+        }
+        channelPan.setTooltip("Channel pan (double-click: centre)");
+        channelVol.setTooltip("Channel volume (double-click: default)");
+        channelPan.onValueChange = [this]
+        {
+            if (independentReady() && state.channel.present)
+                admit({PluginWrapperAction::channelPan, 0, 0, float(channelPan.getValue()), false});
+        };
+        channelVol.onValueChange = [this]
+        {
+            if (independentReady() && state.channel.present)
+                admit({PluginWrapperAction::channelGain, 0, 0, float(channelVol.getValue()), false});
+        };
+        addChildComponent(channelOn);
+        channelOn.setTooltip("Channel on / muted");
+        channelOn.onClick = [this]
+        {
+            const bool wanted = channelOn.getToggleState();
+            channelOn.setToggleState(state.channel.on, juce::dontSendNotification);
+            if (independentReady() && state.channel.present)
+                admit({PluginWrapperAction::channelOn, 0, 0, wanted ? 1.f : 0.f, false});
+        };
+        for (auto *button : {&trackDown, &trackUp})
+        {
+            addChildComponent(*button);
+            button->onClick = [this, up = button == &trackUp]
+            {
+                if (!independentReady() || !state.channel.present)
+                    return;
+                const int next = juce::jlimit(0, state.channel.maxTrack, state.channel.track + (up ? 1 : -1));
+                if (next != state.channel.track)
+                    admit({PluginWrapperAction::channelTrack, std::uint32_t(next), 0, 0.f, false});
+            };
+        }
+        trackDown.setTooltip("Mixer track: previous insert");
+        trackUp.setTooltip("Mixer track: next insert");
+        addChildComponent(trackLabel);
+        trackLabel.setJustificationType(juce::Justification::centred);
+        trackLabel.setColour(juce::Label::backgroundColourId, juce::Colour(0xff8a3d45));
+        trackLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        trackLabel.setTooltip("Mixer TRACK this instrument plays into (0 = Master)");
         addAndMakeVisible(choices);
         choices.setTextWhenNothingSelected("No exposed parameters");
         choices.onChange = [this]
@@ -309,6 +359,22 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
     {
         state = next;
         controlPending = next.pending;
+        {
+            const bool strip = next.channel.present;
+            for (juce::Component *c : std::initializer_list<juce::Component *>{&channelOn, &channelPan, &channelVol,
+                                                                               &trackDown, &trackUp, &trackLabel})
+                if (c->isVisible() != strip)
+                {
+                    c->setVisible(strip);
+                    resized();
+                }
+            channelOn.setToggleState(next.channel.on, juce::dontSendNotification);
+            if (!channelPan.isMouseButtonDown())
+                channelPan.setValue(next.channel.pan, juce::dontSendNotification);
+            if (!channelVol.isMouseButtonDown())
+                channelVol.setValue(next.channel.gain, juce::dontSendNotification);
+            trackLabel.setText("TRACK " + juce::String(next.channel.track), juce::dontSendNotification);
+        }
         std::uint32_t selectedId = 0, selectedGeneration = 0;
         const bool hadSelection = currentParameter() != nullptr;
         if (const auto *parameter = currentParameter())
@@ -460,6 +526,14 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
         g.fillAll(juce::Colour(0xff20252b));
         g.setColour(juce::Colour(0xff343c44));
         g.drawHorizontalLine(toolbarHeight - 1, 0.f, float(getWidth()));
+        if (channelPan.isVisible())
+        {
+            g.setColour(juce::Colour(0xffb8c7cf));
+            g.setFont(juce::Font(juce::FontOptions(11.f, juce::Font::bold)));
+            for (auto *knob : {&channelPan, &channelVol})
+                g.drawText(knob == &channelPan ? "PAN" : "VOL", knob->getRight() + 2, knob->getY(), 28, knob->getHeight(),
+                           juce::Justification::centredLeft);
+        }
     }
 
     void resized() override
@@ -470,6 +544,19 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
         settingsTab.setBounds(toolbar.removeFromLeft(86));
         toolbar.removeFromLeft(4);
         parametersTab.setBounds(toolbar.removeFromLeft(104));
+        if (channelOn.isVisible())
+        {
+            toolbar.removeFromLeft(10);
+            channelOn.setBounds(toolbar.removeFromLeft(50));
+            channelPan.setBounds(toolbar.removeFromLeft(32));
+            toolbar.removeFromLeft(30); // "PAN" label (painted).
+            channelVol.setBounds(toolbar.removeFromLeft(32));
+            toolbar.removeFromLeft(30); // "VOL" label (painted).
+            toolbar.removeFromLeft(6);
+            trackDown.setBounds(toolbar.removeFromLeft(22));
+            trackLabel.setBounds(toolbar.removeFromLeft(70));
+            trackUp.setBounds(toolbar.removeFromLeft(22));
+        }
         bypass.setBounds(toolbar.removeFromRight(84));
         status.setBounds(toolbar);
         feedbackLabel.setBounds(getLocalBounds().removeFromBottom(footerHeight).reduced(8, 2));
@@ -589,6 +676,11 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
         saveChain{"Save chain"}, loadChain{"Load chain"}, chainDirectory{"Chain directory"},
         detectorRouting{"Detector routing"};
     juce::ToggleButton bypass{"Bypass"}, notifications{"Native parameter notifications"};
+    // Instrument Channel strip (familiar wrapper header): ON, PAN, VOL and the Mixer TRACK.
+    juce::ToggleButton channelOn{"ON"};
+    juce::Slider channelPan, channelVol;
+    juce::TextButton trackDown{"<"}, trackUp{">"};
+    juce::Label trackLabel;
     juce::Label status, feedbackLabel, settingsHeading, mixLabel, parameterLabel, unavailable, ioHeading,
         inputBusLabel, outputBusLabel, inputMappingLabel, ioHint, chainHeading, chainHint;
     juce::ComboBox choices, inputBus, outputBus, inputMapping;
