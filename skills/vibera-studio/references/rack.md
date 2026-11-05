@@ -71,3 +71,8 @@ arbitrary semantic control. Legacy MCP gaps are deferred, not waived.
   (lowest index first) as one routing plan and one Undo; refuses with
   `rack.assignFree.insufficient` when there are fewer free inserts than Channels. UI: Channel
   Rack options menu.
+- Row knobs: every Channel row has Pan (bipolar) and Volume (0..200%) knobs before "PR". Drag
+  up/down (150 px full range, Shift fine) is one Undo step (`channel.pan` / `channel.gain`);
+  Alt+click resets (volume 0.7, pan centre); right-click offers Create automation clip (same as
+  `channel.automateVolume` / `channel.automatePan` for that Channel) and Reset. The Rack label
+  column is 230..250 px wide to fit them.

@@ -738,8 +738,18 @@ class Studio::Editor final : public juce::Component,
     }
     int rackLabelWidth() const
     {
-        return juce::jlimit(190, 210, int(getWidth() * .34));
+        // Includes the per-row Pan and Volume knobs (familiar Channel Rack row).
+        return juce::jlimit(230, 250, int(getWidth() * .38));
     }
+    // Channel Rack row knobs: Pan then Volume, just before the "PR" and Mixer labels.
+    juce::Rectangle<int> rackKnobBounds(int rowTop, bool volume) const
+    {
+        return {rackLabelWidth() - 74 - (volume ? 20 : 40), rowTop + 7, 18, 18};
+    }
+    int rackKnobDrag = 0; // 0 none, 1 Volume, 2 Pan.
+    Id rackKnobChannel = 0;
+    float rackKnobStartValue = 0, rackKnobStartY = 0;
+    bool rackKnobGesture = false;
     int mixerStripWidth() const
     {
         return getWidth() >= 700 ? getWidth() - 240 : getWidth();
@@ -3076,12 +3086,31 @@ class Studio::Editor final : public juce::Component,
                     g.fillRect(24.f, float(y + 14), 2.f, 4.f);
                 }
                 g.setColour(grid.brighter(.05f));
-                g.fillRoundedRectangle(38.f, float(y + 2), float(rackLabelWidth() - 112), 28.f, 3);
+                g.fillRoundedRectangle(38.f, float(y + 2), float(rackLabelWidth() - 156), 28.f, 3);
                 const bool hasIcon = c.icon != "none";
                 if (hasIcon)
                     channel_icons::draw(g, {43.f, float(y + 7), 18.f, 18.f}, c.icon, colour);
-                label(g, c.name, {hasIcon ? 65 : 44, y, rackLabelWidth() - (hasIcon ? 143 : 122), 32},
+                label(g, c.name, {hasIcon ? 65 : 44, y, rackLabelWidth() - (hasIcon ? 187 : 166), 32},
                       c.muted ? muted : ink, 12);
+                // Pan (bipolar, from the top) and Volume (0..200%, from the left) knobs.
+                for (const bool volume : {false, true})
+                {
+                    const auto knob = rackKnobBounds(y, volume).toFloat();
+                    const float value = volume ? juce::jlimit(0.f, 1.f, c.gain / 2.f) : (c.pan + 1.f) / 2.f;
+                    const float start = -2.35619f, sweep = 4.71239f;
+                    g.setColour(bg.darker(.25f));
+                    g.fillEllipse(knob);
+                    juce::Path arc;
+                    const float from = volume ? start : 0.f, to = start + sweep * value;
+                    arc.addCentredArc(knob.getCentreX(), knob.getCentreY(), 7.f, 7.f, 0.f, std::min(from, to),
+                                      std::max(from, to), true);
+                    g.setColour((volume ? accent : orange).withAlpha(c.muted ? .35f : .95f));
+                    g.strokePath(arc, juce::PathStrokeType(2.f));
+                    const float angle = to - 1.5708f;
+                    g.setColour(ink.withAlpha(.9f));
+                    g.drawLine(knob.getCentreX(), knob.getCentreY(), knob.getCentreX() + 5.5f * std::cos(angle),
+                               knob.getCentreY() + 5.5f * std::sin(angle), 1.5f);
+                }
                 label(g, c.audioClip ? "--" : "PR", {rackLabelWidth() - 70, y, 30, 32},
                       c.audioClip ? muted : accent, 11);
                 label(g, c.mixer == 0 ? "M" : juce::String(c.mixer), {rackLabelWidth() - 36, y, 32, 32},
@@ -4861,6 +4890,52 @@ class Studio::Editor final : public juce::Component,
                 }
                 return;
             }
+            for (const bool volume : {false, true})
+                if (rackKnobBounds(rackRowTop(row), volume).expanded(2).contains(e.position.toInt()) &&
+                    !targetChannel->audioClip)
+                {
+                    const auto *channel = targetChannel;
+                    if (e.mods.isPopupMenu())
+                    {
+                        juce::PopupMenu menu;
+                        menu.addItem(1, "Create automation clip");
+                        menu.addItem(2, volume ? "Reset volume" : "Centre pan");
+                        const Id id = channelId;
+                        menu.showMenuAsync({}, [safe, id, volume](int chosen)
+                                           {
+                                               if (!safe || chosen <= 0)
+                                                   return;
+                                               if (chosen == 1)
+                                               {
+                                                   if (auto made = safe->s.createChannelAutomation(id, !volume); made.failed())
+                                                       safe->s.status = made.getErrorMessage();
+                                               }
+                                               else
+                                               {
+                                                   CommandArgs a;
+                                                   a.channel = id;
+                                                   a.value = volume ? .7 : 0.;
+                                                   safe->s.command(volume ? "channel.gain" : "channel.pan", a);
+                                               }
+                                               safe->repaint();
+                                           });
+                        return;
+                    }
+                    if (e.mods.isAltDown())
+                    {
+                        CommandArgs a;
+                        a.channel = channelId;
+                        a.value = volume ? .7 : 0.;
+                        s.command(volume ? "channel.gain" : "channel.pan", a);
+                        return;
+                    }
+                    rackKnobDrag = volume ? 1 : 2;
+                    rackKnobChannel = channelId;
+                    rackKnobStartValue = volume ? channel->gain : channel->pan;
+                    rackKnobStartY = e.position.y;
+                    rackKnobGesture = s.controller.beginGesture();
+                    return;
+                }
             s.selectRackChannels({channelId}, "replace", channelId);
             targetChannel = s.controller.project.channel(channelId);
             if (!targetChannel)
@@ -6206,6 +6281,20 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseDrag(const juce::MouseEvent &e) override
     {
+        if (rackKnobDrag)
+        {
+            // 150 px for the full range; Shift for fine steps.
+            const bool volume = rackKnobDrag == 1;
+            const float range = volume ? 2.f : 2.f, scale = (e.mods.isShiftDown() ? .2f : 1.f) * range / 150.f;
+            CommandArgs a;
+            a.channel = rackKnobChannel;
+            a.value = juce::jlimit(volume ? 0. : -1., volume ? 2. : 1.,
+                                   double(rackKnobStartValue + (rackKnobStartY - e.position.y) * scale));
+            if (const auto *channel = s.controller.project.channel(rackKnobChannel);
+                channel && std::abs((volume ? channel->gain : channel->pan) - a.value) > 1.e-4)
+                s.command(volume ? "channel.gain" : "channel.pan", a);
+            return;
+        }
         if (playToolPreviewing)
         {
             const auto hitNote = pianoHit(e.position);
@@ -6759,6 +6848,13 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseUp(const juce::MouseEvent &e) override
     {
+        if (std::exchange(rackKnobDrag, 0))
+        {
+            if (std::exchange(rackKnobGesture, false))
+                finishUiGesture(s, "Channel volume / pan");
+            repaint();
+            return;
+        }
         rulerScrubbing = false;
         if (std::exchange(rackPreviewing, false))
             s.previewNote(-1);
