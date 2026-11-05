@@ -1604,6 +1604,18 @@ class Studio::Editor final : public juce::Component,
                     arrangementsMenu.addItem(391, "Clone arrangement");
                     arrangementsMenu.addItem(392, "Rename arrangement...");
                     arrangementsMenu.addItem(393, "Delete arrangement", !project.arrangements.empty());
+                    juce::PopupMenu mergeEnd, mergeStart, insertHere;
+                    for (size_t i = 0; i < project.arrangements.size(); ++i)
+                    {
+                        mergeEnd.addItem(500 + int(i), project.arrangements[i].name);
+                        mergeStart.addItem(700 + int(i), project.arrangements[i].name);
+                        insertHere.addItem(900 + int(i), project.arrangements[i].name);
+                    }
+                    juce::PopupMenu merge;
+                    merge.addSubMenu("Append at the end", mergeEnd);
+                    merge.addSubMenu("Blend from the start", mergeStart);
+                    merge.addSubMenu("Insert at the playhead (moves later clips)", insertHere);
+                    arrangementsMenu.addSubMenu("Merge with", merge, !project.arrangements.empty());
                     menu.addSubMenu("Arrangements (" + arrangements::currentName(project) + ")", arrangementsMenu);
                 }
                 menu.addItem(11, "Add marker at playhead");
@@ -1672,6 +1684,28 @@ class Studio::Editor final : public juce::Component,
                         if (result == 7)
                         {
                             safe->viewAction("playlist.picker");
+                            return;
+                        }
+                        if (result >= 500 && result < 1200)
+                        {
+                            // Merge with: 500+ append at the end, 700+ blend from the start, 900+ insert at the playhead.
+                            const auto &project = safe->s.controller.project;
+                            const int base = result >= 900 ? 900 : result >= 700 ? 700 : 500;
+                            if (size_t(result - base) >= project.arrangements.size())
+                                return;
+                            CommandArgs a;
+                            a.target = project.arrangements[size_t(result - base)].id;
+                            a.enabled = base == 900;
+                            double end = 0;
+                            for (const auto &c : project.placements)
+                                end = std::max(end, c.beat + c.length);
+                            for (const auto &c : project.audioPlacements)
+                                end = std::max(end, project.audioEndBeat(c.beat, c.duration));
+                            const double bar = project.numerator * 4. / std::max(1, project.denominator);
+                            a.beat = base == 500   ? std::ceil(end / bar - 1.e-9) * bar
+                                     : base == 700 ? 0.
+                                                   : std::max(0., safe->s.audio.positionBeat());
+                            safe->s.command("arrangement.merge", a);
                             return;
                         }
                         if (result >= 390 && result < 400 + 256)

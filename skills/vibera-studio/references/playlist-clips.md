@@ -65,3 +65,6 @@
   With the mode off the right edge resizes (trims) as before.
 - **Track LED:** click mutes, Ctrl+click solos, Shift+click locks, Alt+click mutes the whole
   track group (one Undo). Track menu > Auto color group gives the group this track's colour.
+- **Merge with** (Arrangements menu; `arrangement.merge`, `args.target` stored arrangement,
+  `args.beat` position, `args.enabled` insert = move later material right first): adds copies
+  of that arrangement's clips and markers to the open one (the source stays). One Undo.

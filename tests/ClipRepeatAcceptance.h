@@ -437,6 +437,27 @@ inline void tests()
             controller.undoEdit();
             require(controller.project.mixer.front().eq == MixerEqSettings{}, "EQ edit is one Undo step");
         }
+        {
+            // Arrangement merge: clone, then append the stored original at the end of the copy.
+            const auto before = controller.project.placements.size();
+            CommandArgs clone;
+            require(controller.execute("arrangement.clone", clone).wasOk(), "Clone the arrangement");
+            CommandArgs merge2;
+            merge2.target = controller.project.arrangements.front().id;
+            merge2.beat = 16;
+            merge2.enabled = false;
+            require(controller.execute("arrangement.merge", merge2).wasOk(), "Merge the stored arrangement");
+            int late = 0;
+            for (const auto &c : controller.project.placements)
+                late += c.beat >= 16;
+            require(controller.project.placements.size() == before * 2 && late == int(before),
+                    "Merged clips are added from the merge beat, the open ones stay");
+            controller.undoEdit();
+            require(controller.project.placements.size() == before, "Merge is one Undo step");
+            merge2.target = 0;
+            require(controller.execute("arrangement.merge", merge2).failed(), "Merging the open arrangement fails");
+            controller.undoEdit();
+        }
         CommandArgs empty;
         empty.beat = 4;
         require(controller.execute("clip.paste", empty).failed(), "Paste with nothing copied fails");

@@ -813,6 +813,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"arrangement.clone", "Clone arrangement", Scope::playlist, true, true, "command"},
         {"arrangement.select", "Switch arrangement", Scope::playlist, true, true, "command"},
         {"arrangement.rename", "Rename arrangement", Scope::playlist, true, true, "command"},
+        {"arrangement.merge", "Merge another arrangement into this one", Scope::playlist, true, true, "command"},
         {"arrangement.delete", "Delete arrangement", Scope::playlist, true, true, "command"},
         {"tempo.change.add", "Add tempo change", Scope::playlist, true, true, "command"},
         {"tempo.change.set", "Edit tempo change", Scope::playlist, true, true, "command"},
@@ -5420,7 +5421,53 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         auto stored = std::find_if(next.arrangements.begin(), next.arrangements.end(),
                                    [&](const auto &x) { return x.id == a.target; });
         const bool current = a.target == 0 || (next.arrangementId != 0 && a.target == next.arrangementId);
-        if (id == "arrangement.add" || id == "arrangement.clone")
+        if (id == "arrangement.merge")
+        {
+            // Copies of a stored arrangement's clips and markers land at args.beat in the open
+            // one (blend); with args.enabled (insert) later material first moves right by the
+            // merged length. The source arrangement stays as it is.
+            if (current || stored == next.arrangements.end())
+                return juce::Result::fail("Choose another stored arrangement to merge");
+            if (!std::isfinite(a.beat) || a.beat < 0 || a.beat > 1000000)
+                return juce::Result::fail("Merge position is 0..1000000 beats");
+            auto copy = arrangements::cloneWithNewIds(next, *stored, stored->name);
+            double length = 0;
+            for (const auto &c : copy.placements)
+                length = std::max(length, c.beat + c.length);
+            for (const auto &c : copy.audioPlacements)
+                length = std::max(length, next.audioEndBeat(c.beat, c.duration));
+            for (const auto &c : copy.automationPlacements)
+                length = std::max(length, c.beat + c.length);
+            if (length <= 0)
+                return juce::Result::fail("That arrangement has no clips");
+            if (a.enabled)
+            {
+                const auto moves = [&](double beat) { return beat >= a.beat - 1.e-9; };
+                for (auto &c : next.placements)
+                    if (moves(c.beat))
+                        c.beat += length;
+                for (auto &c : next.audioPlacements)
+                    if (moves(c.beat))
+                        c.beat += length;
+                for (auto &c : next.automation.placements)
+                    if (moves(c.beat))
+                        c.beat += length;
+                for (auto &m : next.markers)
+                    if (moves(m.beat))
+                        m.beat += length;
+            }
+            for (auto c : copy.placements)
+                c.beat += a.beat, next.placements.push_back(c);
+            for (auto c : copy.audioPlacements)
+                c.beat += a.beat, next.audioPlacements.push_back(c);
+            for (auto c : copy.automationPlacements)
+                c.beat += a.beat, next.automation.placements.push_back(c);
+            for (auto m : copy.markers)
+                m.beat += a.beat, next.markers.push_back(m);
+            for (auto &g : copy.clipGroups)
+                next.clipGroups.push_back(g);
+        }
+        else if (id == "arrangement.add" || id == "arrangement.clone")
         {
             if (next.arrangements.size() >= 255)
                 return juce::Result::fail("Too many arrangements");
