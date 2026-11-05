@@ -482,6 +482,7 @@ void Studio::rackGroupMenu(juce::Component *anchor)
     menu.addItem(5, "Move selected to Unsorted", !selectedChannels.empty());
     menu.addSeparator();
     menu.addItem(6, "Select all visible Channels");
+    menu.addItem(28, "Select unused Channels");
     menu.addItem(7, "Deselect Channels", !selectedChannels.empty());
     juce::PopupMenu fill;
     addStepFillItems(fill, selectedChannels, selectedPattern);
@@ -498,6 +499,8 @@ void Studio::rackGroupMenu(juce::Component *anchor)
     menu.addItem(11, "Global Swing...");
     menu.addSeparator();
     menu.addItem(20, "Colour / icon selected Channels...", !selectedChannels.empty());
+    menu.addItem(29, "Random colours for selected Channels", !selectedChannels.empty());
+    menu.addItem(30, "Gradient colours for selected Channels", selectedChannels.size() > 1);
     juce::PopupMenu sort;
     sort.addItem(21, "Name A-Z");
     sort.addItem(22, "Assigned colour (theme first)");
@@ -526,6 +529,35 @@ void Studio::rackGroupMenu(juce::Component *anchor)
             }
             if (action == 20)
                 safe->channelPropertiesDialog(channels);
+            if (action == 29 || action == 30)
+            {
+                CommandArgs args;
+                args.ids = channels;
+                args.text = action == 29 ? "random" : "gradient";
+                args.value = double(juce::Random::getSystemRandom().nextInt(1000000));
+                safe->command("rack.colourSpread", args);
+            }
+            if (action == 28)
+            {
+                // Channels with no notes, steps or loops in any Pattern and no Playlist audio clip.
+                const auto &p = safe->controller.project;
+                std::vector<Id> unused;
+                for (const auto &channel : p.channels)
+                {
+                    bool used = std::any_of(p.audioPlacements.begin(), p.audioPlacements.end(),
+                                            [&](const auto &c) { return c.channel == channel.id; });
+                    for (const auto &pattern : p.patterns)
+                        used = used ||
+                               std::any_of(pattern.notes.begin(), pattern.notes.end(),
+                                           [&](const auto &n) { return n.channel == channel.id; }) ||
+                               std::any_of(pattern.channelLoops.begin(), pattern.channelLoops.end(),
+                                           [&](const auto &l) { return l.channel == channel.id; });
+                    if (!used)
+                        unused.push_back(channel.id);
+                }
+                safe->selectRackChannels(unused);
+                safe->status = juce::String(int(unused.size())) + " unused Channel(s) selected";
+            }
             if (action >= 21 && action <= 25)
             {
                 CommandArgs args;

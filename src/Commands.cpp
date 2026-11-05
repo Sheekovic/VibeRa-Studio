@@ -528,6 +528,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.properties", "Channel name / colour / icon", Scope::rack, true, true, "command"},
         {"rack.properties", "Selected Channel colour / icon", Scope::rack, true, true, "command"},
         {"rack.sort", "Sort selected Channels", Scope::rack, true, true, "command"},
+        {"rack.colourSpread", "Colour selected Channels (random / gradient)", Scope::rack, true, true, "command"},
         {"channel.mixer", "Assign Mixer insert", Scope::rack, true, true, "command"},
         {"channel.gain", "Channel volume", Scope::rack, true, true, "command"},
         {"channel.pan", "Channel pan", Scope::rack, true, true, "command"},
@@ -2825,6 +2826,53 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
     {
         if (auto edited = applyChannelManagement(next, id, a); edited.failed())
             return edited;
+    }
+    else if (id == "rack.colourSpread")
+    {
+        // args.text "random" (args.value seeds it) or "gradient" (from the first to the last
+        // selected Channel's colour; a hue sweep when they match or follow the theme).
+        if (a.text != "random" && a.text != "gradient")
+            return juce::Result::fail("Colour mode is random or gradient");
+        std::vector<Channel *> chosenChannels;
+        for (auto id2 : a.ids)
+        {
+            auto *channel = next.channel(id2);
+            if (!channel)
+                return missing();
+            chosenChannels.push_back(channel);
+        }
+        if (chosenChannels.empty() || chosenChannels.size() > 1024)
+            return juce::Result::fail("Select Channels to colour");
+        const auto n = chosenChannels.size();
+        if (a.text == "random")
+        {
+            juce::Random random(juce::int64(std::isfinite(a.value) ? a.value : 0));
+            float hue = random.nextFloat();
+            for (auto *channel : chosenChannels)
+            {
+                // Golden-ratio hue steps keep neighbours distinct; moderate saturation and
+                // brightness keep every colour readable on the Rack.
+                hue = std::fmod(hue + .618034f, 1.f);
+                channel->colour = juce::Colour::fromHSV(hue, .45f + .2f * random.nextFloat(),
+                                                        .78f + .15f * random.nextFloat(), 1.f)
+                                      .getARGB();
+            }
+        }
+        else
+        {
+            const auto first = juce::Colour(chosenChannels.front()->colour),
+                       last = juce::Colour(chosenChannels.back()->colour);
+            const bool sweep = chosenChannels.front()->colour == 0 || chosenChannels.back()->colour == 0 ||
+                               first == last;
+            for (size_t i = 0; i < n; ++i)
+            {
+                const float t = n > 1 ? float(i) / float(n - 1) : 0.f;
+                chosenChannels[i]->colour =
+                    (sweep ? juce::Colour::fromHSV(.02f + .75f * t, .55f, .88f, 1.f) : first.interpolatedWith(last, t))
+                        .withAlpha(1.f)
+                        .getARGB();
+            }
+        }
     }
     else if (isChannelAppearanceCommand(id))
     {

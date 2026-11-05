@@ -94,3 +94,13 @@ real canonical state/history, malformed inputs, saved recipes and project jobs;
 it supplies no native OS input, physical MIDI/audio, listening or live DSP claim.
 Advanced groups/locked solo/link-aware cloning and the whole RPS-B milestone
 remain open until their own implementation and complete acceptance.
+
+## Random and gradient colours
+
+`rack.colourSpread` (`args.ids` = Channels, `args.text` = `random` or `gradient`): random
+gives distinct readable hues (seeded by `args.value`); gradient blends from the first to the
+last selected Channel's colour, or sweeps the hue when they match or follow the theme. One
+Undo step. In the Rack options menu: Random / Gradient colours for selected Channels, and
+Select unused Channels (no notes, steps, loops or Playlist audio clips in any Pattern).
+Ctrl+click a Channel button previews its sound; Shift+wheel over the Rack title steps
+through Patterns.

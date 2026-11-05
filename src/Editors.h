@@ -454,6 +454,7 @@ class Studio::Editor final : public juce::Component,
     int savedTopPitch = 72;
     bool timeSelecting = false, timeSelectionAdd = false;
     bool rulerScrubbing = false; // Playlist ruler: left-drag moves the playhead continuously.
+    bool rackPreviewing = false; // Ctrl+click on a Channel button sounds it until mouse up.
     int trackResizeLane = -1; // Playlist: dragging a track header's bottom edge sets its height.
     double trackResizeStart = 1;
     bool pitchSelecting = false, pitchSelectionAdd = false;
@@ -4668,6 +4669,11 @@ class Studio::Editor final : public juce::Component,
                     if (!c.audioClip)
                         s.showEditor(1);
                 }
+                else if (e.x >= 38 && e.x < rackLabelWidth() - 74 && e.mods.isCtrlDown() && !c.audioClip)
+                {
+                    s.previewNote(60); // Ctrl+click: hear the Channel without opening it (released on mouse up).
+                    rackPreviewing = true;
+                }
                 else if (e.x >= 38 && e.x < rackLabelWidth() - 74)
                     s.openInstrument(c.id);
             }
@@ -6288,6 +6294,8 @@ class Studio::Editor final : public juce::Component,
     void mouseUp(const juce::MouseEvent &e) override
     {
         rulerScrubbing = false;
+        if (std::exchange(rackPreviewing, false))
+            s.previewNote(-1);
         if (stretchingAudio)
         {
             const auto id = std::exchange(stretchingAudio, Id{});
@@ -6820,6 +6828,20 @@ class Studio::Editor final : public juce::Component,
         }
         if (type == 0)
         {
+            if (e.mods.isShiftDown() && e.y < 44 && std::abs(wheel.deltaY) > 0)
+            {
+                // Shift+wheel over the Rack title bar steps through Patterns.
+                const auto &patterns = s.controller.project.patterns;
+                const auto at = std::find_if(patterns.begin(), patterns.end(),
+                                             [&](const auto &p) { return p.id == s.selectedPattern; });
+                if (at != patterns.end())
+                {
+                    const auto index = std::distance(patterns.begin(), at) + (wheel.deltaY > 0 ? -1 : 1);
+                    if (index >= 0 && index < std::ptrdiff_t(patterns.size()))
+                        s.selectPattern(patterns[size_t(index)].id);
+                }
+                return;
+            }
             if (e.mods.isShiftDown() && !e.mods.isCtrlDown() && !e.mods.isAltDown() && e.x >= 34 &&
                 e.x < rackLabelWidth() - 36 && e.y >= 44 && e.y < rackContentBottom() &&
                 std::abs(wheel.deltaY) > 0)
