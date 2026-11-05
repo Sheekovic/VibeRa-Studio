@@ -812,6 +812,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"clip.cut", "Cut clips", Scope::playlist, false, true, "action"},
         {"clip.paste", "Paste clips at the playhead", Scope::playlist, true, true, "command"},
         {"clip.chop", "Chop clips into bars or beats", Scope::playlist, true, true, "command"},
+        {"clip.trimStart", "Trim Pattern clip start", Scope::playlist, true, true, "command"},
         {"clip.quantize", "Quick quantize clip start times", Scope::playlist, true, true, "command"},
         {"time.insert", "Insert space (time selection)", Scope::playlist, true, true, "command"},
         {"time.delete", "Delete space (time selection)", Scope::playlist, true, true, "command"},
@@ -4659,6 +4660,23 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         if (pieces.empty())
             return juce::Result::fail("The selected clips are shorter than one piece");
         extendSlicedClipGroups(next, slicedMembers);
+    }
+    else if (id == "clip.trimStart")
+    {
+        // Left-edge trim of a Pattern clip: the end stays put; the window start moves with it.
+        auto it = std::find_if(next.placements.begin(), next.placements.end(),
+                               [&](const auto &p) { return p.id == a.target; });
+        if (it == next.placements.end())
+            return missing();
+        const double end = it->beat + it->length;
+        if (!std::isfinite(a.beat) || a.beat < 0 || a.beat > end - 1. / 64)
+            return juce::Result::fail("The clip start must stay before its end (at least 1/64 beat)");
+        const double offset = it->offset + (a.beat - it->beat);
+        if (offset < -1.e-9)
+            return juce::Result::fail("The clip cannot start before its Pattern start");
+        it->offset = std::max(0., offset);
+        it->beat = a.beat;
+        it->length = end - a.beat;
     }
     else if (id == "clip.quantize")
     {

@@ -622,6 +622,8 @@ class Studio::Editor final : public juce::Component,
     int lastPitch = 0, lastLane = 0;
     Id trimmingAudio = 0;
     Id trimmingAutomation = 0;
+    Id trimmingPattern = 0; // Pattern clip left-edge trim (start moves, end stays).
+    double patternTrimBeat = 0, patternTrimOffset = 0, patternTrimLength = 0;
     double automationTrimBeat = 0, automationTrimOffset = 0, automationTrimLength = 0;
     double trimStartBeat = 0, trimStartOffset = 0, trimStartDuration = 0;
     bool selecting = false, dragging = false, erasing = false, resizing = false, paintMode = false;
@@ -5060,6 +5062,7 @@ class Studio::Editor final : public juce::Component,
                 m.addItem(2, "Delete");
                 if (!automationClip(id) && !audioClip(id))
                 {
+                    m.addItem(68, "Rename / colour Pattern...");
                     m.addItem(60, "Split by channel");
                     m.addItem(61, "Merge selected Pattern clips (Ctrl+G)", s.selectedClips.size() >= 2);
                 }
@@ -5178,6 +5181,14 @@ class Studio::Editor final : public juce::Component,
                                         safe->s.selectItems(true, similar);
                                         safe->repaint();
                                     }
+                                    if (n == 68)
+                                        for (const auto &c : safe->s.controller.project.placements)
+                                            if (c.id == id)
+                                            {
+                                                safe->s.selectPattern(c.pattern);
+                                                safe->s.performAction("pattern.renameDialog", nullptr);
+                                                break;
+                                            }
                                     if (n == 67)
                                         safe->s.performAction("clip.quantize", nullptr);
                                     if (n == 4)
@@ -5424,6 +5435,7 @@ class Studio::Editor final : public juce::Component,
         resizing = false;
         trimmingAudio = 0;
         trimmingAutomation = 0;
+        trimmingPattern = 0;
         if (id)
         {
             if (!selected(type == 2 ? s.effectiveClipSelection() : list, id))
@@ -5477,6 +5489,14 @@ class Studio::Editor final : public juce::Component,
                                 automationTrimOffset = clip->offset;
                                 automationTrimLength = clip->length;
                                 automationGestureProject = s.controller.projectIdentity;
+                                list = {id};
+                            }
+                            if (!automationClip(id) && !audioClip(id))
+                            {
+                                trimmingPattern = id;
+                                patternTrimBeat = c.beat;
+                                patternTrimOffset = c.offset;
+                                patternTrimLength = c.length;
                                 list = {id};
                             }
                             if (auto *audio = audioClip(id))
@@ -5939,6 +5959,16 @@ class Studio::Editor final : public juce::Component,
             }
             return;
         }
+        if (type == 2 && trimmingPattern)
+        {
+            const auto delta = juce::jlimit(-std::min(patternTrimBeat, patternTrimOffset), patternTrimLength - 1. / 64,
+                                            snap((e.x - origin.x) / spacing(), e.mods));
+            CommandArgs a;
+            a.target = trimmingPattern;
+            a.beat = patternTrimBeat + delta;
+            s.command("clip.trimStart", a);
+            return;
+        }
         if (type == 2 && trimmingAudio)
         {
             if (auto *audio = audioClip(trimmingAudio))
@@ -6111,6 +6141,7 @@ class Studio::Editor final : public juce::Component,
             return;
         }
         trimmingAutomation = 0;
+        trimmingPattern = 0;
         if (automationDragPoint)
         {
             automationDragPoint = automationDragClip = 0;
@@ -6276,6 +6307,22 @@ class Studio::Editor final : public juce::Component,
             finishUiGesture(s, type == 0 ? "Edit steps" : type == 3 ? "Mixer volume" : "Edit selection");
         dragging = erasing = false;
         repaint();
+    }
+    void mouseMove(const juce::MouseEvent &e) override
+    {
+        // Playlist clip edges show a resize cursor (right edge: length, left edge: trim start).
+        auto cursor = juce::MouseCursor::NormalCursor;
+        if (type == 2 && e.y >= gridTop() && e.x >= leftEdge())
+            if (const Id id = hit(e.position))
+                for (const auto &c : playlistClips())
+                    if (c.id == id)
+                    {
+                        const auto r = cr(c);
+                        if (e.position.x >= r.getRight() - 7 || e.position.x <= r.getX() + 7)
+                            cursor = juce::MouseCursor::LeftRightResizeCursor;
+                        break;
+                    }
+        setMouseCursor(cursor);
     }
     void mouseDoubleClick(const juce::MouseEvent &e) override
     {

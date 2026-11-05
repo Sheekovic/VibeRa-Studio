@@ -26,3 +26,7 @@
   selected clips on the Song grid. **Quick quantize** (`clip.quantize`, Ctrl+Q,
   `args.length` = grid) snaps clip starts, keeping lengths. Clip menu > Select all similar
   clips selects clips of the same Pattern, audio source or automation source. One Undo each.
+- **Trim start** (`clip.trimStart`, `args.target`, `args.beat` = new start): dragging a
+  Pattern clip's left edge moves its start and source window while the end stays; it cannot
+  start before the Pattern start. Clip edges show a resize cursor. Clip menu > Rename /
+  colour Pattern opens the Pattern properties.

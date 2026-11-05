@@ -216,6 +216,23 @@ inline void tests()
         require(controller.execute("clip.quantize", quantize).wasOk(), "Quick quantize clip starts");
         require(clipAt(9) && clipAt(9)->id == second && clipAt(9)->length == 8,
                 "Quick quantize snaps the start and keeps the length");
+        controller.undoEdit();
+
+        CommandArgs trim;
+        trim.target = second;
+        trim.beat = 10;
+        require(controller.execute("clip.trimStart", trim).wasOk(), "Trim a Pattern clip start");
+        require(clipAt(10) && std::abs(clipAt(10)->offset - 2) < 1e-9 && std::abs(clipAt(10)->length - 6) < 1e-9,
+                "Trimming the start moves the window and keeps the end");
+        trim.beat = 8;
+        require(controller.execute("clip.trimStart", trim).wasOk() && clipAt(8) && clipAt(8)->offset == 0,
+                "Dragging the start back restores the window");
+        controller.undoEdit();
+        controller.undoEdit();
+        require(clipAt(8) && clipAt(8)->id == second && clipAt(8)->length == 8, "Trim start is one Undo step per edit");
+        trim.beat = 7;
+        require(controller.execute("clip.trimStart", trim).failed(),
+                "A Pattern clip cannot start before its Pattern start");
         CommandArgs empty;
         empty.beat = 4;
         require(controller.execute("clip.paste", empty).failed(), "Paste with nothing copied fails");
