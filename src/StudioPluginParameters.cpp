@@ -1165,6 +1165,74 @@ juce::Result Studio::recoverPlugin(Id id, bool reopenControls)
     repaint();
     return juce::Result::ok();
 }
+juce::Result Studio::loadEffectImpulse(Id id, const juce::File &file, std::function<void(juce::Result)> done)
+{
+    const auto *spec = controller.project.plugin(id);
+    juce::PluginDescription description;
+    const auto descriptor = spec ? juce::XmlDocument::parse(spec->descriptor) : nullptr;
+    if (!spec || spec->instrument || !descriptor || !description.loadFromXml(*descriptor) ||
+        effects::findNativeDescription(description) != effects::EffectId::convolution)
+        return juce::Result::fail("effectImpulse.invalidTarget: Choose a Convolution Reverb effect");
+    if (!file.existsAsFile() || !file.hasFileExtension("wav;aif;aiff;flac"))
+        return juce::Result::fail("effectImpulse.invalidFile: An existing WAV, AIFF or FLAC file is required");
+    if (mixerChainApplying() || devicePreparationBusy() || routingCoordinator.mutationBlocked())
+        return juce::Result::fail("effectImpulse.busy: Wait for the current audio transaction");
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    const auto identity = controller.projectIdentity;
+    withPluginState(
+        [safe, id, file, report = std::move(done), identity](juce::Result captured, Project snapshot)
+        {
+            if (!safe)
+                return;
+            const auto done = [&](juce::Result result)
+            {
+                // A refusal replaces the "capturing" status with its reason.
+                if (result.failed())
+                {
+                    safe->status = result.getErrorMessage();
+                    safe->repaint();
+                }
+                report(result);
+            };
+            if (captured.wasOk() && safe->controller.projectIdentity != identity)
+                captured = juce::Result::fail("stale_project: The project changed while capturing");
+            if (captured.failed())
+                return done(captured);
+            // Every plugin keeps its freshly captured state (as Save does) before the restart.
+            for (auto &channel : safe->controller.project.channels)
+                if (channel.instrument)
+                    if (const auto *fresh = snapshot.plugin(channel.instrument->id))
+                        channel.instrument->state = fresh->state;
+            for (auto &insert : safe->controller.project.mixer)
+                for (auto &effect : insert.effects)
+                    if (const auto *fresh = snapshot.plugin(effect.id))
+                        effect.state = fresh->state;
+            auto *target = safe->controller.project.plugin(id);
+            juce::MemoryBlock block;
+            const auto xml = target && block.fromBase64Encoding(target->state)
+                                 ? juce::AudioProcessor::getXmlFromBinary(block.getData(), int(block.getSize()))
+                                 : nullptr;
+            if (!xml || !xml->hasTagName("VIBERA_NATIVE_EFFECT"))
+                return done(juce::Result::fail("effectImpulse.noState: The effect has no captured state yet"));
+            xml->setAttribute("impulse", file.getFullPathName());
+            juce::MemoryBlock next;
+            juce::AudioProcessor::copyXmlToBinary(*xml, next);
+            const auto previous = target->state;
+            target->state = next.toBase64Encoding();
+            if (auto reload = safe->audio.requestPluginStateReload(safe->controller.project, id); reload.failed())
+            {
+                target->state = previous; // Nothing changes unless the effect can restart with it.
+                return done(juce::Result::fail("effectImpulse.notPrepared: " + reload.getErrorMessage() +
+                                               " (needs an active audio device projection)"));
+            }
+            safe->controller.dirty = true;
+            safe->needsRebuild = true;
+            safe->status = "Loading impulse " + file.getFileName();
+            safe->repaint();
+            done(juce::Result::ok());
+        });
+    return juce::Result::ok();
+}
 void Studio::openPluginControlsUI(Id id)
 {
     const auto host = audio.preparedPluginHost(controller.project, id);

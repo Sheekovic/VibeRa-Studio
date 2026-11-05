@@ -472,6 +472,9 @@ class AudioEngine
     std::shared_ptr<PluginHost> preparedPluginHost(const Project &, Id) const;
     juce::String pluginStatus(Id) const;
     juce::Result requestPluginRecovery(const Project &, Id); // Explicit structural replacement, control only.
+    // Restarts a running plugin from the project's state for it (e.g. a changed impulse file);
+    // the caller has refreshed every plugin's captured state first.
+    juce::Result requestPluginStateReload(const Project &, Id);
     void invalidateProjection()
     {
         hasProjection = false;

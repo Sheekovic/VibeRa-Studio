@@ -102,8 +102,12 @@ Mixing and mastering processors:
   samples of latency (dry aligned); IRs are built only for instances of this effect.
   `space` 4 (File) plays an impulse loaded with the effect window's "Load IR file..." button
   (WAV/AIFF/FLAC, mono or stereo, first 2.6 s, resampled, energy-normalised); the path is part
-  of the effect state (a missing file keeps its path and plays Studio). MCP cannot choose the
-  file yet (no plugin-state write tool); MCP can still select space 4 by parameter.
+  of the effect state (a missing file keeps its path and plays Studio). Through MCP:
+  `vibera_project {"action":"effectImpulse","plugin":<effect id>,"path":<abs file>}` captures
+  every plugin's state, adds the file to that effect's state and restarts it from there (plugin
+  state, no Undo step); then set space 4 by parameter. It needs an active audio projection: in
+  `--mcp-test` (no device) it is refused with `effectImpulse.notPrepared` and nothing changes.
+  The success path has not yet been run with a real audio device.
 
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);

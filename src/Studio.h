@@ -558,6 +558,11 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void showPluginParameters(Id);
     void openPluginControlsUI(Id);
     juce::Result recoverPlugin(Id, bool reopenControls = false);
+    // Convolution Reverb impulse file through the host (MCP): captures every plugin's current
+    // state, adds the file to that effect's state and restarts it from there. Like the
+    // effect window's own button it is plugin state (saved, no Undo step). `done` reports
+    // that the reload was requested.
+    juce::Result loadEffectImpulse(Id effect, const juce::File &, std::function<void(juce::Result)> done);
     juce::Result selectPluginParameter(Id, std::optional<std::uint32_t>, bool lastTweaked);
     juce::var pluginControlSnapshot() const;
     unsigned refreshPluginCatalogue(Id, const juce::String &instance);

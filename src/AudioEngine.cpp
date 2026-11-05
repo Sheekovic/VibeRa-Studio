@@ -3334,6 +3334,17 @@ juce::Result AudioEngine::requestPluginRecovery(const Project &project, Id id)
         recoveryPlugin->state = it->second.state;
     return juce::Result::ok();
 }
+juce::Result AudioEngine::requestPluginStateReload(const Project &project, Id id)
+{
+    const auto *spec = project.plugin(id);
+    const auto *projected = projectedProject.plugin(id);
+    if (!spec || !hasProjection || !projected || projected->descriptor != spec->descriptor)
+        return juce::Result::fail("Plugin is not in the current prepared project");
+    if (capture || rendering() || recoveryPlugin)
+        return juce::Result::fail("Finish the pending plugin snapshot, export or recovery first");
+    recoveryPlugin = *spec; // Same structural path as recovery, from the given state.
+    return juce::Result::ok();
+}
 std::shared_ptr<PluginHost> AudioEngine::parameterHost(Id id) const
 {
     if (auto it = currentHosts.find(id); it != currentHosts.end())
