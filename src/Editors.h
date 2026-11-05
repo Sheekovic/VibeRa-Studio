@@ -1229,6 +1229,7 @@ class Studio::Editor final : public juce::Component,
         auto *o = new juce::DynamicObject();
         o->setProperty("rulerTop", gridTop() - 22);
         o->setProperty("rulerBottom", gridTop());
+        o->setProperty("laneHeight", type == 2 ? laneHeight() : 0);
         o->setProperty("gridLeft", leftEdge());
         o->setProperty("pixelsPerBeat", spacing());
         o->setProperty("scrollBeat", scroll);
@@ -4121,6 +4122,29 @@ class Studio::Editor final : public juce::Component,
         }
     }
     // Playlist track header: the LED toggles mute (FL's track switch), right-click edits.
+    // Rename dialog for a Playlist track (track menu, or double-click its name).
+    void renameTrack(int lane)
+    {
+        const auto *info = s.controller.project.track(lane);
+        auto *box = new juce::AlertWindow("Rename track", "Track " + juce::String(lane + 1),
+                                          juce::MessageBoxIconType::NoIcon);
+        box->addTextEditor("name", info ? info->name : juce::String());
+        box->addButton("OK", 1, juce::KeyPress(juce::KeyPress::returnKey));
+        box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+        juce::Component::SafePointer<Editor> safe(this);
+        box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                       [box, safe, lane](int result)
+                                       {
+                                           if (result != 1 || !safe)
+                                               return;
+                                           CommandArgs a;
+                                           a.lane = lane;
+                                           a.text = box->getTextEditorContents("name");
+                                           safe->s.command("track.rename", a);
+                                           safe->repaint();
+                                       }),
+                             true);
+    }
     void trackMenu(int lane, const juce::ModifierKeys &mods)
     {
         const auto *info = s.controller.project.track(lane);
@@ -4190,8 +4214,7 @@ class Studio::Editor final : public juce::Component,
         menu.addItem(5, "Move track up", lane > 0);
         menu.addItem(6, "Move track down", lane < 127);
         menu.showMenuAsync(juce::PopupMenu::Options(),
-                           [safe = juce::Component::SafePointer<Editor>(this), lane, run, palette, instrumentChoices,
-                            name = info ? info->name : juce::String()](int chosen)
+                           [safe = juce::Component::SafePointer<Editor>(this), lane, run, palette, instrumentChoices](int chosen)
                            {
                                if (!safe || chosen <= 0)
                                    return;
@@ -4236,21 +4259,7 @@ class Studio::Editor final : public juce::Component,
                                else if (chosen == 1)
                                    run("track.mute", [&](CommandArgs &a) { a.enabled = !safe->s.controller.project.laneMuted(lane); });
                                else if (chosen == 2)
-                               {
-                                   auto *box = new juce::AlertWindow("Rename track", "Track " + juce::String(lane + 1),
-                                                                     juce::MessageBoxIconType::NoIcon);
-                                   box->addTextEditor("name", name);
-                                   box->addButton("OK", 1, juce::KeyPress(juce::KeyPress::returnKey));
-                                   box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
-                                   box->enterModalState(true, juce::ModalCallbackFunction::create(
-                                                                  [box, run](int result)
-                                                                  {
-                                                                      if (result == 1)
-                                                                          run("track.rename", [&](CommandArgs &a)
-                                                                              { a.text = box->getTextEditorContents("name"); });
-                                                                  }),
-                                                        true);
-                               }
+                                   safe->renameTrack(lane);
                                else if (chosen == 3)
                                    run("track.insert", [](CommandArgs &) {});
                                else if (chosen == 4)
@@ -6558,6 +6567,12 @@ class Studio::Editor final : public juce::Component,
                 s.selectRackChannels(s.visibleRackChannels());
             return;
         }
+        if (type == 2 && e.y >= gridTop() && e.x < leftEdge() && e.x >= pickerWidth() + 26 &&
+            e.mods.isLeftButtonDown())
+        {
+            renameTrack(laneAtY(e.y)); // Double-click a track name: rename it.
+            return;
+        }
         if (type == 2)
         {
             auto id = hit(e.position);
@@ -6722,6 +6737,15 @@ class Studio::Editor final : public juce::Component,
             if (e.mods.isCtrlDown())
             {
                 setZoom(zoom * (wheel.deltaY > 0 ? 1.1 : .9), e.x);
+                repaint();
+                return;
+            }
+            if (type == 2 && e.mods.isAltDown() && wheel.deltaY != 0)
+            {
+                // Alt+wheel: vertical zoom of every track (the per-track heights scale with it).
+                playlistLaneScale = juce::jlimit(.35, 4., playlistLaneScale * (wheel.deltaY > 0 ? 1.12 : 1. / 1.12));
+                laneOffset = juce::jlimit(0, std::max(0, visibleLaneCount() - playlistRows()), laneOffset);
+                verticalBar.repaint();
                 repaint();
                 return;
             }

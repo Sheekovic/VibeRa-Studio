@@ -188,7 +188,7 @@ juce::var Studio::mcpTools()
       {"name":"vibera_update","description":"In-app updates from the project's GitHub Releases. status reads the phase (idle, checking, upToDate, available, downloading, ready, installing, failed), the current version, the newest available release with its notes and installable asset, download progress and the update settings. check starts a background check (poll status; completes as upToDate, available or failed) without opening dialogs. Downloading and installing need the user's approval in the app (Tools > Check for updates), so they are not MCP actions.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["status","check"]}},"required":["action"],"additionalProperties":false}},
       {"name":"vibera_snapshot","description":"Capture this instance as a bounded JUCE component PNG including the header. With channel: that local Channel's settings window instead (opened if needed) (page 0 Sample, 1 Envelope, 2 Miscellaneous). Not native PrintWindow, physical input or listening evidence.","inputSchema":{"type":"object","properties":{"channel":{"type":"integer","minimum":1},"page":{"type":"integer","minimum":0,"maximum":2}},"additionalProperties":false}},
       {"name":"vibera_key","description":"Run an allowed contextual shortcut through the real JUCE handler. File/dialog/macro commands and held typing-performance input are excluded. Not OS keyboard input.","inputSchema":{"type":"object","properties":{"key":{"type":"integer","minimum":1,"maximum":65535},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["key"],"additionalProperties":false}},
-      {"name":"vibera_pointer","description":"Run paired down/drag/up or cancel through actual editor/child mouse handlers. Logical editor pixels from state; left/right/middle/x1 buttons. Not global or physical mouse input.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":3},"phase":{"type":"string","enum":["down","drag","up","cancel"]},"x":{"type":"number"},"y":{"type":"number"},"button":{"type":"string","enum":["left","right","middle","x1"]},"clicks":{"type":"integer","minimum":1,"maximum":3},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["editor","phase"],"additionalProperties":false}}
+      {"name":"vibera_pointer","description":"Run paired down/drag/up or cancel through actual editor/child mouse handlers, or one wheel step (phase wheel, deltaY; positive is up/away). Logical editor pixels from state; left/right/middle/x1 buttons. Not global or physical mouse input.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":3},"phase":{"type":"string","enum":["down","drag","up","cancel","wheel"]},"deltaY":{"type":"number","minimum":-4,"maximum":4},"x":{"type":"number"},"y":{"type":"number"},"button":{"type":"string","enum":["left","right","middle","x1"]},"clicks":{"type":"integer","minimum":1,"maximum":3},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["editor","phase"],"additionalProperties":false}}
       ,{"name":"vibera_controller","description":"Production state/setBinding use the same validated Settings mapping service. Full binding edits save atomically before metadata publication, never Project Undo or MIDI port reopen. Selected/fixed/banked source and explicit mixer.send destination are preserved; invocation validates actual project targets. Preset/configure/learn/cancel/inject remain owned --mcp-test diagnostics only; no production MIDI injection/ports/filesystem arguments.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["state","setBinding","preset","configure","learn","cancel","inject"]},"profile":{"type":"object"},"index":{"type":"integer","minimum":0,"maximum":511,"description":"setBinding: existing row or exact append(size), no gaps; at most512 mappings."},"port":{"type":"integer","minimum":0,"maximum":1},"kind":{"type":"integer","minimum":0,"maximum":6},"channel":{"type":"integer","minimum":0,"maximum":16},"number":{"type":"integer","minimum":0,"maximum":127},"value":{"type":"integer","minimum":0,"maximum":16383},"binding":{"type":"object","description":"Complete mapping; authoritative schema supplied from MidiController validator."},"expectedProfile":{"type":"string","minLength":64,"maxLength":64,"pattern":"^[0-9a-f]{64}$","description":"Required for setBinding. Exact controllerProfileIdentity from state; binds runtime mappings and available saved bytes. Re-read after any mapping/bank/profile change."}},"required":["action"],"additionalProperties":false}}
     ])JSON");
     const auto additions = juce::JSON::parse(R"JSON([
@@ -3422,6 +3422,27 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             editor->cancelPointerGesture();
             mcpPointerTarget = nullptr;
             mcpPointerEditor = -1;
+        }
+        else if (phase == "wheel")
+        {
+            if (!windows[size_t(index)]->isVisible())
+                throw std::runtime_error("Show editor before pointer input");
+            if (mcpPointerTarget)
+                throw std::runtime_error("Finish the active pointer gesture first");
+            const auto point = juce::Point<float>{float(number(args, "x", -1)), float(number(args, "y", -1))};
+            if (!editor->getLocalBounds().toFloat().contains(point))
+                throw std::runtime_error("Wheel position must be inside editor");
+            auto *target = editor->getComponentAt(point.toInt());
+            if (!target)
+                throw std::runtime_error("No pointer target at coordinates");
+            const auto local = target->getLocalPoint(editor, point);
+            const auto now = juce::Time::getCurrentTime();
+            juce::MouseEvent event(juce::Desktop::getInstance().getMainMouseSource(), local,
+                                   juce::ModifierKeys(modifiers(args)), 1, 0, 0, 0, 0, target, target, now, local, now,
+                                   1, false);
+            juce::MouseWheelDetails wheel{};
+            wheel.deltaY = float(number(args, "deltaY", 0));
+            target->mouseWheelMove(event, wheel);
         }
         else
         {

@@ -48,3 +48,6 @@
   `state.snapMarkers`); Alt bypasses snap while dragging. Set it with `vibera_editor`
   `{"editor":2,"action":"snap","snap":<beats>}` (shared with the Piano roll) and read
   `state.snap`.
+- **Vertical zoom:** Alt+wheel over the Playlist scales every track's height
+  (`editors[2].timeline.laneHeight`); double-click a track name to rename it.
+  `vibera_pointer` phase `wheel` (with `deltaY`, `alt`/`ctrl`/`shift`) runs one wheel step.
