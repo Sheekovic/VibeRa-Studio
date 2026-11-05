@@ -55,3 +55,5 @@
 - **Riff machine** (`notes.riff`: `args.text` scale, `args.pitch` root, `args.length` grid,
   `args.value` density, `args.seed`): replaces the Channel part with a riff that repeats a
   one-bar rhythm, starts each bar on the root and moves mostly by scale steps.
+- **Note grid highlights** (`view.noteGridHighlights`, Alt+B): toggles the black-key row shading
+  of the grid (on by default); off shows even rows with thin lines. Read `state.pianoGridHighlights`.

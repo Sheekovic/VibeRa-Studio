@@ -3198,9 +3198,14 @@ class Studio::Editor final : public juce::Component,
                 for (int p = topPitch; p > topPitch - visiblePitches(); --p)
                 {
                     const float y = top + (topPitch - p) * height();
-                    const bool black = juce::MidiMessage::isMidiNoteBlack(p);
+                    const bool black = s.pianoGridHighlights && juce::MidiMessage::isMidiNoteBlack(p);
                     g.setColour(black ? bg.darker(.08f) : panel.brighter(.035f));
                     g.fillRect(float(left), y, float(getWidth() - left), height());
+                    if (!s.pianoGridHighlights)
+                    {
+                        g.setColour(grid.withAlpha(.35f));
+                        g.drawHorizontalLine(int(y), float(left), float(getWidth()));
+                    }
                     if (guide[size_t(p % 12)] != 0)
                     {
                         // Scale/maqam guide: degrees tinted, the tonic stronger.

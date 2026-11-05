@@ -4485,6 +4485,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "view.noteGridHighlights")
+    {
+        pianoGridHighlights = !pianoGridHighlights;
+        status = pianoGridHighlights ? "Note grid highlights on" : "Note grid highlights off";
+        if (windows[1])
+            windows[1]->repaint();
+        return true;
+    }
     if (action == "mixer.meterWave")
     {
         mixerMeterWave = !mixerMeterWave;
