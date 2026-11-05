@@ -735,6 +735,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.move", "Move / resize notes", Scope::piano, true, true, "command"},
         {"notes.delete", "Delete notes", Scope::piano, true, true, "command"},
         {"notes.copy", "Copy notes", Scope::piano, false, true, "action"},
+        {"notes.copyMidiClipboard", "Copy to MIDI clipboard (a .mid file other apps can paste)", Scope::piano, false, true, "action"},
+        {"notes.pasteMidiClipboard", "Paste from MIDI clipboard (a copied .mid file)", Scope::piano, false, true, "action"},
         {"notes.cut", "Cut notes", Scope::piano, false, true, "action"},
         {"notes.paste", "Paste notes", Scope::piano, true, true, "command"},
         {"notes.flip", "Flip notes horizontally / vertically", Scope::piano, true, true, "command"},

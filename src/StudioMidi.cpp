@@ -196,6 +196,8 @@ void Studio::midiFileMenu()
         }
         menu.addSubMenu("LFO tool (CC 1 mod wheel, replaces that lane)", lfo);
     }
+    menu.addItem(67, "Copy to MIDI clipboard");
+    menu.addItem(68, "Paste from MIDI clipboard    Shift+Ctrl+V");
     menu.addItem(17, "Flip horizontally (reverse in time)");
     menu.addItem(18, "Flip vertically (mirror pitches)");
     // Composition tools act on the selection, or the whole Channel part without one.
@@ -371,6 +373,12 @@ void Studio::midiFileMenu()
                 args.value = .8;
                 args.offset = .5;
                 safe->command("notes.controller.lfo", args);
+                return;
+            }
+            if (result == 67 || result == 68)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction(result == 67 ? "notes.copyMidiClipboard" : "notes.pasteMidiClipboard");
                 return;
             }
             if (result >= 60 && result <= 66)

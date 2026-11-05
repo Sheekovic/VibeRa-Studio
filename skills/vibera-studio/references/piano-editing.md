@@ -60,3 +60,7 @@
 - **Key labels** (right-click a Piano roll key; `channel.keyLabel`, `args.channel`, `args.pitch`,
   `args.text` at most 32 characters, empty removes): names keys for the Channel (drum maps),
   drawn on the keyboard and saved with the project. Read `state.keyLabels` (selected Channel).
+- **MIDI clipboard** (Piano roll menu; `notes.copyMidiClipboard`, `notes.pasteMidiClipboard`
+  Shift+Ctrl+V): copy exports the Channel part to a .mid file and puts that file on the system
+  clipboard (Windows file list) for other apps; paste imports the first .mid/.midi file on the
+  clipboard into the current Channel (replacing its part, like MIDI import). Windows only.

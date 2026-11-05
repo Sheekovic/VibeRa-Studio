@@ -21,6 +21,7 @@
 #include "Quantizer.h"
 #include "Editors.h"
 #include "MixerEqEditor.h"
+#include "MidiClipboard.h"
 #include "ChannelColourPicker.h"
 #include "DetachedWindow.h"
 #include "Settings.h"
@@ -4624,6 +4625,44 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return started.wasOk();
     }
+    if (action == "notes.copyMidiClipboard")
+    {
+        const auto snapshot = midiExportSnapshot();
+        if (!snapshot || midiClipboardOperation.isNotEmpty())
+        {
+            status = "Nothing to copy, or a MIDI clipboard copy is already running";
+            repaint();
+            return false;
+        }
+        midiClipboardFile = juce::File::getSpecialLocation(juce::File::tempDirectory)
+                                .getChildFile("VibeRa MIDI clipboard")
+                                .getChildFile("VibeRa score.mid");
+        midiClipboardFile.getParentDirectory().createDirectory();
+        juce::String operation;
+        const auto started = startMidiExport(midiClipboardFile, *snapshot, true, operation);
+        if (started.failed())
+        {
+            status = started.getErrorMessage();
+            repaint();
+            return false;
+        }
+        midiClipboardOperation = operation;
+        status = "Copying the Piano roll to the MIDI clipboard...";
+        repaint();
+        return true;
+    }
+    if (action == "notes.pasteMidiClipboard")
+    {
+        const juce::File file(juce::String(midi_clipboard::firstMidiFile().c_str()));
+        if (file == juce::File{} || !file.existsAsFile())
+        {
+            status = "No MIDI file on the clipboard (copy a .mid file, or use Copy to MIDI clipboard)";
+            repaint();
+            return false;
+        }
+        importMidiFile(file, selectedPattern, selectedChannel, false);
+        return true;
+    }
     if (action == "notes.copy" || action == "notes.cut")
     {
         const auto *part = controller.project.pattern(selectedPattern);
@@ -6072,6 +6111,7 @@ void Studio::timerCallback()
         if (auto *playlist = dynamic_cast<Editor *>(windows[2]->getContentComponent()))
             playlist->followPlayhead();
     serviceEffectSpare();
+    serviceMidiClipboard();
     play.setButtonText(audio.playing() ? "Pause" : "Play");
     play.setToggleState(audio.playing(), juce::dontSendNotification);
     loopButton.setToggleState(audio.looping(), juce::dontSendNotification);
@@ -7037,6 +7077,22 @@ void Studio::serviceEffectSpare()
         effectSpareJob.reset();
     }
     repaint();
+}
+void Studio::serviceMidiClipboard()
+{
+    if (midiClipboardOperation.isEmpty())
+        return;
+    for (const auto &job : mcpOperations)
+        if (job.id == midiClipboardOperation && job.state != "pending")
+        {
+            const bool ok = job.state == "completed" && midiClipboardFile.existsAsFile() &&
+                            midi_clipboard::putFile(midiClipboardFile.getFullPathName().toWideCharPointer());
+            status = ok ? "Copied to the MIDI clipboard (paste the .mid into another app)"
+                        : "MIDI clipboard copy failed: " + (job.message.isNotEmpty() ? job.message : juce::String("clipboard unavailable"));
+            midiClipboardOperation.clear();
+            repaint();
+            return;
+        }
 }
 void Studio::storeSpareState(Id channel)
 {

@@ -255,6 +255,7 @@ Customization Customization::familiarDefaults()
     add("notes.copy", Scope::piano, 'C', ctrl);
     add("notes.cut", Scope::piano, 'X', ctrl);
     add("notes.paste", Scope::piano, 'V', ctrl);
+    add("notes.pasteMidiClipboard", Scope::piano, 'V', ctrl | shift);
     add("selection.invert", Scope::piano, 'I', shift);
     add("notes.rotateLeft", Scope::piano, juce::KeyPress::leftKey, ctrl | shift);
     add("notes.insertSpaceAction", Scope::piano, juce::KeyPress::insertKey, ctrl);
