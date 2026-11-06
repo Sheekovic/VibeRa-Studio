@@ -78,7 +78,7 @@ arbitrary semantic control. Legacy MCP gaps are deferred, not waived.
   column is 230..250 px wide to fit them.
 - Channel button width (Channel Rack menu > Channel button width): actions `view.rackButtonsNarrow`,
   `view.rackButtonsNormal` (default) and `view.rackButtonsWide`; read `state.rackButtonWidth`.
-- Focus selected channel (Channel Rack menu; `view.rackFocusSelected`, on by default, read
+- Focus selected channel (Channel Rack menu; `view.rackFocusSelected`, off by default, read
   `state.rackFocusSelected`) scrolls the rack to show a newly active Channel; `view.rackScrollToSelected`
   scrolls once. Read the result as `state.rack.viewport.firstRow`.
 - Rotate / clear steps: `steps.rotate` {`ids` Channels, `value` whole steps, +right/-left} wraps the

@@ -2090,6 +2090,9 @@ juce::Result Studio::verifyAudioPlaylist(const juce::File &folder)
         return juce::Result::fail("Audio Playlist evidence directory");
     folder.getChildFile("audio-playlist-failure.txt").deleteFile();
     controller.replace(Project::demo());
+    // Pointer gestures need the Playlist alone on screen (the default layout shares it).
+    if (maximisedEditor != 2)
+        maximiseEditor(2);
     refresh();
     const auto source = folder.getChildFile("original-wave-45s.wav");
     {
@@ -2114,7 +2117,10 @@ juce::Result Studio::verifyAudioPlaylist(const juce::File &folder)
     showEditor(2);
     const auto before = controller.project.state();
     const auto count = controller.project.audioPlacements.size();
-    playlist->filesDroppedWithModifiers({source.getFullPathName()}, 190, 100, {});
+    // Drop on the lane below the first demo Pattern clip, at its start (layout independent).
+    const auto laneZero = playlist->playlistClipBounds(controller.project.placements.front().id);
+    playlist->filesDroppedWithModifiers({source.getFullPathName()}, int(laneZero.getX()) + 2,
+                                        int(laneZero.getBottom()) + 12, {});
     const auto deadline = juce::Time::getMillisecondCounter() + 8000;
     while (controller.project.audioPlacements.size() == count &&
            juce::Time::getMillisecondCounter() < deadline)
@@ -2165,6 +2171,8 @@ juce::Result Studio::verifyAudioPlaylist(const juce::File &folder)
         playlist->mouseDrag(event(end, true));
         playlist->mouseUp(event(end, true));
     };
+    // Clip focus draws the chosen kind on top: the imported audio overlaps a demo Pattern clip.
+    playlist->setClipFocus(1);
     auto trimBefore = controller.project.state();
     auto bounds = playlist->playlistClipBounds(imported.id);
     drag({bounds.getX() + 2, bounds.getCentreY()}, {bounds.getX() + 18, bounds.getCentreY()});

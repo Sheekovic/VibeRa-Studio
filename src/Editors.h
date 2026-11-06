@@ -1451,6 +1451,13 @@ class Studio::Editor final : public juce::Component,
                         return automationPointPosition(clipId, point);
         return {};
     }
+    // Playlist clip focus (picker Pat / Audio / Auto): that kind is drawn and picked on top.
+    void setClipFocus(int kind)
+    {
+        if (picker)
+            picker->setKind(kind);
+        repaint();
+    }
     juce::Rectangle<float> playlistClipBounds(Id id) const
     {
         for (auto &clip : playlistClips())

@@ -311,6 +311,10 @@ juce::Result Studio::verifyMixerRouting(const juce::File &output)
     // must never receive wheel/unity edits from that different visible surface.
     const auto wideWidth = getWidth(), wideHeight = getHeight();
     setSize(1280, 1044);
+    // The default layout shares the lower half between Playlist and Mixer; this fixture
+    // needs the Mixer alone so its strips and FX pane are both on screen.
+    if (maximisedEditor != 3)
+        maximiseEditor(3);
     refresh();
     if (editor->getWidth() < 700)
         return fail("Narrow Mixer fixture must include the FX pane");

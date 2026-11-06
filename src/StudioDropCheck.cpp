@@ -27,6 +27,9 @@ juce::Result Studio::verifyDropTargets(const juce::File &folder)
     for (int i = 0; i < 4; ++i)
         if (!windows[size_t(i)]->isVisible())
             toggleEditor(i);
+    // The default layout stacks the Rack over the Piano roll: give it enough height that empty
+    // Rack space stays below the Channels as the fixture adds them.
+    setSize(std::max(getWidth(), 1280), std::max(getHeight(), 1400));
     resized();
     auto *rack = dynamic_cast<juce::DragAndDropTarget *>(windows[0]->getContentComponent());
     auto *playlist = dynamic_cast<juce::DragAndDropTarget *>(windows[2]->getContentComponent());

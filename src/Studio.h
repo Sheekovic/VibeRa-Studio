@@ -233,7 +233,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool stemsArmedOnly = false;
     bool outputRoutesCaptured = false; // channel.outputRoutes runs after its plugin state capture. // The next stems export renders only renderArmedInserts.
     bool pianoBackgroundWaveform = false; // Piano roll: draw Playlist audio clips behind the notes.
-    bool rackFocusSelected = true; // Channel Rack scrolls to show a newly selected Channel.
+    bool rackFocusSelected = false; // Channel Rack scrolls to show a newly selected Channel (opt-in).
     bool rackScrollRequest = false; // One-shot "scroll to the selected Channel".
     int rackButtonWidth = 1; // Channel Rack channel button width: 0 narrow, 1 normal, 2 wide. // Piano roll auto-scroll during playback.
     bool followCenter = false;       // Auto-scroll keeps the playhead centred instead of paging.

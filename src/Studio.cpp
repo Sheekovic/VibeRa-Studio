@@ -11420,7 +11420,7 @@ juce::Result PluginPage::verifyDiscoveryControls(const juce::File &output, const
     browser.selectRow(0);
     if (!create.isEnabled() || !replace.isEnabled() || insert.isEnabled())
         return juce::Result::fail("Built-in Synth selection must offer instrument Channel actions only");
-    browser.selectRow(1);
+    browser.selectRow(int(instruments.size())); // First built-in effect, after the native instruments.
     if (create.isEnabled() || replace.isEnabled() || !insert.isEnabled())
         return juce::Result::fail("Built-in effect selection must offer Mixer insertion only");
     const auto invalid = output.getChildFile("invalid-bundle");
