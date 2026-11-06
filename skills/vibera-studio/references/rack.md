@@ -81,3 +81,7 @@ arbitrary semantic control. Legacy MCP gaps are deferred, not waived.
 - Focus selected channel (Channel Rack menu; `view.rackFocusSelected`, on by default, read
   `state.rackFocusSelected`) scrolls the rack to show a newly active Channel; `view.rackScrollToSelected`
   scrolls once. Read the result as `state.rack.viewport.firstRow`.
+- Rotate / clear steps: `steps.rotate` {`ids` Channels, `value` whole steps, +right/-left} wraps the
+  step-sequencer steps inside the Pattern (piano-roll notes stay); Ctrl+Shift+Left/Right (actions
+  `steps.rotateLeft/Right`) rotate the selected Channels by one step. `steps.clear` {`ids`} removes
+  their steps. One Undo step each.

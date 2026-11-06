@@ -683,6 +683,10 @@ const std::vector<CommandInfo> &commandRegistry()
         {"steps.set", "Activate / deactivate step", Scope::rack, true, true, "command"},
         {"steps.fill", "Fill Channel steps at an interval", Scope::rack, true, false, "command"},
         {"steps.fill2", "Fill each 2 steps", Scope::rack, true, true, "command"},
+        {"steps.rotate", "Rotate Channel steps (wrap within the Pattern)", Scope::rack, true, false, "command"},
+        {"steps.clear", "Clear Channel steps", Scope::rack, true, true, "command"},
+        {"steps.rotateLeft", "Rotate steps left", Scope::rack, false, true, "action"},
+        {"steps.rotateRight", "Rotate steps right", Scope::rack, false, true, "action"},
         {"steps.fill4", "Fill each 4 steps", Scope::rack, true, true, "command"},
         {"steps.fill8", "Fill each 8 steps", Scope::rack, true, true, "command"},
         {"steps.compose", "Apply Advanced Fill recipes", Scope::rack, true, false, "command"},
@@ -3714,6 +3718,50 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             if (auto result = applyChannelMuteCommand(next, "channel.solo", solo); result.failed())
                 return result;
         }
+    }
+    else if (id == "steps.rotate" || id == "steps.clear")
+    {
+        // args.ids Channels (or args.channel); steps.rotate moves their step-sequencer steps by
+        // args.value steps, wrapping inside the Pattern's step count; steps.clear removes them.
+        // Piano-roll (non-step) notes stay where they are.
+        if (!pat)
+            return missing();
+        const auto targets = a.ids.empty() ? std::vector<Id>{a.channel} : a.ids;
+        const std::set<Id> chosen(targets.begin(), targets.end());
+        if (chosen.empty() || std::any_of(chosen.begin(), chosen.end(), [&](Id channel)
+                                          { const auto *c = next.channel(channel); return !c || c->audioClip; }))
+            return juce::Result::fail("steps.invalidTarget: Choose playable instrument Channels");
+        const int count = stepSequenceSize(*pat);
+        int delta = 0;
+        if (id == "steps.rotate")
+        {
+            if (!std::isfinite(a.value) || std::floor(a.value) != a.value || a.value == 0 ||
+                std::abs(a.value) >= count)
+                return juce::Result::fail("steps.rotate.invalidValue: A whole, nonzero step count inside the Pattern");
+            delta = int(a.value);
+        }
+        bool found = false;
+        std::vector<Note> result;
+        result.reserve(pat->notes.size());
+        for (auto note : pat->notes)
+        {
+            const bool step = note.step && chosen.contains(note.channel) && note.beat >= 0 && note.beat < count * .25;
+            if (!step)
+            {
+                result.push_back(note);
+                continue;
+            }
+            found = true;
+            if (id == "steps.clear")
+                continue;
+            const int cell = int(std::floor(note.beat * 4. + 1.e-9));
+            const double offset = note.beat - cell * .25; // Keeps a step's own time shift.
+            note.beat = ((cell + delta) % count + count) % count * .25 + offset;
+            result.push_back(note);
+        }
+        if (!found)
+            return juce::Result::fail("steps.empty: The Channel has no steps in this Pattern");
+        pat->notes = std::move(result);
     }
     else if (id.startsWith("steps.fill"))
     {

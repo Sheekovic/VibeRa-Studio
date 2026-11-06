@@ -5153,6 +5153,16 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
                 a);
         return status == "Ready";
     }
+    if (action == "steps.rotateLeft" || action == "steps.rotateRight")
+    {
+        CommandArgs args;
+        args.channel = selectedChannel;
+        for (const auto id : selectedChannels)
+            args.ids.push_back(id);
+        args.value = action == "steps.rotateLeft" ? -1 : 1;
+        command("steps.rotate", args);
+        return true;
+    }
     if (action == "notes.rotateLeft" || action == "notes.rotateRight" || action == "notes.discardLengthsAction")
     {
         a.ids = selectedNotes;
