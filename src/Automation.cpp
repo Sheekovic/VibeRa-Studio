@@ -86,6 +86,14 @@ AutomationProgram::Span segment(const Clip &clip, double beat, bool held)
             result.coefficients[2] = 3 * difference;
             result.coefficients[3] = -2 * difference;
             break;
+        case AutomationShape::stairs:
+        case AutomationShape::pulse:
+        case AutomationShape::wave:
+            result.shape = unsigned(next->incoming);
+            result.from = result.coefficients[0];
+            result.delta = difference;
+            result.count = automationShapeCount(next->tension);
+            break;
         case AutomationShape::single:
             // Original bounded monotonic quadratic, not copied FL spline mathematics.
             result.coefficients[1] = difference * (1 + next->tension);
@@ -116,6 +124,12 @@ float AutomationProgram::Span::valueAt(double position) const noexcept
     if (inverseLength == 0)
         return float(coefficients[0]);
     const auto x = std::clamp((position - origin) * inverseLength, 0., 1.);
+    if (shape == unsigned(AutomationShape::stairs))
+        return float(from + delta * std::min(1., std::floor(x * count) / count));
+    if (shape == unsigned(AutomationShape::pulse))
+        return float(from + (std::fmod(x * count, 1.) < .5 ? 0. : delta));
+    if (shape == unsigned(AutomationShape::wave))
+        return float(from + delta * (.5 - .5 * std::cos(6.283185307179586 * x * count)));
     return float(((coefficients[3] * x + coefficients[2]) * x + coefficients[1]) * x + coefficients[0]);
 }
 float AutomationProgram::Lane::valueAt(double beat) const noexcept
@@ -202,7 +216,7 @@ bool AutomationProgram::compile(const AutomationDocument &doc, bool songMode, Au
             if (!unique(point.id) || !std::isfinite(point.beat) || point.beat <= previous ||
                 point.beat > source.length || !std::isfinite(point.value) || point.value < 0 ||
                 point.value > 1 || !std::isfinite(point.tension) || std::abs(point.tension) > 1 ||
-                unsigned(point.incoming) > unsigned(AutomationShape::smooth) ||
+                unsigned(point.incoming) > unsigned(AutomationShape::wave) ||
                 !std::isfinite(1. / (point.beat - previous)))
                 return fail("Invalid automation point, curve or ordering");
             previous = point.beat;

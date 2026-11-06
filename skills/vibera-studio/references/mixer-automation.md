@@ -174,3 +174,9 @@ Channel volume / pan automation: `automation.create` (and link/init) take
 value applies. Actions `channel.automateVolume` / `channel.automatePan` (and right-click Volume /
 Pan in a plugin instrument's channel window > Create automation clip) create a clip over the
 Song on the first free Playlist track from the current value.
+
+Point curve shapes (`automation.point.shape`, `text`, `value` = tension -1..1; Playlist point
+right-click menu): `single` (tension bends the curve), `hold`, `smooth`, and the repeating
+`stairs` (steps towards the next point), `pulse` (square alternation between the two values)
+and `wave` (sine from this value to the next and back). For the repeating shapes tension sets
+the count: -1 = 1, 0 = 4, +1 = 16 (exponential in between). Saved as shape 0..5.

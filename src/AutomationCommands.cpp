@@ -173,6 +173,12 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
                 point->incoming = AutomationShape::hold;
             else if (a.text == "smooth")
                 point->incoming = AutomationShape::smooth;
+            else if (a.text == "stairs")
+                point->incoming = AutomationShape::stairs;
+            else if (a.text == "pulse")
+                point->incoming = AutomationShape::pulse;
+            else if (a.text == "wave")
+                point->incoming = AutomationShape::wave;
             else
                 return juce::Result::fail("Unsupported automation curve shape");
             point->tension = float(a.value);

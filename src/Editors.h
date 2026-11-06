@@ -145,6 +145,9 @@ class Studio::Editor final : public juce::Component,
         menu.addItem(3, "Single curve");
         menu.addItem(4, "Hold");
         menu.addItem(5, "Smooth");
+        menu.addItem(6, "Stairs (4 steps; tension sets 1..16)");
+        menu.addItem(7, "Pulse (4 cycles)");
+        menu.addItem(8, "Wave (4 cycles)");
         menu.showMenuAsync(
             {},
             [safe = juce::Component::SafePointer<Editor>(this), clipId, pointId,
@@ -158,7 +161,8 @@ class Studio::Editor final : public juce::Component,
                     safe->s.command("automation.point.delete", a);
                 else if (action >= 3)
                 {
-                    a.text = action == 3 ? "single" : action == 4 ? "hold" : "smooth";
+                    static const char *names[]{"single", "hold", "smooth", "stairs", "pulse", "wave"};
+                    a.text = names[juce::jlimit(0, 5, action - 3)];
                     safe->s.command("automation.point.shape", a);
                 }
                 else if (const auto *clip = safe->automationClip(clipId))
@@ -222,9 +226,7 @@ class Studio::Editor final : public juce::Component,
                                             return;
                                         }
                                         a.value = tension;
-                                        a.text = shape == AutomationShape::single ? "single"
-                                                 : shape == AutomationShape::hold ? "hold"
-                                                                                  : "smooth";
+                                        a.text = automationShapeName(shape);
                                         safe->s.command("automation.point.shape", a);
                                         finishUiGesture(safe->s, "Edit automation point");
                                     }),

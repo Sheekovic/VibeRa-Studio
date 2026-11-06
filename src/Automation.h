@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include <cmath>
 #include <cstdint>
 #include <compare>
 #include <optional>
@@ -31,8 +32,31 @@ enum class AutomationShape : unsigned
 {
     single,
     hold,
-    smooth
+    smooth,
+    // Repeating shapes towards the next point; tension sets the count (-1: 1, 0: 4, +1: 16).
+    stairs, // Rising (or falling) steps.
+    pulse,  // Square alternation between the two values.
+    wave    // Sine-shaped oscillation from this value to the next and back.
 };
+// Steps or cycles of a repeating shape for a point tension -1..1.
+inline int automationShapeCount(float tension) noexcept
+{
+    const float t = tension < -1 ? -1.f : tension > 1 ? 1.f : tension;
+    const int count = int(4.0 * std::pow(2.0, 2.0 * t) + .5);
+    return count < 1 ? 1 : count > 16 ? 16 : count;
+}
+inline const char *automationShapeName(AutomationShape shape) noexcept
+{
+    switch (shape)
+    {
+    case AutomationShape::hold: return "hold";
+    case AutomationShape::smooth: return "smooth";
+    case AutomationShape::stairs: return "stairs";
+    case AutomationShape::pulse: return "pulse";
+    case AutomationShape::wave: return "wave";
+    default: return "single";
+    }
+}
 struct AutomationPoint
 {
     std::int64_t id = 0;
@@ -82,6 +106,8 @@ class AutomationProgram
     {
         double beat = 0, origin = 0, inverseLength = 0;
         double coefficients[4]{};
+        unsigned shape = 0; // 0 polynomial; else AutomationShape stairs/pulse/wave.
+        double from = 0, delta = 0, count = 1;
         float valueAt(double position) const noexcept;
     };
     struct Lane
