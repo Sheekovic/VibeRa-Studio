@@ -13,9 +13,9 @@ Right-click an existing Mixer gain/pan/separation/send control, then choose
 starts capture. While already playing it begins immediately. Existing mapped
 controller pickup and relative modes still apply; uncaught input is not recorded.
 The recording checkbox/Keep and Cancel context actions bind the original token.
-Stop keeps the automation take; Escape cancels its manual preview. UI pointer
-knob gestures are refused while this MIDI recorder owns the document: use MIDI
-or the shared semantic value operation. No hidden generic pointer record mode.
+Stop keeps the automation take; Escape cancels its manual preview. Mixer pointer
+moves of the recorded insert's fader, pan or sends are recorded too (see Touch
+recording below); other editing waits until the take is finished or cancelled.
 
 Read project identity/revision, then call:
 
