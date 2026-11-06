@@ -10507,15 +10507,15 @@ juce::Result Studio::runSmokeTest(const juce::File &folder)
     a.pattern = selectedPattern;
     a.length = 8;
     command("pattern.length", a);
-    click(0, float(juce::jlimit(190, 210, int(windows[0]->getContentComponent()->getWidth() * .34)) + 10), 60,
+    click(0, float(juce::jlimit(230, 250, int(windows[0]->getContentComponent()->getWidth() * .38)) + 18 /* first step, after name/knob column */), 60,
           juce::ModifierKeys::leftButtonModifier);
     if (controller.project.pattern(selectedPattern)->notes.size() != 1)
         return fail("Step activation gesture failed");
-    click(0, float(juce::jlimit(190, 210, int(windows[0]->getContentComponent()->getWidth() * .34)) + 10), 60,
+    click(0, float(juce::jlimit(230, 250, int(windows[0]->getContentComponent()->getWidth() * .38)) + 18 /* first step, after name/knob column */), 60,
           juce::ModifierKeys::rightButtonModifier);
     if (!controller.project.pattern(selectedPattern)->notes.empty())
         return fail("Step deactivation gesture failed");
-    click(0, float(juce::jlimit(190, 210, int(windows[0]->getContentComponent()->getWidth() * .34)) + 10), 60,
+    click(0, float(juce::jlimit(230, 250, int(windows[0]->getContentComponent()->getWidth() * .38)) + 18 /* first step, after name/knob column */), 60,
           juce::ModifierKeys::leftButtonModifier);
     selectedChannel = controller.project.channels.back().id;
     const auto noteArea = static_cast<Editor *>(windows[1]->getContentComponent())->pianoNoteViewport();
@@ -10776,8 +10776,13 @@ juce::Result Studio::runSmokeTest(const juce::File &folder)
         dynamic_cast<juce::Viewport *>(existing->getContentComponent()->getChildComponent(0));
     if (!samplerViewport)
         return fail("Sampler viewport missing");
+    // A short window must scroll its settings (the default size may already fit them all).
+    const auto samplerWindowSize = existing->getBounds();
+    existing->setSize(existing->getWidth(), 360);
     samplerViewport->setViewPosition(0, 1000);
-    if (samplerViewport->getViewPositionY() <= 0)
+    const bool samplerScrolled = samplerViewport->getViewPositionY() > 0;
+    existing->setBounds(samplerWindowSize);
+    if (!samplerScrolled)
         return fail("Sampler settings overflow did not scroll");
     auto lowerStream = folder.getChildFile("sampler-controls-bottom.png").createOutputStream();
     if (!lowerStream)
@@ -10801,7 +10806,7 @@ juce::Result Studio::runSmokeTest(const juce::File &folder)
     rack->mouseDoubleClick(doubleClick);
     if (windows[1]->isVisible())
         return fail("Name double-click still opened Piano Roll");
-    click(0, float(juce::jlimit(190, 210, int(rack->getWidth() * .34)) - 55), 60,
+    click(0, float(juce::jlimit(230, 250, int(rack->getWidth() * .38)) - 55), 60,
           juce::ModifierKeys::leftButtonModifier);
     if (!windows[1]->isVisible())
         return fail("Dedicated Rack Piano Roll button failed");

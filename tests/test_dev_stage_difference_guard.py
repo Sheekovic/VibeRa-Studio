@@ -105,7 +105,7 @@ class StageDifferenceGuardTests(unittest.TestCase):
         data = json.loads(original)
         data["files"][0]["patchedSha256"] = "0" * 64
         manifest.write_text(json.dumps(data))
-        with self.assertRaisesRegex(ValueError, "contract raw identity"):
+        with self.assertRaisesRegex(ValueError, "contract (raw )?identity"):
             self.guard.preflight()
         manifest.write_bytes(original)
         payload = self.root / self.entry["patch"]

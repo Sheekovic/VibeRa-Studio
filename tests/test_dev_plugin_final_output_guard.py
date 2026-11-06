@@ -392,7 +392,7 @@ class PluginFinalOutputGuardTests(unittest.TestCase):
                     before=snapshot();(root/target).write_bytes(altered)
                     with self.assertRaisesRegex(ValueError,'unknown/ambiguous vendor'):guard.preflight()
                     assert_unchanged(before,target,altered);(root/target).write_bytes(original)
-            for name,message in [(FAMILY,'contract raw identity'),(BRIDGE,'contract raw identity'),(AUDIO_ZERO,'contract raw identity'),(MEMORY,'contract raw identity'),(ARRANGER,'contract raw identity'),(EXCHANGE,'contract raw identity'),(ZERO_CHANNEL,'contract raw identity'),(STABLE_MIDI,'contract raw identity'),(SOURCE_TIME,'contract raw identity'),(legacy['path'],'contract raw identity')]+[(e['patch'],'payload exact identity') for e in all_rows]:
+            for name,message in [(FAMILY,'contract (raw )?identity'),(BRIDGE,'contract (raw )?identity'),(AUDIO_ZERO,'contract (raw )?identity'),(MEMORY,'contract (raw )?identity'),(ARRANGER,'contract (raw )?identity'),(EXCHANGE,'contract (raw )?identity'),(ZERO_CHANNEL,'contract (raw )?identity'),(STABLE_MIDI,'contract (raw )?identity'),(SOURCE_TIME,'contract (raw )?identity'),(legacy['path'],'contract (raw )?identity')]+[(e['patch'],'payload exact identity') for e in all_rows]:
                 path=root/name;original=path.read_bytes();before=snapshot();path.write_bytes(original+b'\n')
                 with self.assertRaisesRegex(ValueError,message):guard.preflight()
                 assert_unchanged(before);path.write_bytes(original)

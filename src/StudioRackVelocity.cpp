@@ -595,10 +595,20 @@ juce::Result Studio::verifyRackVelocity(const juce::File &folder, const juce::Fi
         return fail("actual Graph wheel changed Channel order or missed shared horizontal scroll");
     editor->setSize(editorSize.x, editorSize.y);
     editor->setRackViewport(0, 0);
+    // A drop over the graph never replaces the Channel row hidden behind it; it may add a new
+    // Channel (the drop-target contract), which this fixture then removes with Undo.
+    const auto channelsBeforeDrop = controller.project.channels;
     const auto beforeDrop = controller.project.state();
     editor->filesDroppedWithModifiers({"builtin:snare"}, 60, graph->getY() + 24, {});
-    if (!controller.project.state().isEquivalentTo(beforeDrop))
+    const auto &channelsAfterDrop = controller.project.channels;
+    if (channelsAfterDrop.size() < channelsBeforeDrop.size() ||
+        !std::equal(channelsBeforeDrop.begin(), channelsBeforeDrop.end(), channelsAfterDrop.begin(),
+                    [](const auto &a, const auto &b) { return a.id == b.id && a.source == b.source; }))
         return fail("graph file drop replaced an obscured Channel");
+    if (!controller.project.state().isEquivalentTo(beforeDrop))
+        controller.undoEdit();
+    if (!controller.project.state().isEquivalentTo(beforeDrop))
+        return fail("graph file drop did not undo to the prior Project");
     auto parentEvent = [&](juce::Point<float> point, bool moved)
     {
         return juce::MouseEvent(juce::Desktop::getInstance().getMainMouseSource(), point,

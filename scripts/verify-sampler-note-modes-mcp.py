@@ -209,8 +209,12 @@ try:
         time.sleep(.03)
         result = client.call("vibera_project", dict(action="job", operation=result["operation"]),
                              allow_failure=True)["structuredContent"]
+    # Note data must be intact; on-screen geometry (pianoBounds) may follow a view scroll.
+    def note_data(notes):
+        return [{k: v for k, v in note.items() if k != "pianoBounds"} for note in notes]
     check(result["completionState"] == "failed" and state()["revision"] == revision and
-          state()["notes"] == snapshot, "Malformed saved mode data fails terminally without live data loss")
+          note_data(state()["notes"]) == note_data(snapshot),
+          "Malformed saved mode data fails terminally without live data loss")
 
     # Real wire acceptance beyond the former1024-ID decoder limit. No render of
     # this bulk fixture is attempted; its source/history/selection are the subject.

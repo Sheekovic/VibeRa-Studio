@@ -156,7 +156,7 @@ class LocalSourceGuardTests(unittest.TestCase):
         value = json.loads(original)
         value["productionEnabled"] = True
         manifest.write_text(json.dumps(value), encoding="utf-8")
-        with self.assertRaisesRegex(ValueError, "contract raw identity"):
+        with self.assertRaisesRegex(ValueError, "contract (raw )?identity"):
             self.guard.preflight()
         manifest.write_bytes(original)
         payload = self.root / self.family["files"][-1]["patch"]

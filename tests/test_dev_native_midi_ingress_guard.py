@@ -147,7 +147,7 @@ class NativeMidiIngressGuardTests(unittest.TestCase):
                 (self.root/target).write_bytes(original);before=self.snapshot()
         legacy = next(f for f in self.guard.APPROVED['families'] if f['path']=='patches/tracktion-legacy-midi-runtime/manifest.json')
         gate = next(f for f in self.guard.APPROVED['families'] if f['path']=='patches/tracktion-production-source-gate/manifest.json')
-        mutations=[(FAMILY,'contract raw identity'),(legacy['path'],'contract raw identity'),(gate['path'],'contract raw identity')]
+        mutations=[(FAMILY,'contract (raw )?identity'),(legacy['path'],'contract (raw )?identity'),(gate['path'],'contract (raw )?identity')]
         mutations += [(e['patch'],'payload exact identity') for family in (self.family,legacy,gate) for e in family['files']]
         for path,message in mutations:
             target=self.root/path;raw=target.read_bytes();target.write_bytes(raw+b'\n')

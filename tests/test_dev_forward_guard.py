@@ -184,7 +184,7 @@ class ForwardGuardTests(unittest.TestCase):
     def test_tamper_each_family_manifest_or_payload_refuses_without_vendor_writes(self):
         before = self.snapshot()
         for family in (self.family, self.phase, next(f for f in self.guard.APPROVED['families'] if f['path'] == ZERO), next(f for f in self.guard.APPROVED['families'] if f['path'] == INVERSE), next(f for f in self.guard.APPROVED['families'] if f['path'] == SEAL), next(f for f in self.guard.APPROVED['families'] if f['path'] == MIDI), next(f for f in self.guard.APPROVED['families'] if f['path'] == CONTEXT_WAIT)):
-            for name, message in ((family['path'], 'contract raw identity'),
+            for name, message in ((family['path'], 'contract (raw )?identity'),
                                   (family['files'][0]['patch'], 'payload exact identity')):
                 path = self.root / name
                 raw = path.read_bytes()

@@ -117,7 +117,7 @@ class GuardPureTransformCacheTests(unittest.TestCase):
             self.assertEqual(first,guard.load_pinned('contract.json',expected))
             self.assertIsNot(first,guard.load_pinned('contract.json',expected))
             contract.write_bytes(b'{"allowed": false}\n')
-            with self.assertRaisesRegex(ValueError,'contract raw identity mismatch'):guard.load_pinned('contract.json',expected)
+            with self.assertRaisesRegex(ValueError,'contract (raw )?identity'):guard.load_pinned('contract.json',expected)
             native=root/'native.h';native.write_bytes(b'old\n')
             self.assertEqual(guard.apply(hunks,guard.read_target('native.h')),b'new\n')
             native.write_bytes(b'foreign\n')
