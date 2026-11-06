@@ -36,7 +36,9 @@ enum class AutomationShape : unsigned
     // Repeating shapes towards the next point; tension sets the count (-1: 1, 0: 4, +1: 16).
     stairs, // Rising (or falling) steps.
     pulse,  // Square alternation between the two values.
-    wave    // Sine-shaped oscillation from this value to the next and back.
+    wave,   // Sine-shaped oscillation from this value to the next and back.
+    doubleCurve,  // S-shaped transition; tension sets how sharp the middle is.
+    smoothStairs  // Stairs whose steps glide smoothly (count from tension like stairs).
 };
 // Steps or cycles of a repeating shape for a point tension -1..1.
 inline int automationShapeCount(float tension) noexcept
@@ -54,6 +56,8 @@ inline const char *automationShapeName(AutomationShape shape) noexcept
     case AutomationShape::stairs: return "stairs";
     case AutomationShape::pulse: return "pulse";
     case AutomationShape::wave: return "wave";
+    case AutomationShape::doubleCurve: return "double";
+    case AutomationShape::smoothStairs: return "smoothStairs";
     default: return "single";
     }
 }

@@ -179,4 +179,6 @@ Point curve shapes (`automation.point.shape`, `text`, `value` = tension -1..1; P
 right-click menu): `single` (tension bends the curve), `hold`, `smooth`, and the repeating
 `stairs` (steps towards the next point), `pulse` (square alternation between the two values)
 and `wave` (sine from this value to the next and back). For the repeating shapes tension sets
-the count: -1 = 1, 0 = 4, +1 = 16 (exponential in between). Saved as shape 0..5.
+the count: -1 = 1, 0 = 4, +1 = 16 (exponential in between). Also `double` (S-shaped curve; the
+same count is the sharpness, 1 = linear) and `smoothStairs` (steps that glide). Saved as shape
+0..7.

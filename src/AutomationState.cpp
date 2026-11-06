@@ -197,7 +197,7 @@ juce::Result parseAutomationState(const juce::ValueTree &root, AutomationDocumen
             std::int64_t shape = 0;
             if (!p.hasType("POINT") || !fields(p, {"id", "beat", "value", "shape", "tension"}) ||
                 p.getNumChildren() || !integer(p["id"], point.id) || !number(p["beat"], point.beat) ||
-                !scalar(p["value"], point.value) || !integer(p["shape"], shape) || shape < 0 || shape > 5 ||
+                !scalar(p["value"], point.value) || !integer(p["shape"], shape) || shape < 0 || shape > 7 ||
                 !scalar(p["tension"], point.tension))
                 return fail();
             point.incoming = AutomationShape(shape);

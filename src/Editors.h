@@ -151,6 +151,8 @@ class Studio::Editor final : public juce::Component,
         menu.addItem(6, "Stairs (4 steps; tension sets 1..16)");
         menu.addItem(7, "Pulse (4 cycles)");
         menu.addItem(8, "Wave (4 cycles)");
+        menu.addItem(9, "Double curve (S shape)");
+        menu.addItem(10, "Smooth stairs (4 steps)");
         menu.showMenuAsync(
             {},
             [safe = juce::Component::SafePointer<Editor>(this), clipId, pointId,
@@ -164,8 +166,8 @@ class Studio::Editor final : public juce::Component,
                     safe->s.command("automation.point.delete", a);
                 else if (action >= 3)
                 {
-                    static const char *names[]{"single", "hold", "smooth", "stairs", "pulse", "wave"};
-                    a.text = names[juce::jlimit(0, 5, action - 3)];
+                    static const char *names[]{"single", "hold", "smooth", "stairs", "pulse", "wave", "double", "smoothStairs"};
+                    a.text = names[juce::jlimit(0, 7, action - 3)];
                     safe->s.command("automation.point.shape", a);
                 }
                 else if (const auto *clip = safe->automationClip(clipId))
