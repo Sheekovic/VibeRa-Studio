@@ -4671,6 +4671,15 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         command(action, a);
         return true;
     }
+    if (action == "view.keyLabelsNone" || action == "view.keyLabelsRoot" || action == "view.keyLabelsWhite")
+    {
+        pianoKeyboardLabels = action == "view.keyLabelsNone" ? 0 : action == "view.keyLabelsRoot" ? 1 : 2;
+        status = pianoKeyboardLabels == 0 ? "Keyboard labels off"
+                 : pianoKeyboardLabels == 1 ? "Keyboard labels: root notes"
+                                            : "Keyboard labels: all white notes";
+        refresh();
+        return true;
+    }
     if (action == "view.noteGridHighlights")
     {
         pianoGridHighlights = !pianoGridHighlights;

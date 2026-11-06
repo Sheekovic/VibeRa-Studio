@@ -250,6 +250,13 @@ void Studio::midiFileMenu()
                         lastNoteScript.isNotEmpty());
         menu.addSubMenu("Scripts", scripts);
     }
+    {
+        juce::PopupMenu labels;
+        labels.addItem(44000, "None", true, pianoKeyboardLabels == 0);
+        labels.addItem(44001, "Root notes (C)", true, pianoKeyboardLabels == 1);
+        labels.addItem(44002, "All white notes", true, pianoKeyboardLabels == 2);
+        menu.addSubMenu("Keyboard labels", labels);
+    }
     menu.addItem(69, "Export as score sheet (PDF)...");
     menu.addItem(67, "Copy to MIDI clipboard");
     menu.addItem(68, "Paste from MIDI clipboard    Shift+Ctrl+V");
@@ -472,6 +479,14 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if (result >= 44000 && result <= 44002)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction(result == 44000 ? "view.keyLabelsNone"
+                                    : result == 44001 ? "view.keyLabelsRoot"
+                                                      : "view.keyLabelsWhite");
                 return;
             }
             if (result >= 43000 && result < 43000 + int(note_script::examples().size()))

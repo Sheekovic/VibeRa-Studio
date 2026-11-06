@@ -234,6 +234,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool pianoPlayTool = false;
     bool mixerMeterWave = false;
     bool pianoGridHighlights = true;
+    int pianoKeyboardLabels = 1; // Piano roll keyboard labels: 0 none, 1 root notes (C), 2 all white notes.
     // Copy to MIDI clipboard: the export job's file goes onto the clipboard when it completes.
     juce::String midiClipboardOperation;
     juce::File midiClipboardFile;

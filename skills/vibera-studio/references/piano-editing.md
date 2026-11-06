@@ -108,3 +108,6 @@
   (pitch 0..127, velocity/release 0..1, pan -1..1, beat/length >= 0) before anything changes.
   Six original examples are in the menu; "Run script file (.js)..." opens
   Documents/VibeRa Studio/Scripts; `notes.scriptAgain` (Ctrl+Alt+Y) repeats the last script.
+- Keyboard labels (Piano roll menu > Keyboard labels): actions `view.keyLabelsNone`,
+  `view.keyLabelsRoot` (default, the Cs) and `view.keyLabelsWhite` (every white key); read back
+  as `state.pianoKeyboardLabels` none/root/white. Custom key names (right-click a key) still show.

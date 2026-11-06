@@ -3366,7 +3366,7 @@ class Studio::Editor final : public juce::Component,
                         g.fillRect(0.f, upper, keyWidth, lower - upper);
                         g.setColour(keyLine);
                         g.fillRect(0.f, lower - 1.f, keyWidth, 1.f);
-                        if (p % 12 == 0 && h >= 7.f)
+                        if (h >= 7.f && (s.pianoKeyboardLabels == 2 || (s.pianoKeyboardLabels == 1 && p % 12 == 0)))
                         {
                             g.setColour(themeColour(0xff56626b));
                             g.setFont(juce::Font(vibera::uiFont, juce::jlimit(8.f, 11.f, h - 1.f), juce::Font::bold));

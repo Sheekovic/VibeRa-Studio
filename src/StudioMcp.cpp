@@ -3731,6 +3731,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "pianoLaneTarget", noteLaneTargets()[pianoLaneTarget]);
     set(state, "mixerMeterWave", mixerMeterWave);
     set(state, "pianoGridHighlights", pianoGridHighlights);
+    set(state, "pianoKeyboardLabels", pianoKeyboardLabels == 0 ? "none" : pianoKeyboardLabels == 1 ? "root" : "white");
     {
         juce::Array<juce::var> tracks;
         for (const auto lane : selectedTracks)
