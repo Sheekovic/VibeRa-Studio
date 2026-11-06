@@ -1676,6 +1676,7 @@ class Studio::Editor final : public juce::Component,
                                                                   : "One every " + juce::String(bars) + " bars");
                     menu.addSubMenu("Add markers", addMarkers);
                 }
+                menu.addItem(3020, "Export all playlist tracks (one WAV each)...", !s.playlistTrackLanes().empty());
                 const bool markers = !s.controller.project.markers.empty();
                 menu.addItem(13, "Jump to next marker", markers);
                 menu.addItem(14, "Jump to previous marker", markers);
@@ -1718,6 +1719,36 @@ class Studio::Editor final : public juce::Component,
                     {
                         if (!safe || !result)
                             return;
+                        if (result == 3020)
+                        {
+                            auto &studio = safe->s;
+                            studio.chooser = std::make_unique<juce::FileChooser>(
+                                "Export all playlist tracks to a folder",
+                                juce::File::getSpecialLocation(juce::File::userDocumentsDirectory));
+                            auto owner = juce::Component::SafePointer<Studio>(&studio);
+                            studio.chooser->launchAsync(
+                                juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
+                                [owner](const juce::FileChooser &fc)
+                                {
+                                    if (!owner)
+                                        return;
+                                    const auto folder = fc.getResult();
+                                    owner->chooser.reset();
+                                    if (folder == juce::File{})
+                                        return;
+                                    const auto report = [owner](juce::Result r)
+                                    {
+                                        if (!owner)
+                                            return;
+                                        owner->status = r.wasOk() ? juce::String("Playlist tracks exported")
+                                                                  : r.getErrorMessage();
+                                        owner->repaint();
+                                    };
+                                    if (auto started = owner->exportPlaylistTracks(folder, report); started.failed())
+                                        report(started);
+                                });
+                            return;
+                        }
                         if (result >= 3001 && result <= 3010)
                         {
                             CommandArgs a;

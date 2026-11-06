@@ -90,3 +90,8 @@
   marker named "Bar N" on every Nth bar up to the Song end, following time-signature changes and
   skipping positions that already have one; `marker.addPair` (`beat`, `length`) marks the start
   and end of a time selection. One Undo step each; refuses when nothing would be added.
+- Export all playlist tracks (Playlist menu; `vibera_project {"action":"exportTracks","path":
+  <absolute folder>}`): one WAV per Playlist track that has Pattern or Audio clips (lanes 64+
+  of Performance mode excluded), named "NN Track name.wav", each rendered from the Song start
+  with only that track's clips while automation and tempo stay, so the files line up. Runs one
+  export after another; the job completes after the last file.
