@@ -53,6 +53,6 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Touch recording of fader/pan/send | done | |
 | Polarity, stereo separation, swap L/R | done | |
 | Multichannel routing | partial | |
-| Disk recording (render armed tracks) | missing | |
+| Disk recording (render armed tracks) | done | `mixer.renderArm`, `mixer.renderArmed` |
 | Smart disable | missing | |
 | Link all parameters | missing | |

@@ -4103,6 +4103,14 @@ class Studio::Editor final : public juce::Component,
                 g.setColour(ink);
                 g.setFont(juce::Font(vibera::uiFont, 13, juce::Font::bold));
                 g.drawFittedText(m.name, {x + 9, 34, width - (m.index > 0 ? 40 : 20), 24}, juce::Justification::centredLeft, 1, .9f);
+                if (s.renderArmedInserts.contains(m.index))
+                {
+                    // Armed for rendering: a small disk badge in the header.
+                    g.setColour(juce::Colour(0xffef4f5f));
+                    g.fillRoundedRectangle(float(x + width - 30), 41.f, 8.f, 8.f, 1.5f);
+                    g.setColour(bg);
+                    g.fillRect(float(x + width - 28), 42.f, 4.f, 2.f);
+                }
                 if (const auto arm = mixerRecordBounds(m.index); !arm.isEmpty())
                 {
                     const bool armed = s.insertRecordArmed(m.index);

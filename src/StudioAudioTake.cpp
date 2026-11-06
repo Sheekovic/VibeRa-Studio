@@ -300,12 +300,16 @@ static juce::File findLame()
 }
 
 // One stem per Mixer insert a Channel feeds directly, named "NN Insert name.wav".
-std::vector<std::pair<int, juce::File>> Studio::stemTargets(const Project &project, const juce::File &folder) const
+// With armedOnly, one stem per Mixer track armed for rendering instead (any track, buses too).
+std::vector<std::pair<int, juce::File>> Studio::stemTargets(const Project &project, const juce::File &folder,
+                                                            bool armedOnly) const
 {
     std::vector<std::pair<int, juce::File>> stems;
     for (const auto &insert : project.mixer)
-        if (insert.index > 0 && std::any_of(project.channels.begin(), project.channels.end(),
-                                            [&](const auto &channel) { return channel.mixer == insert.index; }))
+        if (armedOnly ? renderArmedInserts.contains(insert.index)
+                      : insert.index > 0 &&
+                            std::any_of(project.channels.begin(), project.channels.end(),
+                                        [&](const auto &channel) { return channel.mixer == insert.index; }))
             stems.push_back({insert.index, folder.getChildFile(juce::File::createLegalFileName(
                                                juce::String(insert.index).paddedLeft('0', 2) + " " +
                                                insert.name + ".wav"))});
@@ -314,6 +318,7 @@ std::vector<std::pair<int, juce::File>> Studio::stemTargets(const Project &proje
 
 juce::Result Studio::queueExport(const Project &snapshot, const juce::File &target, bool stems)
 {
+    const bool armedOnly = std::exchange(stemsArmedOnly, false);
     if (exportBusy())
         return juce::Result::fail("Finish the running export first");
     exportQueue.clear();
@@ -333,7 +338,7 @@ juce::Result Studio::queueExport(const Project &snapshot, const juce::File &targ
     {
         if (!target.createDirectory())
             return juce::Result::fail("Cannot create the stems folder " + target.getFullPathName());
-        for (const auto &[insert, file] : stemTargets(snapshot, target))
+        for (const auto &[insert, file] : stemTargets(snapshot, target, armedOnly))
         {
             // The canonical "solo connected" keeps whatever feeds or receives this insert.
             Controller solo;
@@ -345,7 +350,8 @@ juce::Result Studio::queueExport(const Project &snapshot, const juce::File &targ
             exportQueue.push_back({solo.project, file, file});
         }
         if (exportQueue.empty())
-            return juce::Result::fail("No Mixer insert is fed by a Channel: nothing to export as stems");
+            return juce::Result::fail(armedOnly ? "No Mixer track is armed for rendering"
+                                                : "No Mixer insert is fed by a Channel: nothing to export as stems");
     }
     startNextExport();
     return juce::Result::ok();

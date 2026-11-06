@@ -183,3 +183,7 @@ its default policy and that has no effects (no Channel, incoming route, automati
 reference; Master stays). Each deletion runs through the normal insert lifecycle after the
 previous one settles, so it is one Undo step per track. Status ends with
 "Trimmed N unused Mixer track(s)".
+- Render armed tracks (Mixer track menu > File): `mixer.renderArm` toggles the selected track's
+  render arm (red disk badge; `state.mixerRenderArmed`, session state), `mixer.renderArmed` asks for a
+  folder and writes one WAV per armed track soloed with its connections. MCP: `vibera_project export`
+  with `stems: true, armedOnly: true` and a folder path; poll the job.

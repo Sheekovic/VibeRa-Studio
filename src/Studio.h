@@ -226,6 +226,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool patternMode = true;
     bool followPlayhead = true;
     bool pianoFollowPlayhead = true;
+    // Mixer tracks armed for "Render armed tracks" (one WAV each, rendered with the track soloed
+    // with its connections). Session UI state; inserts that no longer exist are skipped.
+    std::set<int> renderArmedInserts;
+    bool stemsArmedOnly = false; // The next stems export renders only renderArmedInserts.
     bool pianoBackgroundWaveform = false; // Piano roll: draw Playlist audio clips behind the notes.
     bool rackFocusSelected = true; // Channel Rack scrolls to show a newly selected Channel.
     bool rackScrollRequest = false; // One-shot "scroll to the selected Channel".
@@ -1355,7 +1359,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     std::unique_ptr<ExportEncoding> exportEncoding;
     juce::StringArray exportOutputs;
     bool exportBusy() const { return exportCurrent.has_value() || !exportQueue.empty() || bool(exportEncoding); }
-    std::vector<std::pair<int, juce::File>> stemTargets(const Project &, const juce::File &folder) const;
+    std::vector<std::pair<int, juce::File>> stemTargets(const Project &, const juce::File &folder,
+                                                        bool armedOnly = false) const;
     juce::Result queueExport(const Project &snapshot, const juce::File &target, bool stems);
     void startNextExport();
     void finishExportStep(juce::Result rendered);

@@ -4819,6 +4819,39 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         refresh();
         return true;
     }
+    if (action == "mixer.renderArm")
+    {
+        const int insert = selectedInsert;
+        if (!renderArmedInserts.erase(insert))
+            renderArmedInserts.insert(insert);
+        status = juce::String(renderArmedInserts.contains(insert) ? "Armed" : "Disarmed") + " Mixer track " +
+                 juce::String(insert) + " for rendering (" + juce::String(int(renderArmedInserts.size())) + " armed)";
+        refresh();
+        return true;
+    }
+    if (action == "mixer.renderArmed")
+    {
+        if (stemTargets(controller.project, {}, true).empty())
+        {
+            status = "No Mixer track is armed for rendering (Mixer track menu > File > Arm for rendering)";
+            refresh();
+            return true;
+        }
+        const auto base = projectFile == juce::File{}
+                              ? juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("VibeRa")
+                              : projectFile.withFileExtension("");
+        chooser = std::make_unique<juce::FileChooser>("Render armed Mixer tracks into folder", base.getParentDirectory());
+        auto safe = juce::Component::SafePointer<Studio>(this);
+        chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
+                             [safe](const juce::FileChooser &fc)
+                             {
+                                 if (!safe || fc.getResult() == juce::File{})
+                                     return;
+                                 safe->stemsArmedOnly = true;
+                                 safe->exportTo(fc.getResult(), 0, true);
+                             });
+        return true;
+    }
     if (action == "view.rackFocusSelected")
     {
         rackFocusSelected = !rackFocusSelected;
@@ -8099,6 +8132,9 @@ void Studio::effectMenu(int index)
     juce::PopupMenu trackFile;
     trackFile.addItem(10028, "Save mixer track state...", !mixerChainBusy());
     trackFile.addItem(10029, "Open mixer track state...", !mixerChainBusy());
+    trackFile.addSeparator();
+    trackFile.addItem(10030, "Arm for rendering", true, renderArmedInserts.contains(index));
+    trackFile.addItem(10031, "Render armed tracks to WAV files...", !renderArmedInserts.empty());
     menu.addSubMenu("File", trackFile);
     menu.addItem(10024, "Trim unused tracks (" + juce::String(int(unusedMixerInserts().size())) + ")",
                  !mixerChainBusy() && !unusedMixerInserts().empty());
@@ -8298,6 +8334,13 @@ void Studio::effectMenu(int index)
                                if (started.failed())
                                    safe->status = started.getErrorMessage();
                                safe->repaint();
+                               return;
+                           }
+                           if (selected == 10030 || selected == 10031)
+                           {
+                               if (selected == 10030)
+                                   safe->selectedInsert = index;
+                               safe->performAction(selected == 10030 ? "mixer.renderArm" : "mixer.renderArmed");
                                return;
                            }
                            if (selected == 10028 || selected == 10029)
