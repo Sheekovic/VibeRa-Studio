@@ -3662,6 +3662,36 @@ class Studio::Editor final : public juce::Component,
             {
                 juce::Graphics::ScopedSaveState clip(g);
                 g.reduceClipRegion(left, top, getWidth() - left, getHeight() - top - (type == 1 ? 66 : 0));
+                if (type == 1 && s.pianoBackgroundWaveform)
+                {
+                    // Background waveform: Playlist audio clips drawn faintly behind the notes, lined
+                    // up with the first Playlist clip of this Pattern (or the song start without one).
+                    const auto &project = s.controller.project;
+                    double anchor = 0;
+                    bool found = false;
+                    for (const auto &clip : project.placements)
+                        if (clip.pattern == s.selectedPattern && (!found || clip.beat < anchor))
+                        {
+                            anchor = clip.beat - clip.offset;
+                            found = true;
+                        }
+                    for (const auto &audio : project.audioPlacements)
+                    {
+                        const auto *source = project.channel(audio.channel);
+                        if (audio.muted || !source || audio.duration <= 0)
+                            continue;
+                        const double start = audio.beat - anchor, length = audio.duration * project.tempo / 60.;
+                        if (start + length < scroll || start > scroll + viewBeats())
+                            continue;
+                        if (!waveforms)
+                            waveforms = std::make_unique<PlaylistWaveforms>(*this);
+                        auto thumbnail = waveforms->get(source->source);
+                        const juce::Rectangle<int> area(int(left + (start - scroll) * spacing()), top,
+                                                        std::max(1, int(length * spacing())), noteBottom() - top);
+                        g.setColour(accent.withAlpha(.16f));
+                        thumbnail.drawChannels(g, area, audio.offset, audio.offset + audio.duration, 1.f);
+                    }
+                }
                 if (type == 1)
                 {
                     if (pattern())

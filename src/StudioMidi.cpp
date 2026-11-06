@@ -259,6 +259,7 @@ void Studio::midiFileMenu()
     }
     menu.addItem(44003, "Auto-scroll with the playhead", true, pianoFollowPlayhead);
     menu.addItem(44004, "Center the playhead while scrolling", true, followCenter);
+    menu.addItem(44005, "Background waveform (Playlist audio clips)", true, pianoBackgroundWaveform);
     menu.addItem(69, "Export as score sheet (PDF)...");
     menu.addItem(67, "Copy to MIDI clipboard");
     menu.addItem(68, "Paste from MIDI clipboard    Shift+Ctrl+V");
@@ -483,10 +484,12 @@ void Studio::midiFileMenu()
                 safe->command("notes.randomize", args);
                 return;
             }
-            if (result == 44003 || result == 44004)
+            if (result >= 44003 && result <= 44005)
             {
                 safe->focus = Scope::piano;
-                safe->performAction(result == 44003 ? "view.pianoFollow" : "view.followCenter");
+                safe->performAction(result == 44003   ? "view.pianoFollow"
+                                    : result == 44004 ? "view.followCenter"
+                                                      : "view.pianoBackgroundWaveform");
                 return;
             }
             if (result >= 44000 && result <= 44002)

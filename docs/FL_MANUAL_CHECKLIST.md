@@ -19,7 +19,7 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Note grid highlights | done | `view.noteGridHighlights` |
 | Auto-scroll with the playhead, centred follow | done | `view.pianoFollow`, `view.followCenter` |
 | Score sheet export, MIDI export | done | |
-| Background waveform of audio clips | missing | |
+| Background waveform of audio clips | done | `view.pianoBackgroundWaveform` |
 | Preview notes during playback | missing | |
 
 ## Channel Rack

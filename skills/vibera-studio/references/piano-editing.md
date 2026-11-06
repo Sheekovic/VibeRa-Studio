@@ -114,3 +114,6 @@
 - Auto-scroll (Piano roll menu > Auto-scroll with the playhead; action `view.pianoFollow`, on by
   default, `state.pianoFollowPlayhead`) pages the Piano roll with the playhead during playback.
   `view.followCenter` (`state.followCenter`) keeps the playhead centred instead, in both editors.
+- Background waveform (Piano roll menu; `view.pianoBackgroundWaveform`, off by default, read
+  `state.pianoBackgroundWaveform`) draws Playlist audio clips faintly behind the notes, aligned to
+  the first Playlist clip of the Pattern (song start when it has none).

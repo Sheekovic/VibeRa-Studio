@@ -226,6 +226,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool patternMode = true;
     bool followPlayhead = true;
     bool pianoFollowPlayhead = true;
+    bool pianoBackgroundWaveform = false; // Piano roll: draw Playlist audio clips behind the notes.
     bool rackFocusSelected = true; // Channel Rack scrolls to show a newly selected Channel.
     bool rackScrollRequest = false; // One-shot "scroll to the selected Channel".
     int rackButtonWidth = 1; // Channel Rack channel button width: 0 narrow, 1 normal, 2 wide. // Piano roll auto-scroll during playback.

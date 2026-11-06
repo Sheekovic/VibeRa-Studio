@@ -4812,6 +4812,13 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
+    if (action == "view.pianoBackgroundWaveform")
+    {
+        pianoBackgroundWaveform = !pianoBackgroundWaveform;
+        status = pianoBackgroundWaveform ? "Piano roll background waveform on" : "Piano roll background waveform off";
+        refresh();
+        return true;
+    }
     if (action == "view.rackFocusSelected")
     {
         rackFocusSelected = !rackFocusSelected;

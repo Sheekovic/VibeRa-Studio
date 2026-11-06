@@ -3726,6 +3726,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "pianoFollowPlayhead", pianoFollowPlayhead);
     set(state, "followCenter", followCenter);
     set(state, "rackFocusSelected", rackFocusSelected);
+    set(state, "pianoBackgroundWaveform", pianoBackgroundWaveform);
     set(state, "rackButtonWidth", rackButtonWidth == 0 ? "narrow" : rackButtonWidth == 1 ? "normal" : "wide");
     set(state, "snap", snap);
     set(state, "snapLine", snapLine);
