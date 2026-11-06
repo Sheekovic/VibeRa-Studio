@@ -78,7 +78,14 @@ inline juce::Result deleteMixerInsert(Project &project, int id, const MixerInser
         return juce::Result::fail(
             "mixer.groupReferenced: Explicit display-group membership removal required");
     const bool assigned = std::any_of(project.channels.begin(), project.channels.end(),
-                                      [&](const auto &channel) { return channel.mixer == id; });
+                                      [&](const auto &channel)
+                                      {
+                                          return channel.mixer == id ||
+                                                 (channel.instrument &&
+                                                  std::find(channel.instrument->extraOutputMixers.begin(),
+                                                            channel.instrument->extraOutputMixers.end(),
+                                                            id) != channel.instrument->extraOutputMixers.end());
+                                      });
     bool incoming = false;
     for (const auto &row : project.mixer)
         for (const auto &route : row.routes)
@@ -98,8 +105,14 @@ inline juce::Result deleteMixerInsert(Project &project, int id, const MixerInser
     if (policy.replacement)
     {
         for (auto &channel : project.channels)
+        {
             if (channel.mixer == id)
                 channel.mixer = *policy.replacement;
+            if (channel.instrument)
+                for (auto &target : channel.instrument->extraOutputMixers)
+                    if (target == id)
+                        target = *policy.replacement;
+        }
         for (auto &row : project.mixer)
             for (auto &route : row.routes)
                 if (route.target == id)

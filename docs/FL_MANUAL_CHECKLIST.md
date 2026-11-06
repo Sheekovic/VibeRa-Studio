@@ -52,7 +52,7 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Dock, reset, track state save/open | done | |
 | Touch recording of fader/pan/send | done | |
 | Polarity, stereo separation, swap L/R | done | |
-| Multichannel routing | partial | |
+| Multichannel routing | partial | worker transfer + model done; graph routing, command/UI/MCP open |
 | Disk recording (render armed tracks) | done | `mixer.renderArm`, `mixer.renderArmed` |
 | Smart disable | done | VibeRa effects; `effectSmartDisable` |
 | Link all parameters | done | `mixer.linkAll` (track volume, pan, separation to MIDI CCs) |

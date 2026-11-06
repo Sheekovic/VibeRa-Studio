@@ -36,6 +36,9 @@ struct PluginSpec
     float wet = 1; // Host effect mix, not a native parameter; instruments require1.
     std::optional<PluginDetectorAssignment> detector; // Effects only; absent preserves old stereo layout.
     int mainInputBus = 0, mainOutputBus = 0, mainInputChannels = 2, mainInputMonoSource = 0;
+    // Multi-output instruments: Mixer insert (0 Master) for each extra stereo output bus, in the
+    // plugin's ascending bus order after the main one. Empty keeps the single main output.
+    std::vector<int> extraOutputMixers;
     bool operator==(const PluginSpec &) const = default;
 };
 // Requires an independently validated Project. Invalid bus/channel declarations
@@ -52,6 +55,7 @@ inline PluginBusRequest pluginBusRequestFor(const PluginSpec &spec) noexcept
     request.mainOutputBus = spec.mainOutputBus;
     request.mainInputChannels = spec.mainInputChannels;
     request.mainInputMonoSource = spec.mainInputMonoSource;
+    request.extraOutputBuses = int(spec.extraOutputMixers.size());
     return request;
 }
 // Control-thread snapshot only. Identity is independent of worker IPC/pairing tokens.

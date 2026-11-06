@@ -260,6 +260,13 @@ static juce::ValueTree pluginState(const PluginSpec &p)
     if (p.wet != 1)
         t.setProperty("wet", double(p.wet), nullptr);
     t.appendChild(pluginBindingsState(p.automationBindings), nullptr);
+    if (!p.extraOutputMixers.empty())
+    {
+        juce::StringArray targets;
+        for (int target : p.extraOutputMixers)
+            targets.add(juce::String(target));
+        t.setProperty("extraOutputMixers", targets.joinIntoString(","), nullptr);
+    }
     if (pluginMainIoFor(p) != PluginMainIo{})
     {
         t.setProperty("mainInputBus", p.mainInputBus, nullptr);
@@ -323,6 +330,18 @@ static juce::Result parsePlugin(const juce::ValueTree &t, PluginSpec &output, in
             (channels != 1 && channels != 2))
             return juce::Result::fail("sidechain.invalidEncoding: Exact effect detector assignment required");
         plugin.detector = PluginDetectorAssignment{int(source), int(bus), int(channels)};
+    }
+    if (t.hasProperty("extraOutputMixers"))
+    {
+        const auto tokens = juce::StringArray::fromTokens(t["extraOutputMixers"].toString(), ",", "");
+        if (tokens.isEmpty() || tokens.size() > PluginBusRequest::maximumExtraOutputBuses)
+            return juce::Result::fail("pluginIo.invalidEncoding: 1..7 extra output Mixer targets required");
+        for (const auto &token : tokens)
+        {
+            if (!token.containsOnly("0123456789") || token.isEmpty() || token.length() > 9)
+                return juce::Result::fail("pluginIo.invalidEncoding: Integral extra output Mixer targets required");
+            plugin.extraOutputMixers.push_back(token.getIntValue());
+        }
     }
     int ioFields = 0;
     for (const auto *key : {"mainInputBus", "mainOutputBus", "mainInputChannels", "mainInputMonoSource"})
@@ -2338,7 +2357,10 @@ juce::Result Project::validate() const
             plugin.descriptor.length() > 65536 || plugin.state.length() > 24 * 1024 * 1024 ||
             bindingCount > 4096 || !validPluginBindings(plugin.automationBindings) ||
             !pluginBusRequestFor(plugin).valid() || !std::isfinite(plugin.wet) || plugin.wet < 0 ||
-            plugin.wet > 1 || (instrument && (plugin.wet != 1 || plugin.detector)))
+            plugin.wet > 1 || (instrument && (plugin.wet != 1 || plugin.detector)) ||
+            (!instrument && !plugin.extraOutputMixers.empty()) ||
+            std::any_of(plugin.extraOutputMixers.begin(), plugin.extraOutputMixers.end(),
+                        [&](int target) { return !mixerInsert(*this, target); }))
             return false;
         auto xml = juce::XmlDocument::parse(plugin.descriptor);
         juce::PluginDescription type;
