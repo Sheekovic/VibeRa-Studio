@@ -1312,11 +1312,16 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void withPluginState(std::function<void(juce::Result, Project)>, const std::vector<Id> *only = nullptr);
     void saveTo(const juce::File &, std::function<void(juce::Result)> completion = {});
     void exportTo(const juce::File &, Id patternOnly = 0, bool stems = false, std::vector<Id> clipsOnly = {},
-                  int laneOnly = -1);
+                  std::vector<int> lanesOnly = {});
     // Playlist "Export all playlist tracks": one WAV per Playlist track that has Pattern or
     // Audio clips ("NN Name.wav" in `folder`), each rendered from the Song start with only that
     // track's clips (automation and tempo kept), one after another. `done` reports the count.
     juce::Result exportPlaylistTracks(const juce::File &folder, std::function<void(juce::Result)> done);
+    // "Export all playlist track groups": one WAV per group of two or more tracks (named after
+    // its first track), same rules as the track export.
+    juce::Result exportPlaylistTrackGroups(const juce::File &folder, std::function<void(juce::Result)> done);
+    juce::Result exportLaneSets(const juce::File &folder, std::vector<std::pair<juce::String, std::vector<int>>> sets,
+                                std::function<void(juce::Result)> done);
     std::vector<int> playlistTrackLanes() const;
     std::shared_ptr<std::function<void()>> pendingTrackExport;
     // Export queue: each step renders a WAV through the shared render worker, then (for

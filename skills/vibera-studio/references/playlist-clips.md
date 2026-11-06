@@ -95,3 +95,7 @@
   of Performance mode excluded), named "NN Track name.wav", each rendered from the Song start
   with only that track's clips while automation and tempo stay, so the files line up. Runs one
   export after another; the job completes after the last file.
+- Export all playlist track groups (Playlist menu; `vibera_project` `exportTrackGroups` with a
+  folder `path`): one WAV per group of two or more tracks (a first track plus the tracks
+  "Grouped with the track above") that has clips, named after the group's first track
+  ("Group N" when unnamed), with the same Song-start alignment as the track export.

@@ -6866,22 +6866,56 @@ std::vector<int> Studio::playlistTrackLanes() const
 }
 juce::Result Studio::exportPlaylistTracks(const juce::File &folder, std::function<void(juce::Result)> done)
 {
-    const auto lanes = playlistTrackLanes();
-    if (lanes.empty())
+    std::vector<std::pair<juce::String, std::vector<int>>> sets;
+    for (const int lane : playlistTrackLanes())
+    {
+        const auto *track = controller.project.track(lane);
+        sets.push_back({track && track->name.isNotEmpty() ? track->name : "Track " + juce::String(lane + 1), {lane}});
+    }
+    if (sets.empty())
         return juce::Result::fail("No Playlist track has Pattern or Audio clips");
+    return exportLaneSets(folder, std::move(sets), std::move(done));
+}
+juce::Result Studio::exportPlaylistTrackGroups(const juce::File &folder, std::function<void(juce::Result)> done)
+{
+    const auto used = playlistTrackLanes();
+    std::vector<std::pair<juce::String, std::vector<int>>> sets;
+    for (int lane = 0; lane < 64; ++lane)
+    {
+        const auto *head = controller.project.track(lane);
+        if (head && head->groupedAbove)
+            continue; // Not a group's first track.
+        std::vector<int> members{lane};
+        for (int next = lane + 1; next < 64; ++next)
+            if (const auto *member = controller.project.track(next); member && member->groupedAbove)
+                members.push_back(next);
+            else
+                break;
+        const bool hasClips = std::any_of(members.begin(), members.end(), [&](int l)
+                                          { return std::find(used.begin(), used.end(), l) != used.end(); });
+        if (members.size() >= 2 && hasClips)
+            sets.push_back({head && head->name.isNotEmpty() ? head->name : "Group " + juce::String(lane + 1), members});
+    }
+    if (sets.empty())
+        return juce::Result::fail("No Playlist track group (two or more tracks with clips) to export");
+    return exportLaneSets(folder, std::move(sets), std::move(done));
+}
+juce::Result Studio::exportLaneSets(const juce::File &folder, std::vector<std::pair<juce::String, std::vector<int>>> sets,
+                                    std::function<void(juce::Result)> done)
+{
     if (!folder.isDirectory() && !folder.createDirectory())
         return juce::Result::fail("Cannot create " + folder.getFullPathName());
     if (pendingExport || audio.rendering() || exportBusy())
         return juce::Result::fail("Finish the current export first");
     struct Run
     {
-        std::vector<int> lanes;
+        std::vector<std::pair<juce::String, std::vector<int>>> sets;
         size_t next = 0;
         bool started = false;
         int patience = 0;
     };
     auto run = std::make_shared<Run>();
-    run->lanes = lanes;
+    run->sets = std::move(sets);
     auto safe = juce::Component::SafePointer<Studio>(this);
     auto step = std::make_shared<std::function<void()>>();
     *step = [safe, run, folder, done, weak = std::weak_ptr<std::function<void()>>(step)]
@@ -6907,17 +6941,15 @@ juce::Result Studio::exportPlaylistTracks(const juce::File &folder, std::functio
             }
             run->started = false;
         }
-        if (run->next >= run->lanes.size())
+        if (run->next >= run->sets.size())
             return done(juce::Result::ok());
-        const int lane = run->lanes[run->next++];
-        const auto *track = safe->controller.project.track(lane);
-        const auto name = track && track->name.isNotEmpty() ? track->name : "Track " + juce::String(lane + 1);
-        const auto file = folder.getChildFile(juce::String(lane + 1).paddedLeft('0', 2) + " " +
+        const auto &[name, lanes] = run->sets[run->next++];
+        const auto file = folder.getChildFile(juce::String(lanes.front() + 1).paddedLeft('0', 2) + " " +
                                               juce::File::createLegalFileName(name) + ".wav");
-        safe->status = "Exporting Playlist track " + juce::String(run->next) + " of " + juce::String(int(run->lanes.size()));
+        safe->status = "Exporting " + juce::String(int(run->next)) + " of " + juce::String(int(run->sets.size()));
         run->started = true;
         run->patience = 30;
-        safe->exportTo(file, 0, false, {}, lane);
+        safe->exportTo(file, 0, false, {}, lanes);
         if (auto next = weak.lock())
             juce::Timer::callAfterDelay(200, [next] { (*next)(); });
     };
@@ -7451,7 +7483,8 @@ juce::Result Studio::newProject(bool demo, bool discardChanges)
     refresh();
     return juce::Result::ok();
 }
-void Studio::exportTo(const juce::File &file, Id patternOnly, bool stems, std::vector<Id> clipsOnly, int laneOnly)
+void Studio::exportTo(const juce::File &file, Id patternOnly, bool stems, std::vector<Id> clipsOnly,
+                      std::vector<int> lanesOnly)
 {
     if (!audio.rendering() && !pendingExport && !exportBusy())
         exportCancelRequested = false; // A cancel never carries over to a new export.
@@ -7481,15 +7514,16 @@ void Studio::exportTo(const juce::File &file, Id patternOnly, bool stems, std::v
     }
     auto safe = juce::Component::SafePointer<Studio>(this);
     withPluginState(
-        [safe, file, patternOnly, stems, clipsOnly, laneOnly](juce::Result result, Project snapshot)
+        [safe, file, patternOnly, stems, clipsOnly, lanesOnly](juce::Result result, Project snapshot)
         {
             if (!safe)
                 return;
-            if (result.wasOk() && laneOnly >= 0)
+            if (result.wasOk() && !lanesOnly.empty())
             {
-                // One Playlist track from the Song start: other tracks' Pattern/Audio clips go.
-                std::erase_if(snapshot.placements, [laneOnly](const auto &p) { return p.lane != laneOnly; });
-                std::erase_if(snapshot.audioPlacements, [laneOnly](const auto &p) { return p.lane != laneOnly; });
+                // Chosen Playlist tracks from the Song start: other tracks' Pattern/Audio clips go.
+                const auto keep = [&](int lane) { return std::find(lanesOnly.begin(), lanesOnly.end(), lane) != lanesOnly.end(); };
+                std::erase_if(snapshot.placements, [&](const auto &p) { return !keep(p.lane); });
+                std::erase_if(snapshot.audioPlacements, [&](const auto &p) { return !keep(p.lane); });
             }
             if (result.wasOk() && patternOnly != 0)
             {
