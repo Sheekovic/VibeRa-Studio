@@ -105,7 +105,7 @@ inline juce::Result verify()
                 throw std::runtime_error(message);
         };
         const auto descriptions = effects::nativeDescriptions();
-        check(descriptions.size() == 25, "All 25 original native effects are individually described");
+        check(descriptions.size() == 40, "All 40 native effects are individually described");
         std::set<juce::String> identifiers;
         constexpr std::array<unsigned char, 5> opaque{0, 0x5a, 0xff, 1, 0x3f};
         const auto state = juce::MemoryBlock(opaque.data(), opaque.size()).toBase64Encoding();

@@ -280,8 +280,8 @@ def main():
             check(initial["disposableSettings"] is True and initial["pluginCount"] == 0,
                   "External catalogue is disposable and empty; no plugin scan occurs")
             builtins = data("vibera_effects", {"action": "list"})["effects"]
-            check(len(builtins) == 25 and len({p["type"] for p in builtins}) == 25,
-                  "25 independently insertable built-in effects available immediately")
+            check(len(builtins) == 40 and len({p["type"] for p in builtins}) == 40,
+                  "40 independently insertable built-in effects available immediately")
             descriptors = {}
             for row in builtins:
                 descriptor = data("vibera_effects", {"action": "descriptor", "type": row["type"]})

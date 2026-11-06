@@ -418,9 +418,12 @@ static void runChannelLoopAcceptance(const juce::File &folder)
         auto extended = c.project;
         extended.placements = {{extended.allocate(), pattern, 0, 10, 8, .25}};
         const auto events = sequence(extended, false, pattern);
-        require(!events.empty() && std::all_of(events.begin(), events.end(),
-                                               [](const auto &n) { return n.beat + n.length <= 13.75; }),
-                "Long offset Song placement clips crossing notes at actual Pattern horizon");
+        // A Song placement longer than its Pattern repeats the Pattern up to the clip end.
+        require(!events.empty() &&
+                    std::all_of(events.begin(), events.end(),
+                                [](const auto &n) { return n.beat + n.length <= 18 + 1.e-9; }) &&
+                    std::any_of(events.begin(), events.end(), [](const auto &n) { return n.beat >= 13.75; }),
+                "Long offset Song placement repeats its Pattern and clips notes at the clip end");
         Controller burner;
         burner.replace(extended);
         require(burner.execute("pattern.burnChannelLoop", args).wasOk() &&

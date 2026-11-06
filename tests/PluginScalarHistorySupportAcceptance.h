@@ -116,10 +116,10 @@ static void synthScalarPatchHistoryTests()
             if (before[index] != after[index])
                 edits.push_back(gestures[index]);
         }
-        require(gestures.size() == 64 && !edits.empty() && edits.size() < gestures.size() &&
+        require(gestures.size() == synth::parameterCount && gestures.size() >= 64 && !edits.empty() && edits.size() < gestures.size() &&
                     before[source] != after[source] && before[selector] != after[selector] &&
                     source < selector && before[unrelated] == after[unrelated],
-                "Full64 UI witnesses contain changed source-before-selector and explicit filtered no-ops");
+                "Full-parameter UI witnesses contain changed source-before-selector and explicit filtered no-ops");
         for (const auto &edit : edits)
             require(edit.before != edit.after, "History receives zero no-op witnesses after UI filtering");
         const auto original = owner->project.state().toXmlString();

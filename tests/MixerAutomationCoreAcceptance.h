@@ -99,7 +99,11 @@ inline void model(const juce::File &folder)
     auto unsupported = c.project;
     unsupported.automation.initialValues.push_back(
         {{AutomationParameter::channelPan, unsupported.channels.front().id, 0}, 0});
-    require(unsupported.validate().failed(), "Channel targets remain outside this Mixer batch");
+    // Channel volume/pan automation is a supported target; it still needs an existing Channel.
+    require(unsupported.validate().wasOk(), "Channel pan automation targets an existing Channel");
+    auto orphan = c.project;
+    orphan.automation.initialValues.push_back({{AutomationParameter::channelPan, Id(987654321), 0}, 0});
+    require(orphan.validate().failed(), "Channel automation for a missing Channel is refused");
     // Initialization deliberately survives source/placement deletion; removing
     // it as well restores current manual fallback, not a stale held endpoint.
     CommandArgs remove;
