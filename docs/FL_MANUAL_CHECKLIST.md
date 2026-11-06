@@ -55,4 +55,4 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Multichannel routing | partial | |
 | Disk recording (render armed tracks) | done | `mixer.renderArm`, `mixer.renderArmed` |
 | Smart disable | done | VibeRa effects; `effectSmartDisable` |
-| Link all parameters | missing | |
+| Link all parameters | done | `mixer.linkAll` (track volume, pan, separation to MIDI CCs) |

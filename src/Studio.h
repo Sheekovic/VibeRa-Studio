@@ -576,6 +576,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // that the reload was requested.
     juce::Result loadEffectImpulse(Id effect, const juce::File &, std::function<void(juce::Result)> done);
     juce::Result setEffectSmartDisable(Id effect, bool on, std::function<void(juce::Result)> done);
+    // Link all parameters: maps the Mixer track's volume, pan and stereo separation to the next
+    // three free MIDI CCs (channel 1, absolute) through the validated controller mapping service.
+    juce::Result linkAllMixerParameters(int insert, int &firstCc);
     bool effectSmartDisabled(Id effect) const;
     juce::Result editNativeEffectState(Id effect, std::function<void(juce::XmlElement &)> edit, juce::String code,
                                        juce::String doneStatus, std::function<void(juce::Result)> done);

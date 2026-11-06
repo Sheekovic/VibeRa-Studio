@@ -155,3 +155,7 @@ waveform (newest at the bottom, width = peak). View only; read `state.mixerMeter
   to) replace the selection and refuse when there is nothing to select.
 - Reset track: `mixer.reset` (`mixer`; one Undo) puts name, colour, volume, pan, mute, stereo,
   phase/swap, EQ, track delay and dock back to defaults; effects and routing stay.
+- Link all parameters (Mixer track menu > File > Link all parameters to MIDI CCs; `mixer.linkAll` on
+  the selected track): maps volume, pan and stereo separation to the next three free CCs (20..119,
+  MIDI channel 1, absolute with pickup) through the controller mapping service; the status names the
+  CCs. Remove or relearn them on the Controllers page.

@@ -4826,6 +4826,17 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         refresh();
         return true;
     }
+    if (action == "mixer.linkAll")
+    {
+        int first = 0;
+        const auto linked = linkAllMixerParameters(selectedInsert, first);
+        status = linked.failed() ? linked.getErrorMessage()
+                                 : "Linked Mixer track " + juce::String(selectedInsert) + ": volume CC" +
+                                       juce::String(first) + ", pan CC" + juce::String(first + 1) +
+                                       ", stereo separation CC" + juce::String(first + 2) + " (MIDI channel 1)";
+        refresh();
+        return true;
+    }
     if (action == "mixer.renderArm")
     {
         const int insert = selectedInsert;
@@ -8140,6 +8151,7 @@ void Studio::effectMenu(int index)
     trackFile.addItem(10028, "Save mixer track state...", !mixerChainBusy());
     trackFile.addItem(10029, "Open mixer track state...", !mixerChainBusy());
     trackFile.addSeparator();
+    trackFile.addItem(10032, "Link all parameters to MIDI CCs");
     trackFile.addItem(10030, "Arm for rendering", true, renderArmedInserts.contains(index));
     trackFile.addItem(10031, "Render armed tracks to WAV files...", !renderArmedInserts.empty());
     menu.addSubMenu("File", trackFile);
@@ -8347,6 +8359,12 @@ void Studio::effectMenu(int index)
                                if (started.failed())
                                    safe->status = started.getErrorMessage();
                                safe->repaint();
+                               return;
+                           }
+                           if (selected == 10032)
+                           {
+                               safe->selectedInsert = index;
+                               safe->performAction("mixer.linkAll");
                                return;
                            }
                            if (selected == 10030 || selected == 10031)
@@ -11560,3 +11578,59 @@ juce::Result Studio::verifyNoteModesWorkflow(const juce::File &folder)
 }
 } // namespace vibera
 #include "../tests/PianoNoteModesAcceptance.inc"
+
+namespace vibera
+{
+juce::Result Studio::linkAllMixerParameters(int insert, int &firstCc)
+{
+    const auto *track = mixerInsert(controller.project, insert);
+    if (!track)
+        return juce::Result::fail("mixer.linkAll: Choose an existing Mixer track");
+    struct Parameter
+    {
+        const char *action, *name;
+        double minimum, maximum;
+    };
+    static constexpr Parameter parameters[]{{"mixer.gain", "Volume", 0, 1.5},
+                                            {"mixer.pan", "Pan", -1, 1},
+                                            {"mixer.stereoSeparation", "Stereo separation", -1, 1}};
+    const auto binding = [&](const Parameter &parameter, int cc)
+    {
+        ControllerBinding b;
+        b.port = 1;
+        b.channel = 1;
+        b.kind = 0;
+        b.number = cc;
+        b.mode = 1; // Absolute.
+        b.action = parameter.action;
+        b.minimum = parameter.minimum;
+        b.maximum = parameter.maximum;
+        b.mixer = insert;
+        b.label = track->name + " " + parameter.name;
+        return b;
+    };
+    // Three consecutive CCs that no enabled mapping uses yet (20..119, the common free range).
+    firstCc = -1;
+    for (int cc = 20; cc + 2 <= 119 && firstCc < 0; ++cc)
+        if (std::none_of(std::begin(parameters), std::end(parameters),
+                         [&](const Parameter &parameter)
+                         {
+                             const auto candidate = binding(parameter, cc + int(&parameter - parameters));
+                             return midiController.conflicts(candidate, std::numeric_limits<size_t>::max());
+                         }))
+            firstCc = cc;
+    if (firstCc < 0)
+        return juce::Result::fail("mixer.linkAll: No three free MIDI CCs are left (20..119)");
+    for (int i = 0; i < 3; ++i)
+    {
+        juce::String profile;
+        if (auto identity = midiController.bindingProfileIdentity(profile); identity.failed())
+            return identity;
+        if (auto added = midiController.setBinding(midiController.bindings.size(), binding(parameters[i], firstCc + i),
+                                                   profile);
+            added.failed())
+            return added;
+    }
+    return juce::Result::ok();
+}
+} // namespace vibera
