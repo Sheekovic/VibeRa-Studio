@@ -12,9 +12,14 @@ struct PluginBusRequest
     int auxiliaryInputBus = -1;
     int auxiliaryChannels = 0;
     int mainInputBus = 0, mainOutputBus = 0, mainInputChannels = 2, mainInputMonoSource = 0;
+    // Multi-output instruments: this many further output buses (ascending bus order, skipping
+    // the main one) are enabled as stereo and transferred beside the main output.
+    int extraOutputBuses = 0;
+    static constexpr int maximumExtraOutputBuses = 7;
     constexpr bool valid() const noexcept
     {
-        return mainInputBus >= 0 && mainInputBus <= 31 && mainOutputBus >= 0 && mainOutputBus <= 31 &&
+        return extraOutputBuses >= 0 && extraOutputBuses <= maximumExtraOutputBuses &&
+               mainInputBus >= 0 && mainInputBus <= 31 && mainOutputBus >= 0 && mainOutputBus <= 31 &&
                ((mainInputChannels == 2 && mainInputMonoSource == 0) ||
                 (mainInputChannels == 1 && mainInputMonoSource >= 1 && mainInputMonoSource <= 3)) &&
                (auxiliaryChannels == 0 ? auxiliaryInputBus == -1

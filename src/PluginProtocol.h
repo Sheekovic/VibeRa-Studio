@@ -13,7 +13,8 @@
 namespace vibera::ipc
 {
 constexpr int frames = 8192, slots = 8, events = 512, stateBytes = 16 * 1024 * 1024;
-constexpr int version = 21; // Bounded native patch ACKs require an exact app/worker pair.
+constexpr int outputChannels = 16; // Main stereo output plus up to seven extra stereo output buses.
+constexpr int version = 22; // Bounded native patch ACKs require an exact app/worker pair.
 constexpr int patchValues = 96; // Scalars in one atomic native patch (a whole Synth preset).
 constexpr std::uint32_t magic = 0x56525330 + version;
 constexpr int parameters = 8192, parameterEvents = 8192;
@@ -105,7 +106,8 @@ struct Block
     int numerator = 4, denominator = 4;
     std::array<MidiEvent, events> midi;
     std::array<ParameterEvent, parameterEvents> parameters;
-    float input[4][frames]{}, output[2][frames]{};
+    // output[0..1] is the main stereo output; output[2 + 2k ..] is extra output bus k (multi-output).
+    float input[4][frames]{}, output[outputChannels][frames]{};
 };
 struct Shared
 {

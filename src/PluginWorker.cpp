@@ -360,9 +360,12 @@ class WorkerApp final : public juce::JUCEApplication,
     juce::MidiBuffer midi;
     // Fixed preparation-owned packing storage for nondefault native input order.
     // Packet input[0:2] stays app stereo; input[2:4] stays independent detector.
-    std::array<std::array<float, ipc::frames>, 4> selectedBusAudio{};
+    std::array<std::array<float, ipc::frames>, ipc::outputChannels> selectedBusAudio{};
     bool packSelectedBuses = false;
     int selectedMainOffset = 0, selectedAuxiliaryOffset = 0;
+    // Output channel offsets inside the processing buffer: main stereo output, then each extra bus.
+    int mainOutputOffset = 0, extraOutputs = 0;
+    std::array<int, PluginBusRequest::maximumExtraOutputBuses> extraOutputOffsets{};
     int preparedInputBusCount = 0, preparedOutputBusCount = 0;
     std::array<int, PluginBusCatalogue::maximumPerDirection> preparedInputChannels{},
         preparedOutputChannels{};
@@ -1030,7 +1033,8 @@ class WorkerApp final : public juce::JUCEApplication,
         if (!shared || shared->signature != ipc::magic || shared->blockSize < 16 ||
             shared->blockSize > ipc::frames || !std::isfinite(shared->rate) || shared->rate < 8000 ||
             shared->rate > 192000 || !shared->requestedBuses.valid() ||
-            (shared->instrument && shared->requestedBuses.auxiliaryChannels != 0))
+            (shared->instrument && shared->requestedBuses.auxiliaryChannels != 0) ||
+            (!shared->instrument && shared->requestedBuses.extraOutputBuses != 0))
         {
             fail("Invalid IPC configuration");
             return;
@@ -1094,6 +1098,7 @@ class WorkerApp final : public juce::JUCEApplication,
         if (preparedInputBusCount > PluginBusCatalogue::maximumPerDirection || preparedOutputBusCount < 1 ||
             preparedOutputBusCount > PluginBusCatalogue::maximumPerDirection ||
             requested.mainOutputBus >= preparedOutputBusCount ||
+            1 + requested.extraOutputBuses > preparedOutputBusCount ||
             (!absentDefaultInput && requested.mainInputBus >= preparedInputBusCount) ||
             (requested.auxiliaryChannels != 0 && requested.auxiliaryInputBus >= preparedInputBusCount))
         {
@@ -1101,9 +1106,25 @@ class WorkerApp final : public juce::JUCEApplication,
                  "catalogue capacity");
             return;
         }
-        for (int i = 0; i < preparedOutputBusCount; ++i)
-            layout.outputBuses.set(i, i == requested.mainOutputBus ? juce::AudioChannelSet::stereo()
-                                                                   : juce::AudioChannelSet::disabled());
+        {
+            // Main output plus the first extraOutputBuses other buses, all stereo; channel
+            // offsets follow JUCE's ascending bus order inside the processing buffer.
+            int extras = 0, offset = 0;
+            extraOutputs = requested.extraOutputBuses;
+            for (int i = 0; i < preparedOutputBusCount; ++i)
+            {
+                const bool main = i == requested.mainOutputBus;
+                const bool extra = !main && extras < requested.extraOutputBuses;
+                layout.outputBuses.set(i, main || extra ? juce::AudioChannelSet::stereo()
+                                                        : juce::AudioChannelSet::disabled());
+                if (main)
+                    mainOutputOffset = offset;
+                if (extra)
+                    extraOutputOffsets[size_t(extras++)] = offset;
+                if (main || extra)
+                    offset += 2;
+            }
+        }
         for (int i = 0; i < preparedInputBusCount; ++i)
             layout.inputBuses.set(i,
                                   i == requested.mainInputBus
@@ -1116,7 +1137,7 @@ class WorkerApp final : public juce::JUCEApplication,
         const int mainChannels = absentDefaultInput ? 0 : requested.mainInputChannels;
         const auto layoutMatches = [&]
         {
-            return plugin->getTotalNumOutputChannels() == 2 &&
+            return plugin->getTotalNumOutputChannels() == 2 + 2 * requested.extraOutputBuses &&
                    plugin->getTotalNumInputChannels() == mainChannels + requested.auxiliaryChannels &&
                    plugin->getBusesLayout() == layout;
         };
@@ -1206,7 +1227,8 @@ class WorkerApp final : public juce::JUCEApplication,
             return;
         }
         packSelectedBuses = requested.mainInputBus != 0 || requested.mainOutputBus != 0 ||
-                            requested.mainInputChannels != 2 || requested.mainInputMonoSource != 0;
+                            requested.mainInputChannels != 2 || requested.mainInputMonoSource != 0 ||
+                            requested.extraOutputBuses != 0;
         selectedMainOffset =
             requested.auxiliaryChannels && requested.auxiliaryInputBus < requested.mainInputBus
                 ? requested.auxiliaryChannels
@@ -1651,9 +1673,9 @@ class WorkerApp final : public juce::JUCEApplication,
                 shared->status.store(-1, std::memory_order_release);
                 return;
             }
-            float *pointers[]{block.output[0], block.output[1], block.input[2], block.input[3]};
+            float *pointers[ipc::outputChannels]{block.output[0], block.output[1], block.input[2], block.input[3]};
             const int audioChannels =
-                std::max(2, shared->negotiatedMainInputs + shared->negotiatedBuses.auxiliaryChannels);
+                std::max(2 + 2 * extraOutputs, shared->negotiatedMainInputs + shared->negotiatedBuses.auxiliaryChannels);
             if (packSelectedBuses)
             {
                 for (int c = 0; c < audioChannels; ++c)
@@ -1723,8 +1745,14 @@ class WorkerApp final : public juce::JUCEApplication,
             shared->dspPhase.store(ipc::DspPhase::processing, std::memory_order_release);
             plugin->processBlock(audio, midi);
             if (packSelectedBuses)
+            {
                 for (int c = 0; c < 2; ++c)
-                    std::copy_n(pointers[c], block.count, block.output[c]);
+                    std::copy_n(pointers[mainOutputOffset + c], block.count, block.output[c]);
+                for (int k = 0; k < extraOutputs; ++k)
+                    for (int c = 0; c < 2; ++c)
+                        std::copy_n(pointers[extraOutputOffsets[size_t(k)] + c], block.count,
+                                    block.output[2 + 2 * k + c]);
+            }
             shared->dspPhase.store(ipc::DspPhase::waiting, std::memory_order_release);
             const auto latency = PluginLatencyStamp::unpack(shared->latency.load(std::memory_order_relaxed))
                                      .next(plugin->getLatencySamples());
