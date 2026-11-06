@@ -29,7 +29,7 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Step sequencer, graph editor, swing, fill each N | done | |
 | Volume / pan knobs, channel automation clips | done | `channel.automateVolume/Pan` |
 | Clone, layer, transpose, filter groups | done | |
-| Channel button width | missing | |
+| Channel button width | done | `view.rackButtons*` |
 | Focus selected channel | missing | |
 | Patcherize, DirectWave, Slicex | out of scope | FL-only plugins |
 
