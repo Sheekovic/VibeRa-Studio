@@ -119,7 +119,10 @@ juce::Result Studio::requestNativeScalar(Id plugin, std::uint32_t parameter, uns
 juce::Result Studio::requestNativePatch(Id plugin, unsigned generation, const juce::String &instance,
     std::span<const std::pair<std::uint32_t,float>> values, juce::String &operation)
 {
-    if(values.empty() || values.size()>64 || recordArmed || midiTaking || hasPendingMidiTake())
+    // One atomic patch carries a whole Synth preset (the protocol bounds it at ipc::patchValues).
+    if(values.empty() || values.size()>size_t(ipc::patchValues))
+        return juce::Result::fail("parameterHistory.patchRefused: a patch needs 1.." + juce::String(ipc::patchValues) + " values");
+    if(recordArmed || midiTaking || hasPendingMidiTake())
         return juce::Result::fail("parameterHistory.patchRefused: a bounded patch requires stopped recording");
     const auto host=audio.preparedPluginHost(controller.project,plugin);
     PluginParameterCatalogue catalogue;

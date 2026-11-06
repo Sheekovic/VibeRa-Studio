@@ -79,6 +79,10 @@ def main():
         refreshed = call("vibera_plugin", dict(action="refresh", plugin=plugin, instance=row["instance"]))
         wait("vibera_plugin", refreshed)
         page = call("vibera_synth", dict(action="parameters", plugin=plugin))
+        # Parameter pages hold 64 rows: follow nextOffset so every exposed scalar is read.
+        while page.get("nextOffset") is not None:
+            more = call("vibera_synth", dict(action="parameters", plugin=plugin, offset=page["nextOffset"]))
+            page = dict(page, items=page["items"] + more["items"], nextOffset=more.get("nextOffset"))
         return row, page
 
     def command(name, args=None):
@@ -113,7 +117,7 @@ def main():
             fraction = (value - spec["minimum"]) / (spec["maximum"] - spec["minimum"])
             expected[spec["id"]] = min(1., max(0., fraction)) ** spec["skew"]
         actual = {p["id"]: p["normalized"] for p in page["items"]}
-        check(len(expected) == 64 and actual.keys() == expected.keys() and
+        check(len(expected) == len(discovery["parameters"]) and actual.keys() == expected.keys() and
               all(abs(actual[key] - value) < 2e-5 for key, value in expected.items()), description)
 
     def step_patch(plugin, action, current, expected):
@@ -193,12 +197,12 @@ def main():
         check(set(discovery["families"]) == families | {"All"} and {p["family"] for p in presets} == families,
               "all thirteen required families have actual presets")
         kinds = {kind: sum(p["sourceKind"] == kind for p in presets) for kind in ["SAMPLE", "SAMPLE + SYNTH", "SYNTHESIS"]}
-        check(kinds == {"SAMPLE": 20, "SAMPLE + SYNTH": 1, "SYNTHESIS": 56}, "honest sample/hybrid/oscillator counts")
+        check(kinds == {"SAMPLE": 20, "SAMPLE + SYNTH": 1, "SYNTHESIS": 60}, "honest sample/hybrid/oscillator counts (incl. four wavetable presets)")
         maps = {instrument["id"] for instrument in json.loads(library_path.read_text(encoding="utf-8"))["instruments"]}
         check(len(maps) == 20 and {p["soundSource"] for p in presets if p["sourceKind"] != "SYNTHESIS"} == maps and
               all(not p["soundSource"] for p in presets if p["sourceKind"] == "SYNTHESIS"), "every recorded-source claim resolves to the real library")
         specs = {p["key"]: p for p in discovery["parameters"]}
-        check(len(specs) == 64 and len({p["id"] for p in specs.values()}) == 64 and
+        check(len(specs) == 67 and len({p["id"] for p in specs.values()}) == 67 and  # 64 + 3 wavetable/unison parameters
               all(p["minimum"] <= p["default"] <= p["maximum"] for p in specs.values()), "all stable parameter keys, IDs and ranges")
         for genre in ["Pop", "Jazz", "Funk", "Hip-Hop", "R&B", "Electronic", "Rock", "Cinematic", "Arabic"]:
             filtered_rows = call("vibera_synth", dict(action="list", genre=genre, family="All", search="", favoritesOnly=False))["presets"]
@@ -280,7 +284,7 @@ def main():
                   "individual parameter ACK/readback with unchanged neighbours: " + parameter["key"])
             report["parameterCases"].append(dict(key=parameter["key"], nativeValue=target,
                                                   normalized=expected, historyCommitted=True))
-        check(len(report["parameterCases"]) == 63, "all63 exposed scalar setter branches qualified")
+        check(len(report["parameterCases"]) == len(discovery["parameters"]) - 1, "every exposed scalar setter branch qualified (all but the factory preset)")
         # Each write above commits captured canonical history. Replay one exact
         # scalar edge here; cross-bank, user-sound and automation history are
         # exercised separately below and all46 scalar rewrites in core tests.
@@ -586,7 +590,7 @@ def main():
               "semantic Synth assignment preserves every score note field and updates only target instrument capabilities")
         assigned_row, assigned_page = parameters(assigned_plugin)
         check(assigned_row["instrument"] is True and assigned_row["channel"] == target and
-              bool(assigned_row["instance"]) and len(assigned_page["items"]) == 64,
+              bool(assigned_row["instance"]) and len(assigned_page["items"]) == len(discovery["parameters"]),
               "semantic Synth assignment owns a ready actual native worker with all46 readable scalars")
         expect_patch(assigned_plugin, presets[0], "assigned Synth starts with the exact complete native default patch")
         expect_telemetry(assigned_plugin, presets[0], voices=False)

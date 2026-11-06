@@ -98,6 +98,9 @@ juce::var Studio::mcpSynthOperation(const juce::var &args)
     {
         auto forwarded=obj(); set(forwarded,"plugin",juce::int64(id));
         if(args.hasProperty("instance")) set(forwarded,"instance",args["instance"]);
+        // Parameter pages hold 64 rows by default: offset/limit reach every exposed scalar.
+        if(action=="parameters" && args.hasProperty("offset")) set(forwarded,"offset",args["offset"]);
+        if(action=="parameters" && args.hasProperty("limit")) set(forwarded,"limit",args["limit"]);
         set(forwarded,"action",action=="status"?"parameters":action);
         if(action=="set")
         {

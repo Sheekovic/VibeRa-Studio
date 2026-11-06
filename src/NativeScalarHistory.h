@@ -9,7 +9,7 @@ namespace vibera
 {
 // Bounded CONTROL XML-rewrite admission. Larger gestures must finish as separate
 // actual owned operations, never an unbounded callback/native-history batch.
-inline constexpr std::size_t nativeScalarHistoryMaxEdits = 64;
+inline constexpr std::size_t nativeScalarHistoryMaxEdits = 96; // One whole native patch (ipc::patchValues), e.g. a Synth preset.
 inline constexpr std::size_t nativeScalarHistoryRewriteBytes = 64 * 1024 * 1024;
 // CONTROL-only witnessed scalar edit. Native opaque state is always freshly
 // captured by the application; this is never a substitute for that capture.

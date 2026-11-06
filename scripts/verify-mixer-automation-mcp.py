@@ -43,7 +43,7 @@ def main():
         for operation in ("automation.create", "automation.link", "automation.range", "automation.init", "automation.init.remove"):
             contract = d("vibera_commands", dict(command=operation, includeSchemas=True))["operations"][0]
             check(contract["supported"] and contract["macroAvailable"] and
-                  contract["arguments"]["properties"]["automationControl"]["enum"] == ["gain", "pan", "stereoSeparation", "send"] and
+                  contract["arguments"]["properties"]["automationControl"]["enum"] == ["gain", "pan", "stereoSeparation", "send", "channelGain", "channelPan"] and
                   contract["arguments"]["properties"]["automationSendTarget"]["type"] == "integer" and
                   contract["arguments"]["properties"]["automationSendTarget"]["minimum"] == 0,
                   "Actual typed discoverable target control " + operation)

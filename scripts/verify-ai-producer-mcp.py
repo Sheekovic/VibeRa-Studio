@@ -212,7 +212,7 @@ try:
     ai(action="chat", message="Pan it again")
     wait(lambda: not ai(action="events")["busy"], "read-only run", 120)
     tools = [r for r in seen["anthropic"] if "body" in r][0]["body"]["tools"]
-    check(all(t["name"] in ("vibera_state", "vibera_inspect", "vibera_commands", "vibera_snapshot", "vibera_selection")
+    check(all(t["name"] in ("vibera_state", "vibera_inspect", "vibera_commands", "vibera_snapshot", "vibera_selection", "vibera_update")
               for t in tools), "Read-only mode offers only read tools")
     results = [b for m in [r for r in seen["anthropic"] if "body" in r][1]["body"]["messages"]
                if isinstance(m["content"], list) for b in m["content"] if b.get("type") == "tool_result"]

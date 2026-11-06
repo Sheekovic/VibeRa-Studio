@@ -86,10 +86,10 @@ try:
         "vibera_picker", "vibera_project", "vibera_batch", "vibera_mixer", "vibera_inspect",
         "vibera_rack", "vibera_groove", "vibera_recording", "vibera_mixerchain", "vibera_samplerTempo",
         "vibera_stepCompose", "vibera_synth", "vibera_note_modes", "vibera_ai", "vibera_audioRecording",
-        "vibera_update"
+        "vibera_update", "vibera_dialog"
     }
-    check(len(tools) == 35 and set(tool_names) == expected_tools,
-          "Expected all28 released tools plus sampler tempo, Advanced Fill, Synth, Note modes, AI and audio recording, without duplicates")
+    check(len(tools) == 36 and set(tool_names) == expected_tools,
+          "Expected all28 released tools plus sampler tempo, Advanced Fill, Synth, Note modes, AI, audio recording and test-mode dialogs, without duplicates")
     effects_tool = next(t for t in tools if t["name"] == "vibera_effects")
     effects_schema = effects_tool["inputSchema"]
     check(effects_tool["annotations"]["readOnlyHint"] is True and
@@ -98,7 +98,7 @@ try:
           effects_schema["properties"]["action"]["enum"] == ["list", "descriptor"],
           "Built-in effects discovery exposes a typed immutable contract")
     builtins = call("vibera_effects", {"action":"list"})["structuredContent"]["effects"]
-    check(len(builtins) == 25 and len({row["type"] for row in builtins}) == 25 and
+    check(len(builtins) == 40 and len({row["type"] for row in builtins}) == 40 and
           all(row["builtIn"] and row["format"] == "VibeRa" for row in builtins),
           "Independent built-in effects are available without scanning")
     select_schema = next(t for t in tools if t["name"] == "vibera_select")["inputSchema"]

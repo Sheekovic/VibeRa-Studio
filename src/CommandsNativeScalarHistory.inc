@@ -2,6 +2,7 @@
 // Included in Commands.cpp after StateAction and fresh-capture helpers.
 namespace
 {
+static_assert(nativeScalarHistoryMaxEdits == std::size_t(ipc::patchValues), "History holds one whole native patch");
 bool nativeScalarValue(float value) noexcept
 {
     return std::isfinite(value) && value >= 0 && value <= 1;

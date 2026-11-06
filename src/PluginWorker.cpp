@@ -743,7 +743,7 @@ class WorkerApp final : public juce::JUCEApplication,
             // validated on CONTROL while the existing DSP pause is held.
             if(!nativeEffect || request.patchCount>request.patch.size()) request.result=2;
             else if(request.generation!=shared->catalogueGeneration.load()) request.result=1;
-            std::array<juce::AudioProcessorParameter*,64> targets{};
+            std::array<juce::AudioProcessorParameter*,ipc::patchValues> targets{}; // One slot per patch value.
             for(unsigned i=0;request.result==0 && i<request.patchCount;++i)
             {
                 auto &entry=request.patch[i];
@@ -758,7 +758,7 @@ class WorkerApp final : public juce::JUCEApplication,
             if(request.result==0)
                 if(auto *ownedSynth=dynamic_cast<synth::SynthPlugin *>(plugin.get()))
                 {
-                    std::array<std::pair<std::uint32_t,float>,64> values{};
+                    std::array<std::pair<std::uint32_t,float>,ipc::patchValues> values{};
                     for(unsigned i=0;i<request.patchCount;++i) values[i]={request.patch[i].id,request.patch[i].value};
                     if(!ownedSynth->validateParameterPatch({values.data(),request.patchCount})) request.result=3;
                 }
