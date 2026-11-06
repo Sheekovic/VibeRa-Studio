@@ -3723,6 +3723,8 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "playing", audio.playing());
     set(state, "patternMode", patternMode);
     set(state, "playlistFollowPlayhead", followPlayhead);
+    set(state, "pianoFollowPlayhead", pianoFollowPlayhead);
+    set(state, "followCenter", followCenter);
     set(state, "snap", snap);
     set(state, "snapLine", snapLine);
     set(state, "snapMarkers", snapMarkers);

@@ -225,6 +225,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     Scope focus = Scope::rack;
     bool patternMode = true;
     bool followPlayhead = true;
+    bool pianoFollowPlayhead = true; // Piano roll auto-scroll during playback.
+    bool followCenter = false;       // Auto-scroll keeps the playhead centred instead of paging.
     bool snapLine = false;
     bool snapMarkers = false;
     bool audioStretchMode = false;

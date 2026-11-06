@@ -257,6 +257,8 @@ void Studio::midiFileMenu()
         labels.addItem(44002, "All white notes", true, pianoKeyboardLabels == 2);
         menu.addSubMenu("Keyboard labels", labels);
     }
+    menu.addItem(44003, "Auto-scroll with the playhead", true, pianoFollowPlayhead);
+    menu.addItem(44004, "Center the playhead while scrolling", true, followCenter);
     menu.addItem(69, "Export as score sheet (PDF)...");
     menu.addItem(67, "Copy to MIDI clipboard");
     menu.addItem(68, "Paste from MIDI clipboard    Shift+Ctrl+V");
@@ -479,6 +481,12 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if (result == 44003 || result == 44004)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction(result == 44003 ? "view.pianoFollow" : "view.followCenter");
                 return;
             }
             if (result >= 44000 && result <= 44002)

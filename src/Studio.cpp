@@ -4805,6 +4805,20 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
+    if (action == "view.pianoFollow")
+    {
+        pianoFollowPlayhead = !pianoFollowPlayhead;
+        status = pianoFollowPlayhead ? "Piano roll auto-scroll on" : "Piano roll auto-scroll off";
+        repaint();
+        return true;
+    }
+    if (action == "view.followCenter")
+    {
+        followCenter = !followCenter;
+        status = followCenter ? "Auto-scroll keeps the playhead centred" : "Auto-scroll pages with the playhead";
+        repaint();
+        return true;
+    }
     if (action == "playlist.follow")
     {
         followPlayhead = !followPlayhead;
@@ -6324,9 +6338,10 @@ void Studio::timerCallback()
     audio.setMidiTarget(selectedChannel);
     click.setToggleState(audio.metronome(), juce::dontSendNotification);
     countIn.setToggleState(audio.countInBars() > 0, juce::dontSendNotification);
-    if (windows[2])
-        if (auto *playlist = dynamic_cast<Editor *>(windows[2]->getContentComponent()))
-            playlist->followPlayhead();
+    for (int w : {1, 2})
+        if (windows[w])
+            if (auto *editor = dynamic_cast<Editor *>(windows[w]->getContentComponent()))
+                editor->followPlayhead();
     serviceEffectSpare();
     serviceMidiClipboard();
     play.setButtonText(audio.playing() ? "Pause" : "Play");

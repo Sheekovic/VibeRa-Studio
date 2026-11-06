@@ -37,7 +37,8 @@
   muted. Poll `vibera_state` until the audio clip appears.
 - **Auto-scroll** (`playlist.follow` toggles; Playlist menu > Auto-scroll with the playhead;
   on by default, read `state.playlistFollowPlayhead`): during Song playback the Playlist
-  page-scrolls when the playhead leaves the view, never during a pointer gesture.
+  page-scrolls when the playhead leaves the view, never during a pointer gesture. With
+  `view.followCenter` (menu > Center the playhead while scrolling) the playhead stays centred.
 - **Track height:** drag the bottom edge of a track header (or `track.height`, `args.lane`,
   `args.value` .5..3). `state.playlistTracks` lists tracks with non-default settings (name,
   colour, mute, lock, group, height, instrument Channel, audio).

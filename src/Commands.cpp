@@ -784,6 +784,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tool.drumPaint", "Paint drum sequencer tool", Scope::piano, false, true, "action"},
         {"tool.play", "Play selected tool (hold to audition)", Scope::global, false, true, "action"},
         {"view.noteGridHighlights", "Note grid highlights (shade black-key rows)", Scope::piano, false, true, "action"},
+        {"view.pianoFollow", "Auto-scroll the Piano roll with the playhead", Scope::piano, false, true, "action"},
+        {"view.followCenter", "Auto-scroll keeps the playhead centred", Scope::global, false, true, "action"},
         {"view.keyLabelsNone", "Piano roll keyboard labels: none", Scope::piano, false, true, "action"},
         {"view.keyLabelsRoot", "Piano roll keyboard labels: root notes (C)", Scope::piano, false, true, "action"},
         {"view.keyLabelsWhite", "Piano roll keyboard labels: all white notes", Scope::piano, false, true, "action"},

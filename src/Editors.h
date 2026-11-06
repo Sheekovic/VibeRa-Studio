@@ -486,14 +486,26 @@ class Studio::Editor final : public juce::Component,
         return timeEnd - timeStart > 1.e-8;
     }
   public:
-    // Song playback auto-scroll: when the playhead leaves the visible range, the next page
-    // starts at the playhead (a jump back, e.g. a loop, scrolls back too).
+    // Playback auto-scroll (Playlist in Song mode, Piano roll in both modes): when the playhead
+    // leaves the visible range, the next page starts at the playhead (a jump back, e.g. a loop,
+    // scrolls back too). With "Center" on, the view instead keeps the playhead in the middle.
     void followPlayhead()
     {
-        if (type != 2 || !s.followPlayhead || s.patternMode || !s.audio.playing() || !isShowing() ||
-            isMouseButtonDown(true) || rulerScrubbing)
+        if ((type != 1 && type != 2) || !(type == 1 ? s.pianoFollowPlayhead : s.followPlayhead) ||
+            (type == 2 && s.patternMode) || !s.audio.playing() || !isShowing() || isMouseButtonDown(true) ||
+            rulerScrubbing)
             return;
         const double beat = std::max(0., s.audio.positionBeat()), span = viewBeats();
+        if (s.followCenter)
+        {
+            const double centred = std::max(0., beat - span * .5);
+            if (std::abs(centred - scroll) < 1.e-6)
+                return;
+            scroll = centred;
+            horizontalBar.repaint();
+            repaint();
+            return;
+        }
         if (beat >= scroll && beat < scroll + span * .98)
             return;
         scroll = std::max(0., beat - span * .02);
@@ -1645,6 +1657,7 @@ class Studio::Editor final : public juce::Component,
                 menu.addItem(9, "Ungroup Clips (Alt+G)", !s.selectedClips.empty());
                 menu.addItem(10, "Enable Clip grouping", true, s.controller.clipGroupingEnabled);
                 menu.addItem(16, "Auto-scroll with the playhead", true, s.followPlayhead);
+                menu.addItem(18, "Center the playhead while scrolling", true, s.followCenter);
                 menu.addItem(17, "Stretch audio clips by dragging (Shift+M)", true, s.audioStretchMode);
                 menu.addSeparator();
                 {
@@ -1779,6 +1792,11 @@ class Studio::Editor final : public juce::Component,
                             safe->s.performAction(result == 13   ? "marker.next"
                                                   : result == 14 ? "marker.previous"
                                                                  : "marker.selectSection");
+                            return;
+                        }
+                        if (result == 18)
+                        {
+                            safe->s.performAction("view.followCenter");
                             return;
                         }
                         if (result == 16 || result == 17)
