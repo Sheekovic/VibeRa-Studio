@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "Studio.h"
+#include "NoteScript.h"
 #include "ScoreTools.h"
 #include <juce_cryptography/juce_cryptography.h>
 #include "Editors.h"
@@ -237,6 +238,18 @@ void Studio::midiFileMenu()
         }
         menu.addSubMenu("LFO tool (CC 1 mod wheel, replaces that lane)", lfo);
     }
+    {
+        juce::PopupMenu scripts;
+        const auto &list = note_script::examples();
+        for (size_t i = 0; i < list.size(); ++i)
+            scripts.addItem(43000 + int(i), list[i].name);
+        scripts.addSeparator();
+        scripts.addItem(43100, "Run script file (.js)...");
+        scripts.addItem(43101, "Run last script again    Ctrl+Alt+Y" +
+                                   (lastNoteScriptName.isNotEmpty() ? " (" + lastNoteScriptName + ")" : juce::String()),
+                        lastNoteScript.isNotEmpty());
+        menu.addSubMenu("Scripts", scripts);
+    }
     menu.addItem(69, "Export as score sheet (PDF)...");
     menu.addItem(67, "Copy to MIDI clipboard");
     menu.addItem(68, "Paste from MIDI clipboard    Shift+Ctrl+V");
@@ -459,6 +472,21 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if (result >= 43000 && result < 43000 + int(note_script::examples().size()))
+            {
+                const auto &example = note_script::examples()[size_t(result - 43000)];
+                if (auto ran = safe->runNoteScript(example.source, example.name); ran.failed())
+                    safe->status = ran.getErrorMessage();
+                return;
+            }
+            if (result == 43100)
+                return safe->chooseNoteScriptFile();
+            if (result == 43101)
+            {
+                safe->focus = Scope::piano;
+                safe->performAction("notes.scriptAgain");
                 return;
             }
             if ((result >= 42300 && result <= 42427) || result == 42501 || result == 42502)

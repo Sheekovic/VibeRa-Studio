@@ -7,6 +7,7 @@
 #include "Arrangements.h"
 #include "StepActivationCommand.h"
 #include "effects/NativeEffectsRegistry.h"
+#include "NoteScript.h"
 #include "MixerAutomationTake.h"
 #include "PluginParameterState.h"
 #include "MixerEffectOrder.h"
@@ -816,6 +817,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.glue", "Glue", Scope::piano, true, true, "command"},
         {"notes.group", "Group selected notes (click one selects all)", Scope::piano, true, true, "command"},
         {"notes.toAutomation", "Turn a controller lane into an automation clip", Scope::piano, true, true, "command"},
+        {"notes.script", "Run a Piano roll script (JavaScript in text) on the Channel part", Scope::piano, true, true, "command"},
+        {"notes.scriptAgain", "Run the last Piano roll script again", Scope::piano, false, true, "action"},
         {"notes.insertControllerValue", "Insert current controller value at the playhead (last edited lane)", Scope::piano, false, true, "action"},
         {"notes.ungroup", "Ungroup selected notes", Scope::piano, true, true, "command"},
         {"notes.chordify", "Chordify selection", Scope::piano, true, true, "command"},
@@ -4116,6 +4119,17 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 copies.push_back(right);
             }
             pat->notes.insert(pat->notes.end(), copies.begin(), copies.end());
+        }
+        if (id == "notes.script")
+        {
+            // args.text: the script; ids: the selection it may focus on; length: the snap.
+            if (!ch || ch->audioClip)
+                return juce::Result::fail("noteScript.invalidTarget: Select a playable Channel");
+            std::vector<Note> replacement;
+            if (auto ran = note_script::run(next, *pat, ch->id, a.ids, a.length, a.text, replacement); ran.failed())
+                return ran;
+            std::erase_if(pat->notes, [&](const auto &n) { return n.channel == ch->id; });
+            pat->notes.insert(pat->notes.end(), replacement.begin(), replacement.end());
         }
         if (id == "notes.toAutomation")
         {

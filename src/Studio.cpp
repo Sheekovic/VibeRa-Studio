@@ -4294,6 +4294,22 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return selected.wasOk();
     }
+    if (action == "notes.scriptAgain")
+    {
+        if (lastNoteScript.isEmpty())
+        {
+            status = "Run a script first (Piano roll menu > Scripts)";
+            repaint();
+            return false;
+        }
+        if (auto ran = runNoteScript(lastNoteScript, lastNoteScriptName); ran.failed())
+        {
+            status = ran.getErrorMessage();
+            repaint();
+            return false;
+        }
+        return true;
+    }
     if (action == "channel.automateVolume" || action == "channel.automatePan")
     {
         const auto made = createChannelAutomation(selectedChannel, action == "channel.automatePan");
@@ -6837,6 +6853,50 @@ juce::Result Studio::createSubmix()
                        }},
                       {});
     return juce::Result::ok();
+}
+juce::Result Studio::runNoteScript(const juce::String &source, const juce::String &name)
+{
+    CommandArgs a;
+    a.pattern = selectedPattern;
+    a.channel = selectedChannel;
+    a.ids = selectedNotes;
+    a.length = snap > 0 ? snap : .25;
+    a.text = source;
+    command("notes.script", a);
+    if (status != "Ready")
+        return juce::Result::fail(status);
+    lastNoteScript = source;
+    lastNoteScriptName = name;
+    status = "Script: " + name;
+    repaint();
+    return juce::Result::ok();
+}
+void Studio::chooseNoteScriptFile()
+{
+    const auto folder = juce::File::getSpecialLocation(juce::File::userDocumentsDirectory).getChildFile("VibeRa Studio/Scripts");
+    chooser = std::make_unique<juce::FileChooser>("Run Piano roll script", folder.isDirectory() ? folder : juce::File{}, "*.js");
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                         [safe](const juce::FileChooser &fc)
+                         {
+                             if (!safe)
+                                 return;
+                             const auto file = fc.getResult();
+                             safe->chooser.reset();
+                             if (!file.existsAsFile())
+                                 return;
+                             if (file.getSize() > 200000)
+                             {
+                                 safe->status = "Script files are limited to 200 KB";
+                                 return safe->repaint();
+                             }
+                             if (auto ran = safe->runNoteScript(file.loadFileAsString(), file.getFileNameWithoutExtension());
+                                 ran.failed())
+                             {
+                                 safe->status = ran.getErrorMessage();
+                                 safe->repaint();
+                             }
+                         });
 }
 juce::Result Studio::createChannelAutomation(Id channel, bool pan)
 {

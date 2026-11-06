@@ -98,3 +98,13 @@
   event (pitch bend when none), holding the lane's value there (previous event, else the
   Channel's pitch bend or 0). Piano roll menu > Edit > Insert current controller value picks
   the lane (CC with events, Pitch bend, Pressure).
+- Scripts (Piano roll menu > Scripts; familiar Tools > Scripting): `notes.script` (`pattern`,
+  `channel`, `text` = JavaScript, `ids` = selection, `length` = snap; one Undo) runs the script
+  on that Channel's part with JUCE's QuickJS engine (2 s limit, no file/network/project access).
+  The script sees `notes` (objects with id, pitch, beat, length, velocity, pan, release, muted,
+  selected), `patternLength`, `snap`, `selected(n)` (true for every note when none is selected),
+  `addNote(pitch, beat, length, velocity)` and `clamp`; the final `notes` replaces the part
+  (notes keeping their `id` keep fine pitch, mod X/Y, slide, colour...). Values are validated
+  (pitch 0..127, velocity/release 0..1, pan -1..1, beat/length >= 0) before anything changes.
+  Six original examples are in the menu; "Run script file (.js)..." opens
+  Documents/VibeRa Studio/Scripts; `notes.scriptAgain` (Ctrl+Alt+Y) repeats the last script.

@@ -37,7 +37,8 @@ target_compile_definitions(VibeRaCore PUBLIC
   TRACKTION_ENABLE_TIMESTRETCH_SOUNDTOUCH=0 TRACKTION_ENABLE_REX=0
   TRACKTION_ENABLE_ARA=0 TRACKTION_ENABLE_CMAJOR=0 TRACKTION_ENABLE_VIDEO=0)
 target_link_libraries(VibeRaCore PUBLIC tracktion::tracktion_engine tracktion::tracktion_graph
-  tracktion::tracktion_core juce::juce_audio_utils juce::juce_dsp juce::juce_cryptography)
+  tracktion::tracktion_core juce::juce_audio_utils juce::juce_dsp juce::juce_cryptography
+  juce::juce_javascript) # Piano roll scripts (JUCE's QuickJS engine, vendored).
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   # Static Core consumers need JUCE HTTPS and Tracktion's non-inline atomics.
   # Reuse JUCE's pkg-config curl target so curl's own link dependencies follow.

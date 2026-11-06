@@ -1152,6 +1152,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // "Create automation clip" for a Channel's volume (pan false) or pan: an automation clip
     // over the Song on the first free Playlist track, starting at the current value.
     juce::Result createChannelAutomation(Id channel, bool pan);
+    // Piano roll scripts: run JavaScript on the selected Channel's part (one Undo step).
+    juce::String lastNoteScript, lastNoteScriptName;
+    juce::Result runNoteScript(const juce::String &source, const juce::String &name);
+    void chooseNoteScriptFile();
     // Mixer "Save / Open mixer track state": a chain preset (.vibfx in the chain preset
     // directory) that also carries the track's controls. Save captures the effects and adds
     // the controls; Open applies the effect chain, then the controls (one Undo step each).
