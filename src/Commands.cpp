@@ -785,6 +785,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tool.play", "Play selected tool (hold to audition)", Scope::global, false, true, "action"},
         {"view.noteGridHighlights", "Note grid highlights (shade black-key rows)", Scope::piano, false, true, "action"},
         {"view.pianoFollow", "Auto-scroll the Piano roll with the playhead", Scope::piano, false, true, "action"},
+        {"view.rackFocusSelected", "Channel Rack: focus (scroll to) the selected Channel automatically", Scope::rack, false, true, "action"},
+        {"view.rackScrollToSelected", "Channel Rack: scroll to the selected Channel", Scope::rack, false, true, "action"},
         {"view.rackButtonsNarrow", "Channel Rack channel button width: narrow", Scope::rack, false, true, "action"},
         {"view.rackButtonsNormal", "Channel Rack channel button width: normal", Scope::rack, false, true, "action"},
         {"view.rackButtonsWide", "Channel Rack channel button width: wide", Scope::rack, false, true, "action"},

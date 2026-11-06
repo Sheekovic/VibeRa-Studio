@@ -74,6 +74,7 @@ class Studio::Editor final : public juce::Component,
     std::unique_ptr<RackVelocityGraph> velocityGraph;
     std::unique_ptr<RackSwingControl> swingControl;
     juce::String rackViewKey, rackGroupNames;
+    Id rackFocusedChannel = 0; // Last selected Channel the rack scrolled to (Focus selected channel).
     std::vector<Id> rackRowIds, rackSelectionVisited;
     bool rackSelecting = false, rackSelectAdd = true;
     int rackSelectionLastRow = -1;
@@ -2198,6 +2199,20 @@ class Studio::Editor final : public juce::Component,
         if (reset)
             rackOffset = 0;
         rackOffset = juce::jlimit(0, std::max(0, int(rows.size()) - rackRows()), rackOffset);
+        // Focus selected channel: a newly selected Channel (from any editor) is scrolled into view.
+        if ((s.rackFocusSelected && s.selectedChannel != rackFocusedChannel) || std::exchange(s.rackScrollRequest, false))
+        {
+            rackFocusedChannel = s.selectedChannel;
+            const auto at = std::find(rows.begin(), rows.end(), s.selectedChannel);
+            if (at != rows.end() && !isMouseButtonDown(true))
+            {
+                const int row = int(at - rows.begin()), visible = std::max(1, rackRows());
+                if (row < rackOffset)
+                    rackOffset = row;
+                else if (row >= rackOffset + visible)
+                    rackOffset = juce::jlimit(0, std::max(0, int(rows.size()) - visible), row - visible + 1);
+            }
+        }
         juce::String names;
         for (const auto &group : s.controller.project.channelGroups)
             names += juce::String(group.id) + ":" + group.name + "\n";

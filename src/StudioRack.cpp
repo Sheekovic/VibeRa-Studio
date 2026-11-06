@@ -520,6 +520,8 @@ void Studio::rackGroupMenu(juce::Component *anchor)
         width.addItem(42, "Wide", true, rackButtonWidth == 2);
         menu.addSubMenu("Channel button width", width);
     }
+    menu.addItem(43, "Focus selected channel", true, rackFocusSelected);
+    menu.addItem(44, "Scroll to the selected channel");
     const auto identity = controller.projectIdentity;
     const auto group = rackGroup;
     const auto channels = selectedChannels;
@@ -531,6 +533,11 @@ void Studio::rackGroupMenu(juce::Component *anchor)
             if (!safe || safe->controller.projectIdentity != identity)
                 return;
             safe->focus = Scope::rack;
+            if (action == 43 || action == 44)
+            {
+                safe->performAction(action == 43 ? "view.rackFocusSelected" : "view.rackScrollToSelected");
+                return;
+            }
             if (action >= 40 && action <= 42)
             {
                 safe->performAction(action == 40 ? "view.rackButtonsNarrow"
