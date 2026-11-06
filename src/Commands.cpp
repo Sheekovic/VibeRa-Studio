@@ -346,6 +346,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"mixer.routeSelectedHere", "Route the selected Mixer tracks to the active track", Scope::mixer, false, true, "action"},
         {"mixer.routeSelectedHereOnly", "Route the selected Mixer tracks only to the active track", Scope::mixer, false, true, "action"},
         {"mixer.createSubmix", "Create a submix track fed only by the selected Mixer tracks", Scope::mixer, false, true, "action"},
+        {"mixer.trackControls", "Apply Mixer track controls from a track state (JSON text)", Scope::mixer, true, false, "command"},
         {"mixer.trimUnused", "Trim unused Mixer tracks (no Channel, route, effect, automation or group)", Scope::mixer, false, true, "action"},
         {"mixer.selectChannelsRouted", "Select the Channels routed to the selected Mixer track", Scope::mixer, false, true, "action"},
         {"mixer.selectRoutedHere", "Select the Mixer tracks routed to the selected track", Scope::mixer, false, true, "action"},
@@ -5788,7 +5789,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             return result;
     }
     else if (id == "mixer.stereoSeparation" || id == "mixer.phaseInvert" || id == "mixer.stereoSwap" ||
-             id == "mixer.eq" || id == "mixer.eqReset" || id == "mixer.delay" || id == "mixer.dock" || id == "mixer.reset" || id == "mixer.gain" || id == "mixer.pan" || id == "mixer.mute" || id == "mixer.rename" ||
+             id == "mixer.eq" || id == "mixer.eqReset" || id == "mixer.delay" || id == "mixer.dock" || id == "mixer.reset" || id == "mixer.trackControls" || id == "mixer.gain" || id == "mixer.pan" || id == "mixer.mute" || id == "mixer.rename" ||
              id == "mixer.colour" || id == "mixer.solo" || id == "mixer.soloConnected" ||
              id == "mixer.unsolo" || id == "mixer.unmuteAll")
     {

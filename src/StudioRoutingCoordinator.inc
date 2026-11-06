@@ -286,7 +286,7 @@ bool Studio::routingStructuralCommand(const juce::String &id, const CommandArgs 
         id == "channel.moveUp" || id == "channel.moveDown" || id == "clip.add" || id == "clip.group" ||
         id == "clip.ungroup" || id == "mixer.gain" || id == "mixer.pan" || id == "mixer.mute" ||
         id == "mixer.solo" || id == "mixer.unsolo" || id == "mixer.unmuteAll" ||
-        id == "mixer.soloConnected" || id == "mixer.rename" || id == "mixer.colour" ||
+        id == "mixer.soloConnected" || id == "mixer.rename" || id == "mixer.colour" || id == "mixer.eq" || id == "mixer.eqReset" || id == "mixer.delay" || id == "mixer.dock" || id == "mixer.reset" || id == "mixer.trackControls" || // Live timeline values / layout only.
         id == "plugin.effect.mix" || id == "mixer.effects.bypass" || id == "plugin.bypass" ||
         isMixerInsertOrderCommand(id) || isMixerGroupCommand(id))
         return false;

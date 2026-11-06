@@ -169,3 +169,11 @@ insert from chain preset...) creates a new insert, waits for that structural cha
 (up to about 10 s) and then opens the chain file chooser for the new insert (loadApply). It
 refuses before creating anything when no chain preset directory is configured. The chooser is
 native; automation can pick the file in its list with UI Automation (owned process only).
+
+Mixer track state (Mixer track menu > File > Save / Open mixer track state; `vibera_project`
+`saveTrackState` / `openTrackState` with `mixer` and an absolute `.vibfx` path directly in the
+configured chain preset directory): Save is the chain save of that track plus a track-controls
+block (header flag 2: name, colour, volume, pan, stereo separation, phase/swap, EQ, track delay,
+dock). Open applies the chain with loadApply, then the controls with `mixer.trackControls` (JSON
+in `text`); each is its own Undo step. Plain chain presets stay readable; older builds refuse
+files with the controls block. Both start once earlier audio work has settled.

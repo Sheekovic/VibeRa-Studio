@@ -1143,6 +1143,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::String settledFinished;
     bool settledRunning = false;
     void runSettledSteps(int patience);
+    // Same condition as MCP state.pendingAudioUpdate: structural/plugin work still running.
+    bool audioWorkPending();
     // Mixer track menu > Routing: the selected tracks (not Master or `target`) to `target`.
     juce::Result routeSelectedTo(int target, bool only);
     // Mixer track menu > Create submix: a new insert fed only by the selected tracks.
@@ -1150,6 +1152,13 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // "Create automation clip" for a Channel's volume (pan false) or pan: an automation clip
     // over the Song on the first free Playlist track, starting at the current value.
     juce::Result createChannelAutomation(Id channel, bool pan);
+    // Mixer "Save / Open mixer track state": a chain preset (.vibfx in the chain preset
+    // directory) that also carries the track's controls. Save captures the effects and adds
+    // the controls; Open applies the effect chain, then the controls (one Undo step each).
+    juce::Result saveTrackState(int insert, const juce::File &, std::function<void(juce::Result)> done);
+    juce::Result openTrackState(int insert, const juce::File &, std::function<void(juce::Result)> done);
+    void chooseTrackStateFile(int insert, bool saving);
+    void pollChainJob(const juce::String &operation, std::function<void(juce::Result)> done, int patience);
     std::shared_ptr<std::function<void(int)>> pendingChainChooser; // Keeps the settle-wait alive.
     juce::Label title, deviceLabel;
     juce::ThreadPool midiFileJobs{1};

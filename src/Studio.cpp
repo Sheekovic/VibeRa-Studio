@@ -6735,10 +6735,16 @@ void Studio::queueSettledSteps(std::vector<std::function<void()>> steps, juce::S
         runSettledSteps(100);
     }
 }
+bool Studio::audioWorkPending()
+{
+    return mixerChainApplying() || mixerChainBusy() || afterPluginState || devicePreparationBusy() || needsRebuild ||
+           routingPending() || !audio.deferredWorkerPreparationIdle() ||
+           audio.projectionDiagnostics().pluginSourceState == "pending";
+}
 void Studio::runSettledSteps(int patience)
 {
     auto safe = juce::Component::SafePointer<Studio>(this);
-    if (mixerChainBusy() || afterPluginState || routingPending())
+    if (audioWorkPending())
     {
         if (patience > 0)
             juce::Timer::callAfterDelay(100, [safe, patience] { if (safe) safe->runSettledSteps(patience - 1); });
@@ -6887,7 +6893,7 @@ void Studio::trimUnusedInserts()
     {
         if (!safe)
             return;
-        const bool busy = safe->mixerChainBusy() || safe->afterPluginState || safe->routingPending();
+        const bool busy = safe->audioWorkPending();
         if (busy && patience > 0)
         {
             if (auto next = weak.lock())
@@ -6942,7 +6948,7 @@ void Studio::addInsertFromChainPreset()
         for (const auto &row : safe->controller.project.mixer)
             if (!before.contains(row.index))
                 created = row.index;
-        const bool busy = safe->mixerChainBusy() || safe->afterPluginState || safe->routingPending();
+        const bool busy = safe->audioWorkPending();
         if ((created < 0 || busy) && left > 0)
         {
             if (auto next = weak.lock())
@@ -7865,6 +7871,10 @@ void Studio::effectMenu(int index)
                     std::any_of(mixerSelection.ids.begin(), mixerSelection.ids.end(), [](int id) { return id != 0; }));
     menu.addSubMenu("Routing", routing);
     menu.addItem(10023, "Reset track (controls, name, colour; keeps effects)");
+    juce::PopupMenu trackFile;
+    trackFile.addItem(10028, "Save mixer track state...", !mixerChainBusy());
+    trackFile.addItem(10029, "Open mixer track state...", !mixerChainBusy());
+    menu.addSubMenu("File", trackFile);
     menu.addItem(10024, "Trim unused tracks (" + juce::String(int(unusedMixerInserts().size())) + ")",
                  !mixerChainBusy() && !unusedMixerInserts().empty());
     juce::PopupMenu dockMenu;
@@ -8063,6 +8073,11 @@ void Studio::effectMenu(int index)
                                if (started.failed())
                                    safe->status = started.getErrorMessage();
                                safe->repaint();
+                               return;
+                           }
+                           if (selected == 10028 || selected == 10029)
+                           {
+                               safe->chooseTrackStateFile(index, selected == 10028);
                                return;
                            }
                            if (selected == 10024)

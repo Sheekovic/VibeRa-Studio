@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include <array>
+#include <optional>
 #include "Project.h"
 #include <cstddef>
 #include <memory>
@@ -17,11 +19,25 @@ struct Slot
     int mainInputBus = 0, mainOutputBus = 0, mainInputChannels = 2, mainInputMonoSource = 0;
     bool operator==(const Slot &) const = default;
 };
+// Mixer track state (familiar "Save mixer track state"): the insert's own controls,
+// stored after the slots when present (header flag 2).
+struct TrackControls
+{
+    juce::String name;
+    juce::uint32 colour = 0;
+    float gain = .8f, pan = 0, stereoSeparation = 0;
+    bool phaseInverted = false, stereoSwapped = false;
+    std::array<float, 6> eq{0, 120, 0, 1000, 0, 8000}; // gain dB / frequency Hz for low, mid, high.
+    float delayMs = 0;
+    int dock = 0;
+    bool operator==(const TrackControls &) const = default;
+};
 struct Chain
 {
     juce::String name;
     bool effectsBypassed = false;
     std::vector<Slot> effects;
+    std::optional<TrackControls> track;
     bool operator==(const Chain &) const = default;
 };
 inline constexpr std::size_t maximumBytes = 64 * 1024 * 1024;
@@ -32,7 +48,9 @@ inline constexpr int maximumSlots = 16;
 // Format2 adds four LE u32 main input/output bus, channels, mono source after
 // each wet field. Writer retains Format1 bytes when every slot uses defaults;
 // reader preserves genuine Format1 stereo defaults.
-// Strings use LE u32 byte lengths. Unknown flags/version/trailing bytes refused.
+// Header flag 2: a track-controls block follows the slots (UTF-8 name, LE u32 colour, binary32
+// gain/pan/separation, LE u32 phase|swap<<1, six binary32 EQ values, binary32 delay ms,
+// LE u32 dock+1). Strings use LE u32 byte lengths. Unknown flags/version/trailing bytes refused.
 // No disk I/O. Failure leaves the caller's owning output unchanged.
 juce::Result validate(const Chain &);
 juce::Result encode(const Chain &, std::unique_ptr<juce::MemoryBlock> &);

@@ -181,7 +181,7 @@ juce::Result encode(const Chain &chain, std::unique_ptr<juce::MemoryBlock> &outp
                                         slot.mainInputMonoSource} != PluginMainIo{};
                 });
             w.u32(extended ? 2 : 1);
-            w.u32(chain.effectsBypassed ? 1 : 0);
+            w.u32((chain.effectsBypassed ? 1u : 0u) | (chain.track ? 2u : 0u));
             w.text(chain.name);
             w.u32(static_cast<std::uint32_t>(chain.effects.size()));
             for (const auto &slot : chain.effects)
@@ -198,6 +198,18 @@ juce::Result encode(const Chain &chain, std::unique_ptr<juce::MemoryBlock> &outp
                 w.text(slot.name);
                 w.text(slot.descriptor);
                 w.text(slot.state);
+            }
+            if (const auto &track = chain.track)
+            {
+                w.text(track->name);
+                w.u32(track->colour);
+                for (float value : {track->gain, track->pan, track->stereoSeparation})
+                    w.u32(std::bit_cast<std::uint32_t>(value));
+                w.u32((track->phaseInverted ? 1u : 0u) | (track->stereoSwapped ? 2u : 0u));
+                for (float value : track->eq)
+                    w.u32(std::bit_cast<std::uint32_t>(value));
+                w.u32(std::bit_cast<std::uint32_t>(track->delayMs));
+                w.u32(static_cast<std::uint32_t>(track->dock + 1));
             }
             auto next = std::make_unique<juce::MemoryBlock>(w.bytes.data(), w.bytes.size());
             output.swap(next);
@@ -217,10 +229,10 @@ juce::Result decode(std::span<const std::byte> bytes, std::unique_ptr<Chain> &ou
             if (version != 1 && version != 2)
                 return fail("effectChain.version");
             const auto flags = r.u32();
-            if (flags > 1)
+            if (flags > 3)
                 return fail("effectChain.flags");
             auto next = std::make_unique<Chain>();
-            next->effectsBypassed = (flags == 1);
+            next->effectsBypassed = (flags & 1u) != 0;
             next->name = r.text(nameBytes);
             const auto count = r.u32();
             if (count > maximumSlots)
@@ -252,6 +264,35 @@ juce::Result decode(std::span<const std::byte> bytes, std::unique_ptr<Chain> &ou
                 slot.descriptor = r.text(descriptorBytes);
                 slot.state = r.text(stateBytes);
                 next->effects.push_back(std::move(slot));
+            }
+            if (flags & 2u)
+            {
+                TrackControls track;
+                track.name = r.text(nameBytes);
+                track.colour = r.u32();
+                track.gain = std::bit_cast<float>(r.u32());
+                track.pan = std::bit_cast<float>(r.u32());
+                track.stereoSeparation = std::bit_cast<float>(r.u32());
+                const auto modes = r.u32();
+                if (modes > 3)
+                    return fail("effectChain.track");
+                track.phaseInverted = (modes & 1u) != 0;
+                track.stereoSwapped = (modes & 2u) != 0;
+                for (auto &value : track.eq)
+                    value = std::bit_cast<float>(r.u32());
+                track.delayMs = std::bit_cast<float>(r.u32());
+                const auto dock = r.u32();
+                if (dock > 2)
+                    return fail("effectChain.track");
+                track.dock = int(dock) - 1;
+                const auto finite = [](float v) { return std::isfinite(v); };
+                if (!finite(track.gain) || track.gain < 0 || track.gain > 2 || !finite(track.pan) ||
+                    std::abs(track.pan) > 1 || !finite(track.stereoSeparation) || std::abs(track.stereoSeparation) > 1 ||
+                    !finite(track.delayMs) || track.delayMs < 0 || track.delayMs > 500 ||
+                    !std::all_of(track.eq.begin(), track.eq.end(), finite) ||
+                    (track.colour != 0 && (track.colour >> 24) != 255))
+                    return fail("effectChain.track");
+                next->track = std::move(track);
             }
             if (r.offset != bytes.size())
                 return fail("effectChain.trailingBytes");

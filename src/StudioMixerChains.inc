@@ -1710,6 +1710,196 @@ void Studio::chooseMixerChainDirectory()
                              safe->chooser.reset();
                          });
 }
+void Studio::pollChainJob(const juce::String &operation, std::function<void(juce::Result)> done, int patience)
+{
+    auto args = chain_workflow_detail::object();
+    chain_workflow_detail::put(args, "action", "job");
+    chain_workflow_detail::put(args, "operation", operation);
+    const auto job = mixerChainOperation(args);
+    const auto state = job["completionState"].toString();
+    if (state == "pending" && patience > 0)
+    {
+        auto safe = juce::Component::SafePointer<Studio>(this);
+        juce::Timer::callAfterDelay(100, [safe, operation, done, patience]
+                                    { if (safe) safe->pollChainJob(operation, done, patience - 1); });
+        return;
+    }
+    done(state == "completed" ? juce::Result::ok()
+                              : juce::Result::fail(job["message"].toString().isNotEmpty() ? job["message"].toString()
+                                                                                          : juce::String("Chain job ") + state));
+}
+juce::Result Studio::saveTrackState(int insert, const juce::File &file, std::function<void(juce::Result)> done)
+{
+    const auto *row = mixerInsert(controller.project, insert);
+    if (!row)
+        return juce::Result::fail("Choose an existing Mixer track");
+    effect_chain::TrackControls track;
+    track.name = row->name;
+    track.colour = row->colour;
+    track.gain = row->gain;
+    track.pan = row->pan;
+    track.stereoSeparation = row->stereoSeparation;
+    track.phaseInverted = row->phaseInverted;
+    track.stereoSwapped = row->stereoSwapped;
+    for (size_t band = 0; band < 3; ++band)
+        track.eq[band * 2] = row->eq.gain[band], track.eq[band * 2 + 1] = row->eq.freq[band];
+    track.delayMs = row->delayMs;
+    track.dock = row->dock;
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    queueSettledSteps({[safe, insert, file, track, done]
+                       {
+                           if (!safe)
+                               return;
+                           auto args = chain_workflow_detail::object();
+                           chain_workflow_detail::put(args, "action", "save");
+                           chain_workflow_detail::put(args, "mixer", insert);
+                           chain_workflow_detail::put(args, "projectIdentity", safe->controller.projectIdentity);
+                           chain_workflow_detail::put(args, "revision", juce::int64(safe->controller.revision));
+                           chain_workflow_detail::put(args, "path", file.getFullPathName());
+                           chain_workflow_detail::put(args, "overwrite", true);
+                           const auto started = safe->mixerChainOperation(args);
+                           if (started["completionState"].toString() == "failed")
+                               return done(juce::Result::fail(started["message"].toString()));
+                           safe->pollChainJob(started["operation"].toString(),
+                 [file, track, done](juce::Result saved)
+                 {
+                     if (saved.failed())
+                         return done(saved);
+                     // Add the controls to the written chain (re-encoded, atomic replace).
+                     juce::MemoryBlock bytes;
+                     std::unique_ptr<effect_chain::Chain> chain;
+                     if (!file.loadFileAsData(bytes) ||
+                         effect_chain::decode({static_cast<const std::byte *>(bytes.getData()), bytes.getSize()}, chain).failed())
+                         return done(juce::Result::fail("Cannot read back " + file.getFileName()));
+                     chain->track = track;
+                     std::unique_ptr<juce::MemoryBlock> encoded;
+                     if (auto ok = effect_chain::encode(*chain, encoded); ok.failed())
+                         return done(ok);
+                     done(file.replaceWithData(encoded->getData(), encoded->getSize())
+                              ? juce::Result::ok()
+                              : juce::Result::fail("Cannot write " + file.getFileName()));
+                 },
+                 600);
+                       }},
+                      {});
+    return juce::Result::ok();
+}
+juce::Result Studio::openTrackState(int insert, const juce::File &file, std::function<void(juce::Result)> done)
+{
+    if (!mixerInsert(controller.project, insert))
+        return juce::Result::fail("Choose an existing Mixer track");
+    juce::MemoryBlock bytes;
+    std::unique_ptr<effect_chain::Chain> chain;
+    if (!file.loadFileAsData(bytes) ||
+        effect_chain::decode({static_cast<const std::byte *>(bytes.getData()), bytes.getSize()}, chain).failed())
+        return juce::Result::fail("Not a readable chain / track state file: " + file.getFileName());
+    juce::String controls;
+    if (chain->track)
+    {
+        auto *o = new juce::DynamicObject();
+        const auto &k = *chain->track;
+        o->setProperty("name", k.name);
+        o->setProperty("colour", juce::int64(k.colour));
+        o->setProperty("gain", k.gain);
+        o->setProperty("pan", k.pan);
+        o->setProperty("stereoSeparation", k.stereoSeparation);
+        o->setProperty("phaseInverted", k.phaseInverted);
+        o->setProperty("stereoSwapped", k.stereoSwapped);
+        juce::Array<juce::var> eq;
+        for (float value : k.eq)
+            eq.add(value);
+        o->setProperty("eq", eq);
+        o->setProperty("delayMs", k.delayMs);
+        o->setProperty("dock", k.dock);
+        controls = juce::JSON::toString(juce::var(o), true);
+    }
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    // Started once earlier audio work has settled (a busy engine refuses the chain job).
+    queueSettledSteps({[safe, insert, file, controls, done]
+                       {
+                           if (!safe)
+                               return;
+                           auto args = chain_workflow_detail::object();
+                           chain_workflow_detail::put(args, "action", "loadApply");
+                           chain_workflow_detail::put(args, "mixer", insert);
+                           chain_workflow_detail::put(args, "projectIdentity", safe->controller.projectIdentity);
+                           chain_workflow_detail::put(args, "revision", juce::int64(safe->controller.revision));
+                           chain_workflow_detail::put(args, "path", file.getFullPathName());
+                           const auto started = safe->mixerChainOperation(args);
+                           if (started["completionState"].toString() == "failed")
+                               return done(juce::Result::fail(started["message"].toString()));
+                           safe->pollChainJob(started["operation"].toString(),
+                 [safe, insert, controls, done](juce::Result applied)
+                 {
+                     if (!safe)
+                         return;
+                     if (applied.failed() || controls.isEmpty())
+                         return done(applied);
+                     // Controls after the chain has settled.
+                     safe->queueSettledSteps({[safe, insert, controls, done]
+                                              {
+                                                  if (!safe)
+                                                      return;
+                                                  CommandArgs a;
+                                                  a.mixer = insert;
+                                                  a.text = controls;
+                                                  safe->command("mixer.trackControls", a);
+                                                  done(safe->status == "Ready" ? juce::Result::ok()
+                                                                               : juce::Result::fail(safe->status));
+                                              }},
+                                             {});
+                 },
+                 600);
+                       }},
+                      {});
+    return juce::Result::ok();
+}
+void Studio::chooseTrackStateFile(int insert, bool saving)
+{
+    if (!mixerChains || !mixerChains->files)
+    {
+        status = "Choose the chain preset directory first";
+        repaint();
+        return;
+    }
+    if (mixerChainBusy() || afterPluginState || chooser)
+    {
+        status = "Chain or file chooser work is active";
+        repaint();
+        return;
+    }
+    const auto *row = mixerInsert(controller.project, insert);
+    const auto folder = juce::File(mixerChains->files->configuredDirectory());
+    chooser = std::make_unique<juce::FileChooser>(saving ? "Save mixer track state" : "Open mixer track state",
+                                                  saving && row ? folder.getChildFile(juce::File::createLegalFileName(row->name) + ".vibfx")
+                                                                : folder,
+                                                  "*.vibfx");
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    chooser->launchAsync((saving ? juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::warnAboutOverwriting
+                                 : juce::FileBrowserComponent::openMode) |
+                             juce::FileBrowserComponent::canSelectFiles,
+                         [safe, insert, saving](const juce::FileChooser &fc)
+                         {
+                             if (!safe)
+                                 return;
+                             const auto file = fc.getResult();
+                             safe->chooser.reset();
+                             if (file == juce::File{})
+                                 return;
+                             const auto report = [safe, saving](juce::Result r)
+                             {
+                                 if (!safe)
+                                     return;
+                                 safe->status = r.wasOk() ? juce::String(saving ? "Mixer track state saved" : "Mixer track state applied")
+                                                          : r.getErrorMessage();
+                                 safe->repaint();
+                             };
+                             const auto started = saving ? safe->saveTrackState(insert, file.withFileExtension("vibfx"), report)
+                                                         : safe->openTrackState(insert, file, report);
+                             if (started.failed())
+                                 report(started);
+                         });
+}
 void Studio::chooseMixerChainFile(const juce::String &action, int insert)
 {
     if (!mixerChains || !mixerChains->files)

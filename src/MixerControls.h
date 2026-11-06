@@ -135,6 +135,45 @@ inline juce::Result applyMixerControl(Project &project, const juce::String &id, 
     }
     else if (id == "mixer.eqReset")
         it->eq = {};
+    else if (id == "mixer.trackControls")
+    {
+        // args.text: JSON track controls from a track state file (effect_chain::TrackControls).
+        const auto v = juce::JSON::parse(a.text);
+        if (!v.isObject())
+            return juce::Result::fail("mixer.trackControls.invalid: JSON object required");
+        const auto number = [&](const char *key, double low, double high, double &out)
+        {
+            out = double(v[key]);
+            return v.hasProperty(key) && std::isfinite(out) && out >= low && out <= high;
+        };
+        double gain, pan, stereo, delay, dock;
+        if (!number("gain", 0, 2, gain) || !number("pan", -1, 1, pan) || !number("stereoSeparation", -1, 1, stereo) ||
+            !number("delayMs", 0, 500, delay) || !number("dock", -1, 1, dock) || !v["eq"].isArray() ||
+            v["eq"].size() != 6)
+            return juce::Result::fail("mixer.trackControls.invalid: Values outside their ranges");
+        MixerEqSettings eq;
+        for (size_t band = 0; band < 3; ++band)
+        {
+            eq.gain[band] = float(double(v["eq"][int(band) * 2]));
+            eq.freq[band] = float(double(v["eq"][int(band) * 2 + 1]));
+            if (!MixerEqSettings::valid(eq.gain[band], eq.freq[band]))
+                return juce::Result::fail("mixer.trackControls.invalid: EQ band outside its range");
+        }
+        const auto colour = juce::uint32(juce::int64(v["colour"]));
+        if (colour != 0 && (colour >> 24) != 255)
+            return juce::Result::fail("mixer.trackControls.invalid: Colour must be opaque or 0");
+        if (const auto name = v["name"].toString().trim(); name.isNotEmpty() && name.length() <= 128)
+            it->name = name;
+        it->colour = colour;
+        it->gain = float(gain);
+        it->pan = float(pan);
+        it->stereoSeparation = float(stereo);
+        it->phaseInverted = bool(v["phaseInverted"]);
+        it->stereoSwapped = bool(v["stereoSwapped"]);
+        it->eq = eq;
+        it->delayMs = float(delay);
+        it->dock = int(dock);
+    }
     else if (id == "mixer.reset")
     {
         // Familiar "Reset track": controls, name and colour back to new-track defaults; the
