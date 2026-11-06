@@ -75,3 +75,9 @@ that automation take. A failed automation transaction retains both for explicit
 retry/cancel; ordinary Save/project replacement/other edits refuse while owned.
 No hardware, physical MIDI, listening, native parameter recording or whole MX-G
 completion claim follows from component/MCP/synthetic-device evidence.
+
+Touch recording with the mouse: while a take is recording, dragging that insert's volume
+fader, pan knob or a send level in the Mixer records each value at its time through the same
+admission as `value` (no gesture is opened, so nothing else can be edited meanwhile). Stopping
+playback seals and commits the take as usual; the recorded source is named "<target> - Recorded".
+MCP `vibera_pointer` on the Mixer (editor 3) is admitted during a take for the same reason.

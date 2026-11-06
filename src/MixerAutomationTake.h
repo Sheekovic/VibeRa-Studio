@@ -217,7 +217,7 @@ class MixerAutomationTake
                 AutomationSource source;
                 source.id = next.allocate();
                 source.length = length;
-                source.name = (t.name + " - Recorded MIDI").toStdString();
+                source.name = (t.name + " - Recorded").toStdString(); // MIDI or mouse (touch) input.
                 source.links = {{t.key, t.minimum, t.maximum}};
                 source.points.push_back({next.allocate(), 0, t.normalizedManual(), AutomationShape::hold, 0});
                 float last = t.normalizedManual();

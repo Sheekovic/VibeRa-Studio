@@ -584,8 +584,11 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         (args["command"].toString() == "mixer.gain" || args["command"].toString() == "mixer.pan" ||
          args["command"].toString() == "mixer.stereoSeparation" ||
          args["command"].toString() == "mixer.send");
+    // Mixer pointer input during a take is the UI's own touch-recording path (each value goes
+    // through the same recorder admission as recordingValue).
+    const bool recordingPointer = name == "vibera_pointer" && int(args["editor"]) == 3;
     if (automationRecordingActive() && !recordingReadOnly && !recordingStop && !recordingPlay &&
-        !recordingValue &&
+        !recordingValue && !recordingPointer &&
         !(controllerTestMode && name == "vibera_controller" && args["action"].toString() == "inject"))
         throw McpFailure("automationRecording.busy",
                          "Finish/retry/cancel the automation take before other mutations");

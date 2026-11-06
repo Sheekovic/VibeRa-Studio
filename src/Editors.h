@@ -108,6 +108,9 @@ class Studio::Editor final : public juce::Component,
     float mixerSendStart = 0;
     int mixerPanSource = -1;
     float mixerPanStart = 0;
+    // Touch recording: while a Song automation take is recording, Mixer pointer drags send
+    // their values without a gesture so each one is recorded at its time.
+    bool mixerTouchRecording = false;
     double stretchReferenceSpan = 1, stretchStartMouseBeat = 0;
 
     juce::Point<float> lastMutePoint;
@@ -5311,7 +5314,8 @@ class Studio::Editor final : public juce::Component,
                 }
                 if (mixerSendLevelHit(destination, e.position) && route)
                 {
-                    if (s.controller.hasGesture() || !s.controller.beginGesture())
+                    mixerTouchRecording = s.automationRecordingActive();
+                    if (!mixerTouchRecording && (s.controller.hasGesture() || !s.controller.beginGesture()))
                         return;
                     mixerSendSource = source;
                     mixerSendTarget = destination;
@@ -5433,8 +5437,10 @@ class Studio::Editor final : public juce::Component,
                     s.mixerAutomationMenu(destination, MixerAutomationControl::pan);
                     return;
                 }
-                if (e.mods.isLeftButtonDown() && s.controller.beginGesture())
+                const bool touch = s.automationRecordingActive();
+                if (e.mods.isLeftButtonDown() && (touch || s.controller.beginGesture()))
                 {
+                    mixerTouchRecording = touch;
                     mixerPanSource = destination;
                     mixerPanStart = mixerInsert(s.controller.project, destination)->pan;
                     origin = e.position;
@@ -5457,7 +5463,9 @@ class Studio::Editor final : public juce::Component,
                 repaint();
                 return;
             }
-            s.controller.beginGesture();
+            mixerTouchRecording = s.automationRecordingActive();
+            if (!mixerTouchRecording)
+                s.controller.beginGesture();
             dragging = true;
             mouseDrag(e);
             return;
@@ -6673,7 +6681,7 @@ class Studio::Editor final : public juce::Component,
             CommandArgs a;
             if (mixerPanSource >= 0)
             {
-                if (!s.controller.hasGesture())
+                if (!s.controller.hasGesture() && !mixerTouchRecording)
                 {
                     mixerPanSource = -1;
                     dragging = false;
@@ -6688,7 +6696,7 @@ class Studio::Editor final : public juce::Component,
             }
             if (mixerSendSource >= 0)
             {
-                if (!s.controller.hasGesture())
+                if (!s.controller.hasGesture() && !mixerTouchRecording)
                 {
                     mixerSendSource = -1;
                     dragging = false;
@@ -7012,7 +7020,7 @@ class Studio::Editor final : public juce::Component,
             a.value = insert ? insert->pan : 0;
             mixerPanSource = -1;
             dragging = false;
-            const bool committed = finishUiGesture(s, "Mixer pan");
+            const bool committed = !std::exchange(mixerTouchRecording, false) && finishUiGesture(s, "Mixer pan");
             if (committed && insert && s.recordingNotes)
                 s.command("mixer.pan", a);
             repaint();
@@ -7027,7 +7035,7 @@ class Studio::Editor final : public juce::Component,
             a.value = route ? route->gain : 0;
             mixerSendSource = -1;
             dragging = false;
-            const bool committed = finishUiGesture(s, "Mixer send level");
+            const bool committed = !std::exchange(mixerTouchRecording, false) && finishUiGesture(s, "Mixer send level");
             if (committed && route && s.recordingNotes)
                 s.command("mixer.send", a);
             repaint();
@@ -7040,7 +7048,7 @@ class Studio::Editor final : public juce::Component,
             const auto *insert = mixerInsert(s.controller.project, s.selectedInsert);
             a.value = insert ? insert->gain : 0;
             dragging = false;
-            const bool committed = finishUiGesture(s, "Mixer volume");
+            const bool committed = !std::exchange(mixerTouchRecording, false) && finishUiGesture(s, "Mixer volume");
             if (committed && insert && s.recordingNotes)
                 s.command("mixer.gain", a);
             repaint();
