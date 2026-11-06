@@ -86,3 +86,7 @@
   Pattern clips; Shift+Ctrl+G; clip menu) merges them like `clip.merge` into one new Pattern
   ("Merged xN") and replaces every other repeat of the same stack (same Patterns, tracks,
   windows, mute and spacing, any time) with a clip of it. One Undo.
+- Markers in bulk (Playlist menu > Add markers): `marker.addEvery` (`value` 1..64 bars) adds a
+  marker named "Bar N" on every Nth bar up to the Song end, following time-signature changes and
+  skipping positions that already have one; `marker.addPair` (`beat`, `length`) marks the start
+  and end of a time selection. One Undo step each; refuses when nothing would be added.

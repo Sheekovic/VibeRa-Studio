@@ -863,6 +863,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tempo.curve", "Draw tempo curve", Scope::playlist, true, true, "command"},
         {"tempo.fromAutomation", "Use automation clip as tempo", Scope::playlist, true, true, "command"},
         {"marker.add", "Add Playlist marker", Scope::playlist, true, true, "command"},
+        {"marker.addEvery", "Add a marker every N bars (value 1..64)", Scope::playlist, true, true, "command"},
+        {"marker.addPair", "Add markers at the start and end of a time range", Scope::playlist, true, true, "command"},
         {"marker.rename", "Rename Playlist marker", Scope::playlist, true, true, "command"},
         {"marker.move", "Move Playlist marker", Scope::playlist, true, true, "command"},
         {"marker.delete", "Delete Playlist marker", Scope::playlist, true, true, "command"},
@@ -6416,12 +6418,62 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
     {
         auto found = std::find_if(next.markers.begin(), next.markers.end(),
                                   [&](const auto &marker) { return marker.id == a.target; });
-        if (id != "marker.add" && found == next.markers.end())
+        if (id != "marker.add" && id != "marker.addEvery" && id != "marker.addPair" && found == next.markers.end())
             return missing();
         if ((id == "marker.add" || id == "marker.move") && (!std::isfinite(a.beat) || a.beat < 0 || a.beat > 1000000))
             return juce::Result::fail("Marker beat is 0..1000000");
         if ((id == "marker.add" || id == "marker.rename") && a.text.length() > 128)
             return juce::Result::fail("Marker names are at most 128 characters");
+        if (id == "marker.addEvery" || id == "marker.addPair")
+        {
+            // addEvery: a marker on every `value`-th bar (1..64) up to the Song end (meter
+            // changes respected; existing marker positions skipped). addPair: markers at
+            // `beat` and `beat + length` (a time selection). One Undo step.
+            std::vector<double> beats;
+            if (id == "marker.addPair")
+            {
+                if (!std::isfinite(a.length) || a.length <= 0 || a.beat + a.length > 1000000)
+                    return juce::Result::fail("Select a time range first");
+                beats = {a.beat, a.beat + a.length};
+            }
+            else
+            {
+                const int every = int(a.value);
+                if (!std::isfinite(a.value) || every < 1 || every > 64 || double(every) != a.value)
+                    return juce::Result::fail("Add a marker every 1..64 bars");
+                double end = 4;
+                for (const auto &p : next.placements)
+                    end = std::max(end, p.beat + p.length);
+                for (const auto &p : next.audioPlacements)
+                    end = std::max(end, p.beat + p.duration * next.tempo / 60.);
+                for (const auto &p : next.automation.placements)
+                    end = std::max(end, p.beat + p.length);
+                int bar = 0;
+                for (double beat = 0; beat < end - 1.e-9 && beats.size() < 2000;)
+                {
+                    if (bar % every == 0)
+                        beats.push_back(beat);
+                    beat += std::max(.25, next.barPosition(beat).barLength);
+                    ++bar;
+                }
+            }
+            int added = 0;
+            for (const double beat : beats)
+            {
+                if (std::any_of(next.markers.begin(), next.markers.end(),
+                                [&](const auto &m) { return std::abs(m.beat - beat) < 1.e-6; }))
+                    continue;
+                if (next.markers.size() >= 10000)
+                    return juce::Result::fail("Too many markers");
+                const auto bar = next.barPosition(beat);
+                next.markers.push_back({next.allocate(), beat, "Bar " + juce::String(bar.bar + 1)}); // 1-based like the ruler.
+                ++added;
+            }
+            if (added == 0)
+                return juce::Result::fail("Markers already exist at those positions");
+            std::stable_sort(next.markers.begin(), next.markers.end(),
+                             [](const auto &x, const auto &y) { return x.beat < y.beat; });
+        }
         if (id == "marker.add")
         {
             if (next.markers.size() >= 10000)

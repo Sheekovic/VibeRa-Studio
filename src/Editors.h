@@ -1668,6 +1668,14 @@ class Studio::Editor final : public juce::Component,
                     menu.addSubMenu("Arrangements (" + arrangements::currentName(project) + ")", arrangementsMenu);
                 }
                 menu.addItem(11, "Add marker at playhead");
+                {
+                    juce::PopupMenu addMarkers;
+                    addMarkers.addItem(3010, "At the start and end of the time selection", s.playlistRange.has_value());
+                    for (int bars : {1, 2, 4, 8})
+                        addMarkers.addItem(3000 + bars, bars == 1 ? juce::String("One every bar")
+                                                                  : "One every " + juce::String(bars) + " bars");
+                    menu.addSubMenu("Add markers", addMarkers);
+                }
                 const bool markers = !s.controller.project.markers.empty();
                 menu.addItem(13, "Jump to next marker", markers);
                 menu.addItem(14, "Jump to previous marker", markers);
@@ -1710,6 +1718,22 @@ class Studio::Editor final : public juce::Component,
                     {
                         if (!safe || !result)
                             return;
+                        if (result >= 3001 && result <= 3010)
+                        {
+                            CommandArgs a;
+                            if (result == 3010 && safe->s.playlistRange)
+                            {
+                                a.beat = safe->s.playlistRange->first;
+                                a.length = safe->s.playlistRange->second - safe->s.playlistRange->first;
+                                safe->s.command("marker.addPair", a);
+                            }
+                            else if (result != 3010)
+                            {
+                                a.value = result - 3000;
+                                safe->s.command("marker.addEvery", a);
+                            }
+                            return;
+                        }
                         if (result >= 13 && result <= 15)
                         {
                             safe->s.performAction(result == 13   ? "marker.next"
