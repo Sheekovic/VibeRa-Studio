@@ -513,6 +513,13 @@ void Studio::rackGroupMenu(juce::Component *anchor)
     sort.addItem(25, "Name Z-A");
     menu.addSubMenu("Sort selected Channels", sort, !selectedChannels.empty());
     addSwingItems(menu, selectedChannels);
+    {
+        juce::PopupMenu width;
+        width.addItem(40, "Narrow", true, rackButtonWidth == 0);
+        width.addItem(41, "Normal", true, rackButtonWidth == 1);
+        width.addItem(42, "Wide", true, rackButtonWidth == 2);
+        menu.addSubMenu("Channel button width", width);
+    }
     const auto identity = controller.projectIdentity;
     const auto group = rackGroup;
     const auto channels = selectedChannels;
@@ -524,6 +531,13 @@ void Studio::rackGroupMenu(juce::Component *anchor)
             if (!safe || safe->controller.projectIdentity != identity)
                 return;
             safe->focus = Scope::rack;
+            if (action >= 40 && action <= 42)
+            {
+                safe->performAction(action == 40 ? "view.rackButtonsNarrow"
+                                    : action == 41 ? "view.rackButtonsNormal"
+                                                   : "view.rackButtonsWide");
+                return;
+            }
             if (action == 26 || action == 27)
             {
                 CommandArgs args;

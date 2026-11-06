@@ -4812,6 +4812,15 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         repaint();
         return true;
     }
+    if (action == "view.rackButtonsNarrow" || action == "view.rackButtonsNormal" || action == "view.rackButtonsWide")
+    {
+        rackButtonWidth = action == "view.rackButtonsNarrow" ? 0 : action == "view.rackButtonsNormal" ? 1 : 2;
+        status = rackButtonWidth == 0   ? "Channel buttons: narrow"
+                 : rackButtonWidth == 1 ? "Channel buttons: normal"
+                                        : "Channel buttons: wide";
+        refresh();
+        return true;
+    }
     if (action == "view.followCenter")
     {
         followCenter = !followCenter;

@@ -76,3 +76,5 @@ arbitrary semantic control. Legacy MCP gaps are deferred, not waived.
   Alt+click resets (volume 0.7, pan centre); right-click offers Create automation clip (same as
   `channel.automateVolume` / `channel.automatePan` for that Channel) and Reset. The Rack label
   column is 230..250 px wide to fit them.
+- Channel button width (Channel Rack menu > Channel button width): actions `view.rackButtonsNarrow`,
+  `view.rackButtonsNormal` (default) and `view.rackButtonsWide`; read `state.rackButtonWidth`.

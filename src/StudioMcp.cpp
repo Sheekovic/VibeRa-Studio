@@ -3725,6 +3725,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "playlistFollowPlayhead", followPlayhead);
     set(state, "pianoFollowPlayhead", pianoFollowPlayhead);
     set(state, "followCenter", followCenter);
+    set(state, "rackButtonWidth", rackButtonWidth == 0 ? "narrow" : rackButtonWidth == 1 ? "normal" : "wide");
     set(state, "snap", snap);
     set(state, "snapLine", snapLine);
     set(state, "snapMarkers", snapMarkers);

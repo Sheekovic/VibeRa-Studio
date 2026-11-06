@@ -757,8 +757,10 @@ class Studio::Editor final : public juce::Component,
     }
     int rackLabelWidth() const
     {
-        // Includes the per-row Pan and Volume knobs (familiar Channel Rack row).
-        return juce::jlimit(230, 250, int(getWidth() * .38));
+        // Includes the per-row Pan and Volume knobs (familiar Channel Rack row). The channel
+        // button width option widens the name button (wide) or keeps it at the minimum (narrow).
+        const int normal = juce::jlimit(230, 250, int(getWidth() * .38));
+        return s.rackButtonWidth == 0 ? 230 : s.rackButtonWidth == 2 ? normal + 90 : normal;
     }
     // Channel Rack row knobs: Pan then Volume, just before the "PR" and Mixer labels.
     juce::Rectangle<int> rackKnobBounds(int rowTop, bool volume) const
