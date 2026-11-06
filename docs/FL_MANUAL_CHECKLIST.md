@@ -42,7 +42,7 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Clip grouping, track grouping, performance mode | done | |
 | Track and track-group export | done | `exportTracks`, `exportTrackGroups` |
 | Auto-scroll, centred follow | done | `playlist.follow`, `view.followCenter` |
-| Mini playlist / track separators | missing | |
+| Mini playlist (song overview) | done | overview in the Playlist scrollbar |
 
 ## Mixer
 
@@ -54,5 +54,5 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Polarity, stereo separation, swap L/R | done | |
 | Multichannel routing | partial | |
 | Disk recording (render armed tracks) | done | `mixer.renderArm`, `mixer.renderArmed` |
-| Smart disable | missing | |
+| Smart disable | done | VibeRa effects; `effectSmartDisable` |
 | Link all parameters | missing | |

@@ -8222,6 +8222,12 @@ void Studio::effectMenu(int index)
         const auto host = audio.parameterHost(fx.id);
         sourceInstances[fx.id] = host ? host->runtimeIdentity() : juce::String{};
         add("Recover saved state", 7, 0, !host || !host->alive());
+        {
+            juce::PluginDescription description;
+            const auto descriptor = juce::XmlDocument::parse(fx.descriptor);
+            if (descriptor && description.loadFromXml(*descriptor) && effects::isNativeDescription(description))
+                add("Smart disable", 8, effectSmartDisabled(fx.id) ? 0 : 1, !mixerChainBusy(), effectSmartDisabled(fx.id));
+        }
         add("Bypass", 3, fx.bypass ? 0 : 1, true, fx.bypass);
         add("Move up", 4, int(i) - 1, i > 0);
         add("Move down", 4, int(i) + 1, i + 1 < insert->effects.size());
@@ -8529,6 +8535,14 @@ void Studio::effectMenu(int index)
                                safe->openPluginControlsUI(action.id);
                            else if (action.command == 7)
                                safe->recoverPlugin(action.id);
+                           else if (action.command == 8)
+                           {
+                               if (auto started = safe->setEffectSmartDisable(action.id, action.destination == 1,
+                                                                              [](juce::Result) {});
+                                   started.failed())
+                                   safe->status = started.getErrorMessage();
+                               safe->repaint();
+                           }
                            else if (action.command == 1 || action.command == 2)
                            {
                                const auto host = safe->audio.parameterHost(action.id);

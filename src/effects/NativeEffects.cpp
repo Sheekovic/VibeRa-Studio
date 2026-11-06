@@ -279,6 +279,12 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
         for (int i = 0; i < frames; ++i)
             input = std::max(input, std::max(std::abs(left[i]), std::abs(right[i])));
         inputPeak_.store(std::isfinite(input) ? input : 0.f, std::memory_order_relaxed);
+        if (smartDisable_ && eventCount_ == 0 && input < 1.e-6f && silentFrames_ >= int(preparedRate_))
+        {
+            buffer.clear();
+            peakLeft_.store(0.f, std::memory_order_relaxed);
+            return; // Idle: nothing to process until input arrives.
+        }
     }
     int cursor = 0;
     std::size_t event = 0;
@@ -311,6 +317,10 @@ void NativeEffectInstance::processBlock(juce::AudioBuffer<float> &buffer, juce::
         maximumRight = std::max(maximumRight, std::abs(right[i]));
     }
     peakLeft_.store(maximumLeft, std::memory_order_relaxed);
+    if (std::max(maximumLeft, maximumRight) < 1.e-6f && inputPeak_.load(std::memory_order_relaxed) < 1.e-6f)
+        silentFrames_ = std::min(silentFrames_ + frames, 1 << 30);
+    else
+        silentFrames_ = 0;
     reduction_.store(engine_.gainReductionDb(), std::memory_order_relaxed);
     {
         // Every effect feeds its editor visual (relaxed atomics; no locks or allocation).
@@ -434,6 +444,8 @@ void NativeEffectInstance::getStateInformation(juce::MemoryBlock &destination)
     xml.setAttribute("effect", spec_.slug);
     if (effect_ == EffectId::convolution && impulsePath_.isNotEmpty())
         xml.setAttribute("impulse", impulsePath_);
+    if (smartDisable_)
+        xml.setAttribute("smartDisable", 1);
     for (std::size_t i = 0; i < spec_.parameterCount; ++i)
     {
         auto *node = xml.createNewChildElement("PARAM");
@@ -454,7 +466,9 @@ bool NativeEffectInstance::restoreState(const void *data, int bytes)
     const auto xml = getXmlFromBinary(data, bytes);
     const bool impulse = effect_ == EffectId::convolution && xml && xml->hasAttribute("impulse") &&
                          juce::File::isAbsolutePath(xml->getStringAttribute("impulse"));
-    if (!xml || !xml->hasTagName("VIBERA_NATIVE_EFFECT") || xml->getNumAttributes() != (impulse ? 3 : 2) ||
+    const bool smart = xml && xml->getStringAttribute("smartDisable") == "1";
+    if (!xml || !xml->hasTagName("VIBERA_NATIVE_EFFECT") ||
+        xml->getNumAttributes() != (impulse ? 3 : 2) + (smart ? 1 : 0) ||
         xml->getStringAttribute("schemaVersion") != "1" || xml->getStringAttribute("effect") != spec_.slug)
         return refuse();
     Values candidate{};
@@ -508,6 +522,8 @@ bool NativeEffectInstance::restoreState(const void *data, int bytes)
     // is a host control operation; sample-offset events remain DSP-thread owned.
     for (std::size_t i = 0; i < spec_.parameterCount; ++i)
         parameters_[i]->setValue(candidate[i]);
+    smartDisable_ = smart;
+    silentFrames_ = 0;
     // A missing impulse file keeps its path (saved again) and plays the Studio space.
     if (impulse)
     {

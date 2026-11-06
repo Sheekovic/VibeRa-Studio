@@ -114,6 +114,10 @@ class NativeEffectInstance final : public juce::AudioPluginInstance, public Nati
     bool prepared_ = false;
     double preparedRate_ = 0;
     juce::String impulsePath_;
+    // Smart disable: after a second of silent input and output the DSP is skipped (output
+    // stays silent) until input arrives again. Saved as the "smartDisable" state attribute.
+    bool smartDisable_ = false;
+    int silentFrames_ = 0;
     std::array<std::vector<float>, 2> impulseRaw_; // At impulseRate_, for rebuilding on prepare.
     double impulseRate_ = 0;
     void publishImpulse();

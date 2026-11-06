@@ -1165,6 +1165,28 @@ juce::Result Studio::recoverPlugin(Id id, bool reopenControls)
     repaint();
     return juce::Result::ok();
 }
+// Native effect smart disable flag, read from the effect's saved state.
+bool Studio::effectSmartDisabled(Id id) const
+{
+    const auto *spec = controller.project.plugin(id);
+    juce::MemoryBlock block;
+    const auto xml = spec && block.fromBase64Encoding(spec->state)
+                         ? juce::AudioProcessor::getXmlFromBinary(block.getData(), int(block.getSize()))
+                         : nullptr;
+    return xml && xml->hasTagName("VIBERA_NATIVE_EFFECT") && xml->getStringAttribute("smartDisable") == "1";
+}
+juce::Result Studio::setEffectSmartDisable(Id id, bool on, std::function<void(juce::Result)> done)
+{
+    const auto *spec = controller.project.plugin(id);
+    juce::PluginDescription description;
+    const auto descriptor = spec ? juce::XmlDocument::parse(spec->descriptor) : nullptr;
+    if (!spec || spec->instrument || !descriptor || !description.loadFromXml(*descriptor) ||
+        !effects::isNativeDescription(description))
+        return juce::Result::fail("smartDisable.invalidTarget: Smart disable is available for VibeRa effects");
+    return editNativeEffectState(
+        id, [on](juce::XmlElement &xml) { on ? xml.setAttribute("smartDisable", 1) : xml.removeAttribute("smartDisable"); },
+        "smartDisable", on ? "Smart disable on" : "Smart disable off", std::move(done));
+}
 juce::Result Studio::loadEffectImpulse(Id id, const juce::File &file, std::function<void(juce::Result)> done)
 {
     const auto *spec = controller.project.plugin(id);
@@ -1175,12 +1197,23 @@ juce::Result Studio::loadEffectImpulse(Id id, const juce::File &file, std::funct
         return juce::Result::fail("effectImpulse.invalidTarget: Choose a Convolution Reverb effect");
     if (!file.existsAsFile() || !file.hasFileExtension("wav;aif;aiff;flac"))
         return juce::Result::fail("effectImpulse.invalidFile: An existing WAV, AIFF or FLAC file is required");
+    const auto path = file.getFullPathName();
+    return editNativeEffectState(
+        id, [path](juce::XmlElement &xml) { xml.setAttribute("impulse", path); }, "effectImpulse",
+        "Loading impulse " + file.getFileName(), std::move(done));
+}
+// Captures every plugin state, edits one native effect's state XML and restarts it with that
+// state (one effect worker reload). Nothing changes when the effect cannot restart.
+juce::Result Studio::editNativeEffectState(Id id, std::function<void(juce::XmlElement &)> edit, juce::String code,
+                                           juce::String doneStatus, std::function<void(juce::Result)> done)
+{
     if (mixerChainApplying() || devicePreparationBusy() || routingCoordinator.mutationBlocked())
-        return juce::Result::fail("effectImpulse.busy: Wait for the current audio transaction");
+        return juce::Result::fail(code + ".busy: Wait for the current audio transaction");
     auto safe = juce::Component::SafePointer<Studio>(this);
     const auto identity = controller.projectIdentity;
     withPluginState(
-        [safe, id, file, report = std::move(done), identity](juce::Result captured, Project snapshot)
+        [safe, id, edit = std::move(edit), code, doneStatus, report = std::move(done),
+         identity](juce::Result captured, Project snapshot)
         {
             if (!safe)
                 return;
@@ -1213,8 +1246,8 @@ juce::Result Studio::loadEffectImpulse(Id id, const juce::File &file, std::funct
                                  ? juce::AudioProcessor::getXmlFromBinary(block.getData(), int(block.getSize()))
                                  : nullptr;
             if (!xml || !xml->hasTagName("VIBERA_NATIVE_EFFECT"))
-                return done(juce::Result::fail("effectImpulse.noState: The effect has no captured state yet"));
-            xml->setAttribute("impulse", file.getFullPathName());
+                return done(juce::Result::fail(code + ".noState: The effect has no captured state yet"));
+            edit(*xml);
             juce::MemoryBlock next;
             juce::AudioProcessor::copyXmlToBinary(*xml, next);
             const auto previous = target->state;
@@ -1222,12 +1255,12 @@ juce::Result Studio::loadEffectImpulse(Id id, const juce::File &file, std::funct
             if (auto reload = safe->audio.requestPluginStateReload(safe->controller.project, id); reload.failed())
             {
                 target->state = previous; // Nothing changes unless the effect can restart with it.
-                return done(juce::Result::fail("effectImpulse.notPrepared: " + reload.getErrorMessage() +
+                return done(juce::Result::fail(code + ".notPrepared: " + reload.getErrorMessage() +
                                                " (needs an active audio device projection)"));
             }
             safe->controller.dirty = true;
             safe->needsRebuild = true;
-            safe->status = "Loading impulse " + file.getFileName();
+            safe->status = doneStatus;
             safe->repaint();
             done(juce::Result::ok());
         });

@@ -575,6 +575,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // effect window's own button it is plugin state (saved, no Undo step). `done` reports
     // that the reload was requested.
     juce::Result loadEffectImpulse(Id effect, const juce::File &, std::function<void(juce::Result)> done);
+    juce::Result setEffectSmartDisable(Id effect, bool on, std::function<void(juce::Result)> done);
+    bool effectSmartDisabled(Id effect) const;
+    juce::Result editNativeEffectState(Id effect, std::function<void(juce::XmlElement &)> edit, juce::String code,
+                                       juce::String doneStatus, std::function<void(juce::Result)> done);
     juce::Result selectPluginParameter(Id, std::optional<std::uint32_t>, bool lastTweaked);
     juce::var pluginControlSnapshot() const;
     unsigned refreshPluginCatalogue(Id, const juce::String &instance);

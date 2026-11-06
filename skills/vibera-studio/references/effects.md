@@ -114,3 +114,7 @@ Mixing and mastering processors:
 Vocoder (type `vocoder`): 16-band channel vocoder. The input (voice) shapes an internal
 carrier: a band-limited saw at `note` (MIDI 24..96) mixed with `noise` (consonants);
 `release` sets band decay, plus mix and output gain. There is no external carrier input.
+- Smart disable (Mixer effect slot menu > Smart disable, VibeRa effects only): after a second of
+  silent input and output the effect skips processing until input returns; tails finish first.
+  MCP: `vibera_project effectSmartDisable {plugin, enabled}` (job; the effect restarts with the new
+  state); read `effects[].smartDisable` in the Mixer rows. Saved with the effect state.
