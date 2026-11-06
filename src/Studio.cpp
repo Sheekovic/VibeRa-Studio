@@ -3599,7 +3599,7 @@ void Studio::previewNote(int pitch)
     if (previewPitch >= 0)
         performanceInput.set(1, previewPitch, false, 0);
     previewPitch = -1;
-    if (pitch >= 0 && pitch <= 127 && !audio.playing())
+    if (pitch >= 0 && pitch <= 127 && (!audio.playing() || (previewDuringPlayback && !midiTaking && !recordArmed)))
     {
         previewPitch = pitch;
         performanceInput.set(1, pitch, true, 100);
@@ -4816,6 +4816,13 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     {
         pianoBackgroundWaveform = !pianoBackgroundWaveform;
         status = pianoBackgroundWaveform ? "Piano roll background waveform on" : "Piano roll background waveform off";
+        refresh();
+        return true;
+    }
+    if (action == "view.previewDuringPlayback")
+    {
+        previewDuringPlayback = !previewDuringPlayback;
+        status = previewDuringPlayback ? "Notes preview during playback" : "No note preview during playback";
         refresh();
         return true;
     }

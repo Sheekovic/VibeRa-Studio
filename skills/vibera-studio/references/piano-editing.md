@@ -117,3 +117,6 @@
 - Background waveform (Piano roll menu; `view.pianoBackgroundWaveform`, off by default, read
   `state.pianoBackgroundWaveform`) draws Playlist audio clips faintly behind the notes, aligned to
   the first Playlist clip of the Pattern (song start when it has none).
+- Preview notes during playback (Piano roll menu; `view.previewDuringPlayback`, off by default,
+  `state.previewDuringPlayback`): clicked/drawn notes and `vibera_transport previewNote` sound while the
+  transport plays; never while Record is armed or a MIDI take runs. `state.previewPitch` is the held note.

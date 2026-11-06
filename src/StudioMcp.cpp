@@ -3385,8 +3385,8 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             const auto *target = controller.project.channel(Id(juce::int64(args["channel"])));
             if (!target || target->audioClip)
                 throw McpFailure("invalid_target", "channel must be an existing score Channel");
-            if (audio.playing() || midiTaking || hasPendingMidiTake())
-                throw McpFailure("busy", "Stop playback/recording before a note preview");
+            if ((audio.playing() && (!previewDuringPlayback || recordArmed)) || midiTaking || hasPendingMidiTake())
+                throw McpFailure("busy", "Stop playback/recording before a note preview (or enable view.previewDuringPlayback)");
             const int pitch = args.hasProperty("pitch") ? int(args["pitch"])
                                                         : (target->sampler.root < 0 ? 60 : target->sampler.root);
             if (pitch < 0 || pitch > 127)
@@ -3726,6 +3726,8 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "pianoFollowPlayhead", pianoFollowPlayhead);
     set(state, "followCenter", followCenter);
     set(state, "rackFocusSelected", rackFocusSelected);
+    set(state, "previewDuringPlayback", previewDuringPlayback);
+    set(state, "previewPitch", previewPitch);
     {
         juce::Array<juce::var> armed;
         for (int insert : renderArmedInserts)

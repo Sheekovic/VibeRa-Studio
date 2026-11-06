@@ -226,6 +226,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool patternMode = true;
     bool followPlayhead = true;
     bool pianoFollowPlayhead = true;
+    bool previewDuringPlayback = false; // Hear clicked/drawn notes while the transport plays (never while recording).
     // Mixer tracks armed for "Render armed tracks" (one WAV each, rendered with the track soloed
     // with its connections). Session UI state; inserts that no longer exist are skipped.
     std::set<int> renderArmedInserts;

@@ -786,6 +786,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"view.noteGridHighlights", "Note grid highlights (shade black-key rows)", Scope::piano, false, true, "action"},
         {"view.pianoFollow", "Auto-scroll the Piano roll with the playhead", Scope::piano, false, true, "action"},
         {"view.pianoBackgroundWaveform", "Piano roll: show Playlist audio clips as a background waveform", Scope::piano, false, true, "action"},
+        {"view.previewDuringPlayback", "Preview notes during playback (Piano roll, Channel Rack)", Scope::piano, false, true, "action"},
         {"mixer.renderArm", "Arm/disarm the selected Mixer track for rendering", Scope::mixer, false, true, "action"},
         {"mixer.renderArmed", "Render armed Mixer tracks to WAV files...", Scope::mixer, false, true, "action"},
         {"view.rackFocusSelected", "Channel Rack: focus (scroll to) the selected Channel automatically", Scope::rack, false, true, "action"},
