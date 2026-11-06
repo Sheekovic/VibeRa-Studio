@@ -3730,12 +3730,19 @@ class Studio::Editor final : public juce::Component,
                         else
                             label(g, c.muted ? "x" : "v", {int(r.getX()) + 3, int(r.getY()), 12, 16}, ink,
                                   10);
-                        label(g,
-                              curve    ? juce::String::fromUTF8(curve->name.c_str())
-                              : source ? source->name
-                              : p      ? p->name
-                                       : "Missing",
-                              {int(r.getX()) + 18, int(r.getY()), int(r.getWidth()) - 22, 16}, ink, 11);
+                        {
+                            // Keep labels on screen: a clip scrolled off the left keeps its name
+                            // visible at the Playlist edge (never outside the clip).
+                            const int nameX = std::max(int(r.getX()) + 18, leftEdge() + 4);
+                            const int nameWidth = int(r.getRight()) - 4 - nameX;
+                            if (nameWidth > 8)
+                                label(g,
+                                      curve    ? juce::String::fromUTF8(curve->name.c_str())
+                                      : source ? source->name
+                                      : p      ? p->name
+                                               : "Missing",
+                                      {nameX, int(r.getY()), nameWidth, 16}, ink, 11);
+                        }
                         if (audio && source && r.getWidth() > 4)
                         {
                             if (!waveforms)
