@@ -355,6 +355,10 @@ bool Studio::requiresBoundedMixerStructural(const juce::String &id, const Comman
         // topology needs the general bounded reconfiguration path.
         if ((id == "mixer.route" || id == "mixer.routeOnly" || id == "mixer.send") && args.target > 0)
             return true;
+        // Multi-output instrument output tracks are an auxiliary audible topology too.
+        for (const auto &channel : controller.project.channels)
+            if (channel.instrument && !channel.instrument->extraOutputMixers.empty())
+                return true;
         for (const auto &row : controller.project.mixer)
             for (const auto &edge : row.routes)
                 if (edge.target != 0)

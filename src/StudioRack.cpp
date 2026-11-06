@@ -521,6 +521,17 @@ void Studio::rackGroupMenu(juce::Component *anchor)
         menu.addSubMenu("Channel button width", width);
     }
     menu.addItem(43, "Focus selected channel", true, rackFocusSelected);
+    {
+        const auto *active = controller.project.channel(selectedChannel);
+        const bool instrument = active && active->instrument && !active->audioClip;
+        const int current = instrument ? int(active->instrument->extraOutputMixers.size()) : 0;
+        juce::PopupMenu outputs;
+        outputs.addItem(50, "Main output only", instrument, instrument && current == 0);
+        for (int n = 1; n <= 7; ++n)
+            outputs.addItem(50 + n, "Outputs 2-" + juce::String(n + 1) + " to free Mixer tracks", instrument,
+                            current == n);
+        menu.addSubMenu("Multi-output (selected instrument)", outputs);
+    }
     menu.addItem(44, "Scroll to the selected channel");
     const auto identity = controller.projectIdentity;
     const auto group = rackGroup;
@@ -533,6 +544,11 @@ void Studio::rackGroupMenu(juce::Component *anchor)
             if (!safe || safe->controller.projectIdentity != identity)
                 return;
             safe->focus = Scope::rack;
+            if (action >= 50 && action <= 57)
+            {
+                safe->performAction("channel.multiOutputs" + juce::String(action - 50));
+                return;
+            }
             if (action == 43 || action == 44)
             {
                 safe->performAction(action == 43 ? "view.rackFocusSelected" : "view.rackScrollToSelected");

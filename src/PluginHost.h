@@ -164,6 +164,14 @@ class PluginHost
         const void *writer = nullptr;
     };
     std::optional<DryHistoryPreparation> prepareDryHistoryRetention() const;
+  public:
+    // Multi-output instruments: extra stereo output buses this host transfers, and the samples of
+    // the latest processed callback block for one of them (indexed like that callback's buffer).
+    // Read only by an output tap that the graph orders after this host's track.
+    int extraOutputBuses() const noexcept;
+    const float *extraOutput(int bus, int channel) const noexcept;
+
+  private:
     // AudioEngine CONTROL only, with NO Edit/graph/process reader able to use
     // this Host. Fresh control-only startup may finalize its transport ONCE;
     // after any admitted source sample the policy is permanently immutable.

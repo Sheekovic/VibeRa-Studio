@@ -19,6 +19,7 @@
 #include "AutomationGain.h"
 #include "ChannelBalance.h"
 #include "MixerRoutePlugins.h"
+#include "MultiOutputPlugins.h"
 #include "MixerRouting.h"
 #include "MixerNativeIdentity.h"
 #include "PluginAutomationStream.h"
@@ -1128,7 +1129,8 @@ juce::Result prepareMixerNativeBindings(te::Edit& edit, const Project& project,
     if (MixerNativeIdentity::prepare(project,layout) != MixerNativeIdentity::Error::none)
         return juce::Result::fail("mixer.nativeIdentity.invalidUniverse: Valid fixed Mixer IDs required");
     const auto tracks = te::getAudioTracks(edit);
-    if (size_t(tracks.size()) != project.channels.size() + project.mixer.size() - 1)
+    if (size_t(tracks.size()) !=
+        project.channels.size() + project.mixer.size() - 1 + size_t(multiOutputTrackCount(project)))
         return juce::Result::fail("mixer.nativeIdentity.trackCount: Native universe does not match Project");
     std::map<int,te::AudioTrack*> next;
     for (int slot = 1; slot < layout.size(); ++slot)
@@ -1552,6 +1554,8 @@ AudioEngine::AudioEngine(bool enableDevice, juce::File guidePreferences, int exp
     engine.getPluginManager().createBuiltInType<MixerSendPlugin>();
     engine.getPluginManager().createBuiltInType<MixerSidechainSend>();
     engine.getPluginManager().createBuiltInType<MixerMasterGate>();
+    engine.getPluginManager().createBuiltInType<MultiOutputDependencySend>();
+    engine.getPluginManager().createBuiltInType<MultiOutputTap>();
     persistentGuide = enableDevice || guidePreferences != juce::File{};
     guideFile = guidePreferences != juce::File{}
                     ? guidePreferences
@@ -1700,7 +1704,8 @@ AudioEngine::buildEdit(const Project &project, bool patternMode, Id selectedPatt
                         return std::any_of(row.routes.begin(), row.routes.end(),
                                            [](const auto &route) { return route.target != 0; });
                     });
-    if (ordinaryLive && sourcePlan && !hasDetectorAssignments && !hasBusSends)
+    // Multi-output instruments add output tracks and order sends: the general graph owns them.
+    if (ordinaryLive && sourcePlan && !hasDetectorAssignments && !hasBusSends && multiOutputTrackCount(project) == 0)
     {
         const auto *device = engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
         ordinaryPorts = ordinary_sample_ports::Policy::prepare(
@@ -1819,7 +1824,9 @@ AudioEngine::buildEdit(const Project &project, bool patternMode, Id selectedPatt
                 });
         };
     }
-    options.numAudioTracks = juce::uint32(project.channels.size() + project.mixer.size() - 1);
+    // Channel tracks, then non-Master insert tracks, then multi-output instrument output tracks.
+    options.numAudioTracks =
+        juce::uint32(project.channels.size() + project.mixer.size() - 1 + size_t(multiOutputTrackCount(project)));
     options.defaultMasterVolumedB = 0;
     auto result = te::Edit::createEdit(options);
     if (!result)
@@ -1936,6 +1943,14 @@ AudioEngine::buildEdit(const Project &project, bool patternMode, Id selectedPatt
     int detectorBus = MixerNativeIdentity::firstBus + MixerNativeIdentity::capacity;
     for (auto &[source, bus] : detectorBuses)
         bus = detectorBus++;
+    int multiOutputBus = detectorBus; // Private order buses for multi-output instruments.
+    struct MultiOutput
+    {
+        std::shared_ptr<PluginHost> host;
+        juce::String name;
+        int bus, orderBus, target;
+    };
+    std::vector<MultiOutput> multiOutputs;
     for (auto &m : project.mixer)
     {
         auto &list = m.index == 0 ? result->getMasterPluginList() : inserts.at(m.index)->pluginList;
@@ -2122,6 +2137,16 @@ AudioEngine::buildEdit(const Project &project, bool patternMode, Id selectedPatt
             auto host = prepareHost(*channel.instrument);
             if (role == te::Edit::forRendering && !host)
                 return {};
+            if (!channel.instrument->extraOutputMixers.empty())
+            {
+                const int orderBus = multiOutputBus++;
+                for (size_t k = 0; k < channel.instrument->extraOutputMixers.size(); ++k)
+                    multiOutputs.push_back({host, channel.name, int(k), orderBus,
+                                            channel.instrument->extraOutputMixers[k]});
+                auto order = result->getPluginCache().createNewPlugin(MultiOutputDependencySend::xmlTypeName, {});
+                dynamic_cast<MultiOutputDependencySend *>(order.get())->configure(orderBus);
+                track->pluginList.insertPlugin(order, track->pluginList.getPlugins().size(), nullptr);
+            }
             sampler->setRemote(std::move(host), channel.instrument->bypass, channel.instrument->id);
             if (initialSourceTransport && sourcePlan && initialSourceTransport->options.zeroStageSourceRoutes)
             {
@@ -2147,6 +2172,25 @@ AudioEngine::buildEdit(const Project &project, bool patternMode, Id selectedPatt
         clip->setUsesProxy(false);
         // Empty anchor clips define the initial display/range, never the live note sequence.
         // Routine notes are published through LiveTimeline without touching Edit ValueTrees.
+    }
+    // Output tracks after the insert tracks, one per extra output bus, in Channel order.
+    for (size_t i = 0; i < multiOutputs.size(); ++i)
+    {
+        const auto &output = multiOutputs[i];
+        auto *outputTrack = tracks[int(project.channels.size() + project.mixer.size() - 1 + i)];
+        outputTrack->setName(output.name + " out " + juce::String(output.bus + 2));
+        outputTrack->state.setProperty("viberaMultiOutputTarget", output.target, nullptr);
+        outputTrack->getVolumePlugin()->setEnabled(false);
+        auto receive = result->getPluginCache().createNewPlugin(te::AuxReturnPlugin::xmlTypeName, {});
+        dynamic_cast<te::AuxReturnPlugin *>(receive.get())->busNumber = output.orderBus;
+        outputTrack->pluginList.insertPlugin(receive, 0, nullptr);
+        auto tap = result->getPluginCache().createNewPlugin(MultiOutputTap::xmlTypeName, {});
+        dynamic_cast<MultiOutputTap *>(tap.get())->configure(output.host, output.bus);
+        outputTrack->pluginList.insertPlugin(tap, 1, nullptr);
+        if (output.target == 0)
+            outputTrack->getOutput().setOutputToDefaultDevice(false);
+        else
+            outputTrack->getOutput().setOutputToTrack(inserts.at(output.target));
     }
     std::stable_sort(cutInputs.begin(), cutInputs.end(),
                      [](const auto &a, const auto &b) { return a.channel < b.channel; });
@@ -2475,6 +2519,10 @@ void AudioEngine::updateMixerRoutes(const Project &p)
                 }
         }
 }
+bool AudioEngine::hasAudioDevice() const
+{
+    return engine.getDeviceManager().deviceManager.getCurrentAudioDevice() != nullptr;
+}
 bool AudioEngine::canDeferChannelRouting() const noexcept
 {
     const auto* manager = juce::MessageManager::getInstanceWithoutCreating();
@@ -2670,7 +2718,8 @@ juce::Result AudioEngine::rebuild(const Project &p, bool patternMode, Id selecte
                 sameTopology && a.audioClip == b.audioClip && bool(a.instrument) == bool(b.instrument);
             if (a.instrument && b.instrument)
                 sameTopology = sameTopology && a.instrument->id == b.instrument->id &&
-                               a.instrument->descriptor == b.instrument->descriptor;
+                               a.instrument->descriptor == b.instrument->descriptor &&
+                               a.instrument->extraOutputMixers == b.instrument->extraOutputMixers; // Output tracks.
         }
         for (size_t i = 0; i < p.mixer.size(); ++i)
         {
@@ -4035,10 +4084,15 @@ juce::Result AudioEngine::commitRenderedFile(juce::TemporaryFile &temporary,
     if (samplerAutomationFailed)
         return juce::Result::fail("sampler.automation.renderFailed: Sampler automation processing failed; "
                                   "previous output preserved");
-    if (std::any_of(hosts.begin(), hosts.end(),
-                    [](const auto &host) { return !host || !host->alive() || host->deliveryFailed(); }))
-        return juce::Result::fail(
-            "VST3 audio/MIDI/automation delivery failed during export; previous output preserved");
+    for (const auto &host : hosts)
+        if (!host || !host->alive() || host->deliveryFailed())
+        {
+            // Name the worker's own reason when it reported one.
+            const auto reason = host ? host->error() : juce::String{};
+            return juce::Result::fail(
+                "VST3 audio/MIDI/automation delivery failed during export" +
+                (reason.isNotEmpty() ? " (" + reason + ")" : juce::String{}) + "; previous output preserved");
+        }
     if (!completed)
         return juce::Result::fail("Render cancelled; previous output preserved");
     if (taskError.isNotEmpty())
@@ -4125,7 +4179,11 @@ class AudioEngine::RenderWorker final : public juce::Thread
     bool applyTail()
     {
         juce::WavAudioFormat wav;
-        std::unique_ptr<juce::AudioFormatReader> reader(wav.createReaderFor(temporary.getFile().createInputStream().release(), true));
+        // A render that wrote no file must fail truthfully: JUCE's WAV reader dereferences a null stream.
+        auto stream = temporary.getFile().createInputStream();
+        if (!stream)
+            return false;
+        std::unique_ptr<juce::AudioFormatReader> reader(wav.createReaderFor(stream.release(), true));
         if (!reader)
             return false;
         int frames = int(reader->lengthInSamples);

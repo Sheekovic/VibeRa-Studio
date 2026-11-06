@@ -172,6 +172,11 @@ struct PluginHost::Impl
     std::uint64_t sequence = 0;
     ipc::Block *input = nullptr;
     float output[2][ipc::frames]{};
+    // Multi-output instruments: extra stereo buses from the packet (2 * extraOutputBuses channels),
+    // and the same samples placed at their callback-buffer positions for the output taps.
+    // Allocated at preparation, never on the audio thread.
+    int extraChannels = 0;
+    std::unique_ptr<float[]> extraPacket, extraBlock;
     // Same existing samples/algorithm, with an independently retained owner.
     // All shared-owner operations are CONTROL construction/retirement only.
     const PluginDryHistory::Ptr dryHistory = std::make_shared<PluginDryHistory>(this);
@@ -269,6 +274,8 @@ struct PluginHost::Impl
                     {
                         for (int c = 0; c < 2; ++c)
                             std::copy_n(packet.output[c], blockSize, output[c]);
+                        for (int c = 0; c < extraChannels; ++c)
+                            std::copy_n(packet.output[2 + c], blockSize, extraPacket.get() + c * ipc::frames);
                         consumedNativeSamples = packet.latency.nativeSamples;
                         emittedPacket = PluginPcmPacketKind::completed;
                         emittedConsumed = PluginConsumedLatency{packet.latency, packet.sequence};
@@ -600,6 +607,14 @@ juce::Result PluginHost::start(const PluginSpec &spec, double rate, int block, b
     impl->offline = offline;
     impl->instrument = spec.instrument;
     impl->buses = shared.negotiatedBuses;
+    impl->extraChannels = 2 * impl->buses.extraOutputBuses;
+    if (impl->extraChannels > 0)
+    {
+        impl->extraPacket = std::make_unique<float[]>(size_t(impl->extraChannels) * ipc::frames);
+        impl->extraBlock = std::make_unique<float[]>(size_t(impl->extraChannels) * ipc::frames);
+        std::fill_n(impl->extraPacket.get(), size_t(impl->extraChannels) * ipc::frames, 0.f);
+        std::fill_n(impl->extraBlock.get(), size_t(impl->extraChannels) * ipc::frames, 0.f);
+    }
     impl->busCatalogue = shared.busCatalogue;
     impl->bypassFrames = std::max(1, int(std::ceil(rate * .005)));
     impl->bypassStep = 1. / impl->bypassFrames;
@@ -1660,6 +1675,16 @@ void PluginHost::setBlockPpq(double beat, double seconds) noexcept
     impl->ppqAnchor = std::isfinite(beat) && beat >= 0 ? beat : -1.;
     impl->ppqAnchorSeconds = seconds;
 }
+int PluginHost::extraOutputBuses() const noexcept
+{
+    return impl->extraChannels / 2;
+}
+const float *PluginHost::extraOutput(int bus, int channel) const noexcept
+{
+    if (bus < 0 || channel < 0 || channel > 1 || 2 * bus + channel >= impl->extraChannels)
+        return nullptr;
+    return impl->extraBlock.get() + size_t(2 * bus + channel) * ipc::frames;
+}
 void PluginHost::process(juce::AudioBuffer<float> &buffer, int offset, int count,
                          const ipc::MidiEvent *events, int numEvents, double seconds, double tempo,
                          bool playing, bool bypass, int numerator, int denominator,
@@ -1836,6 +1861,10 @@ void PluginHost::process(juce::AudioBuffer<float> &buffer, int offset, int count
                 buffer.setSample(c, offset + frame, HostWetMix::render(processed, dry, wet, mix));
             }
         }
+        if (p.extraChannels > 0 && offset + frame < ipc::frames)
+            for (int c = 0; c < p.extraChannels; ++c)
+                p.extraBlock[size_t(c) * ipc::frames + size_t(offset + frame)] =
+                    p.extraPacket[size_t(c) * ipc::frames + size_t(p.cursor)];
         if (p.input)
             for (int c = 0; c < 2; ++c)
                 p.input->input[c + 2][p.cursor] = validAuxiliary && c < p.buses.auxiliaryChannels

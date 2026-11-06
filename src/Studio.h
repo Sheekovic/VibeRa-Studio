@@ -230,7 +230,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Mixer tracks armed for "Render armed tracks" (one WAV each, rendered with the track soloed
     // with its connections). Session UI state; inserts that no longer exist are skipped.
     std::set<int> renderArmedInserts;
-    bool stemsArmedOnly = false; // The next stems export renders only renderArmedInserts.
+    bool stemsArmedOnly = false;
+    bool outputRoutesCaptured = false; // channel.outputRoutes runs after its plugin state capture. // The next stems export renders only renderArmedInserts.
     bool pianoBackgroundWaveform = false; // Piano roll: draw Playlist audio clips behind the notes.
     bool rackFocusSelected = true; // Channel Rack scrolls to show a newly selected Channel.
     bool rackScrollRequest = false; // One-shot "scroll to the selected Channel".

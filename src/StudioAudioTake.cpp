@@ -11,6 +11,12 @@
 
 namespace vibera
 {
+// JUCE's WAV reader dereferences a null stream: a missing or locked file must fail, not crash.
+static juce::AudioFormatReader *wavReaderFor(juce::WavAudioFormat &wav, const juce::File &file)
+{
+    auto stream = file.createInputStream();
+    return stream ? wav.createReaderFor(stream.release(), true) : nullptr;
+}
 namespace
 {
 juce::var obj()
@@ -229,7 +235,7 @@ void Studio::scanRecoveredTakes()
                 continue;
             juce::WavAudioFormat wav;
             std::unique_ptr<juce::AudioFormatReader> reader(
-                wav.createReaderFor(file.createInputStream().release(), true));
+                wavReaderFor(wav, file));
             if (!reader || reader->lengthInSamples <= 0 || reader->sampleRate <= 0)
                 continue; // Nothing was flushed before the crash: there is nothing to recover.
             RecoveredTake take;
@@ -394,7 +400,7 @@ void Studio::finishExportStep(juce::Result rendered)
                 {
                     juce::WavAudioFormat wav;
                     std::unique_ptr<juce::AudioFormatReader> reader(
-                        wav.createReaderFor(source.createInputStream().release(), true));
+                        wavReaderFor(wav, source));
                     if (!reader)
                         return juce::Result::fail("Cannot read the rendered WAV");
                     const bool flac = target.hasFileExtension("flac"), mp3 = target.hasFileExtension("mp3");
@@ -1197,7 +1203,7 @@ void Studio::beginAudioTake()
 juce::Result Studio::splitAudioTake(const juce::File &source, int tracks, std::vector<juce::File> &parts)
 {
     juce::WavAudioFormat wav;
-    std::unique_ptr<juce::AudioFormatReader> reader(wav.createReaderFor(source.createInputStream().release(), true));
+    std::unique_ptr<juce::AudioFormatReader> reader(wavReaderFor(wav, source));
     if (!reader || tracks < 2 || int(reader->numChannels) % tracks != 0)
         return juce::Result::fail("Cannot split the recorded inputs into tracks");
     const int width = int(reader->numChannels) / tracks;

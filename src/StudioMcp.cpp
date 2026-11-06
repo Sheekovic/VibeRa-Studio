@@ -4068,6 +4068,13 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         set(sampler, "voiceControlsAvailable", !channel.instrument && !channel.audioClip);
         set(c, "sampler", sampler);
         set(c, "instrument", channel.instrument ? channel.instrument->name : sourceName(channel.source));
+        if (channel.instrument)
+        {
+            juce::Array<juce::var> routes;
+            for (int target : channel.instrument->extraOutputMixers)
+                routes.add(target);
+            set(c, "extraOutputMixers", routes);
+        }
         channels.add(c);
     }
     juce::Array<juce::var> samplerWindows;
@@ -4794,6 +4801,13 @@ juce::var Studio::mcpPluginOperation(const juce::var &args, juce::String *admitt
             set(row, "mainOutputBus", plugin.mainOutputBus);
             set(row, "mainInputChannels", plugin.mainInputChannels);
             set(row, "mainInputMonoSource", plugin.mainInputMonoSource);
+            {
+                juce::Array<juce::var> routes;
+                for (int target : plugin.extraOutputMixers)
+                    routes.add(target);
+                set(row, "extraOutputMixers", routes);
+                set(row, "extraOutputBusesAvailable", host ? juce::var(host->extraOutputBuses()) : juce::var{});
+            }
             if (!plugin.instrument)
                 set(row, "detector", pluginDetectorState(controller.project, plugin.id));
             const auto *chain = channel == 0 ? mixerInsert(controller.project, mixer) : nullptr;

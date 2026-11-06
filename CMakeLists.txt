@@ -442,6 +442,16 @@ add_test(NAME plugin_io_mcp COMMAND "${Python3_EXECUTABLE}"
   "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-plugin-io-mcp.py" "$<TARGET_FILE:VibeRa>"
   "${CMAKE_CURRENT_BINARY_DIR}/plugin_io_mcp" "$<TARGET_FILE:VibeRaBusChoiceFixture>")
 set_tests_properties(plugin_io_mcp PROPERTIES TIMEOUT 120 RUN_SERIAL TRUE)
+add_library(VibeRaMultiOutputFixture MODULE tests/MultiOutputInstrumentFixture.cpp)
+target_include_directories(VibeRaMultiOutputFixture PRIVATE "${VST3_SDK_ROOT}")
+set_target_properties(VibeRaMultiOutputFixture PROPERTIES PREFIX "" SUFFIX ".vst3")
+if(WIN32)
+  add_dependencies(VibeRa VibeRaMultiOutputFixture)
+endif()
+add_test(NAME multi_output_routing_mcp COMMAND "${Python3_EXECUTABLE}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-multi-output-mcp.py" "$<TARGET_FILE:VibeRa>"
+  "${CMAKE_CURRENT_BINARY_DIR}/multi_output_routing_mcp" "$<TARGET_FILE:VibeRaMultiOutputFixture>")
+set_tests_properties(multi_output_routing_mcp PROPERTIES TIMEOUT 180 RUN_SERIAL TRUE)
 add_library(VibeRaMixerLatencyFixture MODULE tests/MixerLatencyFixture.cpp)
 target_include_directories(VibeRaMixerLatencyFixture PRIVATE "${VST3_SDK_ROOT}")
 set_target_properties(VibeRaMixerLatencyFixture PROPERTIES PREFIX "" SUFFIX ".vst3")

@@ -342,6 +342,15 @@ const std::vector<CommandInfo> &commandRegistry()
         {"mixer.insert.fromChainPreset", "Add insert from chain preset (file chooser)", Scope::mixer, false, true, "action"},
         {"mixer.dock", "Dock Mixer track left / middle / right", Scope::mixer, true, true, "command"},
         {"mixer.reset", "Reset Mixer track controls, name and colour (keeps effects and routing)", Scope::mixer, true, true, "command"},
+        {"channel.multiOutputs0", "Multi-output: main output only", Scope::rack, false, true, "action"},
+        {"channel.multiOutputs1", "Multi-output: route 1 extra output to free Mixer tracks", Scope::rack, false, true, "action"},
+        {"channel.multiOutputs2", "Multi-output: route 2 extra outputs to free Mixer tracks", Scope::rack, false, true, "action"},
+        {"channel.multiOutputs3", "Multi-output: route 3 extra outputs to free Mixer tracks", Scope::rack, false, true, "action"},
+        {"channel.multiOutputs4", "Multi-output: route 4 extra outputs to free Mixer tracks", Scope::rack, false, true, "action"},
+        {"channel.multiOutputs5", "Multi-output: route 5 extra outputs to free Mixer tracks", Scope::rack, false, true, "action"},
+        {"channel.multiOutputs6", "Multi-output: route 6 extra outputs to free Mixer tracks", Scope::rack, false, true, "action"},
+        {"channel.multiOutputs7", "Multi-output: route 7 extra outputs to free Mixer tracks", Scope::rack, false, true, "action"},
+        {"channel.outputRoutes", "Route a multi-output instrument's extra outputs to Mixer tracks", Scope::rack, true, true, "command"},
         {"channel.automateVolume", "Create automation clip: selected Channel volume", Scope::rack, false, true, "action"},
         {"channel.automatePan", "Create automation clip: selected Channel pan", Scope::rack, false, true, "action"},
         {"mixer.routeSelectedHere", "Route the selected Mixer tracks to the active track", Scope::mixer, false, true, "action"},
@@ -3025,6 +3034,26 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             return decoded;
         if (auto applied = applyChannelPreset(next, a.channel, preset); applied.failed())
             return applied;
+    }
+    else if (id == "channel.outputRoutes")
+    {
+        // args.channel: a plugin-instrument Channel. args.ids: Mixer insert (0 Master) for each
+        // extra output bus after the main one, in the plugin's bus order (empty: main output only).
+        auto *target = next.channel(a.channel);
+        if (!target || !target->instrument || target->audioClip)
+            return juce::Result::fail("channel.outputRoutes.invalidTarget: Choose a plugin instrument Channel");
+        if (a.ids.size() > size_t(PluginBusRequest::maximumExtraOutputBuses))
+            return juce::Result::fail("channel.outputRoutes.tooMany: At most seven extra outputs");
+        std::vector<int> routes;
+        for (const auto mixer : a.ids)
+        {
+            if (mixer < 0 || mixer > std::numeric_limits<int>::max() || !mixerInsert(next, int(mixer)))
+                return juce::Result::fail("channel.outputRoutes.invalidMixer: Each output needs an existing Mixer track");
+            routes.push_back(int(mixer));
+        }
+        if (routes == target->instrument->extraOutputMixers)
+            return juce::Result::fail("channel.outputRoutes.unchanged: The outputs already use these Mixer tracks");
+        target->instrument->extraOutputMixers = std::move(routes);
     }
     else if (id.startsWith("channel.") && id != "channel.paste")
     {

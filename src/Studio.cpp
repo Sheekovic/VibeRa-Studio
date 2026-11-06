@@ -1335,6 +1335,39 @@ juce::Result Studio::finishRackEditsChecked()
 }
 void Studio::command(const juce::String &id, CommandArgs a, const juce::String &owner)
 {
+    // Multi-output routing restarts the instrument's worker with new buses: capture every plugin's
+    // current native state first (as Save does), so the restart keeps it, then apply the edit.
+    if (id == "channel.outputRoutes" && !outputRoutesCaptured && audio.hasAudioDevice())
+    {
+        auto safe = juce::Component::SafePointer<Studio>(this);
+        const auto identity = controller.projectIdentity;
+        status = "Capturing plugin state for the new outputs...";
+        repaint();
+        withPluginState(
+            [safe, identity, a, owner](juce::Result captured, Project snapshot)
+            {
+                if (!safe || safe->controller.projectIdentity != identity)
+                    return;
+                if (captured.failed())
+                {
+                    safe->status = "channel.outputRoutes.captureFailed: " + captured.getErrorMessage();
+                    safe->repaint();
+                    return;
+                }
+                for (auto &channel : safe->controller.project.channels)
+                    if (channel.instrument)
+                        if (const auto *fresh = snapshot.plugin(channel.instrument->id))
+                            channel.instrument->state = fresh->state;
+                for (auto &insert : safe->controller.project.mixer)
+                    for (auto &effect : insert.effects)
+                        if (const auto *fresh = snapshot.plugin(effect.id))
+                            effect.state = fresh->state;
+                safe->outputRoutesCaptured = true;
+                safe->command("channel.outputRoutes", a, owner);
+                safe->outputRoutesCaptured = false;
+            });
+        return;
+    }
     if (id == "pattern.burnChannelLoop" && (recordArmed || midiTaking || hasPendingMidiTake()))
     {
         status = "channelLoop.transportBusy: Stop recording before materializing loop identities";
@@ -4491,6 +4524,80 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         a.ids = selectedClips;
         command(action, a);
         return status == "Ready";
+    }
+    if (action.startsWith("channel.multiOutputs"))
+    {
+        // Multi-output: route the selected instrument's next N output buses (after the main one)
+        // to N free Mixer tracks, lowest first; 0 keeps the main output only. One Undo step.
+        const int wanted = action.getTrailingIntValue();
+        const auto *channel = controller.project.channel(selectedChannel);
+        if (!channel || !channel->instrument || channel->audioClip || wanted < 0 ||
+            wanted > PluginBusRequest::maximumExtraOutputBuses)
+        {
+            status = "channel.outputRoutes.invalidTarget: Select a plugin instrument Channel";
+            repaint();
+            return false;
+        }
+        if (wanted > 0)
+        {
+            PluginBusCatalogue catalogue;
+            const auto host = audio.preparedPluginHost(controller.project, channel->instrument->id);
+            if (host && host->readBusCatalogue(catalogue) && catalogue.outputCount < 1 + wanted)
+            {
+                status = "channel.outputRoutes.busUnavailable: " + channel->instrument->name + " has " +
+                         juce::String(catalogue.outputCount) + " output bus(es)";
+                repaint();
+                return false;
+            }
+        }
+        std::vector<int> free;
+        for (const auto &insert : controller.project.mixer)
+        {
+            const bool used =
+                std::any_of(controller.project.channels.begin(), controller.project.channels.end(),
+                            [&](const auto &other)
+                            {
+                                return other.mixer == insert.index ||
+                                       (other.instrument && other.id != channel->id &&
+                                        std::find(other.instrument->extraOutputMixers.begin(),
+                                                  other.instrument->extraOutputMixers.end(),
+                                                  insert.index) != other.instrument->extraOutputMixers.end());
+                            });
+            if (insert.index > 0 && !used)
+                free.push_back(insert.index);
+        }
+        std::sort(free.begin(), free.end());
+        if (int(free.size()) < wanted)
+        {
+            status = "channel.outputRoutes.insufficient: " + juce::String(int(free.size())) +
+                     " free Mixer track(s) for " + juce::String(wanted) + " output(s); add inserts first";
+            repaint();
+            return false;
+        }
+        CommandArgs args;
+        args.channel = channel->id;
+        for (int i = 0; i < wanted; ++i)
+            args.ids.push_back(Id(free[size_t(i)]));
+        if (audio.hasAudioDevice())
+        {
+            // Captures plugin state first, then applies the routes (status reports the outcome).
+            command("channel.outputRoutes", args);
+            return true;
+        }
+        const auto revision = controller.revision;
+        command("channel.outputRoutes", args);
+        const bool result = controller.revision != revision;
+        if (result)
+        {
+            juce::StringArray tracks;
+            for (const auto id : args.ids)
+                tracks.add(juce::String(id));
+            status = wanted == 0 ? channel->name + ": main output only"
+                                 : channel->name + ": outputs 2-" + juce::String(wanted + 1) + " to Mixer tracks " +
+                                       tracks.joinIntoString(", ");
+        }
+        repaint();
+        return result;
     }
     if (action == "rack.assignFreeInserts")
     {

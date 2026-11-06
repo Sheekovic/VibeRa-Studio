@@ -325,3 +325,13 @@ it their only destination; `mixer.createSubmix` creates an insert named "Submix"
 selected tracks only to it. Steps run one after another once each structural change settles
 (one Undo step each); the status ends with "Routed N track(s) to ..." or "Submix created from
 N track(s)".
+
+## Multi-output instruments
+
+- A plugin instrument with several stereo output buses can send its outputs 2..8 to their own Mixer
+  tracks at the same time. Command `channel.outputRoutes` {`channel`, `ids`: one Mixer insert per extra
+  output, in the plugin's bus order; empty = main output only} is one Undo step. With an audio device
+  it first captures plugin state, then applies (poll the plugin row). Actions
+  `channel.multiOutputs0..7` (Channel Rack menu > Multi-output) route N outputs to free tracks.
+- Read `extraOutputMixers` and `extraOutputBusesAvailable` (live host) in `vibera_plugin list` rows.
+  Extra outputs bypass the Channel volume/pan; the main output keeps them. Saved with the project.

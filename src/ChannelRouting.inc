@@ -1140,6 +1140,8 @@ AudioEngine::ChannelRoutingOutcome AudioEngine::prepareGraphProjection(const Pro
                     replacement = plugin;
                 else if (dynamic_cast<te::AuxReturnPlugin *>(plugin) ||
                          dynamic_cast<MixerSidechainSend *>(plugin) ||
+                         dynamic_cast<MultiOutputDependencySend *>(plugin) ||
+                         dynamic_cast<MultiOutputTap *>(plugin) ||
                          (dynamic_cast<te::LevelMeterPlugin *>(plugin) &&
                           bool(edit->state["viberaOwnMetering"])))
                     replacement = plugin;
@@ -1168,6 +1170,18 @@ AudioEngine::ChannelRoutingOutcome AudioEngine::prepareGraphProjection(const Pro
                 else
                     routes.push_back({track->itemID, te::GraphOutputRouting::Target::destinationTrack,
                                       projectedInserts.at(destinationIndex)->itemID});
+            }
+            else if (track->state.hasProperty("viberaMultiOutputTarget"))
+            {
+                // Multi-output instrument output track: keeps its own Mixer target.
+                const int target = int(track->state["viberaMultiOutputTarget"]);
+                if (target == 0)
+                    routes.push_back({track->itemID, te::GraphOutputRouting::Target::defaultWaveDevice, {}});
+                else if (projectedInserts.contains(target))
+                    routes.push_back({track->itemID, te::GraphOutputRouting::Target::destinationTrack,
+                                      projectedInserts.at(target)->itemID});
+                else
+                    throw std::invalid_argument("routing.unknownTrack: Multi-output target insert changed");
             }
             else
             {

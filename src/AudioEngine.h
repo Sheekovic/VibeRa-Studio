@@ -504,6 +504,7 @@ class AudioEngine
     void markCapturedPluginStateSaved();
     bool pluginDeviceConfigurationChanged() const;
     bool deviceRestorationRequired() const;
+    bool hasAudioDevice() const; // An open output device (live graph), not offline-only.
     // CONTROL coordinator: exact capture, retire old context, actual native retry,
     // then build/arm replacement. Pending means preparation, never audio completion.
     juce::Result prepareDeviceRestoration(const Project &captured);
