@@ -22,6 +22,24 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def local_only(name):
+    """True for a file the public repository deliberately keeps out of Git (.git/info/exclude)."""
+    result = subprocess.run(GIT + ['check-ignore', '--no-index', '-q', name], capture_output=True)
+    return result.returncode == 0 and (ROOT / name).is_file()
+
+
+def committed_or_local(archive, name, local):
+    """Bytes of a release authority: from the commit, or, for a local-only file, from disk.
+
+    Local-only reads are recorded in `local` with their SHA so provenance stays exact."""
+    if name in archive.namelist():
+        return archive.read(name)
+    require(local_only(name), 'Checkpoint release authority before packaging: ' + name)
+    data = (ROOT / name).read_bytes()
+    local[name] = digest(data)
+    return data
+
+
 def require(condition, message):
     if not condition:
         raise RuntimeError(message)
@@ -236,7 +254,8 @@ def record(before_path, configuration, passed, total):
     # recorded rather than inferred from green musical tests.
     skill = json.loads(archive.read('skills/vibera-studio/manifest.json'))
     reference = json.loads(archive.read('skills/vibera-studio/references/generated/provenance.json'))
-    coverage = json.loads(archive.read('docs/mcp/COVERAGE.json'))
+    localSources = {}
+    coverage = json.loads(committed_or_local(archive, 'docs/mcp/COVERAGE.json', localSources))
     # A stale generated inventory must not retain old reviewed counts after a
     # backend, skill or evidence input changed. Partial previews remain allowed;
     # the complete readiness flag/counts must still describe current authority.
@@ -303,10 +322,12 @@ def record(before_path, configuration, passed, total):
             authorities.add(entry['verification']['receipt'])
             authorities.update(entry['verification']['inputs'])
     for name in authorities:
-        require(source_identity_matches(dict(path=name, **content_identity(ROOT / name)), archive.read(name)),
+        require(source_identity_matches(dict(path=name, **content_identity(ROOT / name)),
+                                        committed_or_local(archive, name, localSources)),
                 'Checkpoint the exact coverage authority/evidence before packaging: ' + name)
     require(reference['applicationSha256'].lower() == digest(binaries[0].read_bytes()).lower(),
             'Regenerate and checkpoint the skill references for the exact compiled executable before packaging')
+    proof['localOnlySources'] = dict(sorted(localSources.items()))
     proof['skillVersion'] = skill['version']
     proof['mcpContractVersion'] = reference['contractVersion']
     proof['mcpCoverageComplete'] = bool(coverage['coverageComplete'])
