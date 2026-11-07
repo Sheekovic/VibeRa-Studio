@@ -15,11 +15,13 @@ void bringWindowToFront(juce::Component &window)
     if (auto *peer = window.getPeer())
     {
         const auto handle = static_cast<HWND>(peer->getNativeHandle());
+        if (!IsWindowVisible(handle))
+            return; // Hidden (e.g. headless check) windows keep their state.
         if (IsIconic(handle))
             ShowWindow(handle, SW_RESTORE);
         // Windows may refuse the foreground (another app had the last input), which would leave
         // the new window behind. A brief topmost toggle still raises it above ordinary windows.
-        constexpr UINT flags = SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW;
+        constexpr UINT flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE;
         SetWindowPos(handle, HWND_TOPMOST, 0, 0, 0, 0, flags);
         SetWindowPos(handle, HWND_NOTOPMOST, 0, 0, 0, 0, flags);
         SetForegroundWindow(handle);
