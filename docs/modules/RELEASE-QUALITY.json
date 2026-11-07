@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "RQ-A, RQ-C, RQ-D verified. Next: RQ-H notices/checksums audit, then RQ-G diagnostics export.",
+  "nextAction": "RQ-A, RQ-C, RQ-D, RQ-H verified. Next: RQ-G diagnostics export (version, device, workers, recent errors; no personal paths).",
   "requirements": [
     {
       "id": "RQ-A",
@@ -80,10 +80,15 @@
     {
       "id": "RQ-H",
       "name": "Source, notices and checksums",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "Package ships licenses/notices for every bundled dependency and asset, exact source commit and checksums; reproducible build inputs recorded.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/notices/attempt-45f8d29c158f4ad1a6e3a9818b5527e1/verification.json",
+          "sha256": "f780f07feb5fa6b037e534c9f29640293152f5a940ae9979f70c0907dcc10847"
+        }
+      ]
     },
     {
       "id": "RQ-I",

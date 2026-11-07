@@ -12,5 +12,5 @@ release-required; human/clean-machine checks are listed separately in the ledger
 - [ ] **RQ-E accessibility:** Keyboard-only navigation of the main workspace and dialogs, focus order and visible focus, accessible names/roles for controls, readable contrast and target sizes.
 - [ ] **RQ-F scalable ui and windows:** 100-200 percent scale and 1080p-4K layouts without clipping/overlap; detached windows open in front, restore on the right monitor and survive monitor disconnect.
 - [ ] **RQ-G diagnostics:** User-visible diagnostics export (version, device, plugin workers, recent errors) without personal paths or credentials; actionable error messages.
-- [ ] **RQ-H source, notices and checksums:** Package ships licenses/notices for every bundled dependency and asset, exact source commit and checksums; reproducible build inputs recorded.
+- [x] **RQ-H source, notices and checksums:** Package ships licenses/notices for every bundled dependency and asset, exact source commit and checksums; reproducible build inputs recorded.
 - [ ] **RQ-I exact module release:** Complete source suite, module gate, staged/final installed verification and distribution audit on exact identities before replacing the sole distribution.
