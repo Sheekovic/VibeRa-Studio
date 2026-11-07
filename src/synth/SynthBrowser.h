@@ -121,8 +121,15 @@ inline bool synthPresetMatchesBrowser(const FactoryPreset &preset, const SynthBr
         return false;
     if (favourites && !state.favouriteIds.contains(preset.id))
         return false;
+    // Presets built on the Wavetable oscillator are findable as "wavetable" even when
+    // their name does not say so.
+    constexpr float wavetableOscillator = 5;
+    const bool wavetable =
+        preset.values[size_t(ParameterId::oscillatorType)] == wavetableOscillator ||
+        preset.values[size_t(ParameterId::oscillator2Type)] == wavetableOscillator;
     const auto searchable = juce::String(preset.name) + " " + preset.family + " " + preset.genre + " " +
-                            preset.description + " " + sourceKindName(preset.source);
+                            preset.description + " " + sourceKindName(preset.source) +
+                            (wavetable ? " Wavetable" : "");
     return state.search.isEmpty() || searchable.containsIgnoreCase(state.search);
 }
 // Pure CONTROL helper: factory order, matching filters, wrap and hidden-current
