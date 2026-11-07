@@ -1452,6 +1452,14 @@ juce::Result Studio::verifyMidiInterchange(const juce::File &folder)
     controller.undoEdit();
     if (!controller.project.state().isEquivalentTo(beforeLoad))
         return juce::Result::fail("Browser add exact undo");
+    {
+        // Move to Recycle Bin: only the chosen file leaves its folder; the project is untouched.
+        const auto spare = sample.getSiblingFile("recycle-me.wav");
+        if (!sample.copyFileTo(spare) || !SampleFileBrowser::recycleFile(spare) || spare.exists() ||
+            !sample.existsAsFile() || !controller.project.state().isEquivalentTo(beforeLoad) ||
+            SampleFileBrowser::recycleFile(spare))
+            return juce::Result::fail("Browser Move to Recycle Bin");
+    }
     refresh();
     audio.requestAudition(sample.getFullPathName());
     if (!wait([&] { return audio.pollAudition().wasOk() && audio.canReplayAudition(); }) ||

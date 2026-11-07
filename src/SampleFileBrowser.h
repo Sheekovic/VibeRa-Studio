@@ -788,13 +788,20 @@ class SampleFileBrowser final : public juce::Component,
         menu.addSeparator();
         menu.addItem(4, "Add tags...", taggable);
         menu.addItem(5, "Edit tags...", taggable);
+        menu.addSeparator();
+        menu.addItem(6, "Show in folder", file.exists());
+        menu.addItem(7, "Move to Recycle Bin...", file.existsAsFile());
         auto safe = juce::Component::SafePointer<SampleFileBrowser>(this);
         menu.showMenuAsync(
             juce::PopupMenu::Options().withTargetComponent(
                 searchResults.isVisible() ? static_cast<juce::Component *>(&searchResults) : &tree),
             [safe, file](int choice)
             {
-                if (safe && (choice == 4 || choice == 5))
+                if (safe && choice == 6)
+                    file.revealToUser();
+                else if (safe && choice == 7)
+                    safe->confirmRecycle(file);
+                else if (safe && (choice == 4 || choice == 5))
                     safe->editFileTags(file, choice == 4);
                 else if (safe && choice == 3)
                     safe->toggleStar(file);
@@ -802,6 +809,37 @@ class SampleFileBrowser final : public juce::Component,
                     safe->load(file, choice == 1);
             });
     }
+    // Recycle Bin, never permanent deletion; the user confirms first and can restore it.
+    void confirmRecycle(const juce::File &file)
+    {
+        auto safe = juce::Component::SafePointer<SampleFileBrowser>(this);
+        juce::AlertWindow::showAsync(
+            juce::MessageBoxOptions()
+                .withIconType(juce::MessageBoxIconType::WarningIcon)
+                .withTitle("Move to Recycle Bin")
+                .withMessage("Move \"" + file.getFileName() +
+                             "\" to the Recycle Bin? Projects that use it will report it missing until it is restored.")
+                .withButton("Move to Recycle Bin")
+                .withButton("Cancel")
+                .withAssociatedComponent(this),
+            [safe, file](int button)
+            {
+                if (!safe || button != 1)
+                    return;
+                const bool moved = recycleFile(file);
+                safe->studio.status = moved ? "Moved " + file.getFileName() + " to the Recycle Bin"
+                                            : "browser.recycleFailed: Could not move " + file.getFileName() + " to the Recycle Bin";
+                safe->reread.onClick();
+                safe->studio.repaint();
+            });
+    }
+  public:
+    // Shared by the menu and its check: moves one file to the Recycle Bin (no permanent delete).
+    static bool recycleFile(const juce::File &file)
+    {
+        return file.existsAsFile() && file.moveToTrash() && !file.exists();
+    }
+  private:
     void fileDoubleClicked(const juce::File &file) override
     {
         load(file, false);

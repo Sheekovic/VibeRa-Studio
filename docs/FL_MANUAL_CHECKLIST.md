@@ -1,7 +1,7 @@
 # FL manual item checklist
 
 Familiar-workflow items taken from the FL Studio manual pages for the Piano roll, Channel
-Rack, Playlist and Mixer, checked against the VibeRa source. Status: **done** (command,
+Rack, Playlist, Mixer and Browser, checked against the VibeRa source. Status: **done** (command,
 UI and readback exist), **partial**, **missing**, or **out of scope** (depends on FL-only
 plugins or architecture VibeRa does not copy). Behaviour is implemented independently.
 
@@ -56,3 +56,21 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Disk recording (render armed tracks) | done | `mixer.renderArm`, `mixer.renderArmed` |
 | Smart disable | done | VibeRa effects; `effectSmartDisable` |
 | Link all parameters | done | `mixer.linkAll` (track volume, pan, separation to MIDI CCs) |
+
+## Browser
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Folder tree with user-added folders, back / forward / up history | done | `browser.back/forward/up` |
+| Search with next / previous result, clear filter, case-insensitive | done | `browser.find`, `browser.nextMatch/previousMatch`, `browser.clearSearch` |
+| Save search result as tab, rename / delete tab | done | Browser menu |
+| Starred tab, add / remove starred | done | `browser.showStarred`, `browser.toggleFavorite` |
+| Tags: add, edit, filter, Any / All matching | done | `browser.addTags/editTags/matchAllTags/clearTagFilters` |
+| Preview: short and full sample preview, play to end, stop, preview volume | done | `browser.playPreview/fullPreview/stopPreview/previewLouder/previewSofter` |
+| Reread folders, indexing | done | `browser.reindex` |
+| Current project view (samples, instruments, effects) | done | Browser Project view |
+| Send to selected Channel, open in new Channel, drag to Channel / Playlist / Mixer | done | file right-click menu |
+| Show in folder (Explorer), delete file | done | right-click: Show in folder, Move to Recycle Bin (confirmed, never permanent) |
+| Wildcard and AND / OR / NOT search | missing | plain substring search today |
+| Sort by name / type / date, view layouts (columns, sample grid) | missing | |
+| Folder colours / icons, frozen tab layouts, FL Cloud and online content | out of scope | FL-service and cosmetic items |
