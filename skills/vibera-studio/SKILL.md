@@ -290,6 +290,11 @@ Export: `vibera_project export` picks WAV/FLAC/OGG/MP3 from the path extension (
 lame.exe on PATH or VIBERA_LAME_EXECUTABLE; otherwise the job fails with that reason);
 `stems: true` with a folder path writes one WAV per Mixer insert fed by a Channel.
 
+Bug reports: `vibera_project diagnostics` with an absolute `.txt` path (and `overwrite`
+to replace one) writes and returns a shareable report: version, OS, audio device,
+plugin workers and the last 20 typed errors, with the home folder and account name
+replaced. The same report is Tools > Export diagnostics... in the app.
+
 Audio-input (microphone/instrument) takes, input/monitor settings and their placed
 Audio Clips: [audio recording](references/audio-recording.md).
 
