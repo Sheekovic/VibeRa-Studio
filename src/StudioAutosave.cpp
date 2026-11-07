@@ -142,6 +142,10 @@ std::optional<Studio::CrashedSession> Studio::findCrashedSession()
 void Studio::startAutosaveSession()
 {
     autosaveEnabled = true;
+    // Owned recovery acceptance may shorten the interval (5..120 s); the default stays 120 s.
+    if (const auto seconds = juce::SystemStats::getEnvironmentVariable("VIBERA_AUTOSAVE_SECONDS", {}).getIntValue();
+        seconds >= 5 && seconds <= 120)
+        autosaveSeconds = seconds;
     lastAutosaveTime = juce::Time::getMillisecondCounterHiRes();
     autosaveRevision = controller.revision;
     const auto crashed = findCrashedSession();

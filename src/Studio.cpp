@@ -8709,6 +8709,11 @@ juce::File Studio::profileFile() const
 {
     if (workflowTestSettings)
         return workflowTestSettings->getFile();
+    // Owned recovery acceptance (scripts/verify-crash-recovery.py) keeps the shortcut profile,
+    // autosaves and session markers in its own folder instead of the user's profile.
+    if (const auto folder = juce::SystemStats::getEnvironmentVariable("VIBERA_PROFILE_DIRECTORY", {});
+        folder.isNotEmpty() && juce::File::isAbsolutePath(folder) && juce::File(folder).isDirectory())
+        return juce::File(folder).getChildFile("shortcuts.json");
     return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
         .getChildFile("VibeRa Studio/shortcuts.json");
 }

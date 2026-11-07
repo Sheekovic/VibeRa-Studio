@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "RQ-A verified (real 0.1.0 installer: temp install, provenance hashes, launch, upgrade, uninstall, settings untouched). Next: audit RQ-C/RQ-D recovery and migration foundations.",
+  "nextAction": "RQ-A, RQ-C verified. Next: RQ-D project migration (open earlier schema projects, save, compare audible settings).",
   "requirements": [
     {
       "id": "RQ-A",
@@ -30,10 +30,15 @@
     {
       "id": "RQ-C",
       "name": "Crash and forced-termination recovery",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "Forced app and worker termination during edit, playback, recording and save: autosave/recovery restores the last committed state, takes are not lost and outcomes are truthful.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/recovery/attempt-a79ef4ad6316443c807ca13a725dc40d/verification.json",
+          "sha256": "1289e588d9d3a63badd3c977de42894ec417baa6b466be78720a06238968228b"
+        }
+      ]
     },
     {
       "id": "RQ-D",
