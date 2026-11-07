@@ -1368,13 +1368,46 @@
             "maximize",
             "detach",
             "dock",
-            "grouping"
+            "grouping",
+            "snap",
+            "stamp",
+            "laneTarget"
           ]
+        },
+        "target": {
+          "type": "string",
+          "enum": [
+            "velocity",
+            "release",
+            "pan",
+            "modX",
+            "modY",
+            "fine"
+          ],
+          "description": "Only editor1/action laneTarget: the note property the Piano roll event lane shows and paints (notes.velocity args.text). Read back as state.pianoLaneTarget."
+        },
+        "chord": {
+          "type": "string",
+          "description": "Only action stamp: a Chordify shape name (e.g. major, minor) so drawing a Piano roll note places that chord; empty turns the stamp off. Read back as state.pianoStamp."
         },
         "enabled": {
           "type": "boolean",
           "default": true,
           "description": "Only editor2/action grouping: temporarily enable/disable group targeting; retain membership. Refused during active gestures."
+        },
+        "snap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 32,
+          "description": "Only action snap: the shared Piano roll/Playlist grid in beats (0 = none; e.g. 0.25 step, 1/3 triplet, 4 bar). Read back as state.snap."
+        },
+        "line": {
+          "type": "boolean",
+          "description": "Only action snap: true snaps pointer edits to the visible grid lines (zoom dependent) instead of snap; read back as state.snapLine."
+        },
+        "markers": {
+          "type": "boolean",
+          "description": "Only action snap: true snaps Playlist positions to markers (distances to bars); read back as state.snapMarkers."
         },
         "projectIdentity": {
           "type": "string",
@@ -1395,11 +1428,51 @@
     }
   },
   {
-    "name": "vibera_snapshot",
-    "description": "Capture this instance as a bounded JUCE component PNG including the header. Not native PrintWindow, physical input or listening evidence.",
+    "name": "vibera_update",
+    "description": "In-app updates from the project's GitHub Releases. status reads the phase (idle, checking, upToDate, available, downloading, ready, installing, failed), the current version, the newest available release with its notes and installable asset, download progress and the update settings. check starts a background check (poll status; completes as upToDate, available or failed) without opening dialogs. Downloading and installing need the user's approval in the app (Tools > Check for updates), so they are not MCP actions.",
     "inputSchema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "status",
+            "check"
+          ]
+        },
+        "projectIdentity": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Optional current project-session identity guard."
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "vibera_snapshot",
+    "description": "Capture this instance as a bounded JUCE component PNG including the header. With channel: that local Channel's settings window instead (opened if needed) (page 0 Sample, 1 Envelope, 2 Miscellaneous). Not native PrintWindow, physical input or listening evidence.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "channel": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        }
+      },
       "additionalProperties": false
     },
     "annotations": {
@@ -1447,7 +1520,7 @@
   },
   {
     "name": "vibera_pointer",
-    "description": "Run paired down/drag/up or cancel through actual editor/child mouse handlers. Logical editor pixels from state; left/right/middle/x1 buttons. Not global or physical mouse input.",
+    "description": "Run paired down/drag/up or cancel through actual editor/child mouse handlers, or one wheel step (phase wheel, deltaY; positive is up/away). Logical editor pixels from state; left/right/middle/x1 buttons. Not global or physical mouse input.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1462,8 +1535,14 @@
             "down",
             "drag",
             "up",
-            "cancel"
+            "cancel",
+            "wheel"
           ]
+        },
+        "deltaY": {
+          "type": "number",
+          "minimum": -4,
+          "maximum": 4
         },
         "x": {
           "type": "number"
@@ -3030,6 +3109,19 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 1000000000
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000,
+          "description": "parameters: first row (follow nextOffset)."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 512,
+          "default": 64,
+          "description": "parameters: rows per page."
         },
         "instance": {
           "type": "string",
@@ -4814,6 +4906,43 @@
     }
   },
   {
+    "name": "vibera_dialog",
+    "description": "Test mode only: read or answer the app's open modal JUCE dialog in-process (no OS input). state lists its title, text fields and buttons; submit sets fields by name and presses the named button through its real handler.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "state",
+            "submit"
+          ]
+        },
+        "fields": {
+          "type": "object"
+        },
+        "button": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "projectIdentity": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Optional current project-session identity guard."
+        }
+      },
+      "required": [
+        "action"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "openWorldHint": false
+    }
+  },
+  {
     "name": "vibera_slice",
     "description": "Shared Piano Roll cut-line preview/session. Begin captures the current Pattern/Channel; update validates a musical line and returns planned targets without mutating score/audio/history. Commit executes canonical notes.slice once; cancel/lease expiry leaves the source unchanged. Local actions preempt remote preview. Poll state for actual terminal outcomes and actual created right-note IDs; no pointer simulation. Empty IDs target the active part unless line.allChannels explicitly includes ghosts. Preview is not a completed edit.",
     "inputSchema": {
@@ -5318,12 +5447,21 @@
             "new",
             "open",
             "save",
+            "saveTemplate",
+            "templates",
+            "effectImpulse",
+            "effectSmartDisable",
+            "saveTrackState",
+            "openTrackState",
+            "exportTracks",
+            "exportTrackGroups",
             "export",
             "exportMidi",
             "job",
             "savePreset",
             "loadPreset",
             "stretchClip",
+            "warpClip",
             "editClip",
             "sliceChannel",
             "video",
@@ -5386,18 +5524,25 @@
             "reverse",
             "normalize",
             "gain",
+            "pitch",
             "consolidate"
           ],
-          "description": "editClip: offline edit into a new source file (one Undo). consolidate bakes the clip window and its fades."
+          "description": "editClip: offline edit into a new source file (one Undo). consolidate bakes the clip window and its fades; pitch shifts by value semitones keeping the length."
         },
         "value": {
           "type": "number",
-          "description": "editClip: normalize target dBFS (-48..0, default -0.3 in the UI) or gain dB (+/-48)."
+          "description": "editClip: normalize target dBFS (-48..0, default -0.3 in the UI), gain dB (+/-48) or pitch semitones (-24..24, nonzero)."
         },
         "clip": {
           "type": "integer",
           "minimum": 1,
-          "description": "stretchClip/alignClip: Audio Clip placement ID."
+          "description": "stretchClip/warpClip/alignClip: Audio Clip placement ID."
+        },
+        "bpm": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 522,
+          "description": "warpClip: tempo the clip was played at (default the base tempo). Each source beat is rendered onto the matching Song beat from the clip start, following tempo jumps and ramps (pitch kept, new file, one Undo)."
         },
         "ratio": {
           "type": "number",
@@ -5422,13 +5567,26 @@
           "type": "string",
           "maxLength": 100
         },
+        "mixer": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "saveTrackState/openTrackState: the Mixer track; path is an absolute .vibfx directly in the configured chain preset directory. Save writes the effect chain plus the track controls; Open applies the chain, then the controls (one Undo step each)."
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "effectSmartDisable: turn smart disable on (true) or off for the VibeRa effect in plugin. When on, after a second of silent input and output the effect stops processing until input returns (saves CPU; tails finish first). The effect restarts with the new state; read effects[].smartDisable in vibera_mixer state."
+        },
+        "plugin": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "effectImpulse/effectSmartDisable: the effect's plugin ID; for effectImpulse the Convolution Reverb's (vibera_plugin list); path is the absolute WAV/AIFF/FLAC impulse. The job completes when the reload is requested; read the effect state (e.g. after save) to confirm."
+        },
         "template": {
           "type": "string",
-          "enum": [
-            "empty",
-            "demo"
-          ],
-          "default": "empty"
+          "maxLength": 64,
+          "default": "empty",
+          "description": "new: empty, demo, or the name of a user project template (listed by action templates); saveTemplate: the template name to write (overwrites one of the same name)."
         },
         "discardChanges": {
           "type": "boolean",
@@ -5454,6 +5612,15 @@
           ],
           "description": "export: render rate (kept for later exports; default 48000)."
         },
+        "tail": {
+          "type": "string",
+          "enum": [
+            "cut",
+            "leave",
+            "wrap"
+          ],
+          "description": "export: what happens after the Song end (kept for later exports; default cut): cut stops there, leave keeps effect tails until silence (at most 8 s), wrap mixes the tails onto the start for seamless loops."
+        },
         "bitDepth": {
           "type": "integer",
           "enum": [
@@ -5467,6 +5634,11 @@
           "type": "boolean",
           "default": false,
           "description": "export only: path is a folder; one WAV per Mixer insert fed by a Channel ('NN Name.wav'), each rendered with that insert soloed with its connections."
+        },
+        "armedOnly": {
+          "type": "boolean",
+          "default": false,
+          "description": "export with stems=true: render only the Mixer tracks armed for rendering (vibera_command mixer.renderArm toggles the selected track; state.mixerRenderArmed lists them)."
         },
         "projectIdentity": {
           "type": "string",
