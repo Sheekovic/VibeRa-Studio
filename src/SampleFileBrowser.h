@@ -49,6 +49,15 @@ class SampleFileBrowser final : public juce::Component,
     PreviewPlayerView playerView;
     std::unique_ptr<browser_search::Service> searchService;
     std::shared_ptr<const browser_search::Service::Result> searchData;
+    int resultSort = 0; // browser_search::sortEntries mode for library search results.
+    std::shared_ptr<const browser_search::Service::Result> sorted(std::shared_ptr<const browser_search::Service::Result> result) const
+    {
+        if (!result || resultSort == 0)
+            return result;
+        auto copy = std::make_shared<browser_search::Service::Result>(*result);
+        browser_search::sortEntries(copy->matches, resultSort);
+        return copy;
+    }
     juce::ToggleButton librarySearch{"All folders"};
     juce::Label searchStatus;
     browser_search::Collections collections;
@@ -404,6 +413,11 @@ class SampleFileBrowser final : public juce::Component,
         menu.addSeparator();
         menu.addItem(3, "Rename search tab...", currentView >= 2);
         menu.addItem(4, "Delete search tab (keep files)", currentView >= 2);
+        juce::PopupMenu sorting;
+        const juce::StringArray orders{"Search order", "Name", "Type", "Date (newest first)"};
+        for (int i = 0; i < orders.size(); ++i)
+            sorting.addItem(10 + i, orders[i], true, resultSort == i);
+        menu.addSubMenu("Sort results", sorting);
         const auto id =
             currentView >= 2 ? collections.searches[std::size_t(currentView - 2)].id : juce::String{};
         menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&viewMenu),
@@ -416,6 +430,11 @@ class SampleFileBrowser final : public juce::Component,
         {
             if (!safe || !choice)
                 return;
+            if (choice >= 10 && choice <= 13)
+            {
+                safe->setResultSort(choice - 10);
+                return;
+            }
             if (choice == 2)
             {
                 safe->toggleStar(file);
@@ -624,7 +643,8 @@ class SampleFileBrowser final : public juce::Component,
         playerView.repaint();
         if (auto result = searchService->takeResult())
         {
-            searchData = std::move(result);
+            unsortedData = std::move(result);
+            searchData = sorted(unsortedData);
             searchResults.setMinimumContentWidth(
                 std::max(190, int(std::min<std::size_t>(1600, searchData->widestRow * 7 + 16))));
             searchResults.deselectAllRows();
@@ -809,6 +829,21 @@ class SampleFileBrowser final : public juce::Component,
                     safe->load(file, choice == 1);
             });
     }
+  public:
+    // Re-sorts the current library results; later searches keep this order.
+    void setResultSort(int mode)
+    {
+        resultSort = juce::jlimit(0, 3, mode);
+        unsortedData = unsortedData ? unsortedData : searchData;
+        searchData = sorted(unsortedData);
+        searchResults.deselectAllRows();
+        searchResults.updateContent();
+        searchResults.repaint();
+    }
+    int resultSortForTest() const { return resultSort; }
+    juce::File resultForTest(int row) const { return resultModel.file(row); }
+  private:
+    std::shared_ptr<const browser_search::Service::Result> unsortedData;
     // Recycle Bin, never permanent deletion; the user confirms first and can restore it.
     void confirmRecycle(const juce::File &file)
     {

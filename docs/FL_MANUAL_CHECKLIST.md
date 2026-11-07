@@ -71,6 +71,7 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Current project view (samples, instruments, effects) | done | Browser Project view |
 | Send to selected Channel, open in new Channel, drag to Channel / Playlist / Mixer | done | file right-click menu |
 | Show in folder (Explorer), delete file | done | right-click: Show in folder, Move to Recycle Bin (confirmed, never permanent) |
-| Wildcard and AND / OR / NOT search | missing | plain substring search today |
-| Sort by name / type / date, view layouts (columns, sample grid) | missing | |
+| Wildcard and AND / OR / NOT search | done | `*`, `?`, AND / OR / NOT, parentheses and quoted text (BrowserQuery) |
+| Sort results by name / type / date | done | Browser tabs menu > Sort results |
+| Alternative view layouts (columns, sample grid) | missing | one list layout today |
 | Folder colours / icons, frozen tab layouts, FL Cloud and online content | out of scope | FL-service and cosmetic items |

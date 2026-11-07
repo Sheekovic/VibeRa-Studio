@@ -28,6 +28,20 @@ struct Entry
     bool missing = false;   // Ephemeral Starred references; never written to the index cache.
     juce::StringArray tags; // Query snapshot metadata; not part of the file index cache.
 };
+// Browser result order: 0 search order (unchanged), 1 name, 2 type then name, 3 newest first.
+// Stable, case-insensitive; ties keep the search order.
+inline void sortEntries(std::vector<Entry> &entries, int mode)
+{
+    auto byName = [](const Entry &a, const Entry &b) { return a.lowerName < b.lowerName; };
+    if (mode == 1)
+        std::stable_sort(entries.begin(), entries.end(), byName);
+    else if (mode == 2)
+        std::stable_sort(entries.begin(), entries.end(), [&](const Entry &a, const Entry &b)
+                         { return a.extension != b.extension ? a.extension < b.extension : byName(a, b); });
+    else if (mode == 3)
+        std::stable_sort(entries.begin(), entries.end(),
+                         [](const Entry &a, const Entry &b) { return a.modified > b.modified; });
+}
 class Index
 {
     std::map<std::string, Entry> entries; // Worker-owned; never accessed by DSP/UI.

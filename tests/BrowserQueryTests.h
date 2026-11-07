@@ -27,6 +27,26 @@ static void browserQueryTests()
             "Quoted operators are filename text");
     require(accepts("rock and roll", "Rock and roll.wav") && accepts("\"(dry)\"", "Kick (dry).wav"),
             "Lowercase operator words and quoted parentheses stay literal");
+    {
+        using browser_search::Entry;
+        auto entry = [](std::string name, std::string ext, juce::int64 modified)
+        {
+            Entry e;
+            e.name = name;
+            e.lowerName = juce::String(name).toLowerCase().toStdString();
+            e.extension = ext;
+            e.modified = modified;
+            return e;
+        };
+        std::vector<Entry> list{entry("snare.wav", ".wav", 3), entry("Bass.flac", ".flac", 1), entry("kick.wav", ".wav", 2)};
+        auto names = [&] { std::string s; for (auto &e : list) s += e.name + ","; return s; };
+        browser_search::sortEntries(list, 1);
+        require(names() == "Bass.flac,kick.wav,snare.wav,", "Browser sort by name is case-insensitive");
+        browser_search::sortEntries(list, 2);
+        require(names() == "Bass.flac,kick.wav,snare.wav,", "Browser sort by type then name");
+        browser_search::sortEntries(list, 3);
+        require(names() == "snare.wav,kick.wav,Bass.flac,", "Browser sort newest first");
+    }
     require(accepts("sytr*", "Sytrus.wav") && accepts("s*us", "Stylus.flac") && !accepts("s*us", "Snare.wav"),
             "Documented wildcard examples against names with extensions");
     require(accepts("k?ck AND NOT wet", "Kick dry.wav") && !accepts("k?ck AND NOT wet", "Kick wet.wav"),
