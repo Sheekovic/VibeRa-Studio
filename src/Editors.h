@@ -1631,6 +1631,7 @@ class Studio::Editor final : public juce::Component,
                                       "Snap: 1/3 T", "Snap: 2 bars", "Snap: Line", "Snap: Markers"},
                                      1);
             playlistSnap.setSelectedId(2, juce::dontSendNotification);
+            playlistSnap.setTitle("Playlist snap");
             playlistSnap.onChange = [this]
             {
                 const auto values = playlistSnapValues();

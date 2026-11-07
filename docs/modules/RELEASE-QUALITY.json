@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "RQ-A, RQ-C, RQ-D, RQ-G, RQ-H verified. Next: RQ-E accessibility (keyboard navigation and accessible names), RQ-F scaling, RQ-B two-hour stress.",
+  "nextAction": "RQ-E: dialog keyboard focus order and visible focus. RQ-B two-hour run awaits the owner's go-ahead (script ready). Then RQ-F scaling.",
   "requirements": [
     {
       "id": "RQ-A",
@@ -134,5 +134,11 @@
   ],
   "evidencePolicy": "Only verified rows with passed structured receipts binding actual dependencies and exact candidate binaries satisfy module-gate. Human, hardware and clean-machine checks stay separate.",
   "updated": "2026-11-07",
-  "progressEvidence": []
+  "progressEvidence": [
+    {
+      "row": "RQ-E",
+      "date": "2026-11-08",
+      "note": "accessibility_gui now also requires names for every slider/choice/text field (18), no button under 16 px (tempo +/- now side by side) and WCAG 4.5:1 contrast for label/button/text field/choice/menu colours; Tab/Shift+Tab note and clip browsing retained. Open: dialog focus order and visible focus indicator."
+    }
+  ]
 }

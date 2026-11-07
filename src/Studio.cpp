@@ -171,7 +171,12 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     tempo.setValue(120);
     tempo.setSliderStyle(juce::Slider::IncDecButtons);
     tempo.setTextValueSuffix(" BPM");
-    tempo.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 88, 28);
+    // A 70 px value box leaves the +/- buttons side by side at a comfortable size.
+    tempo.setTextBoxStyle(juce::Slider::TextBoxLeft, false, 70, 28);
+    tempo.setTitle("Tempo");
+    tempo.setTooltip("Project tempo in BPM: type a value, drag, or use + and -");
+    patterns.setTitle("Pattern");
+    snapChoice.setTitle("Snap");
     tempo.onDragStart = [this] { controller.beginGesture(); };
     tempo.onDragEnd = [this]
     {

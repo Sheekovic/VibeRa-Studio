@@ -567,13 +567,41 @@ juce::Result Studio::verifyAccessibility(const juce::File &folder)
     setSize(1600, 940);
     resized();
     refresh();
-    juce::StringArray missing, named;
+    juce::StringArray missing, named, unnamedValues, smallTargets;
+    int namedValues = 0;
     std::function<void(juce::Component &)> walk = [&](juce::Component &c)
     {
         if (!c.isVisible())
             return;
+        // Sliders, choice boxes and text fields need a spoken name too (title, tooltip or name).
+        if (dynamic_cast<juce::Slider *>(&c) || dynamic_cast<juce::ComboBox *>(&c) ||
+            dynamic_cast<juce::TextEditor *>(&c))
+        {
+            auto *handler = c.getAccessibilityHandler();
+            auto *client = dynamic_cast<juce::SettableTooltipClient *>(&c);
+            const auto label = handler ? handler->getTitle() : juce::String();
+            if (label.trim().isEmpty() && (!client || client->getTooltip().trim().isEmpty()) &&
+                c.getName().trim().isEmpty() && c.getTitle().trim().isEmpty())
+            {
+                juce::String where;
+                for (auto *p = c.getParentComponent(); p && where.length() < 200; p = p->getParentComponent())
+                    where << "<" << juce::String(typeid(*p).name()).fromLastOccurrenceOf("::", false, false);
+                unnamedValues.add(juce::String(typeid(c).name()).fromLastOccurrenceOf("::", false, false) + " " +
+                                  c.getBounds().toString() + " " + where);
+            }
+            else
+                namedValues++;
+        }
         if (auto *button = dynamic_cast<juce::Button *>(&c))
         {
+            // Pointer targets: at least 16 x 16 logical pixels (readable, clickable).
+            if (c.getWidth() < 16 || c.getHeight() < 16)
+            {
+                juce::String where;
+                for (auto *p = c.getParentComponent(); p && where.length() < 200; p = p->getParentComponent())
+                    where << "<" << juce::String(typeid(*p).name()).fromLastOccurrenceOf("::", false, false);
+                smallTargets.add(button->getButtonText() + " " + c.getBounds().toString() + " " + where);
+            }
             auto *handler = button->getAccessibilityHandler();
             const auto title = handler ? handler->getTitle() : juce::String();
             const auto tooltip = button->getTooltip();
@@ -602,9 +630,43 @@ juce::Result Studio::verifyAccessibility(const juce::File &folder)
             }
     folder.getChildFile("accessibility.txt")
         .replaceWithText("editors:\n" + editors.joinIntoString("\n") + "\nnamed controls: " +
-                         juce::String(named.size()) + "\nunnamed: " + missing.joinIntoString(", ") + "\n");
+                         juce::String(named.size()) + "\nunnamed: " + missing.joinIntoString(", ") +
+                         "\nnamed value controls: " + juce::String(namedValues) +
+                         "\nunnamed value controls: " + unnamedValues.joinIntoString(", ") +
+                         "\nsmall targets: " + smallTargets.joinIntoString(", ") + "\n");
     if (!missing.isEmpty())
         return juce::Result::fail("accessibility: unnamed controls: " + missing.joinIntoString(", "));
+    if (!unnamedValues.isEmpty() || namedValues < 10)
+        return juce::Result::fail("accessibility: unnamed sliders/choices/text fields: " + unnamedValues.joinIntoString(", "));
+    if (!smallTargets.isEmpty())
+        return juce::Result::fail("accessibility: buttons under 16 px: " + smallTargets.joinIntoString(", "));
+    // Readable contrast (WCAG AA 4.5:1) for the theme's text on its surfaces.
+    {
+        auto luminance = [](juce::Colour c)
+        {
+            auto channel = [](float v) { return v <= .03928f ? v / 12.92f : std::pow((v + .055f) / 1.055f, 2.4f); };
+            return .2126f * channel(c.getFloatRed()) + .7152f * channel(c.getFloatGreen()) + .0722f * channel(c.getFloatBlue());
+        };
+        auto ratio = [&](juce::Colour a, juce::Colour b)
+        {
+            const auto x = luminance(a), y = luminance(b);
+            return (std::max(x, y) + .05f) / (std::min(x, y) + .05f);
+        };
+        auto &lf = getLookAndFeel();
+        const std::vector<std::tuple<const char *, juce::Colour, juce::Colour>> pairs{
+            {"label text on window", lf.findColour(juce::Label::textColourId), lf.findColour(juce::ResizableWindow::backgroundColourId)},
+            {"button text on button", lf.findColour(juce::TextButton::textColourOffId), lf.findColour(juce::TextButton::buttonColourId)},
+            {"text field", lf.findColour(juce::TextEditor::textColourId), lf.findColour(juce::TextEditor::backgroundColourId)},
+            {"choice box", lf.findColour(juce::ComboBox::textColourId), lf.findColour(juce::ComboBox::backgroundColourId)},
+            {"menu", lf.findColour(juce::PopupMenu::textColourId), lf.findColour(juce::PopupMenu::backgroundColourId)}};
+        juce::StringArray low;
+        for (const auto &[name, text, surface] : pairs)
+            if (ratio(text, surface) < 4.5f)
+                low.add(juce::String(name) + " " + juce::String(ratio(text, surface), 2));
+        folder.getChildFile("accessibility-contrast.txt").replaceWithText(low.isEmpty() ? "all pairs >= 4.5:1\n" : low.joinIntoString("\n"));
+        if (!low.isEmpty())
+            return juce::Result::fail("accessibility: low contrast: " + low.joinIntoString(", "));
+    }
     if (editors.size() != 4 || named.size() < 40)
         return juce::Result::fail("accessibility: expected 4 editors and the toolbar controls");
 

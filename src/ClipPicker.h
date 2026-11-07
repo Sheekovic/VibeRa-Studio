@@ -349,6 +349,8 @@ class ClipPicker final : public juce::Component, private juce::ListBoxModel
         search.setIndents(6, 5);
         search.setTextToShowWhenEmpty("Filter sources...", muted);
         search.onTextChange = [this] { sync(); };
+        search.setTitle("Filter sources");
+        groups.setTitle("Source group");
         addAndMakeVisible(search);
         groups.onChange = [this]
         {
