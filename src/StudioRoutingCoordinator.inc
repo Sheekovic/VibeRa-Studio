@@ -334,6 +334,11 @@ bool Studio::requiresBoundedMixerStructural(const juce::String &id, const Comman
         id == "plugin.effect.insert" || id == "plugin.effect.move" || (removed && !removed->instrument);
     if (!route && !effect)
         return false;
+    // A plugin instrument's worker stage carries its own compensation delay; the deferred
+    // route overlay cannot move it to another insert, so the bounded rebuild does.
+    if (id == "channel.mixer")
+        if (const auto *channel = controller.project.channel(args.channel); channel && channel->instrument)
+            return true;
     if ((route || id == "plugin.effect.move") && audio.canDeferChannelRouting())
         return false; // Initial document routing/order retains its proven deferred canonical path.
     for (const auto &row : controller.project.mixer)
@@ -628,6 +633,11 @@ std::optional<juce::Result> Studio::admitControllerHistory(HistoryDirection dire
     {
         CommandArgs route;
         boundedRouting = requiresBoundedMixerStructural("channel.mixer", route);
+        // Moving a plugin instrument between inserts uses the bounded rebuild (as the command does).
+        for (const auto &channel : controller.project.channels)
+            if (const auto *next = target.channel(channel.id);
+                channel.instrument && next && next->mixer != channel.mixer)
+                boundedRouting = true;
         // An older history edge can introduce a delayed/auxiliary destination;
         // any detector is sufficient; actual final engine validation still owns it.
         for (const auto &row : target.mixer)
