@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "RQ-A, RQ-C verified. Next: RQ-D project migration (open earlier schema projects, save, compare audible settings).",
+  "nextAction": "RQ-A, RQ-C, RQ-D verified. Next: RQ-H notices/checksums audit, then RQ-G diagnostics export.",
   "requirements": [
     {
       "id": "RQ-A",
@@ -43,10 +43,15 @@
     {
       "id": "RQ-D",
       "name": "Project migration",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "Projects from earlier schema versions open, migrate and save without losing audible settings or links; refusals are explicit for unsupported versions.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/migration/attempt-1a627e20ce2442cd86f283a531a39d76/verification.json",
+          "sha256": "7b50bc718333a9129036afd956284280b5843d43786ad18fb91bcae4748bf8d4"
+        }
+      ]
     },
     {
       "id": "RQ-E",
