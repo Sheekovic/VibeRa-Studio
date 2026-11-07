@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "RQ-E: dialog keyboard focus order and visible focus. RQ-B two-hour run awaits the owner's go-ahead (script ready). Then RQ-F scaling.",
+  "nextAction": "RQ-A/C/D/E/G/H verified. RQ-B two-hour run awaits the owner's go-ahead (script ready). Next: RQ-F scaling/windows.",
   "requirements": [
     {
       "id": "RQ-A",
@@ -56,10 +56,15 @@
     {
       "id": "RQ-E",
       "name": "Accessibility",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "Keyboard-only navigation of the main workspace and dialogs, focus order and visible focus, accessible names/roles for controls, readable contrast and target sizes.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/accessibility/attempt-81864141a4ba415a9fb3cede36d30811/verification.json",
+          "sha256": "f1ec183673910576227a3d9ea4126f1db5743c6915fa92300329f953b9dcd69a"
+        }
+      ]
     },
     {
       "id": "RQ-F",

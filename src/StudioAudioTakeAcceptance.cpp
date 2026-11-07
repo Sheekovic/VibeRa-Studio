@@ -667,6 +667,75 @@ juce::Result Studio::verifyAccessibility(const juce::File &folder)
         if (!low.isEmpty())
             return juce::Result::fail("accessibility: low contrast: " + low.joinIntoString(", "));
     }
+    // Dialog keyboard use: Tab reaches the field, the choice and both buttons in reading order,
+    // and a focused button draws a visible focus ring.
+    {
+        const auto before = controller.project.state();
+        transposePattern();
+        juce::Component::SafePointer<juce::AlertWindow> dialog = patternPropertiesWindow;
+        if (!dialog)
+            return juce::Result::fail("accessibility: Transpose dialog did not open");
+        auto traverser = dialog->createKeyboardFocusTraverser();
+        const auto order = traverser->getAllComponents(dialog.getComponent());
+        juce::StringArray kinds;
+        juce::Button *transpose = nullptr;
+        for (auto *c : order)
+        {
+            if (auto *b = dynamic_cast<juce::Button *>(c))
+            {
+                kinds.add("button:" + b->getButtonText());
+                if (b->getButtonText() == "Transpose")
+                    transpose = b;
+            }
+            else
+                kinds.add(dynamic_cast<juce::TextEditor *>(c) ? "field" : dynamic_cast<juce::ComboBox *>(c) ? "choice" : "other");
+        }
+        // Tab cycles; the dialog opens on its text field, so compare the cycle from the field.
+        if (const auto start = kinds.indexOf("field"); start > 0)
+        {
+            juce::StringArray rotated;
+            for (int i = 0; i < kinds.size(); ++i)
+                rotated.add(kinds[(start + i) % kinds.size()]);
+            kinds = rotated;
+        }
+        const auto expected = juce::StringArray{"field", "choice", "button:Transpose", "button:Cancel"};
+        bool ordered = kinds.size() >= 4;
+        for (int i = 0; ordered && i < 4; ++i)
+            ordered = kinds[i] == expected[i];
+        juce::String ringResult = "not checked";
+        if (ordered && transpose && transpose->isShowing())
+        {
+            if (auto *field = dialog->getTextEditor("semitones"))
+                field->grabKeyboardFocus(); // The plain image must not already carry the ring.
+            const bool focusedBefore = transpose->hasKeyboardFocus(false);
+            const auto plain = transpose->createComponentSnapshot(transpose->getLocalBounds());
+            if (focusedBefore)
+                return juce::Result::fail("accessibility: the button kept focus after Tab moved away");
+            transpose->grabKeyboardFocus();
+            if (transpose->hasKeyboardFocus(false))
+            {
+                const auto ring = transpose->createComponentSnapshot(transpose->getLocalBounds());
+                int changed = 0;
+                for (int y = 0; y < plain.getHeight(); ++y)
+                    for (int x = 0; x < plain.getWidth(); ++x)
+                        changed += plain.getPixelAt(x, y) != ring.getPixelAt(x, y);
+                ringResult = juce::String(changed) + " pixels change with focus";
+                if (changed < 20)
+                    ordered = false;
+            }
+            else
+                ringResult = "focus not granted (no active window); ring drawing not observed";
+        }
+        folder.getChildFile("accessibility-dialog.txt")
+            .replaceWithText("Transpose dialog Tab order: " + kinds.joinIntoString(", ") + "\nfocus ring: " + ringResult + "\n");
+        if (dialog)
+            dialog->exitModalState(0);
+        dispatchMessages(5);
+        if (!ordered)
+            return juce::Result::fail("accessibility: dialog Tab order/focus ring: " + kinds.joinIntoString(", ") + " | " + ringResult);
+        if (!controller.project.state().isEquivalentTo(before))
+            return juce::Result::fail("accessibility: cancelling the dialog changed the project");
+    }
     if (editors.size() != 4 || named.size() < 40)
         return juce::Result::fail("accessibility: expected 4 editors and the toolbar controls");
 

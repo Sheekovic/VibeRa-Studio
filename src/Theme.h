@@ -207,6 +207,14 @@ class WorkspaceLook final : public juce::LookAndFeel_V4
     {
         return {uiFont, 13.f, juce::Font::plain};
     }
+    // Keyboard focus ring: shown only while a control has keyboard focus (Tab navigation).
+    static void drawFocusRing(juce::Graphics &g, juce::Component &c, juce::Rectangle<float> r, float radius)
+    {
+        if (!c.hasKeyboardFocus(false) || !c.isEnabled())
+            return;
+        g.setColour(accent);
+        g.drawRoundedRectangle(r.reduced(1.f), radius, 2.f);
+    }
     void drawButtonBackground(juce::Graphics &g, juce::Button &b, const juce::Colour &, bool over,
                               bool down) override
     {
@@ -240,6 +248,7 @@ class WorkspaceLook final : public juce::LookAndFeel_V4
         g.fillRoundedRectangle(r, 4.f);
         g.setColour(b.getToggleState() && b.isEnabled() ? onColour.brighter(.5f) : grid);
         g.drawRoundedRectangle(r, 4.f, 1.f);
+        drawFocusRing(g, b, r, 4.f);
     }
     void drawComboBox(juce::Graphics &g, int w, int h, bool, int, int, int, int, juce::ComboBox &box) override
     {
@@ -253,6 +262,7 @@ class WorkspaceLook final : public juce::LookAndFeel_V4
         arrow.lineTo(w - 9.f, h * .44f);
         g.setColour(box.isEnabled() ? muted : grid);
         g.strokePath(arrow, juce::PathStrokeType(1.3f));
+        drawFocusRing(g, box, {.5f, .5f, w - 1.f, h - 1.f}, 3.f);
     }
     juce::Font getComboBoxFont(juce::ComboBox &) override
     {
@@ -422,6 +432,7 @@ class WorkspaceLook final : public juce::LookAndFeel_V4
         g.setFont(juce::Font(uiFont, 13.f, juce::Font::plain));
         g.drawFittedText(button.getButtonText(), bounds.withTrimmedLeft(box.getRight() + 8.f).toNearestInt(),
                          juce::Justification::centredLeft, 2, 1.f);
+        drawFocusRing(g, button, box.expanded(1.f), 4.f);
     }
     void fillTextEditorBackground(juce::Graphics &g, int width, int height, juce::TextEditor &editor) override
     {
