@@ -108,6 +108,26 @@ juce::Result Studio::Editor::verifyStepFill(const juce::File &folder)
     s.controller.undoEdit();
     if (!s.controller.project.state().isEquivalentTo(bulk))
         return fail("shortcut Undo");
+    s.selectRackChannels({kick});
+    s.focus = Scope::rack;
+    const auto rotateKey = juce::KeyPress(juce::KeyPress::rightKey,
+                                          juce::ModifierKeys::ctrlModifier | juce::ModifierKeys::shiftModifier, 0);
+    const auto kickBeats = [&]
+    {
+        std::vector<double> beats;
+        for (const auto &n : s.controller.project.pattern(pattern)->notes)
+            if (n.channel == kick && n.step)
+                beats.push_back(n.beat);
+        std::sort(beats.begin(), beats.end());
+        return beats;
+    };
+    const auto beforeRotate = kickBeats();
+    const bool rotated = s.keyPressed(rotateKey);
+    if (!rotated || kickBeats() == beforeRotate)
+        return fail("Ctrl+Shift+Right rotates the selected Channel's steps: " + s.status);
+    s.controller.undoEdit();
+    if (!s.controller.project.state().isEquivalentTo(bulk))
+        return fail("rotate shortcut Undo");
     setRackViewport(0, 0);
     s.selectedChannel = active;
     s.refresh();

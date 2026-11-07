@@ -5156,6 +5156,7 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "steps.rotateLeft" || action == "steps.rotateRight")
     {
         CommandArgs args;
+        args.pattern = selectedPattern;
         args.channel = selectedChannel;
         for (const auto id : selectedChannels)
             args.ids.push_back(id);
