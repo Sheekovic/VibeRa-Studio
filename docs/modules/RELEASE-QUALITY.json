@@ -4,15 +4,20 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "Audit existing installer, recovery, migration and accessibility foundations against RQ-A..H; then close the first missing software row.",
+  "nextAction": "RQ-A verified (real 0.1.0 installer: temp install, provenance hashes, launch, upgrade, uninstall, settings untouched). Next: audit RQ-C/RQ-D recovery and migration foundations.",
   "requirements": [
     {
       "id": "RQ-A",
       "name": "Installer and portable package",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "Per-user installer and portable folder built from the qualified distribution: install, launch, upgrade over an older version, uninstall entry and clean removal without touching user projects/settings.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/installer/attempt-98f133a95e1846d0a4d44885c7faed68/verification.json",
+          "sha256": "5ddf46d4523435adf766dce458720b04169512fb706fa5b26f7b5216530119c6"
+        }
+      ]
     },
     {
       "id": "RQ-B",
