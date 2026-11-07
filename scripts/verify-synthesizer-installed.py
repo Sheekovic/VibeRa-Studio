@@ -210,8 +210,12 @@ def main():
         row = settled(plugin)
         wait("vibera_plugin", call("vibera_plugin", dict(action="refresh", plugin=plugin, instance=row["instance"])))
         page = call("vibera_synth", dict(action="parameters", plugin=plugin))
-        check(len(page["items"]) == 64 and len({p["id"] for p in page["items"]}) == 64,
-              "fresh native catalogue exposes all 64 distinct scalars")
+        # Parameter pages hold 64 rows: follow nextOffset so every exposed scalar is read.
+        while page.get("nextOffset") is not None:
+            more = call("vibera_synth", dict(action="parameters", plugin=plugin, offset=page["nextOffset"]))
+            page = dict(page, items=page["items"] + more["items"], nextOffset=more.get("nextOffset"))
+        check(len(page["items"]) == 67 and len({p["id"] for p in page["items"]}) == 67,
+              "fresh native catalogue exposes all 67 distinct scalars")
         return row, page
 
     def values(page):
@@ -228,9 +232,9 @@ def main():
         _, page = parameters(plugin)
         expected = {spec["id"]: normalized(spec, value) for spec, value in zip(discovery["parameters"], preset["settings"])}
         actual = values(page)
-        check(len(preset["settings"]) == 64 and actual.keys() == expected.keys() and
+        check(len(preset["settings"]) == 67 and actual.keys() == expected.keys() and
               all(abs(actual[key] - value) < 2e-5 for key, value in expected.items()),
-              "whole-patch ACK and fresh 64-scalar readback: " + preset["id"])
+              "whole-patch ACK and fresh 67-scalar readback: " + preset["id"])
         return page
 
     def prepared_telemetry(plugin):
@@ -354,14 +358,14 @@ def main():
         check(len(presets) == 81 and len({preset["id"] for preset in presets}) == 81, "all 81 distinct installed factory patches")
         check(discovery["separateVST3"] is False, "first-class native instrument requires no external VST3")
         kinds = {kind: sum(preset["sourceKind"] == kind for preset in presets) for kind in ("SAMPLE", "SAMPLE + SYNTH", "SYNTHESIS")}
-        check(kinds == {"SAMPLE": 20, "SAMPLE + SYNTH": 1, "SYNTHESIS": 56}, "installed 20 recorded / one hybrid / 56 synthesized patch inventory")
+        check(kinds == {"SAMPLE": 20, "SAMPLE + SYNTH": 1, "SYNTHESIS": 60}, "installed 20 recorded / one hybrid / 60 synthesized patch inventory (incl. four wavetable presets)")
         map_ids = {instrument["id"] for instrument in manifest["instruments"]}
         check({preset["soundSource"] for preset in presets if preset["sourceKind"] != "SYNTHESIS"} == map_ids and
               all(not preset["soundSource"] for preset in presets if preset["sourceKind"] == "SYNTHESIS"),
               "every installed recorded-source claim resolves to a bundled map")
-        check(len(discovery["parameters"]) == 64 and len({spec["id"] for spec in discovery["parameters"]}) == 64,
-              "64 stable installed parameter IDs")
-        report["discovery"] = dict(factoryCount=len(presets), sourceKinds=kinds, parameterCount=64,
+        check(len(discovery["parameters"]) == 67 and len({spec["id"] for spec in discovery["parameters"]}) == 67,
+              "67 stable installed parameter IDs (64 + 3 wavetable/unison)")
+        report["discovery"] = dict(factoryCount=len(presets), sourceKinds=kinds, parameterCount=67,
                                     genres=discovery["genres"], families=discovery["families"])
         sampled = next(preset for preset in presets if preset["sourceKind"] == "SAMPLE" and "piano" in preset["soundSource"])
         synthesized = next(preset for preset in presets if preset["sourceKind"] == "SYNTHESIS" and preset["family"] == "Bass")
