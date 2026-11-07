@@ -3708,6 +3708,8 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "gestureOwner", controller.gestureOwner().isEmpty() ? "local-or-none" : "mcp");
     set(state, "controllerProfile", midiController.state());
     set(state, "samplerControllers", samplerControllerState());
+    if (browser)
+        set(state, "browser", browser->filesForTest().mcpState()); // Readback for browser.* actions.
     set(state, "controllerLearnIndex", midiController.learnIndex);
     set(state, "selectedPattern", juce::int64(selectedPattern));
     set(state, "selectedChannel", juce::int64(selectedChannel));

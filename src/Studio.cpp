@@ -4276,6 +4276,8 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         stop.onClick();
         return true;
     }
+    if (action.startsWith("sampler.view."))
+        return navigateSamplerView(action);
     if (action.startsWith("sampler.modulation."))
         return selectSamplerModulationTarget(
             selectedChannel,

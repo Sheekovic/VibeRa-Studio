@@ -295,6 +295,15 @@ to replace one) writes and returns a shareable report: version, OS, audio device
 plugin workers and the last 20 typed errors, with the home folder and account name
 replaced. The same report is Tools > Export diagnostics... in the app.
 
+Browser: `browser.*` actions run through `vibera_command`; read `vibera_state.browser`
+(view, folder, canGoBack/Forward, search, results, selectedFile, starred, tagsShown,
+tagFilter, tagMatchAll, sort, columns, fullPreview, previewVolume) before and after.
+back/forward/up/nextMatch/previousMatch/toggleFavorite refuse when there is no history,
+folder, result or selection. editTags/addTags/collectionsMenu and pattern.renameDialog
+open a dialog: answer or cancel it with `vibera_dialog`. `sampler.view.zoomIn/zoomOut/all/
+range` need the selected Channel's instrument window (`channel.openInstrument`); read
+`samplerWindows[].waveformViewStart/Length`.
+
 Audio-input (microphone/instrument) takes, input/monitor settings and their placed
 Audio Clips: [audio recording](references/audio-recording.md).
 

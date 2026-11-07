@@ -10,6 +10,18 @@
 
 namespace vibera
 {
+bool Studio::navigateSamplerView(const juce::String &action)
+{
+    const auto found = instrumentWindows.find(selectedChannel);
+    if (found == instrumentWindows.end())
+        return false;
+    auto *range = dynamic_cast<SamplerRangeView *>(
+        found->second->controlsComponent()->findChildWithID("instrument.sampler.waveform"));
+    if (!range)
+        return false;
+    range->navigation(action);
+    return true;
+}
 void Studio::invokeController(const ControllerInvocation &value)
 {
     if (value.automationSession && (!automationTouch || value.automationSession != automationTouch->session))

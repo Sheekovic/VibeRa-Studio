@@ -930,6 +930,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // offers the autosave at the next start; Save keeps `backupCount` previous versions.
     // Diagnostics export (StudioDiagnostics.cpp): a shareable text report with personal
     // paths and the user name replaced; recent error statuses are kept in memory only.
+    // sampler.view.* on the selected Channel's open instrument window; false when none is open.
+    bool navigateSamplerView(const juce::String &action);
     juce::StringArray recentErrors;
     juce::String lastDiagnosticStatus;
     void recordDiagnosticStatus();

@@ -698,19 +698,20 @@ class SampleFileBrowser final : public juce::Component,
         forward.setEnabled(historyIndex >= 0 && historyIndex + 1 < history.size());
         up.setEnabled(hasRoot() && files.getDirectory().getParentDirectory() != files.getDirectory());
     }
-    void navigateHistory(int delta)
+    bool navigateHistory(int delta)
     {
         const int target = historyIndex + delta;
         if (!juce::isPositiveAndBelow(target, history.size()))
-            return;
+            return false;
         const juce::File root(history[target]);
         if (!root.isDirectory())
         {
             studio.status = "Browser history folder is missing; reconnect it or choose another folder";
-            return;
+            return false;
         }
         historyIndex = target;
         setRoot(root, false, true, false);
+        return true;
     }
     juce::TextEditor search;
     juce::ComboBox libraries;
@@ -863,6 +864,30 @@ class SampleFileBrowser final : public juce::Component,
         searchResults.repaint();
     }
     int resultSortForTest() const { return resultSort; }
+    // Shared read-only state for vibera_state.browser (MCP readback of the browser.* actions).
+    juce::var mcpState() const
+    {
+        auto *state = new juce::DynamicObject;
+        static const juce::StringArray sorts{"search", "name", "type", "date"};
+        state->setProperty("view", currentView == 0 ? juce::String("all") : currentView == 1 ? juce::String("starred")
+                                                                                            : "search:" + views.getTabNames()[currentView]);
+        state->setProperty("folder", files.getDirectory().getFullPathName());
+        state->setProperty("canGoBack", historyIndex > 0);
+        state->setProperty("canGoForward", historyIndex + 1 < history.size());
+        state->setProperty("search", search.getText());
+        state->setProperty("results", searchData ? int(searchData->matches.size()) : 0);
+        state->setProperty("selectedResult", searchResults.getSelectedRow());
+        state->setProperty("selectedFile", selectedFile().getFullPathName());
+        state->setProperty("starred", collections.starred(selectedFile()));
+        state->setProperty("tagsShown", tagsShown);
+        state->setProperty("tagFilter", activeFilter.selected);
+        state->setProperty("tagMatchAll", activeFilter.all);
+        state->setProperty("sort", sorts[resultSort]);
+        state->setProperty("columns", detailColumns);
+        state->setProperty("fullPreview", studio.audio.fullAudition());
+        state->setProperty("previewVolume", studio.audio.auditionVolume());
+        return juce::var(state);
+    }
     // Columns layout: compact one-line rows with type, size and date.
     static constexpr int detailColumnsWidth = 210; // type + size + date columns.
     void updateResultWidth()
@@ -1288,8 +1313,9 @@ class SampleFileBrowser final : public juce::Component,
         else if (action == "browser.toggleFavorite")
         {
             const auto file = selectedFile();
-            if (file != juce::File{})
-                toggleStar(file);
+            if (file == juce::File{})
+                return false; // Nothing selected: refuse rather than report a change.
+            toggleStar(file);
         }
         else if (action == "browser.collectionsMenu")
             collectionMenu();
@@ -1304,7 +1330,8 @@ class SampleFileBrowser final : public juce::Component,
         else if (action == "browser.nextMatch" || action == "browser.previousMatch")
         {
             const auto count = resultModel.getNumRows();
-            if (count > 0)
+            if (count == 0)
+                return false; // No search results to step through.
             {
                 const int current = searchResults.getSelectedRow();
                 const int next = action == "browser.nextMatch" ? (current + 1) % count
@@ -1315,14 +1342,14 @@ class SampleFileBrowser final : public juce::Component,
         }
         else if (action == "browser.reindex")
             reread.onClick();
-        else if (action == "browser.back")
-            navigateHistory(-1);
-        else if (action == "browser.forward")
-            navigateHistory(1);
+        else if (action == "browser.back" || action == "browser.forward")
+            return navigateHistory(action == "browser.back" ? -1 : 1);
         else if (action == "browser.up")
         {
-            if (hasRoot())
-                setRoot(files.getDirectory().getParentDirectory(), false);
+            const auto parent = files.getDirectory().getParentDirectory();
+            if (!hasRoot() || parent == files.getDirectory())
+                return false; // No folder, or already at a drive root.
+            setRoot(parent, false);
         }
         else if (action == "browser.clearSearch")
         {
