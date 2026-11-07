@@ -329,7 +329,7 @@ void Studio::openStepComposer(Id pattern, const std::vector<Id> &channels)
         if (!stepComposeSession->remote && stepComposeWindow)
         {
             stepComposeWindow->setVisible(true);
-            stepComposeWindow->toFront(true);
+            bringWindowToFront(*stepComposeWindow);
         }
         else
             status = "Advanced Fill is owned by an MCP session";
@@ -408,7 +408,7 @@ void Studio::openStepComposer(Id pattern, const std::vector<Id> &channels)
     window->centreAroundComponent(this, 840, 600);
     window->addToDesktop();
     window->setVisible(true);
-    window->toFront(true);
+    bringWindowToFront(*window);
 }
 juce::Result Studio::verifyStepCompose(const juce::File &requested)
 {

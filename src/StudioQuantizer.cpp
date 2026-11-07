@@ -395,7 +395,7 @@ void Studio::openQuantizer()
 {
     if (quantizerWindow)
     {
-        quantizerWindow->toFront(true);
+        bringWindowToFront(*quantizerWindow);
         return;
     }
     if (finishRackVelocity().failed() || finishRackSwing().failed())

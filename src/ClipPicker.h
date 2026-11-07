@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include "WindowForeground.h"
 #include "Studio.h"
 
 namespace vibera
@@ -272,7 +273,7 @@ class ClipPicker final : public juce::Component, private juce::ListBoxModel
     {
         if (dialog)
         {
-            dialog->toFront(true);
+            bringWindowToFront(*dialog);
             return;
         }
         dialog = std::make_unique<juce::AlertWindow>("Group selected Patterns", "Filter group name",

@@ -544,7 +544,7 @@ void Studio::mixerValueDialog(int index, MixerAutomationControl control, std::op
                     safe->command(action, a);
                 }),
             true);
-        dialog->toFront(true);
+        bringWindowToFront(*dialog);
         dialog->getTextEditor("amount")->grabKeyboardFocus();
         dialog->getTextEditor("amount")->selectAll();
 }
@@ -589,7 +589,7 @@ void Studio::mixerNameDialog(int index)
                                 }),
                             true);
     // F2 must be ready for typing, regardless of button traversal order.
-    dialog->toFront(true);
+    bringWindowToFront(*dialog);
     dialog->getTextEditor("name")->grabKeyboardFocus();
     dialog->getTextEditor("name")->selectAll();
 }
@@ -626,7 +626,7 @@ void Studio::mixerStereoDialog(int index)
             CommandArgs args; args.mixer = index; args.value = value;
             safe->command("mixer.stereoSeparation", args); // Canonical range/admission/history, never clamp typed input.
         }), true);
-    dialog->toFront(true);
+    bringWindowToFront(*dialog);
     dialog->getTextEditor("amount")->grabKeyboardFocus();
     dialog->getTextEditor("amount")->selectAll();
 }

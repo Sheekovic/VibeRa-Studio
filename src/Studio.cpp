@@ -1041,7 +1041,7 @@ void Studio::detachWorkspaceWindow(int index)
     {
         window->setVisible(true);
         window->setMinimised(false);
-        window->toFront(true);
+        bringWindowToFront(*window);
         return;
     }
     auto *component = index == 4 ? static_cast<juce::Component *>(browser.get())
@@ -1284,7 +1284,7 @@ void Studio::toggleEditor(int i)
         if (window->isVisible())
         {
             window->setMinimised(false);
-            window->toFront(true);
+            bringWindowToFront(*window);
         }
         resized();
         return;
@@ -1663,7 +1663,7 @@ void Studio::showEditor(int i)
         auto &window = detachedWindows[size_t(i)];
         window->setVisible(true);
         window->setMinimised(false);
-        window->toFront(true);
+        bringWindowToFront(*window);
         w->getContentComponent()->grabKeyboardFocus();
         focus = Scope(i + 1);
         resized();
@@ -1673,7 +1673,7 @@ void Studio::showEditor(int i)
     if (maximisedEditor >= 0)
         maximisedEditor = i;
     resized();
-    w->toFront(true);
+    bringWindowToFront(*w);
     w->getContentComponent()->grabKeyboardFocus();
     focus = Scope(i + 1);
 }
@@ -3082,7 +3082,7 @@ void Studio::transposePattern()
 {
     if (patternPropertiesWindow && patternPropertiesWindow->isCurrentlyModal())
     {
-        patternPropertiesWindow->toFront(true);
+        bringWindowToFront(*patternPropertiesWindow);
         return;
     }
     const auto *pattern = controller.project.pattern(selectedPattern);
@@ -3140,7 +3140,7 @@ void Studio::renamePattern()
 {
     if (patternPropertiesWindow && patternPropertiesWindow->isCurrentlyModal())
     {
-        patternPropertiesWindow->toFront(true);
+        bringWindowToFront(*patternPropertiesWindow);
         return;
     }
     const auto *pattern = controller.project.pattern(selectedPattern);
@@ -7788,7 +7788,7 @@ void Studio::audioSettings()
     }
     if (settingsWindow)
     {
-        settingsWindow->toFront(true);
+        bringWindowToFront(*settingsWindow);
         return;
     }
     juce::DialogWindow::LaunchOptions o;
@@ -7852,7 +7852,7 @@ void Studio::openInstrument(Id id)
             window = std::make_unique<InstrumentWindow>(*this, id);
         window->setVisible(true);
         roundNativeWindow(*window);
-        window->toFront(true);
+        bringWindowToFront(*window);
     }
     refresh();
 }

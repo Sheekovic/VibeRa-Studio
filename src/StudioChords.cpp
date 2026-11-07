@@ -214,6 +214,6 @@ void Studio::showChordProgression()
         chordWindow->centreWithSize(640, 340);
     }
     chordWindow->setVisible(true);
-    chordWindow->toFront(true);
+    bringWindowToFront(*chordWindow);
 }
 } // namespace vibera

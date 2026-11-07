@@ -326,7 +326,7 @@ juce::var noteModes(const juce::var &args)
                         if (notePropertiesWindow)
                         {
                             notePropertiesWindow->setVisible(true);
-                            notePropertiesWindow->toFront(true);
+                            bringWindowToFront(*notePropertiesWindow);
                         }
                         auto current = noteModesState();
                         current.getDynamicObject()->setProperty("operation",
@@ -393,7 +393,7 @@ juce::var noteModes(const juce::var &args)
                 notePropertiesWindow->cancel = [finish] { finish(3); };
                 syncNotePropertiesWindow();
                 notePropertiesWindow->setVisible(true);
-                notePropertiesWindow->toFront(true);
+                bringWindowToFront(*notePropertiesWindow);
             }
         }
     }

@@ -8,6 +8,7 @@
 #include <Windows.h>
 #include <dwmapi.h>
 #endif
+#include "WindowForeground.h"
 namespace vibera
 {
 // Window creation/message-thread only. Windows 10 keeps its OS fallback.

@@ -544,7 +544,7 @@ juce::Result Studio::verifySamplerGestures(const juce::File &folder)
     // This owned GUI test must expose its target above unrelated desktop windows.
     // JUCE's keyboard hit test includes native WindowFromPoint occlusion checks.
     window->setAlwaysOnTop(true);
-    window->toFront(true);
+    bringWindowToFront(*window);
     auto *controls = window->controlsComponent();
     auto *range = dynamic_cast<SamplerRangeView *>(controls->findChildWithID("instrument.sampler.waveform"));
     auto *keyboard =
@@ -989,7 +989,7 @@ juce::Result Studio::verifySamplerGestures(const juce::File &folder)
             {
                 window->closeButtonPressed();
                 window->setVisible(true);
-                window->toFront(true); // Restore this window without selecting/retargeting the Channel.
+                bringWindowToFront(*window); // Restore this window without selecting/retargeting the Channel.
                 if (instrumentWindows[first].get() != window)
                     return fail("Sampler reopen duplicated its window");
             }

@@ -118,7 +118,7 @@ void Studio::mixerOrganisationDialog(const juce::String &operation, const juce::
             else args.ids.assign(targets.begin(), targets.end());
             safe->command(operation, args);
         }), true);
-    dialog->toFront(true); dialog->getTextEditor("name")->grabKeyboardFocus(); dialog->getTextEditor("name")->selectAll();
+    bringWindowToFront(*dialog); dialog->getTextEditor("name")->grabKeyboardFocus(); dialog->getTextEditor("name")->selectAll();
 }
 void Studio::mixerOrganisationMenu(int index)
 {

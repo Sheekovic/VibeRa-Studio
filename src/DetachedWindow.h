@@ -109,6 +109,7 @@ class Studio::DetachedWindow final : public juce::DocumentWindow,
         setBounds(
             recoverDesktopWindow(bounds.withHeight(std::max(256, bounds.getHeight())), desktopWorkAreas()));
         setVisible(true);
+        bringWindowToFront(*this);
         if (auto *peer = getPeer())
             peer->addScaleFactorListener(this);
         roundNativeWindow(*this);

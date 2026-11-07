@@ -188,7 +188,7 @@ void Studio::showDrumPads()
         drumPadsWindow->centreWithSize(520, 560);
     }
     drumPadsWindow->setVisible(true);
-    drumPadsWindow->toFront(true);
+    bringWindowToFront(*drumPadsWindow);
     if (auto *content = drumPadsWindow->getContentComponent())
         content->grabKeyboardFocus();
 }

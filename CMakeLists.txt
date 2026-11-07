@@ -20,7 +20,7 @@ target_sources(VibeRaCore PRIVATE src/synth/SynthPresets.cpp)
 target_include_directories(VibeRaCore PUBLIC src)
 # MIT-licensed pitch-preserving stretcher bundled with the pinned engine (header-only).
 target_include_directories(VibeRaCore PRIVATE "${TE_ROOT}/modules/tracktion_engine/3rd_party")
-target_sources(VibeRaCore PRIVATE src/StoppedEffectWorkers.cpp src/PluginAutomationPacket.cpp src/PluginAutomationStream.cpp src/PluginAutomationPreparation.cpp src/PluginEditorClock.cpp)
+target_sources(VibeRaCore PRIVATE src/StoppedEffectWorkers.cpp src/PluginAutomationPacket.cpp src/PluginAutomationStream.cpp src/PluginAutomationPreparation.cpp src/PluginEditorClock.cpp src/WindowForeground.cpp)
 target_sources(VibeRaCore PRIVATE src/EffectChain.cpp src/EffectChainPresetFiles.cpp src/ChannelPreset.cpp)
 target_sources(VibeRaCore PRIVATE src/ChannelRoutingEffects.cpp)
 target_sources(VibeRaCore PRIVATE src/ai/AiSettings.cpp src/ai/AiHttp.cpp src/ai/LlmClient.cpp src/ai/MusicEngines.cpp src/ai/ProducerAgent.cpp src/ai/McpLoopback.cpp src/ai/CodexAgent.cpp src/ai/ClaudeCli.cpp)
@@ -112,7 +112,7 @@ add_dependencies(VibeRaTests VibeRaScannerFixture)
 add_custom_command(TARGET VibeRaTests POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
   "$<TARGET_FILE:VibeRaScannerFixture>" "$<TARGET_FILE_DIR:VibeRaTests>/$<TARGET_FILE_NAME:VibeRaScannerFixture>")
 juce_add_gui_app(VibeRaPluginWorker PRODUCT_NAME "VibeRa Plugin Worker" COMPANY_NAME "VibeRa")
-target_sources(VibeRaPluginWorker PRIVATE src/PluginWorker.cpp src/PluginEditorClock.cpp)
+target_sources(VibeRaPluginWorker PRIVATE src/PluginWorker.cpp src/PluginEditorClock.cpp src/WindowForeground.cpp)
 target_sources(VibeRaPluginWorker PRIVATE src/effects/NativeEffects.cpp src/effects/NativeEffectsEditor.cpp
   src/effects/dsp/Dynamics.cpp src/effects/dsp/TimeEffects.cpp src/effects/dsp/PitchCorrect.cpp src/effects/dsp/Vocoder.cpp src/effects/dsp/StudioEffects.cpp)
 target_sources(VibeRaPluginWorker PRIVATE src/synth/SynthPlugin.cpp src/synth/SynthPresets.cpp

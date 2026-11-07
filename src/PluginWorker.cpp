@@ -1438,7 +1438,7 @@ class WorkerApp final : public juce::JUCEApplication,
                     }
                     editor->setMinimised(false);
                     editor->setVisible(true);
-                    editor->toFront(true); // OS foreground permission is not implied by this call.
+                    bringWindowToFront(*editor); // The host granted this process the foreground.
                     pendingEditorAttachment =
                         existing ? PluginEditorOutcome::broughtToFront : PluginEditorOutcome::opened;
                     finishEditorAttachment();

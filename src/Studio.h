@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include "WindowForeground.h"
 #include "Commands.h"
 #include "EffectChain.h"
 #include "AudioEngine.h"

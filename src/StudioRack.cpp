@@ -16,7 +16,7 @@ void Studio::patternMeterDialog(Id pattern)
 {
     if (patternMeterWindow && patternMeterWindow->isCurrentlyModal())
     {
-        patternMeterWindow->toFront(true);
+        bringWindowToFront(*patternMeterWindow);
         return;
     }
     const auto *part = controller.project.pattern(pattern);
@@ -186,7 +186,7 @@ void Studio::channelPropertiesDialog(const std::vector<Id> &ids)
 {
     if (channelPropertiesWindow)
     {
-        channelPropertiesWindow->toFront(true);
+        bringWindowToFront(*channelPropertiesWindow);
         return;
     }
     if (ids.empty() || ids.size() > 128)
@@ -410,7 +410,7 @@ void Studio::rackGroupDialog(const juce::String &operation)
         return;
     if (rackGroupWindow && rackGroupWindow->isCurrentlyModal())
     {
-        rackGroupWindow->toFront(true);
+        bringWindowToFront(*rackGroupWindow);
         return;
     }
     if (operation == "assign" && selectedChannels.empty())

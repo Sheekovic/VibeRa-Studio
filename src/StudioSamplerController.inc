@@ -366,7 +366,7 @@ void Studio::showSamplerControllerLearn(Id channel, std::uint32_t parameter)
 {
     if (auto *existing = samplerControllerLearnWindow.getComponent())
     {
-        existing->toFront(true);
+        bringWindowToFront(*existing);
         return;
     }
     const auto started = startSamplerControllerLearn(channel, parameter);
@@ -483,7 +483,7 @@ void Studio::samplerControllerLinkDialog(Id id)
         return;
     if (auto *existing = samplerControllerPropertiesWindow.getComponent())
     {
-        existing->toFront(true);
+        bringWindowToFront(*existing);
         return;
     }
     const auto original = *found;

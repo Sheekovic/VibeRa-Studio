@@ -44,7 +44,10 @@ class VibeRaApplication final : public juce::JUCEApplication
             startTimer(250);
             setVisible(!smoke);
             if (!smoke)
+            {
+                vibera::bringWindowToFront(*this); // Open in front, not behind the launching app.
                 getContentComponent()->grabKeyboardFocus();
+            }
         }
         ~Window() override
         {

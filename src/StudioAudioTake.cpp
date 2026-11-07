@@ -1084,7 +1084,7 @@ void Studio::showPerformance()
         performanceWindow->centreWithSize(540, 320);
     }
     performanceWindow->setVisible(true);
-    performanceWindow->toFront(true);
+    bringWindowToFront(*performanceWindow);
 }
 
 juce::Result Studio::openVideo(const juce::File &file)

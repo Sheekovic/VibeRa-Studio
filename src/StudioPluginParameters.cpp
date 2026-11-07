@@ -180,6 +180,8 @@ juce::Result Studio::requestPluginEditor(Id id, bool open, const juce::String &i
     job.instance = instance;
     job.started = juce::Time::getMillisecondCounter();
     job.host = host;
+    if (open)
+        allowProcessForeground(host->processId()); // The worker's editor window opens in front.
     const auto admission =
         host->requestEditor(instance, !open ? PluginEditorAction::close
                                       : view == PluginWrapperView::settings ? PluginEditorAction::settings
@@ -1300,7 +1302,7 @@ void Studio::showPluginParameters(Id id)
             controls && controls->pluginId == id && controls->host == host)
         {
             parameterWindow->setVisible(true);
-            parameterWindow->toFront(true);
+            bringWindowToFront(*parameterWindow);
             return;
         }
     if (pluginControlsPending())
@@ -1315,7 +1317,7 @@ void Studio::showPluginParameters(Id id)
     parameterWindow->setCentrePosition(getScreenBounds().getCentre());
     parameterWindow->setLookAndFeel(&getLookAndFeel());
     roundNativeWindow(*parameterWindow);
-    parameterWindow->toFront(true);
+    bringWindowToFront(*parameterWindow);
 }
 juce::Result Studio::selectPluginParameter(Id id, std::optional<std::uint32_t> parameter, bool lastTweaked)
 {
