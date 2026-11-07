@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "RQ-A/C/D/E/G/H verified. RQ-B two-hour run awaits the owner's go-ahead (script ready). Next: RQ-F scaling/windows.",
+  "nextAction": "Software rows RQ-A and RQ-C..H verified. RQ-B two-hour run awaits the owner's go-ahead (script ready); then RQ-I module release.",
   "requirements": [
     {
       "id": "RQ-A",
@@ -69,10 +69,19 @@
     {
       "id": "RQ-F",
       "name": "Scalable UI and windows",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "100-200 percent scale and 1080p-4K layouts without clipping/overlap; detached windows open in front, restore on the right monitor and survive monitor disconnect.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/scaling/attempt-65a9ef079b0249ba98c2e3f655da1f45/verification.json",
+          "sha256": "e477229e3c20cfa2ce5e3c1a271a298abe960097c78ef1cd774c53d276df6536"
+        },
+        {
+          "path": "build/module-qualification/release-quality/window-front/attempt-c27e8064dd5449d4b6fa5cf0de950704/verification.json",
+          "sha256": "265ba277dd68c60a4fabc7ca12596acf0222b3b9e8a0bd4a6188eb8bd0507b5c"
+        }
+      ]
     },
     {
       "id": "RQ-G",
