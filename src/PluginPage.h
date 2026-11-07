@@ -257,7 +257,8 @@ class PluginPage final : public juce::Component, private juce::ListBoxModel, pri
         channel.onChange = [this]
         {
             if (owner && channel.getSelectedId())
-                owner->selectedChannel = selectedChannelId();
+                if (auto selected = owner->selectChannelChecked(selectedChannelId()); selected.failed())
+                    localError = selected.getErrorMessage();
             updateButtons();
         };
         channelSlots.onClick = [this]

@@ -675,7 +675,7 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `settings.plugins.foldersDraft` | local TextEditor; no shared draft command | gap:shared draft setter/readback required; manual mapping/verification required |
 | `settings.plugins.standardLocationsDraft` | local ToggleButton; committed only by scan | gap:shared draft setting/readback required; manual mapping/verification required |
 | `settings.plugins.catalogueSelection` | local ListBox, stable-ID retention on rescan | gap:descriptor lookup does not select UI row; manual mapping/verification required |
-| `settings.plugins.channelTargetSelection` | local selector updates Studio.selectedChannel directly | gap:share canonical channel-selector validation/context; manual mapping/verification required |
+| `settings.plugins.channelTargetSelection` | Shared Studio::selectChannelChecked (same validation/take-finish/typing-release rules as vibera_select) | gap:needs a registered selection command for review; vibera_select applies the same rules; manual mapping/verification required |
 | `settings.plugins.mixerTargetSelection` | local ComboBox, explicit insert argument on creation | gap:shared target-selection state required; manual mapping/verification required |
 | `settings.plugins.viewportNavigation` | JUCE ListBox and ScrollingSettingsPage local viewport | gap:shared visible viewport/range state required; manual mapping/verification required |
 | `plugin.controls.manualValue` | token-owned runtime write; not canonical document Undo | gap:manual-before authority and shared Undo reconciliation required; manual mapping/verification required |

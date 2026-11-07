@@ -521,6 +521,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result verifyMixerEffectSlots(const juce::File &output);
     juce::Result verifyMixerChainControlsUi();
     void pluginMenu(Id);
+    // Shared Channel selection rules (vibera_select and the Plugins page): the Channel must
+    // exist, a held MIDI take is finished first, typing notes are released.
+    juce::Result selectChannelChecked(Id channel);
     void openMixerEq(int index); // Integrated 3-band EQ editor window for a Mixer insert.
     void effectMenu(int insert);
     juce::var mixerChainOperation(const juce::var &, juce::String *admittedOperation = nullptr);

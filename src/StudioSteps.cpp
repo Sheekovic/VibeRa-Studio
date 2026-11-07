@@ -128,6 +128,12 @@ juce::Result Studio::Editor::verifyStepFill(const juce::File &folder)
     s.controller.undoEdit();
     if (!s.controller.project.state().isEquivalentTo(bulk))
         return fail("rotate shortcut Undo");
+    // Shared Channel selection (Plugins page, vibera_select): unknown IDs refuse and keep the selection.
+    const auto keptChannel = s.selectedChannel;
+    if (s.selectChannelChecked(Id(987654321)).wasOk() || s.selectedChannel != keptChannel ||
+        s.selectChannelChecked(hat).failed() || s.selectedChannel != hat)
+        return fail("shared Channel selection rules");
+    s.selectedChannel = keptChannel;
     setRackViewport(0, 0);
     s.selectedChannel = active;
     s.refresh();

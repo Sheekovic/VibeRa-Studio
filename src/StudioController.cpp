@@ -10,6 +10,21 @@
 
 namespace vibera
 {
+juce::Result Studio::selectChannelChecked(Id channel)
+{
+    if (!controller.project.channel(channel))
+        return juce::Result::fail("Unknown Channel");
+    if (channel != selectedChannel)
+    {
+        if (auto finished = finishMidiTake(); finished.failed())
+            return juce::Result::fail("take_pending: " + finished.getErrorMessage());
+        releaseTypingNotes();
+    }
+    selectedChannel = channel;
+    refresh();
+    needsRebuild = true;
+    return juce::Result::ok();
+}
 bool Studio::navigateSamplerView(const juce::String &action)
 {
     const auto found = instrumentWindows.find(selectedChannel);
