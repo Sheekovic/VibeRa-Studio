@@ -2,9 +2,9 @@
   "format": 1,
   "id": "rack-pattern-sampler",
   "name": "Channel Rack / Pattern / sampler - compose and recall instrument variations",
-  "state": "in_progress",
+  "state": "released",
   "checklist": "docs/modules/RACK-PATTERN-SAMPLER.md",
-  "nextAction": "Integrate narrow new-note-mode MCP coverage evidence, run full223 source regression on stable inputs and fix actual regressions; checkpoint then continue the complete RPS checklist. Global5 voice controls and per-note Slide/Porta/color/Properties have scoped source/MCP/component/real Analog proof, not whole-module/package qualification. Preserve all14 rows and sole qualified0.0.65.",
+  "nextAction": "Released as 0.1.0 (source 914f89f): complete 259/259 source regression, module gate, staged 99/99 and final installed verification, provenance and one-folder audit. Owner listening plan passed. Physical MIDI/latency and structured FL-familiarity acceptance remain pending and unclaimed.",
   "requirements": [
     {
       "id": "RPS-A",
@@ -273,18 +273,36 @@
     {
       "id": "RPS-N",
       "name": "Exact complete module source and packaged candidate",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "phase": "release",
       "scope": "Full required current source/regression/installed-provider/module/staged/final gates, exact input/binary identities and audit before sole-distribution replacement; no subset release qualification.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/distribution-verification/current/verification.json",
+          "sha256": "a8bc2efcab1c74d198b3a7f08eb1378d0c6ec5e61fad4978ffd0ad431beaa222"
+        },
+        {
+          "path": "build/distribution-verification/staging/verification.json",
+          "sha256": "c9b26f323df700b8b5486c631668b12606e064f775ccd58638a5696bea571457"
+        },
+        {
+          "path": "build/single-folder-current-inventory.json",
+          "sha256": "5773341b78b5cf7cdd97f4409788b4adf9ebe201569a3359791351729c28b730"
+        }
+      ]
     }
   ],
   "externalAcceptance": [
     {
       "name": "Listening: sample/envelope/loop/stretch quality and transitions",
-      "status": "pending",
-      "evidence": []
+      "status": "passed",
+      "evidence": [
+        {
+          "path": "build/listening/LISTENING-RESULT.json",
+          "sha256": "e652332e0244e21bdbee61a34962cf926a3b38f2317810594f3f31c4209d65fc"
+        }
+      ]
     },
     {
       "name": "Physical MIDI/audio hardware and latency",
