@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "Software rows RQ-A and RQ-C..H verified. RQ-B two-hour run awaits the owner's go-ahead (script ready); then RQ-I module release.",
+  "nextAction": "Software rows RQ-A and RQ-C..H verified. RQ-B two-hour run awaits the owner's go-ahead (script ready). RQ-I: complete dev.ps1 -Full, then scripts/rebind-surface-evidence.py --apply (149 reviewed UI surfaces), rerun RQ receipts on the candidate, ReleaseCandidate. Seven plugin-settings/manual-value UI surfaces remain MCP gaps.",
   "requirements": [
     {
       "id": "RQ-A",
