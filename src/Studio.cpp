@@ -3472,6 +3472,7 @@ void Studio::toolsMenu()
     menu.addItem(226, "Save as template...");
     // Save keeps five backups per project; autosave covers unexpected closes.
     menu.addItem(224, "Open project backups folder", profileFile().getSiblingFile("backups").isDirectory());
+    menu.addItem(228, "Export diagnostics...");
     menu.addItem(225, updatePhase == "available" ? "Update available: " + (availableUpdate ? availableUpdate->name : juce::String()) + "..."
                       : updatePhase == "downloading" ? "Downloading update..."
                       : updatePhase == "ready"       ? "Install downloaded update..."
@@ -3534,6 +3535,27 @@ void Studio::toolsMenu()
                             safe->repaint();
                         }
                     });
+                return;
+            }
+            if (choice == 228)
+            {
+                auto chooser = std::make_shared<juce::FileChooser>(
+                    "Export diagnostics",
+                    juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
+                        .getChildFile("VibeRa diagnostics.txt"),
+                    "*.txt");
+                chooser->launchAsync(juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles |
+                                         juce::FileBrowserComponent::warnAboutOverwriting,
+                                     [safe, chooser](const juce::FileChooser &picked)
+                                     {
+                                         const auto file = picked.getResult();
+                                         if (!safe || file == juce::File{})
+                                             return;
+                                         const auto result = safe->writeDiagnostics(file, true);
+                                         safe->status = result.wasOk() ? "Diagnostics saved to " + file.getFileName()
+                                                                       : result.getErrorMessage();
+                                         safe->repaint();
+                                     });
                 return;
             }
             if (choice == 224)
@@ -6301,6 +6323,7 @@ juce::var Studio::midiTakeState() const
 void Studio::timerCallback()
 {
     pollAiMusic();
+    recordDiagnosticStatus();
     serviceAutosave();
     pollUpdates();
     if (!mixerChainApplying() || mixerChainRecovering())

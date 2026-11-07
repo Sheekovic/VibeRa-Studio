@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "RQ-A, RQ-C, RQ-D, RQ-H verified. Next: RQ-G diagnostics export (version, device, workers, recent errors; no personal paths).",
+  "nextAction": "RQ-A, RQ-C, RQ-D, RQ-G, RQ-H verified. Next: RQ-E accessibility (keyboard navigation and accessible names), RQ-F scaling, RQ-B two-hour stress.",
   "requirements": [
     {
       "id": "RQ-A",
@@ -72,10 +72,15 @@
     {
       "id": "RQ-G",
       "name": "Diagnostics",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "User-visible diagnostics export (version, device, plugin workers, recent errors) without personal paths or credentials; actionable error messages.",
-      "evidence": []
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/diagnostics/attempt-5dd4a0ebbaed4a14bf7ae5dcb4ff23c6/verification.json",
+          "sha256": "d0c6b4fe981fd31cb085f3896e0433836e4b591acc32267b0adad2b867c60bfc"
+        }
+      ]
     },
     {
       "id": "RQ-H",

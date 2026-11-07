@@ -928,6 +928,13 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Autosave, backups and crash recovery (StudioAutosave.cpp). Autosave writes the dirty
     // project every `autosaveSeconds` while stopped; a session marker without a clean exit
     // offers the autosave at the next start; Save keeps `backupCount` previous versions.
+    // Diagnostics export (StudioDiagnostics.cpp): a shareable text report with personal
+    // paths and the user name replaced; recent error statuses are kept in memory only.
+    juce::StringArray recentErrors;
+    juce::String lastDiagnosticStatus;
+    void recordDiagnosticStatus();
+    juce::String diagnosticsReport() const;
+    juce::Result writeDiagnostics(const juce::File &file, bool overwrite) const;
     bool autosaveEnabled = false, autosaveRunning = false;
     double autosaveSeconds = 120, lastAutosaveTime = 0;
     std::uint64_t autosaveRevision = 0;
