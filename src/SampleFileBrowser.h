@@ -418,6 +418,7 @@ class SampleFileBrowser final : public juce::Component,
         for (int i = 0; i < orders.size(); ++i)
             sorting.addItem(10 + i, orders[i], true, resultSort == i);
         menu.addSubMenu("Sort results", sorting);
+        menu.addItem(14, "Show results as columns (name, type, size, date)", true, detailColumns);
         const auto id =
             currentView >= 2 ? collections.searches[std::size_t(currentView - 2)].id : juce::String{};
         menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&viewMenu),
@@ -430,6 +431,11 @@ class SampleFileBrowser final : public juce::Component,
         {
             if (!safe || !choice)
                 return;
+            if (choice == 14)
+            {
+                safe->setDetailColumns(!safe->detailColumns);
+                return;
+            }
             if (choice >= 10 && choice <= 13)
             {
                 safe->setResultSort(choice - 10);
@@ -531,6 +537,23 @@ class SampleFileBrowser final : public juce::Component,
             const auto &entry = owner.searchData->matches[std::size_t(row)];
             if (selected)
                 g.fillAll(accent.withAlpha(.22f));
+            if (owner.detailColumns)
+            {
+                // Columns layout: name | type | size | modified, one line per file.
+                const int date = 92, size = 62, type = 44, name = std::max(40, width - detailColumnsWidth);
+                g.setColour(ink);
+                g.setFont(juce::Font(vibera::uiFont, 12.f, juce::Font::plain));
+                g.drawFittedText(juce::String(entry.name) + (entry.missing ? " (missing)" : ""), 5, 0, name, height,
+                                 juce::Justification::centredLeft, 1);
+                g.setColour(muted);
+                g.drawFittedText(juce::String(entry.extension).trimCharactersAtStart(".").toUpperCase(), 9 + name, 0,
+                                 type, height, juce::Justification::centredLeft, 1);
+                g.drawFittedText(juce::File::descriptionOfSizeInBytes(entry.size), 9 + name + type, 0, size, height,
+                                 juce::Justification::centredRight, 1);
+                g.drawFittedText(entry.modified > 0 ? juce::Time(entry.modified).formatted("%Y-%m-%d") : juce::String("-"),
+                                 13 + name + type + size, 0, date, height, juce::Justification::centredLeft, 1);
+                return;
+            }
             g.setColour(ink);
             g.setFont(juce::Font(vibera::uiFont, 13.f, juce::Font::plain));
             g.drawFittedText(juce::String(entry.name) + (entry.missing ? " (missing)" : ""), 5, 1, width - 10,
@@ -645,8 +668,7 @@ class SampleFileBrowser final : public juce::Component,
         {
             unsortedData = std::move(result);
             searchData = sorted(unsortedData);
-            searchResults.setMinimumContentWidth(
-                std::max(190, int(std::min<std::size_t>(1600, searchData->widestRow * 7 + 16))));
+            updateResultWidth();
             searchResults.deselectAllRows();
             searchResults.updateContent();
             searchStatus.setText(
@@ -841,6 +863,22 @@ class SampleFileBrowser final : public juce::Component,
         searchResults.repaint();
     }
     int resultSortForTest() const { return resultSort; }
+    // Columns layout: compact one-line rows with type, size and date.
+    static constexpr int detailColumnsWidth = 210; // type + size + date columns.
+    void updateResultWidth()
+    {
+        const int names = searchData ? int(std::min<std::size_t>(1600, searchData->widestRow * 7 + 16)) : 0;
+        searchResults.setMinimumContentWidth(std::max(190, names + (detailColumns ? detailColumnsWidth : 0)));
+    }
+    void setDetailColumns(bool on)
+    {
+        detailColumns = on;
+        updateResultWidth();
+        searchResults.setRowHeight(on ? 22 : 36);
+        searchResults.updateContent();
+        searchResults.repaint();
+    }
+    bool detailColumns = false;
     juce::File resultForTest(int row) const { return resultModel.file(row); }
   private:
     std::shared_ptr<const browser_search::Service::Result> unsortedData;

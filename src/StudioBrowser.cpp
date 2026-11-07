@@ -251,6 +251,27 @@ juce::Result Studio::verifyBrowserLive(const juce::File &folder, const juce::Fil
                         next = now + 25;
                         break;
                     }
+                    if (selection == 0)
+                    {
+                        // Columns layout: one-line rows, then back to the default two-line rows.
+                        files.setDetailColumns(true);
+                        auto &list = files.resultsForTest();
+                        if (list.getRowHeight() != 22)
+                            return juce::Result::fail("Browser columns layout row height");
+                        juce::PNGImageFormat png;
+                        const auto docked = list.getBounds();
+                        list.setSize(520, std::max(120, docked.getHeight())); // A wide Browser shows every column.
+                        if (auto stream = folder.getChildFile("browser-columns.png").createOutputStream())
+                        {
+                            stream->setPosition(0);
+                            stream->truncate();
+                            png.writeImageToStream(list.createComponentSnapshot(list.getLocalBounds(), true, 2.f), *stream);
+                        }
+                        list.setBounds(docked);
+                        files.setDetailColumns(false);
+                        if (list.getRowHeight() != 36)
+                            return juce::Result::fail("Browser default layout row height");
+                    }
                     files.resultsForTest().selectRow(0);
                     ++selection;
                 }

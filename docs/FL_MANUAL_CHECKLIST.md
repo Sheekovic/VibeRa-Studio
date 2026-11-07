@@ -73,5 +73,5 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Show in folder (Explorer), delete file | done | right-click: Show in folder, Move to Recycle Bin (confirmed, never permanent) |
 | Wildcard and AND / OR / NOT search | done | `*`, `?`, AND / OR / NOT, parentheses and quoted text (BrowserQuery) |
 | Sort results by name / type / date | done | Browser tabs menu > Sort results |
-| Alternative view layouts (columns, sample grid) | missing | one list layout today |
+| Alternative view layout (columns: name, type, size, date) | done | Browser tabs menu > Show results as columns |
 | Folder colours / icons, frozen tab layouts, FL Cloud and online content | out of scope | FL-service and cosmetic items |
