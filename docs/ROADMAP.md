@@ -8,9 +8,9 @@ and VERIFICATION. Listening/hardware/content gaps remain explicit. The whole RPS
 module and inherited full-MCP backlog remain open.
 
 Delivery uses **substantial modules**, not individual controls.
-Active development is [Channel Rack / Pattern / sampler](modules/RACK-PATTERN-SAMPLER.md)
-with its [complete ledger](modules/RACK-PATTERN-SAMPLER.json); current scoped
-source evidence and exact next action live in STATUS.md.
+[Channel Rack / Pattern / sampler](modules/RACK-PATTERN-SAMPLER.md) was released as 0.1.0
+(2026-11-07, [ledger](modules/RACK-PATTERN-SAMPLER.json)). Active development is the
+[M6 release-quality module](modules/RELEASE-QUALITY.md); STATUS.md owns the next action.
 The Mixer links below retain its completed software milestone, not the active queue.
 The Mixer software milestone is qualified; human acceptance and the full DAW remain open.
 [Complete checklist and implementation order](modules/MIXER.md),
@@ -172,8 +172,8 @@ These gates preserve [MILESTONES.md](MILESTONES.md); M3 plugin work has delibera
 | M1 — music workflow foundation | Implemented subset; user familiarity/listening pending | Create drums and bass, edit notes, switch Pattern/Song, place linked patterns, Make Unique, route and mix, save/reopen and export an eight-bar song. Require document/render tests, runnable Windows package and user task outcomes. |
 | M2 / v0.1 — productive song writing | Partial, active | Complete the five familiar daily workflows over a 32-bar song, sampler and Browser editing, MIDI/audio interchange, built-in effects and Automation Clips, configurable shortcuts/macros, undo and crash recovery. Require native gesture evidence, exact round trips/export and forced-termination recovery. |
 | M3 / v0.2 — plugin and mixing depth | Partial | Qualify isolated VST3 discovery/editors/state/crash recovery, buses/sends/sidechains, latency compensation, plugin automation, tempo maps and stems. Require real-provider round trips/offline renders plus crash/hang/routing/latency fixtures. |
-| M4 / v0.3 — recording and audio production | Planned beyond current MIDI/audio-clip subset | Audio capture/monitoring, punch, loop takes, recovery, fades, alignment, consolidation and time stretching. Require synthetic capture/failure tests and actual interface/input/output/latency/listening checks. |
-| M5 / v0.4 — tuning and instruments | Planned | Per-note cents, Scala, maqam-friendly scale layouts/guidance, richer original instruments. Require frequency/render/persistence evidence, user musical review and explicit plugin tuning limitations. |
+| M4 / v0.3 — recording and audio production | Implemented in source, module unqualified; hardware/latency/listening pending | Source (2026-11-07) has audio/MIDI capture, count-in, punch/loop takes, take placement/comp/flatten, recovery/retry, fades, transient alignment, consolidation, stretch/warp and clip pitch/reverse. Still required: a module ledger and qualification, plus | Audio capture/monitoring, punch, loop takes, recovery, fades, alignment, consolidation and time stretching. Require synthetic capture/failure tests and actual interface/input/output/latency/listening checks. |
+| M5 / v0.4 — tuning and instruments | Implemented in source, module unqualified; musical review pending | Source (2026-11-07) has per-Channel tuning, MPE and MTS-ESP output, quarter-tone maqam snapping and the native VibeRa Synthesizer (qualified separately). Still required: a module ledger and qualification, plus | Per-note cents, Scala, maqam-friendly scale layouts/guidance, richer original instruments. Require frequency/render/persistence evidence, user musical review and explicit plugin tuning limitations. |
 | M6 / v1 — release qualification | Partial foundations, release gate open | Accessibility, scalable UI, mixed monitors, diagnostics, migrations, reproducible builds, installer/portable packaging, source/notices. Require clean-Windows tests, two-hour stress, install/upgrade/recovery checks and publication approval. 2026-11-04 (source): every source push builds Windows x64, Linux x64 and macOS universal in GitHub Actions (separate Windows/Linux/macOS workflows sharing `build-platform.yml`; tags use `release.yml`; first all-green run 41841307284 at ef32cdf; compile/link/number-text test only, no Linux/macOS runtime or audio acceptance). In-app updater (f4c8175): daily/manual check of GitHub Releases, release notes shown, user-approved download verified by the published SHA-256, Windows per-user setup started after VibeRa exits (unsaved projects must be saved first); `VibeRaTests --updater-check` 21 assertions and a live `vibera_update check`; download/install not exercised end to end until a release is published. |
 
 ## Feature backlog

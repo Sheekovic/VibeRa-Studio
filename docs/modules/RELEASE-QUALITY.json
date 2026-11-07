@@ -1,0 +1,113 @@
+{
+  "format": 1,
+  "id": "release-quality",
+  "name": "M6 release quality - install, run long sessions, recover and stay accessible",
+  "state": "in_progress",
+  "checklist": "docs/modules/RELEASE-QUALITY.md",
+  "nextAction": "Audit existing installer, recovery, migration and accessibility foundations against RQ-A..H; then close the first missing software row.",
+  "requirements": [
+    {
+      "id": "RQ-A",
+      "name": "Installer and portable package",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Per-user installer and portable folder built from the qualified distribution: install, launch, upgrade over an older version, uninstall entry and clean removal without touching user projects/settings.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-B",
+      "name": "Long-session stability",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Two-hour unattended playback/edit stress on the real device: no crash, leak growth, worker loss, stuck notes or callback overruns beyond the declared device limits; memory/handle/worker counts recorded over time.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-C",
+      "name": "Crash and forced-termination recovery",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Forced app and worker termination during edit, playback, recording and save: autosave/recovery restores the last committed state, takes are not lost and outcomes are truthful.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-D",
+      "name": "Project migration",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Projects from earlier schema versions open, migrate and save without losing audible settings or links; refusals are explicit for unsupported versions.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-E",
+      "name": "Accessibility",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Keyboard-only navigation of the main workspace and dialogs, focus order and visible focus, accessible names/roles for controls, readable contrast and target sizes.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-F",
+      "name": "Scalable UI and windows",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "100-200 percent scale and 1080p-4K layouts without clipping/overlap; detached windows open in front, restore on the right monitor and survive monitor disconnect.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-G",
+      "name": "Diagnostics",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "User-visible diagnostics export (version, device, plugin workers, recent errors) without personal paths or credentials; actionable error messages.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-H",
+      "name": "Source, notices and checksums",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Package ships licenses/notices for every bundled dependency and asset, exact source commit and checksums; reproducible build inputs recorded.",
+      "evidence": []
+    },
+    {
+      "id": "RQ-I",
+      "name": "Exact module release",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Complete source suite, module gate, staged/final installed verification and distribution audit on exact identities before replacing the sole distribution.",
+      "evidence": [],
+      "phase": "release"
+    }
+  ],
+  "externalAcceptance": [
+    {
+      "name": "Clean Windows machine install/upgrade/uninstall by the owner",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "name": "Mixed-monitor/DPI and screen-reader use by a person",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "name": "Publication approval",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "baselineContext": [
+    {
+      "path": "docs/MILESTONES.md",
+      "scope": "M6 / v1 gate"
+    },
+    {
+      "path": "docs/ROADMAP.md",
+      "scope": "M6 row and UX-01..04"
+    }
+  ],
+  "evidencePolicy": "Only verified rows with passed structured receipts binding actual dependencies and exact candidate binaries satisfy module-gate. Human, hardware and clean-machine checks stay separate.",
+  "updated": "2026-11-07",
+  "progressEvidence": []
+}
