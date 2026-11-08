@@ -267,7 +267,15 @@ struct Marker
     Id id = 0;
     double beat = 0;    // Song position in quarter-note beats.
     juce::String name;  // At most 128 characters.
+    // Playback action (version 57): "" none, "start" (Play from the Song start begins here),
+    // "loop" (the section up to the next marker repeats), "skip" (jump to the next marker),
+    // "pause" (playback pauses here).
+    juce::String action;
 };
+inline bool validMarkerAction(const juce::String &action)
+{
+    return action.isEmpty() || action == "start" || action == "loop" || action == "skip" || action == "pause";
+}
 // Playlist track settings by lane (version 50); lanes without an entry use the defaults.
 struct PlaylistTrack
 {

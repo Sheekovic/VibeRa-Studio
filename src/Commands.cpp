@@ -844,6 +844,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"chord.set", "Change a Chord Track chord", Scope::playlist, true, true, "command"},
         {"chord.delete", "Delete Chord Track chords", Scope::playlist, true, true, "command"},
         {"chord.fill", "Write a chord progression to the Chord Track (one chord per bar)", Scope::playlist, true, true, "command"},
+        {"marker.action", "Set a marker's playback action (start, loop, skip, pause)", Scope::playlist, true, true, "command"},
         {"channel.articulations", "Set the Channel expression map (articulations and keyswitches)", Scope::rack, true, true, "command"},
         {"notes.articulation", "Set the articulation of notes (expression map)", Scope::piano, true, true, "command"},
         {"rack.group.create", "Add Channel filter group", Scope::rack, true, true, "command"},
@@ -6791,6 +6792,16 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         }
         else if (id == "marker.rename")
             found->name = a.text;
+        else if (id == "marker.action")
+        {
+            if (!validMarkerAction(a.text))
+                return juce::Result::fail("marker.invalidAction: none (empty), start, loop, skip or pause");
+            if (a.text == "start")
+                for (auto &other : next.markers)
+                    if (other.action == "start")
+                        other.action.clear(); // One Start marker per Song.
+            found->action = a.text;
+        }
         else if (id == "marker.move")
             found->beat = a.beat;
         else if (id == "marker.delete")

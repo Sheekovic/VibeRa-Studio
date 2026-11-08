@@ -1024,14 +1024,23 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Moves an Audio Clip (with its take group) so its first transient lands on the nearest
     // multiple of `grid` beats; one clip.move Undo step. Reports the shift in the status.
     juce::Result alignClipToGrid(Id clip, double grid = .25);
-    // Song looping follows the Playlist time selection (whole Song without one).
+    // Song looping follows the Playlist time selection (whole Song without one), or the section of
+    // a Loop marker while the playhead is inside it.
     void syncSongLoop()
     {
+        if (!patternMode && !playlistRange && markerLoop)
+            return audio.setSongLoopBeats(markerLoop, true);
         if (patternMode || !playlistRange)
             return audio.setSongLoopBeats(std::nullopt);
         audio.setSongLoopBeats(std::pair{std::min(playlistRange->first, playlistRange->second),
                                          std::max(playlistRange->first, playlistRange->second)});
     }
+    // Marker actions while the Song plays (StudioMarkers in Studio.cpp): Start, Loop, Skip, Pause.
+    // Skip and Pause act on the 20 Hz UI timer, so they can land up to one tick late.
+    void pollMarkerActions();
+    std::optional<std::pair<double, double>> markerLoop;
+    bool markerLoopEnabledLooping = false, markerWasPlaying = false;
+    double markerLastBeat = 0;
     juce::Result openVideo(const juce::File &);
     void closeVideo();
     juce::var videoState() const;

@@ -523,6 +523,8 @@ juce::ValueTree Project::state() const
             set(entry, "id", juce::int64(marker.id));
             set(entry, "beat", marker.beat);
             set(entry, "name", marker.name);
+            if (marker.action.isNotEmpty())
+                set(entry, "action", marker.action);
             markerTree.appendChild(entry, nullptr);
         }
         root.appendChild(markerTree, nullptr);
@@ -1076,6 +1078,13 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 std::floor(id) != id)
                 return juce::Result::fail("Invalid Playlist marker");
             p.markers.push_back({Id(id), exactNumber(entry["beat"]), entry["name"].toString()});
+            if (entry.hasProperty("action"))
+            {
+                const auto action = entry["action"].toString();
+                if (fileVersion < 57 || action.isEmpty() || !validMarkerAction(action))
+                    return juce::Result::fail("Invalid Playlist marker action");
+                p.markers.back().action = action;
+            }
         }
     }
     if (const auto chordTree = t.getChildWithName("CHORDS"); chordTree.isValid())

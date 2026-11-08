@@ -990,6 +990,71 @@ void Studio::resized()
         component->toFront(false);
     repaint();
 }
+void Studio::pollMarkerActions()
+{
+    const bool playing = audio.playing() && !patternMode;
+    const double now = audio.positionBeat();
+    auto sorted = controller.project.markers;
+    std::stable_sort(sorted.begin(), sorted.end(), [](const auto &x, const auto &y) { return x.beat < y.beat; });
+    const auto nextAfter = [&](double beat) -> std::optional<double>
+    {
+        for (const auto &m : sorted)
+            if (m.beat > beat + 1.e-9)
+                return m.beat;
+        return std::nullopt;
+    };
+    if (playing && !markerWasPlaying && now < 1.e-6)
+        for (const auto &m : sorted)
+            if (m.action == "start" && m.beat > 0)
+            {
+                audio.seekBeat(m.beat); // Start marker: Play from the Song start begins here.
+                markerLastBeat = m.beat;
+                markerWasPlaying = true;
+                return;
+            }
+    std::optional<std::pair<double, double>> loop;
+    if (playing)
+    {
+        for (const auto &m : sorted)
+            if (m.action == "loop" && now >= m.beat - 1.e-9)
+                if (const auto end = nextAfter(m.beat); end && now < *end)
+                    loop = std::pair{m.beat, *end};
+        // Crossed during ordinary forward playback (not a seek or loop wrap).
+        if (now > markerLastBeat && now - markerLastBeat < 4)
+            for (const auto &m : sorted)
+                if (m.beat > markerLastBeat && m.beat <= now)
+                {
+                    if (m.action == "pause")
+                    {
+                        play.onClick(); // Pause at the marker.
+                        audio.seekBeat(m.beat);
+                        break;
+                    }
+                    if (m.action == "skip")
+                    {
+                        const auto end = nextAfter(m.beat);
+                        audio.seekBeat(end ? *end : controller.project.endBeat());
+                        break;
+                    }
+                }
+    }
+    if (loop != markerLoop)
+    {
+        markerLoop = loop;
+        if (loop && !audio.looping())
+        {
+            markerLoopEnabledLooping = performAction("transport.loop");
+        }
+        else if (!loop && markerLoopEnabledLooping)
+        {
+            markerLoopEnabledLooping = false;
+            if (audio.looping())
+                performAction("transport.loop");
+        }
+    }
+    markerWasPlaying = playing;
+    markerLastBeat = audio.positionBeat();
+}
 void Studio::updateMidiScaleSnap()
 {
     std::uint32_t mask = 0;
@@ -6472,6 +6537,7 @@ void Studio::timerCallback()
     mtsEsp.sync(controller.project);
     followTempoWarps();
     pollPerformance();
+    pollMarkerActions();
     syncSongLoop();
     if (videoWindow)
         videoWindow->follow(controller.project.songSeconds(audio.positionBeat()), audio.playing());

@@ -2400,6 +2400,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 set(row, "id", juce::int64(marker.id));
                 set(row, "beat", marker.beat);
                 set(row, "name", marker.name);
+                set(row, "action", marker.action);
                 append(row);
             }
         }

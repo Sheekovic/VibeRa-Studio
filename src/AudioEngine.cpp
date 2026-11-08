@@ -3974,6 +3974,10 @@ void AudioEngine::stop()
 }
 void AudioEngine::seekBeat(double beat)
 {
+    // A Loop marker's section stops looping when the playhead is sent outside it, before the
+    // transport can wrap back into it.
+    if (songLoopFromMarker && songLoop && (beat < songLoop->first - 1.e-9 || beat >= songLoop->second))
+        setSongLoopBeats(std::nullopt);
     if (deferredDocumentProjection && !edit) deferredPositionBeat = std::max(0., beat);
     guide->cancel();
     if (edit)
@@ -3986,8 +3990,9 @@ void AudioEngine::setLooping(bool loop)
         edit->getTransport().looping = loop;
     publishLoopBounds();
 }
-void AudioEngine::setSongLoopBeats(std::optional<std::pair<double, double>> beats)
+void AudioEngine::setSongLoopBeats(std::optional<std::pair<double, double>> beats, bool fromMarker)
 {
+    songLoopFromMarker = beats && fromMarker;
     if (beats == songLoop)
         return;
     songLoop = beats;

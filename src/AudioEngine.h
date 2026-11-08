@@ -377,7 +377,8 @@ class AudioEngine
     void setLooping(bool);
     bool looping() const;
     // Song mode loops the Playlist time selection (beats) when one is set, else the whole Song.
-    void setSongLoopBeats(std::optional<std::pair<double, double>>);
+    // fromMarker: the range is a Loop marker's section; seeking outside it releases it at once.
+    void setSongLoopBeats(std::optional<std::pair<double, double>>, bool fromMarker = false);
     std::optional<std::pair<double, double>> songLoopBeats() const
     {
         return songLoop;
@@ -655,6 +656,7 @@ class AudioEngine
     double deferredPositionBeat = 0;
     bool deferredLooping = false;
     std::optional<std::pair<double, double>> songLoop;
+    bool songLoopFromMarker = false;
     te::TimeRange loopRange(const Project &, bool patternMode, double duration) const;
     Id projectedPattern = 0;
     std::uint64_t replacements = 0, updates = 0, samplerCreations = 0, midiUpdates = 0;

@@ -5623,12 +5623,26 @@ class Studio::Editor final : public juce::Component,
                     menu.addItem(1, "Rename marker...");
                     menu.addItem(2, "Move marker to playhead");
                     menu.addItem(3, "Delete marker");
-                    menu.showMenuAsync({}, [safe, id, name = marker.name](int chosen)
+                    juce::PopupMenu actions;
+                    const juce::StringArray kinds{"", "start", "loop", "skip", "pause"};
+                    const juce::StringArray labels{"None", "Start (Play from the Song start begins here)",
+                                                   "Loop (repeat up to the next marker)", "Skip (jump to the next marker)",
+                                                   "Pause"};
+                    for (int k = 0; k < kinds.size(); ++k)
+                        actions.addItem(10 + k, labels[k], true, marker.action == kinds[k]);
+                    menu.addSubMenu("Action", actions);
+                    menu.showMenuAsync({}, [safe, id, name = marker.name, kinds](int chosen)
                     {
                         if (!safe || chosen <= 0)
                             return;
                         CommandArgs a;
                         a.target = id;
+                        if (chosen >= 10 && chosen < 10 + kinds.size())
+                        {
+                            a.text = kinds[chosen - 10];
+                            safe->s.command("marker.action", a);
+                            return;
+                        }
                         if (chosen == 2)
                         {
                             a.beat = std::max(0., safe->s.audio.positionBeat());

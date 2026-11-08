@@ -948,6 +948,9 @@ set_tests_properties(playlist_tools_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME midi_scale_snap_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-midi-scale-snap-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/midi_scale_snap_mcp")
 set_tests_properties(midi_scale_snap_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME marker_actions_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-marker-actions-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/marker_actions_mcp")
+set_tests_properties(marker_actions_mcp PROPERTIES TIMEOUT 200)
 add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
 set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)
