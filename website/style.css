@@ -169,6 +169,15 @@ h1 { font-size: clamp(40px, 6vw, 72px); line-height: 1.02; margin: 0 0 22px; let
 .muted { color: var(--muted); }
 .center { text-align: center; }
 
+/* Manual call to action */
+.manual-cta { display: grid; grid-template-columns: 1fr 1.1fr; gap: 32px; align-items: center; padding: clamp(22px, 3vw, 36px); border-radius: 22px; color: inherit;
+  border: 1px solid rgba(238, 183, 106, .4); background: linear-gradient(135deg, rgba(238, 183, 106, .12), rgba(41, 215, 197, .08)); transition: transform .2s, box-shadow .2s; }
+.manual-cta:hover { text-decoration: none; transform: translateY(-4px); box-shadow: 0 24px 60px rgba(0, 0, 0, .4); }
+.manual-cta h2 { font-size: clamp(26px, 3vw, 36px); margin: 0 0 10px; }
+.manual-cta p { color: #c4d3da; font-size: 17px; }
+.manual-cta img { border-radius: 12px; border: 1px solid rgba(66, 90, 104, .6); box-shadow: 0 20px 50px rgba(0, 0, 0, .45); }
+@media (max-width: 960px) { .manual-cta { grid-template-columns: 1fr; } }
+
 /* Roadmap */
 .timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .step { }

@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VibeRa Studio Manual</title>
+<meta name="description" content="The VibeRa Studio manual: what the studio is, a guided tour, step-by-step tutorials for every editor, 40 built-in effects, keyboard shortcuts and producer hacks.">
+<meta property="og:title" content="VibeRa Studio Manual">
+<meta property="og:description" content="Learn VibeRa Studio: tutorials, shortcuts and hacks for every feature.">
+<meta property="og:image" content="img/manual/workspace.png">
+<link rel="icon" href="img/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="manual.css">
+</head>
+<body class="manual-page">
+<div class="read-progress" id="progress"></div>
+
+<header class="topbar">
+  <a class="brand" href="index.html"><img src="img/icon.png" alt=""><span>VibeRa Studio</span></a>
+  <nav>
+    <a href="index.html#features">Features</a>
+    <a href="manual.html" class="current">Manual</a>
+    <a href="#shortcuts">Shortcuts</a>
+    <a href="#hacks">Hacks</a>
+    <a href="index.html#download">Download</a>
+    <a class="gh" href="https://github.com/Sheekovic/VibeRa-Studio" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<section class="m-hero">
+  <p class="eyebrow"><span class="dot"></span> Manual &middot; Tutorials &middot; Hacks</p>
+  <h1>Learn VibeRa <span class="accent">in one sitting.</span></h1>
+  <p class="lead">Everything the studio can do, how to do it, and the shortcuts that make it fast.
+    Every picture on this page is a real capture of VibeRa Studio running the bundled
+    <i>Midnight Session</i> example.</p>
+  <div class="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    <input id="search" type="search" placeholder="Search the manual: swing, sidechain, maqam, quantize..." autocomplete="off" aria-label="Search the manual">
+    <kbd>/</kbd>
+  </div>
+  <p class="search-count" id="search-count" aria-live="polite"></p>
+  <div class="chips" id="quick">
+    <a href="#first-beat">Your first beat</a><a href="#rack">Channel Rack</a><a href="#piano">Piano roll</a>
+    <a href="#playlist">Playlist</a><a href="#mixer">Mixer</a><a href="#effects">40 effects</a>
+    <a href="#maqam">Maqam</a><a href="#shortcuts">Shortcuts</a><a href="#hacks">Hacks</a>
+  </div>
+</section>
+
+<div class="m-layout">
+  <aside class="toc" id="toc" aria-label="Contents">
+    <p class="toc-title">Contents</p>
+    <ol>
+      <li><a href="#what">What is VibeRa?</a></li>
+      <li><a href="#tour">Workspace tour</a></li>
+      <li><a href="#first-beat">Your first beat</a></li>
+      <li><a href="#rack">Channel Rack</a></li>
+      <li><a href="#piano">Piano roll</a></li>
+      <li><a href="#playlist">Playlist</a></li>
+      <li><a href="#mixer">Mixer</a></li>
+      <li><a href="#effects">Built-in effects</a></li>
+      <li><a href="#sampler">Sampler channel</a></li>
+      <li><a href="#instruments">Instruments</a></li>
+      <li><a href="#recording">Recording</a></li>
+      <li><a href="#performance">Performance mode</a></li>
+      <li><a href="#chords">Chord Track</a></li>
+      <li><a href="#maqam">Maqam &amp; tuning</a></li>
+      <li><a href="#plugins">VST3 plugins</a></li>
+      <li><a href="#browser">Browser</a></li>
+      <li><a href="#export">Export &amp; loudness</a></li>
+      <li><a href="#projects">Projects &amp; safety</a></li>
+      <li><a href="#ai">AI &amp; automation</a></li>
+      <li><a href="#shortcuts">Shortcuts</a></li>
+      <li><a href="#hacks">Hacks</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ol>
+  </aside>
+
+  <main class="m-content" id="content">
+
+  <!-- WHAT -->
+  <section class="m-sec" id="what" data-keys="definition overview concepts channel pattern playlist mixer free open source">
+    <h2><span class="num">01</span> What is VibeRa Studio?</h2>
+    <p class="big">VibeRa Studio is a <b>free, open-source digital audio workstation</b> for Windows. You
+      build sounds as <b>Channels</b>, write them into <b>Patterns</b>, arrange Patterns and audio on the
+      <b>Playlist</b>, and shape everything in the <b>Mixer</b>, then export a finished track. No account,
+      no license key, no cost, under the GNU AGPL v3.0.</p>
+    <div class="flow" aria-label="How sound flows through VibeRa">
+      <div class="node" style="--c:#db6b85"><b>Channel</b><span>a sample, the Synth or a VST3 instrument</span></div>
+      <i></i>
+      <div class="node" style="--c:#eeb76a"><b>Pattern</b><span>steps and notes for many Channels</span></div>
+      <i></i>
+      <div class="node" style="--c:#a48ce1"><b>Playlist</b><span>Pattern, audio and automation clips in time</span></div>
+      <i></i>
+      <div class="node" style="--c:#29d7c5"><b>Mixer</b><span>inserts, effects, sends, Master</span></div>
+      <i></i>
+      <div class="node" style="--c:#669ce3"><b>Export</b><span>WAV, FLAC, OGG, MP3 or stems</span></div>
+    </div>
+    <div class="facts">
+      <div><b data-count="40">40</b><span>built-in effects</span></div>
+      <div><b data-count="75">75</b>+<span>Synth presets</span></div>
+      <div><b data-count="15">15</b><span>maqam scales</span></div>
+      <div><b data-count="2">2</b> min<span>autosave interval</span></div>
+    </div>
+    <details class="more"><summary>Key words you will meet</summary>
+      <dl class="glossary">
+        <dt>Channel</dt><dd>One sound source in the Channel Rack: a sample, the VibeRa Synth, the Drum Synth or a VST3 instrument. Each Channel sends its audio to a Mixer insert.</dd>
+        <dt>Pattern</dt><dd>A reusable block of steps and notes. One Pattern can hold parts for every Channel, and every copy on the Playlist plays the same Pattern, so editing it once updates every placement.</dd>
+        <dt>Pattern / Song mode</dt><dd>Press <kbd>L</kbd> to switch. Pattern mode loops the selected Pattern; Song mode plays the Playlist.</dd>
+        <dt>Insert</dt><dd>A Mixer track. Inserts hold up to a chain of effects, route to Master or to other inserts, and can sidechain each other.</dd>
+        <dt>Clip</dt><dd>Anything placed on the Playlist: a Pattern clip, an audio clip or an automation clip.</dd>
+        <dt>Snap</dt><dd>The grid that edits lock to: bars, beats, steps, triplets, grid lines or markers.</dd>
+      </dl>
+    </details>
+  </section>
+
+  <!-- TOUR -->
+  <section class="m-sec" id="tour" data-keys="tour workspace layout toolbar transport window dock">
+    <h2><span class="num">02</span> Workspace tour</h2>
+    <p>Hover or tap the numbered dots to learn each area of the default workspace.</p>
+    <div class="tour" id="tour-map">
+      <img src="img/manual/workspace.png" alt="The VibeRa Studio workspace with Browser, Channel Rack, Piano roll, Playlist and Mixer" loading="lazy">
+    </div>
+    <div class="tour-card" id="tour-card" aria-live="polite"><b>Tip</b> Choose a dot to begin the tour, or use the arrows.
+      <div class="tour-nav"><button id="tour-prev" aria-label="Previous stop">&larr;</button><button id="tour-next" aria-label="Next stop">&rarr;</button></div></div>
+    <div class="hack"><b>Hack</b> Every panel can float or dock: use the buttons at the top right of a panel to
+      detach, maximize or close it. Lost your layout? <i>Tools &gt; Restore docked workspace layout</i>.
+      <kbd>F5</kbd> Playlist, <kbd>F6</kbd> Channel Rack, <kbd>F7</kbd> Piano roll, <kbd>F9</kbd> Mixer,
+      <kbd>F8</kbd> plugins, <kbd>F10</kbd> Settings.</div>
+  </section>
+
+  <!-- FIRST BEAT -->
+  <section class="m-sec" id="first-beat" data-keys="tutorial beginner first beat start getting started steps">
+    <h2><span class="num">03</span> Your first beat in six steps</h2>
+    <div class="stepper" id="stepper">
+      <div class="steps-nav" role="tablist"></div>
+      <div class="step-panel">
+        <article data-title="Open the example">
+          <h3>1. Open the example or start fresh</h3>
+          <p>VibeRa ships with <b>Midnight Session</b> in the <code>Examples</code> folder. Open it with
+            <kbd>Ctrl</kbd>+<kbd>O</kbd> to hear a finished arrangement, or press the <b>Demo</b> button.
+            For a clean page, start a new project, or use <i>New from template</i>.</p>
+        </article>
+        <article data-title="Add sounds">
+          <h3>2. Add your sounds</h3>
+          <p>Drag samples from the <b>Browser</b> onto the Channel Rack, or press the <b>+</b> under the
+            Channels to add the VibeRa Synth, the Drum Synth or a VST3 instrument. A kick, a snare, a hat and
+            a bass is all you need.</p>
+        </article>
+        <article data-title="Program steps">
+          <h3>3. Click in a groove</h3>
+          <p>Left-click steps to turn them on, right-click to turn them off. Press <kbd>Space</kbd> to hear
+            the Pattern loop. Try a kick on every beat, a snare on 2 and 4 and hats in between.</p>
+        </article>
+        <article data-title="Write a melody">
+          <h3>4. Write a bassline</h3>
+          <p>Select the bass Channel and press <kbd>F7</kbd>. Draw notes with the pencil (<kbd>P</kbd>),
+            resize their ends, delete with right-click. <kbd>Ctrl</kbd>+<kbd>Q</kbd> tidies the timing.</p>
+        </article>
+        <article data-title="Arrange">
+          <h3>5. Arrange the song</h3>
+          <p>Press <kbd>L</kbd> for Song mode and <kbd>F5</kbd> for the Playlist. Paint the Pattern along
+            a track, make a second Pattern for the chorus with <kbd>F4</kbd>, and build intro, verse and drop.</p>
+        </article>
+        <article data-title="Mix and export">
+          <h3>6. Mix and export</h3>
+          <p>Link each Channel to its own Mixer insert with <kbd>Ctrl</kbd>+<kbd>L</kbd>, balance the faders,
+            add an EQ and a reverb, put the Maximizer on Master, then export with <kbd>Ctrl</kbd>+<kbd>R</kbd>.</p>
+        </article>
+      </div>
+      <div class="step-foot"><button class="btn ghost" id="step-prev">Back</button>
+        <div class="step-bar"><i id="step-bar"></i></div>
+        <button class="btn primary" id="step-next">Next step</button></div>
+    </div>
+  </section>
+
+  <!-- RACK -->
+  <section class="m-sec" id="rack" data-keys="channel rack step sequencer swing graph steps rotate clone zip link mixer transpose group">
+    <h2><span class="num">04</span> Channel Rack <kbd class="fkey">F6</kbd></h2>
+    <figure class="shot"><img src="img/manual/rack.png" alt="Channel Rack with kick, snare, hat and bass rows" loading="lazy">
+      <figcaption>Each row is a Channel: mute light, pan and volume knobs, its piano-roll marker, Mixer insert and steps.</figcaption></figure>
+    <div class="cols">
+      <div>
+        <h3>How to</h3>
+        <ul class="how">
+          <li><b>Program steps</b>: left-click on, right-click off, drag to paint a row.</li>
+          <li><b>Swing</b>: the Swing box at the top right shuffles every Channel in the Pattern.</li>
+          <li><b>Graph editor</b> <kbd>Ctrl</kbd>+<kbd>K</kbd>: edit velocity, pan and pitch per step.</li>
+          <li><b>Select Channels</b>: click the name; right-drag a selector; double-click selects all.</li>
+          <li><b>Rename / colour</b> <kbd>F2</kbd>, <b>clone</b> <kbd>Alt</kbd>+<kbd>C</kbd>, <b>move</b> <kbd>Alt</kbd>+<kbd>&uarr;</kbd>/<kbd>&darr;</kbd>, <b>delete</b> <kbd>Alt</kbd>+<kbd>Del</kbd>.</li>
+          <li><b>Filter groups</b>: the top-left list shows only one group of Channels; <kbd>PgUp</kbd>/<kbd>PgDn</kbd> switch groups.</li>
+          <li><b>Pan and volume automation</b>: every row's knobs can get their own automation clip.</li>
+        </ul>
+      </div>
+      <div class="hacks">
+        <h3>Hacks</h3>
+        <p><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>&larr;</kbd>/<kbd>&rarr;</kbd> rotates the selected Channel's steps: instant hat and percussion variations.</p>
+        <p><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> links all selected Channels to consecutive Mixer inserts in one move.</p>
+        <p><kbd>Alt</kbd>+<kbd>Z</kbd> zips selected Channels into compact rows, <kbd>Alt</kbd>+<kbd>U</kbd> unzips all.</p>
+        <p>Ctrl+click a Channel button to preview its sound without selecting it.</p>
+        <p><i>Store in spare state</i> (right-click a Channel) keeps an A version; <i>flip</i> toggles A/B to compare two sounds.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIANO -->
+  <section class="m-sec" id="piano" data-keys="piano roll notes quantize chop strum arpeggio slide portamento ghost chord legato glue scale velocity script riff">
+    <h2><span class="num">05</span> Piano roll <kbd class="fkey">F7</kbd></h2>
+    <figure class="shot"><img src="img/manual/piano.png" alt="Piano roll showing a bassline with velocity lane" loading="lazy">
+      <figcaption>Notes on the grid, ghost notes from other Channels, and the event lane (velocity here) underneath.</figcaption></figure>
+    <div class="tabs" data-tabs>
+      <div class="tab-bar"><button class="on">Tools</button><button>Editing</button><button>Generators</button><button>Hacks</button></div>
+      <div class="tab on">
+        <div class="keygrid">
+          <div><kbd>P</kbd> Draw</div><div><kbd>B</kbd> Paint</div><div><kbd>C</kbd> Slice</div><div><kbd>T</kbd> Mute</div>
+          <div><kbd>E</kbd> Select</div><div><kbd>Shift</kbd>+<kbd>Z</kbd> Zoom</div><div><kbd>N</kbd> Drum paint</div><div><kbd>Y</kbd> Play tool</div>
+          <div><kbd>S</kbd> Insert slide</div><div><kbd>O</kbd> Insert portamento</div><div><kbd>Alt</kbd>+<kbd>V</kbd> Ghost notes</div><div><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>V</kbd> Edit ghosts</div>
+        </div>
+      </div>
+      <div class="tab">
+        <ul class="how">
+          <li><b>Transpose</b> <kbd>Shift</kbd>+<kbd>&uarr;</kbd>/<kbd>&darr;</kbd>, <b>octave</b> <kbd>Ctrl</kbd>+<kbd>&uarr;</kbd>/<kbd>&darr;</kbd>, <b>nudge</b> <kbd>Shift</kbd>+<kbd>&larr;</kbd>/<kbd>&rarr;</kbd>.</li>
+          <li><b>Quick quantize</b> <kbd>Ctrl</kbd>+<kbd>Q</kbd>, starts only <kbd>Shift</kbd>+<kbd>Q</kbd>, full quantizer <kbd>Alt</kbd>+<kbd>Q</kbd>.</li>
+          <li><b>Legato</b> <kbd>Ctrl</kbd>+<kbd>L</kbd>, <b>chop</b> <kbd>Ctrl</kbd>+<kbd>U</kbd>, <b>glue</b> <kbd>Ctrl</kbd>+<kbd>G</kbd>, <b>duplicate</b> <kbd>Ctrl</kbd>+<kbd>B</kbd>.</li>
+          <li><b>Group notes</b> <kbd>Shift</kbd>+<kbd>G</kbd> so they move together; <kbd>Alt</kbd>+<kbd>G</kbd> ungroups.</li>
+          <li><b>Mute notes</b> <kbd>Alt</kbd>+<kbd>M</kbd>, unmute <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>.</li>
+          <li><b>Event lane</b>: switch it between Velocity, Release, Pan, Mod X, Mod Y and Fine pitch.</li>
+          <li><b>Insert / delete space</b> <kbd>Ctrl</kbd>+<kbd>Ins</kbd> / <kbd>Ctrl</kbd>+<kbd>Del</kbd> at the time selection.</li>
+        </ul>
+      </div>
+      <div class="tab">
+        <ul class="how">
+          <li><b>Chord stamp</b>: pick a chord shape and every note you draw becomes that chord.</li>
+          <li><b>Arpeggiate, strum, flam, randomize, limit, articulate, scale levels</b> and an <b>LFO tool</b> for velocity or pitch curves.</li>
+          <li><b>Riff machine</b> and <b>Claw machine</b> generate and thin out melodic ideas.</li>
+          <li><b>Note scripts</b>: run JavaScript on the selected notes; <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Y</kbd> runs the last one again.</li>
+          <li><b>Scale snapping</b> and the scale guide, including maqam scales with quarter tones.</li>
+          <li><b>Export</b> a score sheet as PDF, or use the MIDI clipboard.</li>
+        </ul>
+      </div>
+      <div class="tab hacks-tab">
+        <p><kbd>Shift</kbd>+<kbd>R</kbd> selects random notes and <kbd>Shift</kbd>+<kbd>O</kbd> every other note: delete or lower them for instant variations.</p>
+        <p><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> pastes notes copied as MIDI from another program.</p>
+        <p><kbd>Ctrl</kbd>+<kbd>Enter</kbd> selects the time around the selected notes; <kbd>Ctrl</kbd>+<kbd>&larr;</kbd>/<kbd>&rarr;</kbd> moves that time selection.</p>
+        <p><kbd>Alt</kbd>+<kbd>B</kbd> shades the black-key rows for easier reading.</p>
+        <p><kbd>Shift</kbd>+<kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> are zoom presets, <kbd>Shift</kbd>+<kbd>4</kbd> fits, <kbd>Shift</kbd>+<kbd>5</kbd> zooms to the selection.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAYLIST -->
+  <section class="m-sec" id="playlist" data-keys="playlist arrange clips tracks markers audio clip automation slice chop stretch reverse time signature tempo">
+    <h2><span class="num">06</span> Playlist <kbd class="fkey">F5</kbd></h2>
+    <figure class="shot"><img src="img/manual/playlist.png" alt="Playlist with Pattern clips, the clip picker and a Chord Track on the ruler" loading="lazy">
+      <figcaption>The clip picker on the left, tracks, Pattern clips with mini previews, and the Chord Track symbols on the ruler.</figcaption></figure>
+    <div class="cols">
+      <div>
+        <h3>How to</h3>
+        <ul class="how">
+          <li><b>Place clips</b>: choose a Pattern, audio or automation source in the picker (<kbd>Alt</kbd>+<kbd>P</kbd>), then draw (<kbd>P</kbd>) or paint (<kbd>B</kbd>).</li>
+          <li><b>Tools</b>: slice <kbd>C</kbd>, slip <kbd>S</kbd>, select <kbd>E</kbd>, delete <kbd>D</kbd>, mute <kbd>T</kbd>, zoom <kbd>Shift</kbd>+<kbd>Z</kbd>.</li>
+          <li><b>Move</b> clips between tracks with <kbd>Shift</kbd>+<kbd>&uarr;</kbd>/<kbd>&darr;</kbd>, nudge with <kbd>Shift</kbd>+<kbd>&larr;</kbd>/<kbd>&rarr;</kbd>.</li>
+          <li><b>Copy, cut, paste, duplicate</b>: <kbd>Ctrl</kbd>+<kbd>C</kbd>/<kbd>X</kbd>/<kbd>V</kbd>/<kbd>B</kbd>.</li>
+          <li><b>Markers</b>: <kbd>Alt</kbd>+<kbd>T</kbd> adds one at the playhead; markers can also be added every N bars.</li>
+          <li><b>Tracks</b>: drag the edge to resize, <kbd>Alt</kbd>+wheel zooms vertically, lock tracks, colour them, group them.</li>
+          <li><b>Tempo and meter</b>: tempo curves and time-signature changes live on the ruler.</li>
+          <li><b>Multiple arrangements</b> of the same Patterns in one project.</li>
+        </ul>
+      </div>
+      <div class="hacks">
+        <h3>Hacks</h3>
+        <p>On audio clips: <kbd>7</kbd>/<kbd>8</kbd> pitch down/up a semitone, <kbd>9</kbd> reverses.</p>
+        <p><kbd>Ctrl</kbd>+<kbd>Ins</kbd> inserts and <kbd>Ctrl</kbd>+<kbd>Del</kbd> deletes the ruler-selected time across the whole song: perfect for adding a bar to a finished arrangement.</p>
+        <p><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd> merges similar Pattern clips everywhere; <kbd>Ctrl</kbd>+<kbd>G</kbd> merges the selected ones.</p>
+        <p><kbd>Shift</kbd>+<kbd>M</kbd> switches to stretch mode, so dragging an audio clip's end time-stretches it.</p>
+        <p><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> clones the selected track with its clips.</p>
+        <p>Render selected clips to one audio clip, or consolidate a whole track to audio to free CPU.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MIXER -->
+  <section class="m-sec" id="mixer" data-keys="mixer insert fader pan send sidechain route master eq latency group meter render arm">
+    <h2><span class="num">07</span> Mixer <kbd class="fkey">F9</kbd></h2>
+    <figure class="shot"><img src="img/manual/mixer.png" alt="Mixer with Master, inserts and an effect chain with Studio Reverb and Seven Band EQ" loading="lazy">
+      <figcaption>Master and inserts on the left; the selected insert's effect chain on the right, each slot with a wet knob.</figcaption></figure>
+    <div class="cols">
+      <div>
+        <h3>How to</h3>
+        <ul class="how">
+          <li><b>Route a Channel</b>: select it in the Channel Rack, select an insert, press <kbd>Ctrl</kbd>+<kbd>L</kbd>.</li>
+          <li><b>Add effects</b>: <i>Add effect</i> in the chain panel, or the <b>+</b> button. Drag slots to reorder.</li>
+          <li><b>Sends and sidechain</b>: route an insert into another, set the send level, or pick it as an effect's detector input.</li>
+          <li><b>Rename</b> <kbd>F2</kbd>, <b>move</b> <kbd>Alt</kbd>+<kbd>&larr;</kbd>/<kbd>&rarr;</kbd>, <b>solo</b> Ctrl+click the enable light, <b>centre pan</b> double-click.</li>
+          <li><b>Built-in 3-band EQ</b> on every track, plus track delay, polarity, stereo separation and swap L/R.</li>
+          <li><b>Save track state</b>: store a whole insert (effects, EQ, fader, pan) and open it in another project.</li>
+          <li><b>Latency compensation</b> keeps effects with lookahead perfectly aligned.</li>
+        </ul>
+      </div>
+      <div class="hacks">
+        <h3>Hacks</h3>
+        <p>Touch-record fader, pan and send moves into automation while the song plays.</p>
+        <p><kbd>Alt</kbd>+<kbd>L</kbd> selects the Channels routed to the selected insert.</p>
+        <p><kbd>Alt</kbd>+<kbd>W</kbd> shows the Meter-wave view, a scrolling picture of each track's level.</p>
+        <p><kbd>Alt</kbd>+<kbd>G</kbd> groups inserts; dock tracks to the left, middle or right.</p>
+        <p>Render-arm tracks to bounce them to audio in one pass.</p>
+        <p>Smart disable switches off idle VibeRa effects automatically to save CPU.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EFFECTS -->
+  <section class="m-sec" id="effects" data-keys="effects reverb delay compressor eq limiter maximizer chorus distortion saturator vocoder lofi gate pump beat gate multiband de-esser">
+    <h2><span class="num">08</span> 40 built-in effects</h2>
+    <p>Every VibeRa effect opens with a balanced, bright window and a live visual of what it controls.
+      Choose a category to filter.</p>
+    <div class="fx-filter" id="fx-filter"></div>
+    <div class="fx-grid" id="fx-grid"></div>
+    <div class="hack"><b>Hack</b> Put <b>Pump</b> on a bass insert for tempo-synced sidechain-style pumping
+      without routing a kick. Use <b>Beat Gate</b> on a pad for instant stutters and half-time, and finish the
+      Master with <b>Maximizer</b> and check the result with the <b>Spectrum Analyzer</b>.</div>
+  </section>
+
+  <!-- SAMPLER -->
+  <section class="m-sec" id="sampler" data-keys="sampler channel window envelope lfo filter root note stretch loop fade sample">
+    <h2><span class="num">09</span> Sampler channel window</h2>
+    <p>Click a sample Channel's name to open its window: three pages, compact knobs, and a root-note keyboard.</p>
+    <div class="gallery" data-tabs>
+      <div class="tab-bar"><button class="on">Sample</button><button>Envelope</button><button>Misc</button></div>
+      <div class="tab on"><figure class="shot small"><img src="img/manual/sampler-sample.png" alt="Sampler Sample page" loading="lazy"></figure>
+        <p>Trim, loop points, fades, reverse and <b>time stretching</b> (pitch, multiply, time and mode) to fit the sample to the tempo.</p></div>
+      <div class="tab"><figure class="shot small"><img src="img/manual/sampler-envelope.png" alt="Sampler Envelope page with Mod X envelope and LFO" loading="lazy"></figure>
+        <p>Envelopes and LFOs for <b>Panning, Volume, Mod X, Mod Y and Pitch</b>, with tempo sync and a filter (LP, HP, BP) driven by Mod X and Mod Y.</p></div>
+      <div class="tab"><figure class="shot small"><img src="img/manual/sampler-misc.png" alt="Sampler Miscellaneous page" loading="lazy"></figure>
+        <p>Polyphony, glide, gate, cut groups and other channel settings.</p></div>
+    </div>
+    <div class="hack"><b>Hack</b> On the keyboard strip, <b>right-click a key</b> to set the root note and
+      <b>left-click</b> to audition. Drop a drum loop on a Channel and use automatic slicing to spread its hits
+      across new Channels.</div>
+  </section>
+
+  <!-- INSTRUMENTS -->
+  <section class="m-sec" id="instruments" data-keys="synth synthesizer wavetable unison presets drum synth drum pads kit instrument">
+    <h2><span class="num">10</span> Instruments</h2>
+    <div class="cards3">
+      <article class="icard"><h3>VibeRa Synth</h3><p>An original instrument with more than 75 presets:
+        synthesized basses, leads and pads plus recorded pianos, strings, brass and guitars. Wavetable
+        oscillators with up to 16-voice unison.</p><p class="tip">Type <b>wavetable</b> in the preset search to list every wavetable preset.</p></article>
+      <article class="icard"><h3>VibeRa Drum Synth</h3><p>A fully synthesized kit on eight pads: kick, snare,
+        clap, hats, toms and rim. No samples needed, every drum is shaped with knobs.</p><p class="tip">Layer it under a sampled kick for extra weight.</p></article>
+      <article class="icard"><h3>Drum pads</h3><p><i>Tools &gt; Drum pads</i> opens a pad grid to play and load a
+        kit with the mouse, the computer keyboard or a MIDI controller.</p><p class="tip">Turn on step record to write what you play at a cursor.</p></article>
+    </div>
+  </section>
+
+  <!-- RECORDING -->
+  <section class="m-sec" id="recording" data-keys="record audio midi takes comping punch count-in metronome overdub step record typing keyboard input">
+    <h2><span class="num">11</span> Recording</h2>
+    <div class="cols">
+      <div>
+        <h3>Audio</h3>
+        <ul class="how">
+          <li>Choose inputs in Settings (<kbd>F10</kbd>), arm, then press <kbd>R</kbd> and <kbd>Space</kbd>.</li>
+          <li><b>Loop takes</b>: each pass becomes a take; <b>comp</b> the best parts into one.</li>
+          <li><b>Punch-in</b> with a ruler selection; record several inputs at once.</li>
+          <li><b>Count-in</b> <kbd>Ctrl</kbd>+<kbd>P</kbd> and <b>metronome</b> <kbd>Ctrl</kbd>+<kbd>M</kbd>.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>MIDI</h3>
+        <ul class="how">
+          <li><b>Overdub or replace</b>: choose in <i>Tools &gt; MIDI recording replaces notes</i>.</li>
+          <li><b>Step record</b>: write played notes at a cursor; insert rests from the Tools menu.</li>
+          <li><b>Typing keyboard</b> <kbd>Ctrl</kbd>+<kbd>T</kbd>: play notes with your computer keys.</li>
+          <li><b>Automation recording</b>: knob moves while recording become automation.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="hack"><b>Hack</b> Record knob moves <i>inside a Pattern</i> and they play wherever that Pattern is placed,
+      great for filter sweeps that repeat every chorus.</div>
+  </section>
+
+  <!-- PERFORMANCE -->
+  <section class="m-sec" id="performance" data-keys="performance live launch pads scenes follow action quantum">
+    <h2><span class="num">12</span> Performance mode</h2>
+    <p><i>Tools &gt; Performance mode</i> turns Patterns into launch pads you can trigger from the mouse or a MIDI
+      controller. While the song plays, what you launch is written onto the Playlist, so a jam becomes an arrangement.</p>
+    <div class="pads" id="pads" aria-hidden="true"></div>
+    <ul class="how">
+      <li><b>Launch quantum</b>: start immediately, on the next beat or on the next bar (right-click a pad).</li>
+      <li><b>Scenes</b> launch a whole row of Patterns together.</li>
+      <li><b>Follow actions</b>: right-click a pad &gt; <i>Follow action</i>. After 1, 2, 4 or 8 plays it moves to the
+        next, previous, first, last, a random or another random Pattern, plays again or stops.</li>
+    </ul>
+    <div class="hack"><b>Hack</b> Set <i>Another Pattern (random)</i> on a few drum variations and let the
+      performance generate a never-repeating groove; it is written to the Playlist so you can keep the best take.</div>
+  </section>
+
+  <!-- CHORDS -->
+  <section class="m-sec" id="chords" data-keys="chord track progression harmony follow chords chord progression">
+    <h2><span class="num">13</span> Chord Track</h2>
+    <p>Write a song-wide chord progression that shows on the Playlist ruler, then let notes follow it.</p>
+    <div class="chordbar" id="chordbar" aria-hidden="true"></div>
+    <ol class="how">
+      <li><i>Tools &gt; Chord Track: write a chord progression</i>, type for example <code>Am | F | C | G</code> (one chord per bar), choose the start bar.</li>
+      <li>Slash and extended chords work: <code>Bb/D</code>, <code>Dm7</code>, <code>Cmaj7</code>, <code>G7</code>.</li>
+      <li><i>Tools &gt; Chord Track: selected notes / Channel follow the chords</i> moves each note to the nearest chord tone at its song position, as one Undo step.</li>
+    </ol>
+    <div class="hack"><b>Hack</b> Write one bassline over a single chord, place it under every bar, then make it
+      follow the Chord Track: the line re-harmonizes to the whole progression in one click. For a quick idea,
+      <i>Tools &gt; Create a chord progression</i> writes chords into a Pattern.</div>
+  </section>
+
+  <!-- MAQAM -->
+  <section class="m-sec" id="maqam" data-keys="maqam quarter tone microtonal tuning scala rast bayati saba sikah hijaz mpe mts-esp">
+    <h2><span class="num">14</span> Maqam &amp; microtonal tuning</h2>
+    <p>VibeRa speaks quarter tones. The Piano roll's scale guide marks every half-flat degree, snapping can follow a
+      maqam, and each Channel can be tuned with maqam presets or any Scala (<code>.scl</code>) file.</p>
+    <div class="maqam-pick" id="maqam-pick"></div>
+    <div class="maqam-keys" id="maqam-keys" aria-hidden="true"></div>
+    <ul class="how">
+      <li>Maqams include Rast, Bayati, Saba, Sikah, Huzam, Hijaz, Nahawand, Kurd, Athar and Jiharkah.</li>
+      <li>The <b>Tune</b> effect corrects pitch to a maqam on any key.</li>
+      <li>Plugin instruments receive tuning through <b>MPE</b> or <b>MTS-ESP</b>.</li>
+    </ul>
+    <div class="hack"><b>Hack</b> In a rendered test, Rast E measured exactly 50 cents flat: what you see in the
+      guide is what you hear.</div>
+  </section>
+
+  <!-- PLUGINS -->
+  <section class="m-sec" id="plugins" data-keys="vst3 plugin scan worker crash protected process browser">
+    <h2><span class="num">15</span> VST3 plugins <kbd class="fkey">F8</kbd></h2>
+    <p>Scan your VST3 folders from the plugin browser, then add instruments to the Channel Rack and effects to
+      Mixer inserts. Every plugin runs in a <b>protected worker process</b>: if a plugin crashes, VibeRa recovers it and
+      your session keeps going.</p>
+    <ul class="how">
+      <li>The plugin window header has <b>ON, PAN, VOL, PITCH, RANGE</b> and the Mixer <b>TRACK</b>.</li>
+      <li>Plugin parameters can be automated and linked to MIDI controllers.</li>
+      <li>Multi-output instruments can send each output to its own Mixer track.</li>
+    </ul>
+  </section>
+
+  <!-- BROWSER -->
+  <section class="m-sec" id="browser" data-keys="browser samples search tags starred preview folder sort recycle">
+    <h2><span class="num">16</span> Browser</h2>
+    <div class="split2">
+      <figure class="shot tall"><img src="img/manual/browser.png" alt="Browser panel" loading="lazy"></figure>
+      <div>
+        <ul class="how">
+          <li><b>Folders</b>: add your sample folders, then go back <kbd>Backspace</kbd>, forward <kbd>Shift</kbd>+<kbd>Backspace</kbd>, up <kbd>Alt</kbd>+<kbd>&uarr;</kbd>.</li>
+          <li><b>Search</b> <kbd>Ctrl</kbd>+<kbd>F</kbd>, next result <kbd>F3</kbd>, previous <kbd>Shift</kbd>+<kbd>F3</kbd>.</li>
+          <li><b>Smart queries</b>: <code>*</code> and <code>?</code> wildcards, <code>AND</code>, <code>OR</code>, <code>NOT</code>, parentheses and "quoted text".</li>
+          <li><b>Tags and stars</b>: tag files, filter by Any or All tags, keep favourites in the Starred tab.</li>
+          <li><b>Preview</b>: short or full preview with its own volume.</li>
+          <li><b>Project view</b> lists every sample, instrument and effect in the current project.</li>
+          <li>Right-click a file: send to the selected Channel, open in a new Channel, Show in folder, Move to Recycle Bin.</li>
+        </ul>
+        <div class="hack"><b>Hack</b> Search <code>kick NOT (loop OR fx)</code> to find only one-shot kicks.
+          Save a search as a tab to keep it, and sort by date to find the samples you just downloaded.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPORT -->
+  <section class="m-sec" id="export" data-keys="export wav flac ogg mp3 stems loudness lufs true peak render score pdf">
+    <h2><span class="num">17</span> Export &amp; loudness</h2>
+    <div class="cols">
+      <div>
+        <ul class="how">
+          <li><kbd>Ctrl</kbd>+<kbd>R</kbd>: <b>WAV, FLAC, OGG or MP3</b> at 44.1 or 48 kHz, 16, 24 or 32-bit.</li>
+          <li><b>Stems</b>: one file per Mixer insert, or each Playlist track or track group.</li>
+          <li>Effect latency is lined up from the first sample, so stems line up in any other program.</li>
+          <li>MIDI export, and score sheets as PDF.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Loudness meter</h3>
+        <p>After an export VibeRa reports <b>integrated loudness (LUFS), loudness range and true peak</b> to
+          the EBU R128 / BS.1770 method. Check any audio file with <i>Tools &gt; Analyze loudness of an audio file</i>.</p>
+        <div class="lufs" id="lufs"><div class="lufs-bar"><i></i></div><span>-14 LUFS</span></div>
+      </div>
+    </div>
+    <div class="hack"><b>Hack</b> Streaming services commonly normalize around -14 LUFS. Raise the Maximizer gain until
+      the report lands near that, keeping true peak below -1 dBTP.</div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section class="m-sec" id="projects" data-keys="project save autosave backup recovery template flp midi import missing samples diagnostics">
+    <h2><span class="num">18</span> Projects &amp; safety</h2>
+    <div class="cards3">
+      <article class="icard"><h3>Never lose work</h3><p>Autosave every two minutes, five rotating backups of every
+        save, and recovery after a crash. <i>Tools &gt; Open project backups folder</i> goes straight to them.</p></article>
+      <article class="icard"><h3>Bring your projects</h3><p>Open <code>.flp</code> project files and MIDI files, and
+        drag samples from the Browser or Explorer. <i>Find missing samples</i> relinks moved files.</p></article>
+      <article class="icard"><h3>Templates</h3><p><i>Save as template</i> keeps your favourite starting setup;
+        <i>New from template</i> opens it ready to go.</p></article>
+    </div>
+    <div class="hack"><b>Hack</b> Found a bug? <i>Tools &gt; Export diagnostics</i> writes a report without your personal
+      paths; attach it to a GitHub issue.</div>
+  </section>
+
+  <!-- AI -->
+  <section class="m-sec" id="ai" data-keys="ai mcp coproducer automation assistant skill">
+    <h2><span class="num">19</span> AI &amp; automation</h2>
+    <p>VibeRa includes a <b>Model Context Protocol (MCP) server</b>, so an AI assistant can read the project and use the
+      same commands you use in the interface, with the same Undo and validation. A provider-neutral skill package
+      in the <code>skills</code> folder teaches assistants the workflows.</p>
+    <p>The <b>CoProducer</b> side panel (spark button in the toolbar) is an early producer chat and MIDI-idea panel.
+      It is experimental and still growing.</p>
+  </section>
+
+  <!-- SHORTCUTS -->
+  <section class="m-sec" id="shortcuts" data-keys="shortcuts keyboard keys hotkeys bindings">
+    <h2><span class="num">20</span> Keyboard shortcuts</h2>
+    <p>The defaults below are editable in Settings. Type to filter.</p>
+    <div class="sc-head">
+      <div class="sc-tabs" id="sc-tabs"></div>
+      <input id="sc-filter" type="search" placeholder="Filter shortcuts..." aria-label="Filter shortcuts">
+    </div>
+    <div class="sc-list" id="sc-list"></div>
+  </section>
+
+  <!-- HACKS -->
+  <section class="m-sec" id="hacks" data-keys="hacks tips tricks pro">
+    <h2><span class="num">21</span> Producer hacks</h2>
+    <div class="tipbox" id="tipbox">
+      <p class="tip-label">Hack of the moment</p>
+      <p class="tip-text" id="tip-text"></p>
+      <button class="btn ghost" id="tip-next">Another hack</button>
+    </div>
+    <div class="hack-grid" id="hack-grid"></div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="m-sec" id="faq" data-keys="faq questions help mac linux price">
+    <h2><span class="num">22</span> FAQ</h2>
+    <details class="faq"><summary>Is it really free?</summary><p>Yes. VibeRa Studio is free software under the GNU AGPL v3.0. No account, license key or subscription.</p></details>
+    <details class="faq"><summary>Which systems are supported?</summary><p>Windows 10 and 11, 64-bit. Linux and macOS builds are produced automatically but are not tested yet.</p></details>
+    <details class="faq"><summary>I hear nothing.</summary><p>Open Settings with <kbd>F10</kbd> and choose an audio device. The status bar shows the active device. Check that the Channel is linked to an insert that routes to Master and is not muted.</p></details>
+    <details class="faq"><summary>A plugin crashed. Did I lose my session?</summary><p>No. Plugins run in a protected process and VibeRa recovers them. Autosave and backups protect the project too.</p></details>
+    <details class="faq"><summary>Can I use my FL Studio projects?</summary><p>VibeRa opens <code>.flp</code> files and imports their Patterns, Channels and arrangement as far as the format allows. VibeRa is an independent project and not affiliated with Image-Line.</p></details>
+    <details class="faq"><summary>How do I report a problem?</summary><p>Use <i>Tools &gt; Export diagnostics</i> and open an issue on <a href="https://github.com/Sheekovic/VibeRa-Studio/issues" target="_blank" rel="noopener">GitHub</a>.</p></details>
+  </section>
+
+  <p class="no-results" id="no-results" hidden>Nothing in the manual matches that search. Try a shorter word.</p>
+  </main>
+</div>
+
+<div class="lightbox" id="lightbox" hidden><img alt=""><button aria-label="Close">&times;</button></div>
+
+<footer>
+  <p><img src="img/icon.png" alt=""> VibeRa Studio &middot; Free software under the GNU AGPL v3.0 &middot;
+    <a href="https://github.com/Sheekovic/VibeRa-Studio">Source on GitHub</a></p>
+  <p class="muted">An independent project, not affiliated with any other music software company.</p>
+</footer>
+
+<script src="manual.js"></script>
+</body>
+</html>
