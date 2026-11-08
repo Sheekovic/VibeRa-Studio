@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include "Loudness.h"
 #include "WindowForeground.h"
 #include "Commands.h"
 #include "EffectChain.h"
@@ -935,6 +936,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // paths and the user name replaced; recent error statuses are kept in memory only.
     // sampler.view.* on the selected Channel's open instrument window; false when none is open.
     bool navigateSamplerView(const juce::String &action);
+    // Loudness of rendered audio (StudioLoudness.cpp, BS.1770 / EBU R128).
+    static juce::Result analyzeLoudnessFile(const juce::File &file, loudness::Result &result);
+    static juce::String describeLoudness(const loudness::Result &result);
+    void reportExportLoudness(const juce::File &file);
     juce::StringArray recentErrors;
     juce::String lastDiagnosticStatus;
     void recordDiagnosticStatus();

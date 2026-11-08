@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "../../src/Loudness.h"
 #include "../../src/drums/DrumSynth.h"
 #include "dsp/EffectsEngine.h"
 #include "AllocationGuard.h"
@@ -1011,6 +1012,41 @@ void studioOracles()
     }
 
 }
+// BS.1770 reference vectors for the offline loudness meter.
+void loudnessOracles()
+{
+    const double rate = 48000;
+    auto sine = [&](double hz, double amplitude, double seconds, double phase)
+    {
+        std::vector<float> s(size_t(rate * seconds));
+        for (size_t i = 0; i < s.size(); ++i)
+            s[i] = float(amplitude * std::sin(2 * vibera::loudness::pi * hz * double(i) / rate + phase));
+        return s;
+    };
+    // 997 Hz, 0 dBFS, one channel: -3.01 LUFS (ITU-R BS.1770 calibration).
+    auto left = sine(997, 1., 20., 0.);
+    auto r = vibera::loudness::measure({left, std::vector<float>(left.size(), 0.f)}, rate);
+    require(std::abs(r.integratedLufs + 3.01) < .1, "Loudness calibration: 997 Hz 0 dBFS one channel is -3.01 LUFS, got " + std::to_string(r.integratedLufs));
+    require(std::abs(r.shortTermMaxLufs - r.integratedLufs) < .1 && r.rangeLu < .1, "A steady tone has flat short-term loudness and no range");
+    // Same tone 20 dB lower: 20 LU lower.
+    auto quiet = sine(997, .1, 20., 0.);
+    auto q = vibera::loudness::measure({quiet, std::vector<float>(quiet.size(), 0.f)}, rate);
+    require(std::abs(q.integratedLufs - (r.integratedLufs - 20.)) < .05, "Loudness scales 1:1 with level");
+    // Inter-sample peak: fs/4 sine at 45 degrees has samples at -3.01 dBFS but a 0 dBTP true peak.
+    auto isp = sine(rate / 4, 1., 2., vibera::loudness::pi / 4);
+    auto t = vibera::loudness::measure({isp}, rate);
+    require(std::abs(t.samplePeakDbfs + 3.01) < .05, "Inter-sample test: sample peak is -3.01 dBFS");
+    require(t.truePeakDbtp > -.3 && t.truePeakDbtp < .3, "Inter-sample test: true peak is about 0 dBTP, got " + std::to_string(t.truePeakDbtp));
+    // Silence is gated out entirely.
+    auto s = vibera::loudness::measure({std::vector<float>(48000 * 5, 0.f)}, rate);
+    require(!std::isfinite(s.integratedLufs), "Silence has no integrated loudness");
+    // Loudness range: 10 s at -20 dB then 10 s at -30 dB gives about 10 LU.
+    auto stepped = sine(997, .1, 10., 0.);
+    auto low = sine(997, .0316, 10., 0.);
+    stepped.insert(stepped.end(), low.begin(), low.end());
+    auto lra = vibera::loudness::measure({stepped}, rate);
+    require(std::abs(lra.rangeLu - 10.) < 1., "Loudness range of a 10 dB step is about 10 LU, got " + std::to_string(lra.rangeLu));
+}
 int main()
 {
     const auto start = std::chrono::steady_clock::now();
@@ -1026,6 +1062,7 @@ int main()
         tuneOracles();
         studioOracles();
         vocoderOracles();
+        loudnessOracles();
         std::cout << "PASS " << catalogueEntries().size() << " original effects; " << checks
                   << " checks; callback allocations=" << effects_test::allocations
                   << ", destructions=" << effects_test::destructions << "; seconds="

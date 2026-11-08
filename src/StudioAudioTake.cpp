@@ -443,6 +443,8 @@ void Studio::finishExportStep(juce::Result rendered)
         return startNextExport();
     status = exportOutputs.size() > 1 ? "Exported " + juce::String(exportOutputs.size()) + " stems"
                                       : "Exported " + juce::File(exportOutputs[0]).getFileName();
+    if (exportOutputs.size() == 1)
+        reportExportLoudness(juce::File(exportOutputs[0])); // Adds LUFS / true peak to the status.
     completeMcpOperation(mcpExportOperation, juce::Result::ok());
     mcpExportOperation.clear();
     completeRenderClip(juce::Result::ok()); // Render-to-clip requests place their audio clip now.

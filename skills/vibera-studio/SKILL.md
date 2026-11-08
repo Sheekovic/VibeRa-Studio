@@ -295,6 +295,11 @@ to replace one) writes and returns a shareable report: version, OS, audio device
 plugin workers and the last 20 typed errors, with the home folder and account name
 replaced. The same report is Tools > Export diagnostics... in the app.
 
+Loudness: `vibera_project loudness {path}` measures a WAV/FLAC/AIFF/OGG file (ITU-R BS.1770 /
+EBU R128): integratedLufs, shortTermMaxLufs, momentaryMaxLufs, loudnessRangeLu, truePeakDbtp,
+samplePeakDbfs (null for silence). Export a mix first, then measure it; the app also shows
+these after a single-file export and in Tools > Analyze loudness of an audio file.
+
 Browser: `browser.*` actions run through `vibera_command`; read `vibera_state.browser`
 (view, folder, canGoBack/Forward, search, results, selectedFile, starred, tagsShown,
 tagFilter, tagMatchAll, sort, columns, fullPreview, previewVolume) before and after.

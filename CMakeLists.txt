@@ -54,7 +54,7 @@ if(MSVC)
 endif()
 juce_add_gui_app(VibeRa PRODUCT_NAME "VibeRa Studio" COMPANY_NAME "VibeRa" VERSION "${PROJECT_VERSION}" ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-512.png" ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-64.png")
 juce_add_binary_data(VibeRaBranding SOURCES assets/vibera-symbol.svg)
-target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioDropCheck.cpp src/StudioAutosave.cpp src/StudioDiagnostics.cpp src/StudioUpdater.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp src/MidiClipboard.cpp)
+target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioDropCheck.cpp src/StudioAutosave.cpp src/StudioDiagnostics.cpp src/StudioLoudness.cpp src/StudioUpdater.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp src/MidiClipboard.cpp)
 target_include_directories(VibeRa PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_sources(VibeRa PRIVATE src/StudioPicker.cpp)
 
@@ -927,6 +927,9 @@ add_test(NAME musical_acceptance COMMAND VibeRaTests "${CMAKE_CURRENT_BINARY_DIR
 add_test(NAME plugins_page_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-plugins-page-mcp.py"
   "$<TARGET_FILE:VibeRa>")
 set_tests_properties(plugins_page_mcp PROPERTIES TIMEOUT 180)
+add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
+set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME mcp_ui_actions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-ui-actions-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/mcp_ui_actions")
 set_tests_properties(mcp_ui_actions PROPERTIES TIMEOUT 120)

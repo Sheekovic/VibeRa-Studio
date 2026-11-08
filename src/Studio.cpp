@@ -3478,6 +3478,7 @@ void Studio::toolsMenu()
     // Save keeps five backups per project; autosave covers unexpected closes.
     menu.addItem(224, "Open project backups folder", profileFile().getSiblingFile("backups").isDirectory());
     menu.addItem(228, "Export diagnostics...");
+    menu.addItem(229, "Analyze loudness of an audio file...");
     menu.addItem(225, updatePhase == "available" ? "Update available: " + (availableUpdate ? availableUpdate->name : juce::String()) + "..."
                       : updatePhase == "downloading" ? "Downloading update..."
                       : updatePhase == "ready"       ? "Install downloaded update..."
@@ -3540,6 +3541,25 @@ void Studio::toolsMenu()
                             safe->repaint();
                         }
                     });
+                return;
+            }
+            if (choice == 229)
+            {
+                auto chooser = std::make_shared<juce::FileChooser>("Analyze loudness", juce::File(),
+                                                                   "*.wav;*.flac;*.aif;*.aiff;*.ogg");
+                chooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                                     [safe, chooser](const juce::FileChooser &picked)
+                                     {
+                                         const auto file = picked.getResult();
+                                         if (!safe || file == juce::File{})
+                                             return;
+                                         loudness::Result measured;
+                                         const auto analysed = analyzeLoudnessFile(file, measured);
+                                         safe->status = analysed.wasOk()
+                                                            ? file.getFileName() + ": " + describeLoudness(measured)
+                                                            : analysed.getErrorMessage();
+                                         safe->repaint();
+                                     });
                 return;
             }
             if (choice == 228)
