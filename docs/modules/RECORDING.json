@@ -14,8 +14,8 @@
       "scope": "Arm, count-in, record audio input and MIDI, input monitoring, held-take ownership.",
       "evidence": [
         {
-          "path": "build/module-qualification/recording/capture-comp/attempt-92b21da05fd447dba90e154f911765ef/verification.json",
-          "sha256": "e9696d32acccd5e4a3dd0122934af84718914e50e443c41f7cc60fb30eabf064"
+          "path": "build/module-qualification/recording/capture-comp/attempt-b7c8b7c3584e43699bd32e7d932676b0/verification.json",
+          "sha256": "44e818359a4baaa16c9793195ef5ce8d89ed961a2e7d1d6939e5516fb9d6c3c6"
         }
       ]
     },
@@ -27,8 +27,8 @@
       "scope": "Punch range, loop recording into stacked take lanes.",
       "evidence": [
         {
-          "path": "build/module-qualification/recording/recording-mcp/attempt-5096724db72f4128885798d94e5b4613/verification.json",
-          "sha256": "1dd3c4dca1e59ba6327559b1a312137c758e643c2a6fbbb415e17fa37ea19088"
+          "path": "build/module-qualification/recording/recording-mcp/attempt-3c5b6b995cb34dba9851903e5c003fb9/verification.json",
+          "sha256": "cb1179b5cc4e6060e72b44fed24095ba50f950b4f6adbb69969eda6c74be1c46"
         }
       ]
     },
@@ -40,8 +40,8 @@
       "scope": "Place takes, use a take here, flatten unused takes, one Undo per edit.",
       "evidence": [
         {
-          "path": "build/module-qualification/recording/capture-comp/attempt-92b21da05fd447dba90e154f911765ef/verification.json",
-          "sha256": "e9696d32acccd5e4a3dd0122934af84718914e50e443c41f7cc60fb30eabf064"
+          "path": "build/module-qualification/recording/capture-comp/attempt-b7c8b7c3584e43699bd32e7d932676b0/verification.json",
+          "sha256": "44e818359a4baaa16c9793195ef5ce8d89ed961a2e7d1d6939e5516fb9d6c3c6"
         }
       ]
     },
@@ -53,8 +53,8 @@
       "scope": "Retained/failed takes retry or cancel exactly; nothing recorded is silently lost.",
       "evidence": [
         {
-          "path": "build/module-qualification/recording/take-recovery/attempt-97dec871a3fd43f0ae1ca262e50fe52e/verification.json",
-          "sha256": "fcf9c44b9774cc90bbdc7c04a708aa9fe15cfcf3767732d1ebc52ce3e65dadfc"
+          "path": "build/module-qualification/recording/take-recovery/attempt-5df8bba33d40413997a096cf22970347/verification.json",
+          "sha256": "9946550fdccf2b32000d397e5667260689e728d5a8c78fbf6913c8873dc1b999"
         }
       ]
     },
@@ -66,12 +66,12 @@
       "scope": "Clip fades, first-transient grid alignment, consolidate window and fades.",
       "evidence": [
         {
-          "path": "build/module-qualification/recording/stretch-fades/attempt-7351ecd36bd24f4790e5df5d0f8b44d7/verification.json",
-          "sha256": "64f41ff04bf58da9cefe409d0bcbf19850a8668c058ae4112e758ee170479ad1"
+          "path": "build/module-qualification/recording/stretch-fades/attempt-f3f79d0996c7483a92b347bdfeae6346/verification.json",
+          "sha256": "2a9e57a30122f1206d58a7dbb9d1e5f718f6f41ca006eb5c1fa38f67f76b7ef7"
         },
         {
-          "path": "build/module-qualification/recording/take-gui/attempt-e167961758a44716b6d63987130aed33/verification.json",
-          "sha256": "8da66f2721106709a7137271466755fe5cf34865063a3329e7da1f851c2a6a09"
+          "path": "build/module-qualification/recording/take-gui/attempt-899a3f9b3ac44948a6fd469f14877c80/verification.json",
+          "sha256": "cd8fc7392b073ee2231fcd8962f93140abf9cd90792e6e8620bae78e1194cb46"
         }
       ]
     },
@@ -83,12 +83,12 @@
       "scope": "Pitch-preserving stretch, tempo warp of recorded audio into new sources.",
       "evidence": [
         {
-          "path": "build/module-qualification/recording/stretch-fades/attempt-7351ecd36bd24f4790e5df5d0f8b44d7/verification.json",
-          "sha256": "64f41ff04bf58da9cefe409d0bcbf19850a8668c058ae4112e758ee170479ad1"
+          "path": "build/module-qualification/recording/stretch-fades/attempt-f3f79d0996c7483a92b347bdfeae6346/verification.json",
+          "sha256": "2a9e57a30122f1206d58a7dbb9d1e5f718f6f41ca006eb5c1fa38f67f76b7ef7"
         },
         {
-          "path": "build/module-qualification/recording/recording-mcp/attempt-5096724db72f4128885798d94e5b4613/verification.json",
-          "sha256": "1dd3c4dca1e59ba6327559b1a312137c758e643c2a6fbbb415e17fa37ea19088"
+          "path": "build/module-qualification/recording/recording-mcp/attempt-3c5b6b995cb34dba9851903e5c003fb9/verification.json",
+          "sha256": "cb1179b5cc4e6060e72b44fed24095ba50f950b4f6adbb69969eda6c74be1c46"
         }
       ]
     },

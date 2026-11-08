@@ -17,7 +17,8 @@
           "path": "build/module-qualification/release-quality/installer/attempt-98f133a95e1846d0a4d44885c7faed68/verification.json",
           "sha256": "5ddf46d4523435adf766dce458720b04169512fb706fa5b26f7b5216530119c6"
         }
-      ]
+      ],
+      "phase": "release"
     },
     {
       "id": "RQ-B",
@@ -27,8 +28,8 @@
       "scope": "Headless 15-minute stress (owner decision 2026-11-08 replaces the visible two-hour run): play/edit/undo/fader cycles with offline renders that must have sound; no crash, worker loss, packet loss or memory/handle growth beyond bounds; memory, handles and workers sampled every minute.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/long-session/attempt-fa0a83d2d5a94d0b8018f9949dbdadfe/verification.json",
-          "sha256": "4377ee1c878a53a0234c5826c30d2223adc14b9cb61b53b3b66bc55d240e514c"
+          "path": "build/module-qualification/release-quality/long-session/attempt-0a79604e86b44fcbaa7097a43666fb3e/verification.json",
+          "sha256": "e60133a38d98f774e240e6f75c43329ce38b16a7e833564cfe128724a2a41297"
         }
       ]
     },
@@ -40,8 +41,8 @@
       "scope": "Forced app and worker termination during edit, playback, recording and save: autosave/recovery restores the last committed state, takes are not lost and outcomes are truthful.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/recovery/attempt-a79ef4ad6316443c807ca13a725dc40d/verification.json",
-          "sha256": "1289e588d9d3a63badd3c977de42894ec417baa6b466be78720a06238968228b"
+          "path": "build/module-qualification/release-quality/recovery/attempt-ccb36858075d4b239751414ab6a66d5b/verification.json",
+          "sha256": "62978a4d1f38002184b86a9b114bd75ecb131f57010caf486222d5897571f175"
         }
       ]
     },
@@ -53,8 +54,8 @@
       "scope": "Projects from earlier schema versions open, migrate and save without losing audible settings or links; refusals are explicit for unsupported versions.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/migration/attempt-1a627e20ce2442cd86f283a531a39d76/verification.json",
-          "sha256": "7b50bc718333a9129036afd956284280b5843d43786ad18fb91bcae4748bf8d4"
+          "path": "build/module-qualification/release-quality/migration/attempt-04fc8d2424f94a4b9c51595ad3a0a9eb/verification.json",
+          "sha256": "f83a525853586d1ef19e01f3d6d872e509b9b21a391a0fa20b1392367ba0669b"
         }
       ]
     },
@@ -66,8 +67,8 @@
       "scope": "Keyboard-only navigation of the main workspace and dialogs, focus order and visible focus, accessible names/roles for controls, readable contrast and target sizes.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/accessibility/attempt-81864141a4ba415a9fb3cede36d30811/verification.json",
-          "sha256": "f1ec183673910576227a3d9ea4126f1db5743c6915fa92300329f953b9dcd69a"
+          "path": "build/module-qualification/release-quality/accessibility/attempt-238b97c801a646e18003aa1d8831f8be/verification.json",
+          "sha256": "8d9db8bf73088261b94d6df4c55814f79eb4c343c85a719446976a335f2689a6"
         }
       ]
     },
@@ -79,12 +80,12 @@
       "scope": "100-200 percent scale and 1080p-4K layouts without clipping/overlap; detached windows open in front, restore on the right monitor and survive monitor disconnect.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/scaling/attempt-65a9ef079b0249ba98c2e3f655da1f45/verification.json",
-          "sha256": "e477229e3c20cfa2ce5e3c1a271a298abe960097c78ef1cd774c53d276df6536"
+          "path": "build/module-qualification/release-quality/scaling/attempt-4f367391d2bb4b3c89a92f9983f91dde/verification.json",
+          "sha256": "d3d1b1fba8bb04c98557679693609eba981484c5c900a4f0e83af12b1c51774c"
         },
         {
-          "path": "build/module-qualification/release-quality/window-front/attempt-c27e8064dd5449d4b6fa5cf0de950704/verification.json",
-          "sha256": "265ba277dd68c60a4fabc7ca12596acf0222b3b9e8a0bd4a6188eb8bd0507b5c"
+          "path": "build/module-qualification/release-quality/window-front/attempt-ed27a61417b247a799a1b74154a63b2c/verification.json",
+          "sha256": "1228d0466544931ae5ccab81c4d10079c2aecee60671928fc98499f6ab3c2b4b"
         }
       ]
     },
@@ -96,8 +97,8 @@
       "scope": "User-visible diagnostics export (version, device, plugin workers, recent errors) without personal paths or credentials; actionable error messages.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/diagnostics/attempt-5dd4a0ebbaed4a14bf7ae5dcb4ff23c6/verification.json",
-          "sha256": "d0c6b4fe981fd31cb085f3896e0433836e4b591acc32267b0adad2b867c60bfc"
+          "path": "build/module-qualification/release-quality/diagnostics/attempt-eb333ae2f68946329b6e33f90c8e8564/verification.json",
+          "sha256": "6eeb4e965993226d92c19fc2f75ee3cfb9fd02448a26e88c01ed8507356ae6f5"
         }
       ]
     },
@@ -112,7 +113,8 @@
           "path": "build/module-qualification/release-quality/notices/attempt-45f8d29c158f4ad1a6e3a9818b5527e1/verification.json",
           "sha256": "f780f07feb5fa6b037e534c9f29640293152f5a940ae9979f70c0907dcc10847"
         }
-      ]
+      ],
+      "phase": "release"
     },
     {
       "id": "RQ-I",

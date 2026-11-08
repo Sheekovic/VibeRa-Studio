@@ -5447,6 +5447,7 @@
             "new",
             "open",
             "save",
+            "diagnostics",
             "saveTemplate",
             "templates",
             "effectImpulse",
@@ -5594,7 +5595,8 @@
         },
         "overwrite": {
           "type": "boolean",
-          "default": false
+          "default": false,
+          "description": "diagnostics: replace an existing report. diagnostics writes a shareable text report (version, OS, audio device, plugin workers, recent errors) to the absolute .txt path with the user folder and name replaced, and returns it as report."
         },
         "pattern": {
           "type": "integer",

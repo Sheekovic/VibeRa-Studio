@@ -1,11 +1,11 @@
 {
   "server": {
     "name": "VibeRa Studio",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "contractVersion": 1,
-  "applicationSha256": "3b7640cb800e160eedd3a524f2c0212cdd5a0f57521df7536f6cbf445e2bd631",
-  "operationCount": 657,
+  "applicationSha256": "fa6822a96334ecbfaf83a2df1abb12284ab671609a0bcc8ea2c8c2748c6639d1",
+  "operationCount": 658,
   "toolCount": 36,
   "evidence": "Actual stdio discovery only; not musical/plugin/GUI/listening qualification"
 }

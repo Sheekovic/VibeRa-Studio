@@ -667,7 +667,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 460; unreviewed: 460.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 156; gaps: 156.
+Explicit UI inventory complete: False; known controls: 156; gaps: 38.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -679,126 +679,126 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `settings.plugins.mixerTargetSelection` | local ComboBox, explicit insert argument on creation | gap:shared target-selection state required; manual mapping/verification required |
 | `settings.plugins.viewportNavigation` | JUCE ListBox and ScrollingSettingsPage local viewport | gap:shared visible viewport/range state required; manual mapping/verification required |
 | `plugin.controls.manualValue` | token-owned runtime write; not canonical document Undo | gap:manual-before authority and shared Undo reconciliation required; manual mapping/verification required |
-| `rack.selectionGroupsAndFilter` | Studio Rack services and Controller rack.group commands | vibera_rack; manual mapping/verification required |
-| `rack.stepFill` | Controller steps.fill* and shared Rack viewport/steps.set | vibera_command; manual mapping/verification required |
-| `rack.soloAndScoreMute` | Controller channel.solo/unsolo/mute and rack mute commands | vibera_command; manual mapping/verification required |
-| `settings.workflow.soloRestore` | Studio::setSoloRestorePreference persists before updating shared state | vibera_rack; manual mapping/verification required |
-| `rack.channelManagement` | Studio Channel state-capture service and Controller channel.clone/delete/moveUp/moveDown | vibera_rack; manual mapping/verification required |
-| `rack.velocityGraph` | Shared Rack service and canonical step property commands/leases/history | vibera_rack; manual mapping/verification required |
-| `rack.swing` | Controller Swing commands and shared local/leased gesture history | vibera_command; manual mapping/verification required |
-| `piano.quantizer` | Controller note transform and shared owned/leased baseline gestures | vibera_command; manual mapping/verification required |
-| `piano.grooves` | Controller note transform and shared owned/leased baseline gestures | vibera_command; manual mapping/verification required |
-| `sampler.voices` | Shared Controller commands/history and fixed-target voice gesture | vibera_command; manual mapping/verification required |
-| `transport.loopBounds` | Shared transport.loop application action plus canonical document commands and control-thread publisher | vibera_transport; manual mapping/verification required |
-| `sampler.normalize` | Shared Controller command/history, prepared immutable source peak and fixed-storage voice gain | vibera_command; manual mapping/verification required |
-| `playlist.clipGroups` | Controller Clip commands and shared Studio effective selection/grouping behavior/history | vibera_command; manual mapping/verification required |
-| `piano.noteMute` | Controller notes.mute/unmute and Studio shared async score-export service | vibera_command; manual mapping/verification required |
-| `piano.noteSlice` | Controller notes.slice and shared Studio nondestructive preview/commit/cancel service | vibera_command; manual mapping/verification required |
-| `piano.noteStretch` | Controller notes.stretch and shared Studio baseline-relative stretch preview/commit/cancel service | vibera_command; manual mapping/verification required |
-| `mixer.routing` | Controller mixer.route/routeOnly/send, shared source selection and leased mixerSend gestures | vibera_command; manual mapping/verification required |
-| `recording.retainedTakeRecovery` | Studio finishMidiTake/retryMidiTake/cancelPendingMidiTake through actual prepared Controller history | vibera_recording; manual mapping/verification required |
+| `rack.selectionGroupsAndFilter` | Studio Rack services and Controller rack.group commands | vibera_rack; reviewed |
+| `rack.stepFill` | Controller steps.fill* and shared Rack viewport/steps.set | vibera_command; reviewed |
+| `rack.soloAndScoreMute` | Controller channel.solo/unsolo/mute and rack mute commands | vibera_command; reviewed |
+| `settings.workflow.soloRestore` | Studio::setSoloRestorePreference persists before updating shared state | vibera_rack; reviewed |
+| `rack.channelManagement` | Studio Channel state-capture service and Controller channel.clone/delete/moveUp/moveDown | vibera_rack; reviewed |
+| `rack.velocityGraph` | Shared Rack service and canonical step property commands/leases/history | vibera_rack; reviewed |
+| `rack.swing` | Controller Swing commands and shared local/leased gesture history | vibera_command; reviewed |
+| `piano.quantizer` | Controller note transform and shared owned/leased baseline gestures | vibera_command; reviewed |
+| `piano.grooves` | Controller note transform and shared owned/leased baseline gestures | vibera_command; reviewed |
+| `sampler.voices` | Shared Controller commands/history and fixed-target voice gesture | vibera_command; reviewed |
+| `transport.loopBounds` | Shared transport.loop application action plus canonical document commands and control-thread publisher | vibera_transport; reviewed |
+| `sampler.normalize` | Shared Controller command/history, prepared immutable source peak and fixed-storage voice gain | vibera_command; reviewed |
+| `playlist.clipGroups` | Controller Clip commands and shared Studio effective selection/grouping behavior/history | vibera_command; reviewed |
+| `piano.noteMute` | Controller notes.mute/unmute and Studio shared async score-export service | vibera_command; reviewed |
+| `piano.noteSlice` | Controller notes.slice and shared Studio nondestructive preview/commit/cancel service | vibera_command; reviewed |
+| `piano.noteStretch` | Controller notes.stretch and shared Studio baseline-relative stretch preview/commit/cancel service | vibera_command; reviewed |
+| `mixer.routing` | Controller mixer.route/routeOnly/send, shared source selection and leased mixerSend gestures | vibera_command; reviewed |
+| `recording.retainedTakeRecovery` | Studio finishMidiTake/retryMidiTake/cancelPendingMidiTake through actual prepared Controller history | vibera_recording; reviewed |
 | `mixer.effects.native` | Studio::openPluginEditorUI -> requestPluginEditor | vibera_plugin; manual mapping/verification required |
-| `mixer.effects.controls` | Studio::showPluginParameters | vibera_plugin; manual mapping/verification required |
-| `mixer.effects.power` | Studio::command plugin.bypass | vibera_command; manual mapping/verification required |
-| `mixer.effects.remove` | Studio::command plugin.remove | vibera_command; manual mapping/verification required |
-| `mixer.effects.browse` | Studio::browseMixerEffects | vibera_mixer; manual mapping/verification required |
-| `mixer.effects.scroll` | Editor::setEffectSlotsOffset | vibera_mixer; manual mapping/verification required |
-| `mixer.effects.reorder` | Studio::admitMixerEffectMove -> Controller plugin.effect.move | vibera_command; manual mapping/verification required |
-| `mixer.effects.orderContext` | Studio::admitMixerEffectMove -> Controller plugin.effect.move | vibera_command; manual mapping/verification required |
-| `mixer.effects.wet` | plugin.effect.mix via shared Controller gesture and Studio admission | vibera_command; manual mapping/verification required |
-| `mixer.effects.chainBypass` | mixer.effects.bypass via shared Controller and Studio admission | vibera_command; manual mapping/verification required |
-| `mixer.stereoSeparation` | Shared Controller command and Studio Mixer admission; saved schema21 stereo target | vibera_command; manual mapping/verification required |
-| `mixer.phaseInvert` | Shared Controller command and Studio Mixer admission; saved schema21 stereo target | vibera_command; manual mapping/verification required |
-| `mixer.stereoSwap` | Shared Controller command and Studio Mixer admission; saved schema21 stereo target | vibera_command; manual mapping/verification required |
-| `plugin.audioIo` | Studio::addPluginIoMenu and vibera_command plugin.io share captured canonical structural preparation, native negotiation, activation and history. | vibera_command; manual mapping/verification required |
-| `mixer.moduleWorkflows` | Existing canonical Mixer organisation and meter commands; shared mixer.chain UI/MCP services with exact owned file/application jobs. | vibera_command; manual mapping/verification required |
+| `mixer.effects.controls` | Studio::showPluginParameters | vibera_plugin; reviewed |
+| `mixer.effects.power` | Studio::command plugin.bypass | vibera_command; reviewed |
+| `mixer.effects.remove` | Studio::command plugin.remove | vibera_command; reviewed |
+| `mixer.effects.browse` | Studio::browseMixerEffects | vibera_mixer; reviewed |
+| `mixer.effects.scroll` | Editor::setEffectSlotsOffset | vibera_mixer; reviewed |
+| `mixer.effects.reorder` | Studio::admitMixerEffectMove -> Controller plugin.effect.move | vibera_command; reviewed |
+| `mixer.effects.orderContext` | Studio::admitMixerEffectMove -> Controller plugin.effect.move | vibera_command; reviewed |
+| `mixer.effects.wet` | plugin.effect.mix via shared Controller gesture and Studio admission | vibera_command; reviewed |
+| `mixer.effects.chainBypass` | mixer.effects.bypass via shared Controller and Studio admission | vibera_command; reviewed |
+| `mixer.stereoSeparation` | Shared Controller command and Studio Mixer admission; saved schema21 stereo target | vibera_command; reviewed |
+| `mixer.phaseInvert` | Shared Controller command and Studio Mixer admission; saved schema21 stereo target | vibera_command; reviewed |
+| `mixer.stereoSwap` | Shared Controller command and Studio Mixer admission; saved schema21 stereo target | vibera_command; reviewed |
+| `plugin.audioIo` | Studio::addPluginIoMenu and vibera_command plugin.io share captured canonical structural preparation, native negotiation, activation and history. | vibera_command; reviewed |
+| `mixer.moduleWorkflows` | Existing canonical Mixer organisation and meter commands; shared mixer.chain UI/MCP services with exact owned file/application jobs. | vibera_command; reviewed |
 | `mixer.unmuteAll.gesture` | mixer.unmuteAll through Studio.command and Controller document history | vibera_command; manual mapping/verification required |
-| `plugin.wrapper.containingChain` | Exact-effect wrapper parent delegates existing canonical Mixer chain/sidechain services; UI choices and semantic arguments share validation, outcomes and history. | vibera_plugin; manual mapping/verification required |
-| `sampler.tempo.workflow` | Studio::samplerTempoOperation with source/settings witness; atomic Controller channel.sampler.tempo and existing fit toggle | vibera_samplerTempo; manual mapping/verification required |
-| `rack.appearance.workflow` | Controller Channel appearance commands shared by captured UI/macro/MCP; properties draft commits once or cancels; explicit selected-slot stable order | vibera_command; manual mapping/verification required |
-| `rack.groupSolo.muteLocks` | Shared Controller mute/solo commands; captured stable Channel/group ownership | vibera_command; manual mapping/verification required |
-| `rack.appearance.visualColours` | Local draft; Apply uses channel.properties/rack.properties canonical Controller transaction | vibera_command; manual mapping/verification required |
-| `automation.source.clonePolicies` | automation.source.clone through shared Controller validation/history and ordinary playback admission | vibera_command; manual mapping/verification required |
-| `pattern.channelLoops` | pattern.channelLoop/pattern.burnChannelLoop/steps.set through shared Controller application admission, validation/history and prepared timeline | vibera_command; manual mapping/verification required |
-| `pattern.extentMeter` | pattern.extent/pattern.meter/pattern.length through shared Controller validation/history and final application admission | vibera_command; manual mapping/verification required |
-| `synth.ui.parameter.tone` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.warmth` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.space` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.motion` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.attack-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.decay-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.sustain` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.release-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.filter-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.cutoff-hz` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.resonance` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.eq-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.eq-low-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.eq-mid-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.eq-high-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.compressor-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.compressor-threshold-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.compressor-ratio` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.chorus-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.chorus-mix` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.delay-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.delay-time-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.delay-feedback` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.delay-mix` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.reverb-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.reverb-size` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.reverb-decay-seconds` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.reverb-mix` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.master-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.source-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.oscillator-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.oscillator-blend` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.detune-cents` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.pitch-bend` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.mod-wheel` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.oscillator-2-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.oscillator-2-semitones` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.pulse-width` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.sample-level` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.filter-envelope-octaves` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.pan` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.bend-range-semitones` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.vibrato-rate-hz` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.vibrato-depth-cents` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.parameter.polyphony` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; manual mapping/verification required |
-| `synth.ui.genre-filter` | Shared SynthBrowserState genre/favorites predicate | vibera_synth; manual mapping/verification required |
-| `synth.ui.family-filter` | Shared family preference and composed predicate | vibera_synth; manual mapping/verification required |
-| `synth.ui.search-filter` | Shared search preference and composed predicate | vibera_synth; manual mapping/verification required |
-| `synth.ui.favourites-filter` | Shared favoritesOnly filter | vibera_synth; manual mapping/verification required |
-| `synth.ui.favorite-current` | Stable factory membership, no sound/history mutation | vibera_synth; manual mapping/verification required |
-| `synth.ui.favorite-row` | Actual ListBoxModel star branch, independent stable ID | vibera_synth; manual mapping/verification required |
-| `synth.ui.row-highlight` | Shared selectedPresetId; selection is not loading | vibera_synth; manual mapping/verification required |
-| `synth.ui.row-load` | Actual ListBoxModel body branch applies all46 scalar values | vibera_synth; manual mapping/verification required |
-| `synth.ui.return-load` | ListBox returnKeyPressed full native patch publication | vibera_synth; manual mapping/verification required |
-| `synth.ui.previous-next` | Shared filtered factory order, hidden-current and empty-filter semantics | vibera_synth; manual mapping/verification required |
-| `synth.ui.fx-page` | Shared effectPage0..4; controls visibility only | vibera_synth; manual mapping/verification required |
-| `synth.ui.octave` | Shared octave-1..4, actual range start36+12*octave, held-GUI release | vibera_synth; manual mapping/verification required |
-| `synth.ui.workspace-scroll` | Actual viewport logical coordinates, clamped persistence | vibera_synth; manual mapping/verification required |
-| `synth.ui.preset-scroll` | Shared presetScrollY; actual ListBox viewport adoption | vibera_synth; manual mapping/verification required |
-| `synth.ui.shared-navigation` | Timer adopts shared FX/octave/workspace/list/highlight preferences | vibera_synth; manual mapping/verification required |
-| `synth.ui.slider-drag` | Hosted gesture begin/change/end; pitch has spring-return special branch | vibera_synth; manual mapping/verification required |
-| `synth.ui.slider-entry-reset` | Stock Slider value editing/reset enters shared hosted scalar callback | vibera_synth; manual mapping/verification required |
-| `synth.ui.pitch-return` | Spring to native zero, balanced hosted gesture | vibera_synth; manual mapping/verification required |
-| `synth.ui.keyboard-pointer` | GUI event queue and host preview have explicit note ownership | vibera_synth; manual mapping/verification required |
-| `synth.ui.keyboard-computer` | Stock keyboard bindings feed the same GUI note queue | vibera_synth; manual mapping/verification required |
-| `synth.ui.focus-cleanup` | Release held GUI owners, centre pitch, close hosted gesture | vibera_synth; manual mapping/verification required |
-| `synth.ui.hide-cleanup` | Release private JUCE held-key bookkeeping and GUI notes | vibera_synth; manual mapping/verification required |
-| `synth.ui.close-cleanup` | Worker editor lifecycle plus GUI held-note cleanup | vibera_synth; manual mapping/verification required |
-| `synth.ui.save-chooser` | Managed root/plain basename, strict wrapper and captured state | vibera_synth; manual mapping/verification required |
-| `synth.ui.load-chooser` | Managed child path/stable user identity and complete strict state | vibera_synth; manual mapping/verification required |
-| `synth.ui.readback` | Fresh native scalar controls and modified-patch read view | vibera_synth; manual mapping/verification required |
-| `synth.ui.meter-status` | Last processed native block or initial prepared patch; no device-timestamp ACK | vibera_synth; manual mapping/verification required |
-| `synth.ui.minimum-layout` | Reachable workspace, keyboard/footer and focusable browser controls | vibera_synth; manual mapping/verification required |
-| `synth.ui.component-render` | Source component renders, separate from native DPI/input | vibera_synth; manual mapping/verification required |
-| `synth.ui.create-channel` | Strict local VibeRa descriptor through canonical instrument creation | vibera_synth; manual mapping/verification required |
-| `synth.ui.rack-open` | Native Synth Channel name and vibera_synth openEditor converge on the existing acknowledged plugin editor operation; resolve plugin ID from Channel readback. The generic inherited channel.openInstrument context adapter remains an honest global gap. | vibera_synth; manual mapping/verification required |
-| `sampler.filter` | Shared metadata, Controller/Customization validation and history; other inherited builder branches remain unqualified | vibera_command; manual mapping/verification required |
-| `macro.stepModulation` | Shared metadata, Controller/Customization validation and history; other inherited builder branches remain unqualified | vibera_macros; manual mapping/verification required |
+| `plugin.wrapper.containingChain` | Exact-effect wrapper parent delegates existing canonical Mixer chain/sidechain services; UI choices and semantic arguments share validation, outcomes and history. | vibera_plugin; reviewed |
+| `sampler.tempo.workflow` | Studio::samplerTempoOperation with source/settings witness; atomic Controller channel.sampler.tempo and existing fit toggle | vibera_samplerTempo; reviewed |
+| `rack.appearance.workflow` | Controller Channel appearance commands shared by captured UI/macro/MCP; properties draft commits once or cancels; explicit selected-slot stable order | vibera_command; reviewed |
+| `rack.groupSolo.muteLocks` | Shared Controller mute/solo commands; captured stable Channel/group ownership | vibera_command; reviewed |
+| `rack.appearance.visualColours` | Local draft; Apply uses channel.properties/rack.properties canonical Controller transaction | vibera_command; reviewed |
+| `automation.source.clonePolicies` | automation.source.clone through shared Controller validation/history and ordinary playback admission | vibera_command; reviewed |
+| `pattern.channelLoops` | pattern.channelLoop/pattern.burnChannelLoop/steps.set through shared Controller application admission, validation/history and prepared timeline | vibera_command; reviewed |
+| `pattern.extentMeter` | pattern.extent/pattern.meter/pattern.length through shared Controller validation/history and final application admission | vibera_command; reviewed |
+| `synth.ui.parameter.tone` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.warmth` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.space` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.motion` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.attack-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.decay-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.sustain` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.release-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.filter-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.cutoff-hz` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.resonance` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.eq-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.eq-low-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.eq-mid-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.eq-high-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.compressor-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.compressor-threshold-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.compressor-ratio` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.chorus-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.chorus-mix` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.delay-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.delay-time-ms` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.delay-feedback` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.delay-mix` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.reverb-enabled` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.reverb-size` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.reverb-decay-seconds` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.reverb-mix` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.master-db` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.source-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.oscillator-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.oscillator-blend` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.detune-cents` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.pitch-bend` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.mod-wheel` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.oscillator-2-type` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.oscillator-2-semitones` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.pulse-width` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.sample-level` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.filter-envelope-octaves` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.pan` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.bend-range-semitones` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.vibrato-rate-hz` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.vibrato-depth-cents` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.parameter.polyphony` | Hosted native scalar, shared validated native-unit set / normalized parameter ACK and captured history | vibera_synth; reviewed |
+| `synth.ui.genre-filter` | Shared SynthBrowserState genre/favorites predicate | vibera_synth; reviewed |
+| `synth.ui.family-filter` | Shared family preference and composed predicate | vibera_synth; reviewed |
+| `synth.ui.search-filter` | Shared search preference and composed predicate | vibera_synth; reviewed |
+| `synth.ui.favourites-filter` | Shared favoritesOnly filter | vibera_synth; reviewed |
+| `synth.ui.favorite-current` | Stable factory membership, no sound/history mutation | vibera_synth; reviewed |
+| `synth.ui.favorite-row` | Actual ListBoxModel star branch, independent stable ID | vibera_synth; reviewed |
+| `synth.ui.row-highlight` | Shared selectedPresetId; selection is not loading | vibera_synth; reviewed |
+| `synth.ui.row-load` | Actual ListBoxModel body branch applies all46 scalar values | vibera_synth; reviewed |
+| `synth.ui.return-load` | ListBox returnKeyPressed full native patch publication | vibera_synth; reviewed |
+| `synth.ui.previous-next` | Shared filtered factory order, hidden-current and empty-filter semantics | vibera_synth; reviewed |
+| `synth.ui.fx-page` | Shared effectPage0..4; controls visibility only | vibera_synth; reviewed |
+| `synth.ui.octave` | Shared octave-1..4, actual range start36+12*octave, held-GUI release | vibera_synth; reviewed |
+| `synth.ui.workspace-scroll` | Actual viewport logical coordinates, clamped persistence | vibera_synth; reviewed |
+| `synth.ui.preset-scroll` | Shared presetScrollY; actual ListBox viewport adoption | vibera_synth; reviewed |
+| `synth.ui.shared-navigation` | Timer adopts shared FX/octave/workspace/list/highlight preferences | vibera_synth; reviewed |
+| `synth.ui.slider-drag` | Hosted gesture begin/change/end; pitch has spring-return special branch | vibera_synth; reviewed |
+| `synth.ui.slider-entry-reset` | Stock Slider value editing/reset enters shared hosted scalar callback | vibera_synth; reviewed |
+| `synth.ui.pitch-return` | Spring to native zero, balanced hosted gesture | vibera_synth; reviewed |
+| `synth.ui.keyboard-pointer` | GUI event queue and host preview have explicit note ownership | vibera_synth; reviewed |
+| `synth.ui.keyboard-computer` | Stock keyboard bindings feed the same GUI note queue | vibera_synth; reviewed |
+| `synth.ui.focus-cleanup` | Release held GUI owners, centre pitch, close hosted gesture | vibera_synth; reviewed |
+| `synth.ui.hide-cleanup` | Release private JUCE held-key bookkeeping and GUI notes | vibera_synth; reviewed |
+| `synth.ui.close-cleanup` | Worker editor lifecycle plus GUI held-note cleanup | vibera_synth; reviewed |
+| `synth.ui.save-chooser` | Managed root/plain basename, strict wrapper and captured state | vibera_synth; reviewed |
+| `synth.ui.load-chooser` | Managed child path/stable user identity and complete strict state | vibera_synth; reviewed |
+| `synth.ui.readback` | Fresh native scalar controls and modified-patch read view | vibera_synth; reviewed |
+| `synth.ui.meter-status` | Last processed native block or initial prepared patch; no device-timestamp ACK | vibera_synth; reviewed |
+| `synth.ui.minimum-layout` | Reachable workspace, keyboard/footer and focusable browser controls | vibera_synth; reviewed |
+| `synth.ui.component-render` | Source component renders, separate from native DPI/input | vibera_synth; reviewed |
+| `synth.ui.create-channel` | Strict local VibeRa descriptor through canonical instrument creation | vibera_synth; reviewed |
+| `synth.ui.rack-open` | Native Synth Channel name and vibera_synth openEditor converge on the existing acknowledged plugin editor operation; resolve plugin ID from Channel readback. The generic inherited channel.openInstrument context adapter remains an honest global gap. | vibera_synth; reviewed |
+| `sampler.filter` | Shared metadata, Controller/Customization validation and history; other inherited builder branches remain unqualified | vibera_command; reviewed |
+| `macro.stepModulation` | Shared metadata, Controller/Customization validation and history; other inherited builder branches remain unqualified | vibera_macros; reviewed |
 | `sampler.envelopes.parameters` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; manual mapping/verification required |
 | `sampler.envelopes.navigation` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; manual mapping/verification required |
 | `sampler.envelopes.macroInput` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; manual mapping/verification required |
