@@ -5868,6 +5868,17 @@ class Studio::Editor final : public juce::Component,
                 juce::PopupMenu m;
                 m.addItem(1, "Make Unique");
                 m.addItem(2, "Delete");
+                m.addItem(90, "Delete and close the gap (ripple)");
+                if (automationClip(id))
+                {
+                    juce::PopupMenu tools;
+                    tools.addItem(91, "Flip vertically");
+                    tools.addItem(92, "Normalize levels");
+                    tools.addItem(93, "Turn all points smooth");
+                    tools.addItem(94, "Scale levels to 50 %");
+                    m.addSubMenu("Articulator tools", tools);
+                    m.addItem(96, "Merge selected Automation Clips", s.selectedClips.size() >= 2);
+                }
                 if (!automationClip(id) && !audioClip(id))
                 {
                     m.addItem(68, "Rename / colour Pattern...");
@@ -5959,6 +5970,31 @@ class Studio::Editor final : public juce::Component,
                                         safe->s.command("clip.unique", a);
                                     if (n == 2)
                                         safe->s.command("clip.delete", a);
+                                    if (n == 90)
+                                    {
+                                        a.ids = safe->s.effectiveClipSelection();
+                                        if (std::find(a.ids.begin(), a.ids.end(), id) == a.ids.end())
+                                            a.ids = {id};
+                                        safe->s.command("clip.rippleDelete", a);
+                                    }
+                                    if (n >= 91 && n <= 94)
+                                        if (const auto *clip = safe->automationClip(id))
+                                        {
+                                            a.target = clip->source;
+                                            a.value = .5;
+                                            a.offset = .25;
+                                            const char *tools[] = {"automation.source.flip", "automation.source.normalize",
+                                                                   "automation.source.smooth", "automation.source.scale"};
+                                            safe->s.command(tools[n - 91], a);
+                                        }
+                                    if (n == 96)
+                                    {
+                                        a.ids.clear();
+                                        for (const auto clip : safe->s.effectiveClipSelection())
+                                            if (safe->automationClip(clip))
+                                                a.ids.push_back(clip);
+                                        safe->s.command("automation.merge", a);
+                                    }
                                     if (n == 60)
                                         safe->s.command("clip.splitChannels", a);
                                     if (n == 61 || n == 70)

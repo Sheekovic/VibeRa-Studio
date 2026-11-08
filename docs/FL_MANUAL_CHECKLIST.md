@@ -75,3 +75,25 @@ plugins or architecture VibeRa does not copy). Behaviour is implemented independ
 | Sort results by name / type / date | done | Browser tabs menu > Sort results |
 | Alternative view layout (columns: name, type, size, date) | done | Browser tabs menu > Show results as columns |
 | Folder colours / icons, frozen tab layouts, FL Cloud and online content | out of scope | FL-service and cosmetic items |
+
+## Second pass (2026-11-09, pianoroll_menu / pianoroll / channelrack / chansettings / playlist pages)
+
+Each manual item was compared with the command registry. Rows below are the ones the first pass
+did not list.
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Playlist: Automation Clip articulator tools (flip, normalize, smooth, scale levels) | done | `automation.source.flip/normalize/smooth/scale` |
+| Playlist: Merge automation clips | done | `automation.merge` (keeps the first clip's links) |
+| Playlist: ripple editing (close the gap) | done | `clip.rippleDelete` |
+| Playlist: marker actions (loop, skip, pause, start) and quantized song jumps | missing | next |
+| Piano roll: snap incoming MIDI to scale | missing | next |
+| Piano roll: Interpolate tool (event data) | missing | next |
+| Piano roll: nudge with mouse wheel, Center (Shift+0) | missing | next |
+| Piano roll: Magic lasso selection | missing | |
+| Piano roll: time / key markers in Pattern mode | missing | |
+| Channel Rack: Mute removed steps | missing | next |
+| Channel Rack: Receive notes from (channel to channel) | missing | |
+| Channel Rack: declicking mode, Restretch all, name alignment, auto resize | out of scope | FL sampler/display specifics |
+| Loop Starter, FL Cloud, Patcherize, DirectWave, NewTone/NewTime, stem extraction, Deverb | out of scope | FL-only plugins and services |
+| View cosmetics (grid colour/contrast, keyboard styles, note shadows, Behind clips) | out of scope | theme handles appearance |

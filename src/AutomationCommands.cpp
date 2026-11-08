@@ -247,6 +247,101 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
         std::sort(source->points.begin(), source->points.end(),
                   [](const auto &p, const auto &q) { return p.beat < q.beat; });
     }
+    else if (operation == "automation.source.flip" || operation == "automation.source.normalize" ||
+             operation == "automation.source.smooth" || operation == "automation.source.scale")
+    {
+        // Articulator tools on one curve (every linked placement follows): flip vertically,
+        // normalize to the full 0..1 range, turn every point smooth, or value * value + offset.
+        if (!source)
+            return juce::Result::fail("automation.sourceMissing: Existing Automation source ID required");
+        auto &points = source->points;
+        if (operation == "automation.source.flip")
+            for (auto &p : points)
+                p.value = 1 - p.value;
+        else if (operation == "automation.source.smooth")
+            for (size_t i = 1; i < points.size(); ++i)
+            {
+                points[i].incoming = AutomationShape::smooth;
+                points[i].tension = 0;
+            }
+        else if (operation == "automation.source.normalize")
+        {
+            const auto [low, high] = std::minmax_element(points.begin(), points.end(),
+                                                         [](const auto &x, const auto &y) { return x.value < y.value; });
+            const float from = low->value, span = high->value - low->value;
+            if (span <= 0)
+                return juce::Result::fail("automation.flatCurve: A flat curve cannot be normalized");
+            for (auto &p : points)
+                p.value = (p.value - from) / span;
+        }
+        else
+        {
+            if (!std::isfinite(a.value) || !std::isfinite(a.offset) || std::abs(a.value) > 16 || std::abs(a.offset) > 1)
+                return juce::Result::fail("automation.invalidScale: Multiply by -16..16 and offset by -1..1");
+            for (auto &p : points)
+                p.value = std::clamp(float(p.value * a.value + a.offset), 0.f, 1.f);
+        }
+    }
+    else if (operation == "automation.merge")
+    {
+        // Merge Automation Clips (ids: placements, at least two): one new curve over their span
+        // keeping the first clip's target links; each clip's visible window is copied in time
+        // order (later clips win where they overlap). One clip replaces them on the first lane.
+        std::vector<AutomationPlacement> chosen;
+        for (const auto &p : doc.placements)
+            if (std::find(a.ids.begin(), a.ids.end(), p.id) != a.ids.end())
+                chosen.push_back(p);
+        if (chosen.size() < 2 || chosen.size() != a.ids.size())
+            return juce::Result::fail("automation.mergeTargets: Choose two or more Automation Clips");
+        std::sort(chosen.begin(), chosen.end(), [](const auto &x, const auto &y) { return x.beat < y.beat; });
+        const double start = chosen.front().beat;
+        double end = start;
+        for (const auto &p : chosen)
+            end = std::max(end, p.beat + p.length);
+        const auto *first = project.automationSource(chosen.front().source);
+        if (!first)
+            return fail();
+        AutomationSource merged;
+        merged.id = project.allocate();
+        merged.length = end - start;
+        merged.name = first->name + " - Merged";
+        merged.colour = first->colour;
+        merged.links = first->links;
+        std::vector<std::pair<double, float>> curve;
+        for (size_t k = 0; k < chosen.size(); ++k)
+        {
+            const auto &p = chosen[k];
+            const auto *s = project.automationSource(p.source);
+            if (!s)
+                return fail();
+            const double from = p.beat - start, to = from + p.length,
+                         until = k + 1 < chosen.size() ? std::min(to, chosen[k + 1].beat - start) : to;
+            std::erase_if(curve, [&](const auto &q) { return q.first >= from; });
+            curve.push_back({from, automationSourceValueAt(*s, p.offset)});
+            for (const auto &point : s->points)
+            {
+                const double at = from + point.beat - p.offset;
+                if (at > from && at < until)
+                    curve.push_back({at, point.value});
+            }
+            curve.push_back({until, automationSourceValueAt(*s, p.offset + (until - from))});
+        }
+        if (curve.back().first < merged.length)
+            curve.push_back({merged.length, curve.back().second});
+        double previous = -1;
+        for (const auto &[beat, value] : curve)
+            if (beat > previous + 1.e-9)
+            {
+                merged.points.push_back({project.allocate(), beat, std::clamp(value, 0.f, 1.f)});
+                previous = beat;
+            }
+        merged.points.back().beat = merged.length;
+        const int lane = chosen.front().lane;
+        std::erase_if(doc.placements, [&](const auto &p)
+                      { return std::find(a.ids.begin(), a.ids.end(), p.id) != a.ids.end(); });
+        doc.placements.push_back({project.allocate(), merged.id, start, merged.length, 0, lane, false});
+        doc.sources.push_back(std::move(merged));
+    }
     else if (operation == "automation.source.clone")
     {
         if (!source)

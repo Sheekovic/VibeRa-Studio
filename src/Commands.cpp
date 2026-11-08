@@ -980,6 +980,12 @@ const std::vector<CommandInfo> &commandRegistry()
         {"automation.range", "Automation target range", Scope::playlist, true, true, "command"},
         {"automation.init", "Init song with this position", Scope::mixer, true, true, "command"},
         {"automation.init.remove", "Delete initialized control", Scope::mixer, true, true, "command"},
+        {"automation.source.flip", "Flip automation curve vertically", Scope::playlist, true, true, "command"},
+        {"automation.source.normalize", "Normalize automation curve levels", Scope::playlist, true, true, "command"},
+        {"automation.source.smooth", "Turn all automation points smooth", Scope::playlist, true, true, "command"},
+        {"automation.source.scale", "Scale automation curve levels (value x, offset)", Scope::playlist, true, true, "command"},
+        {"automation.merge", "Merge Automation Clips", Scope::playlist, true, true, "command"},
+        {"clip.rippleDelete", "Ripple delete clips (close the gap on their track)", Scope::playlist, true, true, "command"},
         {"automation.modulator", "Add a modulator (LFO / random) to a Mixer or Channel control", Scope::mixer, true, true,
          "command"},
         {"automation.plugin.modulator", "Add a modulator (LFO / random) to a plugin parameter", Scope::playlist, true,
@@ -2690,7 +2696,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     return missing();
     }
     if (id == "clip.move" || id == "clip.delete" || id == "clip.duplicate" || id == "clip.slice" ||
-        id == "clip.slip")
+        id == "clip.slip" || id == "clip.rippleDelete")
         for (auto target : a.ids)
             if (std::none_of(next.placements.begin(), next.placements.end(),
                              [&](auto &p) { return p.id == target; }) &&
@@ -5447,6 +5453,40 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         std::erase_if(next.placements, [&](auto &p) { return chosen(p.id); });
         std::erase_if(next.audioPlacements, [&](auto &p) { return chosen(p.id); });
         std::erase_if(next.automation.placements, [&](auto &p) { return chosen(p.id); });
+    }
+    else if (id == "clip.rippleDelete")
+    {
+        // Ripple delete: remove the clips and pull every later clip on the same track left by
+        // the removed length, closing the gap (latest first so earlier gaps stay exact).
+        std::vector<std::tuple<double, double, int>> gaps; // start, length, lane
+        for (const auto &p : next.placements)
+            if (chosen(p.id))
+                gaps.push_back({p.beat, p.length, p.lane});
+        for (const auto &p : next.audioPlacements)
+            if (chosen(p.id))
+                gaps.push_back({p.beat, next.songBeat(next.songSeconds(p.beat) + p.duration) - p.beat, p.lane});
+        for (const auto &p : next.automation.placements)
+            if (chosen(p.id))
+                gaps.push_back({p.beat, p.length, p.lane});
+        if (gaps.empty())
+            return missing();
+        std::erase_if(next.placements, [&](auto &p) { return chosen(p.id); });
+        std::erase_if(next.audioPlacements, [&](auto &p) { return chosen(p.id); });
+        std::erase_if(next.automation.placements, [&](auto &p) { return chosen(p.id); });
+        std::sort(gaps.begin(), gaps.end(), [](const auto &x, const auto &y) { return std::get<0>(x) > std::get<0>(y); });
+        for (const auto &[start, length, lane] : gaps)
+        {
+            const double end = start + length - 1.e-9;
+            for (auto &p : next.placements)
+                if (p.lane == lane && p.beat >= end)
+                    p.beat = std::max(0., p.beat - length);
+            for (auto &p : next.audioPlacements)
+                if (p.lane == lane && p.beat >= end)
+                    p.beat = std::max(0., p.beat - length);
+            for (auto &p : next.automation.placements)
+                if (p.lane == lane && p.beat >= end)
+                    p.beat = std::max(0., p.beat - length);
+        }
     }
     else if (id == "clip.duplicate")
     {
