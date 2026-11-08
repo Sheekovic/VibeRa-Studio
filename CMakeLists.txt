@@ -320,6 +320,9 @@ set_tests_properties(song_meter PROPERTIES TIMEOUT 60)
 add_test(NAME audio_stretch COMMAND VibeRaTests --audio-stretch-check
   "${CMAKE_CURRENT_BINARY_DIR}/audio_stretch")
 set_tests_properties(audio_stretch PROPERTIES TIMEOUT 120)
+add_test(NAME tuning_render_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-tuning-render.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/tuning_render_mcp")
+set_tests_properties(tuning_render_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME channel_tuning COMMAND VibeRaTests --channel-tuning-check
   "${CMAKE_CURRENT_BINARY_DIR}/channel_tuning")
 set_tests_properties(channel_tuning PROPERTIES TIMEOUT 60)

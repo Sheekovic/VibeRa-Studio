@@ -1,0 +1,131 @@
+{
+  "format": 1,
+  "id": "tuning",
+  "name": "M5 tuning and maqam - per-Channel tuning, Scala, scales, MPE/MTS-ESP and maqam snapping",
+  "state": "in_progress",
+  "checklist": "docs/modules/TUNING.md",
+  "nextAction": "TM-A..G verified (TM-F by rendered frequency). TM-H joins the next module release; musical review by the owner pending.",
+  "requirements": [
+    {
+      "id": "TM-A",
+      "name": "Per-Channel 12-tone tuning and maqam presets",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Cents per pitch class, maqam presets on any tonic, one exact Undo, limits and persistence.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/tuning/channel-tuning/attempt-c9d3285931384e198330f9e4653493dd/verification.json",
+          "sha256": "da4681d6a65ff92a2b8b384193cd60b2c1e482b8ce96b1a7b9b989f37e81156c"
+        }
+      ]
+    },
+    {
+      "id": "TM-B",
+      "name": "Scala files",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "12-note Scala tables and any-size Scala scales mapped to the keyboard; invalid files refused.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/tuning/channel-tuning/attempt-c9d3285931384e198330f9e4653493dd/verification.json",
+          "sha256": "da4681d6a65ff92a2b8b384193cd60b2c1e482b8ce96b1a7b9b989f37e81156c"
+        }
+      ]
+    },
+    {
+      "id": "TM-C",
+      "name": "Keyboard-mapped scales",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "channel.scale degree cents with a root key, Undo and schema gate.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/tuning/channel-tuning/attempt-c9d3285931384e198330f9e4653493dd/verification.json",
+          "sha256": "da4681d6a65ff92a2b8b384193cd60b2c1e482b8ce96b1a7b9b989f37e81156c"
+        }
+      ]
+    },
+    {
+      "id": "TM-D",
+      "name": "Tuning to plugin instruments",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "MPE member-channel bends and MTS-ESP source; explicit refusal where unsupported.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/tuning/channel-tuning/attempt-c9d3285931384e198330f9e4653493dd/verification.json",
+          "sha256": "da4681d6a65ff92a2b8b384193cd60b2c1e482b8ce96b1a7b9b989f37e81156c"
+        }
+      ]
+    },
+    {
+      "id": "TM-E",
+      "name": "Maqam note snapping",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "notes.maqam quarter-tone snapping that keeps tuned notes.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/tuning/maqam-snap/attempt-49866932eea54e189ce53ede77e4bbea/verification.json",
+          "sha256": "27317492331ca773018a3374eb47ec59bc2d180d8604058728a062ffe3071c89"
+        }
+      ]
+    },
+    {
+      "id": "TM-F",
+      "name": "Rendered pitch",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Offline renders of a tuned Channel measure the expected frequency (Rast E -50 cents, A unchanged, Undo).",
+      "evidence": [
+        {
+          "path": "build/module-qualification/tuning/render/attempt-0688b94ca3a94bb09a72f34bda736d07/verification.json",
+          "sha256": "de7d4b32b11e9e621bf6af4f554c3ca0d6ab0cf52bb5eaaabad5fe31c0ea190c"
+        }
+      ]
+    },
+    {
+      "id": "TM-G",
+      "name": "MCP and skill guidance",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "channel.tuning/scale/mpe/mtsEsp and notes.maqam are canonical commands with skill guidance (score-tools.md).",
+      "evidence": [
+        {
+          "path": "build/module-qualification/tuning/channel-tuning/attempt-c9d3285931384e198330f9e4653493dd/verification.json",
+          "sha256": "da4681d6a65ff92a2b8b384193cd60b2c1e482b8ce96b1a7b9b989f37e81156c"
+        }
+      ]
+    },
+    {
+      "id": "TM-H",
+      "name": "Exact module release",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Complete suite, module gate and packaged verification before replacing the distribution.",
+      "evidence": [],
+      "phase": "release"
+    }
+  ],
+  "externalAcceptance": [
+    {
+      "name": "Musical review of maqam tuning by ear (owner)",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "name": "Third-party MPE / MTS-ESP plugin behaviour",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "baselineContext": [
+    {
+      "path": "docs/MILESTONES.md",
+      "scope": "M5 / v0.4"
+    }
+  ],
+  "evidencePolicy": "Verified rows need passed receipts binding sources and exact binaries; listening is separate.",
+  "updated": "2026-11-08",
+  "progressEvidence": []
+}
