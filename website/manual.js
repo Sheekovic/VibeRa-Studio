@@ -318,6 +318,10 @@
     ['Export', 'After export, read the loudness report and aim near -14 LUFS with true peak below -1 dBTP.'],
     ['Safety', 'Tools > Open project backups folder holds five rotating backups of every save.'],
     ['Speed', 'Shift+4 fits the song or Pattern on screen; Shift+5 zooms to the selection.'],
+    ['Mixer', 'A slow sine modulator on a pad pan (4 bars, 25 %) makes it drift gently across the stereo field.'],
+    ['Mixer', 'Add a parallel chain to the drum bus, squash it with the Compressor and blend it in for punch.'],
+    ['Vocal', 'In the vocal pitch editor, Snap 50 % fixes the worst notes but keeps the singer natural.'],
+    ['Piano', 'Set an expression map once and pick Staccato or Legato per note instead of drawing keyswitch notes.'],
   ];
   const tipText = $('#tip-text');
   let lastTip = -1;

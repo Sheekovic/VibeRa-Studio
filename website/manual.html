@@ -63,6 +63,7 @@
       <li><a href="#effects">Built-in effects</a></li>
       <li><a href="#sampler">Sampler channel</a></li>
       <li><a href="#instruments">Instruments</a></li>
+      <li><a href="#vocal">Vocal pitch editor</a></li>
       <li><a href="#recording">Recording</a></li>
       <li><a href="#performance">Performance mode</a></li>
       <li><a href="#chords">Chord Track</a></li>
@@ -238,6 +239,8 @@
           <li><b>Note scripts</b>: run JavaScript on the selected notes; <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Y</kbd> runs the last one again.</li>
           <li><b>Scale snapping</b> and the scale guide, including maqam scales with quarter tones.</li>
           <li><b>Export</b> a score sheet as PDF, or use the MIDI clipboard.</li>
+          <li><b>Expression maps</b>: Menu &gt; Articulation &gt; Edit expression map, e.g. <code>Legato=C1; Staccato=C#1</code>, then
+            choose an articulation for the selected notes. Its keyswitch is sent just before each note.</li>
         </ul>
       </div>
       <div class="tab hacks-tab">
@@ -318,6 +321,14 @@
       Choose a category to filter.</p>
     <div class="fx-filter" id="fx-filter"></div>
     <div class="fx-grid" id="fx-grid"></div>
+    <h3>Parallel chains (FX container)</h3>
+    <p>Right-click an insert's effect area &gt; <i>Add parallel chains</i> and pick 1 to 4. Each branch gets a copy of the
+      insert's sound and outputs where it does, so effects on a branch run in parallel with the dry signal: parallel
+      compression, a wet reverb chain or a distortion blend. Balance with the branch faders, mute a branch to bypass it.</p>
+    <h3>Modulators (LFO)</h3>
+    <p>Right-click a fader, pan, separation or send &gt; <i>Modulator (LFO)</i>, or press <i>Modulator...</i> in a plugin's
+      Controls window. Choose sine, triangle, saw, square or random, a rate from 1/16 note to 4 bars and a depth. The
+      control moves around the value you set, in time with the song, in playback and in exports.</p>
     <div class="hack"><b>Hack</b> Put <b>Pump</b> on a bass insert for tempo-synced sidechain-style pumping
       without routing a kick. Use <b>Beat Gate</b> on a pad for instant stutters and half-time, and finish the
       Master with <b>Maximizer</b> and check the result with the <b>Spectrum Analyzer</b>.</div>
@@ -353,6 +364,22 @@
       <article class="icard"><h3>Drum pads</h3><p><i>Tools &gt; Drum pads</i> opens a pad grid to play and load a
         kit with the mouse, the computer keyboard or a MIDI controller.</p><p class="tip">Turn on step record to write what you play at a cursor.</p></article>
     </div>
+  </section>
+
+  <!-- VOCAL PITCH -->
+  <section class="m-sec" id="vocal" data-keys="vocal pitch tune autotune notes variaudio melodyne audio clip">
+    <h2><span class="num">10b</span> Vocal pitch editor</h2>
+    <p>Right-click an Audio Clip &gt; <i>Edit</i> &gt; <i>Edit vocal pitch (notes)...</i>. VibeRa finds every sung note and
+      draws it as a block over the real pitch curve, with how many cents it is off.</p>
+    <figure class="shot"><img src="img/manual/vocal-pitch.png" alt="Vocal pitch editor with note blocks and pitch curve" loading="lazy">
+      <figcaption>Each note shows its name and cents; the line inside is the sung pitch with its vibrato.</figcaption></figure>
+    <ul class="how">
+      <li>Drag a note up or down in semitones; hold <kbd>Alt</kbd> for cents.</li>
+      <li>Double-click a note to put it in tune, or use <b>Snap to semitones</b> (or <b>Snap 50 %</b> for a natural result).</li>
+      <li><b>Apply</b> renders the clip with the same length; one Undo brings back the original.</li>
+    </ul>
+    <div class="hack"><b>Hack</b> Snap 50 % keeps the singer's character while fixing the worst notes. Works on one voice
+      or instrument at a time.</div>
   </section>
 
   <!-- RECORDING -->
