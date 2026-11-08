@@ -73,6 +73,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `plugins.scan` | vibera_catalogue | vibera_catalogue state / job / list / descriptor | skills/vibera-studio/references/catalogue.md; per-operation verification incomplete |
 | `channel.select` | vibera_select | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `plugin.parameter.set` | vibera_plugin | vibera_plugin list / parameters / job; vibera_state audio / pluginControls | skills/vibera-studio/references/plugins.md; per-operation verification incomplete |
+| `plugin.editor.open` | vibera_plugin | vibera_plugin list / parameters / job; vibera_state audio / pluginControls | skills/vibera-studio/references/plugins.md; per-operation verification incomplete |
 | `plugins.cancelScan` | vibera_catalogue | vibera_catalogue state / job / list / descriptor | skills/vibera-studio/references/catalogue.md; per-operation verification incomplete |
 | `tools.lastTweaked.controls` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `tools.lastTweaked.create` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -669,7 +670,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 460; unreviewed: 460.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 156; gaps: 31.
+Explicit UI inventory complete: False; known controls: 156; gaps: 0.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -699,7 +700,7 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `piano.noteStretch` | Controller notes.stretch and shared Studio baseline-relative stretch preview/commit/cancel service | vibera_command; reviewed |
 | `mixer.routing` | Controller mixer.route/routeOnly/send, shared source selection and leased mixerSend gestures | vibera_command; reviewed |
 | `recording.retainedTakeRecovery` | Studio finishMidiTake/retryMidiTake/cancelPendingMidiTake through actual prepared Controller history | vibera_recording; reviewed |
-| `mixer.effects.native` | Studio::openPluginEditorUI -> requestPluginEditor | vibera_plugin; manual mapping/verification required |
+| `mixer.effects.native` | Studio::openPluginEditorUI -> requestPluginEditor | vibera_plugin; reviewed |
 | `mixer.effects.controls` | Studio::showPluginParameters | vibera_plugin; reviewed |
 | `mixer.effects.power` | Studio::command plugin.bypass | vibera_command; reviewed |
 | `mixer.effects.remove` | Studio::command plugin.remove | vibera_command; reviewed |
@@ -714,7 +715,7 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `mixer.stereoSwap` | Shared Controller command and Studio Mixer admission; saved schema21 stereo target | vibera_command; reviewed |
 | `plugin.audioIo` | Studio::addPluginIoMenu and vibera_command plugin.io share captured canonical structural preparation, native negotiation, activation and history. | vibera_command; reviewed |
 | `mixer.moduleWorkflows` | Existing canonical Mixer organisation and meter commands; shared mixer.chain UI/MCP services with exact owned file/application jobs. | vibera_command; reviewed |
-| `mixer.unmuteAll.gesture` | mixer.unmuteAll through Studio.command and Controller document history | vibera_command; manual mapping/verification required |
+| `mixer.unmuteAll.gesture` | mixer.unmuteAll through Studio.command and Controller document history | vibera_command; reviewed |
 | `plugin.wrapper.containingChain` | Exact-effect wrapper parent delegates existing canonical Mixer chain/sidechain services; UI choices and semantic arguments share validation, outcomes and history. | vibera_plugin; reviewed |
 | `sampler.tempo.workflow` | Studio::samplerTempoOperation with source/settings witness; atomic Controller channel.sampler.tempo and existing fit toggle | vibera_samplerTempo; reviewed |
 | `rack.appearance.workflow` | Controller Channel appearance commands shared by captured UI/macro/MCP; properties draft commits once or cancels; explicit selected-slot stable order | vibera_command; reviewed |
@@ -801,32 +802,32 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `synth.ui.rack-open` | Native Synth Channel name and vibera_synth openEditor converge on the existing acknowledged plugin editor operation; resolve plugin ID from Channel readback. The generic inherited channel.openInstrument context adapter remains an honest global gap. | vibera_synth; reviewed |
 | `sampler.filter` | Shared metadata, Controller/Customization validation and history; other inherited builder branches remain unqualified | vibera_command; reviewed |
 | `macro.stepModulation` | Shared metadata, Controller/Customization validation and history; other inherited builder branches remain unqualified | vibera_macros; reviewed |
-| `sampler.envelopes.parameters` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; manual mapping/verification required |
-| `sampler.envelopes.navigation` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; manual mapping/verification required |
-| `sampler.envelopes.macroInput` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; manual mapping/verification required |
-| `sampler.automation.targets` | Shared Controller commands, immutable source targets and existing Picker/window services | vibera_command; manual mapping/verification required |
-| `sampler.automation.sourceProperties` | Shared Controller commands, immutable source targets and existing Picker/window services | vibera_command; manual mapping/verification required |
-| `sampler.automation.savedRecipes` | Shared Controller commands, immutable source targets and existing Picker/window services | vibera_command; manual mapping/verification required |
-| `sampler.controller.contextLearn` | Immutable SamplerAutomationUiIntent ->showSamplerControllerLearn ->owned Learn service | vibera_controller; manual mapping/verification required |
-| `sampler.controller.learn` | Shared samplerControllerOperation/start/accept/cancel; Controller create only after explicit acceptance | vibera_controller; manual mapping/verification required |
-| `sampler.controller.management` | Project links button ->samplerControllerLinksMenu ->captured stable ID/project ->properties; state lists same rows semantically | vibera_controller; manual mapping/verification required |
-| `sampler.controller.properties` | Captured project/revision/link ->decodeSamplerControllerArguments ->Controller update/remove ->effective sync | vibera_command; manual mapping/verification required |
-| `sampler.voice.flags` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; manual mapping/verification required |
-| `sampler.voice.continuous` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; manual mapping/verification required |
-| `sampler.voice.shortcuts` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; manual mapping/verification required |
-| `sampler.voice.controllers` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; manual mapping/verification required |
-| `piano.noteModes.slideInsertion` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.portamentoInsertion` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.colourInsertion` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.recolour` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.selectColour` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesOpen` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesStage` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesApply` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesReset` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesCancel` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesClose` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesReturn` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesEscape` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.propertiesInvalid` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
-| `piano.noteModes.creationPayload` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; manual mapping/verification required |
+| `sampler.envelopes.parameters` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; reviewed |
+| `sampler.envelopes.navigation` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; reviewed |
+| `sampler.envelopes.macroInput` | Shared Controller commands, fixed Channel/target gesture and application window selection | vibera_command; reviewed |
+| `sampler.automation.targets` | Shared Controller commands, immutable source targets and existing Picker/window services | vibera_command; reviewed |
+| `sampler.automation.sourceProperties` | Shared Controller commands, immutable source targets and existing Picker/window services | vibera_command; reviewed |
+| `sampler.automation.savedRecipes` | Shared Controller commands, immutable source targets and existing Picker/window services | vibera_command; reviewed |
+| `sampler.controller.contextLearn` | Immutable SamplerAutomationUiIntent ->showSamplerControllerLearn ->owned Learn service | vibera_controller; reviewed |
+| `sampler.controller.learn` | Shared samplerControllerOperation/start/accept/cancel; Controller create only after explicit acceptance | vibera_controller; reviewed |
+| `sampler.controller.management` | Project links button ->samplerControllerLinksMenu ->captured stable ID/project ->properties; state lists same rows semantically | vibera_controller; reviewed |
+| `sampler.controller.properties` | Captured project/revision/link ->decodeSamplerControllerArguments ->Controller update/remove ->effective sync | vibera_command; reviewed |
+| `sampler.voice.flags` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; reviewed |
+| `sampler.voice.continuous` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; reviewed |
+| `sampler.voice.shortcuts` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; reviewed |
+| `sampler.voice.controllers` | Shared canonical five-control sampler commands, Controller validation/history and prepared voice settings | vibera_command; reviewed |
+| `piano.noteModes.slideInsertion` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.portamentoInsertion` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.colourInsertion` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.recolour` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.selectColour` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesOpen` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesStage` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesApply` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesReset` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesCancel` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesClose` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesReturn` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesEscape` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.propertiesInvalid` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `piano.noteModes.creationPayload` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |

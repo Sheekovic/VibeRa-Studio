@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
+  "applicationSha256": "213f2eece5d9d4de439c073ea9bf41de7fbf2efa255ca004b43b5250f78e274d",
   "sourceInputs": {
     "scripts/verify-plugins-page-mcp.py": "bcd86eac30636b7395ee70a71cbaa0fe6f92f73efe8594479e1414eb8e61a255",
     "src/PluginPage.h": "0f0d7330e4a645a5b47b72fe384846d0da40bef5473c58da9cb6b59a4e45c56b",
     "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
-    "src/Commands.cpp": "6f7aeca9a903240ca09dd9879e51a34f417856bf7e601f94812ca1845c020550",
+    "src/Commands.cpp": "3fc5fa7f48c854cafbfbe675986242d9749c336a54e6c4884d61b8db92463bf3",
     "src/StudioPluginParameters.cpp": "d43e457755398a65d7e16278b6da9a9d011d931df1f403a10c54e83d6f06e5fb"
   },
   "sourceHashMode": "text-lf-v1",
@@ -19,13 +19,13 @@
     "channelTargetSelection: vibera_select selects the Channel",
     "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
     "manualValue: the effect exposes its native parameters",
-    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': '1a47312db714456a951501f8bec3d18a', 'revision': 3, 'operation': '6a64661ee99b480b8a1c3261c90ff545', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'e1bedeffc9d24b12994915e41c32c5ab', 'revision': 3, 'operation': '206e15d94e394a7596ace20d01d3daf9', 'kind': 'set', 'plugin': 46, 'requestedI",
     "manualValue: the parameter edit enters project history"
   ],
   "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-153158/affected-tests.log",
+    "sourceLog": "build/dev/20261108-160348/affected-tests.log",
     "tests": 262
   }
 }
