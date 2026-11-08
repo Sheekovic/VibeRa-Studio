@@ -166,7 +166,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result acceptSamplerControllerLearn(const juce::String &, double, double, bool,
                                               const std::vector<Id> &);
     void showSamplerControllerLearn(Id, std::uint32_t);
-    void samplerControllerLinksMenu();
+    void samplerControllerLinksMenu(juce::Component *anchor = nullptr); // Menu under `anchor` when given.
     void samplerControllerLinkDialog(Id);
     bool recordingNotes = false;
     bool quantizeRecordingStart = false, quantizeRecordingEnd = false;

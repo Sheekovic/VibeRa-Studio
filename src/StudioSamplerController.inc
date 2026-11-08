@@ -442,7 +442,7 @@ void Studio::showSamplerControllerLearn(Id channel, std::uint32_t parameter)
         true);
 }
 
-void Studio::samplerControllerLinksMenu()
+void Studio::samplerControllerLinksMenu(juce::Component *anchor)
 {
     syncSamplerControllerBindings();
     juce::PopupMenu menu;
@@ -465,7 +465,7 @@ void Studio::samplerControllerLinksMenu()
     if (ids.empty())
         menu.addItem(1, "Right-click an envelope/LFO control to add a link", false);
     const auto project = controller.projectIdentity;
-    menu.showMenuAsync({},
+    menu.showMenuAsync(anchor ? juce::PopupMenu::Options().withTargetComponent(anchor) : juce::PopupMenu::Options(),
                        [safe = juce::Component::SafePointer<Studio>(this), ids, project](int choice)
                        {
                            if (safe && choice > 0 && choice <= int(ids.size()) &&

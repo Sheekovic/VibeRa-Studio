@@ -292,7 +292,7 @@ class ControllerPage final : public juce::Component, private juce::ListBoxModel,
         projectLinks.onClick = [this]
         {
             if (owner)
-                owner->samplerControllerLinksMenu();
+                owner->samplerControllerLinksMenu(&projectLinks);
         };
         for (auto *component : std::initializer_list<juce::Component *>{
                  &input,           &output,  &action,     &mode,  &port,    &channel, &kind,   &layer,
