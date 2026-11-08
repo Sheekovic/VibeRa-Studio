@@ -215,6 +215,14 @@ struct BarPosition
     double beatInBar = 0, barLength = 4;
     int numerator = 4, denominator = 4;
 };
+// Chord Track event (version 57): a chord symbol (e.g. "Am7", "F#maj7", "C/E") from `beat` until
+// the next event. Song-wide, like markers; notes can follow it (notes.followChords).
+struct ChordEvent
+{
+    Id id = 0;
+    double beat = 0;
+    juce::String symbol; // At most 32 characters; must parse with score::chordPitchClasses.
+};
 struct Marker
 {
     Id id = 0;
@@ -248,7 +256,7 @@ struct Arrangement
 };
 struct Project
 {
-    static constexpr int currentVersion = 56;
+    static constexpr int currentVersion = 57;
     static constexpr int maxChannels = 999; // Channel Rack capacity (FL-sized projects).
     int version = currentVersion;
     Id nextId = 1;
@@ -262,6 +270,7 @@ struct Project
     std::vector<Placement> placements;
     std::vector<ClipGroup> clipGroups;
     std::vector<Marker> markers; // Playlist markers (version 44); display order is by beat.
+    std::vector<ChordEvent> chords; // Chord Track (version 57), sorted by beat.
     std::vector<TempoChange> tempoChanges; // Song tempo map (version 45), strictly increasing beats.
     std::vector<PlaylistTrack> tracks;     // Sparse, sorted by lane (version 50).
     std::vector<MeterChange> meterChanges; // Song time signatures after the first (v54), by beat.

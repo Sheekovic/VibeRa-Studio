@@ -26,6 +26,99 @@ inline const std::vector<Shape> &chordShapes()
         {"min9", {0, 3, 7, 10, 14}}, {"9", {0, 4, 7, 10, 14}},      {"power", {0, 7, 12}}};
     return shapes;
 }
+// Chord symbol -> pitch classes (0 = C). Root letter with optional #/b, then a quality suffix
+// (none, m, min, -, dim, aug, +, sus2, sus4, maj7, M7, m7, min7, 7, dim7, m7b5, 6, m6, add9, maj9,
+// m9, 9, 5) and an optional /bass note. Empty for an unknown symbol.
+inline std::vector<int> chordPitchClasses(const juce::String &symbol)
+{
+    auto text = symbol.trim();
+    if (text.isEmpty() || text.length() > 32)
+        return {};
+    static const juce::String letters = "C.D.EF.G.A.B";
+    auto pitch = [&](juce::String &s) -> int
+    {
+        if (s.isEmpty())
+            return -1;
+        const int base = letters.indexOfChar(juce::CharacterFunctions::toUpperCase(s[0]));
+        if (base < 0)
+            return -1;
+        int pc = base;
+        s = s.substring(1);
+        while (s.startsWithChar('#') || s.startsWithChar('b'))
+        {
+            pc += s[0] == '#' ? 1 : -1;
+            s = s.substring(1);
+        }
+        return (pc % 12 + 12) % 12;
+    };
+    int bass = -1;
+    if (const int slash = text.lastIndexOfChar('/'); slash > 0)
+    {
+        auto bassText = text.substring(slash + 1);
+        bass = pitch(bassText);
+        if (bass < 0 || bassText.isNotEmpty())
+            return {};
+        text = text.substring(0, slash);
+    }
+    const int root = pitch(text);
+    if (root < 0)
+        return {};
+    static const std::vector<std::pair<const char *, const char *>> qualities{
+        {"", "major"},  {"maj", "major"}, {"M", "major"},     {"m", "minor"},    {"min", "minor"},   {"-", "minor"},
+        {"dim", "dim"}, {"o", "dim"},     {"aug", "aug"},     {"+", "aug"},      {"sus2", "sus2"},   {"sus4", "sus4"},
+        {"sus", "sus4"}, {"maj7", "maj7"}, {"M7", "maj7"},    {"m7", "min7"},    {"min7", "min7"},   {"-7", "min7"},
+        {"7", "dom7"},  {"dim7", "dim7"}, {"o7", "dim7"},     {"m7b5", "m7b5"},  {"6", "6"},         {"m6", "m6"},
+        {"add9", "add9"}, {"maj9", "maj9"}, {"m9", "min9"},   {"min9", "min9"},  {"9", "9"},         {"5", "power"}};
+    const auto found = std::find_if(qualities.begin(), qualities.end(), [&](const auto &q) { return text == q.first; });
+    if (found == qualities.end())
+        return {};
+    const auto shape = std::find_if(chordShapes().begin(), chordShapes().end(),
+                                    [&](const auto &s) { return juce::String(s.name) == found->second; });
+    std::vector<int> out;
+    for (const int interval : shape->intervals)
+        if (std::find(out.begin(), out.end(), (root + interval) % 12) == out.end())
+            out.push_back((root + interval) % 12);
+    if (bass >= 0 && std::find(out.begin(), out.end(), bass) == out.end())
+        out.push_back(bass);
+    return out;
+}
+// Chord sounding at a Song beat: the last Chord Track event at or before it (nullptr before the first).
+inline const ChordEvent *chordAt(const std::vector<ChordEvent> &chords, double beat)
+{
+    const ChordEvent *found = nullptr;
+    for (const auto &chord : chords)
+        if (chord.beat <= beat + 1.e-9)
+            found = &chord;
+    return found;
+}
+// Moves each target note to the nearest pitch whose class is a tone of the chord at
+// songOffset + note.beat (ties go down). Notes before the first chord stay. Returns the count moved.
+inline int followChords(Pattern &pattern, const std::vector<size_t> &targets, const std::vector<ChordEvent> &chords,
+                        double songOffset)
+{
+    int moved = 0;
+    for (const auto index : targets)
+    {
+        auto &note = pattern.notes[index];
+        const auto *chord = chordAt(chords, songOffset + note.beat);
+        if (!chord)
+            continue;
+        const auto tones = chordPitchClasses(chord->symbol);
+        if (tones.empty())
+            continue;
+        int best = note.pitch, bestDistance = 128;
+        for (int candidate = std::max(0, note.pitch - 11); candidate <= std::min(127, note.pitch + 11); ++candidate)
+            if (std::find(tones.begin(), tones.end(), candidate % 12) != tones.end())
+            {
+                const int distance = std::abs(candidate - note.pitch);
+                if (distance < bestDistance || (distance == bestDistance && candidate < best))
+                    best = candidate, bestDistance = distance;
+            }
+        if (best != note.pitch)
+            note.pitch = best, ++moved;
+    }
+    return moved;
+}
 // 12-tone scales. The maqam entries are 12-TET approximations only (no quarter tones).
 inline const std::vector<Shape> &scaleShapes()
 {

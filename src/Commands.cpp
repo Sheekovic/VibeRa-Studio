@@ -836,6 +836,11 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.humanize", "Humanize notes", Scope::piano, true, true, "command"},
         {"notes.scaleSnap", "Snap notes to scale", Scope::piano, true, true, "command"},
         {"notes.maqam", "Snap notes to maqam (quarter tones)", Scope::piano, true, true, "command"},
+        {"notes.followChords", "Follow the Chord Track (notes move to the nearest chord tone)", Scope::piano, true, true, "command"},
+        {"chord.add", "Add or replace a Chord Track chord", Scope::playlist, true, true, "command"},
+        {"chord.set", "Change a Chord Track chord", Scope::playlist, true, true, "command"},
+        {"chord.delete", "Delete Chord Track chords", Scope::playlist, true, true, "command"},
+        {"chord.fill", "Write a chord progression to the Chord Track (one chord per bar)", Scope::playlist, true, true, "command"},
         {"rack.group.create", "Add Channel filter group", Scope::rack, true, true, "command"},
         {"rack.group.rename", "Rename Channel filter group", Scope::rack, true, true, "command"},
         {"rack.group.delete", "Delete Channel filter group", Scope::rack, true, true, "command"},
@@ -4768,6 +4773,24 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             if (pat->controllers.size() == before)
                 return juce::Result::fail("This Channel has no recorded controllers in the Pattern");
         }
+        if (id == "notes.followChords")
+        {
+            // Song position of the Pattern: its first Playlist placement (beat 0 without one).
+            if (next.chords.empty())
+                return juce::Result::fail("chord.empty: Write chords on the Chord Track first");
+            if (a.ids.empty() && (!ch || ch->audioClip))
+                return juce::Result::fail("Select a playable Channel for score tools");
+            std::vector<size_t> targets;
+            for (size_t i = 0; i < pat->notes.size(); ++i)
+                if (a.ids.empty() ? pat->notes[i].channel == a.channel : chosen(pat->notes[i].id))
+                    targets.push_back(i);
+            double offset = -1;
+            for (const auto &placement : next.placements)
+                if (placement.pattern == pat->id && (offset < 0 || placement.beat < offset))
+                    offset = placement.beat;
+            if (score::followChords(*pat, targets, next.chords, std::max(0., offset)) == 0)
+                return juce::Result::fail("chord.noChange: The notes already follow the Chord Track");
+        }
         if (id == "notes.chordify" || id == "notes.arpeggiate" || id == "notes.strum" ||
             id == "notes.humanize" || id == "notes.scaleSnap" || id == "notes.maqam")
         {
@@ -6491,6 +6514,65 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             next.tempoChanges.erase(found);
         std::sort(next.tempoChanges.begin(), next.tempoChanges.end(),
                   [](const auto &x, const auto &y) { return x.beat < y.beat; });
+    }
+    if (id.startsWith("chord."))
+    {
+        auto sortChords = [&] { std::stable_sort(next.chords.begin(), next.chords.end(),
+                                                  [](const auto &x, const auto &y) { return x.beat < y.beat; }); };
+        auto validSymbol = [](const juce::String &text) { return !score::chordPitchClasses(text).empty(); };
+        if (id == "chord.add")
+        {
+            if (!std::isfinite(a.beat) || a.beat < 0 || a.beat > 1000000)
+                return juce::Result::fail("chord.invalidBeat: Chord beat is 0..1000000");
+            if (!validSymbol(a.text))
+                return juce::Result::fail("chord.invalidSymbol: Use a chord symbol such as C, Am7, F#maj7, Bb/D");
+            std::erase_if(next.chords, [&](const auto &c) { return std::abs(c.beat - a.beat) < 1.e-6; });
+            if (next.chords.size() >= 10000)
+                return juce::Result::fail("Too many chords");
+            next.chords.push_back({next.allocate(), a.beat, a.text.trim()});
+            sortChords();
+        }
+        else if (id == "chord.set")
+        {
+            auto found = std::find_if(next.chords.begin(), next.chords.end(), [&](const auto &c) { return c.id == a.target; });
+            if (found == next.chords.end())
+                return missing();
+            if (!validSymbol(a.text))
+                return juce::Result::fail("chord.invalidSymbol: Use a chord symbol such as C, Am7, F#maj7, Bb/D");
+            found->symbol = a.text.trim();
+        }
+        else if (id == "chord.delete")
+        {
+            const auto before = next.chords.size();
+            std::erase_if(next.chords, [&](const auto &c) { return std::find(a.ids.begin(), a.ids.end(), c.id) != a.ids.end(); });
+            if (a.ids.empty() || next.chords.size() + a.ids.size() != before)
+                return missing();
+        }
+        else if (id == "chord.fill")
+        {
+            // text: chords separated by | or spaces ("C | Am | F | G"); one chord per bar from `beat`
+            // (bar lengths follow the meter), replacing chords inside the written span. One Undo step.
+            juce::StringArray symbols;
+            symbols.addTokens(a.text.replace("|", " "), " ", "");
+            symbols.removeEmptyStrings();
+            if (symbols.isEmpty() || symbols.size() > 512)
+                return juce::Result::fail("chord.invalidProgression: Write 1..512 chords, e.g. C | Am | F | G");
+            for (const auto &symbol : symbols)
+                if (!validSymbol(symbol))
+                    return juce::Result::fail("chord.invalidSymbol: Unknown chord " + symbol);
+            if (!std::isfinite(a.beat) || a.beat < 0 || a.beat > 1000000)
+                return juce::Result::fail("chord.invalidBeat: Start beat is 0..1000000");
+            double beat = a.beat;
+            std::vector<ChordEvent> written;
+            for (const auto &symbol : symbols)
+            {
+                written.push_back({next.allocate(), beat, symbol});
+                beat += std::max(.25, next.barPosition(beat).barLength);
+            }
+            std::erase_if(next.chords, [&](const auto &c) { return c.beat >= a.beat - 1.e-6 && c.beat < beat - 1.e-6; });
+            next.chords.insert(next.chords.end(), written.begin(), written.end());
+            sortChords();
+        }
     }
     if (id.startsWith("marker."))
     {

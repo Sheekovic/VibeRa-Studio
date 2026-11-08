@@ -75,3 +75,15 @@ All take `ids` (empty = the whole selected/explicit Channel part) plus `pattern`
 - MTS-ESP: `vibera_command channel.mtsEsp {channel, enabled}` broadcasts that Channel's
   tuning to every MTS-ESP client plugin (one source Channel). Needs the user-installed
   LIBMTS.dll; `vibera_inspect channels` shows `mtsEspActive` and `mtsEspClients`.
+
+## Chord Track
+
+Song-wide chord symbols (project schema 57), read with `vibera_inspect entity: chords` (id, beat,
+symbol, pitchClasses). Symbols: root C..B with #/b, quality none/m/dim/aug/sus2/sus4/maj7/m7/7/dim7/
+m7b5/6/m6/add9/maj9/m9/9/5, optional /bass (e.g. Am7, F#maj7, Bb/D).
+- `chord.fill {text: "C | Am | F | G", beat}` writes one chord per bar from beat (meter aware),
+  replacing chords in that span; `chord.add {beat, text}`, `chord.set {target, text}`,
+  `chord.delete {ids}` edit single chords. Unknown symbols are refused.
+- `notes.followChords {channel, pattern}` (or `ids`) moves notes to the nearest tone of the chord
+  sounding at their Song position (the Pattern's first Playlist placement; ties go down); one Undo.
+  The app shows chords on the Playlist ruler and in Tools > Chord Track.

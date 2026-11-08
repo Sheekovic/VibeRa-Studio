@@ -3561,6 +3561,19 @@ class Studio::Editor final : public juce::Component,
                             g.drawText(marker.name, juce::Rectangle<float>(x + 9, float(gridTop() - 22), 140, 12),
                                        juce::Justification::centredLeft, true);
                         }
+                    if (row == 0)
+                        for (const auto &chord : s.controller.project.chords)
+                        {
+                            // Chord Track: symbols on the lower ruler line, held until the next chord.
+                            const float x = float(left + (chord.beat - scroll) * spacing());
+                            if (x < left - 60 || x > getWidth() - scrollBarThickness)
+                                continue;
+                            g.setColour(juce::Colour(0xff4fd1c5));
+                            g.fillRect(x, float(gridTop() - 11), 1.f, 11.f);
+                            g.setFont(juce::Font(vibera::uiFont, 11.f, juce::Font::bold));
+                            g.drawText(chord.symbol, juce::Rectangle<float>(x + 3, float(gridTop() - 11), 70, 11),
+                                       juce::Justification::centredLeft, true);
+                        }
                     if (row == 0 && s.playlistRange)
                     {
                         // Time selection (also the audio punch range) on the ruler and tracks.

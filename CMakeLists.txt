@@ -927,6 +927,9 @@ add_test(NAME musical_acceptance COMMAND VibeRaTests "${CMAKE_CURRENT_BINARY_DIR
 add_test(NAME plugins_page_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-plugins-page-mcp.py"
   "$<TARGET_FILE:VibeRa>")
 set_tests_properties(plugins_page_mcp PROPERTIES TIMEOUT 180)
+add_test(NAME chord_track_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-chord-track-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/chord_track_mcp")
+set_tests_properties(chord_track_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
 set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)

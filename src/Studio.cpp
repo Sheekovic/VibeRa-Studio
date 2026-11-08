@@ -3479,6 +3479,9 @@ void Studio::toolsMenu()
     menu.addItem(224, "Open project backups folder", profileFile().getSiblingFile("backups").isDirectory());
     menu.addItem(228, "Export diagnostics...");
     menu.addItem(229, "Analyze loudness of an audio file...");
+    menu.addSeparator();
+    menu.addItem(230, "Chord Track: write a chord progression...");
+    menu.addItem(231, "Chord Track: selected notes / Channel follow the chords", !controller.project.chords.empty());
     menu.addItem(225, updatePhase == "available" ? "Update available: " + (availableUpdate ? availableUpdate->name : juce::String()) + "..."
                       : updatePhase == "downloading" ? "Downloading update..."
                       : updatePhase == "ready"       ? "Install downloaded update..."
@@ -3541,6 +3544,44 @@ void Studio::toolsMenu()
                             safe->repaint();
                         }
                     });
+                return;
+            }
+            if (choice == 230)
+            {
+                auto *box = new juce::AlertWindow("Chord Track", "One chord per bar, e.g.  C | Am | F | G   or  Dm7 G7 Cmaj7",
+                                                  juce::MessageBoxIconType::NoIcon);
+                juce::StringArray current;
+                for (const auto &chord : safe->controller.project.chords)
+                    current.add(chord.symbol);
+                box->addTextEditor("chords", current.joinIntoString(" | "), "Chords");
+                box->addTextEditor("bar", "1", "Start bar");
+                box->addButton("Write", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                               [safe, box](int button)
+                                               {
+                                                   if (!safe || button != 1)
+                                                       return;
+                                                   CommandArgs a;
+                                                   a.text = box->getTextEditorContents("chords");
+                                                   const int bar = std::max(1, box->getTextEditorContents("bar").getIntValue());
+                                                   double beat = 0;
+                                                   for (int b = 1; b < bar; ++b)
+                                                       beat += std::max(.25, safe->controller.project.barPosition(beat).barLength);
+                                                   a.beat = beat;
+                                                   safe->command("chord.fill", a);
+                                               }),
+                                     true);
+                return;
+            }
+            if (choice == 231)
+            {
+                CommandArgs a;
+                a.pattern = safe->selectedPattern;
+                a.channel = safe->selectedChannel;
+                for (const auto id : safe->selectedNotes)
+                    a.ids.push_back(id);
+                safe->command("notes.followChords", a);
                 return;
             }
             if (choice == 229)

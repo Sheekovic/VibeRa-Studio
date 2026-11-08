@@ -2,6 +2,7 @@
 #include "synth/SynthRegistry.h"
 #include "NativeInstruments.h"
 #include "Project.h"
+#include "ScoreTools.h"
 #include "Arrangements.h"
 #include "NoteTiming.h"
 #include "NoteRepeat.h"
@@ -515,6 +516,19 @@ juce::ValueTree Project::state() const
             markerTree.appendChild(entry, nullptr);
         }
         root.appendChild(markerTree, nullptr);
+    }
+    if (!chords.empty())
+    {
+        juce::ValueTree chordTree("CHORDS");
+        for (const auto &chord : chords)
+        {
+            juce::ValueTree entry("CHORD");
+            set(entry, "id", juce::int64(chord.id));
+            set(entry, "beat", chord.beat);
+            set(entry, "symbol", chord.symbol);
+            chordTree.appendChild(entry, nullptr);
+        }
+        root.appendChild(chordTree, nullptr);
     }
     juce::ValueTree cs("CHANNELS"), ps("PATTERNS"), ls("PLACEMENTS"), ms("MIXER"), als("AUDIO_PLACEMENTS");
     for (auto &c : channels)
@@ -1038,6 +1052,18 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 std::floor(id) != id)
                 return juce::Result::fail("Invalid Playlist marker");
             p.markers.push_back({Id(id), exactNumber(entry["beat"]), entry["name"].toString()});
+        }
+    }
+    if (const auto chordTree = t.getChildWithName("CHORDS"); chordTree.isValid())
+    {
+        if (fileVersion < 57 || chordTree.getNumChildren() > 10000)
+            return juce::Result::fail("Chord Track needs project version 57 (at most 10000 chords)");
+        for (const auto &entry : chordTree)
+        {
+            const auto id = exactNumber(entry["id"]);
+            if (!entry.hasType("CHORD") || !std::isfinite(id) || id < 1 || id > 1000000000 || std::floor(id) != id)
+                return juce::Result::fail("Invalid Chord Track event");
+            p.chords.push_back({Id(id), exactNumber(entry["beat"]), entry["symbol"].toString()});
         }
     }
     if (const auto sceneTree = t.getChildWithName("SCENES"); sceneTree.isValid())
@@ -2163,6 +2189,11 @@ juce::Result Project::validate() const
         if (!unique(marker.id) || !std::isfinite(marker.beat) || marker.beat < 0 || marker.beat > 1000000 ||
             marker.name.length() > 128)
             return fail("Invalid Playlist marker");
+    for (size_t i = 0; i < chords.size(); ++i)
+        if (!unique(chords[i].id) || !std::isfinite(chords[i].beat) || chords[i].beat < 0 || chords[i].beat > 1000000 ||
+            chords[i].symbol.length() > 32 || score::chordPitchClasses(chords[i].symbol).empty() ||
+            (i > 0 && chords[i].beat <= chords[i - 1].beat))
+            return fail("Invalid Chord Track event (known symbol, strictly rising beats)");
     std::set<int> inserts;
     juce::StringArray groupNames;
     for (const auto &group : channelGroups)
