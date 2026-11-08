@@ -6,20 +6,20 @@
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
     "src/StudioPluginIo.inc": "ff3f53993520dcc21dc018ab35c826e4dc5d84e59473c0596fb076032eb9b4dc",
-    "src/Studio.cpp": "5bd9bbb64cd0b9e750740269834e8db8579d6cda7923f1bbd3723ba3abb29042",
-    "src/Studio.h": "183e32662f5af49c3da6ccf186cb0e6c29a626e8f8ed07b32fbff1b79b0b2767",
-    "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
+    "src/Studio.cpp": "02efac777989b7802c0feed2e3c68a98a2528b7b69236375d41404f4fc59f6b6",
+    "src/Studio.h": "25966ded758ed81468e6e1066436299f2d7d5d8df19571877bafad1a9369d08d",
+    "src/StudioMcp.cpp": "8b7b04cb423d7ae514aaa4ccdfaaef3ff79c87beec6dd3e2786725dab5e7c087",
     "src/StudioMixerChains.inc": "421cac7ff6fe44d131fedd1e6abd20b39e008a14df997821d89594d5450a6abb",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
     "src/PluginIoContracts.h": "4ac6273851e90eab44c28b4541d2d77c3546e617559cc4f9eab0d5f1881d63cc",
-    "src/McpContracts.h": "b9e28ac1c950cf40d164c921befb98fa2aa951006a0325d4834240809885a5ba",
+    "src/McpContracts.h": "5ea83e5c5c040062b6746cf78adeb01c03b9df7a7203d6978ca338a80bed47a0",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "3fc5fa7f48c854cafbfbe675986242d9749c336a54e6c4884d61b8db92463bf3",
-    "src/Project.h": "703b5dff5b10841120e877fb752e2da3c7057537c25b4dafdd308f3747858e07",
-    "src/Project.cpp": "b1be936ac2125da3f4bb5d938e1eb87d43d4464b79949594f47265e24db68a48",
+    "src/Commands.cpp": "8a371d620098506fb177c534bd89370c50b98429939141eee3fa7bc75a62c96f",
+    "src/Project.h": "f3cdd844e281ca537d246054e76ebbd27fb0da175434f93c865593f9e1cabf70",
+    "src/Project.cpp": "93ea984e467fa7eedb5fe4eb950d6a711b935cdd70b8bd7c0a0798101bef82db",
     "src/AudioEngine.h": "e925fda600345c1f91d3d2f9d1fb500d4b8bd12aff71e861fcb949139fd66a91",
-    "src/AudioEngine.cpp": "16a86460efd5979a5df49dcf3ed7d5a373edb81679352b88f5c60395874fd00f",
+    "src/AudioEngine.cpp": "cae69a41e434c67c2ce5cb7dea03a2a30b04078d53278c94e85ad1e853304f0e",
     "src/ChannelRouting.inc": "74ce23f6adcd77d0697c6481b595ec132e4a5c50b9269fda70cc0010a4e4c9cb",
     "src/ProductionPluginTransport.inc": "2b0179fbecc1d1549f1c407985abd156650794857f6a92d13664c2f35c19e76d",
     "src/Customization.cpp": "1eee33132a22d4114b009e2f471643d72fa49bec7af6f8faa90673eb7c8095d4",
@@ -35,16 +35,16 @@
     "tests/NativeBusChoiceFixture.cpp": "fadd85b100efd3ff0190289d0ff7c7916d12df47012ab90b4dd86d62409e26e1",
     "tests/PluginBusChoiceAcceptance.h": "288d57cf1db091e1a4351a3809751f4c4b469f925788c95bc0b2dbdf4fa2c924",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
-    "skills/vibera-studio/SKILL.md": "f59194d3fa9047d720555619a2790f089ef424932059c62894c232b7cb896cba",
+    "skills/vibera-studio/SKILL.md": "8f485c068985e1cabe030b1bbb99a9f76f402b32e9b63a049bfc957ab97f5e09",
     "skills/vibera-studio/references/plugin-audio-io.md": "b16c09aff13a7853587a7ee797fb111eafd6bf003c13924d3a1a410c5a7d8de4",
     "skills/vibera-studio/references/effect-chains.md": "ec30d226e977d294ee293825a0dd83c29789fc5de892b96de98c3c576d9c4131",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
-    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
+    "CMakeLists.txt": "ebcf91ea272659fc438aca66b2cf8298f447f7fbb86d0b68efb6f2658c48c9af",
     "scripts/mcp-coverage.py": "fb6d490161c26511ce394709594388a55a73c3081a80cd3b8b3f91fc1acf4169",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "src/MixerChainWorkflowContracts.h": "d1dbd9357f9305824ab3a922a4550d3cf0a73e38a5705964bb3e6fcc0d36ad8c"
   },
-  "applicationSha256": "213f2eece5d9d4de439c073ea9bf41de7fbf2efa255ca004b43b5250f78e274d",
+  "applicationSha256": "34284962afd35077a8401706c5f7ad088f07cf62a6a91be726c6a3f55334ae55",
   "workerSha256": "6e02557aad3bf9e805b95167609d75db09d021ad329d91e7830ab6d1bf8fbfda",
   "checks": [
     "Actual instrument/effect Audio input/output contextual menu dispatch reaches canonical plugin.io; component dispatch, not native OS input.",
@@ -391,7 +391,7 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-160348/affected-tests.log",
-    "tests": 262
+    "sourceLog": "build/dev/20261109-001100/affected-tests.log",
+    "tests": 268
   }
 }

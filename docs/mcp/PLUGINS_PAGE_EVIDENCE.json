@@ -1,13 +1,13 @@
 {
   "passed": true,
-  "applicationSha256": "213f2eece5d9d4de439c073ea9bf41de7fbf2efa255ca004b43b5250f78e274d",
+  "applicationSha256": "34284962afd35077a8401706c5f7ad088f07cf62a6a91be726c6a3f55334ae55",
   "sourceInputs": {
     "scripts/verify-plugins-page-mcp.py": "bcd86eac30636b7395ee70a71cbaa0fe6f92f73efe8594479e1414eb8e61a255",
     "src/PluginPage.h": "0f0d7330e4a645a5b47b72fe384846d0da40bef5473c58da9cb6b59a4e45c56b",
-    "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
+    "src/StudioMcp.cpp": "8b7b04cb423d7ae514aaa4ccdfaaef3ff79c87beec6dd3e2786725dab5e7c087",
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
-    "src/Commands.cpp": "3fc5fa7f48c854cafbfbe675986242d9749c336a54e6c4884d61b8db92463bf3",
-    "src/StudioPluginParameters.cpp": "d43e457755398a65d7e16278b6da9a9d011d931df1f403a10c54e83d6f06e5fb"
+    "src/Commands.cpp": "8a371d620098506fb177c534bd89370c50b98429939141eee3fa7bc75a62c96f",
+    "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
@@ -19,13 +19,13 @@
     "channelTargetSelection: vibera_select selects the Channel",
     "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
     "manualValue: the effect exposes its native parameters",
-    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'e1bedeffc9d24b12994915e41c32c5ab', 'revision': 3, 'operation': '206e15d94e394a7596ace20d01d3daf9', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': '3d54c98635af46d5bab323f1b14462ae', 'revision': 3, 'operation': '9946dae848024069925a369bf5807568', 'kind': 'set', 'plugin': 46, 'requestedI",
     "manualValue: the parameter edit enters project history"
   ],
   "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-160348/affected-tests.log",
-    "tests": 262
+    "sourceLog": "build/dev/20261109-001100/affected-tests.log",
+    "tests": 268
   }
 }

@@ -1,35 +1,35 @@
 {
   "passed": true,
-  "applicationSha256": "213f2eece5d9d4de439c073ea9bf41de7fbf2efa255ca004b43b5250f78e274d",
+  "applicationSha256": "34284962afd35077a8401706c5f7ad088f07cf62a6a91be726c6a3f55334ae55",
   "sourceInputs": {
-    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
-    "src/Studio.cpp": "5bd9bbb64cd0b9e750740269834e8db8579d6cda7923f1bbd3723ba3abb29042",
-    "src/Studio.h": "183e32662f5af49c3da6ccf186cb0e6c29a626e8f8ed07b32fbff1b79b0b2767",
-    "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
-    "src/Commands.cpp": "3fc5fa7f48c854cafbfbe675986242d9749c336a54e6c4884d61b8db92463bf3",
+    "CMakeLists.txt": "ebcf91ea272659fc438aca66b2cf8298f447f7fbb86d0b68efb6f2658c48c9af",
+    "src/Studio.cpp": "02efac777989b7802c0feed2e3c68a98a2528b7b69236375d41404f4fc59f6b6",
+    "src/Studio.h": "25966ded758ed81468e6e1066436299f2d7d5d8df19571877bafad1a9369d08d",
+    "src/StudioMcp.cpp": "8b7b04cb423d7ae514aaa4ccdfaaef3ff79c87beec6dd3e2786725dab5e7c087",
+    "src/Commands.cpp": "8a371d620098506fb177c534bd89370c50b98429939141eee3fa7bc75a62c96f",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Project.cpp": "b1be936ac2125da3f4bb5d938e1eb87d43d4464b79949594f47265e24db68a48",
-    "src/Project.h": "703b5dff5b10841120e877fb752e2da3c7057537c25b4dafdd308f3747858e07",
+    "src/Project.cpp": "93ea984e467fa7eedb5fe4eb950d6a711b935cdd70b8bd7c0a0798101bef82db",
+    "src/Project.h": "f3cdd844e281ca537d246054e76ebbd27fb0da175434f93c865593f9e1cabf70",
     "src/Customization.cpp": "1eee33132a22d4114b009e2f471643d72fa49bec7af6f8faa90673eb7c8095d4",
     "src/MidiRecording.h": "865ec42fd11171ac21aeda3a3ac2f6194eee469fbe8839e3f3f42c570b1e6188",
     "src/MidiInput.cpp": "d5217995bf5e105f24a72fd1f375d4412f759b2c7bae6065e62944ad287f8554",
     "src/MidiInput.h": "ab632c74dbd5a175c2a9579647c06fe00345026721eb79ddb0bf912748be9c8b",
     "src/LiveTimeline.cpp": "93e09b2755d14fdbe20e20da00919b6c03f55c23f9c5667733d23bf40a656ffe",
     "src/LiveTimeline.h": "520071100c554a8fcf7f2d68bf47e5e3d3e80cd7a6619b3e75bd731de24942ac",
-    "src/AudioEngine.cpp": "16a86460efd5979a5df49dcf3ed7d5a373edb81679352b88f5c60395874fd00f",
+    "src/AudioEngine.cpp": "cae69a41e434c67c2ce5cb7dea03a2a30b04078d53278c94e85ad1e853304f0e",
     "src/AudioEngine.h": "e925fda600345c1f91d3d2f9d1fb500d4b8bd12aff71e861fcb949139fd66a91",
     "src/RecordingContracts.h": "e150c8e13d952fd327716d35bb017fb47e5bcd68f86cbd9a0065109d54b2df7e",
-    "src/McpContracts.h": "b9e28ac1c950cf40d164c921befb98fa2aa951006a0325d4834240809885a5ba",
+    "src/McpContracts.h": "5ea83e5c5c040062b6746cf78adeb01c03b9df7a7203d6978ca338a80bed47a0",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
-    "src/StudioMidi.cpp": "84544ea0a67f5374027e6dc120ed0a2032ba139324d6fe47d386af98f7598e97",
+    "src/StudioMidi.cpp": "5eddf55f584b45dbec01c19e8bf80ee109b469fe45e55438337bc2856e9a1412",
     "src/StudioChannels.cpp": "5945fb1b2b5192b6ae315c964be6d42289fe6f2935d1b6ce438d57fe7e7c6723",
-    "src/Editors.h": "b8203795f7e864ba12c4716c8e9f57dccf6e81a39498be6838f3b19ab3bdfe87",
+    "src/Editors.h": "36b853602ac323c33719c99a4dbe67d0568fef763cc352de270d28a8e7f25ebb",
     "src/StudioMidiTakeRecoveryAcceptance.cpp": "db176e5c066433a5edcd60ad794927450c598c7736369cab24c4ea9aa6804829",
     "src/BuildAcceptanceOutput.h": "5a93f55dafc86365f537a23ceb8e7c4c2047cb8c53c60b89d6c5c8c3f9b3cd95",
     "tests/MidiTakeRecoveryAcceptance.h": "6bb351c1899cda6a40fa37375f9ef74ab435fe090809617b32be586ab5138761",
     "tests/mcp_acceptance.py": "30979aeef30491ea8cf67f69fa78ef32097e5c905f3d41ba93ec268c87d69012",
-    "skills/vibera-studio/SKILL.md": "f59194d3fa9047d720555619a2790f089ef424932059c62894c232b7cb896cba",
+    "skills/vibera-studio/SKILL.md": "8f485c068985e1cabe030b1bbb99a9f76f402b32e9b63a049bfc957ab97f5e09",
     "skills/vibera-studio/references/take-recovery.md": "cb49c00d0b8d70d47ce22a529a736d9b51cefaa208004c7f54284f04b1f76b71"
   },
   "checks": [
@@ -51,7 +51,7 @@
   "sourceHashMode": "text-lf-v1",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-160348/affected-tests.log",
-    "tests": 262
+    "sourceLog": "build/dev/20261109-001100/affected-tests.log",
+    "tests": 268
   }
 }

@@ -1,25 +1,25 @@
 {
   "passed": true,
-  "applicationSha256": "213f2eece5d9d4de439c073ea9bf41de7fbf2efa255ca004b43b5250f78e274d",
+  "applicationSha256": "34284962afd35077a8401706c5f7ad088f07cf62a6a91be726c6a3f55334ae55",
   "sourceInputs": {
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "812f44966a4a12d220eed88526c93a4fe7e763b563eb40e9d9442d16b3ab246e",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "a5e530974eaad44f098f82175098d349d667cf296d510a0d62153308132ac89f",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "213f2eece5d9d4de439c073ea9bf41de7fbf2efa255ca004b43b5250f78e274d",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "34284962afd35077a8401706c5f7ad088f07cf62a6a91be726c6a3f55334ae55",
     "scripts/verify-mixer-controls-desktop.py": "96dc51a8941f3c8bcb5988372f63341651f1a11476ac9af856b866c796a98545",
     "scripts/verify-mixer-controls-mcp.py": "d7983a6c5cfbd76f8c29df43065edb52a6c52ba60270337faf6ec3700b0d5c2f",
     "skills/vibera-studio/references/mixer-controls.md": "05c7cd87ad2abb980af6f24d9c652656c3dc8aed754c9638795e8d9b8cdb7dce",
     "src/AudioEngine.h": "e925fda600345c1f91d3d2f9d1fb500d4b8bd12aff71e861fcb949139fd66a91",
-    "src/Commands.cpp": "3fc5fa7f48c854cafbfbe675986242d9749c336a54e6c4884d61b8db92463bf3",
+    "src/Commands.cpp": "8a371d620098506fb177c534bd89370c50b98429939141eee3fa7bc75a62c96f",
     "src/Customization.cpp": "1eee33132a22d4114b009e2f471643d72fa49bec7af6f8faa90673eb7c8095d4",
-    "src/Editors.h": "b8203795f7e864ba12c4716c8e9f57dccf6e81a39498be6838f3b19ab3bdfe87",
-    "src/McpContracts.h": "b9e28ac1c950cf40d164c921befb98fa2aa951006a0325d4834240809885a5ba",
+    "src/Editors.h": "36b853602ac323c33719c99a4dbe67d0568fef763cc352de270d28a8e7f25ebb",
+    "src/McpContracts.h": "5ea83e5c5c040062b6746cf78adeb01c03b9df7a7203d6978ca338a80bed47a0",
     "src/MixerControls.h": "3790e3611c98d22ab5a5a76ac525a0ab789d4426ec898ffb2e4316f773059f49",
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
-    "src/Project.h": "703b5dff5b10841120e877fb752e2da3c7057537c25b4dafdd308f3747858e07",
+    "src/Project.h": "f3cdd844e281ca537d246054e76ebbd27fb0da175434f93c865593f9e1cabf70",
     "src/Settings.h": "8a988e49a3ef34d1485059487fdf8236f50e29d3e04d7749593276bf4a7cbd83",
-    "src/Studio.cpp": "5bd9bbb64cd0b9e750740269834e8db8579d6cda7923f1bbd3723ba3abb29042",
+    "src/Studio.cpp": "02efac777989b7802c0feed2e3c68a98a2528b7b69236375d41404f4fc59f6b6",
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
-    "src/StudioMixerControls.cpp": "b8706a4235fe3335f46dd6e2b405b77ba9b4b0b6473b09064c5b8b02c385efb1",
+    "src/StudioMixerControls.cpp": "e21d5188ebd5c5f50fa7debbdf61dae7ad1d0288d1c7162629c650324b90b780",
     "src/StudioRackVelocity.cpp": "e5f1e7cedae1474f51a1b9868ddd446c2f7d17f9a4cbef03a1096f6693ec69d4",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
     "tests/MixerControlsAcceptance.h": "4a3ce48e920cf053c55f305dc777410c6d7dddf9dc80c7fbdfd178ef624c47de",
@@ -35,7 +35,7 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-160348/affected-tests.log",
-    "tests": 262
+    "sourceLog": "build/dev/20261109-001100/affected-tests.log",
+    "tests": 268
   }
 }

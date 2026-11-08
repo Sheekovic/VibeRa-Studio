@@ -1,20 +1,20 @@
 {
   "passed": true,
   "scope": "Verified sampler tempo increment only; RPS-J and the whole module remain incomplete. No full-FL, native input, listening or hardware claim.",
-  "applicationSha256": "213f2eece5d9d4de439c073ea9bf41de7fbf2efa255ca004b43b5250f78e274d",
+  "applicationSha256": "34284962afd35077a8401706c5f7ad088f07cf62a6a91be726c6a3f55334ae55",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
-    "src/Studio.h": "183e32662f5af49c3da6ccf186cb0e6c29a626e8f8ed07b32fbff1b79b0b2767",
-    "src/Studio.cpp": "5bd9bbb64cd0b9e750740269834e8db8579d6cda7923f1bbd3723ba3abb29042",
-    "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
+    "CMakeLists.txt": "ebcf91ea272659fc438aca66b2cf8298f447f7fbb86d0b68efb6f2658c48c9af",
+    "src/Studio.h": "25966ded758ed81468e6e1066436299f2d7d5d8df19571877bafad1a9369d08d",
+    "src/Studio.cpp": "02efac777989b7802c0feed2e3c68a98a2528b7b69236375d41404f4fc59f6b6",
+    "src/StudioMcp.cpp": "8b7b04cb423d7ae514aaa4ccdfaaef3ff79c87beec6dd3e2786725dab5e7c087",
     "src/StudioSampler.cpp": "a903c13be242986663c5f979a5939562257ce907936bf51e33fade6dfe996002",
     "src/InstrumentWindow.h": "07770b0b75bdfb19506febdf8b90c67efe983f49ecfc92b575719216ad877252",
     "src/AudioEngine.h": "e925fda600345c1f91d3d2f9d1fb500d4b8bd12aff71e861fcb949139fd66a91",
-    "src/AudioEngine.cpp": "16a86460efd5979a5df49dcf3ed7d5a373edb81679352b88f5c60395874fd00f",
+    "src/AudioEngine.cpp": "cae69a41e434c67c2ce5cb7dea03a2a30b04078d53278c94e85ad1e853304f0e",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "3fc5fa7f48c854cafbfbe675986242d9749c336a54e6c4884d61b8db92463bf3",
-    "src/McpContracts.h": "b9e28ac1c950cf40d164c921befb98fa2aa951006a0325d4834240809885a5ba",
+    "src/Commands.cpp": "8a371d620098506fb177c534bd89370c50b98429939141eee3fa7bc75a62c96f",
+    "src/McpContracts.h": "5ea83e5c5c040062b6746cf78adeb01c03b9df7a7203d6978ca338a80bed47a0",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Sampler.h": "f441e0778acf4d6e0e2208a191d2c50001dd8a6718787a7775351a66ef16367b",
     "src/SamplerSettings.h": "425236b93bda9614d3bc329c804b43bda81508b7e3be3cb86f050e099f404ab5",
@@ -22,8 +22,8 @@
     "src/SamplerTempoContracts.h": "cf44041f1fcfe6e34b38bf05236b92e79c3f8901297308ccfda15908e4391932",
     "src/SampleCache.h": "ea975ade9e4a48b391f5d411d391b86eb1e97f8b1b0fffa43aff4da910149c59",
     "src/SampleCache.cpp": "e0471cd8e4ab4c8e68b53721eb6cf9a49bac4fa396114716f05cd6e585e1c8c1",
-    "src/Project.h": "703b5dff5b10841120e877fb752e2da3c7057537c25b4dafdd308f3747858e07",
-    "src/Project.cpp": "b1be936ac2125da3f4bb5d938e1eb87d43d4464b79949594f47265e24db68a48",
+    "src/Project.h": "f3cdd844e281ca537d246054e76ebbd27fb0da175434f93c865593f9e1cabf70",
+    "src/Project.cpp": "93ea984e467fa7eedb5fe4eb950d6a711b935cdd70b8bd7c0a0798101bef82db",
     "src/Customization.cpp": "1eee33132a22d4114b009e2f471643d72fa49bec7af6f8faa90673eb7c8095d4",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
     "scripts/verify-sampler-tempo-mcp.py": "c315f34058a56433c7b37d0b444594b7296543c3fb32f622fb452eab1456ad4d",
@@ -188,7 +188,7 @@
   "receipt": "build/sampler-tempo-semantic-20261019/verification.json",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-160348/affected-tests.log",
-    "tests": 262
+    "sourceLog": "build/dev/20261109-001100/affected-tests.log",
+    "tests": 268
   }
 }
