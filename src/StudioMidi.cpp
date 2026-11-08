@@ -259,6 +259,7 @@ void Studio::midiFileMenu()
     }
     menu.addItem(44003, "Auto-scroll with the playhead", true, pianoFollowPlayhead);
     menu.addItem(44004, "Center the playhead while scrolling", true, followCenter);
+    menu.addItem(44010, "Snap incoming MIDI to the scale guide", true, snapIncomingMidi);
     menu.addItem(44005, "Background waveform (Playlist audio clips)", true, pianoBackgroundWaveform);
     menu.addItem(44006, "Preview notes during playback", true, previewDuringPlayback);
     menu.addItem(69, "Export as score sheet (PDF)...");
@@ -419,6 +420,7 @@ void Studio::midiFileMenu()
                                               : juce::String(score::scaleShapes()[size_t(code % 100)].name),
                                         code / 100, maqam};
                 }
+                safe->updateMidiScaleSnap();
                 safe->repaint();
                 return;
             }
@@ -533,6 +535,11 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if (result == 44010)
+            {
+                safe->performAction("view.snapIncomingMidi");
                 return;
             }
             if (result >= 44003 && result <= 44006)

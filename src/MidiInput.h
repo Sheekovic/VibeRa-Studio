@@ -115,6 +115,20 @@ class MidiInputRouter final : public juce::MidiInputCallback
     void poll();
     void route(const juce::MidiMessage &, bool monitor, bool record);
     void handleIncomingMidiMessage(juce::MidiInput *, const juce::MidiMessage &) override;
+    // Snap incoming MIDI to scale: bit 12 on, bits 0..11 allowed pitch classes. Note on/off keys
+    // move to the nearest allowed key (ties down) before monitoring and recording; the mapping is
+    // fixed per key so every note-off matches its note-on. Lock-free; set by the control thread.
+    std::atomic<std::uint32_t> scaleSnap{0};
+    static int snapToScale(int key, std::uint32_t mask) noexcept
+    {
+        if (!(mask & (1u << 12)) || (mask & 0xfffu) == 0)
+            return key;
+        for (int distance = 0; distance < 12; ++distance)
+            for (const int candidate : {key - distance, key + distance})
+                if (candidate >= 0 && candidate <= 127 && (mask >> (candidate % 12)) & 1u)
+                    return candidate;
+        return key;
+    }
 };
 class MidiMonitor
 {

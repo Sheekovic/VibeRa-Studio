@@ -87,12 +87,12 @@ did not list.
 | Playlist: Merge automation clips | done | `automation.merge` (keeps the first clip's links) |
 | Playlist: ripple editing (close the gap) | done | `clip.rippleDelete` |
 | Playlist: marker actions (loop, skip, pause, start) and quantized song jumps | missing | next |
-| Piano roll: snap incoming MIDI to scale | missing | next |
+| Piano roll: snap incoming MIDI to scale | done | Piano roll menu, `view.snapIncomingMidi`, `vibera_editor` guide; hardware and typing keyboard |
 | Piano roll: Interpolate tool (event data) | missing | next |
 | Piano roll: nudge with mouse wheel, Center (Shift+0) | missing | next |
 | Piano roll: Magic lasso selection | missing | |
 | Piano roll: time / key markers in Pattern mode | missing | |
-| Channel Rack: Mute removed steps | missing | next |
+| Channel Rack: Mute removed steps | done | existing Workflow setting (`retainSteps`, muted notes kept) |
 | Channel Rack: Receive notes from (channel to channel) | missing | |
 | Channel Rack: declicking mode, Restretch all, name alignment, auto resize | out of scope | FL sampler/display specifics |
 | Loop Starter, FL Cloud, Patcherize, DirectWave, NewTone/NewTime, stem extraction, Deverb | out of scope | FL-only plugins and services |

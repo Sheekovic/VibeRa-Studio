@@ -1011,6 +1011,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
         int root = 0;
         bool maqam = false;
     } pianoGuide;
+    bool snapIncomingMidi = false; // Piano roll: snap live/recorded MIDI to the scale guide.
+    void updateMidiScaleSnap();
     juce::Result relinkMissingMedia(const juce::File &folder);
     // Song/Pattern/stem export format (export menu, MCP sampleRate/bitDepth).
     double exportRate = 48000;

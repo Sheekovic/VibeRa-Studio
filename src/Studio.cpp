@@ -990,6 +990,20 @@ void Studio::resized()
         component->toFront(false);
     repaint();
 }
+void Studio::updateMidiScaleSnap()
+{
+    std::uint32_t mask = 0;
+    if (snapIncomingMidi && pianoGuide.name.isNotEmpty())
+    {
+        const auto marks = score::guideMarks(pianoGuide.name, pianoGuide.root, pianoGuide.maqam);
+        for (int pitchClass = 0; pitchClass < 12; ++pitchClass)
+            if (marks[size_t(pitchClass)] & 3)
+                mask |= 1u << pitchClass;
+        if (mask)
+            mask |= 1u << 12;
+    }
+    audio.midiInput.scaleSnap.store(mask);
+}
 void Studio::moveWorkspaceWindow(int index, juce::Rectangle<int> bounds)
 {
     if (index < 0 || index >= 5)
@@ -4875,6 +4889,15 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
                  : pianoKeyboardLabels == 1 ? "Keyboard labels: root notes"
                                             : "Keyboard labels: all white notes";
         refresh();
+        return true;
+    }
+    if (action == "view.snapIncomingMidi")
+    {
+        snapIncomingMidi = !snapIncomingMidi;
+        updateMidiScaleSnap();
+        status = !snapIncomingMidi                ? "Incoming MIDI is not snapped"
+                 : pianoGuide.name.isEmpty()      ? "Incoming MIDI will snap once a scale guide is chosen"
+                                                  : "Incoming MIDI snaps to " + pianoGuide.name;
         return true;
     }
     if (action == "view.noteGridHighlights")

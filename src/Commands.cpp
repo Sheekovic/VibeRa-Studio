@@ -771,6 +771,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"tool.drumPaint", "Paint drum sequencer tool", Scope::piano, false, true, "action"},
         {"tool.play", "Play selected tool (hold to audition)", Scope::global, false, true, "action"},
         {"view.noteGridHighlights", "Note grid highlights (shade black-key rows)", Scope::piano, false, true, "action"},
+        {"view.snapIncomingMidi", "Snap incoming MIDI to the scale guide", Scope::piano, false, true, "action"},
         {"view.pianoFollow", "Auto-scroll the Piano roll with the playhead", Scope::piano, false, true, "action"},
         {"view.pianoBackgroundWaveform", "Piano roll: show Playlist audio clips as a background waveform", Scope::piano, false, true, "action"},
         {"view.previewDuringPlayback", "Preview notes during playback (Piano roll, Channel Rack)", Scope::piano, false, true, "action"},
