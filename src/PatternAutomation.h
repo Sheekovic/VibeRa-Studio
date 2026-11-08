@@ -29,6 +29,7 @@ inline AudibleAutomation audibleAutomation(const Project &p, bool patternMode, I
             result.songMode = false; // Unchanged: no automation in Pattern mode.
             return result;
         }
+        result.document.modulators = p.automation.modulators;
         std::set<std::int64_t> used;
         std::set<AutomationKey> keys;
         for (const auto &window : pattern->automation)

@@ -96,12 +96,60 @@ struct AutomationInitialValue
     float value = 0;
 };
 float automationSourceValueAt(const AutomationSource &, double beat) noexcept;
+// Modulator (version 57): a tempo-synced LFO / random source that moves one target around its
+// manual (or initialized) value without an Automation Clip. One per target; a target that an
+// Automation Clip links cannot also be modulated.
+enum class ModulatorShape : unsigned
+{
+    sine,
+    triangle,
+    sawUp,
+    sawDown,
+    square,
+    random,      // Sample and hold: a new random value every cycle.
+    smoothRandom // Random values joined by smooth curves.
+};
+inline const char *modulatorShapeName(ModulatorShape shape) noexcept
+{
+    switch (shape)
+    {
+    case ModulatorShape::triangle: return "triangle";
+    case ModulatorShape::sawUp: return "sawUp";
+    case ModulatorShape::sawDown: return "sawDown";
+    case ModulatorShape::square: return "square";
+    case ModulatorShape::random: return "random";
+    case ModulatorShape::smoothRandom: return "smoothRandom";
+    default: return "sine";
+    }
+}
+inline std::optional<ModulatorShape> modulatorShapeFromName(const std::string &name) noexcept
+{
+    for (unsigned i = 0; i <= unsigned(ModulatorShape::smoothRandom); ++i)
+        if (name == modulatorShapeName(ModulatorShape(i)))
+            return ModulatorShape(i);
+    return {};
+}
+// Bipolar unit value (-1..1) of a modulator shape at a cycle position; seed varies random shapes.
+double modulatorUnit(ModulatorShape, double cycles, std::uint64_t seed) noexcept;
+struct AutomationModulator
+{
+    std::int64_t id = 0;
+    AutomationLink link; // Target and its value range (swing and clamping use it).
+    ModulatorShape shape = ModulatorShape::sine;
+    double period = 4;   // Beats per cycle, 1/64 .. 1024.
+    float depth = .25f;  // 0..1: peak-to-peak swing as a fraction of the range.
+    float phase = 0;     // 0..1 cycle offset.
+    bool enabled = true;
+    std::string name = "Modulator";
+};
+inline constexpr double minimumModulatorPeriod = 1. / 64, maximumModulatorPeriod = 1024;
 // Original source/placement/initialization model; Project rejects unsupported targets.
 struct AutomationDocument
 {
     std::vector<AutomationSource> sources;
     std::vector<AutomationPlacement> placements;
     std::vector<AutomationInitialValue> initialValues;
+    std::vector<AutomationModulator> modulators;
 };
 class AutomationProgram
 {
@@ -110,7 +158,8 @@ class AutomationProgram
     {
         double beat = 0, origin = 0, inverseLength = 0;
         double coefficients[4]{};
-        unsigned shape = 0; // 0 polynomial; else AutomationShape stairs/pulse/wave.
+        unsigned shape = 0; // 0 polynomial; AutomationShape stairs/pulse/wave; modulatorBase+ a modulator.
+        static constexpr unsigned modulatorBase = 100;
         double from = 0, delta = 0, count = 1;
         float valueAt(double position) const noexcept;
     };

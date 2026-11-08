@@ -30,7 +30,7 @@ Sources are reviews and forums, not a ranked survey; treat them as recurring the
 2. Loudness metering on the Master (LUFS / true peak) with export targets.
 3. Chord Track that drives MIDI and follows into harmony (Cubase-style), building on the chord tools.
 4. Session/clip-launcher grid with Follow Actions (Ableton-style jam, then record into the Playlist).
-5. Universal modulators (LFO/envelope/random) assignable to any plugin or mixer parameter (Bitwig-style).
+5. Universal modulators (LFO/envelope/random) assignable to any plugin or mixer parameter (Bitwig-style). **Done:** tempo-synced LFO / random modulators on Mixer, Channel and plugin controls (`automation.modulator`, `scripts/verify-modulators-mcp.py`); envelope followers and modulating modulators remain open.
 6. Vocal pitch editor (graphical note blobs on audio, Cubase VariAudio / Logic Flex Pitch style).
 7. Expression maps for orchestral/articulation libraries.
 8. FX containers / parallel effect chains.

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "AutomationCommands.h"
 #include <algorithm>
+#include <cmath>
 
 namespace vibera
 {
@@ -117,6 +118,60 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
             doc.initialValues.push_back({key, float(a.value)});
         else
             initialized->value = float(a.value);
+    }
+    else if (operation == "automation.modulator" || operation == "automation.plugin.modulator" ||
+             operation == "automation.modulator.set" || operation == "automation.modulator.enable" ||
+             operation == "automation.modulator.delete")
+    {
+        // text: shape; value: period in beats; strength: depth 0..1; offset: phase 0..1.
+        const bool adding = operation == "automation.modulator" || operation == "automation.plugin.modulator";
+        auto &list = doc.modulators;
+        auto found = adding ? std::find_if(list.begin(), list.end(), [&](const auto &m) { return m.link.key == key; })
+                            : std::find_if(list.begin(), list.end(), [&](const auto &m) { return m.id == a.target; });
+        if (adding && found != list.end())
+            return juce::Result::fail("modulator.duplicateTarget: This control already has a modulator");
+        if (!adding && found == list.end())
+            return juce::Result::fail("modulator.missing: Existing modulator ID required");
+        if (operation == "automation.modulator.delete")
+        {
+            list.erase(found);
+            return juce::Result::ok();
+        }
+        if (operation == "automation.modulator.enable")
+        {
+            found->enabled = a.enabled;
+            return juce::Result::ok();
+        }
+        const auto shape = modulatorShapeFromName((a.text.isEmpty() ? juce::String("sine") : a.text).toStdString());
+        const double period = a.value == 0 ? 4. : a.value;
+        if (!shape)
+            return juce::Result::fail("modulator.invalidShape: sine, triangle, sawUp, sawDown, square, random or smoothRandom");
+        if (!std::isfinite(period) || period < minimumModulatorPeriod || period > maximumModulatorPeriod)
+            return juce::Result::fail("modulator.invalidPeriod: Period is 1/64..1024 beats");
+        if (!std::isfinite(a.strength) || a.strength < 0 || a.strength > 1)
+            return juce::Result::fail("modulator.invalidDepth: Depth is 0..1 of the control's range");
+        if (!std::isfinite(a.offset) || a.offset < 0 || a.offset >= 1)
+            return juce::Result::fail("modulator.invalidPhase: Phase is 0..1 (below one cycle)");
+        AutomationModulator next = adding ? AutomationModulator{} : *found;
+        next.shape = *shape;
+        next.period = period;
+        next.depth = float(a.strength);
+        next.phase = float(a.offset);
+        if (adding)
+        {
+            if (!native && !mixerTarget)
+                return fail();
+            next.id = project.allocate();
+            next.link = {key, native ? 0.f : mixer.minimum, native ? 1.f : mixer.maximum};
+            const auto nativeName = native && a.binding->name.isEmpty()
+                                        ? "Parameter " + juce::String(juce::int64(a.binding->id))
+                                    : native ? a.binding->name
+                                             : juce::String{};
+            next.name = ("LFO - " + (native ? plugin->name + " - " + nativeName : mixer.name)).toStdString();
+            list.push_back(std::move(next));
+        }
+        else
+            *found = std::move(next);
     }
     else if (id.startsWith("automation.point."))
     {

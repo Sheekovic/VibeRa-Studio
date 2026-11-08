@@ -63,7 +63,8 @@ inline std::optional<MixerAutomationControl> parseMixerAutomationControl(const j
 inline bool isMixerAutomationTargetCommand(const juce::String &id)
 {
     return id == "automation.create" || id == "automation.init" || id == "automation.init.remove" ||
-           id == "automation.link" || id == "automation.unlink" || id == "automation.range";
+           id == "automation.link" || id == "automation.unlink" || id == "automation.range" ||
+           id == "automation.modulator";
 }
 struct MixerAutomationTarget
 {

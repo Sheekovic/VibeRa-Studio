@@ -121,8 +121,43 @@ float automationSourceValueAt(const AutomationSource &source, double beat) noexc
     const AutomationLink link{{AutomationParameter::mixerGain, 0, 0}, 0, 1};
     return segment({&source, &placement, &link}, std::clamp(beat, 0., source.length), false).valueAt(beat);
 }
+double modulatorUnit(ModulatorShape shape, double cycles, std::uint64_t seed) noexcept
+{
+    const double cycle = std::floor(cycles), x = cycles - cycle;
+    // Deterministic per-cycle random value in -1..1 (no state: any position, any thread).
+    const auto noise = [seed](double index)
+    {
+        auto z = std::uint64_t(std::int64_t(index)) * 0x9E3779B97F4A7C15ull + seed * 0xBF58476D1CE4E5B9ull + 1;
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+        z ^= z >> 31;
+        return double(z >> 11) / double(1ull << 52) * 2. - 1.;
+    };
+    switch (shape)
+    {
+    case ModulatorShape::triangle: return x < .5 ? 4 * x - 1 : 3 - 4 * x;
+    case ModulatorShape::sawUp: return 2 * x - 1;
+    case ModulatorShape::sawDown: return 1 - 2 * x;
+    case ModulatorShape::square: return x < .5 ? 1. : -1.;
+    case ModulatorShape::random: return noise(cycle);
+    case ModulatorShape::smoothRandom:
+    {
+        const double a = noise(cycle), b = noise(cycle + 1), eased = x * x * (3 - 2 * x);
+        return a + (b - a) * eased;
+    }
+    default: return std::sin(6.283185307179586 * x);
+    }
+}
 float AutomationProgram::Span::valueAt(double position) const noexcept
 {
+    if (shape >= modulatorBase)
+    {
+        // from: centre, delta: half swing, count: cycles per beat, origin: phase in cycles,
+        // coefficients[0..1]: clamp range, coefficients[2]: random seed.
+        const double unit = modulatorUnit(ModulatorShape(shape - modulatorBase), position * count + origin,
+                                          std::uint64_t(coefficients[2]));
+        return float(std::clamp(from + delta * unit, coefficients[0], coefficients[1]));
+    }
     if (inverseLength == 0)
         return float(coefficients[0]);
     const auto x = std::clamp((position - origin) * inverseLength, 0., 1.);
@@ -321,6 +356,51 @@ bool AutomationProgram::compile(const AutomationDocument &doc, bool songMode, Au
             }
             result.lanes.push_back(std::move(lane));
         }
+    // Modulators: one lane each, centred on the target's manual/initialized value. A target
+    // without a value (e.g. a plugin parameter outside a partial document) stays silent.
+    if (doc.modulators.size() > 4096)
+        return fail("Too many modulators");
+    std::set<AutomationKey> clipTargets, modulated;
+    for (const auto &source : doc.sources)
+        for (const auto &link : source.links)
+            clipTargets.insert(link.key);
+    for (const auto &m : doc.modulators)
+    {
+        if (!unique(m.id) || !validKey(m.link.key) || !validValue(m.link.key, m.link.minimum) ||
+            !validValue(m.link.key, m.link.maximum) || !(m.link.minimum < m.link.maximum) ||
+            unsigned(m.shape) > unsigned(ModulatorShape::smoothRandom) || !std::isfinite(m.period) ||
+            m.period < minimumModulatorPeriod || m.period > maximumModulatorPeriod || !std::isfinite(m.depth) ||
+            m.depth < 0 || m.depth > 1 || !std::isfinite(m.phase) || m.phase < 0 || m.phase >= 1 ||
+            m.name.empty() || m.name.size() > 1024)
+            return fail("Invalid modulator");
+        if (!modulated.insert(m.link.key).second)
+            return fail("modulator.duplicateTarget: A target can have only one modulator");
+        if (clipTargets.contains(m.link.key))
+            return fail("modulator.targetAutomated: Unlink the target's Automation Clip before modulating it");
+        const auto centre = initial.find(m.link.key);
+        if (!m.enabled || centre == initial.end())
+            continue;
+        Span span;
+        span.beat = std::numeric_limits<double>::lowest();
+        span.inverseLength = 1;
+        span.shape = Span::modulatorBase + unsigned(m.shape);
+        span.from = centre->second;
+        span.delta = .5 * double(m.depth) * (double(m.link.maximum) - m.link.minimum);
+        span.count = 1. / m.period;
+        span.origin = m.phase;
+        span.coefficients[0] = m.link.minimum;
+        span.coefficients[1] = m.link.maximum;
+        span.coefficients[2] = double(std::uint32_t(m.id));
+        Lane lane{m.link.key, centre->second, {span}};
+        const auto existing = std::find_if(result.lanes.begin(), result.lanes.end(),
+                                           [&](const Lane &l) { return l.key == m.link.key; });
+        if (existing != result.lanes.end())
+            *existing = std::move(lane); // An initialized target without clips: the modulator drives it.
+        else
+            result.lanes.push_back(std::move(lane));
+    }
+    std::sort(result.lanes.begin(), result.lanes.end(),
+              [](const Lane &a, const Lane &b) { return a.key < b.key; });
     output = std::move(result);
     return true;
 }

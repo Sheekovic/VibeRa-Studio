@@ -364,7 +364,8 @@ juce::Result AudioEngine::prepareFiniteEffectBaseline(const Controller &controll
         p.channels[0].mixer != 1 || p.channels[0].gain != 1 || p.channels[0].pan != 0 ||
         !juce::File(p.channels[0].source).existsAsFile() || !p.audioPlacements.empty() || p.solo ||
         p.mixerSolo || !p.automation.sources.empty() || !p.automation.placements.empty() ||
-        !p.automation.initialValues.empty() || guide->enabled.load() || guide->leadActive.load())
+        !p.automation.initialValues.empty() || !p.automation.modulators.empty() || guide->enabled.load() ||
+        guide->leadActive.load())
         return juce::Result::fail(
             "finite.baseline.project: One genuine sample source/no automation/Guide required");
     int effects = 0;

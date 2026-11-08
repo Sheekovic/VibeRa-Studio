@@ -977,7 +977,15 @@ const std::vector<CommandInfo> &commandRegistry()
         {"automation.unlink", "Unlink automation target", Scope::playlist, true, true, "command"},
         {"automation.range", "Automation target range", Scope::playlist, true, true, "command"},
         {"automation.init", "Init song with this position", Scope::mixer, true, true, "command"},
-        {"automation.init.remove", "Delete initialized control", Scope::mixer, true, true, "command"}};
+        {"automation.init.remove", "Delete initialized control", Scope::mixer, true, true, "command"},
+        {"automation.modulator", "Add a modulator (LFO / random) to a Mixer or Channel control", Scope::mixer, true, true,
+         "command"},
+        {"automation.plugin.modulator", "Add a modulator (LFO / random) to a plugin parameter", Scope::playlist, true,
+         false, "command"},
+        {"automation.modulator.set", "Change a modulator's shape, rate, depth and phase", Scope::mixer, true, true,
+         "command"},
+        {"automation.modulator.enable", "Turn a modulator on or off", Scope::mixer, true, true, "command"},
+        {"automation.modulator.delete", "Remove a modulator", Scope::mixer, true, true, "command"}};
     return commands;
 }
 namespace
@@ -2785,6 +2793,9 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 if (std::any_of(next.automation.initialValues.begin(), next.automation.initialValues.end(),
                                 [&](const auto &value) { return value.key == key; }))
                     return juce::Result::fail("Remove the initialized control before its binding");
+                if (std::any_of(next.automation.modulators.begin(), next.automation.modulators.end(),
+                                [&](const auto &m) { return m.link.key == key; }))
+                    return juce::Result::fail("Remove the modulator before its binding");
                 bindings.erase(binding);
             }
             else
@@ -2828,6 +2839,10 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                             [&](const auto &value) { return referencesTarget(value.key); }))
                 return juce::Result::fail(
                     "effects.targetAutomationReferenced: Remove target initialization before replacement");
+            if (std::any_of(next.automation.modulators.begin(), next.automation.modulators.end(),
+                            [&](const auto &m) { return referencesTarget(m.link.key); }))
+                return juce::Result::fail(
+                    "effects.targetAutomationReferenced: Remove the target's modulator before replacement");
             const Id reserved = std::max(next.nextId, mixerChainNextId);
             if (reserved < 1 || reserved > 1000000000)
                 return juce::Result::fail("effects.idExhausted: No new replacement identity available");

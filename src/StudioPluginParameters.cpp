@@ -634,6 +634,7 @@ class PluginControls final : public juce::Component, private juce::Timer
     juce::TextButton reset{"Default"}, refresh{"Refresh"};
     juce::TextButton initialize{"Init song"}, removeInitialization{"Delete init"};
     juce::TextButton lastTweaked{"Last tweaked"};
+    juce::TextButton modulate{"Modulator..."};
     juce::TextButton recover{"Recover saved state"};
     juce::ToggleButton notifications{"Notify native parameter changes"};
     static bool automatable(const PluginParameter *p)
@@ -642,6 +643,30 @@ class PluginControls final : public juce::Component, private juce::Timer
             return false;
         const PluginBinding binding{p->id, p->flags, p->steps, p->value, p->name, p->label};
         return validPluginBindings({&binding, 1});
+    }
+    void showModulatorMenu()
+    {
+        const auto *p = parameter();
+        if (!studio || !automatable(p) || pending())
+            return;
+        const AutomationKey key{AutomationParameter::pluginNormalized, pluginId, p->id};
+        const auto &list = studio->controller.project.automation.modulators;
+        const auto found = std::find_if(list.begin(), list.end(), [&](const auto &m) { return m.link.key == key; });
+        const AutomationModulator *current = found == list.end() ? nullptr : &*found;
+        const Id id = current ? current->id : 0;
+        const PluginBinding binding{p->id, p->flags, p->steps, p->value, p->name, p->label};
+        Studio::modulatorMenu(current).showMenuAsync(
+            juce::PopupMenu::Options().withTargetComponent(&modulate),
+            [safe = juce::Component::SafePointer<PluginControls>(this), id, binding](int choice)
+            {
+                if (!safe || !safe->studio || choice < Studio::modulatorMenuFirst ||
+                    choice >= Studio::modulatorMenuLast)
+                    return;
+                CommandArgs a;
+                a.target = safe->pluginId;
+                a.binding = binding;
+                safe->studio->applyModulatorChoice(choice, id, "automation.plugin.modulator", a);
+            });
     }
     void requestAutomation(const juce::String &action)
     {
@@ -860,6 +885,7 @@ class PluginControls final : public juce::Component, private juce::Timer
         const bool canAutomate = metadataAvailable && automatable(p) && !pending();
         automate.setEnabled(canAutomate);
         initialize.setEnabled(canAutomate);
+        modulate.setEnabled(canAutomate);
         const AutomationKey key{AutomationParameter::pluginNormalized, pluginId, p ? p->id : 0};
         removeInitialization.setEnabled(
             canAutomate && std::any_of(studio->controller.project.automation.initialValues.begin(),
@@ -971,9 +997,11 @@ class PluginControls final : public juce::Component, private juce::Timer
                                                             : "Native edit notifications disabled",
                              juce::dontSendNotification);
         };
-        for (auto *component : std::array<juce::Component *, 13>{
+        modulate.setTooltip("Move this parameter with a tempo-synced LFO or random modulator");
+        modulate.onClick = [this] { showModulatorMenu(); };
+        for (auto *component : std::array<juce::Component *, 14>{
                  &heading, &details, &feedback, &choices, &value, &reset, &refresh, &automate, &initialize,
-                 &removeInitialization, &lastTweaked, &notifications, &recover})
+                 &removeInitialization, &lastTweaked, &modulate, &notifications, &recover})
             addAndMakeVisible(component);
         recover.setVisible(false);
         setSize(600, 340);
@@ -1014,6 +1042,8 @@ class PluginControls final : public juce::Component, private juce::Timer
         area.removeFromTop(8);
         auto native = area.removeFromTop(30);
         lastTweaked.setBounds(native.removeFromLeft(180));
+        native.removeFromLeft(8);
+        modulate.setBounds(native.removeFromLeft(120));
         native.removeFromLeft(8);
         notifications.setBounds(native);
         area.removeFromTop(8);

@@ -117,6 +117,15 @@ std::vector<AutomationInitialValue> Project::automationDefaults() const
     for (const auto &value : automation.initialValues)
         if (value.key.kind == AutomationParameter::samplerModulation)
             samplerKeys.insert(value.key);
+    for (const auto &modulator : automation.modulators)
+    {
+        const auto key = modulator.link.key;
+        if (key.kind == AutomationParameter::samplerModulation)
+            samplerKeys.insert(key);
+        else if (key.kind == AutomationParameter::channelGain || key.kind == AutomationParameter::channelPan)
+            if (const auto *owner = channel(key.owner))
+                values.push_back({key, key.kind == AutomationParameter::channelGain ? owner->gain : owner->pan});
+    }
     for (const auto &key : samplerKeys)
         if (const auto *owner = channel(key.owner))
             if (const auto parameter = lookupSamplerAutomationParameter(key.parameter))
@@ -1182,7 +1191,7 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
         if (auto parsed = parseAutomationState(automated, p.automation, int(fileVersion)); parsed.failed())
             return parsed;
         if (int(fileVersion) < 8 && (!p.automation.sources.empty() || !p.automation.placements.empty() ||
-                                     !p.automation.initialValues.empty()))
+                                     !p.automation.initialValues.empty() || !p.automation.modulators.empty()))
             return juce::Result::fail("Automation data requires project version 8");
     }
     p.nextId = juce::int64(t["nextId"]);
@@ -2470,6 +2479,11 @@ juce::Result Project::validate() const
     for (const auto &value : automation.initialValues)
         if (!validAutomationTarget(value.key))
             return fail("Unavailable initialized automation target");
+    for (const auto &modulator : automation.modulators)
+        if (!unique(modulator.id) || !validAutomationTarget(modulator.link.key) ||
+            !juce::CharPointer_UTF8::isValidString(modulator.name.data(), int(modulator.name.size())) ||
+            modulator.name.find('\0') != std::string::npos)
+            return fail("modulator.targetUnavailable: Remove the modulator before its target");
     AutomationProgram checked;
     std::string automationError;
     if (!AutomationProgram::compile(automation, true, checked, automationError, automationDefaults()))

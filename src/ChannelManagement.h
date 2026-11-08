@@ -67,6 +67,8 @@ inline juce::Result applyChannelManagement(Project &project, const juce::String 
             std::erase_if(source.links, [&](const auto &link) { return removedKey(link.key); });
         std::erase_if(project.automation.initialValues,
                       [&](const auto &value) { return removedKey(value.key); });
+        std::erase_if(project.automation.modulators,
+                      [&](const auto &modulator) { return removedKey(modulator.link.key); });
         for (auto &pattern : project.patterns)
         {
             std::erase_if(pattern.notes, [&](const auto &note) { return chosen.contains(note.channel); });

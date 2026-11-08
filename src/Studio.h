@@ -308,6 +308,11 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void mixerControlMenu(int);
     void mixerStereoDialog(int);
     void mixerValueDialog(int, MixerAutomationControl, std::optional<int> sendTarget = {});
+    // Modulator (LFO) submenu shared by Mixer controls and plugin parameters: ids in
+    // [modulatorMenuFirst, modulatorMenuLast). The add command receives a prepared target in `a`.
+    static constexpr int modulatorMenuFirst = 7000, modulatorMenuLast = 7100;
+    static juce::PopupMenu modulatorMenu(const AutomationModulator *);
+    void applyModulatorChoice(int choice, Id modulator, const juce::String &addCommand, CommandArgs a);
     void mixerAutomationMenu(int, MixerAutomationControl, std::optional<int> sendTarget = {});
     juce::Result admitMixerAutomation(const juce::String &owner = {});
     juce::Result performMixerAutomationIntent(const MixerAutomationUiIntent &, MixerAutomationUiAction, Id source = 0);

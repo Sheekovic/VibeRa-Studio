@@ -327,6 +327,8 @@ inline juce::var commandArgumentSchema(const juce::String &id)
       "binding":{"type":"object","additionalProperties":false,"properties":{"id":{"type":"integer","minimum":0,"maximum":4294967295},"flags":{"type":"integer","minimum":0,"maximum":4294967295},"steps":{"type":"integer","minimum":0,"maximum":2147483647},"manual":{"type":"number","minimum":0,"maximum":1},"name":{"type":"string","maxLength":256},"label":{"type":"string","maxLength":256}},"required":["id","flags","steps","manual"]}
     }})JSON");
     auto properties = schema["properties"];
+    if (id == "automation.plugin.modulator" || id.startsWith("automation.modulator."))
+        return modulatorArguments(id, properties["binding"]);
     if (id == "notes.add")
     {
         properties.getDynamicObject()->setProperty(

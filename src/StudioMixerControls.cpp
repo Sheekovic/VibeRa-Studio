@@ -12,6 +12,72 @@
 
 namespace vibera
 {
+namespace
+{
+const char *const modulatorShapeLabels[] = {"Sine", "Triangle", "Saw up", "Saw down", "Square", "Random (steps)",
+                                           "Random (smooth)"};
+const double modulatorPeriods[] = {.25, .5, 1, 2, 4, 8, 16};
+const char *const modulatorPeriodLabels[] = {"1/16 note", "1/8 note", "1 beat", "Half bar", "1 bar", "2 bars",
+                                             "4 bars"};
+const double modulatorDepths[] = {.1, .25, .5, .75, 1};
+} // namespace
+juce::PopupMenu Studio::modulatorMenu(const AutomationModulator *m)
+{
+    juce::PopupMenu menu, rate, depth;
+    menu.addSectionHeader(m ? "Shape" : "Add a modulator");
+    for (int i = 0; i < 7; ++i)
+        menu.addItem(modulatorMenuFirst + i, modulatorShapeLabels[i], true, m && int(m->shape) == i);
+    for (int i = 0; i < 7; ++i)
+        rate.addItem(modulatorMenuFirst + 20 + i, modulatorPeriodLabels[i], m != nullptr,
+                     m && m->period == modulatorPeriods[i]);
+    for (int i = 0; i < 5; ++i)
+        depth.addItem(modulatorMenuFirst + 40 + i, juce::String(int(modulatorDepths[i] * 100)) + " %", m != nullptr,
+                      m && m->depth == float(modulatorDepths[i]));
+    menu.addSeparator();
+    menu.addSubMenu("Rate (one cycle)", rate, m != nullptr);
+    menu.addSubMenu("Depth", depth, m != nullptr);
+    menu.addItem(modulatorMenuFirst + 60, "Enabled", m != nullptr, m && m->enabled);
+    menu.addItem(modulatorMenuFirst + 61, "Remove modulator", m != nullptr);
+    return menu;
+}
+void Studio::applyModulatorChoice(int choice, Id id, const juce::String &addCommand, CommandArgs a)
+{
+    const int item = choice - modulatorMenuFirst;
+    const auto &list = controller.project.automation.modulators;
+    const auto found = std::find_if(list.begin(), list.end(), [&](const auto &m) { return m.id == id; });
+    if (id == 0 || found == list.end())
+    {
+        if (item < 0 || item >= 7)
+            return;
+        a.text = modulatorShapeName(ModulatorShape(item));
+        a.value = 4;
+        a.strength = .5;
+        a.offset = 0;
+        command(addCommand, a);
+        return;
+    }
+    CommandArgs edit;
+    edit.target = id;
+    if (item == 60 || item == 61)
+    {
+        edit.enabled = !found->enabled;
+        command(item == 60 ? "automation.modulator.enable" : "automation.modulator.delete", edit);
+        return;
+    }
+    edit.text = modulatorShapeName(found->shape);
+    edit.value = found->period;
+    edit.strength = found->depth;
+    edit.offset = found->phase;
+    if (item >= 0 && item < 7)
+        edit.text = modulatorShapeName(ModulatorShape(item));
+    else if (item >= 20 && item < 27)
+        edit.value = modulatorPeriods[item - 20];
+    else if (item >= 40 && item < 45)
+        edit.strength = modulatorDepths[item - 40];
+    else
+        return;
+    command("automation.modulator.set", edit);
+}
 juce::Result Studio::admitMixerInsertOrder(juce::String &errorCode, const juce::String &owner)
 {
     errorCode.clear();
@@ -202,12 +268,31 @@ void Studio::mixerAutomationMenu(int insert, MixerAutomationControl control, std
     }
     menu.addSubMenu("Link to existing source", sources, !sourceIds.empty());
     menu.addSubMenu("Select linked source in Playlist", linked, linked.getNumItems() > 0);
+    const auto modulated = std::find_if(controller.project.automation.modulators.begin(),
+                                        controller.project.automation.modulators.end(),
+                                        [&](const auto &m) { return m.link.key == target.key; });
+    const AutomationModulator *modulator =
+        modulated == controller.project.automation.modulators.end() ? nullptr : &*modulated;
+    menu.addSubMenu("Modulator (LFO)", modulatorMenu(modulator), !std::any_of(
+        controller.project.automation.sources.begin(), controller.project.automation.sources.end(),
+        [&](const auto &s) { return std::any_of(s.links.begin(), s.links.end(),
+                                                [&](const auto &l) { return l.key == target.key; }); }));
+    const Id modulatorId = modulator ? modulator->id : 0;
     menu.showMenuAsync(
         {},
-        [safe = juce::Component::SafePointer<Studio>(this), intent, sourceIds, recordingToken](int choice)
+        [safe = juce::Component::SafePointer<Studio>(this), intent, sourceIds, recordingToken, modulatorId](int choice)
         {
             if (!safe || choice == 0)
                 return;
+            if (choice >= modulatorMenuFirst && choice < modulatorMenuLast)
+            {
+                CommandArgs a;
+                a.mixer = intent.insert;
+                a.automationControl = intent.control;
+                a.automationSendTarget = intent.sendTarget;
+                safe->applyModulatorChoice(choice, modulatorId, "automation.modulator", a);
+                return;
+            }
             if ((choice == 5 || choice == 6) && recordingToken.isNotEmpty())
             {
                 if (!safe->automationTouch || safe->automationTouch->token != recordingToken)

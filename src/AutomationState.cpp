@@ -157,13 +157,37 @@ juce::ValueTree automationState(const AutomationDocument &doc)
     root.appendChild(sources, nullptr);
     root.appendChild(placements, nullptr);
     root.appendChild(initial, nullptr);
+    if (!doc.modulators.empty())
+    {
+        juce::ValueTree modulators("MODULATORS");
+        for (const auto &m : doc.modulators)
+        {
+            juce::ValueTree v("MODULATOR");
+            v.setProperty("id", juce::int64(m.id), nullptr);
+            putKey(v, m.link.key);
+            v.setProperty("minimum", double(m.link.minimum), nullptr);
+            v.setProperty("maximum", double(m.link.maximum), nullptr);
+            v.setProperty("shape", modulatorShapeName(m.shape), nullptr);
+            v.setProperty("period", m.period, nullptr);
+            v.setProperty("depth", double(m.depth), nullptr);
+            v.setProperty("phase", double(m.phase), nullptr);
+            v.setProperty("enabled", m.enabled, nullptr);
+            v.setProperty("name", juce::String::fromUTF8(m.name.c_str()), nullptr);
+            modulators.appendChild(v, nullptr);
+        }
+        root.appendChild(modulators, nullptr);
+    }
     return root;
 }
 juce::Result parseAutomationState(const juce::ValueTree &root, AutomationDocument &out, int projectVersion)
 {
     auto fail = []
     { return juce::Result::fail("Malformed or unsupported automation data; project was not changed"); };
-    if (!root.hasType("AUTOMATION") || root.getNumProperties() != 0 || root.getNumChildren() != 3)
+    const auto modulatorTree = root.getChildWithName("MODULATORS");
+    if (!root.hasType("AUTOMATION") || root.getNumProperties() != 0 ||
+        root.getNumChildren() != (modulatorTree.isValid() ? 4 : 3) ||
+        (modulatorTree.isValid() && (projectVersion < 57 || modulatorTree.getNumProperties() != 0 ||
+                                     modulatorTree.getNumChildren() > 4096)))
         return fail();
     const auto sources = root.getChildWithName("SOURCES"), placements = root.getChildWithName("PLACEMENTS"),
                initial = root.getChildWithName("INITIAL_VALUES");
@@ -243,6 +267,33 @@ juce::Result parseAutomationState(const juce::ValueTree &root, AutomationDocumen
             !targetScalar(v["value"], value.key, value.value))
             return fail();
         doc.initialValues.push_back(value);
+    }
+    for (const auto &v : modulatorTree)
+    {
+        AutomationModulator m;
+        double period = 0;
+        float depth = 0, phase = 0;
+        std::int64_t enabled = 0;
+        if (v["enabled"].isBool())
+            enabled = bool(v["enabled"]) ? 1 : 0;
+        else if (!integer(v["enabled"], enabled) || (enabled != 0 && enabled != 1))
+            return fail();
+        const auto shape = modulatorShapeFromName(v["shape"].toString().toStdString());
+        if (!v.hasType("MODULATOR") ||
+            !fields(v, {"id", "kind", "owner", "parameter", "minimum", "maximum", "shape", "period", "depth",
+                        "phase", "enabled", "name"}) ||
+            v.getNumChildren() || !integer(v["id"], m.id) || !key(v, m.link.key, projectVersion) ||
+            !targetScalar(v["minimum"], m.link.key, m.link.minimum) ||
+            !targetScalar(v["maximum"], m.link.key, m.link.maximum) || !shape || !number(v["period"], period) ||
+            !scalar(v["depth"], depth) || !scalar(v["phase"], phase) || !v["name"].isString())
+            return fail();
+        m.shape = *shape;
+        m.period = period;
+        m.depth = depth;
+        m.phase = phase;
+        m.enabled = enabled != 0;
+        m.name = v["name"].toString().toStdString();
+        doc.modulators.push_back(std::move(m));
     }
     out = std::move(doc);
     return juce::Result::ok(); // Parent Project performs ownership/global-ID/domain validation.

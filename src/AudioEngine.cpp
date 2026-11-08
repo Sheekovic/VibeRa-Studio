@@ -3500,7 +3500,7 @@ juce::Result AudioEngine::configureCompensationHistory(std::uint32_t maximumDela
             !projectedProject.audioPlacements.empty() ||
             (!projectedProject.automation.sources.empty() ||
              !projectedProject.automation.placements.empty() ||
-             !projectedProject.automation.initialValues.empty()))
+             !projectedProject.automation.initialValues.empty() || !projectedProject.automation.modulators.empty()))
             return juce::Result::fail("Phase-pair experiment requires a closed non-automated stereo graph");
         int sourceInsert = -1, wetInsert = -1, plugins = 0;
         for (const auto &insert : projectedProject.mixer)

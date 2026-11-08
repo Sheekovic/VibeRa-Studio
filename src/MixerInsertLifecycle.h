@@ -68,6 +68,8 @@ inline juce::Result deleteMixerInsert(Project &project, int id, const MixerInser
     for (const auto &source : project.automation.sources)
         automation = automation || std::any_of(source.links.begin(), source.links.end(),
                                                [&](const auto &link) { return removedTarget(link.key); });
+    automation = automation || std::any_of(project.automation.modulators.begin(), project.automation.modulators.end(),
+                                           [&](const auto &m) { return removedTarget(m.link.key); });
     if (automation && !policy.removeAutomation)
         return juce::Result::fail(
             "mixer.automationReferenced: Explicit target-link/initialization removal required");
@@ -124,6 +126,8 @@ inline juce::Result deleteMixerInsert(Project &project, int id, const MixerInser
             std::erase_if(source.links, [&](const auto &link) { return removedTarget(link.key); });
         std::erase_if(project.automation.initialValues,
                       [&](const auto &value) { return removedTarget(value.key); });
+        std::erase_if(project.automation.modulators,
+                      [&](const auto &modulator) { return removedTarget(modulator.link.key); });
         // Curves, points, placements and other target links remain intact,
         // including an empty unlinked source. No implicit music deletion.
     }
