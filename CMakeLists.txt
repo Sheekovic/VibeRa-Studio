@@ -942,6 +942,9 @@ set_tests_properties(expression_maps_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME parallel_chains_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-parallel-chains-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/parallel_chains_mcp")
 set_tests_properties(parallel_chains_mcp PROPERTIES TIMEOUT 400)
+add_test(NAME playlist_tools_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-playlist-tools-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/playlist_tools_mcp")
+set_tests_properties(playlist_tools_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
 set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)
