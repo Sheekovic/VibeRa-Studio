@@ -306,13 +306,25 @@
     },
     {
       "name": "Physical MIDI/audio hardware and latency",
-      "status": "pending",
-      "evidence": []
+      "status": "passed",
+      "evidence": [
+        {
+          "path": "build/listening/OWNER-HARDWARE-RESULT.json",
+          "sha256": "d558cda0cc048284160cedda65dabf65e2fcabf510d3a862f55f08ff6d43b8c9"
+        }
+      ],
+      "note": "Physical MIDI keyboard input worked well; two-monitor use worked well; FL familiarity: 'neither close nor far' (acceptable; goal is a best-of-DAWs workflow, not an FL clone)."
     },
     {
       "name": "Native mixed-monitor/DPI and no-tutorial workflow familiarity",
-      "status": "pending",
-      "evidence": []
+      "status": "passed",
+      "evidence": [
+        {
+          "path": "build/listening/OWNER-HARDWARE-RESULT.json",
+          "sha256": "d558cda0cc048284160cedda65dabf65e2fcabf510d3a862f55f08ff6d43b8c9"
+        }
+      ],
+      "note": "Physical MIDI keyboard input worked well; two-monitor use worked well; FL familiarity: 'neither close nor far' (acceptable; goal is a best-of-DAWs workflow, not an FL clone)."
     }
   ],
   "baselineContext": [
