@@ -4956,6 +4956,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         refresh();
         return true;
     }
+    if (action == "view.centerPlayhead")
+    {
+        const int editor = focus == Scope::piano ? 1 : 2;
+        if (windows[editor])
+            if (auto *view = dynamic_cast<Editor *>(windows[editor]->getContentComponent()))
+                view->centerOnPlayhead();
+        return true;
+    }
     if (action == "view.snapIncomingMidi")
     {
         snapIncomingMidi = !snapIncomingMidi;

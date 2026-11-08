@@ -89,7 +89,7 @@ did not list.
 | Playlist: marker actions (loop, skip, pause, start) | done | `marker.action`; real-device check: Start 4, Loop 8..16, Skip 20 to 28, Pause at 32. Skip/Pause act on the 20 Hz timer. Quantized song jumps: missing |
 | Piano roll: snap incoming MIDI to scale | done | Piano roll menu, `view.snapIncomingMidi`, `vibera_editor` guide; hardware and typing keyboard |
 | Piano roll: Interpolate tool (event data) | missing | next |
-| Piano roll: nudge with mouse wheel, Center (Shift+0) | missing | next |
+| Piano roll / Playlist: nudge with mouse wheel, Center (Shift+0) | done | Shift+Alt+wheel nudges selected notes/clips (pointer only, not MCP-tested); `view.centerPlayhead` Shift+0 |
 | Piano roll: Magic lasso selection | missing | |
 | Piano roll: time / key markers in Pattern mode | missing | |
 | Channel Rack: Mute removed steps | done | existing Workflow setting (`retainSteps`, muted notes kept) |

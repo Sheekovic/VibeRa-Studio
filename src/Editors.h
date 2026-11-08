@@ -514,6 +514,17 @@ class Studio::Editor final : public juce::Component,
         horizontalBar.repaint();
         repaint();
     }
+    // Center (Shift+0): scroll once so the playhead sits in the middle of the view.
+    void centerOnPlayhead()
+    {
+        scroll = std::max(0., std::max(0., s.audio.positionBeat()) - viewBeats() * .5);
+        horizontalBar.repaint();
+        repaint();
+    }
+    double scrollBeat() const
+    {
+        return scroll;
+    }
     void setTimeSelection(double start, double end)
     {
         timeStart = start;
@@ -7541,6 +7552,16 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseWheelMove(const juce::MouseEvent &e, const juce::MouseWheelDetails &wheel) override
     {
+        // Nudge with the mouse wheel (Shift+Alt+wheel): selected notes / clips move one snap step.
+        if ((type == 1 || type == 2) && e.mods.isShiftDown() && e.mods.isAltDown() && !e.mods.isCtrlDown() &&
+            std::abs(wheel.deltaY) > 0)
+        {
+            const bool right = wheel.deltaY < 0;
+            s.focus = type == 1 ? Scope::piano : Scope::playlist;
+            s.performAction(type == 1 ? (right ? "notes.nudgeRight" : "notes.nudgeLeft")
+                                      : (right ? "clip.nudgeRight" : "clip.nudgeLeft"));
+            return;
+        }
         if (type == 1 && e.mods.isAltDown())
         {
             Id id = hit(e.position);

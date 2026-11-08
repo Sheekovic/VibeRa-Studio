@@ -3861,6 +3861,10 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         set(guide, "snappedKeys48to59", snapped);
         set(state, "pianoGuide", guide);
     }
+    for (const auto &[editor, key] : {std::pair{1, "pianoScrollBeat"}, std::pair{2, "playlistScrollBeat"}})
+        if (windows[size_t(editor)])
+            if (const auto *view = dynamic_cast<const Editor *>(windows[size_t(editor)]->getContentComponent()))
+                set(state, key, view->scrollBeat());
     set(state, "pianoLaneTarget", noteLaneTargets()[pianoLaneTarget]);
     set(state, "mixerMeterWave", mixerMeterWave);
     set(state, "pianoGridHighlights", pianoGridHighlights);

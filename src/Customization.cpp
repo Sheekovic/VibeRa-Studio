@@ -280,6 +280,8 @@ Customization Customization::familiarDefaults()
     add("tool.drumPaint", Scope::piano, 'N');
     add("tool.play", Scope::piano, 'Y');
     add("view.noteGridHighlights", Scope::piano, 'B', juce::ModifierKeys::altModifier);
+    add("view.centerPlayhead", Scope::piano, '0', shift);
+    add("view.centerPlayhead", Scope::playlist, '0', shift);
     add("tool.play", Scope::playlist, 'Y');
     add("piano.resizeLeft", Scope::piano, juce::KeyPress::homeKey, ctrl | juce::ModifierKeys::altModifier);
     add("selection.timeAround", Scope::piano, juce::KeyPress::returnKey, ctrl);
