@@ -111,7 +111,7 @@ def main():
     name = f"VibeRa-Studio-{version}-{args.platform}"
     if mac:
         for binary in (executable, worker):
-            run("lipo", "-verify_arch", "arm64", "x86_64", str(binary))
+            run("lipo", str(binary), "-verify_arch", "arm64", "x86_64")  # lipo wants the file first.
         # All bundle resources are finalized before signing. No paid identity or
         # notarization credentials are assumed by this open-source workflow.
         run("codesign", "--force", "--deep", "--sign", "-", str(app))
