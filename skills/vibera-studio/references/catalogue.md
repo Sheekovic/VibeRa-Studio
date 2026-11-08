@@ -68,3 +68,15 @@ target dropdowns and settings/list viewport state are not all shared remotely.
 Passing scan arguments commits a scan scope; descriptor lookup does not highlight
 the corresponding UI row. Report those limits instead of claiming pointer-based
 coverage or full Settings readiness.
+
+## Settings > Plugins page equivalents
+
+The page's local drafts map to canonical calls; read back after each:
+- Custom folders / standard locations: `vibera_catalogue scan {customFolders, standardLocations}`, poll
+  `job`, then `state.requestedFolders` / `requestedStandardLocations`.
+- Row selection and scrolling: `vibera_catalogue list {offset, limit}` and `descriptor`.
+- Channel target: `vibera_select {channel}` (registered as `channel.select`; a held MIDI take is
+  finished first).
+- Mixer target: the explicit `mixer` argument of `plugin.effect.insert`.
+- Typed parameter value: `vibera_plugin set` (registered as `plugin.parameter.set`), poll to an
+  acknowledged outcome; it enters project history. `busy` means structural work is still settling.

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "applicationSha256": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
+  "sourceInputs": {
+    "scripts/verify-plugins-page-mcp.py": "bcd86eac30636b7395ee70a71cbaa0fe6f92f73efe8594479e1414eb8e61a255",
+    "src/PluginPage.h": "0f0d7330e4a645a5b47b72fe384846d0da40bef5473c58da9cb6b59a4e45c56b",
+    "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
+    "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
+    "src/Commands.cpp": "6f7aeca9a903240ca09dd9879e51a34f417856bf7e601f94812ca1845c020550",
+    "src/StudioPluginParameters.cpp": "d43e457755398a65d7e16278b6da9a9d011d931df1f403a10c54e83d6f06e5fb"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "foldersDraft: scan with customFolders reaches a terminal job",
+    "foldersDraft: the scanned custom folder is read back from catalogue state",
+    "standardLocationsDraft: the scan's standardLocations=false is read back",
+    "viewportNavigation: the catalogue list pages by offset/limit",
+    "catalogueSelection: a stable entry resolves to its exact descriptor",
+    "channelTargetSelection: vibera_select selects the Channel",
+    "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
+    "manualValue: the effect exposes its native parameters",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'fb37efe4b16f4205ad27ad75c7a2df56', 'revision': 3, 'operation': '62e9b7bd068b478b9b7948111c4dceb9', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: the parameter edit enters project history"
+  ],
+  "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts"
+}

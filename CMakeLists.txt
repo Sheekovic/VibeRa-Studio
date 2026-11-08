@@ -924,6 +924,9 @@ set_tests_properties(coproducer_context PROPERTIES TIMEOUT 60)
 add_test(NAME callback_timing COMMAND VibeRaTests --callback-timing-check "${CMAKE_CURRENT_BINARY_DIR}/callback_timing")
 set_tests_properties(callback_timing PROPERTIES TIMEOUT 15)
 add_test(NAME musical_acceptance COMMAND VibeRaTests "${CMAKE_CURRENT_BINARY_DIR}/acceptance")
+add_test(NAME plugins_page_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-plugins-page-mcp.py"
+  "$<TARGET_FILE:VibeRa>")
+set_tests_properties(plugins_page_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME mcp_ui_actions COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-ui-actions-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/mcp_ui_actions")
 set_tests_properties(mcp_ui_actions PROPERTIES TIMEOUT 120)

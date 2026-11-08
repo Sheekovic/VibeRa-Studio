@@ -317,6 +317,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"plugins.discover", "Read installed VST3 catalogue", Scope::global, false, false,
          "vibera_catalogue"},
         {"plugins.scan", "Scan VST3 locations", Scope::global, false, false, "vibera_catalogue"},
+        {"channel.select", "Select Channel and Pattern (shared selection rules)", Scope::global, false, false, "vibera_select"},
+        {"plugin.parameter.set", "Set native plugin parameter with acknowledged history", Scope::global, true, false, "vibera_plugin"},
         {"plugins.cancelScan", "Cancel VST3 discovery", Scope::global, false, false, "vibera_catalogue"},
         {"tools.lastTweaked.controls", "Open last tweaked plugin control", Scope::global, false, true,
          "action"},
