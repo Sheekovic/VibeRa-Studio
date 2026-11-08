@@ -1,13 +1,15 @@
-"""Long-session stability acceptance (RQ-B) on an owned real-device instance.
+"""Long-session stability acceptance (RQ-B).
 
-Runs normal (--mcp) mode with an owned profile folder for --minutes (default 120). Each cycle
-plays the demo song plus a Synth Channel, reads the Master meter, stops, adds and undoes a
-note and moves a Mixer fader. Every minute it samples the owned process's private memory,
-handle count, worker liveness and packet counters. Fails on a crash, a dead worker, silent
-playback, dropped/missed worker packets growing, or memory/handle growth beyond the bounds
-below after the warm-up. Listening is not claimed.
+Default: headless (--mcp-test, no window, no audio device) for --minutes (default 15, owner
+decision 2026-11-08 replacing the visible two-hour run). Each cycle plays/stops the demo song
+plus a Synth Channel, adds and undoes a note and moves a Mixer fader; every 10th cycle renders
+the project offline and requires sound. Every minute it samples the owned process's private
+memory, handle count, worker liveness and packet counters. Fails on a crash, a dead worker,
+a silent render, missed/dropped worker packets growing, or memory/handle growth beyond the
+bounds below after the warm-up. --visible uses the real device and checks the Master meter.
+Listening is not claimed.
 
-usage: python scripts/verify-long-session.py [--minutes N] [executable]
+usage: python scripts/verify-long-session.py [--minutes N] [--visible] [executable]
 """
 import argparse
 import ctypes
@@ -22,10 +24,13 @@ import sys
 import threading
 import time
 import uuid
+import wave
 
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
-parser.add_argument("--minutes", type=float, default=120)
+parser.add_argument("--minutes", type=float, default=15)
+parser.add_argument("--visible", action="store_true",
+                    help="Use the real device in a visible window (default: headless --mcp-test, no window, no device)")
 parser.add_argument("executable", nargs="?", default=str(ROOT / "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe"))
 args = parser.parse_args()
 exe = Path(args.executable).resolve()
@@ -64,7 +69,7 @@ def process_counters(handle):
 class Client:
     def __init__(self):
         self.serial, self.messages = 0, queue.Queue()
-        self.process = subprocess.Popen([str(exe), "--mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        self.process = subprocess.Popen([str(exe), "--mcp" if args.visible else "--mcp-test"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                         stderr=subprocess.DEVNULL, text=True, encoding="utf-8", env=env,
                                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         threading.Thread(target=self._receive, daemon=True).start()
@@ -137,7 +142,7 @@ try:
         client.data("vibera_command", {"command": "notes.add", "args": {"channel": synth, "pitch": 60 + beat % 5,
                                                                         "beat": beat * .5, "length": .4, "value": .8}})
     client.data("vibera_transport", {"action": "pattern"})
-    cycles = silent = 0
+    cycles = silent = renders = 0
     next_sample = start
     deadline = start + args.minutes * 60
     while time.monotonic() < deadline:
@@ -149,7 +154,19 @@ try:
             time.sleep(.25)
             best = max(best, master_peak(client))
         client.data("vibera_transport", {"action": "stop"})
-        silent += best <= 0.001
+        if args.visible:
+            silent += best <= 0.001
+        elif cycles % 10 == 0:
+            # Headless: no device, so prove the audio path with an offline render instead.
+            wav = output / "render.wav"
+            job = client.data("vibera_project", {"action": "export", "path": str(wav), "overwrite": True})
+            render_deadline = time.monotonic() + 120
+            while job.get("completionState") == "pending" and time.monotonic() < render_deadline:
+                time.sleep(.2)
+                job = client.data("vibera_project", {"action": "job", "operation": job["operation"]})
+            with wave.open(str(wav), "rb") as w:
+                silent += job.get("completionState") != "completed" or not w.readframes(w.getnframes()).strip(b"\x00")
+            renders += 1
         client.data("vibera_command", {"command": "notes.add", "args": {"channel": kick, "pitch": 90, "beat": 3.75,
                                                                         "length": .25, "value": .5}})
         client.data("vibera_command", {"command": "edit.undo"})
@@ -168,7 +185,10 @@ try:
             if not samples[-1]["workersAlive"]:
                 raise AssertionError("A plugin worker stopped at minute %s" % samples[-1]["minute"])
     check(client.process.poll() is None, "The application ran for the whole session")
-    check(cycles > 0 and silent == 0, f"Every one of {cycles} playback cycles reached the Master meter (silent: {silent})")
+    if args.visible:
+        check(cycles > 0 and silent == 0, f"Every one of {cycles} playback cycles reached the Master meter (silent: {silent})")
+    else:
+        check(renders > 0 and silent == 0, f"Every one of {renders} offline renders over {cycles} cycles has sound (silent: {silent})")
     check(all(s["workersAlive"] for s in samples), "Plugin workers stayed alive at every sample")
     warm = [s for s in samples if s["minute"] >= min(10, args.minutes / 3)] or samples
     check(warm[-1]["privateMB"] - warm[0]["privateMB"] <= MEMORY_GROWTH_MB,

@@ -4,7 +4,7 @@
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
   "state": "in_progress",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "Software rows RQ-A and RQ-C..H verified. RQ-B two-hour run awaits the owner's go-ahead (script ready). RQ-I: complete dev.ps1 -Full, then scripts/rebind-surface-evidence.py --apply (149 reviewed UI surfaces), rerun RQ receipts on the candidate, ReleaseCandidate. Seven plugin-settings/manual-value UI surfaces remain MCP gaps.",
+  "nextAction": "All software rows RQ-A..H verified. Next RQ-I: complete dev.ps1 -Full, rebind-surface-evidence --apply, rerun the RQ receipts on the candidate binaries, ReleaseCandidate.",
   "requirements": [
     {
       "id": "RQ-A",
@@ -22,10 +22,15 @@
     {
       "id": "RQ-B",
       "name": "Long-session stability",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
-      "scope": "Two-hour unattended playback/edit stress on the real device: no crash, leak growth, worker loss, stuck notes or callback overruns beyond the declared device limits; memory/handle/worker counts recorded over time.",
-      "evidence": []
+      "scope": "Headless 15-minute stress (owner decision 2026-11-08 replaces the visible two-hour run): play/edit/undo/fader cycles with offline renders that must have sound; no crash, worker loss, packet loss or memory/handle growth beyond bounds; memory, handles and workers sampled every minute.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/release-quality/long-session/attempt-fa0a83d2d5a94d0b8018f9949dbdadfe/verification.json",
+          "sha256": "4377ee1c878a53a0234c5826c30d2223adc14b9cb61b53b3b66bc55d240e514c"
+        }
+      ]
     },
     {
       "id": "RQ-C",

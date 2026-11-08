@@ -6,7 +6,7 @@ release-required; human/clean-machine checks are listed separately in the ledger
 ## Complete checklist
 
 - [x] **RQ-A installer and portable package:** Per-user installer and portable folder built from the qualified distribution: install, launch, upgrade over an older version, uninstall entry and clean removal without touching user projects/settings.
-- [ ] **RQ-B long-session stability:** Two-hour unattended playback/edit stress on the real device: no crash, leak growth, worker loss, stuck notes or callback overruns beyond the declared device limits; memory/handle/worker counts recorded over time.
+- [x] **RQ-B long-session stability:** Headless 15-minute stress (owner decision 2026-11-08 replaces the visible two-hour run): play/edit/undo/fader cycles with offline renders that must have sound; no crash, worker loss, packet loss or memory/handle growth.
 - [x] **RQ-C crash and forced-termination recovery:** Forced app and worker termination during edit, playback, recording and save: autosave/recovery restores the last committed state, takes are not lost and outcomes are truthful.
 - [x] **RQ-D project migration:** Projects from earlier schema versions open, migrate and save without losing audible settings or links; refusals are explicit for unsupported versions.
 - [x] **RQ-E accessibility:** Keyboard-only navigation of the main workspace and dialogs, focus order and visible focus, accessible names/roles for controls, readable contrast and target sizes.
