@@ -1,10 +1,10 @@
 {
   "passed": true,
   "scope": "Verified sampler tempo increment only; RPS-J and the whole module remain incomplete. No full-FL, native input, listening or hardware claim.",
-  "applicationSha256": "fa6822a96334ecbfaf83a2df1abb12284ab671609a0bcc8ea2c8c2748c6639d1",
+  "applicationSha256": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "4030196060fcfc860c2bc31768b46321833786937b0a3f3ef3f7d568d1bbed7c",
+    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
     "src/Studio.h": "183e32662f5af49c3da6ccf186cb0e6c29a626e8f8ed07b32fbff1b79b0b2767",
     "src/Studio.cpp": "5bd9bbb64cd0b9e750740269834e8db8579d6cda7923f1bbd3723ba3abb29042",
     "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
@@ -13,7 +13,7 @@
     "src/AudioEngine.h": "e925fda600345c1f91d3d2f9d1fb500d4b8bd12aff71e861fcb949139fd66a91",
     "src/AudioEngine.cpp": "16a86460efd5979a5df49dcf3ed7d5a373edb81679352b88f5c60395874fd00f",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "5a5d66f10aa27ae25c985cec5d452cf431306239ca06b3c30d03547a9064a089",
+    "src/Commands.cpp": "6f7aeca9a903240ca09dd9879e51a34f417856bf7e601f94812ca1845c020550",
     "src/McpContracts.h": "b9e28ac1c950cf40d164c921befb98fa2aa951006a0325d4834240809885a5ba",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Sampler.h": "f441e0778acf4d6e0e2208a191d2c50001dd8a6718787a7775351a66ef16367b",
@@ -188,7 +188,7 @@
   "receipt": "build/sampler-tempo-semantic-20261019/verification.json",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-112625/affected-tests.log",
-    "tests": 261
+    "sourceLog": "build/dev/20261108-153158/affected-tests.log",
+    "tests": 262
   }
 }

@@ -15,7 +15,7 @@
     "src/McpContracts.h": "b9e28ac1c950cf40d164c921befb98fa2aa951006a0325d4834240809885a5ba",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "5a5d66f10aa27ae25c985cec5d452cf431306239ca06b3c30d03547a9064a089",
+    "src/Commands.cpp": "6f7aeca9a903240ca09dd9879e51a34f417856bf7e601f94812ca1845c020550",
     "src/Project.h": "703b5dff5b10841120e877fb752e2da3c7057537c25b4dafdd308f3747858e07",
     "src/Project.cpp": "b1be936ac2125da3f4bb5d938e1eb87d43d4464b79949594f47265e24db68a48",
     "src/AudioEngine.h": "e925fda600345c1f91d3d2f9d1fb500d4b8bd12aff71e861fcb949139fd66a91",
@@ -39,12 +39,12 @@
     "skills/vibera-studio/references/plugin-audio-io.md": "b16c09aff13a7853587a7ee797fb111eafd6bf003c13924d3a1a410c5a7d8de4",
     "skills/vibera-studio/references/effect-chains.md": "ec30d226e977d294ee293825a0dd83c29789fc5de892b96de98c3c576d9c4131",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
-    "CMakeLists.txt": "4030196060fcfc860c2bc31768b46321833786937b0a3f3ef3f7d568d1bbed7c",
+    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
     "scripts/mcp-coverage.py": "fb6d490161c26511ce394709594388a55a73c3081a80cd3b8b3f91fc1acf4169",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "src/MixerChainWorkflowContracts.h": "d1dbd9357f9305824ab3a922a4550d3cf0a73e38a5705964bb3e6fcc0d36ad8c"
   },
-  "applicationSha256": "fa6822a96334ecbfaf83a2df1abb12284ab671609a0bcc8ea2c8c2748c6639d1",
+  "applicationSha256": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
   "workerSha256": "6e02557aad3bf9e805b95167609d75db09d021ad329d91e7830ab6d1bf8fbfda",
   "checks": [
     "Actual instrument/effect Audio input/output contextual menu dispatch reaches canonical plugin.io; component dispatch, not native OS input.",
@@ -391,7 +391,7 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-112625/affected-tests.log",
-    "tests": 261
+    "sourceLog": "build/dev/20261108-153158/affected-tests.log",
+    "tests": 262
   }
 }

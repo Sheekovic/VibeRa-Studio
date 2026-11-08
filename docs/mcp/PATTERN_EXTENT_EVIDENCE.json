@@ -6,11 +6,11 @@
   "scope": "Partial RPS-D/L/M Pattern extent and meter",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "4030196060fcfc860c2bc31768b46321833786937b0a3f3ef3f7d568d1bbed7c",
+    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
     "CMakePresets.json": "a17190f02b339b6aecc8c8802b7c082a82bb67992153a290d04f5e441e876400",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "a06d0822559d01fb6b068b58e173237f367246dc27ad21cf122e16f3f60b95d7",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "aca3f10472cf77edfe5fe19bc79856a21056ea4fd2c1a10d3ba99d63d8295eac",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "fa6822a96334ecbfaf83a2df1abb12284ab671609a0bcc8ea2c8c2748c6639d1",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "ec44a3cebb5e44abe1d7c53d136e018b80c92823a85db17659113d2fd54c04e6",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "docs/PATTERN_EXTENT.md": "9a613d2921be1cb25d6b515d48b0436c3574aac2a285a25620b15da7d50f8cbe",
     "scripts/dev_support.py": "498169f5457fb526aa7ca60e1c881e77375004b17056a7a5320eebcd0269959d",
@@ -56,7 +56,7 @@
     "src/CoProducerPanel.h": "cd6ce9600be1196d2d7bb15b0be6fff81ad247eda746e931716361c050c8eaa6",
     "src/CoProducerWorker.cpp": "f951b754977a2f029e781d3d0d1e8832466bd6efc8405aceac13fc83b520a23d",
     "src/CoProducerWorker.h": "6db564d49e07f3ec15704f42dfbd68bc3848293f66db675599a8f9c6f0c1dd29",
-    "src/Commands.cpp": "5a5d66f10aa27ae25c985cec5d452cf431306239ca06b3c30d03547a9064a089",
+    "src/Commands.cpp": "6f7aeca9a903240ca09dd9879e51a34f417856bf7e601f94812ca1845c020550",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/CommandsNativeScalarHistory.inc": "e65cb51884f76407afc1362561f1fc969aabf3cccc1227a09229756d65185548",
     "src/CompensationGraph.h": "e8e954dab9a0352afc31048c40d12c9ae6cbed743628b0aadadc96f06a6f7fe6",
@@ -593,7 +593,7 @@
     "tests/test_fixture_profiles.py": "efad3b8a16aecc0b40af0861b4bb192a36d6f8d5e36946f54c2e1aafa6fec589",
     "tests/test_mixer_effects_verifier.py": "5b51aeb5ce12dc71bfb02a42d437800bd86d250816b781aba8defa183155928f"
   },
-  "applicationSha256": "fa6822a96334ecbfaf83a2df1abb12284ab671609a0bcc8ea2c8c2748c6639d1",
+  "applicationSha256": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
   "workerSha256": "1fd6690c32ee073c8927d4f6bcca189a3fe71926c1834ee6aeb549b771f4e1e8",
   "checks": [
     "Canonical Auto/manual extent, local/inherited meter, dormant source data and exact note/history/placement identities",
@@ -706,7 +706,7 @@
   ],
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-112625/affected-tests.log",
-    "tests": 261
+    "sourceLog": "build/dev/20261108-153158/affected-tests.log",
+    "tests": 262
   }
 }

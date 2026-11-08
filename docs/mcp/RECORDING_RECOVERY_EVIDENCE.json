@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "fa6822a96334ecbfaf83a2df1abb12284ab671609a0bcc8ea2c8c2748c6639d1",
+  "applicationSha256": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
   "sourceInputs": {
-    "CMakeLists.txt": "4030196060fcfc860c2bc31768b46321833786937b0a3f3ef3f7d568d1bbed7c",
+    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
     "src/Studio.cpp": "5bd9bbb64cd0b9e750740269834e8db8579d6cda7923f1bbd3723ba3abb29042",
     "src/Studio.h": "183e32662f5af49c3da6ccf186cb0e6c29a626e8f8ed07b32fbff1b79b0b2767",
     "src/StudioMcp.cpp": "a2210493460040f38ecc110e1dc2930c1da673df3dcf71feee9e16d524a25217",
-    "src/Commands.cpp": "5a5d66f10aa27ae25c985cec5d452cf431306239ca06b3c30d03547a9064a089",
+    "src/Commands.cpp": "6f7aeca9a903240ca09dd9879e51a34f417856bf7e601f94812ca1845c020550",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Project.cpp": "b1be936ac2125da3f4bb5d938e1eb87d43d4464b79949594f47265e24db68a48",
     "src/Project.h": "703b5dff5b10841120e877fb752e2da3c7057537c25b4dafdd308f3747858e07",
@@ -51,7 +51,7 @@
   "sourceHashMode": "text-lf-v1",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-112625/affected-tests.log",
-    "tests": 261
+    "sourceLog": "build/dev/20261108-153158/affected-tests.log",
+    "tests": 262
   }
 }

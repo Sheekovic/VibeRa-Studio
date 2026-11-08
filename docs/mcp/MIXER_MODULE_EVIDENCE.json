@@ -4,7 +4,7 @@
   "passed": true,
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "4030196060fcfc860c2bc31768b46321833786937b0a3f3ef3f7d568d1bbed7c",
+    "CMakeLists.txt": "fb63df0b8ad7b210c0994a8768353e2a03c2af1ae3f291c21a5968a44f3c166d",
     "scripts/mcp-coverage.py": "fb6d490161c26511ce394709594388a55a73c3081a80cd3b8b3f91fc1acf4169",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "scripts/verify-installed-mcp.py": "8f1f935f120621a334097114b6fd07eabbff24a0e15b68f4aaae8e7fee35f55c",
@@ -41,7 +41,7 @@
     "src/ChannelBalance.h": "13d8a6aa76b1032926c2d868f413d217d0001517700dde69b7e24808e7106a5c",
     "src/ChannelRouting.inc": "74ce23f6adcd77d0697c6481b595ec132e4a5c50b9269fda70cc0010a4e4c9cb",
     "src/ChannelRoutingCoordinator.h": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6",
-    "src/Commands.cpp": "5a5d66f10aa27ae25c985cec5d452cf431306239ca06b3c30d03547a9064a089",
+    "src/Commands.cpp": "6f7aeca9a903240ca09dd9879e51a34f417856bf7e601f94812ca1845c020550",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "1eee33132a22d4114b009e2f471643d72fa49bec7af6f8faa90673eb7c8095d4",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -156,7 +156,7 @@
     "tests/StoppedEffectNativeAcceptance.h": "59bbae9226079d2ceb2252a7c6ac4196319fdb641a669781ffe0c824b76f74dd",
     "tests/StoppedEffectOrdinaryForwardAcceptance.h": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
   },
-  "applicationSha256": "fa6822a96334ecbfaf83a2df1abb12284ab671609a0bcc8ea2c8c2748c6639d1",
+  "applicationSha256": "30ac90b607338c57374bd520094ff7c90f485621e7847fdba5d9f6eb13cfb78c",
   "checks": [
     {
       "id": "mixer.routing",
@@ -1205,7 +1205,7 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261108-112625/affected-tests.log",
-    "tests": 261
+    "sourceLog": "build/dev/20261108-153158/affected-tests.log",
+    "tests": 262
   }
 }

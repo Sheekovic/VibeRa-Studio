@@ -19,8 +19,13 @@
     "channelTargetSelection: vibera_select selects the Channel",
     "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
     "manualValue: the effect exposes its native parameters",
-    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'fb37efe4b16f4205ad27ad75c7a2df56', 'revision': 3, 'operation': '62e9b7bd068b478b9b7948111c4dceb9', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': '1a47312db714456a951501f8bec3d18a', 'revision': 3, 'operation': '6a64661ee99b480b8a1c3261c90ff545', 'kind': 'set', 'plugin': 46, 'requestedI",
     "manualValue: the parameter edit enters project history"
   ],
-  "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts"
+  "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts",
+  "reboundBy": {
+    "script": "scripts/rebind-surface-evidence.py",
+    "sourceLog": "build/dev/20261108-153158/affected-tests.log",
+    "tests": 262
+  }
 }
