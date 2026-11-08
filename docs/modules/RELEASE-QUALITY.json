@@ -2,9 +2,9 @@
   "format": 1,
   "id": "release-quality",
   "name": "M6 release quality - install, run long sessions, recover and stay accessible",
-  "state": "in_progress",
+  "state": "released",
   "checklist": "docs/modules/RELEASE-QUALITY.md",
-  "nextAction": "All software rows RQ-A..H verified. Next RQ-I: complete dev.ps1 -Full, rebind-surface-evidence --apply, rerun the RQ receipts on the candidate binaries, ReleaseCandidate.",
+  "nextAction": "Released as 0.2.0 (source e6b0040): complete 261/261 regression, module gates, staged and final installed verification (133/133; one final swing-vst3-live timing miss under load retained in build/distribution-verification/retained-failures and not reproduced), one-folder audit. Human/hardware acceptance pending.",
   "requirements": [
     {
       "id": "RQ-A",
@@ -14,8 +14,8 @@
       "scope": "Per-user installer and portable folder built from the qualified distribution: install, launch, upgrade over an older version, uninstall entry and clean removal without touching user projects/settings.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/installer/attempt-98f133a95e1846d0a4d44885c7faed68/verification.json",
-          "sha256": "5ddf46d4523435adf766dce458720b04169512fb706fa5b26f7b5216530119c6"
+          "path": "build/module-qualification/release-quality/installer/attempt-903e655745274641862e6de42b86261f/verification.json",
+          "sha256": "3782d8136094c63439b16d219f4af4f8ee7c4b8272efd666e9bf4316f6ce3147"
         }
       ],
       "phase": "release"
@@ -110,8 +110,8 @@
       "scope": "Package ships licenses/notices for every bundled dependency and asset, exact source commit and checksums; reproducible build inputs recorded.",
       "evidence": [
         {
-          "path": "build/module-qualification/release-quality/notices/attempt-45f8d29c158f4ad1a6e3a9818b5527e1/verification.json",
-          "sha256": "f780f07feb5fa6b037e534c9f29640293152f5a940ae9979f70c0907dcc10847"
+          "path": "build/module-qualification/release-quality/notices/attempt-c12f1114d8594bf4b6c839dc56abd604/verification.json",
+          "sha256": "6ad84991c3c61a4fbfa367ff09ffd62599d7cc2e1854658aae0555fe8e08dee6"
         }
       ],
       "phase": "release"
@@ -119,10 +119,23 @@
     {
       "id": "RQ-I",
       "name": "Exact module release",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "Complete source suite, module gate, staged/final installed verification and distribution audit on exact identities before replacing the sole distribution.",
-      "evidence": [],
+      "evidence": [
+        {
+          "path": "build/distribution-verification/current/verification.json",
+          "sha256": "45a538d2c2e7b6021d938cc902bb434d5a827c490f2c6987f6f42e5b5f9a934e"
+        },
+        {
+          "path": "build/distribution-verification/staging/verification.json",
+          "sha256": "5fdb52adde95e132e6f8cdd146eeaac198e82d02ba900f39b9baf451e75b947e"
+        },
+        {
+          "path": "build/single-folder-current-inventory.json",
+          "sha256": "da32050a935c8b6594d82c524f088748e77c5b533176de088be8fef387097178"
+        }
+      ],
       "phase": "release"
     }
   ],

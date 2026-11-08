@@ -10,4 +10,4 @@ Ledger: [RECORDING.json](RECORDING.json).
 - [x] **RC-D take recovery:** Retained/failed takes retry or cancel exactly; nothing recorded is silently lost.
 - [x] **RC-E fades, alignment and consolidation:** Clip fades, first-transient grid alignment, consolidate window and fades.
 - [x] **RC-F time stretching and warping:** Pitch-preserving stretch, tempo warp of recorded audio into new sources.
-- [ ] **RC-G exact module release:** Complete suite, module gate and packaged verification before replacing the distribution.
+- [x] **RC-G exact module release:** Complete suite, module gate and packaged verification before replacing the distribution.

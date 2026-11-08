@@ -81,6 +81,8 @@ try:
     receipt = dict(sourceCommit=provenance["sourceCommit"], shippedFiles=len(files), licenseFiles=len(licenses),
                    tracktionComponents=tracktion_components, sampleSources=sorted(sources))
 finally:
+    if "payload" in locals():
+        payload.close()  # Windows keeps an open ZIP undeletable.
     shutil.rmtree(output / "extracted", ignore_errors=True)
     receipt = locals().get("receipt", {})
     sys.path.insert(0, str(ROOT / "scripts"))

@@ -2,9 +2,9 @@
   "format": 1,
   "id": "recording",
   "name": "M4 recording and audio production - capture, takes, comping, recovery, fades, alignment and stretching",
-  "state": "in_progress",
+  "state": "released",
   "checklist": "docs/modules/RECORDING.md",
-  "nextAction": "RC-A..F verified from existing synthetic/offline suites. RC-G joins the next module release; real interface latency and listening pending.",
+  "nextAction": "Released as 0.2.0 (source e6b0040): complete 261/261 regression, module gates, staged and final installed verification (133/133; one final swing-vst3-live timing miss under load retained in build/distribution-verification/retained-failures and not reproduced), one-folder audit. Human/hardware acceptance pending.",
   "requirements": [
     {
       "id": "RC-A",
@@ -95,10 +95,23 @@
     {
       "id": "RC-G",
       "name": "Exact module release",
-      "status": "open",
+      "status": "verified",
       "releaseRequired": true,
       "scope": "Complete suite, module gate and packaged verification before replacing the distribution.",
-      "evidence": [],
+      "evidence": [
+        {
+          "path": "build/distribution-verification/current/verification.json",
+          "sha256": "45a538d2c2e7b6021d938cc902bb434d5a827c490f2c6987f6f42e5b5f9a934e"
+        },
+        {
+          "path": "build/distribution-verification/staging/verification.json",
+          "sha256": "5fdb52adde95e132e6f8cdd146eeaac198e82d02ba900f39b9baf451e75b947e"
+        },
+        {
+          "path": "build/single-folder-current-inventory.json",
+          "sha256": "da32050a935c8b6594d82c524f088748e77c5b533176de088be8fef387097178"
+        }
+      ],
       "phase": "release"
     }
   ],

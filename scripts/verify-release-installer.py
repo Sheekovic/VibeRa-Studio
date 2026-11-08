@@ -91,7 +91,9 @@ try:
         state = client.call("vibera_state", {}, allow_failure=True).get("structuredContent", {})
     finally:
         client.close()
-    check(version == "0.1.0" or version == provenance.get("version", version), "The installed app runs and reports its version: " + str(version))
+    import re
+    expected_version = re.search(r"project\(VibeRa VERSION ([0-9.]+)", (ROOT / "CMakeLists.txt").read_text(encoding="utf-8")).group(1)
+    check(version == expected_version, f"The installed app runs and reports version {expected_version}: {version}")
     check(isinstance(state, dict) and "rack" in state, "The installed app serves its project state")
     receipt["installedVersion"] = version
 

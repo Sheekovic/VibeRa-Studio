@@ -11,4 +11,4 @@ Ledger: [TUNING.json](TUNING.json).
 - [x] **TM-E maqam note snapping:** notes.maqam quarter-tone snapping that keeps tuned notes.
 - [x] **TM-F rendered pitch:** Offline renders of a tuned Channel measure the expected frequency (Rast E -50 cents, A unchanged, Undo).
 - [x] **TM-G mcp and skill guidance:** channel.tuning/scale/mpe/mtsEsp and notes.maqam are canonical commands with skill guidance (score-tools.md).
-- [ ] **TM-H exact module release:** Complete suite, module gate and packaged verification before replacing the distribution.
+- [x] **TM-H exact module release:** Complete suite, module gate and packaged verification before replacing the distribution.
