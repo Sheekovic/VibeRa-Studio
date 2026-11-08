@@ -128,6 +128,10 @@ struct Pattern
     bool autoLength = true;                // Canonical score edits recompute the last occupied musical bar.
     int numerator = 0, denominator = 0;    // Both zero inherit the document meter.
     double launchQuantum = -1;             // Performance launch step in beats: -1 one bar, 0 immediately.
+    // Performance Follow Action (version 57): after `followAfter` plays the launched pad switches
+    // to another Pattern. Actions: "" none, again, next, previous, first, last, any, other, stop.
+    juce::String followAction;
+    int followAfter = 1;
     // Pattern automation (v56): windows of project automation sources at Pattern beats (lane and
     // id unused). Plays with the Pattern in Song and Pattern mode (PatternAutomation.h).
     std::vector<AutomationPlacement> automation;

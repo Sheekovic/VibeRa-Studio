@@ -385,6 +385,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `pattern.transpose` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `pattern.group` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `pattern.launchQuantum` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `pattern.followAction` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `performance.stopAll` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `performance.saveScene` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `performance.assignPad` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |

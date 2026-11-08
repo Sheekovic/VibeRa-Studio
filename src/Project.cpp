@@ -3,6 +3,7 @@
 #include "NativeInstruments.h"
 #include "Project.h"
 #include "ScoreTools.h"
+#include "Performance.h"
 #include "Arrangements.h"
 #include "NoteTiming.h"
 #include "NoteRepeat.h"
@@ -676,6 +677,11 @@ juce::ValueTree Project::state() const
         set(t, "denominator", p.denominator);
         if (p.launchQuantum != -1)
             set(t, "launchQuantum", p.launchQuantum);
+        if (p.followAction.isNotEmpty())
+        {
+            set(t, "followAction", p.followAction);
+            set(t, "followAfter", p.followAfter);
+        }
         if (p.generation.isNotEmpty())
             set(t, "generation", p.generation);
         for (const auto &loop : p.channelLoops)
@@ -1652,6 +1658,16 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
             if (fileVersion < 49 || !validLaunchQuantum(quantum))
                 return juce::Result::fail("Invalid Pattern launch quantum");
             pat.launchQuantum = quantum;
+        }
+        if (e.hasProperty("followAction"))
+        {
+            const auto action = e["followAction"].toString();
+            const double after = exactNumber(e["followAfter"]);
+            if (fileVersion < 57 || !performance::validFollowAction(action) || !std::isfinite(after) || after < 1 ||
+                after > 64 || std::floor(after) != after)
+                return juce::Result::fail("Invalid Pattern Follow Action");
+            pat.followAction = action;
+            pat.followAfter = int(after);
         }
         pat.generation = e["generation"].toString();
         if (e.hasProperty("group") && fileVersion < 10)

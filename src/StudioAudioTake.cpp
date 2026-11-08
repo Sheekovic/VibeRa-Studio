@@ -902,6 +902,8 @@ juce::var Studio::performanceState() const
         set(row, "pad", int(i) + 1);
         set(row, "pattern", juce::int64(controller.project.patterns[i].id));
         set(row, "quantum", controller.project.patterns[i].launchQuantum);
+        set(row, "followAction", controller.project.patterns[i].followAction);
+        set(row, "followAfter", controller.project.patterns[i].followAfter);
         layout.add(row);
     }
     set(o, "pads", layout);
@@ -992,11 +994,37 @@ void Studio::showPerformance()
             menu.addSubMenu("Assign Pattern to pad " + juce::String(index + 1), assign);
             const auto id = project.padPattern(index);
             menu.addItem(2, "Launch quantum...", id != 0);
+            juce::PopupMenu follow;
+            const auto *part = project.pattern(id);
+            const juce::StringArray actions{"", "again", "next", "previous", "first", "last", "any", "other", "stop"};
+            const juce::StringArray labels{"None", "Play again", "Next Pattern", "Previous Pattern", "First Pattern",
+                                           "Last Pattern", "Any Pattern (random)", "Another Pattern (random)", "Stop"};
+            for (int i = 0; i < actions.size(); ++i)
+                follow.addItem(300 + i, labels[i], id != 0, part && part->followAction == actions[i]);
+            follow.addSeparator();
+            for (int plays : {1, 2, 4, 8})
+                follow.addItem(400 + plays, "After " + juce::String(plays) + (plays == 1 ? " play" : " plays"), id != 0,
+                               part && part->followAfter == plays);
+            menu.addSubMenu("Follow action", follow, id != 0);
             menu.showMenuAsync(juce::PopupMenu::Options(),
-                               [this, index, id](int chosen)
+                               [this, index, id, actions](int chosen)
                                {
                                    if (chosen == 2)
                                        return quantumMenu(id);
+                                   if ((chosen >= 300 && chosen < 300 + actions.size()) || (chosen > 400 && chosen <= 408))
+                                   {
+                                       const auto *current = s.controller.project.pattern(id);
+                                       if (!current)
+                                           return;
+                                       CommandArgs a;
+                                       a.pattern = id;
+                                       a.text = chosen < 400 ? actions[chosen - 300] : current->followAction;
+                                       a.value = chosen < 400 ? current->followAfter : chosen - 400;
+                                       if (chosen > 400 && a.text.isEmpty())
+                                           a.text = "next"; // Choosing a play count turns following on.
+                                       s.command("pattern.followAction", a);
+                                       return;
+                                   }
                                    if (chosen < 1000)
                                        return;
                                    CommandArgs a;

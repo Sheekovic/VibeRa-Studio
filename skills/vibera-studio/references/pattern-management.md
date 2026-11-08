@@ -27,3 +27,12 @@ as a new Audio Clip Channel placed at the Pattern's first Playlist position on t
 first lane below all clips. The returned job `path` is the WAV. The import happens
 after the job completes and is its own Undo step; poll `vibera_state` channels or
 `vibera_inspect` clips to confirm. UI: Pattern picker > Render Pattern to audio clip.
+
+## Performance Follow Actions
+
+`pattern.followAction {pattern, text, value}` sets what a launched Pattern does after `value` plays
+(1..64, default 1): `next`, `previous`, `first`, `last`, `any` (random), `other` (random, not
+itself), `again`, `stop`, or empty text for none. Launch with `vibera_project perform {pattern,
+on: true}` in Song mode; the pad continues on the same lane with the followed Pattern. Read the
+settings back from `vibera_state` performance pads (followAction, followAfter). One Undo each;
+saved with the project (schema 57). In the app: right-click a performance pad > Follow action.

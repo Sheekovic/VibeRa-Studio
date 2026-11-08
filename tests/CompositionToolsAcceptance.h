@@ -2,6 +2,7 @@
 #pragma once
 #include "Commands.h"
 #include "ScoreTools.h"
+#include "Performance.h"
 
 // Piano Roll composition tools through their canonical commands: exact notes, IDs,
 // seeded determinism, refusals and one-step Undo.
@@ -61,8 +62,62 @@ inline std::vector<int> pitches(const std::vector<Note> &notes)
     return out;
 }
 
+inline void followActionTests()
+{
+    // Performance Follow Actions: canonical command, validation, persistence and the pad sequence.
+    Controller controller;
+    auto project = Project::empty();
+    while (project.patterns.size() < 3)
+    {
+        Pattern extra = project.patterns[0];
+        extra.id = project.allocate();
+        extra.name = "Pattern " + juce::String(int(project.patterns.size()) + 1);
+        project.patterns.push_back(extra);
+    }
+    for (auto &p : project.patterns)
+        p.length = 4;
+    controller.replace(project);
+    const auto first = controller.project.patterns[0].id, second = controller.project.patterns[1].id,
+               third = controller.project.patterns[2].id;
+    CommandArgs a;
+    a.pattern = first;
+    a.text = "next";
+    a.value = 2;
+    require(controller.execute("pattern.followAction", a).wasOk(), "Follow Action next after 2 plays");
+    a.pattern = second;
+    a.value = 1;
+    require(controller.execute("pattern.followAction", a).wasOk(), "Follow Action next after 1 play");
+    a.pattern = third;
+    a.text = "stop";
+    require(controller.execute("pattern.followAction", a).wasOk(), "Follow Action stop");
+    a.text = "sideways";
+    require(controller.execute("pattern.followAction", a).failed(), "Unknown Follow Actions are refused");
+    a.text = "next";
+    a.value = 65;
+    require(controller.execute("pattern.followAction", a).failed(), "Play counts above 64 are refused");
+    Project reloaded;
+    require(Project::parse(controller.project.state(), reloaded).wasOk() &&
+                reloaded.pattern(first)->followAction == "next" && reloaded.pattern(first)->followAfter == 2,
+            "Follow Actions survive save/load");
+    std::map<Id, performance::Pad> pads;
+    performance::Pad pad;
+    pad.pattern = first;
+    pad.lane = performance::firstLane;
+    pads[first] = pad;
+    std::vector<Id> played;
+    for (double playhead = 0; playhead < 40; playhead += 1)
+        for (const auto &clip : performance::due(pads, controller.project, playhead, 1.))
+            played.push_back(clip.pattern);
+    require(played == std::vector<Id>{first, first, second, third}, "Pad plays first twice, second once, third once, then stops");
+    require(pads.begin()->second.stopping, "The stop action ends the pad");
+    controller.undoEdit();
+    controller.undoEdit();
+    controller.undoEdit();
+    require(controller.project.pattern(first)->followAction.isEmpty(), "Each Follow Action change is one Undo step");
+}
 inline void tests(const juce::File &)
 {
+    followActionTests();
     auto same = [](double a, double b) { return std::abs(a - b) < 1.e-9; };
     {
         Fixture f;

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#include "Performance.h"
 #include "synth/SynthRegistry.h"
 #include "NativeInstruments.h"
 #include "NativeInstruments.h"
@@ -672,6 +673,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"pattern.transpose", "Transpose Pattern Channels", Scope::rack, true, true, "command"},
         {"pattern.group", "Group selected Patterns", Scope::patterns, true, true, "command"},
         {"pattern.launchQuantum", "Set Pattern launch quantum", Scope::patterns, true, true, "command"},
+        {"pattern.followAction", "Set Pattern Follow Action (performance)", Scope::patterns, true, true, "command"},
         {"performance.stopAll", "Performance: stop all launched Patterns", Scope::global, false, true, "action"},
         {"performance.saveScene", "Save launched Patterns as a performance scene", Scope::global, true, true, "command"},
         {"performance.assignPad", "Assign a Pattern to a performance pad", Scope::global, true, true, "command"},
@@ -3456,6 +3458,19 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 return missing();
             p->group = name;
         }
+    }
+    else if (id == "pattern.followAction")
+    {
+        // text: "" none, again, next, previous, first, last, any, other, stop; value: plays before it (1..64).
+        auto *p = next.pattern(a.pattern);
+        if (!p)
+            return missing();
+        const auto plays = a.value == 0 ? 1. : a.value;
+        if (!performance::validFollowAction(a.text) || !std::isfinite(plays) || plays < 1 || plays > 64 ||
+            std::floor(plays) != plays)
+            return juce::Result::fail("followAction.invalid: Action none/again/next/previous/first/last/any/other/stop after 1..64 plays");
+        p->followAction = a.text;
+        p->followAfter = int(plays);
     }
     else if (id == "pattern.launchQuantum")
     {
