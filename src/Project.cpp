@@ -563,6 +563,13 @@ juce::ValueTree Project::state() const
                 labels.add(juce::String(pitch) + "=" + label);
             set(t, "keyLabels", labels.joinIntoString(";"));
         }
+        if (!c.articulations.empty())
+        {
+            juce::StringArray entries;
+            for (const auto &a : c.articulations)
+                entries.add(juce::String(a.keyswitch) + "=" + a.name);
+            set(t, "articulations", entries.joinIntoString(";"));
+        }
         if (c.group != 0)
             set(t, "group", juce::int64(c.group));
         set(t, "source", c.source);
@@ -732,6 +739,8 @@ juce::ValueTree Project::state() const
                 set(e, "colourGroup", n.colourGroup);
             if (n.group != 0)
                 set(e, "group", juce::int64(n.group));
+            if (n.articulation != 0)
+                set(e, "articulation", n.articulation);
             if (n.modY != .5)
                 set(e, "modY", n.modY);
             t.appendChild(e, nullptr);
@@ -1346,6 +1355,22 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 p.channels.back().keyLabels[pitch] = label;
             }
         }
+        if (c.hasProperty("articulations"))
+        {
+            const auto entries = juce::StringArray::fromTokens(c["articulations"].toString(), ";", "");
+            if (fileVersion < 57 || entries.size() > maximumArticulations)
+                return juce::Result::fail("Invalid Channel expression map");
+            for (const auto &entry : entries)
+            {
+                const auto pitchText = entry.upToFirstOccurrenceOf("=", false, false).trim();
+                const int pitch = pitchText.getIntValue();
+                const auto name = entry.fromFirstOccurrenceOf("=", false, false);
+                if (!entry.containsChar('=') || !pitchText.containsOnly("0123456789") || pitch < 0 || pitch > 127 ||
+                    name.isEmpty() || name.length() > 32)
+                    return juce::Result::fail("Invalid Channel expression map");
+                p.channels.back().articulations.push_back({name, pitch});
+            }
+        }
         auto sampler = c.getChildWithName("SAMPLER");
         int samplerChildren = 0;
         for (const auto &child : c)
@@ -1802,6 +1827,14 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                     std::floor(noteGroup) != noteGroup)
                     return juce::Result::fail("noteGroup.invalidValue: Exact positive note group ID required");
                 pat.notes.back().group = Id(juce::int64(noteGroup));
+            }
+            if (n.hasProperty("articulation"))
+            {
+                const double articulation = exactNumber(n["articulation"]);
+                if (fileVersion < 57 || !std::isfinite(articulation) || articulation < 0 ||
+                    articulation > maximumArticulations || std::floor(articulation) != articulation)
+                    return juce::Result::fail("Invalid note articulation");
+                pat.notes.back().articulation = int(articulation);
             }
         }
         if (fileVersion >= 30)
@@ -2526,6 +2559,7 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
         throw std::invalid_argument(valid.getErrorMessage().toStdString());
     std::vector<ScheduledNote> result;
     std::set<Id> muted;
+    std::set<std::tuple<Id, double, int>> keyswitches; // (Channel, beat, pitch) already sent.
     for (const auto &channel : p.channels)
         if (channel.muted)
             muted.insert(channel.id);
@@ -2547,11 +2581,21 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
                 const auto b = origin - offset;
                 if (!n.muted && b >= 0 && b < length && b < pattern.length - offset &&
                     (n.velocity > 0 || n.slide) && !muted.contains(n.channel))
+                {
+                    if (n.articulation > 0 && channel && n.articulation <= int(channel->articulations.size()))
+                    {
+                        const int keyswitch = channel->articulations[size_t(n.articulation - 1)].keyswitch;
+                        const double at = start + b;
+                        if (keyswitches.insert({n.channel, at, keyswitch}).second) // Short keyswitch note first.
+                            result.push_back({n.channel, at, std::min(1. / 64, duration), keyswitch, .8f, 0,
+                                              loopOccurrencePlacement(placement, occurrence.iteration)});
+                    }
                     result.push_back(
                         {n.channel, start + b, std::min({duration, length - b, pattern.length - offset - b}),
                          n.pitch, n.velocity, n.id, loopOccurrencePlacement(placement, occurrence.iteration),
                          n.step, n.pan, n.fineCents, repeatBits, n.releaseVelocity, n.modX, n.modY, n.slide,
                          n.portamento, n.colourGroup});
+                }
                 continue;
             }
             if (n.muted || (!n.slide && n.velocity <= 0) || muted.contains(n.channel) ||

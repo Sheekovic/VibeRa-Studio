@@ -31,7 +31,41 @@ struct Note
     bool slide = false, portamento = false; // Independent local-sampler source note modes.
     int colourGroup = 0;                    // Per-note voice group0..15 (UI1..16), not a DAW Channel/group.
     Id group = 0; // Note group (Shift+G): clicking one note selects the whole group; 0 = none.
+    int articulation = 0; // Expression map entry (1-based) of its Channel; 0 = none (version 57).
 };
+// Expression map entry (version 57): an articulation and the keyswitch note that selects it in
+// the instrument. Notes with this articulation send the keyswitch just before they start.
+struct Articulation
+{
+    juce::String name;
+    int keyswitch = 0; // MIDI pitch 0..127.
+};
+inline constexpr int maximumArticulations = 64;
+// A MIDI pitch from "24" or a note name such as "C1", "F#2", "Bb0" (C5 = 60 as in the Piano roll, C0 = 0).
+inline std::optional<int> parseNotePitch(juce::String text)
+{
+    text = text.trim();
+    if (text.isNotEmpty() && text.containsOnly("0123456789"))
+    {
+        const int pitch = text.getIntValue();
+        return pitch <= 127 && text.length() <= 3 ? std::optional<int>(pitch) : std::nullopt;
+    }
+    static const int steps[] = {9, 11, 0, 2, 4, 5, 7}; // A..G
+    const auto letter = juce::CharacterFunctions::toUpperCase(text[0]);
+    if (letter < 'A' || letter > 'G')
+        return {};
+    int pitch = steps[letter - 'A'], at = 1;
+    if (text[at] == '#')
+        ++pitch, ++at;
+    else if (text[at] == 'b')
+        --pitch, ++at;
+    const auto octave = text.substring(at);
+    if (octave.isEmpty() || !octave.trimCharactersAtStart("-").containsOnly("0123456789") ||
+        octave.trimCharactersAtStart("-").isEmpty())
+        return {};
+    pitch += octave.getIntValue() * 12;
+    return pitch >= 0 && pitch <= 127 ? std::optional<int>(pitch) : std::nullopt;
+}
 // Piano roll event editor target (FL "Target control"): the note property the lane under the
 // notes shows and paints. Lane values are normalised 0..1; Pan and Fine pitch are centred.
 inline const juce::StringArray &noteLaneTargets()
@@ -84,6 +118,7 @@ struct Channel
     float pitchBend = 0;        // Plugin instrument Channel PITCH: MIDI pitch bend -1..1 sent with its notes.
     int pitchRange = 2;         // RANGE shown with PITCH, semitones at full bend (1..48).
     std::map<int, juce::String> keyLabels; // Piano roll key names (drum maps), pitch -> at most 32 chars.
+    std::vector<Articulation> articulations; // Expression map (version 57); notes refer to it 1-based.
 };
 struct ChannelGroup
 {

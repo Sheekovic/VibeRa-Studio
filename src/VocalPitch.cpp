@@ -64,7 +64,7 @@ juce::String noteName(double midi)
 {
     static const char *const names[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
     const int nearest = int(std::lround(midi));
-    return juce::String(names[((nearest % 12) + 12) % 12]) + juce::String(nearest / 12 - 1);
+    return juce::String(names[((nearest % 12) + 12) % 12]) + juce::String(nearest / 12); // C5 = 60, as in the Piano roll.
 }
 
 Analysis analyzeBuffer(const float *mono, int frames, double rate)

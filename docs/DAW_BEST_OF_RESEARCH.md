@@ -32,7 +32,7 @@ Sources are reviews and forums, not a ranked survey; treat them as recurring the
 4. Session/clip-launcher grid with Follow Actions (Ableton-style jam, then record into the Playlist).
 5. Universal modulators (LFO/envelope/random) assignable to any plugin or mixer parameter (Bitwig-style). **Done:** tempo-synced LFO / random modulators on Mixer, Channel and plugin controls (`automation.modulator`, `scripts/verify-modulators-mcp.py`); envelope followers and modulating modulators remain open.
 6. Vocal pitch editor (graphical note blobs on audio, Cubase VariAudio / Logic Flex Pitch style). **Done:** Audio Clip right-click > Edit vocal pitch (notes): YIN pitch curve, note segments, drag/snap per note, rendered with Signalsmith (`vibera_project vocalPitch/vocalPitchApply`, `scripts/verify-vocal-pitch-mcp.py`); per-note timing and formant editing remain open.
-7. Expression maps for orchestral/articulation libraries.
+7. Expression maps for orchestral/articulation libraries. **Done:** per-Channel articulations with keyswitches, per-note articulation, keyswitch sent before the note (`channel.articulations`, `notes.articulation`, `scripts/verify-expression-maps-mcp.py`); CC/program-change articulations remain open.
 8. FX containers / parallel effect chains.
 
 ## Sources

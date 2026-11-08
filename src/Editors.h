@@ -3747,6 +3747,10 @@ class Studio::Editor final : public juce::Component,
                                 auto name = juce::MidiMessage::getMidiNoteName(n.pitch, true, true, 5);
                                 if (std::abs(n.fineCents) > .5)
                                     name << (n.fineCents > 0 ? " +" : " ") << juce::roundToInt(n.fineCents);
+                                if (n.articulation > 0)
+                                    if (const auto *owner = s.controller.project.channel(n.channel);
+                                        owner && n.articulation <= int(owner->articulations.size()))
+                                        name << "  " << owner->articulations[size_t(n.articulation - 1)].name;
                                 g.setColour(themeColour(0xff0e1418).withAlpha(.85f));
                                 g.setFont(juce::Font(vibera::uiFont, juce::jlimit(8.f, 11.5f, r.getHeight() - 2.f),
                                                      juce::Font::bold));

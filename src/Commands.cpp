@@ -843,6 +843,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"chord.set", "Change a Chord Track chord", Scope::playlist, true, true, "command"},
         {"chord.delete", "Delete Chord Track chords", Scope::playlist, true, true, "command"},
         {"chord.fill", "Write a chord progression to the Chord Track (one chord per bar)", Scope::playlist, true, true, "command"},
+        {"channel.articulations", "Set the Channel expression map (articulations and keyswitches)", Scope::rack, true, true, "command"},
+        {"notes.articulation", "Set the articulation of notes (expression map)", Scope::piano, true, true, "command"},
         {"rack.group.create", "Add Channel filter group", Scope::rack, true, true, "command"},
         {"rack.group.rename", "Rename Channel filter group", Scope::rack, true, true, "command"},
         {"rack.group.delete", "Delete Channel filter group", Scope::rack, true, true, "command"},
@@ -4803,6 +4805,27 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             if (pat->controllers.size() == before)
                 return juce::Result::fail("This Channel has no recorded controllers in the Pattern");
         }
+        if (id == "notes.articulation")
+        {
+            // value: 1-based articulation of each note's Channel expression map; 0 removes it.
+            const int articulation = int(a.value);
+            if (!std::isfinite(a.value) || a.value != articulation || articulation < 0 ||
+                articulation > maximumArticulations)
+                return juce::Result::fail("expressionMap.invalidArticulation: 0 (none) or an entry number");
+            int changed = 0;
+            for (auto &n : pat->notes)
+                if (a.ids.empty() ? n.channel == a.channel : chosen(n.id))
+                {
+                    const auto *owner = next.channel(n.channel);
+                    if (articulation > 0 && (!owner || articulation > int(owner->articulations.size())))
+                        return juce::Result::fail("expressionMap.unmapped: The note's Channel has no articulation " +
+                                                  juce::String(articulation));
+                    changed += n.articulation != articulation;
+                    n.articulation = articulation;
+                }
+            if (changed == 0)
+                return juce::Result::fail("expressionMap.noChange: No note changed");
+        }
         if (id == "notes.followChords")
         {
             // Song position of the Pattern: its first Playlist placement (beat 0 without one).
@@ -6544,6 +6567,31 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             next.tempoChanges.erase(found);
         std::sort(next.tempoChanges.begin(), next.tempoChanges.end(),
                   [](const auto &x, const auto &y) { return x.beat < y.beat; });
+    }
+    if (id == "channel.articulations")
+    {
+        // text: "Name=pitch" entries separated by ';' or new lines; pitch is a MIDI number or a note
+        // name (C5 = 60 as in the Piano roll, C0 = 0). Empty clears the map; notes keep their numbers (ignored if unmapped).
+        auto *target = next.channel(a.channel);
+        if (!target)
+            return juce::Result::fail("expressionMap.missingChannel: Existing Channel required");
+        std::vector<Articulation> map;
+        for (auto entry : juce::StringArray::fromTokens(a.text.replace("\n", ";"), ";", ""))
+        {
+            entry = entry.trim();
+            if (entry.isEmpty())
+                continue;
+            const auto name = entry.upToLastOccurrenceOf("=", false, false).trim();
+            const auto key = entry.fromLastOccurrenceOf("=", false, false).trim();
+            const auto pitch = parseNotePitch(key);
+            if (!entry.containsChar('=') || name.isEmpty() || name.length() > 32 || name.containsChar(';') || !pitch)
+                return juce::Result::fail("expressionMap.invalidEntry: Use Name=pitch, e.g. Legato=24 or Staccato=C#2 ('" +
+                                          entry + "')");
+            map.push_back({name, *pitch});
+        }
+        if (map.size() > size_t(maximumArticulations))
+            return juce::Result::fail("expressionMap.tooMany: At most 64 articulations");
+        target->articulations = std::move(map);
     }
     if (id.startsWith("chord."))
     {

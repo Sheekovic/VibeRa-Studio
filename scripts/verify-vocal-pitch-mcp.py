@@ -37,7 +37,7 @@ def check(ok, label):
 
 # Four sung notes (MIDI pitch with deliberate cents error), 0.5 s each, 0.1 s breaths between.
 RATE = 48000
-sung = [57.30, 60 - .20, 64.0, 55.45]  # A3 +30, C4 -20, E4, G3 +45 cents
+sung = [57.30, 60 - .20, 64.0, 55.45]  # A4 +30, C5 -20, E5, G4 +45 cents (C5 = 60)
 source = output / "original-vocal-fixture.wav"
 samples = []
 phase = 0.0
@@ -86,7 +86,7 @@ try:
     check(all(abs(n["pitch"] - want) < .08 for n, want in zip(notes, sung)), f"Note pitches within 8 cents ({found})")
     check(all(abs(n["start"] - k * .6) < .06 and abs(n["end"] - (k * .6 + .5)) < .06 for k, n in enumerate(notes)),
           "Note boundaries match the sung notes")
-    check([n["name"] for n in notes] == ["A3", "C4", "E4", "G3"], "Note names")
+    check([n["name"] for n in notes] == ["A4", "C5", "E5", "G4"], "Note names")
     check(call("vibera_project", {"action": "vocalPitchApply", "clip": clip, "shifts": [{"note": 9, "semitones": 1}]})
           .get("completionState") != "pending", "An unknown note index is refused")
 
@@ -103,7 +103,7 @@ try:
     check(len(after) == 4, f"Four notes after editing ({pitches})")
     targets = [57, 60, 66, 55]  # Snapped, with E4 moved up two semitones to F#4.
     check(all(abs(n["pitch"] - want) < .08 for n, want in zip(after, targets)),
-          f"Snapped notes sit within 8 cents of a semitone and the moved note reads F#4 ({pitches})")
+          f"Snapped notes sit within 8 cents of a semitone and the moved note reads F#5 ({pitches})")
     call("vibera_command", {"command": "edit.undo", "args": {}})
     check(clip_source(clip) == original, "One Undo restores the original source")
     (output / "pitches.json").write_text(json.dumps(dict(sung=sung, found=found, edited=pitches), indent=2), encoding="utf-8")

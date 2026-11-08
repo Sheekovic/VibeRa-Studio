@@ -344,6 +344,20 @@ void Studio::midiFileMenu()
                                                      : juce::String()),
                         guide);
     }
+    {
+        // Expression map: articulations of the selected Channel, applied to the selected notes.
+        juce::PopupMenu articulation;
+        const auto *owner = controller.project.channel(selectedChannel);
+        articulation.addItem(43000, "Edit expression map (articulations and keyswitches)...", owner != nullptr);
+        articulation.addSeparator();
+        articulation.addItem(43001, "None", owner && !selectedNotes.empty());
+        if (owner)
+            for (size_t k = 0; k < owner->articulations.size(); ++k)
+                articulation.addItem(43002 + int(k), owner->articulations[k].name + "  (keyswitch " +
+                                                         juce::MidiMessage::getMidiNoteName(owner->articulations[k].keyswitch, true, true, 5) + ")",
+                                     !selectedNotes.empty());
+        menu.addSubMenu("Articulation (expression map)", articulation);
+    }
     auto safe = juce::Component::SafePointer<Studio>(this);
     CommandArgs noteTargets;
     noteTargets.pattern = selectedPattern;
@@ -356,6 +370,42 @@ void Studio::midiFileMenu()
         {
             if (!safe)
                 return;
+            if (result == 43000)
+            {
+                const auto *owner = safe->controller.project.channel(noteTargets.channel);
+                if (!owner)
+                    return;
+                juce::StringArray current;
+                for (const auto &a : owner->articulations)
+                    current.add(a.name + "=" + juce::MidiMessage::getMidiNoteName(a.keyswitch, true, true, 5));
+                auto *box = new juce::AlertWindow(
+                    "Expression map - " + owner->name,
+                    "One articulation per line or separated by ';' as Name=keyswitch, e.g. Legato=C1. Notes with an "
+                    "articulation send its keyswitch note just before they play.",
+                    juce::MessageBoxIconType::NoIcon);
+                box->addTextEditor("map", current.joinIntoString("; "), "Articulations");
+                box->addButton("Set", 1, juce::KeyPress(juce::KeyPress::returnKey));
+                box->addButton("Cancel", 0, juce::KeyPress(juce::KeyPress::escapeKey));
+                box->enterModalState(true, juce::ModalCallbackFunction::create(
+                                               [safe, box, channel = noteTargets.channel](int button)
+                                               {
+                                                   if (!safe || button != 1)
+                                                       return;
+                                                   CommandArgs a;
+                                                   a.channel = channel;
+                                                   a.text = box->getTextEditorContents("map");
+                                                   safe->command("channel.articulations", a);
+                                               }),
+                                     true);
+                return;
+            }
+            if (result > 43000 && result < 43000 + 2 + maximumArticulations)
+            {
+                auto a = noteTargets;
+                a.value = result - 43001;
+                safe->command("notes.articulation", a);
+                return;
+            }
             if (result >= 19999 && result < 32000)
             {
                 // View only: tint the Piano Roll rows of the chosen scale or maqam.
