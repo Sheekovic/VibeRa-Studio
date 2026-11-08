@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
 #include "Loudness.h"
+#include "VocalPitch.h"
 #include "WindowForeground.h"
 #include "Commands.h"
 #include "EffectChain.h"
@@ -313,6 +314,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     static constexpr int modulatorMenuFirst = 7000, modulatorMenuLast = 7100;
     static juce::PopupMenu modulatorMenu(const AutomationModulator *);
     void applyModulatorChoice(int choice, Id modulator, const juce::String &addCommand, CommandArgs a);
+    // Vocal pitch editor (StudioVocalPitch.cpp): analysis, per-note render job and the editor window.
+    juce::Result analyzeVocalClip(Id clip, vocal::Analysis &);
+    juce::Result applyVocalPitch(Id clip, std::vector<vocal::Shift>, const juce::String &operation = {});
+    juce::Result openVocalPitchEditor(Id clip);
     void mixerAutomationMenu(int, MixerAutomationControl, std::optional<int> sendTarget = {});
     juce::Result admitMixerAutomation(const juce::String &owner = {});
     juce::Result performMixerAutomationIntent(const MixerAutomationUiIntent &, MixerAutomationUiAction, Id source = 0);

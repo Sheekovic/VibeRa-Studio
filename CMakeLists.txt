@@ -12,7 +12,7 @@ endif()
 add_subdirectory("${JUCE_ROOT}" juce)
 add_subdirectory("${TE_ROOT}/modules" tracktion)
 include(cmake/TracktionImplementation.cmake)
-add_library(VibeRaCore STATIC src/NoteSlice.cpp src/NoteStretch.cpp src/MixerRouting.cpp src/Project.cpp src/Commands.cpp src/AudioEngine.cpp src/AudioInputCapture.cpp src/AudioStretch.cpp src/FlpImport.cpp src/MtsEsp.cpp src/third_party/mts-esp/libMTSMaster.cpp src/Customization.cpp src/Groove.cpp src/SampleCache.cpp src/LiveTimeline.cpp src/Automation.cpp src/AutomationState.cpp src/AutomationCommands.cpp src/PluginAutomationBlock.cpp src/PluginBinding.cpp src/PluginStateEncoding.cpp src/PluginHost.cpp src/PluginCatalog.cpp src/WorkerProcess.cpp src/MidiInput.cpp src/MidiController.cpp src/CoProducer.cpp src/CoProducerWorker.cpp)
+add_library(VibeRaCore STATIC src/NoteSlice.cpp src/NoteStretch.cpp src/MixerRouting.cpp src/Project.cpp src/Commands.cpp src/AudioEngine.cpp src/AudioInputCapture.cpp src/AudioStretch.cpp src/VocalPitch.cpp src/FlpImport.cpp src/MtsEsp.cpp src/third_party/mts-esp/libMTSMaster.cpp src/Customization.cpp src/Groove.cpp src/SampleCache.cpp src/LiveTimeline.cpp src/Automation.cpp src/AutomationState.cpp src/AutomationCommands.cpp src/PluginAutomationBlock.cpp src/PluginBinding.cpp src/PluginStateEncoding.cpp src/PluginHost.cpp src/PluginCatalog.cpp src/WorkerProcess.cpp src/MidiInput.cpp src/MidiController.cpp src/CoProducer.cpp src/CoProducerWorker.cpp)
 # Signalsmith Stretch (MIT) is vendored with Tracktion; used offline for Audio Clip stretching.
 target_include_directories(VibeRaCore PRIVATE "${TE_ROOT}/modules/tracktion_engine/3rd_party/signalsmith-stretch")
 target_sources(VibeRaCore PRIVATE src/synth/SynthPresets.cpp)
@@ -54,7 +54,7 @@ if(MSVC)
 endif()
 juce_add_gui_app(VibeRa PRODUCT_NAME "VibeRa Studio" COMPANY_NAME "VibeRa" VERSION "${PROJECT_VERSION}" ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-512.png" ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/assets/vibera-symbol-64.png")
 juce_add_binary_data(VibeRaBranding SOURCES assets/vibera-symbol.svg)
-target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioDropCheck.cpp src/StudioAutosave.cpp src/StudioDiagnostics.cpp src/StudioLoudness.cpp src/StudioUpdater.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp src/MidiClipboard.cpp)
+target_sources(VibeRa PRIVATE src/Main.cpp src/Studio.cpp src/StudioMcp.cpp src/StudioMidi.cpp src/StudioSampler.cpp src/StudioController.cpp src/StudioAutomation.cpp src/StudioPluginParameters.cpp src/StudioBrowser.cpp src/StudioAudioTake.cpp src/StudioDrumPads.cpp src/StudioChords.cpp src/StudioDropCheck.cpp src/StudioAutosave.cpp src/StudioDiagnostics.cpp src/StudioLoudness.cpp src/StudioVocalPitch.cpp src/StudioUpdater.cpp src/StudioAudioTakeAcceptance.cpp src/VideoPlayer.cpp src/MidiClipboard.cpp)
 target_include_directories(VibeRa PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_sources(VibeRa PRIVATE src/StudioPicker.cpp)
 
@@ -933,6 +933,9 @@ set_tests_properties(chord_track_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME modulators_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-modulators-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/modulators_mcp")
 set_tests_properties(modulators_mcp PROPERTIES TIMEOUT 400)
+add_test(NAME vocal_pitch_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-vocal-pitch-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/vocal_pitch_mcp")
+set_tests_properties(vocal_pitch_mcp PROPERTIES TIMEOUT 300)
 add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
 set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)
