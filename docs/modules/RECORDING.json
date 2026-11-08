@@ -1,0 +1,121 @@
+{
+  "format": 1,
+  "id": "recording",
+  "name": "M4 recording and audio production - capture, takes, comping, recovery, fades, alignment and stretching",
+  "state": "in_progress",
+  "checklist": "docs/modules/RECORDING.md",
+  "nextAction": "RC-A..F verified from existing synthetic/offline suites. RC-G joins the next module release; real interface latency and listening pending.",
+  "requirements": [
+    {
+      "id": "RC-A",
+      "name": "Audio and MIDI capture with monitoring",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Arm, count-in, record audio input and MIDI, input monitoring, held-take ownership.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/recording/capture-comp/attempt-92b21da05fd447dba90e154f911765ef/verification.json",
+          "sha256": "e9696d32acccd5e4a3dd0122934af84718914e50e443c41f7cc60fb30eabf064"
+        }
+      ]
+    },
+    {
+      "id": "RC-B",
+      "name": "Punch and loop takes",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Punch range, loop recording into stacked take lanes.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/recording/recording-mcp/attempt-5096724db72f4128885798d94e5b4613/verification.json",
+          "sha256": "1dd3c4dca1e59ba6327559b1a312137c758e643c2a6fbbb415e17fa37ea19088"
+        }
+      ]
+    },
+    {
+      "id": "RC-C",
+      "name": "Take placement and comping",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Place takes, use a take here, flatten unused takes, one Undo per edit.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/recording/capture-comp/attempt-92b21da05fd447dba90e154f911765ef/verification.json",
+          "sha256": "e9696d32acccd5e4a3dd0122934af84718914e50e443c41f7cc60fb30eabf064"
+        }
+      ]
+    },
+    {
+      "id": "RC-D",
+      "name": "Take recovery",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Retained/failed takes retry or cancel exactly; nothing recorded is silently lost.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/recording/take-recovery/attempt-97dec871a3fd43f0ae1ca262e50fe52e/verification.json",
+          "sha256": "fcf9c44b9774cc90bbdc7c04a708aa9fe15cfcf3767732d1ebc52ce3e65dadfc"
+        }
+      ]
+    },
+    {
+      "id": "RC-E",
+      "name": "Fades, alignment and consolidation",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Clip fades, first-transient grid alignment, consolidate window and fades.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/recording/stretch-fades/attempt-7351ecd36bd24f4790e5df5d0f8b44d7/verification.json",
+          "sha256": "64f41ff04bf58da9cefe409d0bcbf19850a8668c058ae4112e758ee170479ad1"
+        },
+        {
+          "path": "build/module-qualification/recording/take-gui/attempt-e167961758a44716b6d63987130aed33/verification.json",
+          "sha256": "8da66f2721106709a7137271466755fe5cf34865063a3329e7da1f851c2a6a09"
+        }
+      ]
+    },
+    {
+      "id": "RC-F",
+      "name": "Time stretching and warping",
+      "status": "verified",
+      "releaseRequired": true,
+      "scope": "Pitch-preserving stretch, tempo warp of recorded audio into new sources.",
+      "evidence": [
+        {
+          "path": "build/module-qualification/recording/stretch-fades/attempt-7351ecd36bd24f4790e5df5d0f8b44d7/verification.json",
+          "sha256": "64f41ff04bf58da9cefe409d0bcbf19850a8668c058ae4112e758ee170479ad1"
+        },
+        {
+          "path": "build/module-qualification/recording/recording-mcp/attempt-5096724db72f4128885798d94e5b4613/verification.json",
+          "sha256": "1dd3c4dca1e59ba6327559b1a312137c758e643c2a6fbbb415e17fa37ea19088"
+        }
+      ]
+    },
+    {
+      "id": "RC-G",
+      "name": "Exact module release",
+      "status": "open",
+      "releaseRequired": true,
+      "scope": "Complete suite, module gate and packaged verification before replacing the distribution.",
+      "evidence": [],
+      "phase": "release"
+    }
+  ],
+  "externalAcceptance": [
+    {
+      "name": "Recording through the owner's audio interface: latency, monitoring and listening",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "baselineContext": [
+    {
+      "path": "docs/MILESTONES.md",
+      "scope": "M4 / v0.3"
+    }
+  ],
+  "evidencePolicy": "Verified rows need passed receipts binding sources and exact binaries; hardware and listening are separate.",
+  "updated": "2026-11-08",
+  "progressEvidence": []
+}
