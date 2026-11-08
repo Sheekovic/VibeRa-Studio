@@ -5908,16 +5908,44 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         if (id == "mixer.insert.create")
         {
             // args.value: how many inserts to add (default 1, at most 32), one Undo step.
+            // args.target > 0: parallel chains (FX container) of that insert: each new insert is fed
+            // by a unity send from it and outputs where it does, so its effects run in parallel
+            // with the source's own (dry) path.
             const int count = a.value == 0 ? 1 : int(a.value);
             if (!std::isfinite(a.value) || a.value != std::floor(a.value) || count < 1 || count > 32)
                 return juce::Result::fail("mixer.insert.invalidCount: Add 1..32 inserts at once");
+            const auto *parallelSource = a.target > 0 && a.target <= std::numeric_limits<int>::max()
+                                             ? mixerInsert(next, int(a.target))
+                                             : nullptr;
+            if (a.target != 0 && !parallelSource)
+                return juce::Result::fail("mixer.parallel.missingSource: Existing non-Master source insert required");
+            const auto sourceName = parallelSource ? parallelSource->name : juce::String{};
+            const auto dryRoutes = parallelSource ? parallelSource->routes : std::vector<MixerRoute>{};
             for (int i = 0; i < count; ++i)
             {
                 Id reserved = std::max(next.nextId, mixerInsertNextId);
                 for (const auto &row : next.mixer)
                     reserved = std::max(reserved, Id(row.index) + 1);
-                if (auto result = createMixerInsert(next, reserved, a.text); result.failed())
+                const auto name = a.text.isNotEmpty() || !parallelSource
+                                      ? a.text
+                                      : (sourceName + " Parallel " + juce::String(i + 1)).substring(0, 64).trim();
+                if (auto result = createMixerInsert(next, reserved, name); result.failed())
                     return result;
+                if (parallelSource)
+                {
+                    const auto row = [&](int index)
+                    {
+                        const auto found = std::find_if(next.mixer.begin(), next.mixer.end(),
+                                                        [&](const auto &m) { return m.index == index; });
+                        return found == next.mixer.end() ? nullptr : &*found;
+                    };
+                    auto *source = row(int(a.target));
+                    auto *branch = row(int(reserved));
+                    if (!source || !branch)
+                        return missing();
+                    branch->routes = dryRoutes; // Same destinations and levels as the dry path.
+                    source->routes.push_back({int(reserved), 1.f});
+                }
             }
         }
         else if (auto result =

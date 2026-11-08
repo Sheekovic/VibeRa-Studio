@@ -8373,6 +8373,14 @@ void Studio::effectMenu(int index)
     menu.addSubMenu("Dock to", dockMenu);
     menu.addItem(10008, "Create insert", !mixerChainBusy());
     menu.addItem(10012, "Add multiple inserts...", !mixerChainBusy());
+    {
+        // FX container: parallel chains fed from this insert, mixed back where it outputs.
+        juce::PopupMenu parallel;
+        for (int count = 1; count <= 4; ++count)
+            parallel.addItem(10030 + count, juce::String(count) + (count == 1 ? " parallel chain" : " parallel chains"),
+                             index != 0 && !mixerChainBusy());
+        menu.addSubMenu("Add parallel chains (FX container)", parallel, index != 0);
+    }
     menu.addItem(10015, "Add insert from chain preset...", !mixerChainBusy());
     menu.addItem(10013, "Store effect chain in spare state", !mixerChainBusy() && !insert->effects.empty());
     menu.addItem(10014, "Flip effect chain with spare state", !mixerChainBusy() && effectSpares.contains(index));
@@ -8516,6 +8524,14 @@ void Studio::effectMenu(int index)
                            if (selected == 10008)
                            {
                                safe->command("mixer.insert.create", {});
+                               return;
+                           }
+                           if (selected > 10030 && selected <= 10034)
+                           {
+                               CommandArgs a;
+                               a.target = index;
+                               a.value = selected - 10030;
+                               safe->command("mixer.insert.create", a);
                                return;
                            }
                            if (selected == 10010)

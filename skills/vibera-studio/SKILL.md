@@ -37,7 +37,7 @@ physical ranges, saved recipes, fixed project MIDI CC links/Learn and verificati
 read [Sampler envelopes](references/sampler-envelopes.md). New source operations
 require current discovery; they are not automatically present in the qualified package.
 For typed gain/pan/separation and exact-route send Automation Clips, initialization/manual fallback,
-units and paginated readback, see [Mixer automation](references/mixer-automation.md). For tempo-synced LFO / random modulators on any Mixer, Channel or plugin control, see [Modulators](references/modulators.md). To tune or move sung notes inside an Audio Clip, see [Vocal pitch editor](references/vocal-pitch.md). For articulation keyswitches, see [Expression maps](references/expression-maps.md).
+units and paginated readback, see [Mixer automation](references/mixer-automation.md). For tempo-synced LFO / random modulators on any Mixer, Channel or plugin control, see [Modulators](references/modulators.md). To tune or move sung notes inside an Audio Clip, see [Vocal pitch editor](references/vocal-pitch.md). For articulation keyswitches, see [Expression maps](references/expression-maps.md). For parallel effect chains, see [Parallel chains](references/parallel-chains.md).
 For bounded Song MIDI touch recording, follow [Mixer automation recording](references/mixer-automation-recording.md). Native scalar Undo/Redo and recording-time ACK-only writes use [Native parameter history](references/native-parameter-history.md). Discover actual support; source guidance and synthetic checks alone do not establish release or hardware qualification.
 For stable-ID insert display order, shortcuts/wheel/context, history/cancel and
 readback, use [Mixer insert order](references/mixer-insert-order.md).

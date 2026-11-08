@@ -230,7 +230,8 @@ inline juce::var commandArgumentSchema(const juce::String &id)
     if (id == "mixer.insert.create")
         return juce::JSON::parse(R"JSON({"type":"object","additionalProperties":false,"properties":{
           "text":{"type":"string","maxLength":64,"default":"","description":"Optional trimmed insert name; empty generates Insert N. Appends a neutral insert routed to Master. Existing18 defaults remain; maximum129 total. IDs are session-reserved and never display ordinals."},
-          "value":{"type":"integer","minimum":0,"maximum":32,"default":1,"description":"How many inserts to add in one Undo step (0 or 1 adds one)."}}})JSON");
+          "value":{"type":"integer","minimum":0,"maximum":32,"default":1,"description":"How many inserts to add in one Undo step (0 or 1 adds one)."},
+          "target":{"type":"integer","minimum":0,"maximum":2147483647,"default":0,"description":"Parallel chains (FX container): an existing non-Master insert. Each new insert (named '<source> Parallel N' unless text is given) receives a unity send from it and outputs to the same destinations at the same levels, so effects added to it run in parallel with the source's dry path. 0 adds ordinary inserts routed to Master."}}})JSON");
     if (id == "mixer.insert.delete")
         return juce::JSON::parse(
             R"JSON({"type":"object","additionalProperties":false,"required":["mixer"],"properties":{
