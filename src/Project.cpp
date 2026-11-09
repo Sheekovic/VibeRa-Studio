@@ -571,7 +571,10 @@ juce::ValueTree Project::state() const
         {
             juce::StringArray entries;
             for (const auto &a : c.articulations)
-                entries.add(juce::String(a.keyswitch) + "=" + a.name);
+                entries.add((a.kind == 1   ? "cc" + juce::String(a.keyswitch) + ":" + juce::String(a.value)
+                             : a.kind == 2 ? "pc" + juce::String(a.keyswitch)
+                                           : juce::String(a.keyswitch)) +
+                            "=" + a.name);
             set(t, "articulations", entries.joinIntoString(";"));
         }
         if (c.group != 0)
@@ -1381,13 +1384,15 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 return juce::Result::fail("Invalid Channel expression map");
             for (const auto &entry : entries)
             {
-                const auto pitchText = entry.upToFirstOccurrenceOf("=", false, false).trim();
-                const int pitch = pitchText.getIntValue();
+                const auto trigger = entry.upToFirstOccurrenceOf("=", false, false).trim();
                 const auto name = entry.fromFirstOccurrenceOf("=", false, false);
-                if (!entry.containsChar('=') || !pitchText.containsOnly("0123456789") || pitch < 0 || pitch > 127 ||
-                    name.isEmpty() || name.length() > 32)
+                auto parsed = parseArticulationTrigger(trigger);
+                if (!entry.containsChar('=') || !parsed || name.isEmpty() || name.length() > 32 ||
+                    (!trigger.startsWithIgnoreCase("cc") && !trigger.startsWithIgnoreCase("pc") &&
+                     !trigger.containsOnly("0123456789")))
                     return juce::Result::fail("Invalid Channel expression map");
-                p.channels.back().articulations.push_back({name, pitch});
+                parsed->name = name;
+                p.channels.back().articulations.push_back(*parsed);
             }
         }
         auto sampler = c.getChildWithName("SAMPLER");
@@ -2601,7 +2606,8 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
                 if (!n.muted && b >= 0 && b < length && b < pattern.length - offset &&
                     (n.velocity > 0 || n.slide) && !muted.contains(n.channel))
                 {
-                    if (n.articulation > 0 && channel && n.articulation <= int(channel->articulations.size()))
+                    if (n.articulation > 0 && channel && n.articulation <= int(channel->articulations.size()) &&
+                        channel->articulations[size_t(n.articulation - 1)].kind == 0)
                     {
                         const int keyswitch = channel->articulations[size_t(n.articulation - 1)].keyswitch;
                         const double at = start + b;
@@ -2613,7 +2619,7 @@ std::vector<ScheduledNote> sequence(const Project &p, bool patternMode, Id selec
                         {n.channel, start + b, std::min({duration, length - b, pattern.length - offset - b}),
                          n.pitch, n.velocity, n.id, loopOccurrencePlacement(placement, occurrence.iteration),
                          n.step, n.pan, n.fineCents, repeatBits, n.releaseVelocity, n.modX, n.modY, n.slide,
-                         n.portamento, n.colourGroup});
+                         n.portamento, n.colourGroup, n.articulation});
                 }
                 continue;
             }

@@ -6715,11 +6715,12 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 continue;
             const auto name = entry.upToLastOccurrenceOf("=", false, false).trim();
             const auto key = entry.fromLastOccurrenceOf("=", false, false).trim();
-            const auto pitch = parseNotePitch(key);
-            if (!entry.containsChar('=') || name.isEmpty() || name.length() > 32 || name.containsChar(';') || !pitch)
-                return juce::Result::fail("expressionMap.invalidEntry: Use Name=pitch, e.g. Legato=24 or Staccato=C#2 ('" +
-                                          entry + "')");
-            map.push_back({name, *pitch});
+            auto trigger = parseArticulationTrigger(key);
+            if (!entry.containsChar('=') || name.isEmpty() || name.length() > 32 || name.containsChar(';') || !trigger)
+                return juce::Result::fail("expressionMap.invalidEntry: Use Name=keyswitch, e.g. Legato=24, Staccato=C#2, "
+                                          "Pizz=CC32:64 or Tremolo=PC5 ('" + entry + "')");
+            trigger->name = name;
+            map.push_back(*trigger);
         }
         if (map.size() > size_t(maximumArticulations))
             return juce::Result::fail("expressionMap.tooMany: At most 64 articulations");

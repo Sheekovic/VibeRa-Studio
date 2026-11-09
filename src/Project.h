@@ -38,8 +38,13 @@ struct Note
 struct Articulation
 {
     juce::String name;
-    int keyswitch = 0; // MIDI pitch 0..127.
+    int keyswitch = 0; // kind 0: MIDI pitch; kind 1: CC number; kind 2: program number (0..127).
+    int kind = 0;      // 0 keyswitch note, 1 control change, 2 program change.
+    int value = 127;   // kind 1: CC value 0..127.
 };
+// "C1" / "24" (keyswitch note), "CC32:64" (control change 32 = 64) or "PC5" (program change 5).
+inline std::optional<Articulation> parseArticulationTrigger(juce::String text);
+inline juce::String articulationTriggerText(const Articulation &a);
 inline constexpr int maximumArticulations = 64;
 // A MIDI pitch from "24" or a note name such as "C1", "F#2", "Bb0" (C5 = 60 as in the Piano roll, C0 = 0).
 inline std::optional<int> parseNotePitch(juce::String text)
@@ -65,6 +70,47 @@ inline std::optional<int> parseNotePitch(juce::String text)
         return {};
     pitch += octave.getIntValue() * 12;
     return pitch >= 0 && pitch <= 127 ? std::optional<int>(pitch) : std::nullopt;
+}
+inline std::optional<Articulation> parseArticulationTrigger(juce::String text)
+{
+    text = text.trim();
+    const auto upper = text.toUpperCase();
+    const auto number = [](const juce::String &digits) -> std::optional<int>
+    {
+        if (digits.isEmpty() || digits.length() > 3 || !digits.containsOnly("0123456789") || digits.getIntValue() > 127)
+            return {};
+        return digits.getIntValue();
+    };
+    Articulation a;
+    if (upper.startsWith("CC"))
+    {
+        const auto cc = number(upper.substring(2).upToFirstOccurrenceOf(":", false, false));
+        const auto value = upper.containsChar(':') ? number(upper.fromFirstOccurrenceOf(":", false, false))
+                                                   : std::optional<int>(127);
+        if (!cc || !value)
+            return {};
+        a.kind = 1, a.keyswitch = *cc, a.value = *value;
+        return a;
+    }
+    if (upper.startsWith("PC"))
+    {
+        const auto program = number(upper.substring(2));
+        if (!program)
+            return {};
+        a.kind = 2, a.keyswitch = *program;
+        return a;
+    }
+    const auto pitch = parseNotePitch(text);
+    if (!pitch)
+        return {};
+    a.keyswitch = *pitch;
+    return a;
+}
+inline juce::String articulationTriggerText(const Articulation &a)
+{
+    return a.kind == 1   ? "CC" + juce::String(a.keyswitch) + ":" + juce::String(a.value)
+           : a.kind == 2 ? "PC" + juce::String(a.keyswitch)
+                         : juce::MidiMessage::getMidiNoteName(a.keyswitch, true, true, 5);
 }
 // Piano roll event editor target (FL "Target control"): the note property the lane under the
 // notes shows and paints. Lane values are normalised 0..1; Pan and Fine pitch are centred.
@@ -478,6 +524,7 @@ struct ScheduledNote
     double modX = .5, modY = .5;
     bool slide = false, portamento = false;
     int colourGroup = 0;
+    int articulation = 0; // Source note's expression map entry (CC/PC articulations are sent by the timeline).
 };
 std::vector<ScheduledNote> sequence(const Project &, bool patternMode, Id selectedPattern);
 juce::Result saveProject(const Project &, const juce::File &);

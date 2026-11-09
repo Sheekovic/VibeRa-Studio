@@ -369,8 +369,8 @@ void Studio::midiFileMenu()
         articulation.addItem(43001, "None", owner && !selectedNotes.empty());
         if (owner)
             for (size_t k = 0; k < owner->articulations.size(); ++k)
-                articulation.addItem(43002 + int(k), owner->articulations[k].name + "  (keyswitch " +
-                                                         juce::MidiMessage::getMidiNoteName(owner->articulations[k].keyswitch, true, true, 5) + ")",
+                articulation.addItem(43002 + int(k), owner->articulations[k].name + "  (" +
+                                                         articulationTriggerText(owner->articulations[k]) + ")",
                                      !selectedNotes.empty());
         menu.addSubMenu("Articulation (expression map)", articulation);
     }
@@ -393,10 +393,10 @@ void Studio::midiFileMenu()
                     return;
                 juce::StringArray current;
                 for (const auto &a : owner->articulations)
-                    current.add(a.name + "=" + juce::MidiMessage::getMidiNoteName(a.keyswitch, true, true, 5));
+                    current.add(a.name + "=" + articulationTriggerText(a));
                 auto *box = new juce::AlertWindow(
                     "Expression map - " + owner->name,
-                    "One articulation per line or separated by ';' as Name=keyswitch, e.g. Legato=C1. Notes with an "
+                    "One articulation per line or separated by ';' as Name=keyswitch: a note (Legato=C1), a CC (Pizz=CC32:64) or a program (Trem=PC5). Notes with an "
                     "articulation send its keyswitch note just before they play.",
                     juce::MessageBoxIconType::NoIcon);
                 box->addTextEditor("map", current.joinIntoString("; "), "Articulations");

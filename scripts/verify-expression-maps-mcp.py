@@ -98,6 +98,31 @@ try:
     check(channel_map(reopened) == [("Sustain", 12), ("Staccato", 13), ("Pizzicato", 24)], "The map survives reopen")
     articulations = sorted(n["articulation"] for n in call("vibera_inspect", {"entity": "notes", "limit": 50})["items"])
     check(articulations == [0, 2, 2, 3], f"Note articulations survive reopen ({articulations})")
+
+    # CC and program change articulations go to the plugin controls just before their notes.
+    channel, pattern = reopened, state["selectedPattern"]
+    check(command("channel.articulations", channel=channel, text="Sustain=C1; Pizz=CC32:64; Trem=PC5")
+          .get("completionState") == "completed", "A map with CC and program change entries")
+    row = next(c for c in call("vibera_inspect", {"entity": "channels"})["items"] if c["id"] == channel)
+    check([(a["kind"], a["trigger"]) for a in row["articulations"]] ==
+          [("note", "C1"), ("cc", "CC32:64"), ("program", "PC5")], "Triggers read back with their kind")
+    notes = sorted(call("vibera_inspect", {"entity": "notes", "limit": 50})["items"], key=lambda n: (n["beat"], n["pitch"]))
+    command("notes.articulation", channel=channel, pattern=pattern, ids=[notes[2]["id"]], value=2)
+    command("notes.articulation", channel=channel, pattern=pattern, ids=[notes[3]["id"]], value=3)
+    controls = [(round(c["seconds"], 4), c["status"] & 0xf0, c["data1"], c["data2"])
+                for c in call("vibera_inspect", {"entity": "scheduledControls", "pattern": pattern, "limit": 100})["items"]
+                if c["channel"] == channel]
+    check((0.4999, 0xb0, 32, 64) in controls and (0.9999, 0xc0, 5, 0) in controls,
+          f"CC 32 = 64 precedes the beat-1 note and program 5 the beat-2 note ({controls})")
+    plan = [(e["beat"], e["pitch"]) for e in call("vibera_inspect", {"entity": "scheduledNotes", "pattern": pattern,
+                                                                     "limit": 50})["items"] if e["keyswitch"]]
+    check(plan == [], f"CC and program articulations send no keyswitch note ({plan})")
+    command("notes.articulation", channel=channel, pattern=pattern, ids=[notes[3]["id"]], value=1)
+    plan = [(e["beat"], e["pitch"]) for e in call("vibera_inspect", {"entity": "scheduledNotes", "pattern": pattern,
+                                                                     "limit": 50})["items"] if e["keyswitch"]]
+    check(plan == [(2, 12)], f"The note-kind entry still sends its keyswitch note C1 ({plan})")
+    check(command("channel.articulations", channel=channel, text="Bad=CC200").get("completionState") == "failed",
+          "A CC number above 127 is refused")
     passed = True
 finally:
     client.close()

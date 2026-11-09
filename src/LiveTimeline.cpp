@@ -206,6 +206,21 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
                     channel.controls.push_back(live);
                 }
             };
+            // Expression map CC / program change articulations: sent just before their notes.
+            for (const auto &n : events)
+                if (n.channel == c.id && n.articulation > 0 && n.articulation <= int(c.articulations.size()))
+                {
+                    const auto &a = c.articulations[size_t(n.articulation - 1)];
+                    if (a.kind == 0)
+                        continue;
+                    const double at = std::max(0., map.secondsAt(n.beat) - .0001);
+                    const auto midiChannel = std::uint8_t(n.colourGroup & 15);
+                    channel.controls.push_back(
+                        {at, a.kind == 1 ? std::array<std::uint8_t, 3>{std::uint8_t(0xb0 | midiChannel),
+                                                                       std::uint8_t(a.keyswitch), std::uint8_t(a.value)}
+                                         : std::array<std::uint8_t, 3>{std::uint8_t(0xc0 | midiChannel),
+                                                                       std::uint8_t(a.keyswitch), 0}});
+                }
             if (pattern)
             {
                 if (const auto *part = p.pattern(selected))

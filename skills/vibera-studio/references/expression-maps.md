@@ -9,7 +9,9 @@ once. Notes without an articulation send nothing. Project schema 57; one Undo ea
 
 - `channel.articulations`: `channel`, `text` with `Name=keyswitch` entries separated by
   `;` or new lines. Keyswitch is a MIDI number or a note name in the Piano roll
-  convention (C5 = 60, C0 = 0, sharps `#`, flats `b`). Empty text clears the map. At
+  convention (C5 = 60, C0 = 0, sharps `#`, flats `b`), a control change `CCn:v`
+  (e.g. `Pizz=CC32:64`) or a program change `PCn` (e.g. `Trem=PC5`). CC and program
+  articulations are sent to the instrument 0.1 ms before their notes instead of a note. Empty text clears the map. At
   most 64 entries, names up to 32 characters.
 - `notes.articulation`: `pattern`, `channel`, `ids` (notes; empty means the Channel's
   whole part), `value` = 1-based entry of the note's Channel map, 0 for none. A number
@@ -17,7 +19,9 @@ once. Notes without an articulation send nothing. Project schema 57; one Undo ea
 
 ## Readback
 
-- `vibera_inspect channels`: `articulations` [{articulation, name, keyswitch}].
+- `vibera_inspect channels`: `articulations` [{articulation, name, keyswitch, kind note/cc/program, value, trigger}].
+- `vibera_inspect {"entity":"scheduledControls","pattern":id}`: MIDI control messages Pattern
+  playback sends (status, data1, data2, seconds), including CC / program articulations.
 - `vibera_inspect notes`: `articulation` per note.
 - `vibera_inspect {"entity":"scheduledNotes","pattern":id}`: what Pattern playback sends,
   in order; keyswitches have `keyswitch:true` and `note:0`.
