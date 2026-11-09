@@ -106,6 +106,10 @@ the pointer tool or invent native parameter identities.
 `vibera_transport` starts/stops/seeks and switches Pattern/Song. Physical MIDI
 input must already be configured. `notes.record` commits a supplied typed take
 through canonical validation; it is not evidence of live hardware capture.
+Export options: `vibera_project export` also takes `outputChannels` (stereo | mono | left | right;
+mono merges L+R at half level) and `dither` (TPDF at the output LSB for 16/24-bit WAV); both are
+kept for later exports and read back as `state.exportOutputChannels` / `state.exportDither`.
+
 Audio logger: `vibera_project {"action":"audioLogger","enabled":true,"minutes":1..5}` keeps
 the last minutes of the master output (post-fader, live playback only; needs an audio device,
 else `audioLog.noDevice`). `{"action":"audioLoggerSave","path":<abs .wav>,"seconds":0}` writes

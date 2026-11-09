@@ -120,3 +120,14 @@ ping-pong loop, reverse, smart disable, score log, half speed, split by channel,
 | Recording filter (choose automation / notes / audio / clips) | done | Tools > Recording filter: Notes (`transport.recordNotes`), Audio (audio input switch), Automation (armed on its control); record_filter_mcp |
 | Sampler envelope presets | done | Channel menu > Envelope presets (save by name, load); `vibera_project saveEnvelopePreset/loadEnvelopePreset/envelopePresets`, `channel.sampler.envelopeApply` (one Undo); envelope_presets_mcp |
 | Keep on disk / declicking modes | out of scope | FL sampler streaming and declick specifics |
+
+## Fifth pass (2026-11-09, mixer / envsettings_general / songsettings_settings / automation_eventeditor / automation_internal / fformats_save_export / basics_shortcuts pages)
+
+Mixer, preferences, project settings, event editor, controller links and the Playlist / Channel
+Rack / Piano roll / Mixer shortcut lists match existing VibeRa commands. Gaps found and closed:
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Export: output Channels (Stereo / Mono / Left / Right) | done | export menu > Channels / dither; MCP export `outputChannels`; export_options_mcp |
+| Export: Dithering | done | TPDF +/-1 LSB for 16/24-bit WAV; MCP export `dither`; export_options_mcp |
+| FL Cloud / SoundCloud upload, command-line rendering, GUI scaling/animation preferences | out of scope | FL services and FL host options |

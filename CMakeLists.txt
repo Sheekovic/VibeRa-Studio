@@ -984,6 +984,9 @@ set_tests_properties(record_filter_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME envelope_presets_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-envelope-presets-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/envelope_presets_mcp")
 set_tests_properties(envelope_presets_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME export_options_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-export-options-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/export_options_mcp")
+set_tests_properties(export_options_mcp PROPERTIES TIMEOUT 240)
 add_test(NAME controller_interpolate_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-controller-interpolate-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/controller_interpolate_mcp")
 set_tests_properties(controller_interpolate_mcp PROPERTIES TIMEOUT 120)

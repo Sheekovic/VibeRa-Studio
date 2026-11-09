@@ -4138,6 +4138,8 @@ class AudioEngine::RenderWorker final : public juce::Thread
                            [](auto &host) { return !host->alive() || host->deliveryFailed(); });
     }
     int tailMode = 0, bitDepth = 24;
+    int outputChannels = 0; // 0 stereo, 1 mono (L+R)/2, 2 left only, 3 right only.
+    bool dither = false;     // TPDF dither at the output LSB (16/24-bit integer only).
     // Pre-roll: the render starts two blocks before the Song (silence) and that part is
     // removed afterwards. A plugin's first processed block in a render comes out late by its
     // native latency and is realigned from the next block, which left a jump inside the
@@ -4234,10 +4236,35 @@ class AudioEngine::RenderWorker final : public juce::Thread
                     pcm.addSample(c, (i - songEnd) % std::max(1, songEnd), pcm.getSample(c, i));
             keep = songEnd;
         }
+        int written = channels;
+        if (outputChannels != 0 && channels >= 2)
+        {
+            // FL export Channels: Mono (merged / left / right).
+            for (int i = 0; i < keep; ++i)
+            {
+                const float l = pcm.getSample(0, i), r = pcm.getSample(1, i);
+                pcm.setSample(0, i, outputChannels == 1 ? (l + r) * .5f : outputChannels == 2 ? l : r);
+            }
+            written = 1;
+        }
+        if (dither && bitDepth < 32)
+        {
+            // Triangular (TPDF) dither of +/-1 LSB before integer quantisation; deterministic seed.
+            const float lsb = 1.f / float(1 << (bitDepth - 1));
+            juce::Random random(0x5eed);
+            for (int c = 0; c < written; ++c)
+                for (int i = 0; i < keep; ++i)
+                    pcm.setSample(c, i, pcm.getSample(c, i) + (random.nextFloat() - random.nextFloat()) * lsb);
+        }
         temporary.getFile().deleteFile();
         std::unique_ptr<juce::AudioFormatWriter> writer(wav.createWriterFor(temporary.getFile().createOutputStream().release(),
-                                                                           sampleRate, unsigned(channels), bitDepth, {}, 0));
-        return writer && writer->writeFromAudioSampleBuffer(pcm, 0, keep);
+                                                                           sampleRate, unsigned(written), bitDepth, {}, 0));
+        if (!writer)
+            return false;
+        if (written == channels)
+            return writer->writeFromAudioSampleBuffer(pcm, 0, keep);
+        juce::AudioBuffer<float> mono(pcm.getArrayOfWritePointers(), 1, keep);
+        return writer->writeFromAudioSampleBuffer(mono, 0, keep);
     }
     juce::Result commit()
     {
@@ -4312,6 +4339,8 @@ juce::Result AudioEngine::startRender(const Project &p, const juce::File &file, 
         std::make_unique<RenderWorker>(*renderEdit, file, rate, bits, 512, p.songSeconds(p.endBeat()),
                                        std::vector<std::shared_ptr<PluginHost>>(
                                            ownedHosts.begin() + std::ptrdiff_t(firstHost), ownedHosts.end()), tail);
+    worker->outputChannels = exportOutputChannels;
+    worker->dither = exportDither;
     worker->startThread();
     preparation[1].reset();
     return juce::Result::ok();

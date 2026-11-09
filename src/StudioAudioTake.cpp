@@ -512,11 +512,29 @@ void Studio::exportMenu()
     tail.addItem(46, "Leave remainder (keep effect tails)", true, exportTail == 1);
     tail.addItem(47, "Wrap remainder (tails onto the start, for loops)", true, exportTail == 2);
     menu.addSubMenu("Tail", tail);
+    juce::PopupMenu output;
+    const char *outputs[]{"Stereo", "Mono (merged)", "Mono (left only)", "Mono (right only)"};
+    for (int i = 0; i < 4; ++i)
+        output.addItem(48 + i, outputs[i], true, audio.exportOutputChannels == i);
+    output.addSeparator();
+    output.addItem(52, "Dither (16/24-bit WAV)", true, audio.exportDither);
+    menu.addSubMenu("Channels / dither", output);
     menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&exportWav),
                        [this](int chosen)
                        {
                            if (chosen <= 0)
                                return;
+                           if (chosen >= 48 && chosen <= 52)
+                           {
+                               if (chosen == 52)
+                                   audio.exportDither = !audio.exportDither;
+                               else
+                                   audio.exportOutputChannels = chosen - 48;
+                               const char *outputs[]{"stereo", "mono (merged)", "mono (left)", "mono (right)"};
+                               status = juce::String("Export: ") + outputs[audio.exportOutputChannels] +
+                                        (audio.exportDither ? ", dithered" : "");
+                               return;
+                           }
                            if (chosen >= 45 && chosen <= 47)
                            {
                                exportTail = chosen - 45;

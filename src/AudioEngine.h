@@ -354,6 +354,9 @@ class AudioEngine
         return guide->gain.load();
     }
     void setCountInBars(int);
+    // Export options read by the next render (FL export Channels / Dithering).
+    int exportOutputChannels = 0; // 0 stereo, 1 mono merged, 2 left only, 3 right only.
+    bool exportDither = false;
     int countInBars() const
     {
         return guideBars;
