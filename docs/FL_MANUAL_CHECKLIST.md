@@ -99,3 +99,10 @@ did not list.
 | View cosmetics (grid colour/contrast, keyboard styles, note shadows, Behind clips) | out of scope | theme handles appearance |
 | Playlist: Quantize song jumps (Off, beat, 1/2/4/8 bars) | done | Playlist menu, `vibera_transport` jumpQuantize/jump; real-device check: jump at 1.06 waits for 4, lands at 16 |
 | Expression maps: CC / program change articulations | done | `Name=CC32:64`, `Name=PC5`; sent 0.1 ms before the note |
+
+## Third pass (2026-11-09, playlist_patterns / playlist_audioclip / playlist_automationclip / playlist_performance / menu_patterns / stepsequencer_advancedfilltool / pianoroll_chordprogression / pianoroll_riff pages)
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Automation Clip options: Decimate points | done | `automation.source.decimate`, Playlist menu > Decimate points; playlist_tools_mcp |
+| Audio Clip: Make unique as sample (copy the file on disk) | missing | `clip.unique` makes the clip unique but shares the file |

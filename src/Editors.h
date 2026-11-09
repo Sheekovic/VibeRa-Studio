@@ -5968,6 +5968,7 @@ class Studio::Editor final : public juce::Component,
                     tools.addItem(92, "Normalize levels");
                     tools.addItem(93, "Turn all points smooth");
                     tools.addItem(94, "Scale levels to 50 %");
+                    tools.addItem(95, "Decimate points");
                     m.addSubMenu("Articulator tools", tools);
                     m.addItem(96, "Merge selected Automation Clips", s.selectedClips.size() >= 2);
                 }
@@ -6069,14 +6070,15 @@ class Studio::Editor final : public juce::Component,
                                             a.ids = {id};
                                         safe->s.command("clip.rippleDelete", a);
                                     }
-                                    if (n >= 91 && n <= 94)
+                                    if (n >= 91 && n <= 95)
                                         if (const auto *clip = safe->automationClip(id))
                                         {
                                             a.target = clip->source;
-                                            a.value = .5;
+                                            a.value = n == 95 ? 0. : .5; // Decimate: default tolerance.
                                             a.offset = .25;
                                             const char *tools[] = {"automation.source.flip", "automation.source.normalize",
-                                                                   "automation.source.smooth", "automation.source.scale"};
+                                                                   "automation.source.smooth", "automation.source.scale",
+                                                                   "automation.source.decimate"};
                                             safe->s.command(tools[n - 91], a);
                                         }
                                     if (n == 96)

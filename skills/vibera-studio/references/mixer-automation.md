@@ -182,3 +182,13 @@ and `wave` (sine from this value to the next and back). For the repeating shapes
 the count: -1 = 1, 0 = 4, +1 = 16 (exponential in between). Also `double` (S-shaped curve; the
 same count is the sharpness, 1 = linear) and `smoothStairs` (steps that glide). Saved as shape
 0..7.
+
+## Curve tools
+
+Each takes `target` = the Automation source ID and edits the whole curve (every linked clip
+follows) as one Undo step: `automation.source.flip` (mirror levels), `automation.source.normalize`
+(stretch to 0..1), `automation.source.smooth` (every point smooth), `automation.source.scale`
+(`value` x level + `offset`), `automation.source.decimate` (drop interior points within `value`
+of the straight line between kept neighbours; 0 = 0.01, max 0.5; ends and curved points stay;
+refused when nothing would change). `automation.merge` joins selected clips of one target.
+Read points back with `vibera_inspect {"entity":"automationPoints","source":id}`.

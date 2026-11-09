@@ -329,7 +329,8 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
                   [](const auto &p, const auto &q) { return p.beat < q.beat; });
     }
     else if (operation == "automation.source.flip" || operation == "automation.source.normalize" ||
-             operation == "automation.source.smooth" || operation == "automation.source.scale")
+             operation == "automation.source.smooth" || operation == "automation.source.scale" ||
+             operation == "automation.source.decimate")
     {
         // Articulator tools on one curve (every linked placement follows): flip vertically,
         // normalize to the full 0..1 range, turn every point smooth, or value * value + offset.
@@ -345,6 +346,30 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
                 points[i].incoming = AutomationShape::smooth;
                 points[i].tension = 0;
             }
+        else if (operation == "automation.source.decimate")
+        {
+            // FL "Decimate points": drop interior points that lie within the tolerance (value, 0 = 0.01)
+            // of the straight line between the neighbours that are kept; first and last always stay.
+            const double tolerance = a.value == 0 ? .01 : a.value;
+            if (!std::isfinite(tolerance) || tolerance < 0 || tolerance > .5)
+                return juce::Result::fail("automation.invalidTolerance: Decimate tolerance is 0..0.5");
+            if (points.size() < 3)
+                return juce::Result::fail("automation.nothingToDecimate: The curve has no interior points");
+            std::vector<AutomationPoint> kept{points.front()};
+            for (size_t i = 1; i + 1 < points.size(); ++i)
+            {
+                const auto &left = kept.back(), &right = points[i + 1], &p = points[i];
+                const double span = right.beat - left.beat;
+                const double line = span > 0 ? left.value + (right.value - left.value) * (p.beat - left.beat) / span
+                                             : left.value;
+                if (std::abs(p.value - line) > tolerance || p.incoming != AutomationShape::single)
+                    kept.push_back(p);
+            }
+            kept.push_back(points.back());
+            if (kept.size() == points.size())
+                return juce::Result::fail("automation.nothingToDecimate: No point lies on a straight line");
+            points = std::move(kept);
+        }
         else if (operation == "automation.source.normalize")
         {
             const auto [low, high] = std::minmax_element(points.begin(), points.end(),

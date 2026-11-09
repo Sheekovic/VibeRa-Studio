@@ -69,8 +69,29 @@ try:
     check([s for _, _, s in points(source)][1:] != shapes, "Undo restores the previous point shapes")
     command("edit.redo")
 
+    # Decimate points: interior points on a straight line go; the off-line point and the ends stay.
+    command("automation.create", mixer=2, beat=0, length=4, lane=3)
+    line = [c for c in clips("automation") if c["lane"] == 3][0]["source"]
+    ends = [p["id"] for p in call("vibera_inspect", {"entity": "automationPoints", "source": line})["items"]]
+    command("automation.point.move", target=ends[0], beat=0, value=.2)
+    command("automation.point.move", target=ends[-1], beat=4, value=.6)
+    for beat, value in ((1, .3), (2, .4), (3, .5), (3.5, .9)):
+        command("automation.point.add", target=line, beat=beat, value=value)
+    before = points(line)
+    check(len(before) == 6, f"Decimate test curve has six points ({before})")
+    result = command("automation.source.decimate", target=line)
+    after = points(line)
+    check(result.get("completionState") == "completed" and [b for b, _, _ in after] == [0, 3, 3.5, 4],
+          f"Decimate drops the points on the straight line ({after})")
+    check(command("automation.source.decimate", target=line).get("completionState") == "failed",
+          "A curve with nothing left to drop is refused")
+    command("edit.undo")
+    check(points(line) == before, "Decimate is one Undo step")
+    command("clip.delete", ids=[c["id"] for c in clips("automation") if c["lane"] == 3])
+    check(not [c for c in clips("automation") if c["lane"] == 3], "The decimate test clip is removed")
+
     command("automation.place", target=source, beat=6, length=4, value=0, lane=2)
-    automation = sorted(clips("automation"), key=lambda c: c["beat"])
+    automation = sorted((c for c in clips("automation") if c["lane"] == 2), key=lambda c: c["beat"])
     check(len(automation) == 2, "A second Automation Clip of the same curve")
     merged = command("automation.merge", ids=[c["id"] for c in automation])
     check(merged.get("completionState") == "completed", "Merge Automation Clips: " + str(merged.get("error"))[:120])

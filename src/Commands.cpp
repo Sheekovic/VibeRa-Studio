@@ -1039,6 +1039,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"automation.source.flip", "Flip automation curve vertically", Scope::playlist, true, true, "command"},
         {"automation.source.normalize", "Normalize automation curve levels", Scope::playlist, true, true, "command"},
         {"automation.source.smooth", "Turn all automation points smooth", Scope::playlist, true, true, "command"},
+        {"automation.source.decimate", "Decimate automation points (drop points on straight lines)", Scope::playlist, true, true, "command"},
         {"automation.source.scale", "Scale automation curve levels (value x, offset)", Scope::playlist, true, true, "command"},
         {"automation.merge", "Merge Automation Clips", Scope::playlist, true, true, "command"},
         {"clip.rippleDelete", "Ripple delete clips (close the gap on their track)", Scope::playlist, true, true, "command"},
