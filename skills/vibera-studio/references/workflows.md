@@ -111,7 +111,8 @@ mono merges L+R at half level) and `dither` (TPDF at the output LSB for 16/24-bi
 kept for later exports and read back as `state.exportOutputChannels` / `state.exportDither`.
 
 Audio logger: `vibera_project {"action":"audioLogger","enabled":true,"minutes":1..5}` keeps
-the last minutes of the master output (post-fader, live playback only; needs an audio device,
+the last minutes of the master output (post-fader, continuously while the device runs, also when
+stopped; offline exports are not logged; needs an audio device,
 else `audioLog.noDevice`). `{"action":"audioLoggerSave","path":<abs .wav>,"seconds":0}` writes
 the held audio (0 = all) as 24-bit stereo. Read `state.audioLogger` {enabled, minutes,
 recordedSeconds}.

@@ -116,7 +116,7 @@ ping-pong loop, reverse, smart disable, score log, half speed, split by channel,
 | --- | --- | --- |
 | Recording: Wait for input (start on the first MIDI note, keeping that note) | done | `transport.waitForInput`, Tools > Wait for input; the triggering note is captured at the take start (musical_acceptance capture checks); not hardware-qualified |
 | Master pitch (global tuning offset for every instrument) | done | `project.masterPitch` -1200..1200 cents, Tools > Master pitch; sampler, MPE, MTS-ESP; master_pitch_mcp checks 440/880/466 Hz in exports |
-| Audio logger (rolling master-mix buffer, save the last minutes) | done | Tools > Audio logger (1/2/5 min, Save...); master post-fader, live only; `vibera_project audioLogger/audioLoggerSave`; ring/WAV unit test in musical_acceptance; not hardware-qualified |
+| Audio logger (rolling master-mix buffer, save the last minutes) | done | Tools > Audio logger (1/2/5 min, Save...); master post-fader, live only; `vibera_project audioLogger/audioLoggerSave`; ring/WAV unit test in musical_acceptance; real-device check (scripts/verify-audio-logger-device.py, Focusrite 44.1 kHz) passed; no listening test |
 | Recording filter (choose automation / notes / audio / clips) | done | Tools > Recording filter: Notes (`transport.recordNotes`), Audio (audio input switch), Automation (armed on its control); record_filter_mcp |
 | Sampler envelope presets | done | Channel menu > Envelope presets (save by name, load); `vibera_project saveEnvelopePreset/loadEnvelopePreset/envelopePresets`, `channel.sampler.envelopeApply` (one Undo); envelope_presets_mcp |
 | Keep on disk / declicking modes | out of scope | FL sampler streaming and declick specifics |

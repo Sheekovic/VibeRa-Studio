@@ -10,7 +10,8 @@ namespace vibera
 // Audio logger (FL Tools > Audio logger): a rolling memory of the master output so the last
 // minutes can be saved without having pressed Record. The ring buffer is allocated and freed
 // only on the control thread; the audio thread (master gain stage) only copies samples into
-// the published buffer. Offline renders are not logged.
+// the published buffer. It records continuously (also with the transport stopped, so live
+// playing is kept); offline renders are not logged.
 class AudioLogger
 {
   public:
