@@ -20,7 +20,8 @@ juce::Result Studio::analyzeVocalClip(Id clip, vocal::Analysis &out)
     return vocal::analyze(juce::File(source->source), found->offset, found->duration, out);
 }
 
-juce::Result Studio::applyVocalPitch(Id clip, std::vector<vocal::Shift> shifts, const juce::String &operation)
+juce::Result Studio::applyVocalPitch(Id clip, std::vector<vocal::Shift> shifts, const juce::String &operation,
+                                     bool preserveFormants)
 {
     if (stretchJob)
         return juce::Result::fail("vocalPitch.busy: An audio clip job is already running");
@@ -31,13 +32,13 @@ juce::Result Studio::applyVocalPitch(Id clip, std::vector<vocal::Shift> shifts, 
     const auto *source = controller.project.channel(found->channel);
     if (!source)
         return juce::Result::fail("vocalPitch.missingClip: The clip has no source");
-    std::erase_if(shifts, [](const auto &s) { return s.semitones == 0; });
+    std::erase_if(shifts, [](const auto &s) { return s.semitones == 0 && s.formant == 0; });
     if (shifts.empty())
         return juce::Result::fail("vocalPitch.noChange: No note was moved");
     for (const auto &s : shifts)
-        if (!std::isfinite(s.semitones) || std::abs(s.semitones) > 24 || !(s.end > s.start) || s.start < 0 ||
-            s.end > found->duration + 1)
-            return juce::Result::fail("vocalPitch.invalidShift: Shifts are -24..24 semitones inside the clip");
+        if (!std::isfinite(s.semitones) || std::abs(s.semitones) > 24 || !std::isfinite(s.formant) ||
+            std::abs(s.formant) > 12 || !(s.end > s.start) || s.start < 0 || s.end > found->duration + 1)
+            return juce::Result::fail("vocalPitch.invalidShift: Shifts are -24..24 semitones (formant -12..12) inside the clip");
     const auto folder = projectFile != juce::File{}
                             ? projectFile.getParentDirectory().getChildFile("Edited")
                             : juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
@@ -54,9 +55,10 @@ juce::Result Studio::applyVocalPitch(Id clip, std::vector<vocal::Shift> shifts, 
     auto *raw = job.get();
     const juce::File input(source->source);
     const double offset = found->offset, duration = found->duration;
-    job->thread = std::thread([raw, input, offset, duration, shifts]
+    job->thread = std::thread([raw, input, offset, duration, shifts, preserveFormants]
                               {
-                                  raw->result = vocal::render(input, offset, duration, shifts, raw->target);
+                                  raw->result = vocal::render(input, offset, duration, shifts, raw->target,
+                                                              preserveFormants);
                                   raw->done = true;
                               });
     stretchJob = std::move(job);
@@ -70,8 +72,17 @@ class VocalPitchEditor final : public juce::Component
 {
   public:
     VocalPitchEditor(Studio &owner, Id clipId, vocal::Analysis analysis)
-        : studio(&owner), clip(clipId), a(std::move(analysis)), shift(a.notes.size(), 0.)
+        : studio(&owner), clip(clipId), a(std::move(analysis)), shift(a.notes.size(), 0.), formant(a.notes.size(), 0.)
     {
+        for (auto *b : {&formantDown, &formantUp})
+            addAndMakeVisible(b);
+        addAndMakeVisible(preserve);
+        preserve.setToggleState(true, juce::dontSendNotification);
+        preserve.setTooltip("Keep the voice character when notes move (formant correction)");
+        formantDown.setTooltip("Lower the formant of the selected note (darker voice)");
+        formantUp.setTooltip("Raise the formant of the selected note (brighter voice)");
+        formantDown.onClick = [this] { nudgeFormant(-1); };
+        formantUp.onClick = [this] { nudgeFormant(1); };
         low = 127, high = 0;
         for (const auto &n : a.notes)
         {
@@ -88,17 +99,18 @@ class VocalPitchEditor final : public juce::Component
         reset.onClick = [this]
         {
             std::fill(shift.begin(), shift.end(), 0.);
+            std::fill(formant.begin(), formant.end(), 0.);
             repaint();
         };
         apply.onClick = [this]
         {
             std::vector<vocal::Shift> shifts;
             for (size_t i = 0; i < a.notes.size(); ++i)
-                if (shift[i] != 0)
-                    shifts.push_back({a.notes[i].start, a.notes[i].end, shift[i]});
+                if (shift[i] != 0 || formant[i] != 0)
+                    shifts.push_back({a.notes[i].start, a.notes[i].end, shift[i], formant[i]});
             if (studio)
             {
-                if (auto r = studio->applyVocalPitch(clip, shifts); r.failed())
+                if (auto r = studio->applyVocalPitch(clip, shifts, {}, preserve.getToggleState()); r.failed())
                     studio->status = r.getErrorMessage();
                 studio->repaint();
             }
@@ -116,7 +128,17 @@ class VocalPitchEditor final : public juce::Component
     juce::Component::SafePointer<Studio> studio;
     Id clip;
     vocal::Analysis a;
-    std::vector<double> shift;
+    std::vector<double> shift, formant;
+    juce::TextButton formantDown{"Formant -"}, formantUp{"Formant +"};
+    juce::ToggleButton preserve{"Preserve formants"};
+    void nudgeFormant(double amount)
+    {
+        if (selected < 0)
+            return;
+        auto &value = formant[size_t(selected)];
+        value = std::clamp(value + amount, -12., 12.);
+        repaint();
+    }
     double low = 48, high = 72;
     int selected = -1;
     double dragStart = 0, shiftStart = 0;
@@ -127,7 +149,7 @@ class VocalPitchEditor final : public juce::Component
 
     juce::Rectangle<int> grid() const
     {
-        return getLocalBounds().reduced(10).withTrimmedTop(36).withTrimmedLeft(keys);
+        return getLocalBounds().reduced(10).withTrimmedTop(36).withTrimmedBottom(34).withTrimmedLeft(keys);
     }
     double length() const
     {
@@ -171,6 +193,12 @@ class VocalPitchEditor final : public juce::Component
     void resized() override
     {
         auto top = getLocalBounds().reduced(10).removeFromTop(28);
+        auto bottom = getLocalBounds().reduced(10).removeFromBottom(26);
+        preserve.setBounds(bottom.removeFromRight(160));
+        bottom.removeFromRight(8);
+        formantUp.setBounds(bottom.removeFromRight(90));
+        bottom.removeFromRight(6);
+        formantDown.setBounds(bottom.removeFromRight(90));
         cancel.setBounds(top.removeFromRight(80));
         top.removeFromRight(6);
         apply.setBounds(top.removeFromRight(80));
@@ -236,7 +264,8 @@ class VocalPitchEditor final : public juce::Component
             // Label above the note so the pitch curve inside it stays readable.
             g.setColour(on ? juce::Colour(0xffeeb76a) : juce::Colour(0xffe4eef2));
             g.setFont(juce::Font(juce::FontOptions(11.f, juce::Font::bold)));
-            g.drawText(vocal::noteName(pitch) + (cents ? (cents > 0 ? " +" : " ") + juce::String(cents) + " c" : ""),
+            g.drawText(vocal::noteName(pitch) + (cents ? (cents > 0 ? " +" : " ") + juce::String(cents) + " c" : "") +
+                           (formant[i] != 0 ? "  F" + juce::String(formant[i] > 0 ? "+" : "") + juce::String(int(formant[i])) : ""),
                        juce::Rectangle<float>(r.getX(), r.getY() - 15, std::max(60.f, r.getWidth()), 14),
                        juce::Justification::centredLeft, false);
         }

@@ -106,6 +106,40 @@ try:
           f"Snapped notes sit within 8 cents of a semitone and the moved note reads F#5 ({pitches})")
     call("vibera_command", {"command": "edit.undo", "args": {}})
     check(clip_source(clip) == original, "One Undo restores the original source")
+
+    # Formants: shift note 2 by +6 formant semitones only. Its pitch stays, its spectral centroid rises.
+    import numpy as np
+
+    def centroid(path, start, end):
+        with wave.open(path) as w:
+            raw = np.frombuffer(w.readframes(w.getnframes()), dtype=np.uint8)
+            width, rate = w.getsampwidth(), w.getframerate()
+        if width == 3:
+            raw = raw.reshape(-1, 3)
+            values = (raw[:, 0].astype(np.int32) | (raw[:, 1].astype(np.int32) << 8) | (raw[:, 2].astype(np.int32) << 16))
+            values = np.where(values >= 1 << 23, values - (1 << 24), values).astype(float)
+        else:
+            values = raw.view(np.int16).astype(float)
+        part = values[int(start * rate):int(end * rate)] * np.hanning(int(end * rate) - int(start * rate))
+        spectrum = np.abs(np.fft.rfft(part))
+        freqs = np.fft.rfftfreq(len(part), 1 / rate)
+        return float((spectrum * freqs).sum() / spectrum.sum())
+
+    before = centroid(original, 1.25, 1.65)
+    job = wait(call("vibera_project", {"action": "vocalPitchApply", "clip": clip, "shifts": [{"note": 2, "formant": 6}]}))
+    check(job.get("completionState") == "completed", "A formant-only shift renders: " + str(job)[:160])
+    formanted = clip_source(clip)
+    after = centroid(formanted, 1.25, 1.65)
+    pitch_after = call("vibera_project", {"action": "vocalPitch", "clip": clip}).get("notes", [])[2]["pitch"]
+    check(abs(pitch_after - sung[2]) < .1, f"The formant shift keeps the pitch ({pitch_after:.2f})")
+    check(after > before * 1.05, f"Formant +6 brightens the voice (centroid {before:.0f} -> {after:.0f} Hz)")
+    call("vibera_command", {"command": "edit.undo", "args": {}})
+    job = wait(call("vibera_project", {"action": "vocalPitchApply", "clip": clip, "shifts": [{"note": 2, "formant": -6}]}))
+    darker = centroid(clip_source(clip), 1.25, 1.65)
+    check(job.get("completionState") == "completed" and darker < before * .95,
+          f"Formant -6 darkens the voice (centroid {before:.0f} -> {darker:.0f} Hz)")
+    (output / "formant.json").write_text(json.dumps(dict(before=before, up=after, down=darker, pitch=pitch_after)),
+                                         encoding="utf-8")
     (output / "pitches.json").write_text(json.dumps(dict(sung=sung, found=found, edited=pitches), indent=2), encoding="utf-8")
     passed = True
 finally:

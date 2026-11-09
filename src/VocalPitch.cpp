@@ -181,11 +181,12 @@ juce::Result analyze(const juce::File &source, double offsetSeconds, double dura
 }
 
 juce::Result render(const juce::File &source, double offsetSeconds, double durationSeconds,
-                    const std::vector<Shift> &shifts, const juce::File &target)
+                    const std::vector<Shift> &shifts, const juce::File &target, bool preserveFormants)
 {
     for (const auto &s : shifts)
-        if (!std::isfinite(s.semitones) || std::abs(s.semitones) > 24 || !(s.end > s.start))
-            return juce::Result::fail("Note shifts are -24..24 semitones over a positive span");
+        if (!std::isfinite(s.semitones) || std::abs(s.semitones) > 24 || !(s.end > s.start) ||
+            !std::isfinite(s.formant) || std::abs(s.formant) > 12)
+            return juce::Result::fail("Note shifts are -24..24 semitones (formant -12..12) over a positive span");
     juce::AudioBuffer<float> input;
     double rate = 0;
     juce::String error;
@@ -194,7 +195,7 @@ juce::Result render(const juce::File &source, double offsetSeconds, double durat
     const int channels = input.getNumChannels(), frames = input.getNumSamples();
     // Transposition at a time: the covering note's shift, easing in/out over 20 ms at its edges.
     const double glide = .02;
-    auto transposeAt = [&](double seconds)
+    auto shiftAt = [&](double seconds, double Shift::*field)
     {
         double value = 0;
         for (const auto &s : shifts)
@@ -203,10 +204,12 @@ juce::Result render(const juce::File &source, double offsetSeconds, double durat
                 continue;
             const double in = std::clamp((seconds - (s.start - glide)) / glide, 0., 1.),
                          out = std::clamp(((s.end + glide) - seconds) / glide, 0., 1.);
-            value += s.semitones * std::min(in, out);
+            value += s.*field * std::min(in, out);
         }
         return value;
     };
+    auto transposeAt = [&](double seconds) { return shiftAt(seconds, &Shift::semitones); };
+    auto formantAt = [&](double seconds) { return shiftAt(seconds, &Shift::formant); };
     juce::AudioBuffer<float> output(channels, frames);
     signalsmith::stretch::SignalsmithStretch<float> stretch;
     stretch.presetDefault(channels, float(rate));
@@ -220,6 +223,7 @@ juce::Result render(const juce::File &source, double offsetSeconds, double durat
     int consumed = std::min(frames, stretch.outputSeekLength(1.f));
     point(in, input, 0);
     stretch.setTransposeSemitones(float(transposeAt(0)));
+    stretch.setFormantSemitones(float(formantAt(0)), preserveFormants);
     stretch.outputSeek(in, consumed);
     const int tail = stretch.outputLatency();
     int written = 0;
@@ -227,7 +231,9 @@ juce::Result render(const juce::File &source, double offsetSeconds, double durat
     while (written < frames - tail)
     {
         const int count = std::min(block, frames - tail - written);
-        stretch.setTransposeSemitones(float(transposeAt((written + count * .5) / rate)));
+        const double middle = (written + count * .5) / rate;
+        stretch.setTransposeSemitones(float(transposeAt(middle)));
+        stretch.setFormantSemitones(float(formantAt(middle)), preserveFormants);
         const int want = std::clamp(written + count + stretch.outputSeekLength(1.f), consumed, frames);
         point(in, input, consumed);
         point(out, output, written);

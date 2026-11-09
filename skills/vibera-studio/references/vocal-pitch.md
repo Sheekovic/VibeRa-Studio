@@ -12,7 +12,9 @@ per-note transposition rendered offline with Signalsmith Stretch (length kept).
   `cents` from the nearest semitone), `curveHopSeconds` and `curve` (fractional MIDI
   per frame, null where unvoiced). `editor:true` also opens the graphical editor.
 - `{"action":"vocalPitchApply","clip":..,"snap":0..1,"shifts":[{"note":i,"semitones":s}]}`
-  renders a new source where each note moves by its shift (snap pulls every other
+  renders a new source where each note moves by its shift (each shift may also carry
+  `formant`, -12..12 semitones of voice character without changing pitch;
+  `preserveFormants` (default true) keeps the character when the pitch moves) (snap pulls every other
   note that fraction of the way to its nearest semitone). It is a job: poll
   `{"action":"job","operation":..}` until completed. The clip then plays the new file
   (Edited folder); one Undo restores the previous source. Shifts are -24..24 semitones;
@@ -22,7 +24,8 @@ per-note transposition rendered offline with Signalsmith Stretch (length kept).
 
 Playlist: right-click an Audio Clip > Edit > Edit vocal pitch (notes)... Drag a note up
 or down (semitone steps, Alt for fine), double-click to snap it, Snap to semitones /
-Snap 50 % for all (or the selected) notes, Apply renders.
+Snap 50 % for all (or the selected) notes, Formant - / + for the selected note,
+Preserve formants on by default; Apply renders.
 
-Limits: one voice at a time; timing, vibrato and formant editing are not implemented.
+Limits: one voice at a time; note timing and vibrato editing are not implemented.
 Analysis values are model readings, not listening evidence.

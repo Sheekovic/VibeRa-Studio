@@ -29,13 +29,15 @@ struct Shift
 {
     double start = 0, end = 0; // Seconds from the window start.
     double semitones = 0;      // -24..24.
+    double formant = 0;        // Formant shift in semitones, -12..12 (voice character, not pitch).
 };
 // Pitch range 65..1050 Hz (C2..C6), windows up to ten minutes.
 juce::Result analyze(const juce::File &source, double offsetSeconds, double durationSeconds, Analysis &out);
 // Pure analysis of mono PCM (exposed for tests).
 Analysis analyzeBuffer(const float *mono, int frames, double rate);
 // Renders the window with every shift applied (20 ms glides at note edges) into a 24-bit WAV.
+// preserveFormants keeps the voice character when the pitch moves (formant compensation).
 juce::Result render(const juce::File &source, double offsetSeconds, double durationSeconds,
-                    const std::vector<Shift> &shifts, const juce::File &target);
+                    const std::vector<Shift> &shifts, const juce::File &target, bool preserveFormants = true);
 juce::String noteName(double midi);
 } // namespace vibera::vocal

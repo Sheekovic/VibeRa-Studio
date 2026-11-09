@@ -316,7 +316,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void applyModulatorChoice(int choice, Id modulator, const juce::String &addCommand, CommandArgs a);
     // Vocal pitch editor (StudioVocalPitch.cpp): analysis, per-note render job and the editor window.
     juce::Result analyzeVocalClip(Id clip, vocal::Analysis &);
-    juce::Result applyVocalPitch(Id clip, std::vector<vocal::Shift>, const juce::String &operation = {});
+    juce::Result applyVocalPitch(Id clip, std::vector<vocal::Shift>, const juce::String &operation = {},
+                                 bool preserveFormants = true);
     juce::Result openVocalPitchEditor(Id clip);
     void mixerAutomationMenu(int, MixerAutomationControl, std::optional<int> sendTarget = {});
     juce::Result admitMixerAutomation(const juce::String &owner = {});
