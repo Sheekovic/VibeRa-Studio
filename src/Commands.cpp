@@ -830,6 +830,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.controller.add", "Add a controller event", Scope::piano, true, true, "command"},
         {"notes.controller.set", "Set a controller event", Scope::piano, true, true, "command"},
         {"notes.controller.delete", "Delete controller events", Scope::piano, true, true, "command"},
+        {"notes.controller.interpolate", "Interpolate controller events in a time range", Scope::piano, true, true, "command"},
         {"channel.tuning", "Set Channel tuning", Scope::rack, true, true, "command"},
         {"channel.scale", "Set Channel keyboard-mapped scale", Scope::rack, true, true, "command"},
         {"channel.mpe", "Play Channel tuning through MPE", Scope::rack, true, true, "command"},
@@ -4398,6 +4399,49 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 c.number = type == 0 ? a.pitch : 0;
                 apply(c, a.value);
                 pat->controllers.push_back(c);
+                std::stable_sort(pat->controllers.begin(), pat->controllers.end(),
+                                 [](const auto &x, const auto &y) { return x.beat < y.beat; });
+            }
+            else if (id == "notes.controller.interpolate")
+            {
+                // Interpolate tool: inside [beat, beat + length] on one lane of the Channel, the
+                // first and last events stay and everything between becomes a straight line of
+                // events every 1/16 beat. One Undo step.
+                const juce::StringArray types{"cc", "pitchBend", "pressure"};
+                const int type = types.indexOf(a.text.isEmpty() ? juce::String("cc") : a.text);
+                if (!ch || type < 0 || !std::isfinite(a.beat) || !std::isfinite(a.length) || a.length <= 0 ||
+                    (type == 0 && (a.pitch < 0 || a.pitch > 127)))
+                    return juce::Result::fail("controller.invalidRange: A cc/pitchBend/pressure lane and a positive range");
+                const auto onLane = [&](const ControllerEvent &c)
+                {
+                    return c.channel == ch->id && c.type == type && (type != 0 || c.number == a.pitch) &&
+                           c.beat >= a.beat - 1.e-9 && c.beat <= a.beat + a.length + 1.e-9;
+                };
+                const ControllerEvent *first = nullptr, *last = nullptr;
+                for (const auto &c : pat->controllers)
+                    if (onLane(c))
+                    {
+                        if (!first || c.beat < first->beat)
+                            first = &c;
+                        if (!last || c.beat > last->beat)
+                            last = &c;
+                    }
+                if (!first || !last || last->beat - first->beat < .0625)
+                    return juce::Result::fail("controller.needTwoEvents: The range needs two events at least 1/16 beat apart");
+                const auto start = *first, end = *last;
+                if ((end.beat - start.beat) / .0625 > 8192)
+                    return juce::Result::fail("controller.rangeTooLong: Interpolate at most 512 beats at once");
+                std::erase_if(pat->controllers, [&](const auto &c)
+                              { return onLane(c) && c.id != start.id && c.id != end.id && c.beat > start.beat &&
+                                       c.beat < end.beat; });
+                for (double beat = start.beat + .0625; beat < end.beat - 1.e-9; beat += .0625)
+                {
+                    ControllerEvent c = start;
+                    c.id = next.allocate();
+                    c.beat = beat;
+                    c.value = start.value + (end.value - start.value) * (beat - start.beat) / (end.beat - start.beat);
+                    pat->controllers.push_back(c);
+                }
                 std::stable_sort(pat->controllers.begin(), pat->controllers.end(),
                                  [](const auto &x, const auto &y) { return x.beat < y.beat; });
             }

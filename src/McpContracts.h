@@ -435,6 +435,9 @@ inline juce::var commandArgumentSchema(const juce::String &id)
             return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{)" + common +
                                      R"(,"target":{"type":"integer","minimum":1,"description":"Controller event ID from vibera_inspect controllers."},)" +
                                      value + R"(},"required":["target","value"]})");
+        if (id == "notes.controller.interpolate")
+            return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{)" + common +
+                                     R"(,"channel":{"type":"integer","minimum":1},"text":{"type":"string","enum":["cc","pitchBend","pressure"],"default":"cc"},"pitch":{"type":"integer","minimum":0,"maximum":127,"description":"CC number (cc only)."},"beat":{"type":"number","minimum":0,"description":"Range start (beats)."},"length":{"type":"number","exclusiveMinimum":0,"maximum":512,"description":"Range length (beats). The first and last events of the lane inside it stay; everything between becomes a straight line every 1/16 beat (one Undo)."}},"required":["channel","beat","length"]})");
         return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{)" + common +
                                  R"(,"target":{"type":"integer","minimum":1,"description":"Controller event ID to delete."}},"required":["target"]})");
     }

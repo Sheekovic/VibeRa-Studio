@@ -174,6 +174,21 @@ void Studio::midiFileMenu()
                                                                      " (" + juce::String(count) + " events)");
             }
             edit.addSubMenu("Turn into automation clip", toAutomation, toAutomation.getNumItems() > 0);
+            // Interpolate: straight line between the first and last events of a lane in the time selection.
+            juce::PopupMenu interpolate;
+            if (const auto *part = controller.project.pattern(selectedPattern))
+            {
+                std::set<std::pair<int, int>> lanes;
+                for (const auto &c : part->controllers)
+                    if (c.channel == selectedChannel && c.type <= 2)
+                        lanes.insert({c.type, c.type == 0 ? c.number : 0});
+                for (const auto &[type, number] : lanes)
+                    interpolate.addItem(type == 0 ? 42600 + number : 42800 + type,
+                                        type == 0 ? "CC " + juce::String(number)
+                                                  : juce::String(type == 1 ? "Pitch bend" : "Pressure"),
+                                        timeRange);
+            }
+            edit.addSubMenu("Interpolate events in the time selection", interpolate, interpolate.getNumItems() > 0);
             // Insert current controller value: an event at the playhead holding the lane's
             // value there (the previous event, or the Channel's pitch bend / zero).
             juce::PopupMenu insertValue;
@@ -579,6 +594,22 @@ void Studio::midiFileMenu()
                 const int type = result <= 42427 ? 0 : result == 42501 ? 1 : 2;
                 if (auto inserted = safe->insertControllerValue(type, type == 0 ? result - 42300 : 0); inserted.failed())
                     safe->status = inserted.getErrorMessage();
+                return;
+            }
+            if ((result >= 42600 && result <= 42727) || result == 42801 || result == 42802)
+            {
+                const auto range =
+                    static_cast<Editor *>(safe->windows[1]->getContentComponent())->timeSelection();
+                if (!range)
+                    return;
+                CommandArgs a;
+                a.pattern = safe->selectedPattern;
+                a.channel = safe->selectedChannel;
+                a.text = result < 42800 ? "cc" : result == 42801 ? "pitchBend" : "pressure";
+                a.pitch = result < 42800 ? result - 42600 : 0;
+                a.beat = range->first;
+                a.length = range->second - range->first;
+                safe->command("notes.controller.interpolate", a);
                 return;
             }
             if ((result >= 42000 && result <= 42127) || result == 42201 || result == 42202)
