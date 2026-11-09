@@ -106,3 +106,17 @@ did not list.
 | --- | --- | --- |
 | Automation Clip options: Decimate points | done | `automation.source.decimate`, Playlist menu > Decimate points; playlist_tools_mcp |
 | Audio Clip: Make unique as sample (copy the file on disk) | done | `clip.uniqueSample`, clip menu > Make unique as sample; unique_sample_mcp |
+
+## Fourth pass (2026-11-09, chansettings_misc / chansettings_sampler / chansettings_ins / chansettings_main / menu_tools / menu_add / menu_edit / toolbar_panels pages)
+
+Most items already exist under VibeRa names (arpeggiator, echo, cut groups, trackers, gate, porta/mono,
+ping-pong loop, reverse, smart disable, score log, half speed, split by channel, last tweaked). Gaps:
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Recording: Wait for input (start on the first MIDI note, keeping that note) | missing | needs take capture of the triggering note |
+| Master pitch (global tuning offset for every instrument) | missing | add a project-wide cents offset to the per-Channel tuning tables and MTS-ESP |
+| Audio logger (rolling master-mix buffer, save the last minutes) | missing | real-time-safe preallocated ring buffer on the master output |
+| Recording filter (choose automation / notes / audio / clips) | missing | |
+| Sampler envelope presets | missing | Channel presets (.vibch) already save full settings |
+| Keep on disk / declicking modes | out of scope | FL sampler streaming and declick specifics |
