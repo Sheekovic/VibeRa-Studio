@@ -2396,5 +2396,29 @@
       "browser.forgetFolder"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiImportChannels.h:15:63e0222ab862": {
+    "operations": [
+      "notes.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiImportChannels.h:46:b57c70a84a6a": {
+    "operations": [
+      "notes.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiImportChannels.h:56:8da7e8cf8fab": {
+    "operations": [
+      "notes.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiImportChannels.h:57:07d949933623": {
+    "operations": [
+      "notes.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }
 }

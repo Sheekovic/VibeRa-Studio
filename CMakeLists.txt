@@ -969,6 +969,9 @@ set_tests_properties(coproducer_ideas_mcp PROPERTIES TIMEOUT 400)
 add_test(NAME workspace_layout_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-workspace-layout-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/workspace_layout_mcp")
 set_tests_properties(workspace_layout_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME midi_import_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-midi-import-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/midi_import_mcp")
+set_tests_properties(midi_import_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME controller_interpolate_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-controller-interpolate-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/controller_interpolate_mcp")
 set_tests_properties(controller_interpolate_mcp PROPERTIES TIMEOUT 120)
