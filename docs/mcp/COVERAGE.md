@@ -481,6 +481,8 @@ Callback candidates require manual expansion into individual controls and gestur
 | `tool.drumPaint` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `tool.play` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.noteGridHighlights` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `view.snapIncomingMidi` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `view.centerPlayhead` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.pianoFollow` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.pianoBackgroundWaveform` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.previewDuringPlayback` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -536,6 +538,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `notes.controller.add` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `notes.controller.set` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `notes.controller.delete` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `notes.controller.interpolate` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `channel.tuning` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `channel.scale` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `channel.mpe` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -551,7 +554,12 @@ Callback candidates require manual expansion into individual controls and gestur
 | `chord.set` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `chord.delete` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `chord.fill` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `marker.action` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `channel.articulations` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `channel.receiveMidi` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `pattern.marker.add` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `pattern.marker.rename` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `pattern.marker.delete` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `notes.articulation` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `rack.group.create` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `rack.group.rename` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -675,13 +683,26 @@ Callback candidates require manual expansion into individual controls and gestur
 | `automation.range` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.init` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.init.remove` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.source.flip` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.source.normalize` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.source.smooth` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.source.scale` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.merge` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `clip.rippleDelete` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.modulator` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.plugin.modulator` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.modulator.set` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.modulator.enable` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.modulator.delete` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.macro.add` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.macro.set` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.macro.rename` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.macro.delete` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.plugin.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `automation.macro.unlink` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 
-Custom callback candidates: 469; unreviewed: 469.
+Custom callback candidates: 473; unreviewed: 426.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
 Explicit UI inventory complete: False; known controls: 156; gaps: 0.
@@ -845,3 +866,56 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `piano.noteModes.propertiesEscape` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
 | `piano.noteModes.propertiesInvalid` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
 | `piano.noteModes.creationPayload` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+
+Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
+Native mouse/hardware qualification is separate from component/MCP evidence.
+
+| Callback | Canonical operations | Semantic readback | Skill / receipt |
+| --- | --- | --- | --- |
+| `src/CoProducerDock.h:62:ed1894a23c92` | view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_COPRODUCERDOCK_EVIDENCE.json) |
+| `src/CoProducerDock.h:63:0a5ec6e46bf9` | view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_COPRODUCERDOCK_EVIDENCE.json) |
+| `src/CoProducerDock.h:65:c3b223c4f80e` | view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_COPRODUCERDOCK_EVIDENCE.json) |
+| `src/CoProducerDock.h:68:94b2e7170d34` | view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_COPRODUCERDOCK_EVIDENCE.json) |
+| `src/Editors.h:1505:02de6042fbcf` | rack.graph | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:1646:e8dc84b29acb` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:1656:98e6eb7ad7ef` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:1657:af51c44904b4` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:1658:9796ed6c51bf` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:1663:6a15adc571fc` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:2067:215d56aa3db5` | piano.toolMute, piano.toolSlice | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:2078:acfaacdea27a` | piano.toolMute | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:7168:92585a8f4a47` | transport.stop | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:7643:7a084c3d3104` | notes.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1166:b99c68d7d7fd` | channel.sampler.cutItself | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1171:2a491bcf2447` | channel.sampler.cutItself | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1175:47892afddd59` | channel.sampler.cutItself | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1188:28d57540d487` | channel.sampler.cutItself, channel.sampler.loopPoints | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1203:fd380f87e4d3` | channel.sampler.loopPoints | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1252:738be340c0f1` | channel.sampler.stretch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1253:65f8e409cb2b` | channel.sampler.stretch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1254:28bf16799e4a` | channel.sampler.stretch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1268:ad474acf9068` | channel.sampler.stretch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1281:be92bd2a8c8c` | channel.sampler.stretch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1296:e36f59a75d0a` | channel.sampler.fitTempo | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1297:e40cd3eda67e` | channel.sampler.fitTempo | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1307:23b57c45a741` | channel.sampler.fitTempo | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1381:f538f38ad0d9` | channel.sampler.loop, channel.sampler.pingPong | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1392:b7d72c3c2f92` | channel.sampler.pingPong | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1506:d959c963d9e8` | channel.sampler.loopRange, channel.sampler.range | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/InstrumentWindow.h:1597:8229d8cacf67` | channel.mixer | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_INSTRUMENTWINDOW_EVIDENCE.json) |
+| `src/RackSwingControl.h:33:9679618b9f19` | project.swing | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKSWINGCONTROL_EVIDENCE.json) |
+| `src/RackSwingControl.h:52:c8d405b33814` | project.swing | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKSWINGCONTROL_EVIDENCE.json) |
+| `src/RackSwingControl.h:53:aedb0c5ee2a5` | project.swing | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKSWINGCONTROL_EVIDENCE.json) |
+| `src/Studio.cpp:111:e3a15424dee0` | transport.loop | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:127:072ebeec542f` | transport.loop | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:180:06a6349e5fdc` | project.tempo | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:181:7f64e0af97e7` | project.tempo | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:189:fdb43ed0f79e` | project.tempo | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:270:d32ad4196dc8` | pattern.add | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:293:98b403a2e470` | pattern.add, pattern.clone | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:303:ac3343a4dbff` | pattern.add, pattern.clone | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:311:dd9abaf98f9c` | pattern.add, pattern.clone | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/Studio.cpp:320:b7456b06e48c` | pattern.clone | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
+| `src/StudioAudioTake.cpp:942:4bca6e0920df` | performance.stopAll | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOAUDIOTAKE_EVIDENCE.json) |
+| `src/StudioMixerControls.cpp:33:ddb8f46d1082` | automation.macro.add | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOMIXERCONTROLS_EVIDENCE.json) |
+| `src/StudioMixerControls.cpp:70:e7da335725cd` | automation.macro.set | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOMIXERCONTROLS_EVIDENCE.json) |
