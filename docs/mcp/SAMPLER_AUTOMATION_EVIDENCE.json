@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
   "sourceInputs": {
-    "CMakeLists.txt": "28bb8d880d39e052482007bddcde9d4a2275503f81efddddf9afc3cedab2e4a1",
+    "CMakeLists.txt": "43d8c003a7b812a954d914264c2c56ecb47334a9dbb2acf68e0bcf403dad7a35",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "scripts/dev-select.py": "4eca9fe6273f887f39b394f94de78d102ef2dca10af7ff398d38f15fffb683c2",
     "scripts/distribution.py": "f6102501f12edf0f803a28b2f40b072915f041ba8a77b6b5a1996b18793f40ce",
@@ -21,7 +21,7 @@
     "src/AutomationState.cpp": "f45588dc8d2366bab2081546e939c72a788694f31c42c978bb1cd97b9affaac3",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "f35c6f046930e7482d9f8621a3cfae5a6c77aea966e2eb47c5818f8ddda0a28e",
+    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -47,7 +47,7 @@
     "src/SamplerSettings.h": "b8caf4fa414a4766e3177e65b4865060014720850501fc7a1763cf20a67c3206",
     "src/Settings.h": "ce6f33e6448f04010c0e05236cb4330e951c46fa6763b9290b5fc3a19b2b9a13",
     "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
-    "src/StudioMcp.cpp": "28f2753f0bd58aba2e4ce760e0cbc4b57399737e1e1f06989720e2a695ed953a",
+    "src/StudioMcp.cpp": "edc0eb8eee4415dcc351b9d9924ca19fc28ba8bd8ec3acd394ecb430bbcb4f75",
     "src/StudioMixerControls.cpp": "8f6a4f91f0535c7499a8b1367933317a61af97e4fa14723d0223d09e94451cca",
     "src/StudioMixerMacros.inc": "8e2acb72aef73073839069806dbec2108046591fbad92d149d1846772b710259",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
@@ -79,7 +79,7 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-051902/affected-tests.log",
-    "tests": 278
+    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
+    "tests": 279
   }
 }

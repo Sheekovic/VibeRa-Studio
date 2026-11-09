@@ -1366,5 +1366,276 @@
       "synth.parameter.set"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/GuidePage.h:71:683dc1b76071": {
+    "operations": [
+      "transport.guide",
+      "transport.metronome"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/GuidePage.h:79:4f02409c03c7": {
+    "operations": [
+      "transport.guide"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/GuidePage.h:87:ee3cc901c4d0": {
+    "operations": [
+      "transport.guide"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/GuidePage.h:92:8cd9c0c03e80": {
+    "operations": [
+      "transport.guide"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/GuidePage.h:97:0671acd10ed0": {
+    "operations": [
+      "project.meter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/GuidePage.h:98:530a38f62be3": {
+    "operations": [
+      "project.meter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiPage.h:70:5cb5668a913a": {
+    "operations": [
+      "midi.input"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiPage.h:79:533b6b08e174": {
+    "operations": [
+      "midi.input"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiPage.h:99:acf82b53b675": {
+    "operations": [
+      "midi.input"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MidiPage.h:105:257567ec32ed": {
+    "operations": [
+      "midi.panic"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:348:cb97681ad064": {
+    "operations": [
+      "controller.binding"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:374:dd9ebb27309f": {
+    "operations": [
+      "controller.binding"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:935:9013ad340cb8": {
+    "operations": [
+      "automation.plugin.create"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:936:4d5f9d6e45db": {
+    "operations": [
+      "automation.plugin.init"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:937:302ab56f075c": {
+    "operations": [
+      "automation.plugin.init.remove"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:940:250c96f9ead8": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:945:60e5e27ed0db": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:946:0246ce76094b": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:954:08c64c2d12e1": {
+    "operations": [
+      "plugin.parameters.refresh"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:958:9d2bd3aa3482": {
+    "operations": [
+      "plugin.recover"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:987:4bc5b7a874fc": {
+    "operations": [
+      "plugin.notifications"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:1001:0745efa97c2b": {
+    "operations": [
+      "automation.plugin.modulator",
+      "automation.modulator.enable",
+      "automation.modulator.delete"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:89:da04d61d68f9": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:90:142a5377b5c8": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:102:d8e65967097a": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:103:f6b1de08e8da": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:111:340dd9dfd60e": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:306:a76d41a27533": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:338:23b9e4034d74": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:196:bcfe17c3d93e": {
+    "operations": [
+      "project.tapTempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:198:b6fe2307883f": {
+    "operations": [
+      "transport.play"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:335:569c58e881d4": {
+    "operations": [
+      "project.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:336:32acf0e661fd": {
+    "operations": [
+      "project.open"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:337:f9b7afebdc39": {
+    "operations": [
+      "project.export"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:339:12311c530e57": {
+    "operations": [
+      "project.new"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:346:0f24f5c6342a": {
+    "operations": [
+      "transport.metronome"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:351:16b4d9a615c4": {
+    "operations": [
+      "transport.countIn"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:393:60d9800f0352": {
+    "operations": [
+      "midi.typing"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:416:9fce6795e4a4": {
+    "operations": [
+      "transport.record"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:478:134f38944baf": {
+    "operations": [
+      "transport.stop"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:501:76b9f4397c39": {
+    "operations": [
+      "edit.undo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:515:cc9c961c19fd": {
+    "operations": [
+      "edit.redo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:570:86f709af3559": {
+    "operations": [
+      "view.rack",
+      "view.piano",
+      "view.playlist",
+      "view.mixer"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/CoProducerPanel.h:1349:75d9329cdb2c": {
+    "operations": [
+      "coproducer.accept",
+      "coproducer.replace"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }
 }

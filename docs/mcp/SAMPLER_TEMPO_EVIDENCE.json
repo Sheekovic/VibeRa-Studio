@@ -1,19 +1,19 @@
 {
   "passed": true,
   "scope": "Verified sampler tempo increment only; RPS-J and the whole module remain incomplete. No full-FL, native input, listening or hardware claim.",
-  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "28bb8d880d39e052482007bddcde9d4a2275503f81efddddf9afc3cedab2e4a1",
+    "CMakeLists.txt": "43d8c003a7b812a954d914264c2c56ecb47334a9dbb2acf68e0bcf403dad7a35",
     "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
     "src/Studio.cpp": "9c58d30ac5700fc88c9a29f2d9be08745c2805a59c19027d607a7c6b2175f1e0",
-    "src/StudioMcp.cpp": "28f2753f0bd58aba2e4ce760e0cbc4b57399737e1e1f06989720e2a695ed953a",
+    "src/StudioMcp.cpp": "edc0eb8eee4415dcc351b9d9924ca19fc28ba8bd8ec3acd394ecb430bbcb4f75",
     "src/StudioSampler.cpp": "a903c13be242986663c5f979a5939562257ce907936bf51e33fade6dfe996002",
     "src/InstrumentWindow.h": "07770b0b75bdfb19506febdf8b90c67efe983f49ecfc92b575719216ad877252",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "f35c6f046930e7482d9f8621a3cfae5a6c77aea966e2eb47c5818f8ddda0a28e",
+    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
     "src/McpContracts.h": "bbaac235cb7acf5081742a0faa3e9e3c21c94593f0b5ef2ed2b00b28fdd88f79",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Sampler.h": "f441e0778acf4d6e0e2208a191d2c50001dd8a6718787a7775351a66ef16367b",
@@ -188,7 +188,7 @@
   "receipt": "build/sampler-tempo-semantic-20261019/verification.json",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-051902/affected-tests.log",
-    "tests": 278
+    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
+    "tests": 279
   }
 }

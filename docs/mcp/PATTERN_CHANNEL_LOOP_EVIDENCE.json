@@ -6,11 +6,11 @@
   "scope": "Partial RPS-E/L/M per-Pattern Channel loops and stopped Burn; all RPS software/human rows stay open",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "28bb8d880d39e052482007bddcde9d4a2275503f81efddddf9afc3cedab2e4a1",
+    "CMakeLists.txt": "43d8c003a7b812a954d914264c2c56ecb47334a9dbb2acf68e0bcf403dad7a35",
     "CMakePresets.json": "a17190f02b339b6aecc8c8802b7c082a82bb67992153a290d04f5e441e876400",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "8b94b49e4015ea4d983c87093c9f16937686cc38c11460098f13e47ffd5d2472",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "2a26bc4eb4eb4d13f42af8ea2d3a8f730db86ba5440f84932eed3d586ceec0b3",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "docs/CHANNEL_LOOPS.md": "0bc8db903611d4acfd1f61185236605be9a9713026ef66bdf7def717fd91a7c0",
     "scripts/dev_support.py": "498169f5457fb526aa7ca60e1c881e77375004b17056a7a5320eebcd0269959d",
@@ -55,7 +55,7 @@
     "src/CoProducerPanel.h": "cd6ce9600be1196d2d7bb15b0be6fff81ad247eda746e931716361c050c8eaa6",
     "src/CoProducerWorker.cpp": "f951b754977a2f029e781d3d0d1e8832466bd6efc8405aceac13fc83b520a23d",
     "src/CoProducerWorker.h": "6db564d49e07f3ec15704f42dfbd68bc3848293f66db675599a8f9c6f0c1dd29",
-    "src/Commands.cpp": "f35c6f046930e7482d9f8621a3cfae5a6c77aea966e2eb47c5818f8ddda0a28e",
+    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/CommandsNativeScalarHistory.inc": "e65cb51884f76407afc1362561f1fc969aabf3cccc1227a09229756d65185548",
     "src/CompensationGraph.h": "e8e954dab9a0352afc31048c40d12c9ae6cbed743628b0aadadc96f06a6f7fe6",
@@ -243,7 +243,7 @@
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
     "src/StudioDevicePreparation.h": "61cddfd7349c1d6ee49101996180953587c6ff0fc129927e2a9f0b3b4a55a7dd",
     "src/StudioDevicePreparation.inc": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352",
-    "src/StudioMcp.cpp": "28f2753f0bd58aba2e4ce760e0cbc4b57399737e1e1f06989720e2a695ed953a",
+    "src/StudioMcp.cpp": "edc0eb8eee4415dcc351b9d9924ca19fc28ba8bd8ec3acd394ecb430bbcb4f75",
     "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
     "src/StudioMidiTakeRecoveryAcceptance.cpp": "db176e5c066433a5edcd60ad794927450c598c7736369cab24c4ea9aa6804829",
     "src/StudioMixer.cpp": "82b67f8f8a61dda38598a5f12ac4df760180d5602566ed7f1377a61b8a35d0a7",
@@ -566,7 +566,7 @@
     "tests/effects/AllocationGuard.h": "aca46c91fb96e9c11abc57f25fef8f6d05318093bfbcf7545748ead869b9b968",
     "tests/effects/DspTests.cpp": "fb7ef4370424e43d8cd6e62936001f557b76bedcf54fe936fa51e4214010098b"
   },
-  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
   "workerSha256": "1fd6690c32ee073c8927d4f6bcca189a3fe71926c1834ee6aeb549b771f4e1e8",
   "testRunnerSha256": "4a0a16909cdf1cb75a95d4f397fec43cf8e29b2ca9d2942e2a4c01bebf2d5fd7",
   "schema": 29,
@@ -713,7 +713,7 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-051902/affected-tests.log",
-    "tests": 278
+    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
+    "tests": 279
   }
 }

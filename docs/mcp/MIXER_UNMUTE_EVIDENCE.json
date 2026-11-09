@@ -1,15 +1,15 @@
 {
   "passed": true,
-  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
   "sourceInputs": {
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "8b94b49e4015ea4d983c87093c9f16937686cc38c11460098f13e47ffd5d2472",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "2a26bc4eb4eb4d13f42af8ea2d3a8f730db86ba5440f84932eed3d586ceec0b3",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
     "scripts/verify-mixer-controls-desktop.py": "96dc51a8941f3c8bcb5988372f63341651f1a11476ac9af856b866c796a98545",
     "scripts/verify-mixer-controls-mcp.py": "d7983a6c5cfbd76f8c29df43065edb52a6c52ba60270337faf6ec3700b0d5c2f",
     "skills/vibera-studio/references/mixer-controls.md": "05c7cd87ad2abb980af6f24d9c652656c3dc8aed754c9638795e8d9b8cdb7dce",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
-    "src/Commands.cpp": "f35c6f046930e7482d9f8621a3cfae5a6c77aea966e2eb47c5818f8ddda0a28e",
+    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4",
     "src/McpContracts.h": "bbaac235cb7acf5081742a0faa3e9e3c21c94593f0b5ef2ed2b00b28fdd88f79",
@@ -35,7 +35,7 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-051902/affected-tests.log",
-    "tests": 278
+    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
+    "tests": 279
   }
 }

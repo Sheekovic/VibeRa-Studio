@@ -4,7 +4,7 @@
     "src/Studio.cpp": "9c58d30ac5700fc88c9a29f2d9be08745c2805a59c19027d607a7c6b2175f1e0"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -58,6 +58,7 @@
     "flp_import",
     "groove_mcp",
     "gui_workflow",
+    "guide_midi_input_mcp",
     "history_destination_admission",
     "history_ui_recovery",
     "installer_package",
@@ -285,6 +286,6 @@
     "vibera_synth_processor",
     "vocal_pitch_mcp"
   ],
-  "sourceLog": "build/dev/20261109-051902/affected-tests.log",
+  "sourceLog": "build/dev/20261109-060440/affected-tests.log",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

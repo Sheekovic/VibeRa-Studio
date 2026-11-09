@@ -106,8 +106,13 @@ the pointer tool or invent native parameter identities.
 `vibera_transport` starts/stops/seeks and switches Pattern/Song. Physical MIDI
 input must already be configured. `notes.record` commits a supplied typed take
 through canonical validation; it is not evidence of live hardware capture.
-Device/port/settings, monitoring and long-lived capture control still need
-broader semantic coverage and physical qualification.
+Settings without ports: `vibera_transport {"action":"guide","countInBars":0..2,
+"sound":0..2 (Click/Wood/Beep),"gain":0..1,"metronome":bool}` (read back `countInBars`,
+`guideSound`, `guideGain`, `metronome`) and `{"action":"midiInput","midiChannel":0..16
+(0 all),"quantizeStart":bool,"quantizeEnd":bool}` (read back `state.midiInput`; refused during
+a take; a channel change sends All Notes Off). Fields left out stay as they are. These are local
+preferences, not Undo steps. Device/port selection, monitoring and long-lived capture control
+still need broader semantic coverage and physical qualification.
 
 ## Import a MIDI file
 
