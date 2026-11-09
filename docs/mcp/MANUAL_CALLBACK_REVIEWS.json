@@ -41,6 +41,88 @@
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   },
+  "src/Editors.h:1521:e72404a47c50": {
+    "operations": [
+      "rack.group.previous",
+      "rack.group.next"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:1528:3161df132d74": {
+    "operations": [
+      "rack.group.dialog",
+      "rack.group.create",
+      "rack.group.rename",
+      "rack.group.delete"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:1574:4e33d3dc6b3f": {
+    "operations": [
+      "playlist.zoomIn",
+      "playlist.zoomOut"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:2028:f8298e0960ca": {
+    "operations": [
+      "tool.draw",
+      "tool.paint",
+      "tool.slice",
+      "tool.slip",
+      "tool.mute",
+      "tool.select",
+      "tool.delete",
+      "tool.zoom",
+      "tool.play"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:2088:9e51ddb4c17f": {
+    "operations": [
+      "piano.zoomIn",
+      "piano.zoomOut"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:2106:9317c9abd2eb": {
+    "operations": [
+      "notes.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:2112:e33cb0566347": {
+    "operations": [
+      "piano.ghosts"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:2113:9051dd6d7c85": {
+    "operations": [
+      "piano.editGhosts"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:2120:5d746712e3d5": {
+    "operations": [
+      "piano.zoomIn",
+      "piano.zoomOut",
+      "piano.fit"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8395:c018a38af1ef": {
+    "operations": [
+      "view.plugins"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8396:a9d80658a014": {
+    "operations": [
+      "channel.add"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
   "src/InstrumentWindow.h:1008:a499a771a893": {
     "operations": [
       "channel.sampler.mono",
