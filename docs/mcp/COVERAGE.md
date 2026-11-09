@@ -750,7 +750,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `automation.plugin.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.macro.unlink` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 
-Custom callback candidates: 454; unreviewed: 81.
+Custom callback candidates: 454; unreviewed: 78.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
 Explicit UI inventory complete: False; known controls: 156; gaps: 0.
@@ -1002,6 +1002,7 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/Editors.h:1657:af51c44904b4` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:1658:9796ed6c51bf` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:1663:6a15adc571fc` | playlist.grouping | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:1669:9a3cebeb0ad5` | arrangement.add, arrangement.clone, arrangement.delete, arrangement.merge, arrangement.rename, arrangement.select, clip.delete, clip.duplicate, clip.group, clip.ungroup, clip.unique, edit.redo, edit.undo, marker.add, marker.addEvery, marker.addPair, marker.next, marker.previous, marker.selectSection, meter.change.add, meter.change.delete, playlist.follow, playlist.grouping, playlist.picker, playlist.stretchMode, tempo.change.add, tempo.curve, view.followCenter | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:2028:f8298e0960ca` | tool.delete, tool.draw, tool.mute, tool.paint, tool.play, tool.select, tool.slice, tool.slip, tool.zoom | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:2067:215d56aa3db5` | piano.toolMute, piano.toolSlice | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:2078:acfaacdea27a` | piano.toolMute | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
@@ -1010,7 +1011,9 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/Editors.h:2112:e33cb0566347` | piano.ghosts | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:2113:9051dd6d7c85` | piano.editGhosts | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:2120:5d746712e3d5` | piano.fit, piano.zoomIn, piano.zoomOut | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:6594:d8a6ceaa6dfa` | audio.trim, automation.move, automation.point.move, channel.gain, channel.pan, clip.move, clip.slip, clip.trimStart, mixer.gain, mixer.pan, mixer.send, notes.add, notes.move, notes.slice, notes.stretch, notes.velocity, track.height | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:7168:92585a8f4a47` | transport.stop | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
+| `src/Editors.h:7532:ca89c2d2b571` | mixer.pan, mixer.send | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:7643:7a084c3d3104` | notes.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:8016:360ef80c63b1` | view.editorWindow | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |
 | `src/Editors.h:8021:c388b5285c7a` | view.editorWindow | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_EDITORS_EVIDENCE.json) |

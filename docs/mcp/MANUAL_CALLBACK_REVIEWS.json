@@ -2420,5 +2420,67 @@
       "notes.import"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:1669:9a3cebeb0ad5": {
+    "operations": [
+      "arrangement.add",
+      "arrangement.clone",
+      "arrangement.delete",
+      "arrangement.merge",
+      "arrangement.rename",
+      "arrangement.select",
+      "clip.delete",
+      "clip.duplicate",
+      "clip.group",
+      "clip.ungroup",
+      "clip.unique",
+      "edit.redo",
+      "edit.undo",
+      "marker.add",
+      "marker.addEvery",
+      "marker.addPair",
+      "marker.next",
+      "marker.previous",
+      "marker.selectSection",
+      "meter.change.add",
+      "meter.change.delete",
+      "playlist.follow",
+      "playlist.grouping",
+      "playlist.picker",
+      "playlist.stretchMode",
+      "tempo.change.add",
+      "tempo.curve",
+      "view.followCenter"
+    ],
+    "reviewer": "Handler body read 2026-11-09 (lines 1669-2015): every document edit goes through these registered commands; no direct project writes."
+  },
+  "src/Editors.h:6594:d8a6ceaa6dfa": {
+    "operations": [
+      "audio.trim",
+      "automation.move",
+      "automation.point.move",
+      "channel.gain",
+      "channel.pan",
+      "clip.move",
+      "clip.slip",
+      "clip.trimStart",
+      "mixer.gain",
+      "mixer.pan",
+      "mixer.send",
+      "notes.add",
+      "notes.move",
+      "notes.slice",
+      "notes.stretch",
+      "notes.velocity",
+      "track.height"
+    ],
+    "reviewer": "Handler body read 2026-11-09 (lines 6594-7167): every document edit goes through these registered commands; no direct project writes."
+  },
+  "src/Editors.h:7532:ca89c2d2b571": {
+    "operations": [
+      "mixer.pan",
+      "mixer.send"
+    ],
+    "reviewer": "Handler body read 2026-11-09 (lines 7532-7642): every document edit goes through these registered commands; no direct project writes."
   }
 }
