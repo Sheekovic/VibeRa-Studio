@@ -2163,5 +2163,148 @@
       "ai.idea.audition"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:336:5de27db4ab88": {
+    "operations": [
+      "controller.binding"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:398:cdae833969f3": {
+    "operations": [
+      "controller.binding"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:404:604351efd8de": {
+    "operations": [
+      "controller.binding"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MixerEqEditor.h:95:53e699cace59": {
+    "operations": [
+      "mixer.eq",
+      "mixer.eqReset"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MixerEqEditor.h:112:dca6c9b67bff": {
+    "operations": [
+      "mixer.eq"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MixerEqEditor.h:124:24554b2cb172": {
+    "operations": [
+      "mixer.eq"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/MixerEqEditor.h:131:08260a2c198c": {
+    "operations": [
+      "mixer.eq"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/RackVelocityGraph.h:392:47a6ec64ed16": {
+    "operations": [
+      "steps.velocity",
+      "steps.pitch",
+      "steps.pan",
+      "steps.fine",
+      "steps.modX",
+      "steps.modY",
+      "steps.shift",
+      "steps.repeat",
+      "steps.release"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/RackVelocityGraph.h:492:8b8a18f493cc": {
+    "operations": [
+      "steps.velocity",
+      "steps.pitch",
+      "steps.pan",
+      "steps.fine",
+      "steps.modX",
+      "steps.modY",
+      "steps.shift",
+      "steps.repeat",
+      "steps.release"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/RackVelocityGraph.h:497:d2f3322eb5dd": {
+    "operations": [
+      "steps.velocity",
+      "steps.pitch",
+      "steps.pan",
+      "steps.fine",
+      "steps.modX",
+      "steps.modY",
+      "steps.shift",
+      "steps.repeat",
+      "steps.release"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerGestures.h:458:cfd0d6be6d11": {
+    "operations": [
+      "channel.sampler.start",
+      "channel.sampler.end",
+      "channel.sampler.loopStart",
+      "channel.sampler.loopEnd",
+      "channel.sampler.range",
+      "channel.sampler.loopRange"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerGestures.h:462:134e45bf5071": {
+    "operations": [
+      "channel.sampler.start",
+      "channel.sampler.end",
+      "channel.sampler.loopStart",
+      "channel.sampler.loopEnd",
+      "channel.sampler.range",
+      "channel.sampler.loopRange"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:30:1ee288b187b6": {
+    "operations": [
+      "shortcut.bind"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:702:bb156f9490ad": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:977:3d57f236865c": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:985:7a8a8225fb52": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioPluginParameters.cpp:939:bdb8ad99d608": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioVocalPitch.cpp:104:248b18036d07": {
+    "operations": [
+      "audio.vocalPitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }
 }
