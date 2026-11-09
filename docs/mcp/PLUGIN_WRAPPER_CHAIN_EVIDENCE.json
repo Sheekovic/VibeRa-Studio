@@ -17,7 +17,7 @@
     "src/StudioPluginWrapperChains.inc": "5db55d8f0ba4175f1c3b22c74d52f38e283160227983b85d7b3ccf8ecb0a4d9a",
     "src/StudioMixerChains.inc": "421cac7ff6fe44d131fedd1e6abd20b39e008a14df997821d89594d5450a6abb",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
-    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
+    "src/Commands.cpp": "4ea3631aceb505eaf6e1d80333a3c1f98c104a400ed8263bd8e2ad359948dd59",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/AudioEngine.cpp": "2de1fd5a44f1be460a21891eec1238dff44cdf6e7ba8a4f37a6484ab6316b842",
     "src/EffectChain.cpp": "99bcc8cc3c454131646f68ee56bc3f666caf79039870c187c8a70eecd77fb778",
@@ -43,7 +43,7 @@
     "Active synthetic-device detector disconnect/reconnect: exact parent/child close ACK, native replacement, one history edge, active source recovery, original PCM/save/export oracles.",
     "Installed Analog Lab V/MVibratoMB: actual chain file/state/history/replacement/hosted WAV and native main-I/O jobs, exact stable binary/provider/script inputs."
   ],
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "workerSha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6",
   "focused": {
     "plugin_main_io_model": 0.0592918,
@@ -83,9 +83,9 @@
   "inheritedMcpCoverageComplete": false,
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "sourceLog": "build/dev/20261109-191202/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 284
+    "tests": 285
   }
 }

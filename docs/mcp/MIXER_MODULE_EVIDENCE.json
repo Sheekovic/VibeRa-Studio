@@ -4,7 +4,7 @@
   "passed": true,
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "365504b4c8b94cf8f9c488916e7843273e1573a877a4b233efe29b6f6d374a34",
+    "CMakeLists.txt": "25a61f31b02db44338b79617c2962e61323142094227d63ceb576c9e3049a461",
     "scripts/mcp-coverage.py": "d9dbc937441b8e333fc3891559db93f6da9b0e8634a831d694472136448cec9d",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "scripts/verify-installed-mcp.py": "8f1f935f120621a334097114b6fd07eabbff24a0e15b68f4aaae8e7fee35f55c",
@@ -22,7 +22,7 @@
     "skills/vibera-studio/SKILL.md": "6c47416e96fcd2fdcad8286468a89546ea6df46d59639b214bb91e42d4dcc6f6",
     "skills/vibera-studio/references/effect-chains.md": "ec30d226e977d294ee293825a0dd83c29789fc5de892b96de98c3c576d9c4131",
     "skills/vibera-studio/references/mixer-automation-recording.md": "927530586b5f49b1d16ca46ab0499c11367149a7f8d8d8e4b97864a583a1678e",
-    "skills/vibera-studio/references/mixer-automation.md": "4d7c41841f1884cb96ceea1a1e11c322c6286d966edac369d599bc038b897801",
+    "skills/vibera-studio/references/mixer-automation.md": "e8ef22f8542109be5ee0e11ca97aefb88fdcae1b97d1149979388812c01d87ae",
     "skills/vibera-studio/references/mixer-controls.md": "05c7cd87ad2abb980af6f24d9c652656c3dc8aed754c9638795e8d9b8cdb7dce",
     "skills/vibera-studio/references/mixer-effects.md": "208880c8c9a784b3c65b158fdd83434b8e6addb9c5ea30e71bda233998614bd5",
     "skills/vibera-studio/references/mixer-insert-order.md": "90f4e54b97e0142f083a7b000018b7c35f0d0350ceaaf6f6f5c00646a0f191c8",
@@ -34,18 +34,18 @@
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
     "src/Automation.cpp": "91afb80c8b2398de7329e299c413c021f72c23227bda6311e871274b9c93bac7",
     "src/Automation.h": "54fdd663f86b2ac9dc89aad937f8fdb0d7005b444a962e3c595fe8e8d8a4df42",
-    "src/AutomationCommands.cpp": "2944de93ae7364998e6be6511e8b533b510a99eaa256992fa30e30a73cc71021",
+    "src/AutomationCommands.cpp": "814cf57b83fb741e5473596782403ca90695c678c36fb784d319ad5e3972347b",
     "src/AutomationCommands.h": "5945144556c11036fd1ca39253eb7d00b13bd5fd6bc84af9ee986adb5e32db73",
     "src/AutomationState.cpp": "c645d7ececa619499436420ca13c90d3aee7bf71023cd4e084cc3a8d9f05151a",
     "src/AutomationState.h": "1b841145128f4713d9b21b06448198249a58af6eccc246c8a92b45b5a3985ec4",
     "src/ChannelBalance.h": "13d8a6aa76b1032926c2d868f413d217d0001517700dde69b7e24808e7106a5c",
     "src/ChannelRouting.inc": "74ce23f6adcd77d0697c6481b595ec132e4a5c50b9269fda70cc0010a4e4c9cb",
     "src/ChannelRoutingCoordinator.h": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6",
-    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
+    "src/Commands.cpp": "4ea3631aceb505eaf6e1d80333a3c1f98c104a400ed8263bd8e2ad359948dd59",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
-    "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4",
+    "src/Editors.h": "15fa08dbdb504bdb7237e1e1f02e1d424c7e430a4635eaa9e3bbb465f4f76c00",
     "src/EffectChain.cpp": "99bcc8cc3c454131646f68ee56bc3f666caf79039870c187c8a70eecd77fb778",
     "src/EffectChain.h": "b61578effc0f7c97d3983b1e39b86205afef4cc8c46166741f1a4750ddd556b1",
     "src/EffectChainPresetFiles.cpp": "ef4fb33bd29a65fae0b8a3a1d3ef2c851e776c3cd5ce8d71c77b8dfc4b3dee1b",
@@ -91,7 +91,7 @@
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
     "src/RemoteEffect.h": "1c8d35bfa24cdda48a792efe818785b729561543d492ec24ad36743583f82801",
-    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.cpp": "ceb4b08906a735f98137dbfb162c51ec38186c70c385e84f481c81e510c80599",
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioDevicePreparation.inc": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352",
     "src/StudioMcp.cpp": "c89905157241d95a19bdcd283695d2273c0bd96d7a2d3319654da18d11fdd9f0",
@@ -156,7 +156,7 @@
     "tests/StoppedEffectNativeAcceptance.h": "59bbae9226079d2ceb2252a7c6ac4196319fdb641a669781ffe0c824b76f74dd",
     "tests/StoppedEffectOrdinaryForwardAcceptance.h": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
   },
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "checks": [
     {
       "id": "mixer.routing",
@@ -1205,9 +1205,9 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "sourceLog": "build/dev/20261109-191202/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 284
+    "tests": 285
   }
 }

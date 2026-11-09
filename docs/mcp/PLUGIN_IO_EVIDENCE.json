@@ -6,7 +6,7 @@
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
     "src/StudioPluginIo.inc": "ff3f53993520dcc21dc018ab35c826e4dc5d84e59473c0596fb076032eb9b4dc",
-    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.cpp": "ceb4b08906a735f98137dbfb162c51ec38186c70c385e84f481c81e510c80599",
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioMcp.cpp": "c89905157241d95a19bdcd283695d2273c0bd96d7a2d3319654da18d11fdd9f0",
     "src/StudioMixerChains.inc": "421cac7ff6fe44d131fedd1e6abd20b39e008a14df997821d89594d5450a6abb",
@@ -15,7 +15,7 @@
     "src/McpContracts.h": "bbaac235cb7acf5081742a0faa3e9e3c21c94593f0b5ef2ed2b00b28fdd88f79",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
+    "src/Commands.cpp": "4ea3631aceb505eaf6e1d80333a3c1f98c104a400ed8263bd8e2ad359948dd59",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
@@ -39,12 +39,12 @@
     "skills/vibera-studio/references/plugin-audio-io.md": "b16c09aff13a7853587a7ee797fb111eafd6bf003c13924d3a1a410c5a7d8de4",
     "skills/vibera-studio/references/effect-chains.md": "ec30d226e977d294ee293825a0dd83c29789fc5de892b96de98c3c576d9c4131",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
-    "CMakeLists.txt": "365504b4c8b94cf8f9c488916e7843273e1573a877a4b233efe29b6f6d374a34",
+    "CMakeLists.txt": "25a61f31b02db44338b79617c2962e61323142094227d63ceb576c9e3049a461",
     "scripts/mcp-coverage.py": "d9dbc937441b8e333fc3891559db93f6da9b0e8634a831d694472136448cec9d",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "src/MixerChainWorkflowContracts.h": "d1dbd9357f9305824ab3a922a4550d3cf0a73e38a5705964bb3e6fcc0d36ad8c"
   },
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "workerSha256": "6e02557aad3bf9e805b95167609d75db09d021ad329d91e7830ab6d1bf8fbfda",
   "checks": [
     "Actual instrument/effect Audio input/output contextual menu dispatch reaches canonical plugin.io; component dispatch, not native OS input.",
@@ -391,9 +391,9 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "sourceLog": "build/dev/20261109-191202/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 284
+    "tests": 285
   }
 }

@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "sourceInputs": {
-    "CMakeLists.txt": "365504b4c8b94cf8f9c488916e7843273e1573a877a4b233efe29b6f6d374a34",
+    "CMakeLists.txt": "25a61f31b02db44338b79617c2962e61323142094227d63ceb576c9e3049a461",
     "scripts/dev_support.py": "f4e99deebe8388b42ca4f74a68d4425a82c87b3f74f60cb64a76d43842c56a78",
     "scripts/mcp-coverage.py": "c8174ad52f5a3382697d2de2b32123424db8fe282ee0b60a7e45fa7e207c060c",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
@@ -16,7 +16,7 @@
     "src/AudioEngine.cpp": "2de1fd5a44f1be460a21891eec1238dff44cdf6e7ba8a4f37a6484ab6316b842",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
-    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
+    "src/Commands.cpp": "4ea3631aceb505eaf6e1d80333a3c1f98c104a400ed8263bd8e2ad359948dd59",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/ControllerPage.h": "0eaeea82572f467f4ba4fe8fbc56999d8ab56681f983cd820b91c6a2d640b954",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
@@ -47,7 +47,7 @@
     "src/SamplerModulationSettings.h": "26d887c347fbba1929e215b44bacac3028ec430f3542b0235432ad6fc0b30928",
     "src/SamplerSettings.h": "b8caf4fa414a4766e3177e65b4865060014720850501fc7a1763cf20a67c3206",
     "src/Settings.h": "bc213f35cd515e3aa42df1b9bd41344281b79d452b519f49446c779149e2ada4",
-    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.cpp": "ceb4b08906a735f98137dbfb162c51ec38186c70c385e84f481c81e510c80599",
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioAutomationRecording.inc": "ff38f154fa499aadc398e7009b94e0cba9fde644bcc78f53bf5962b6bec84db1",
     "src/StudioController.cpp": "fc3246bc52f03a9f6a8e8841091ac58ccd74e8e08c2a943a9b0dd4c562a4c156",
@@ -75,9 +75,9 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "sourceLog": "build/dev/20261109-191202/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 284
+    "tests": 285
   }
 }

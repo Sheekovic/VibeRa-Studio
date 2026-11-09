@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "sourceInputs": {
     "scripts/verify-plugins-page-mcp.py": "bcd86eac30636b7395ee70a71cbaa0fe6f92f73efe8594479e1414eb8e61a255",
     "src/PluginPage.h": "0f0d7330e4a645a5b47b72fe384846d0da40bef5473c58da9cb6b59a4e45c56b",
     "src/StudioMcp.cpp": "c89905157241d95a19bdcd283695d2273c0bd96d7a2d3319654da18d11fdd9f0",
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
-    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
+    "src/Commands.cpp": "4ea3631aceb505eaf6e1d80333a3c1f98c104a400ed8263bd8e2ad359948dd59",
     "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c"
   },
   "sourceHashMode": "text-lf-v1",
@@ -19,15 +19,15 @@
     "channelTargetSelection: vibera_select selects the Channel",
     "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
     "manualValue: the effect exposes its native parameters",
-    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'ee188431bcba4bafa8beca1854515e95', 'revision': 3, 'operation': '6c2d9513f4d747bc802a399cad212b51', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': '3ff5f105374443ec90cc94b8580ac318', 'revision': 3, 'operation': '838071a4f8ae475fb0852d0472b9be4c', 'kind': 'set', 'plugin': 46, 'requestedI",
     "manualValue: the parameter edit enters project history"
   ],
   "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "sourceLog": "build/dev/20261109-191202/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 284
+    "tests": 285
   }
 }

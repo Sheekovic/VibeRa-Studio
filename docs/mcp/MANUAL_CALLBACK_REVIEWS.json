@@ -2506,6 +2506,7 @@
       "automation.record.finish",
       "automation.sampler.range",
       "automation.source.clone",
+      "automation.source.decimate",
       "automation.source.flip",
       "automation.source.normalize",
       "automation.source.scale",
@@ -2581,6 +2582,7 @@
       "clip.trackUp",
       "clip.ungroup",
       "clip.unique",
+      "clip.uniqueSample",
       "clipboard.copy",
       "clipboard.paste",
       "controller.bankNext",
@@ -3075,5 +3077,145 @@
       "workspace.tileFocused"
     ],
     "reviewer": "Handler read 2026-11-09 (with its Studio helpers three levels deep): every document/view operation goes through these registered commands; no direct project writes."
+  },
+  "src/Editors.h:8402:c018a38af1ef": {
+    "operations": [
+      "view.plugins"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8403:a9d80658a014": {
+    "operations": [
+      "channel.add"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8023:360ef80c63b1": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8028:c388b5285c7a": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8031:3f623484e630": {
+    "operations": [
+      "view.rack",
+      "view.piano",
+      "view.playlist",
+      "view.mixer"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8032:61592bf1cb95": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8117:f0a4537b85a8": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8097:b5608f1385e8": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8107:e4da68963afc": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8113:76ab8b2ebc58": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8143:1739547795c7": {
+    "operations": [
+      "view.workspaceLayout"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8151:8df0a56a9969": {
+    "operations": [
+      "view.workspaceLayout"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8382:29713759279c": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8386:f167aaef0c44": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8574:3adddce954c8": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8629:473d4592f831": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8663:fefb426c96cd": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8667:fd486e34098a": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:6601:d8a6ceaa6dfa": {
+    "operations": [
+      "audio.trim",
+      "automation.move",
+      "automation.point.move",
+      "channel.gain",
+      "channel.pan",
+      "clip.move",
+      "clip.slip",
+      "clip.trimStart",
+      "mixer.gain",
+      "mixer.pan",
+      "mixer.send",
+      "notes.add",
+      "notes.move",
+      "notes.slice",
+      "notes.stretch",
+      "notes.velocity",
+      "track.height"
+    ],
+    "reviewer": "Handler body read 2026-11-09 (lines 6594-7167): every document edit goes through these registered commands; no direct project writes."
+  },
+  "src/Editors.h:7539:ca89c2d2b571": {
+    "operations": [
+      "mixer.pan",
+      "mixer.send"
+    ],
+    "reviewer": "Handler body read 2026-11-09 (lines 7532-7642): every document edit goes through these registered commands; no direct project writes."
   }
 }

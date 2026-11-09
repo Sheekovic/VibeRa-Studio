@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4"
+    "src/Editors.h": "15fa08dbdb504bdb7237e1e1f02e1d424c7e430a4635eaa9e3bbb465f4f76c00"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -279,6 +279,7 @@
     "tempo_map",
     "tempo_warp_mcp",
     "tuning_render_mcp",
+    "unique_sample_mcp",
     "vibera_effects_dsp",
     "vibera_native_effect_model",
     "vibera_native_effects",
@@ -291,7 +292,7 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+  "sourceLog": "build/dev/20261109-191202/affected-tests.log",
   "rerunLogs": [],
   "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."

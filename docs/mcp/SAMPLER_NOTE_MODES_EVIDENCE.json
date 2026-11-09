@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "sourceInputs": {
     "scripts/mcp-coverage.py": "d9dbc937441b8e333fc3891559db93f6da9b0e8634a831d694472136448cec9d",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
@@ -9,11 +9,11 @@
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
     "src/AudioEngine.cpp": "2de1fd5a44f1be460a21891eec1238dff44cdf6e7ba8a4f37a6484ab6316b842",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
-    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
+    "src/Commands.cpp": "4ea3631aceb505eaf6e1d80333a3c1f98c104a400ed8263bd8e2ad359948dd59",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
-    "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4",
+    "src/Editors.h": "15fa08dbdb504bdb7237e1e1f02e1d424c7e430a4635eaa9e3bbb465f4f76c00",
     "src/LiveMidi.h": "84d18168029d5a749dc7835673623621ab74e283727477561e20e3376c25574c",
     "src/LiveTimeline.cpp": "369f5096101b445529d54317ea5df754a2e632f130b0fa04d952b55c19fe5cb8",
     "src/LiveTimeline.h": "520071100c554a8fcf7f2d68bf47e5e3d3e80cd7a6619b3e75bd731de24942ac",
@@ -47,7 +47,7 @@
     "src/SamplerSettings.h": "425236b93bda9614d3bc329c804b43bda81508b7e3be3cb86f050e099f404ab5",
     "src/StepActivationCommand.h": "8199b6f57ec874ef7294b5cc2cbb8eac523fbee2335e779eb1282eb10f6fa6ca",
     "src/StepCompose.h": "7e3d4006ed490a251a937f903cd92cee93cbe3e35e9e6b8ae9e5fea270ebe7e8",
-    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.cpp": "ceb4b08906a735f98137dbfb162c51ec38186c70c385e84f481c81e510c80599",
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioMcp.cpp": "c89905157241d95a19bdcd283695d2273c0bd96d7a2d3319654da18d11fdd9f0",
     "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
@@ -70,9 +70,9 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "sourceLog": "build/dev/20261109-191202/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 284
+    "tests": 285
   }
 }

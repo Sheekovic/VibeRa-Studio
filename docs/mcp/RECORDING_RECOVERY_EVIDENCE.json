@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
   "sourceInputs": {
-    "CMakeLists.txt": "365504b4c8b94cf8f9c488916e7843273e1573a877a4b233efe29b6f6d374a34",
-    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "CMakeLists.txt": "25a61f31b02db44338b79617c2962e61323142094227d63ceb576c9e3049a461",
+    "src/Studio.cpp": "ceb4b08906a735f98137dbfb162c51ec38186c70c385e84f481c81e510c80599",
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioMcp.cpp": "c89905157241d95a19bdcd283695d2273c0bd96d7a2d3319654da18d11fdd9f0",
-    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
+    "src/Commands.cpp": "4ea3631aceb505eaf6e1d80333a3c1f98c104a400ed8263bd8e2ad359948dd59",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
@@ -24,7 +24,7 @@
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
     "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
     "src/StudioChannels.cpp": "5945fb1b2b5192b6ae315c964be6d42289fe6f2935d1b6ce438d57fe7e7c6723",
-    "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4",
+    "src/Editors.h": "15fa08dbdb504bdb7237e1e1f02e1d424c7e430a4635eaa9e3bbb465f4f76c00",
     "src/StudioMidiTakeRecoveryAcceptance.cpp": "db176e5c066433a5edcd60ad794927450c598c7736369cab24c4ea9aa6804829",
     "src/BuildAcceptanceOutput.h": "5a93f55dafc86365f537a23ceb8e7c4c2047cb8c53c60b89d6c5c8c3f9b3cd95",
     "tests/MidiTakeRecoveryAcceptance.h": "6bb351c1899cda6a40fa37375f9ef74ab435fe090809617b32be586ab5138761",
@@ -51,9 +51,9 @@
   "sourceHashMode": "text-lf-v1",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "sourceLog": "build/dev/20261109-191202/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 284
+    "tests": 285
   }
 }
