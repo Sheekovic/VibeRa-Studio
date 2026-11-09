@@ -4235,6 +4235,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "tempo", controller.project.tempo);
     set(state, "masterPitch", controller.project.masterPitch);
     set(state, "waitForInput", waitForInput);
+    set(state, "recordNotes", recordNotes);
     set(state, "waitingForInput", waitingForInput);
     set(state, "pianoNoteModes",
         static_cast<Editor *>(windows[1]->getContentComponent())

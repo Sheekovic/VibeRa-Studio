@@ -978,6 +978,9 @@ set_tests_properties(unique_sample_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME master_pitch_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-master-pitch-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/master_pitch_mcp")
 set_tests_properties(master_pitch_mcp PROPERTIES TIMEOUT 180)
+add_test(NAME record_filter_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-record-filter-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/record_filter_mcp")
+set_tests_properties(record_filter_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME controller_interpolate_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-controller-interpolate-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/controller_interpolate_mcp")
 set_tests_properties(controller_interpolate_mcp PROPERTIES TIMEOUT 120)

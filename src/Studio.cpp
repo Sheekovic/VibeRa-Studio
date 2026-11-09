@@ -268,7 +268,7 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
             repaint();
             return;
         }
-        if (!audio.playing() && recordArmed && waitForInput)
+        if (!audio.playing() && recordArmed && waitForInput && recordNotes)
         {
             // Wait for input: open the take at the stopped playhead; the first note starts it.
             beginMidiTake(0);
@@ -284,7 +284,8 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
         if (!audio.playing() && recordArmed)
         {
             beginAudioTake(); // Before the count-in moves the transport: it trims to this start.
-            beginMidiTake(audio.countInSeconds(bars));
+            if (recordNotes)
+                beginMidiTake(audio.countInSeconds(bars));
         }
         audio.playStop(midiTaking || audioTaking ? bars : 0);
     };
@@ -484,7 +485,8 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
         if (recordArmed && audio.playing())
         {
             beginAudioTake(); // Punch in on the fly: the take starts here.
-            beginMidiTake();
+            if (recordNotes)
+                beginMidiTake();
         }
     };
     audio.midiInput.captureInterrupted = [this](Id channel, double seconds)
@@ -3659,6 +3661,15 @@ void Studio::toolsMenu()
     menu.addItem(209, "MIDI recording replaces notes (off = overdub)", true, midiRecordReplace);
     menu.addItem(213, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
     menu.addItem(214, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
+    {
+        // FL Recording filter: what Record captures. Audio is the audio-input switch; automation
+        // recording is armed separately on its control.
+        juce::PopupMenu filter;
+        filter.addItem(215, "Notes (MIDI take)", true, recordNotes);
+        filter.addItem(216, "Audio (audio input)", true, audioInput.enabled);
+        filter.addItem(217, "Automation: arm it on a Mixer/plugin control", false, automationRecordingActive());
+        menu.addSubMenu("Recording filter", filter);
+    }
     menu.addItem(208, "Step record: insert a rest", stepRecord);
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
@@ -3723,6 +3734,16 @@ void Studio::toolsMenu()
             }
             if (choice == 213)
                 return safe->masterPitchDialog();
+            if (choice == 215)
+            {
+                safe->performAction("transport.recordNotes");
+                return;
+            }
+            if (choice == 216)
+            {
+                safe->audioInputButton.onClick();
+                return;
+            }
             if (choice == 214)
             {
                 safe->performAction("transport.waitForInput");
@@ -4309,6 +4330,12 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "transport.metronome")
     {
         click.onClick();
+        return true;
+    }
+    if (action == "transport.recordNotes")
+    {
+        recordNotes = !recordNotes;
+        repaint();
         return true;
     }
     if (action == "transport.waitForInput")

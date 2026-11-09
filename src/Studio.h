@@ -526,6 +526,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::String macroConfigurationGeneration() const;
     void masterPitchDialog(); // Tools > Master pitch: cents for every tunable instrument (project.masterPitch).
     bool waitForInput = false;   // Transport option: armed recording waits for the first MIDI note.
+    bool recordNotes = true;     // Recording filter: Record opens a MIDI note take (FL "Notes").
     bool waitingForInput = false; // A take is open and the transport waits for that note.
     void armWaitForInput(bool on);
     void pollWaitForInput();

@@ -106,6 +106,10 @@ the pointer tool or invent native parameter identities.
 `vibera_transport` starts/stops/seeks and switches Pattern/Song. Physical MIDI
 input must already be configured. `notes.record` commits a supplied typed take
 through canonical validation; it is not evidence of live hardware capture.
+Recording filter: `vibera_command transport.recordNotes` toggles whether Record opens a MIDI
+note take (`state.recordNotes`, default on); audio takes follow the audio-input switch and
+automation recording is armed on its own control.
+
 Wait for input: `vibera_command transport.waitForInput` toggles it (`state.waitForInput`). With Rec
 armed, Play then opens the take at the playhead without starting (`state.waitingForInput`); the
 first MIDI or typing-keyboard note starts playback and is recorded at the take start. Stop (or
