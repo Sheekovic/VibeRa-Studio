@@ -2267,6 +2267,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 set(row, "colour", juce::int64(c.colour));
                 set(row, "icon", c.icon);
                 set(row, "source", c.source);
+                set(row, "receiveMidiChannel", c.receiveMidiChannel);
                 {
                     juce::Array<juce::var> map;
                     for (size_t k = 0; k < c.articulations.size(); ++k)

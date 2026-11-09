@@ -184,20 +184,41 @@ void MidiInputRouter::poll()
     // Reader pins protect a callback that loaded the previous raw target during a switch.
     if (readers.load() == 0)
         std::erase_if(lanes,
-                      [&](auto &lane) { return lane.get() != target.load() && lane.use_count() == 1; });
+                      [&](auto &lane)
+                      {
+                          return lane.get() != target.load() && lane.use_count() == 1 &&
+                                 std::none_of(receivers.begin(), receivers.end(),
+                                              [&](const auto &r) { return r.load() == lane.get(); });
+                      });
 }
 void MidiInputRouter::handleIncomingMidiMessage(juce::MidiInput *, const juce::MidiMessage &message)
 {
     if (!controls.observe(message, 0))
         route(message, true, true);
 }
+void MidiInputRouter::setReceivers(const std::array<MidiLane *, 17> &next)
+{
+    for (int c = 1; c <= 16; ++c)
+    {
+        auto *previous = receivers[size_t(c)].load();
+        if (previous == next[size_t(c)])
+            continue;
+        receivers[size_t(c)].store(next[size_t(c)]);
+        if (previous && previous != target.load() &&
+            std::none_of(next.begin(), next.end(), [&](auto *lane) { return lane == previous; }))
+            previous->enabled = false;
+        if (next[size_t(c)])
+            next[size_t(c)]->enabled = true;
+    }
+}
 void MidiInputRouter::route(const juce::MidiMessage &message, bool monitor, bool record)
 {
     auto size = message.getRawDataSize();
     if (size < 2 || size > 3 || !message.isForChannel(message.getChannel()) || message.getChannel() == 0)
         return;
+    auto *receiver = receivers[size_t(juce::jlimit(1, 16, message.getChannel()))].load();
     auto channel = filter.load();
-    if (channel && message.getChannel() != channel)
+    if (!receiver && channel && message.getChannel() != channel)
         return;
     unsigned char bytes[3]{message.getRawData()[0], message.getRawData()[1], 0};
     if (size == 3)
@@ -206,9 +227,9 @@ void MidiInputRouter::route(const juce::MidiMessage &message, bool monitor, bool
         mask && size == 3 && ((bytes[0] & 0xf0) == 0x80 || (bytes[0] & 0xf0) == 0x90))
         bytes[1] = static_cast<unsigned char>(snapToScale(bytes[1], mask));
     ++readers;
-    if (record && historyEnabled.load())
+    if (record && historyEnabled.load() && !receiver)
         history.push(historyChannel.load(), historyEpoch.load(), bytes);
-    if (auto *lane = target.load())
+    if (auto *lane = receiver ? receiver : target.load())
     {
         auto overflow = lane->overflows.load();
         if (monitor)

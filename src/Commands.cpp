@@ -848,6 +848,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"chord.fill", "Write a chord progression to the Chord Track (one chord per bar)", Scope::playlist, true, true, "command"},
         {"marker.action", "Set a marker's playback action (start, loop, skip, pause)", Scope::playlist, true, true, "command"},
         {"channel.articulations", "Set the Channel expression map (articulations and keyswitches)", Scope::rack, true, true, "command"},
+        {"channel.receiveMidi", "Receive notes from a MIDI channel (multitimbral live input)", Scope::rack, true, true, "command"},
         {"notes.articulation", "Set the articulation of notes (expression map)", Scope::piano, true, true, "command"},
         {"rack.group.create", "Add Channel filter group", Scope::rack, true, true, "command"},
         {"rack.group.rename", "Rename Channel filter group", Scope::rack, true, true, "command"},
@@ -6682,6 +6683,22 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             next.tempoChanges.erase(found);
         std::sort(next.tempoChanges.begin(), next.tempoChanges.end(),
                   [](const auto &x, const auto &y) { return x.beat < y.beat; });
+    }
+    if (id == "channel.receiveMidi")
+    {
+        // Receive notes from: live MIDI on channel value (1..16) plays and records on this Channel
+        // whatever is selected; 0 turns it off. One Channel per MIDI channel (others are cleared).
+        auto *target = next.channel(a.channel);
+        const int receive = int(a.value);
+        if (!target)
+            return juce::Result::fail("midiReceive.missingChannel: Existing Channel required");
+        if (!std::isfinite(a.value) || a.value != receive || receive < 0 || receive > 16)
+            return juce::Result::fail("midiReceive.invalidChannel: MIDI channel 1..16, or 0 for off");
+        if (receive > 0)
+            for (auto &other : next.channels)
+                if (other.receiveMidiChannel == receive)
+                    other.receiveMidiChannel = 0;
+        target->receiveMidiChannel = receive;
     }
     if (id == "channel.articulations")
     {

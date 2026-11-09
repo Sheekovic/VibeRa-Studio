@@ -565,6 +565,8 @@ juce::ValueTree Project::state() const
                 labels.add(juce::String(pitch) + "=" + label);
             set(t, "keyLabels", labels.joinIntoString(";"));
         }
+        if (c.receiveMidiChannel != 0)
+            set(t, "receiveMidi", c.receiveMidiChannel);
         if (!c.articulations.empty())
         {
             juce::StringArray entries;
@@ -1363,6 +1365,14 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                     return juce::Result::fail("Invalid Channel key label");
                 p.channels.back().keyLabels[pitch] = label;
             }
+        }
+        if (c.hasProperty("receiveMidi"))
+        {
+            const double receive = exactNumber(c["receiveMidi"]);
+            if (fileVersion < 57 || !std::isfinite(receive) || receive < 1 || receive > 16 ||
+                std::floor(receive) != receive)
+                return juce::Result::fail("Invalid Channel MIDI receive channel");
+            p.channels.back().receiveMidiChannel = int(receive);
         }
         if (c.hasProperty("articulations"))
         {

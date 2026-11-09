@@ -3236,6 +3236,13 @@ void AudioEngine::setMidiTarget(Id channel)
     typingInput.select(typingLane);
     midiInput.setHistoryTarget(channel);
     typingInput.setHistoryTarget(channel);
+    std::array<MidiLane *, 17> receiving{};
+    for (const auto &c : projectedProject.channels)
+        if (c.receiveMidiChannel >= 1 && c.receiveMidiChannel <= 16)
+            if (auto it = projectedChannels.find(c.id); it != projectedChannels.end() && it->second.sampler)
+                receiving[size_t(c.receiveMidiChannel)] =
+                    dynamic_cast<FixedSampler *>(it->second.sampler.get())->inputLane();
+    midiInput.setReceivers(receiving);
     if (!deferredDocumentProjection && lane && edit && engine.getDeviceManager().deviceManager.getCurrentAudioDevice())
         edit->getTransport().ensureContextAllocated();
 }

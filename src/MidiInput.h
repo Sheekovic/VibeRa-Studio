@@ -115,6 +115,10 @@ class MidiInputRouter final : public juce::MidiInputCallback
     void poll();
     void route(const juce::MidiMessage &, bool monitor, bool record);
     void handleIncomingMidiMessage(juce::MidiInput *, const juce::MidiMessage &) override;
+    // Receive notes from: MIDI channel 1..16 -> the lane of the Channel that receives it (null:
+    // the selected Channel's lane gets it). Set on the control thread; read lock-free.
+    std::array<std::atomic<MidiLane *>, 17> receivers{};
+    void setReceivers(const std::array<MidiLane *, 17> &next);
     // Snap incoming MIDI to scale: bit 12 on, bits 0..11 allowed pitch classes. Note on/off keys
     // move to the nearest allowed key (ties down) before monitoring and recording; the mapping is
     // fixed per key so every note-off matches its note-on. Lock-free; set by the control thread.

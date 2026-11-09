@@ -119,6 +119,7 @@ struct Channel
     int pitchRange = 2;         // RANGE shown with PITCH, semitones at full bend (1..48).
     std::map<int, juce::String> keyLabels; // Piano roll key names (drum maps), pitch -> at most 32 chars.
     std::vector<Articulation> articulations; // Expression map (version 57); notes refer to it 1-based.
+    int receiveMidiChannel = 0; // Receive notes from (version 57): 1..16 plays live MIDI of that channel; 0 off.
 };
 struct ChannelGroup
 {

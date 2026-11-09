@@ -5140,6 +5140,14 @@ class Studio::Editor final : public juce::Component,
                         m.addSubMenu("Replace", replaceWith, !c.audioClip);
                     }
                     m.addItem(4, "Cut itself", !c.audioClip && !c.instrument);
+                    {
+                        juce::PopupMenu receive;
+                        receive.addItem(61000, "Off (only when selected)", true, c.receiveMidiChannel == 0);
+                        for (int midi = 1; midi <= 16; ++midi)
+                            receive.addItem(61000 + midi, "MIDI channel " + juce::String(midi), true,
+                                            c.receiveMidiChannel == midi);
+                        m.addSubMenu("Receive notes from", receive, !c.audioClip);
+                    }
                     m.addItem(5, "Name / colour / icon...    F2 / middle-click");
                     m.addItem(6, "Store in spare state");
                     m.addItem(7, "Flip with spare state", s.spareStates.contains(c.id));
@@ -5162,6 +5170,14 @@ class Studio::Editor final : public juce::Component,
                                         if (!safe || safe->s.controller.projectIdentity != identity ||
                                             !safe->s.controller.project.channel(id))
                                             return;
+                                        if (action >= 61000 && action <= 61016)
+                                        {
+                                            CommandArgs a;
+                                            a.channel = id;
+                                            a.value = action - 61000;
+                                            safe->s.command("channel.receiveMidi", a);
+                                            return;
+                                        }
                                         safe->s.selectedChannel = id;
                                         safe->s.refresh();
                                         if (action == 1)

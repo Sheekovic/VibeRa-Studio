@@ -93,7 +93,7 @@ did not list.
 | Piano roll: Magic lasso selection | missing | |
 | Piano roll: time / key markers in Pattern mode | missing | |
 | Channel Rack: Mute removed steps | done | existing Workflow setting (`retainSteps`, muted notes kept) |
-| Channel Rack: Receive notes from (channel to channel) | missing | |
+| Channel Rack: Receive notes from | done | `channel.receiveMidi` (MIDI channel 1..16 per Channel, multitimbral live input); right-click > Receive notes from. Cut self already existed (Cut itself) |
 | Channel Rack: declicking mode, Restretch all, name alignment, auto resize | out of scope | FL sampler/display specifics |
 | Loop Starter, FL Cloud, Patcherize, DirectWave, NewTone/NewTime, stem extraction, Deverb | out of scope | FL-only plugins and services |
 | View cosmetics (grid colour/contrast, keyboard styles, note shadows, Behind clips) | out of scope | theme handles appearance |

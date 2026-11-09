@@ -957,6 +957,9 @@ set_tests_properties(center_playhead_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME controller_interpolate_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-controller-interpolate-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/controller_interpolate_mcp")
 set_tests_properties(controller_interpolate_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME midi_receive_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-midi-receive-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/midi_receive_mcp")
+set_tests_properties(midi_receive_mcp PROPERTIES TIMEOUT 150)
 add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
 set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)

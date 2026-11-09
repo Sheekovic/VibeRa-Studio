@@ -415,6 +415,33 @@ static void scoreLogTests(const juce::File &folder)
                          "clock-independent bounded input queue/overflow/clear and long-pattern validation. "
                          "Synthetic timestamps; no hardware/listening.\n");
 }
+static void midiReceiveAndScaleSnapTests()
+{
+    // Receive notes from: MIDI channel 2 goes to the receiving Channel's lane, other channels to
+    // the selected one. Scale snap moves note keys before they reach either lane.
+    MidiInputRouter router(false);
+    auto selected = router.createLane(), receiving = router.createLane();
+    router.select(selected.get());
+    std::array<MidiLane *, 17> receivers{};
+    receivers[2] = receiving.get();
+    router.setReceivers(receivers);
+    require(receiving->enabled.load(), "A receiving lane is enabled without being selected");
+    const auto lastKey = [](const MidiLane &lane)
+    { return lane.queue[(lane.write.load() + lane.queue.size() - 1) % lane.queue.size()].bytes[1]; };
+    router.handleIncomingMidiMessage(nullptr, juce::MidiMessage::noteOn(1, 60, juce::uint8(100)));
+    router.handleIncomingMidiMessage(nullptr, juce::MidiMessage::noteOn(2, 64, juce::uint8(100)));
+    require(selected->write.load() == 1 && receiving->write.load() == 1 && lastKey(*selected) == 60 &&
+                lastKey(*receiving) == 64,
+            "MIDI channel 2 plays on its receiving Channel, channel 1 on the selected Channel");
+    router.scaleSnap = (1u << 12) | 0xab5u; // C major pitch classes.
+    router.handleIncomingMidiMessage(nullptr, juce::MidiMessage::noteOn(1, 61, juce::uint8(100)));
+    router.handleIncomingMidiMessage(nullptr, juce::MidiMessage::noteOff(1, 61));
+    require(selected->write.load() == 3 && lastKey(*selected) == 60,
+            "Scale snap moves C# to C for both note-on and note-off");
+    receivers[2] = nullptr;
+    router.setReceivers(receivers);
+    require(!receiving->enabled.load(), "Clearing the receiver disables its lane");
+}
 static void typingKeyTests()
 {
     PerformanceInput owners;
@@ -5608,6 +5635,7 @@ int main(int argc, char **argv)
         runStage("waveformWorkerTests", [&] { waveformWorkerTests(folder); });
         runStage("playlistEditTests", [&] { playlistEditTests(folder); });
         runStage("typingKeyTests", [&] { typingKeyTests(); });
+        runStage("midiReceiveAndScaleSnapTests", [&] { midiReceiveAndScaleSnapTests(); });
         runStage("guideDspTests", [&] { guideDspTests(folder); });
         runStage("guideIntegrationTests", [&] { guideIntegrationTests(folder); });
         runStage("projectionTests", [&] { projectionTests(folder); });
