@@ -1,4 +1,46 @@
 {
+  "src/ClipPicker.h:167:3e2fe6462e21": {
+    "operations": [
+      "picker.select"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ClipPicker.h:182:b9505d79a139": {
+    "operations": [
+      "picker.select"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ClipPicker.h:345:196c29b50a62": {
+    "operations": [
+      "picker.type"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ClipPicker.h:351:638ea6071769": {
+    "operations": [
+      "picker.filter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ClipPicker.h:355:79f777b6ae62": {
+    "operations": [
+      "picker.groupFilter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ClipPicker.h:40:0677c6744d20": {
+    "operations": [
+      "picker.width"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ClipPicker.h:44:677823569f56": {
+    "operations": [
+      "picker.width"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
   "src/InstrumentWindow.h:1008:a499a771a893": {
     "operations": [
       "channel.sampler.mono",
@@ -271,6 +313,61 @@
       "notes.properties"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PluginPage.h:232:38d79b3a5c12": {
+    "operations": [
+      "plugins.scan"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:241:274a0c940247": {
+    "operations": [
+      "plugins.scan"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:249:bc06bc32d473": {
+    "operations": [
+      "plugins.scan"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:254:fa4792e06d06": {
+    "operations": [
+      "plugin.instrument.create"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:255:b27d02d4b573": {
+    "operations": [
+      "plugin.instrument.replace"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:256:d73eaf24cab9": {
+    "operations": [
+      "plugin.effect.insert"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:257:d7ee6d2546e9": {
+    "operations": [
+      "channel.select"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:264:b4edbe3565c6": {
+    "operations": [
+      "plugin.instrument.create",
+      "plugin.instrument.replace"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginPage.h:269:88a0f55db67b": {
+    "operations": [
+      "plugin.effect.insert"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   },
   "src/PluginWrapperView.h:103:94a4b3018e57": {
     "operations": [
@@ -579,6 +676,253 @@
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
   },
+  "src/SamplerModulationPanel.h:131:51d8cd5d7ae9": {
+    "operations": [
+      "sampler.modulation.volume",
+      "sampler.modulation.pan",
+      "sampler.modulation.cutoff",
+      "sampler.modulation.resonance",
+      "sampler.modulation.pitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:145:fc778fbd0b5b": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:161:c8bb5e90aa06": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:183:f62403ff1d00": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:193:e26204ab36d6": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:195:e36033a04200": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:20:c27a34636ffe": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo",
+      "automation.sampler.create"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:258:fb85d2460291": {
+    "operations": [
+      "sampler.modulation.volume",
+      "sampler.modulation.pan",
+      "sampler.modulation.cutoff",
+      "sampler.modulation.resonance",
+      "sampler.modulation.pitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:38:16b6d2195f4e": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:43:2a05181ce56b": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo",
+      "automation.sampler.create"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SamplerModulationPanel.h:52:84d9a7e02b5d": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
   "src/StepComposePanel.h:112:226ecc1b7e8e": {
     "operations": [
       "steps.compose",
@@ -796,6 +1140,42 @@
       "notes.quantize"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/drums/DrumSynthPlugin.h:417:9af3e4670f7b": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/drums/DrumSynthPlugin.h:425:bb44e338747c": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/drums/DrumSynthPlugin.h:433:f1b3dfac5e78": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/effects/NativeEffectsEditor.cpp:304:755877527670": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/effects/NativeEffectsEditor.cpp:312:3b07e340deca": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/effects/NativeEffectsEditor.cpp:320:c5542cd6113a": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   },
   "src/synth/SynthEditor.cpp:560:32d7cd22ff97": {
     "operations": [
