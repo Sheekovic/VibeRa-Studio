@@ -2897,5 +2897,183 @@
       "workspace.tileFocused"
     ],
     "reviewer": "Handler body (lines 4873-6593) and its Studio helpers three levels deep (446 functions) read 2026-11-09: every document edit goes through these registered commands; no direct project writes."
+  },
+  "src/ClipPicker.h:204:8b44878d2234": {
+    "operations": [
+      "audio.add",
+      "channel.add",
+      "channel.gain",
+      "channel.mixer",
+      "channel.moveDown",
+      "channel.moveUp",
+      "channel.mute",
+      "channel.muteLock",
+      "channel.outputRoutes",
+      "channel.pan",
+      "channel.paste",
+      "channel.preset",
+      "channel.properties",
+      "channel.solo",
+      "channel.source",
+      "channel.unsolo",
+      "clip.group",
+      "clip.ungroup",
+      "clip.unique",
+      "mixer.colour",
+      "mixer.effects.bypass",
+      "mixer.gain",
+      "mixer.mute",
+      "mixer.pan",
+      "mixer.phaseInvert",
+      "mixer.rename",
+      "mixer.route",
+      "mixer.routeOnly",
+      "mixer.send",
+      "mixer.solo",
+      "mixer.soloConnected",
+      "mixer.stereoSeparation",
+      "mixer.stereoSwap",
+      "mixer.unmuteAll",
+      "mixer.unsolo",
+      "notes.chop",
+      "notes.duplicate",
+      "notes.glue",
+      "notes.import",
+      "notes.legato",
+      "notes.move",
+      "notes.mute",
+      "notes.quantize",
+      "notes.quantizeStarts",
+      "notes.quickQuantize",
+      "notes.record",
+      "notes.slice",
+      "notes.stretch",
+      "notes.unmute",
+      "notes.velocity",
+      "pattern.burnChannelLoop",
+      "pattern.channelLoop",
+      "pattern.cloneSelected",
+      "pattern.delete",
+      "pattern.deleteEmpty",
+      "pattern.deleteSelected",
+      "pattern.deleteUnplaced",
+      "pattern.extent",
+      "pattern.group",
+      "pattern.length",
+      "pattern.meter",
+      "pattern.move",
+      "pattern.properties",
+      "pattern.rename",
+      "pattern.transpose",
+      "plugin.effect.insert",
+      "plugin.effect.mix",
+      "plugin.effect.move",
+      "plugin.effect.replace",
+      "plugin.effect.sidechain",
+      "plugin.instrument.create",
+      "plugin.io",
+      "plugin.remove",
+      "project.swing",
+      "rack.group.assign",
+      "rack.group.create",
+      "rack.muteLock",
+      "rack.muteSelected",
+      "rack.properties",
+      "rack.sort",
+      "rack.swingMix",
+      "rack.truncateSwing",
+      "rack.unmuteSelected",
+      "steps.compose",
+      "steps.fill",
+      "steps.fine",
+      "steps.modX",
+      "steps.modY",
+      "steps.pan",
+      "steps.pitch",
+      "steps.release",
+      "steps.repeat",
+      "steps.set",
+      "steps.shift",
+      "steps.velocity",
+      "workspace.docked",
+      "workspace.free",
+      "workspace.tileBalanced",
+      "workspace.tileDetached",
+      "workspace.tileFocused"
+    ],
+    "reviewer": "Handler read 2026-11-09 (with its Studio helpers three levels deep): every document/view operation goes through these registered commands; no direct project writes."
+  },
+  "src/SampleFileBrowser.h:1026:69b3a9bc31a6": {
+    "operations": [
+      "browser.showTags"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SampleFileBrowser.h:1027:62a4a8749c7e": {
+    "operations": [
+      "browser.matchAllTags"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SampleFileBrowser.h:1030:07c57a9c996a": {
+    "operations": [
+      "browser.clearTagFilters"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SampleFileBrowser.h:1046:f12d1823fdf0": {
+    "operations": [
+      "browser.playPreview"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SampleFileBrowser.h:1049:52e00a27895f": {
+    "operations": [
+      "browser.stopPreview"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SampleFileBrowser.h:1052:fb159c6d3b4a": {
+    "operations": [
+      "browser.fullPreview"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SampleFileBrowser.h:1065:4ece84bd2bd8": {
+    "operations": [
+      "browser.back"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SampleFileBrowser.h:1066:b40ef06e24b1": {
+    "operations": [
+      "browser.forward"
+    ],
+    "reviewer": "Handler read 2026-11-09: the button runs exactly this registered Browser action."
+  },
+  "src/SamplerGestures.h:394:9c4219c06c7f": {
+    "operations": [
+      "sampler.view.all",
+      "sampler.view.range",
+      "sampler.view.zoomIn",
+      "sampler.view.zoomOut"
+    ],
+    "reviewer": "Handler read 2026-11-09 (with its Studio helpers three levels deep): every document/view operation goes through these registered commands; no direct project writes."
+  },
+  "src/Studio.cpp:400:bab544ddabc6": {
+    "operations": [
+      "automation.plugin.create",
+      "automation.plugin.init",
+      "automation.plugin.init.remove",
+      "chord.fill",
+      "notes.followChords",
+      "transport.stepRecord",
+      "transport.stepRest",
+      "workspace.free",
+      "workspace.tileBalanced",
+      "workspace.tileDetached",
+      "workspace.tileFocused"
+    ],
+    "reviewer": "Handler read 2026-11-09 (with its Studio helpers three levels deep): every document/view operation goes through these registered commands; no direct project writes."
   }
 }

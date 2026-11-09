@@ -4,7 +4,7 @@
     "src/SamplerGestures.h": "684876c39caf75507d1668e6d0d559dfe6497d0b908ca74ac8fc23b0324c2a50"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
+  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -75,6 +75,7 @@
     "mcp_semantics",
     "mcp_ui_actions",
     "midi_import_extras",
+    "midi_import_mcp",
     "midi_interchange_gui",
     "midi_receive_mcp",
     "midi_scale_snap_mcp",
@@ -287,12 +288,11 @@
     "vibera_synth_host",
     "vibera_synth_mcp",
     "vibera_synth_processor",
-    "vocal_pitch_mcp"
+    "vocal_pitch_mcp",
+    "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-104843/affected-tests.log",
-  "rerunLogs": [
-    "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
-  ],
-  "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+  "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+  "rerunLogs": [],
+  "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

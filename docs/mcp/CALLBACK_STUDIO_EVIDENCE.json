@@ -4,7 +4,7 @@
     "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
+  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -48,6 +48,7 @@
     "controller_recording",
     "controller_routing_capture",
     "coproducer_context",
+    "coproducer_ideas_mcp",
     "deferred_device_candidate_fault",
     "development_fixture_profiles",
     "development_workflow",
@@ -74,6 +75,7 @@
     "mcp_semantics",
     "mcp_ui_actions",
     "midi_import_extras",
+    "midi_import_mcp",
     "midi_interchange_gui",
     "midi_receive_mcp",
     "midi_scale_snap_mcp",
@@ -286,8 +288,11 @@
     "vibera_synth_host",
     "vibera_synth_mcp",
     "vibera_synth_processor",
-    "vocal_pitch_mcp"
+    "vocal_pitch_mcp",
+    "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+  "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+  "rerunLogs": [],
+  "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }
