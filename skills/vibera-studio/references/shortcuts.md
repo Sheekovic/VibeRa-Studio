@@ -30,3 +30,12 @@ panel; read back `state.browserShown` / `state.coProducerShown`.
 `presets`. `set` applies `preset` (`default` keeps the font, or a listed palette), `font` (an
 installed typeface) and `colours` `{role: AARRGGBB}` live; `save:true` keeps it after restart
 (`saved`). `reset` restores the default palette and font. Local preference, not Undo.
+
+## Workspace windows
+
+`vibera_editor` places windows like dragging them: `move` `{editor, bounds:[x,y,w,h]}` floats an
+editor (0 Rack, 1 Piano, 2 Playlist, 3 Mixer) or the Browser (4) in the workspace (dock a
+detached window first); `detach` / `dock` also accept the Browser. `layout` sets the splitters:
+`browserWidth` 180..360, `playlistRatio` 0.12..0.8, `rackWidth` 330..900, `mixerHeight` 168..360,
+`coProducerWidth` 340..760 (clamped like dragging). Read back `state.editorBounds` (five
+[x,y,w,h]) and `state.workspaceLayout`.

@@ -141,7 +141,7 @@ def inventory(root=ROOT):
         manual.append(dict(entry, status="reviewed" if mapped else "manual mapping/verification required"))
     handlers = []
     expression = re.compile(r'\b(?:\w+\.)?(onClick|onChange|onValueChange|onDragStart|onDragEnd|onTextChange|'
-                            r'onReturnKey|onEscapeKey|onPopupMenu|navigation|change)\s*=|'
+                            r'onReturnKey|onEscapeKey|onPopupMenu|navigation|change)\s*=(?!=)|'
                             r'\bvoid\s+(mouseDown|mouseDrag|mouseUp|mouseWheelMove|mouseDoubleClick|'
                             r'listBoxItemClicked|listBoxItemDoubleClicked|selectedRowsChanged)\s*\(')
     for path in sorted((root / "src").rglob("*")):
