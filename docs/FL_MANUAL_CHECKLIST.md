@@ -105,4 +105,4 @@ did not list.
 | Item | Status | Notes |
 | --- | --- | --- |
 | Automation Clip options: Decimate points | done | `automation.source.decimate`, Playlist menu > Decimate points; playlist_tools_mcp |
-| Audio Clip: Make unique as sample (copy the file on disk) | missing | `clip.unique` makes the clip unique but shares the file |
+| Audio Clip: Make unique as sample (copy the file on disk) | done | `clip.uniqueSample`, clip menu > Make unique as sample; unique_sample_mcp |

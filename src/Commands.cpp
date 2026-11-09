@@ -1039,6 +1039,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"automation.source.flip", "Flip automation curve vertically", Scope::playlist, true, true, "command"},
         {"automation.source.normalize", "Normalize automation curve levels", Scope::playlist, true, true, "command"},
         {"automation.source.smooth", "Turn all automation points smooth", Scope::playlist, true, true, "command"},
+        {"clip.uniqueSample", "Make unique as sample (own copy of the audio file)", Scope::playlist, true, true, "command"},
         {"automation.source.decimate", "Decimate automation points (drop points on straight lines)", Scope::playlist, true, true, "command"},
         {"automation.source.scale", "Scale automation curve levels (value x, offset)", Scope::playlist, true, true, "command"},
         {"automation.merge", "Merge Automation Clips", Scope::playlist, true, true, "command"},
@@ -5872,6 +5873,25 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         auto copy = *next.channel(it->channel);
         copy.id = next.allocate();
         copy.name += " unique";
+        it->channel = copy.id;
+        next.channels.push_back(std::move(copy));
+    }
+    else if (id == "clip.uniqueSample")
+    {
+        // The copy is made by the caller (Studio) before this pure model step; text is its path.
+        auto it = std::find_if(next.audioPlacements.begin(), next.audioPlacements.end(),
+                               [&](const auto &clip) { return clip.id == a.target; });
+        if (it == next.audioPlacements.end())
+            return juce::Result::fail("clip.uniqueSample: target is an Audio Clip ID");
+        if (!juce::File::isAbsolutePath(a.text) || !juce::File(a.text).existsAsFile())
+            return juce::Result::fail("clip.uniqueSample: text is the absolute path of the copied audio file");
+        const auto *channel = next.channel(it->channel);
+        if (!channel)
+            return missing();
+        auto copy = *channel;
+        copy.id = next.allocate();
+        copy.name += " unique";
+        copy.source = a.text;
         it->channel = copy.id;
         next.channels.push_back(std::move(copy));
     }

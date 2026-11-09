@@ -1477,6 +1477,36 @@ juce::Result Studio::finishRackEditsChecked()
 }
 void Studio::command(const juce::String &id, CommandArgs a, const juce::String &owner)
 {
+    if (id == "clip.uniqueSample" && a.text.isEmpty())
+    {
+        // FL "Make unique as sample": the clip gets its own Channel and its own copy of the audio
+        // file, next to the original. Undo restores the clip; the copied file stays on disk.
+        const auto &placements = controller.project.audioPlacements;
+        const auto clip = std::find_if(placements.begin(), placements.end(),
+                                       [&](const auto &p) { return p.id == a.target; });
+        const auto *channel = clip != placements.end() ? controller.project.channel(clip->channel) : nullptr;
+        const juce::File original = channel ? juce::File(channel->source) : juce::File{};
+        if (!channel || !juce::File::isAbsolutePath(channel->source) || !original.existsAsFile())
+        {
+            status = "clip.uniqueSample: select an Audio Clip whose audio file exists";
+            repaint();
+            return;
+        }
+        const auto copy = original.getParentDirectory().getNonexistentChildFile(
+            original.getFileNameWithoutExtension() + " unique", original.getFileExtension(), false);
+        if (!original.copyFileTo(copy))
+        {
+            status = "clip.uniqueSample: could not copy " + original.getFileName() + " (folder not writable?)";
+            repaint();
+            return;
+        }
+        a.text = copy.getFullPathName();
+        const auto revision = controller.revision;
+        command(id, a, owner);
+        if (controller.revision == revision)
+            copy.deleteFile(); // The model step refused: no orphan copy.
+        return;
+    }
     // Multi-output routing restarts the instrument's worker with new buses: capture every plugin's
     // current native state first (as Save does), so the restart keeps it, then apply the edit.
     if (id == "channel.outputRoutes" && !outputRoutesCaptured && audio.hasAudioDevice())

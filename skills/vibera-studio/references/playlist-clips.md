@@ -100,3 +100,8 @@
   folder `path`): one WAV per group of two or more tracks (a first track plus the tracks
   "Grouped with the track above") that has clips, named after the group's first track
   ("Group N" when unnamed), with the same Song-start alignment as the track export.
+
+Make unique as sample: `vibera_command clip.uniqueSample` with `target` = Audio Clip ID gives the
+clip its own Channel on a fresh copy of its audio file (`<name> unique.wav` beside the original;
+other clips keep the original). One Undo step; the copied file stays on disk after Undo. Refused
+for anything that is not an Audio Clip with an existing file.

@@ -5959,6 +5959,9 @@ class Studio::Editor final : public juce::Component,
                     list = {id};
                 juce::PopupMenu m;
                 m.addItem(1, "Make Unique");
+                if (std::any_of(s.controller.project.audioPlacements.begin(), s.controller.project.audioPlacements.end(),
+                                [&](const auto &p) { return p.id == id; }))
+                    m.addItem(97, "Make unique as sample (copy the audio file)");
                 m.addItem(2, "Delete");
                 m.addItem(90, "Delete and close the gap (ripple)");
                 if (automationClip(id))
@@ -6061,6 +6064,8 @@ class Studio::Editor final : public juce::Component,
                                     a.ids = {id};
                                     if (n == 1)
                                         safe->s.command("clip.unique", a);
+                                    if (n == 97)
+                                        safe->s.command("clip.uniqueSample", a);
                                     if (n == 2)
                                         safe->s.command("clip.delete", a);
                                     if (n == 90)
