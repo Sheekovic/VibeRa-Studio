@@ -64,6 +64,10 @@ struct MidiCapture
     std::array<Event, 4096> queue{};
     std::atomic<unsigned> read{0}, write{0}, session{0};
     std::atomic<bool> active{false}, failed{false};
+    // Wait for input (FL Ctrl+I): while armed and stopped, the first note-on is captured at the
+    // stopped playhead and raises triggered; the control thread then starts the transport.
+    // Events until the transport actually runs are kept at the same start position.
+    std::atomic<bool> waitArmed{false}, waitTriggered{false};
     void begin()
     {
         active = false;
@@ -87,16 +91,29 @@ struct MidiCapture
             failed = true;
             return;
         }
+        bool waiting = false;
         if (!position.playing)
-            return;
+        {
+            if (waitTriggered.load())
+                waiting = true;
+            else if (waitArmed.load() && kind == 0x90 && bytes[2] != 0)
+            {
+                waiting = true;
+                waitArmed.store(false);
+                waitTriggered.store(true);
+            }
+            else
+                return;
+        }
         auto w = write.load(std::memory_order_relaxed);
         if (w - read.load(std::memory_order_acquire) >= queue.size())
         {
             failed = true;
             return;
         }
-        const double elapsed = juce::jlimit(0., position.block,
-                                            juce::Time::getMillisecondCounterHiRes() / 1000. - position.wall);
+        const double elapsed = waiting ? 0.
+                                       : juce::jlimit(0., position.block,
+                                                      juce::Time::getMillisecondCounterHiRes() / 1000. - position.wall);
         queue[w % queue.size()] = {
             channel, position.seconds + elapsed, generation, epoch, {bytes[0], bytes[1], bytes[2]}};
         write.store(w + 1, std::memory_order_release);

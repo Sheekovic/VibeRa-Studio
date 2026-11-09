@@ -13,6 +13,37 @@ juce::Result Studio::finishRackSwing()
             return slider->finish();
     return juce::Result::ok();
 }
+void Studio::armWaitForInput(bool on)
+{
+    waitingForInput = on;
+    for (auto *capture : {&audio.midiInput.capture, &audio.typingInput.capture})
+    {
+        capture->waitTriggered.store(false);
+        capture->waitArmed.store(on);
+    }
+}
+void Studio::pollWaitForInput()
+{
+    if (!waitingForInput)
+        return;
+    if (!midiTaking)
+        return armWaitForInput(false); // The take ended elsewhere (Escape, project change).
+    auto &hardware = audio.midiInput.capture, &typing = audio.typingInput.capture;
+    if (!hardware.waitTriggered.load() && !typing.waitTriggered.load())
+        return;
+    hardware.waitArmed.store(false);
+    typing.waitArmed.store(false);
+    if (!audio.playing())
+        audio.playStop(0);
+    if (audio.playing())
+    {
+        waitingForInput = false;
+        hardware.waitTriggered.store(false);
+        typing.waitTriggered.store(false);
+        status = "Recording MIDI notes | Stop to keep take; Esc cancels";
+        repaint();
+    }
+}
 void Studio::masterPitchDialog()
 {
     auto *dialog = new juce::AlertWindow("Master pitch",

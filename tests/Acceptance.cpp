@@ -390,6 +390,32 @@ static void scoreLogTests(const juce::File &folder)
     require(queue.failed.load(), "score history queue capacity/overflow is explicit");
     queue.clear();
     require(!queue.pop(event) && !queue.failed.load(), "clear invalidates pending history safely");
+    {
+        // Wait for input: a stopped transport captures nothing unless armed; armed, only a note-on
+        // triggers, at the stopped playhead; later events before playback keep that position.
+        MidiClock clock;
+        clock.publish(2.0, juce::Time::getMillisecondCounterHiRes() / 1000., .005, false);
+        MidiCapture wait;
+        wait.begin();
+        unsigned char off[]{0x80, 60, 0}, cc[]{0xb0, 64, 127}, onWait[]{0x90, 62, 90};
+        wait.push(1, clock, 0, onWait);
+        require(!wait.pop(event) && !wait.waitTriggered.load(), "stopped transport ignores input unless waiting");
+        wait.waitArmed = true;
+        wait.push(1, clock, 0, off);
+        wait.push(1, clock, 0, cc);
+        require(!wait.pop(event) && wait.waitArmed.load(), "note-off/controller do not trigger Wait for input");
+        wait.push(1, clock, 0, onWait);
+        require(wait.pop(event) && event.seconds == 2.0 && event.bytes[1] == 62 && wait.waitTriggered.load() &&
+                    !wait.waitArmed.load(),
+                "first note-on is captured at the stopped playhead and triggers the start");
+        wait.push(1, clock, 0, off);
+        require(wait.pop(event) && event.seconds == 2.0 && (event.bytes[0] & 0xf0) == 0x80,
+                "input before the transport runs keeps the start position");
+        wait.waitTriggered = false;
+        clock.publish(2.5, juce::Time::getMillisecondCounterHiRes() / 1000., .005, true);
+        wait.push(1, clock, 0, onWait);
+        require(wait.pop(event) && event.seconds >= 2.5, "once playing, capture follows the transport clock");
+    }
     MidiInputRouter router(false);
     router.setHistoryTarget(1);
     router.handleIncomingMidiMessage(nullptr, juce::MidiMessage::noteOn(1, 60, juce::uint8(100)));

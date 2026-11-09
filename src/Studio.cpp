@@ -259,6 +259,27 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
             engineRevision = controller.revision;
         }
         previewNote(-1);
+        if (waitingForInput)
+        {
+            // Play again while waiting cancels the wait (and the empty take).
+            armWaitForInput(false);
+            if (auto result = finishMidiTake(); result.failed())
+                status = result.getErrorMessage();
+            repaint();
+            return;
+        }
+        if (!audio.playing() && recordArmed && waitForInput)
+        {
+            // Wait for input: open the take at the stopped playhead; the first note starts it.
+            beginMidiTake(0);
+            if (midiTaking)
+            {
+                armWaitForInput(true);
+                status = "Waiting for input: play a note to start recording (Stop cancels)";
+            }
+            repaint();
+            return;
+        }
         int bars = !audio.playing() && recordArmed ? audio.countInBars() : 0;
         if (!audio.playing() && recordArmed)
         {
@@ -477,6 +498,15 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     };
     stop.onClick = [this]
     {
+        if (waitingForInput)
+        {
+            // Stop while waiting for input: no note arrived, so the empty take ends.
+            armWaitForInput(false);
+            if (auto result = finishMidiTake(); result.failed())
+                status = result.getErrorMessage();
+            repaint();
+            return;
+        }
         if (mixerChainApplying())
             mixerChains->active->playRequested = false;
         if (devicePreparationBusy())
@@ -3628,6 +3658,7 @@ void Studio::toolsMenu()
     menu.addItem(207, "Step record (write played notes at a cursor)", true, stepRecord);
     menu.addItem(209, "MIDI recording replaces notes (off = overdub)", true, midiRecordReplace);
     menu.addItem(213, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
+    menu.addItem(214, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
     menu.addItem(208, "Step record: insert a rest", stepRecord);
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
@@ -3692,6 +3723,11 @@ void Studio::toolsMenu()
             }
             if (choice == 213)
                 return safe->masterPitchDialog();
+            if (choice == 214)
+            {
+                safe->performAction("transport.waitForInput");
+                return;
+            }
             if (choice == 226)
                 return safe->promptSaveTemplate();
             if (choice == 227)
@@ -4273,6 +4309,18 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "transport.metronome")
     {
         click.onClick();
+        return true;
+    }
+    if (action == "transport.waitForInput")
+    {
+        waitForInput = !waitForInput;
+        if (!waitForInput && waitingForInput)
+        {
+            armWaitForInput(false);
+            if (auto result = finishMidiTake(); result.failed())
+                status = result.getErrorMessage();
+        }
+        repaint();
         return true;
     }
     if (action == "transport.countIn")
@@ -6608,6 +6656,7 @@ juce::var Studio::midiTakeState() const
 
 void Studio::timerCallback()
 {
+    pollWaitForInput();
     pollAiMusic();
     recordDiagnosticStatus();
     serviceAutosave();

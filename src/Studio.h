@@ -525,6 +525,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void saveProfile();
     juce::String macroConfigurationGeneration() const;
     void masterPitchDialog(); // Tools > Master pitch: cents for every tunable instrument (project.masterPitch).
+    bool waitForInput = false;   // Transport option: armed recording waits for the first MIDI note.
+    bool waitingForInput = false; // A take is open and the transport waits for that note.
+    void armWaitForInput(bool on);
+    void pollWaitForInput();
     juce::Result changeMacro(MacroConfigurationChange, const Macro &, const juce::String &id,
                               const juce::String &generation);
     juce::Result runSavedMixerMacro(const juce::String &, const juce::String &generation);

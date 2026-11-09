@@ -424,6 +424,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"score.clear", "Clear score log", Scope::global, false, true, "action"},
         {"midi.typing", "Typing keyboard to piano", Scope::global, false, true, "action"},
         {"transport.countIn", "Recording count-in", Scope::global, false, true, "action"},
+        {"transport.waitForInput", "Wait for input (record starts on the first MIDI note)", Scope::global, false, true, "action"},
         {"notes.record", "Record MIDI take", Scope::global, true, true, "command"},
         {"notes.import", "Import MIDI score", Scope::piano, true, true, "command"},
         {"notes.importTracks", "Import MIDI tracks as Channels", Scope::piano, true, true, "command"},
