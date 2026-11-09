@@ -5,21 +5,21 @@
   "scope": "Affected software workflows only; full-source/module/package gates remain pending. No listening/hardware/mixed-monitor or arbitrary native widget qualification.",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "src/PluginWrapperView.h": "aeab48fc1b287055801c15db720d53be43e2261fa6ed0d23435c3d8cadd4cd63",
+    "src/PluginWrapperView.h": "998de4b0aea1c81135c09136eef78c0ba54aa1d867549be8410b1c22bb1c601c",
     "src/PluginWrapperProtocol.h": "a6791b2d61575401751567addb8ddab040fcc39406298fd39042a67c5b392ff6",
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
-    "src/PluginWorker.cpp": "b63610b9ba6c311ea7eeb70f3da8835659f77e67f5471849155b6915c85ada76",
+    "src/PluginWorker.cpp": "f545e13d33206f3efdf3f2de4c79f708edccd965b520d8ad11cc3d4a306b9e39",
     "src/PluginHost.cpp": "dc9010a06a6e25547d6a61f33b5c2e50a378a30e0b7cb4cf6d8380f8d2e54741",
     "src/PluginHost.h": "36a909f41026357f9eeb9826e08ad6685d8541a6c705d4df1147d25fb2b53c1e",
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
-    "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
+    "src/StudioMcp.cpp": "c89905157241d95a19bdcd283695d2273c0bd96d7a2d3319654da18d11fdd9f0",
     "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c",
     "src/StudioPluginWrapperChains.inc": "5db55d8f0ba4175f1c3b22c74d52f38e283160227983b85d7b3ccf8ecb0a4d9a",
     "src/StudioMixerChains.inc": "421cac7ff6fe44d131fedd1e6abd20b39e008a14df997821d89594d5450a6abb",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
-    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
+    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
-    "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
+    "src/AudioEngine.cpp": "2de1fd5a44f1be460a21891eec1238dff44cdf6e7ba8a4f37a6484ab6316b842",
     "src/EffectChain.cpp": "99bcc8cc3c454131646f68ee56bc3f666caf79039870c187c8a70eecd77fb778",
     "src/StudioChannels.cpp": "5945fb1b2b5192b6ae315c964be6d42289fe6f2935d1b6ce438d57fe7e7c6723",
     "src/StudioMixerChainApplyAcceptance.inc": "81ab596669ab3f93006c8ffd51b931840e45c8aa52ea91f2af6f70cebfacec25",
@@ -28,7 +28,7 @@
     "tests/ParameterFixture.cpp": "561fefab19a6b4e8e771e7ab33e0cdb5ec5db81d69a5f124dcd0d9b61e22d99c",
     "tests/PluginWrapperViewAcceptance.h": "7b1c138e78de7be9779da11683ac0ad02ad69ff8ed053ba38cce2a30964e481b",
     "tests/PluginWrapperProtocolAcceptance.h": "b14d320457039ac845d553f454f4234b637cd0725863dfe96cb54e9e332f9774",
-    "tests/PluginWrapperWorkflowAcceptance.inc": "186bbe6194a8d2874e3392af6d2634a654b485025046246dad5b009b3bc02ca1",
+    "tests/PluginWrapperWorkflowAcceptance.inc": "ba468be28375f15b8ba0a3d3b95ce4eedd979ed50a6ec11cc534d4dc2657bb88",
     "src/StudioMixerDetectorAcceptance.inc": "e6c368739a98494b98b7758f4943e5caaa5bc969a9f42f589467884ea0060870",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
     "scripts/verify-installed-mcp.py": "8f1f935f120621a334097114b6fd07eabbff24a0e15b68f4aaae8e7fee35f55c",
@@ -43,7 +43,7 @@
     "Active synthetic-device detector disconnect/reconnect: exact parent/child close ACK, native replacement, one history edge, active source recovery, original PCM/save/export oracles.",
     "Installed Analog Lab V/MVibratoMB: actual chain file/state/history/replacement/hosted WAV and native main-I/O jobs, exact stable binary/provider/script inputs."
   ],
-  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
+  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
   "workerSha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6",
   "focused": {
     "plugin_main_io_model": 0.0592918,
@@ -83,11 +83,9 @@
   "inheritedMcpCoverageComplete": false,
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
-    "rerunLogs": [
-      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
-    ],
-    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
-    "tests": 282
+    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "rerunLogs": [],
+    "rerunNote": "",
+    "tests": 284
   }
 }

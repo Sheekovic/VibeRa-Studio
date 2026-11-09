@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/SampleFileBrowser.h": "e7ab70f014d5c8c376a433761a74e61ae531ff0ce96267868217d7c27f8bb947"
+    "src/SampleFileBrowser.h": "b491edf6a48014d0b7cf91dbf64e3c50e4842488fb2550a72c14e33b248e83b6"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
+  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -12,6 +12,7 @@
     "ai_model",
     "ai_producer_mcp",
     "ai_ui_gui",
+    "appearance_mcp",
     "arrangements",
     "audio_capture",
     "audio_playlist_gui",
@@ -47,6 +48,7 @@
     "controller_recording",
     "controller_routing_capture",
     "coproducer_context",
+    "coproducer_ideas_mcp",
     "deferred_device_candidate_fault",
     "development_fixture_profiles",
     "development_workflow",
@@ -58,6 +60,7 @@
     "flp_import",
     "groove_mcp",
     "gui_workflow",
+    "guide_midi_input_mcp",
     "history_destination_admission",
     "history_ui_recovery",
     "installer_package",
@@ -72,6 +75,7 @@
     "mcp_semantics",
     "mcp_ui_actions",
     "midi_import_extras",
+    "midi_import_mcp",
     "midi_interchange_gui",
     "midi_receive_mcp",
     "midi_scale_snap_mcp",
@@ -260,6 +264,7 @@
     "sampler_voice_modes",
     "sampler_voice_modes_mcp",
     "sampler_voices_mcp",
+    "shortcuts_mcp",
     "slicer",
     "song_meter",
     "step_composition",
@@ -283,8 +288,11 @@
     "vibera_synth_host",
     "vibera_synth_mcp",
     "vibera_synth_processor",
-    "vocal_pitch_mcp"
+    "vocal_pitch_mcp",
+    "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-051902/affected-tests.log",
+  "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+  "rerunLogs": [],
+  "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

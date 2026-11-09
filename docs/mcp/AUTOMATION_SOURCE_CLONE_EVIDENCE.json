@@ -6,10 +6,10 @@
   "scope": "Automation source Clone/Clone with links, partial RPS-B/L/M only",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "6e8b2ec13971b3c5460d639438b46c2f037323ecc08fc95d5ad65f326cf75e3d",
-    "CMakeLists.txt": "88fefe2733bcb54d35519e4ff2de2fcc465aef966cfb2d1cffe9fe4a07cfb118",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "7bf25a4c46bb3cd2486d262ffbba2eacb29394fd9fe1df9be5a58a0623ee6eb1",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "83e1e8dfbfb32c2d24d3218cf599021b11f6e9fcdc55ffd3698790f4d70b5686",
+    "CMakeLists.txt": "365504b4c8b94cf8f9c488916e7843273e1573a877a4b233efe29b6f6d374a34",
     "scripts/verify-automation-source-clone-mcp.py": "30169b9b123634c9858b865848443cefbbbe17378339e96169fb12a2946499db",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
     "skills/vibera-studio/references/automation-source-clone.md": "c7f3690db89f1d451fc526d4ae641840605d210b2daac951c92deb221b161f22",
@@ -18,7 +18,7 @@
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
     "skills/vibera-studio/SKILL.md": "6c47416e96fcd2fdcad8286468a89546ea6df46d59639b214bb91e42d4dcc6f6",
     "src/AudioClipImporter.h": "cbf1bdccd580f22d9839e6a50a6d33f33d54b2b961c8ff3ef8ad277460ab72c0",
-    "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
+    "src/AudioEngine.cpp": "2de1fd5a44f1be460a21891eec1238dff44cdf6e7ba8a4f37a6484ab6316b842",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
     "src/Automation.cpp": "91afb80c8b2398de7329e299c413c021f72c23227bda6311e871274b9c93bac7",
     "src/Automation.h": "54fdd663f86b2ac9dc89aad937f8fdb0d7005b444a962e3c595fe8e8d8a4df42",
@@ -48,7 +48,7 @@
     "src/ChannelSolo.h": "4e892bbec7e947252ceb57c81e1e7075f210ff8a8051a89356f07ab4bff3534f",
     "src/ClipGroups.h": "e8356a636df8268c36e87fa8ba610f2d49880823a47884e4b86769ee126159df",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
+    "src/Commands.cpp": "4c4b734890d17281ec4d249d9d584a1243d61da54b7b952a6aa12094fedfde5c",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/CommandsNativeScalarHistory.inc": "e65cb51884f76407afc1362561f1fc969aabf3cccc1227a09229756d65185548",
     "src/CompensationGraph.h": "e8e954dab9a0352afc31048c40d12c9ae6cbed743628b0aadadc96f06a6f7fe6",
@@ -178,9 +178,9 @@
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
     "src/PluginStateEncoding.cpp": "f008a1e89dbb7455998c6e508aeb44a1278f1eeb72ee2ac57c02df39fe557e5d",
     "src/PluginStateEncoding.h": "936b97a4dde196b775150e30bf821da94dba2c06e20a3839c5d4fca13304c159",
-    "src/PluginWorker.cpp": "b63610b9ba6c311ea7eeb70f3da8835659f77e67f5471849155b6915c85ada76",
+    "src/PluginWorker.cpp": "f545e13d33206f3efdf3f2de4c79f708edccd965b520d8ad11cc3d4a306b9e39",
     "src/PluginWrapperProtocol.h": "a6791b2d61575401751567addb8ddab040fcc39406298fd39042a67c5b392ff6",
-    "src/PluginWrapperView.h": "aeab48fc1b287055801c15db720d53be43e2261fa6ed0d23435c3d8cadd4cd63",
+    "src/PluginWrapperView.h": "998de4b0aea1c81135c09136eef78c0ba54aa1d867549be8410b1c22bb1c601c",
     "src/PreparedAppMixerAudioPorts.h": "2f1397d203f6fe963302271ee49bc020b6dce8ba3a1e87cbb5a9b6c277368914",
     "src/PreparedBalance.h": "775cb34d5be9867ab2c6cedc8c08cb99540bd700199f39ccba706704312793e4",
     "src/PreparedMixerAudioPort.h": "9dafd99ae5611ba8544accb2153581cbc8a6804b43cee425a4b418e7b1e554a0",
@@ -212,7 +212,7 @@
     "src/RetainedWaveContextFixture.inc": "194d786030acc8fb50848b5b2269cd7437d7f810aa85342426e17b591d59e140",
     "src/SampleCache.cpp": "e0471cd8e4ab4c8e68b53721eb6cf9a49bac4fa396114716f05cd6e585e1c8c1",
     "src/SampleCache.h": "ea975ade9e4a48b391f5d411d391b86eb1e97f8b1b0fffa43aff4da910149c59",
-    "src/SampleFileBrowser.h": "e7ab70f014d5c8c376a433761a74e61ae531ff0ce96267868217d7c27f8bb947",
+    "src/SampleFileBrowser.h": "b491edf6a48014d0b7cf91dbf64e3c50e4842488fb2550a72c14e33b248e83b6",
     "src/SamplePreview.h": "b551e23b14e33c0f264ac8ad2b80b28d03c473e5090201bcdd84048b07f8ab51",
     "src/Sampler.h": "f441e0778acf4d6e0e2208a191d2c50001dd8a6718787a7775351a66ef16367b",
     "src/SamplerCuts.h": "bc325e9bef3ac575202a6ddfc2a50d6b44f42224c86691d37830f251216cc899",
@@ -240,7 +240,7 @@
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
     "src/StudioDevicePreparation.h": "61cddfd7349c1d6ee49101996180953587c6ff0fc129927e2a9f0b3b4a55a7dd",
     "src/StudioDevicePreparation.inc": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352",
-    "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
+    "src/StudioMcp.cpp": "c89905157241d95a19bdcd283695d2273c0bd96d7a2d3319654da18d11fdd9f0",
     "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
     "src/StudioMidiTakeRecoveryAcceptance.cpp": "db176e5c066433a5edcd60ad794927450c598c7736369cab24c4ea9aa6804829",
     "src/StudioMixer.cpp": "82b67f8f8a61dda38598a5f12ac4df760180d5602566ed7f1377a61b8a35d0a7",
@@ -286,8 +286,8 @@
     "src/Vst3EditorBridge.h": "1e3a7f09412a3cb7994de83210582e53b2f3f30ec6194d63e7a3b0914c2f468d",
     "src/Vst3ParameterBridge.h": "42c39783dc8aeca8f113b2f6d269aa652b7c229527dd7194116f3110fd20e782",
     "src/WindowChrome.h": "6f47d74583bd45c94d873a1638e0059be478e2ed392c38ef25d0c532c6ceff4f",
-    "src/WorkerProcess.cpp": "488b063bbbe14710b2a4dbf0b0ad2443879f6c6497dbd53b6b9b5ef590b0b799",
-    "src/WorkerProcess.h": "2164535c66d8e48fee1894d73bb09ad187b0e1467b905329538b14fa90e3a125",
+    "src/WorkerProcess.cpp": "6e61e3a8435eaed32fc9d55036433a3e8490e4b9b1c4bd165cd61683dff23dd7",
+    "src/WorkerProcess.h": "efab011d15ef0dd01860c854d792b464d22311cae77cd500ec40f501a294da15",
     "src/WorkspaceTiling.h": "b26f8e645d7b7785b5a45d9cd784d0d351cac5cc14f713c33acca36cc2f64eb3",
     "tests/Acceptance.cpp": "4b2603821a7b50e6e22b5fd8f7fefbe8a7b37f8e555a6a54b03e2cf10f4d93ee",
     "tests/AutomationProjectAcceptance.h": "5f7e75d882dab40479e474f07cd39711986bfeb2272d413d8a85bfab0b401388",
@@ -295,7 +295,7 @@
     "tests/PickerAudioFixture.h": "321d8eb1880de442e0ac0eb145cc4fa36891971824390400ee33959b214e9fba",
     "tests/SyntheticDevice.h": "f32ab87714587bd5a163139f224985061b5e1db0c0c25639bd0049bc85306a77"
   },
-  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
+  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
   "workerSha256": "1fd6690c32ee073c8927d4f6bcca189a3fe71926c1834ee6aeb549b771f4e1e8",
   "testRunnerSha256": "6b22da77ad0bd1affeb1b44342fc53572e49872ff4c6c73e6983553c425bdae8",
   "checks": [
@@ -404,11 +404,9 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
-    "rerunLogs": [
-      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
-    ],
-    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
-    "tests": 282
+    "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+    "rerunLogs": [],
+    "rerunNote": "",
+    "tests": 284
   }
 }

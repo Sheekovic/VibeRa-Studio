@@ -4,7 +4,7 @@
     "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -48,6 +48,7 @@
     "controller_recording",
     "controller_routing_capture",
     "coproducer_context",
+    "coproducer_ideas_mcp",
     "deferred_device_candidate_fault",
     "development_fixture_profiles",
     "development_workflow",
@@ -74,6 +75,7 @@
     "mcp_semantics",
     "mcp_ui_actions",
     "midi_import_extras",
+    "midi_import_mcp",
     "midi_interchange_gui",
     "midi_receive_mcp",
     "midi_scale_snap_mcp",
@@ -286,12 +288,11 @@
     "vibera_synth_host",
     "vibera_synth_mcp",
     "vibera_synth_processor",
-    "vocal_pitch_mcp"
+    "vocal_pitch_mcp",
+    "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-095811/affected-tests.log",
-  "rerunLogs": [
-    "build/dev/20261109-095811/rerun-unreached.log"
-  ],
-  "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
+  "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+  "rerunLogs": [],
+  "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }
