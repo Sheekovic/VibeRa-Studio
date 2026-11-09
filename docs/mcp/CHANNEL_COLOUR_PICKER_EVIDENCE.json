@@ -7,7 +7,7 @@
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "b286e3d8dc22c32878dd5895656725f2665c056d6270ca1e5befeed8dc707e60",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
     "scripts/verify-channel-appearance-mcp.py": "7b9dcc295df63839da8dcb2b24e080eb642bcdd9324c0964830955aef61abfd1",
     "skills/vibera-studio/references/channel-appearance.md": "db831c6973d41b9e692213a4878927477293ac34dbddf4261a178872e30942c7",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
@@ -43,7 +43,7 @@
     "src/ChannelSolo.h": "4e892bbec7e947252ceb57c81e1e7075f210ff8a8051a89356f07ab4bff3534f",
     "src/ClipGroups.h": "e8356a636df8268c36e87fa8ba610f2d49880823a47884e4b86769ee126159df",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "f545a2c3395dc032e54bebc19ad033a4ee54818f7325282aa1bbbc99393d14ea",
+    "src/Commands.cpp": "f35c6f046930e7482d9f8621a3cfae5a6c77aea966e2eb47c5818f8ddda0a28e",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/CommandsNativeScalarHistory.inc": "e65cb51884f76407afc1362561f1fc969aabf3cccc1227a09229756d65185548",
     "src/CompensationGraph.h": "e8e954dab9a0352afc31048c40d12c9ae6cbed743628b0aadadc96f06a6f7fe6",
@@ -238,7 +238,7 @@
     "src/StoppedEffectChangePlan.h": "20bef5b031a7a0567712fabaca0fe3dfbeade44d74ebb6f5bc07166d80791f46",
     "src/StoppedEffectWorkers.cpp": "0fb3b974f6d4466f9d2c8be031e0c069bf9856709896ce81b9d156eab1839588",
     "src/StoppedEffectWorkers.h": "38c8cd27fd58879b0cfddc76c7d304e9c8e59833d67ce46d349177ba6ab7fd69",
-    "src/Studio.cpp": "32161c37837a54d9b39f8cd83dc43f29a2492d850ee9210d6bb8e0f99e7437a9",
+    "src/Studio.cpp": "9c58d30ac5700fc88c9a29f2d9be08745c2805a59c19027d607a7c6b2175f1e0",
     "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
     "src/StudioAutomation.cpp": "459c9c035595d2dbe9a9a09f66a796a17565630c2b998aeaea04456e6bb7d708",
     "src/StudioAutomationRecording.inc": "ff38f154fa499aadc398e7009b94e0cba9fde644bcc78f53bf5962b6bec84db1",
@@ -300,7 +300,7 @@
     "src/WorkerProcess.h": "2164535c66d8e48fee1894d73bb09ad187b0e1467b905329538b14fa90e3a125",
     "src/WorkspaceTiling.h": "b26f8e645d7b7785b5a45d9cd784d0d351cac5cc14f713c33acca36cc2f64eb3"
   },
-  "applicationSha256": "b286e3d8dc22c32878dd5895656725f2665c056d6270ca1e5befeed8dc707e60",
+  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
   "workerSha256": "1fd6690c32ee073c8927d4f6bcca189a3fe71926c1834ee6aeb549b771f4e1e8",
   "checks": [
     "Actual F2/name/modal palette, Theme, HTML and asynchronous spectrum controls retain exact55B7D9 RGB; preview never commits.",
@@ -420,7 +420,7 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-043521/affected-tests.log",
+    "sourceLog": "build/dev/20261109-051902/affected-tests.log",
     "tests": 278
   }
 }

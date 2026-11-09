@@ -1,0 +1,527 @@
+{
+  "src/InstrumentWindow.h:1008:a499a771a893": {
+    "operations": [
+      "channel.sampler.mono",
+      "channel.sampler.portamento",
+      "channel.sampler.fullPortamento"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1071:dd3e6c61220d": {
+    "operations": [
+      "channel.sampler.slideTime",
+      "channel.sampler.gateBeats"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1077:24e4ca2c67fc": {
+    "operations": [
+      "channel.sampler.slideTime",
+      "channel.sampler.gateBeats"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1088:a0409f70e3df": {
+    "operations": [
+      "channel.sampler.slideTime",
+      "channel.sampler.gateBeats"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1116:8548509d29f0": {
+    "operations": [
+      "channel.sampler.root",
+      "channel.sampler.cents",
+      "channel.sampler.start",
+      "channel.sampler.end",
+      "channel.sampler.loopStart",
+      "channel.sampler.loopEnd",
+      "channel.sampler.attack",
+      "channel.sampler.decay",
+      "channel.sampler.sustain",
+      "channel.sampler.release",
+      "channel.sampler.fadeIn",
+      "channel.sampler.fadeOut",
+      "channel.sampler.loopCrossfade"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1132:b14ac5d7c5ee": {
+    "operations": [
+      "channel.sampler.root",
+      "channel.sampler.cents",
+      "channel.sampler.start",
+      "channel.sampler.end",
+      "channel.sampler.loopStart",
+      "channel.sampler.loopEnd",
+      "channel.sampler.attack",
+      "channel.sampler.decay",
+      "channel.sampler.sustain",
+      "channel.sampler.release",
+      "channel.sampler.fadeIn",
+      "channel.sampler.fadeOut",
+      "channel.sampler.loopCrossfade"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1136:ec5ba60ae2d3": {
+    "operations": [
+      "channel.sampler.root",
+      "channel.sampler.cents",
+      "channel.sampler.start",
+      "channel.sampler.end",
+      "channel.sampler.loopStart",
+      "channel.sampler.loopEnd",
+      "channel.sampler.attack",
+      "channel.sampler.decay",
+      "channel.sampler.sustain",
+      "channel.sampler.release",
+      "channel.sampler.fadeIn",
+      "channel.sampler.fadeOut",
+      "channel.sampler.loopCrossfade"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1332:07622a57cc14": {
+    "operations": [
+      "channel.sampler.tempoDetect",
+      "channel.sampler.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1433:4ba09787474d": {
+    "operations": [
+      "channel.sampler.normalize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1435:fb1c3900400c": {
+    "operations": [
+      "channel.sampler.reverse"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1440:23abf33c9b54": {
+    "operations": [
+      "channel.sampler.hqInterpolation"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1441:84b9d5a80fd3": {
+    "operations": [
+      "channel.sampler.envelope"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1450:2a1b5bba93a1": {
+    "operations": [
+      "channel.previewNote"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1561:cdac395a434e": {
+    "operations": [
+      "channel.gain",
+      "channel.pan"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1565:2ca3c615a4a6": {
+    "operations": [
+      "channel.gain",
+      "channel.pan"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1572:35175bf90158": {
+    "operations": [
+      "channel.gain"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1573:55954c36b692": {
+    "operations": [
+      "channel.pan"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1623:af91af05e239": {
+    "operations": [
+      "view.piano",
+      "channel.select"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:1632:facf325e93a9": {
+    "operations": [
+      "channel.source"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:269:b5ceed6b2790": {
+    "operations": [
+      "sampler.page.sample",
+      "sampler.page.envelope",
+      "sampler.page.misc"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:857:d1e706673912": {
+    "operations": [
+      "automation.sampler.create"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:904:d9be2f4d1e30": {
+    "operations": [
+      "channel.sampler.modulation.amount",
+      "channel.sampler.modulation.attack",
+      "channel.sampler.modulation.attackTension",
+      "channel.sampler.modulation.decay",
+      "channel.sampler.modulation.decayTension",
+      "channel.sampler.modulation.delay",
+      "channel.sampler.modulation.enabled",
+      "channel.sampler.modulation.hold",
+      "channel.sampler.modulation.lfoAmount",
+      "channel.sampler.modulation.lfoAttack",
+      "channel.sampler.modulation.lfoDelay",
+      "channel.sampler.modulation.lfoEnabled",
+      "channel.sampler.modulation.lfoGlobal",
+      "channel.sampler.modulation.lfoPeriod",
+      "channel.sampler.modulation.lfoShape",
+      "channel.sampler.modulation.lfoTempo",
+      "channel.sampler.modulation.release",
+      "channel.sampler.modulation.releaseTension",
+      "channel.sampler.modulation.sustain",
+      "channel.sampler.modulation.tempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:932:f1e0d3178919": {
+    "operations": [
+      "channel.sampler.filterType"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:964:18ab34cf8165": {
+    "operations": [
+      "channel.sampler.filterCutoff",
+      "channel.sampler.filterResonance"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:969:630edcaad487": {
+    "operations": [
+      "channel.sampler.filterCutoff",
+      "channel.sampler.filterResonance"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/InstrumentWindow.h:976:f271f3a7834a": {
+    "operations": [
+      "channel.sampler.filterCutoff",
+      "channel.sampler.filterResonance"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:103:94a4b3018e57": {
+    "operations": [
+      "plugin.effect.mix"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:120:340895abe528": {
+    "operations": [
+      "channel.pan"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:126:7ec0b706d2e2": {
+    "operations": [
+      "channel.pitch"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:133:5e3e2d08e295": {
+    "operations": [
+      "channel.pitchRange"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:145:a5f1b43acb28": {
+    "operations": [
+      "channel.gain"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:152:df8cce544777": {
+    "operations": [
+      "channel.mute"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:162:7b77e0185624": {
+    "operations": [
+      "channel.mixer"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:180:a73757a6d2c4": {
+    "operations": [
+      "plugin.wrapper.view"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:196:c45604aeee8e": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:208:4dc3eb7ecb7b": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:228:8c62bfd85c6c": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:235:dbb03d8e2098": {
+    "operations": [
+      "plugin.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:251:ff1dfa76d171": {
+    "operations": [
+      "automation.plugin.create"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:252:0ccb6f1a5135": {
+    "operations": [
+      "automation.plugin.init"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:253:770766ad1574": {
+    "operations": [
+      "automation.plugin.init.remove"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:254:1598033775bf": {
+    "operations": [
+      "plugin.parameters.refresh"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:259:fa9236232c65": {
+    "operations": [
+      "tools.lastTweaked.controls"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:271:09831cff7ce3": {
+    "operations": [
+      "plugin.notifications"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:294:90ae928ab58c": {
+    "operations": [
+      "plugin.io"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:302:80822c43e6e8": {
+    "operations": [
+      "plugin.io"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:310:38ee3875613b": {
+    "operations": [
+      "plugin.io"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:325:e93e233ac73b": {
+    "operations": [
+      "plugin.io"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:346:936bc9d06573": {
+    "operations": [
+      "mixer.chain.copy"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:347:86a8d9d37b8d": {
+    "operations": [
+      "mixer.chain.paste"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:348:f3a457e036bb": {
+    "operations": [
+      "mixer.chain.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:349:18d873a9cc1f": {
+    "operations": [
+      "mixer.chain.loadApply"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:350:a584a9257e2c": {
+    "operations": [
+      "mixer.chain.directory"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:351:94c235b777a6": {
+    "operations": [
+      "plugin.effect.sidechain"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:57:1ad960c0cc47": {
+    "operations": [
+      "plugin.wrapper.view"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:62:6c95be2f39b7": {
+    "operations": [
+      "plugin.wrapper.view"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:63:2ed2b26e8fee": {
+    "operations": [
+      "plugin.wrapper.view"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/PluginWrapperView.h:89:d3341bdd84ed": {
+    "operations": [
+      "plugin.bypass"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:560:32d7cd22ff97": {
+    "operations": [
+      "synth.preset.load"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:569:332ff9c072ad": {
+    "operations": [
+      "synth.browser.favorite"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:667:7b49f221e6b6": {
+    "operations": [
+      "synth.preset.previous"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:668:2b06f9615ad2": {
+    "operations": [
+      "synth.preset.next"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:669:7b2baf8cc2f2": {
+    "operations": [
+      "synth.browser.favorite"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:676:6fe77e2fa206": {
+    "operations": [
+      "synth.user.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:677:caf507a0b940": {
+    "operations": [
+      "synth.user.load"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:685:d97abdc951ea": {
+    "operations": [
+      "synth.browser.filter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:698:72e54031f349": {
+    "operations": [
+      "synth.browser.filter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:727:a9d06f0dd30c": {
+    "operations": [
+      "synth.browser.filter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:788:3112beb863f1": {
+    "operations": [
+      "synth.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:796:aaf570b97327": {
+    "operations": [
+      "synth.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:808:cad9bdfc0c0b": {
+    "operations": [
+      "synth.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:862:5163ee41b1aa": {
+    "operations": [
+      "synth.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:866:07da1b39fc21": {
+    "operations": [
+      "synth.editor.navigate"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:890:74527ccc7198": {
+    "operations": [
+      "synth.editor.navigate"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:891:555e7f25f97f": {
+    "operations": [
+      "synth.editor.navigate"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/synth/SynthEditor.cpp:952:629bcbc93ae0": {
+    "operations": [
+      "synth.parameter.set"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  }
+}

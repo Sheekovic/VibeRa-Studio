@@ -4,7 +4,7 @@
     "src/InstrumentWindow.h": "95e52300362aea7bfeeaf400ed98cd27817b86a2c6618dcaf617d96f3a1f1244"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "b286e3d8dc22c32878dd5895656725f2665c056d6270ca1e5befeed8dc707e60",
+  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -285,6 +285,6 @@
     "vibera_synth_processor",
     "vocal_pitch_mcp"
   ],
-  "sourceLog": "build/dev/20261109-043521/affected-tests.log",
+  "sourceLog": "build/dev/20261109-051902/affected-tests.log",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

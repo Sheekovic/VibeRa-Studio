@@ -4483,6 +4483,20 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     }
     if (action.startsWith("sampler.view."))
         return navigateSamplerView(action);
+    if (action == "sampler.page.sample" || action == "sampler.page.envelope" || action == "sampler.page.misc")
+    {
+        // Channel settings window page of the selected sampler Channel (opened if needed).
+        if (const auto *c = controller.project.channel(selectedChannel); !c || c->instrument)
+            return false;
+        if (!instrumentWindows.contains(selectedChannel) || !instrumentWindows[selectedChannel] ||
+            !instrumentWindows[selectedChannel]->isVisible())
+            openInstrument(selectedChannel);
+        const auto window = instrumentWindows.find(selectedChannel);
+        if (window == instrumentWindows.end() || !window->second)
+            return false;
+        window->second->showPage(action.endsWith("sample") ? 0 : action.endsWith("envelope") ? 1 : 2);
+        return true;
+    }
     if (action.startsWith("sampler.modulation."))
         return selectSamplerModulationTarget(
             selectedChannel,

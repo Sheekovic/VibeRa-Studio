@@ -8,9 +8,9 @@
   "sourceInputs": {
     "CMakeLists.txt": "28bb8d880d39e052482007bddcde9d4a2275503f81efddddf9afc3cedab2e4a1",
     "CMakePresets.json": "a17190f02b339b6aecc8c8802b7c082a82bb67992153a290d04f5e441e876400",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "66fc79b17c84124ef2204c444a4a5ec18bc694ba635114a9599c413b01720a8b",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "8b94b49e4015ea4d983c87093c9f16937686cc38c11460098f13e47ffd5d2472",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "b286e3d8dc22c32878dd5895656725f2665c056d6270ca1e5befeed8dc707e60",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "docs/PATTERN_EXTENT.md": "9a613d2921be1cb25d6b515d48b0436c3574aac2a285a25620b15da7d50f8cbe",
     "scripts/dev_support.py": "498169f5457fb526aa7ca60e1c881e77375004b17056a7a5320eebcd0269959d",
@@ -56,7 +56,7 @@
     "src/CoProducerPanel.h": "cd6ce9600be1196d2d7bb15b0be6fff81ad247eda746e931716361c050c8eaa6",
     "src/CoProducerWorker.cpp": "f951b754977a2f029e781d3d0d1e8832466bd6efc8405aceac13fc83b520a23d",
     "src/CoProducerWorker.h": "6db564d49e07f3ec15704f42dfbd68bc3848293f66db675599a8f9c6f0c1dd29",
-    "src/Commands.cpp": "f545a2c3395dc032e54bebc19ad033a4ee54818f7325282aa1bbbc99393d14ea",
+    "src/Commands.cpp": "f35c6f046930e7482d9f8621a3cfae5a6c77aea966e2eb47c5818f8ddda0a28e",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/CommandsNativeScalarHistory.inc": "e65cb51884f76407afc1362561f1fc969aabf3cccc1227a09229756d65185548",
     "src/CompensationGraph.h": "e8e954dab9a0352afc31048c40d12c9ae6cbed743628b0aadadc96f06a6f7fe6",
@@ -234,7 +234,7 @@
     "src/StoppedEffectChangePlan.h": "20bef5b031a7a0567712fabaca0fe3dfbeade44d74ebb6f5bc07166d80791f46",
     "src/StoppedEffectWorkers.cpp": "0fb3b974f6d4466f9d2c8be031e0c069bf9856709896ce81b9d156eab1839588",
     "src/StoppedEffectWorkers.h": "38c8cd27fd58879b0cfddc76c7d304e9c8e59833d67ce46d349177ba6ab7fd69",
-    "src/Studio.cpp": "32161c37837a54d9b39f8cd83dc43f29a2492d850ee9210d6bb8e0f99e7437a9",
+    "src/Studio.cpp": "9c58d30ac5700fc88c9a29f2d9be08745c2805a59c19027d607a7c6b2175f1e0",
     "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
     "src/StudioAutomation.cpp": "459c9c035595d2dbe9a9a09f66a796a17565630c2b998aeaea04456e6bb7d708",
     "src/StudioAutomationRecording.inc": "ff38f154fa499aadc398e7009b94e0cba9fde644bcc78f53bf5962b6bec84db1",
@@ -593,7 +593,7 @@
     "tests/test_fixture_profiles.py": "efad3b8a16aecc0b40af0861b4bb192a36d6f8d5e36946f54c2e1aafa6fec589",
     "tests/test_mixer_effects_verifier.py": "5b51aeb5ce12dc71bfb02a42d437800bd86d250816b781aba8defa183155928f"
   },
-  "applicationSha256": "b286e3d8dc22c32878dd5895656725f2665c056d6270ca1e5befeed8dc707e60",
+  "applicationSha256": "75498a599bb4e3d4f49121c197267a81ce6a136b2d29e52f791e735dcbfdd587",
   "workerSha256": "1fd6690c32ee073c8927d4f6bcca189a3fe71926c1834ee6aeb549b771f4e1e8",
   "checks": [
     "Canonical Auto/manual extent, local/inherited meter, dormant source data and exact note/history/placement identities",
@@ -706,7 +706,7 @@
   ],
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-043521/affected-tests.log",
+    "sourceLog": "build/dev/20261109-051902/affected-tests.log",
     "tests": 278
   }
 }

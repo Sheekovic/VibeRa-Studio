@@ -10,6 +10,9 @@ through other tools) are left unreviewed: they need real registry/command work, 
 Evidence: a complete passing `dev.ps1 -Full` CTest log (every registered test, 100 %) bound to the
 exact source file hashes and the built application, written as docs/mcp/CALLBACK_COMMANDS_EVIDENCE.json.
 
+Manual reviews in docs/mcp/MANUAL_CALLBACK_REVIEWS.json name the registered operations of handlers
+that act through tool-mapped operations; every named operation must be registered and MCP-mapped.
+
 usage: python scripts/review-command-callbacks.py --source-log build/dev/<run>/affected-tests.log [--apply]
 """
 import argparse
@@ -48,6 +51,14 @@ call = re.compile(r'(?:command|performAction|commandCall|runGlobal)\s*\(\s*"([A-
 application = ROOT / "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe"
 app_sha = hashlib.sha256(application.read_bytes()).hexdigest()
 
+# Manual reviews (docs/mcp/MANUAL_CALLBACK_REVIEWS.json): surfaces whose handler was read and whose
+# operations reach MCP through a registered tool-mapped operation rather than a literal command call.
+manual_path = ROOT / "docs/mcp/MANUAL_CALLBACK_REVIEWS.json"
+manual = json.loads(manual_path.read_text(encoding="utf-8")) if manual_path.exists() else {}
+for key, review in manual.items():
+    unknown = [op for op in review.get("operations", []) if op not in mapped]
+    if not review.get("operations") or unknown:
+        raise SystemExit(f"Refused manual review {key}: unknown or unmapped operations {unknown}")
 reviewed_path = ROOT / "docs/mcp/REVIEWED_SURFACES.json"
 reviewed = json.loads(reviewed_path.read_text(encoding="utf-8-sig")) if reviewed_path.exists() else {}
 receipt_path = "docs/mcp/CALLBACK_COMMANDS_EVIDENCE.json"
@@ -59,6 +70,8 @@ for surface in state["customSurfaceCandidates"]:
     text = (ROOT / file).read_text(encoding="utf-8-sig")
     start = sum(len(part) + 1 for part in text.split("\n")[:int(line) - 1])
     operations = sorted({i for i in call.findall(text[start:start + 1600]) if i in mapped})
+    if not operations and surface["surface"] in manual:
+        operations = sorted(set(manual[surface["surface"]]["operations"]))
     if not operations:
         continue
     inputs[file] = hashlib.sha256((ROOT / file).read_bytes()).hexdigest()
