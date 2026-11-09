@@ -1510,6 +1510,61 @@ juce::Result Studio::finishRackEditsChecked()
 }
 void Studio::command(const juce::String &id, CommandArgs a, const juce::String &owner)
 {
+    if (id == "automation.source.fromAudio")
+    {
+        // FL "Analyze audio file": the file's level (RMS per step, normalised to its loudest step)
+        // becomes the curve over the source length at the project tempo. One Undo step.
+        const auto *source = controller.project.automationSource(Id(a.target));
+        const juce::File file(a.text);
+        const double step = a.value == 0 ? .25 : a.value;
+        auto fail = [this](const juce::String &message)
+        {
+            status = "automation.source.fromAudio: " + message;
+            repaint();
+        };
+        if (!source)
+            return fail("target is an Automation source ID");
+        if (!juce::File::isAbsolutePath(a.text) || !file.existsAsFile())
+            return fail("text is the absolute path of an audio file");
+        if (!std::isfinite(step) || step < 1. / 64 || step > 4)
+            return fail("value is the step in beats, 1/64..4");
+        juce::AudioFormatManager formats;
+        formats.registerBasicFormats();
+        std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(file));
+        if (!reader || reader->sampleRate <= 0)
+            return fail("cannot read " + file.getFileName());
+        const double secondsPerBeat = 60. / controller.project.tempo;
+        const int steps = std::clamp(int(std::ceil(source->length / step)), 1, 4095);
+        std::vector<double> levels;
+        juce::AudioBuffer<float> block(int(reader->numChannels), 1);
+        for (int i = 0; i <= steps; ++i)
+        {
+            const double from = std::min(i * step, source->length) * secondsPerBeat;
+            const auto start = juce::int64(from * reader->sampleRate);
+            const int count = int(step * secondsPerBeat * reader->sampleRate);
+            double sum = 0;
+            if (start < reader->lengthInSamples && count > 0)
+            {
+                const int n = int(std::min<juce::int64>(count, reader->lengthInSamples - start));
+                block.setSize(int(reader->numChannels), n, false, false, true);
+                reader->read(&block, 0, n, start, true, true);
+                for (int c = 0; c < block.getNumChannels(); ++c)
+                    sum += std::pow(block.getRMSLevel(c, 0, n), 2.);
+                sum = std::sqrt(sum / std::max(1, block.getNumChannels()));
+            }
+            levels.push_back(sum);
+        }
+        const double loudest = *std::max_element(levels.begin(), levels.end());
+        if (loudest <= 0)
+            return fail("the file is silent over the curve");
+        juce::Array<juce::var> list;
+        for (int i = 0; i <= steps; ++i)
+            list.add(juce::Array<juce::var>{std::min(i * step, source->length), levels[size_t(i)] / loudest});
+        CommandArgs points = a;
+        points.text = juce::JSON::toString(juce::var(list), true);
+        command("automation.source.points", points, owner);
+        return;
+    }
     if (id == "clip.uniqueSample" && a.text.isEmpty())
     {
         // FL "Make unique as sample": the clip gets its own Channel and its own copy of the audio

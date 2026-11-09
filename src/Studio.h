@@ -529,6 +529,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool recordNotes = true;     // Recording filter: Record opens a MIDI note take (FL "Notes").
     juce::Result setAudioLogger(bool enabled, double minutes); // Tools > Audio logger.
     juce::var audioLoggerState() const;
+    void analyzeAudioIntoAutomation(std::int64_t source); // Playlist automation tools > Analyze audio file...
+    std::unique_ptr<juce::FileChooser> automationAudioChooser;
     // Sampler envelope presets (FL): volume envelope only, JSON files by name.
     juce::File envelopePresetFolder() const;
     juce::StringArray envelopePresetNames() const;

@@ -87,6 +87,36 @@ try:
           "A curve with nothing left to drop is refused")
     command("edit.undo")
     check(points(line) == before, "Decimate is one Undo step")
+    # Filter: a zigzag's interior points move toward their neighbours' average; ends stay.
+    command("automation.source.decimate", target=line)  # Back to [0, 3, 3.5, 4] (.2 .5 .9 .6).
+    zig = points(line)
+    filtered = command("automation.source.filter", target=line, value=3)
+    after = points(line)
+    check(filtered.get("completionState") == "completed" and after[0][1] == zig[0][1] and after[-1][1] == zig[-1][1]
+          and abs(after[1][1] - (zig[0][1] + zig[1][1] + zig[2][1]) / 3) < 1e-3,  # readback is rounded to 4 places
+          f"Filter averages interior points and keeps the ends ({after})")
+    check(command("automation.source.filter", target=line, value=99).get("completionState") == "failed",
+          "A filter width above 32 is refused")
+
+    # Analyze audio file: loud first 2 beats (1 s at 120 BPM), quarter level for the last 2.
+    import array, math, wave
+    level_wav = output / "levels.wav"
+    with wave.open(str(level_wav), "wb") as w:
+        w.setparams((1, 2, 48000, 0, "NONE", "not compressed"))
+        w.writeframes(array.array("h", [int((20000 if i < 48000 else 5000) * math.sin(2 * math.pi * 220 * i / 48000))
+                                         for i in range(96000)]).tobytes())
+    command("project.tempo", value=120)
+    analyzed = command("automation.source.fromAudio", target=line, text=str(level_wav), value=.5)
+    curve = points(line)
+    check(analyzed.get("completionState") == "completed" and len(curve) == 9 and curve[0][0] == 0 and curve[-1][0] == 4,
+          f"Analyze audio file writes one point per half beat over the source ({len(curve)})")
+    loud = [v for b, v, _ in curve if b < 1.75]
+    quiet = [v for b, v, _ in curve if 2.25 <= b < 4]
+    check(min(loud) > .95 and all(abs(v - .25) < .03 for v in quiet), f"Levels follow the file (loud {loud}, quiet {quiet})")
+    check(command("automation.source.fromAudio", target=line, text=str(output / "none.wav")).get("completionState") == "failed",
+          "A missing audio file is refused")
+    command("edit.undo")
+    check(points(line) == after, "Analyze audio file is one Undo step")
     command("clip.delete", ids=[c["id"] for c in clips("automation") if c["lane"] == 3])
     check(not [c for c in clips("automation") if c["lane"] == 3], "The decimate test clip is removed")
 

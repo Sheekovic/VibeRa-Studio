@@ -5972,6 +5972,8 @@ class Studio::Editor final : public juce::Component,
                     tools.addItem(93, "Turn all points smooth");
                     tools.addItem(94, "Scale levels to 50 %");
                     tools.addItem(95, "Decimate points");
+                    tools.addItem(98, "Filter (smooth the levels)");
+                    tools.addItem(99, "Analyze audio file...");
                     m.addSubMenu("Articulator tools", tools);
                     m.addItem(96, "Merge selected Automation Clips", s.selectedClips.size() >= 2);
                 }
@@ -6066,6 +6068,16 @@ class Studio::Editor final : public juce::Component,
                                         safe->s.command("clip.unique", a);
                                     if (n == 97)
                                         safe->s.command("clip.uniqueSample", a);
+                                    if (n == 98)
+                                        if (const auto *clip = safe->automationClip(id))
+                                        {
+                                            a.target = clip->source;
+                                            a.value = 0;
+                                            safe->s.command("automation.source.filter", a);
+                                        }
+                                    if (n == 99)
+                                        if (const auto *clip = safe->automationClip(id))
+                                            safe->s.analyzeAudioIntoAutomation(clip->source);
                                     if (n == 2)
                                         safe->s.command("clip.delete", a);
                                     if (n == 90)

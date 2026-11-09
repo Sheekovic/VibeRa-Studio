@@ -330,7 +330,8 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
     }
     else if (operation == "automation.source.flip" || operation == "automation.source.normalize" ||
              operation == "automation.source.smooth" || operation == "automation.source.scale" ||
-             operation == "automation.source.decimate")
+             operation == "automation.source.decimate" || operation == "automation.source.filter" ||
+             operation == "automation.source.points")
     {
         // Articulator tools on one curve (every linked placement follows): flip vertically,
         // normalize to the full 0..1 range, turn every point smooth, or value * value + offset.
@@ -346,6 +347,52 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
                 points[i].incoming = AutomationShape::smooth;
                 points[i].tension = 0;
             }
+        else if (operation == "automation.source.filter")
+        {
+            // FL automation Filter: centred moving average over `value` points (0 = 3); ends stay put.
+            const int width = a.value == 0 ? 3 : int(a.value);
+            if (!std::isfinite(a.value) || width < 2 || width > 32)
+                return juce::Result::fail("automation.invalidFilter: Filter width is 2..32 points");
+            if (points.size() < 3)
+                return juce::Result::fail("automation.nothingToFilter: The curve has no interior points");
+            std::vector<float> filtered(points.size());
+            const int half = width / 2;
+            for (int i = 0; i < int(points.size()); ++i)
+            {
+                double sum = 0;
+                int count = 0;
+                for (int j = std::max(0, i - half); j <= std::min(int(points.size()) - 1, i + half); ++j, ++count)
+                    sum += points[size_t(j)].value;
+                filtered[size_t(i)] = float(sum / count);
+            }
+            for (size_t i = 1; i + 1 < points.size(); ++i)
+                points[i].value = filtered[i];
+        }
+        else if (operation == "automation.source.points")
+        {
+            // Replace the curve (used by Analyze audio file): text = [[beat, value], ...], first at 0,
+            // last at the source length, ascending, values 0..1, 2..4096 points.
+            const auto list = juce::JSON::parse(a.text);
+            const auto *items = list.getArray();
+            if (!items || items->size() < 2 || items->size() > 4096)
+                return juce::Result::fail("automation.invalidPoints: text is a list of 2..4096 [beat, value] pairs");
+            std::vector<AutomationPoint> next;
+            double previous = -1;
+            for (const auto &item : *items)
+            {
+                const auto *pair = item.getArray();
+                if (!pair || pair->size() != 2)
+                    return juce::Result::fail("automation.invalidPoints: each point is [beat, value]");
+                const double beat = (*pair)[0], value = (*pair)[1];
+                if (!std::isfinite(beat) || !std::isfinite(value) || value < 0 || value > 1 || beat <= previous)
+                    return juce::Result::fail("automation.invalidPoints: beats ascend and values are 0..1");
+                next.push_back({project.allocate(), beat, float(value)});
+                previous = beat;
+            }
+            if (next.front().beat != 0 || std::abs(next.back().beat - source->length) > 1e-9)
+                return juce::Result::fail("automation.invalidPoints: the curve runs from beat 0 to the source length");
+            points = std::move(next);
+        }
         else if (operation == "automation.source.decimate")
         {
             // FL "Decimate points": drop interior points that lie within the tolerance (value, 0 = 0.01)

@@ -190,5 +190,8 @@ follows) as one Undo step: `automation.source.flip` (mirror levels), `automation
 (stretch to 0..1), `automation.source.smooth` (every point smooth), `automation.source.scale`
 (`value` x level + `offset`), `automation.source.decimate` (drop interior points within `value`
 of the straight line between kept neighbours; 0 = 0.01, max 0.5; ends and curved points stay;
-refused when nothing would change). `automation.merge` joins selected clips of one target.
+refused when nothing would change), `automation.source.filter` (centred moving average over
+`value` points, 2..32, default 3; ends stay), `automation.source.fromAudio` (`text` = absolute audio
+path, `value` = step in beats, default 0.25: RMS per step normalised to the loudest step becomes the
+curve over the source length at the project tempo). `automation.merge` joins selected clips of one target.
 Read points back with `vibera_inspect {"entity":"automationPoints","source":id}`.

@@ -47,6 +47,22 @@ void Studio::saveAudioLogDialog()
                                      safe->repaint();
                                  });
 }
+void Studio::analyzeAudioIntoAutomation(std::int64_t source)
+{
+    automationAudioChooser = std::make_unique<juce::FileChooser>("Analyze audio file into automation", juce::File{},
+                                                                 "*.wav;*.flac;*.aif;*.aiff;*.ogg;*.mp3");
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    automationAudioChooser->launchAsync(juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                                        [safe, source](const juce::FileChooser &chooser)
+                                        {
+                                            if (!safe || !chooser.getResult().existsAsFile())
+                                                return;
+                                            CommandArgs a;
+                                            a.target = source;
+                                            a.text = chooser.getResult().getFullPathName();
+                                            safe->command("automation.source.fromAudio", a);
+                                        });
+}
 juce::var Studio::audioLoggerState() const
 {
     auto *o = new juce::DynamicObject;

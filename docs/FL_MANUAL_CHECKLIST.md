@@ -131,3 +131,17 @@ Rack / Piano roll / Mixer shortcut lists match existing VibeRa commands. Gaps fo
 | Export: output Channels (Stereo / Mono / Left / Right) | done | export menu > Channels / dither; MCP export `outputChannels`; export_options_mcp |
 | Export: Dithering | done | TPDF +/-1 LSB for 16/24-bit WAV; MCP export `dither`; export_options_mcp |
 | FL Cloud / SoundCloud upload, command-line rendering, GUI scaling/animation preferences | out of scope | FL services and FL host options |
+
+## Sixth pass (2026-11-09, pianoroll_lfo / automation_eventeditor_lfo / automation_eventeditor_levelscale / automation_midiimport / envelopetools_scalelevel / envelopetools_sequencer / envelopetools_filter / envelopetools_smoothup pages)
+
+Piano roll tools (LFO, randomize, claw, articulate, scale levels, limit, flam, arpeggiate, strum)
+and the MIDI import options already exist. The Automation Clip options menu was under-counted in
+the third pass:
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Automation Clip: Filter | done | `automation.source.filter` (moving average, width 2..32); clip Tools menu; playlist_tools_mcp |
+| Automation Clip: Analyze audio file | done | `automation.source.fromAudio` (RMS per step, normalised) via `automation.source.points`; clip Tools menu; playlist_tools_mcp |
+| Automation Clip: Smooth up (attack/release smoothing) | missing | |
+| Automation Clip: Create sequence (envelope step sequencer) | missing | |
+| Level Scale: Center / Tension | partial | `automation.source.scale` has multiply and offset only |
