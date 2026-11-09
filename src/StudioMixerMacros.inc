@@ -130,6 +130,48 @@ juce::var Studio::mcpMacroOperation(const juce::var &args)
                                         : runSavedMixerMacro(id,view.generation); r.failed()) fail(r);
         configurationCommitted = action == "remove";
     }
+    else if (action == "bindShortcut" || action == "unbindShortcut" || action == "resetShortcuts")
+    {
+        // Same Customization calls as Settings > Shortcuts, then the same profile save.
+        if (args.hasProperty("macro") || args.hasProperty("id"))
+            throw McpFailure("invalid_arguments","Shortcut actions take shortcut (and generation) only");
+        if (customization.running) throw McpFailure("macro.busy","A macro is running");
+        if (action == "resetShortcuts")
+        {
+            if (args.hasProperty("shortcut")) throw McpFailure("invalid_arguments","resetShortcuts takes no shortcut");
+            auto macros = customization.macros;
+            const bool restore = customization.restoreMuteAfterSolo;
+            customization = Customization::familiarDefaults();
+            customization.macros = std::move(macros);
+            customization.restoreMuteAfterSolo = restore;
+        }
+        else
+        {
+            const auto s = args["shortcut"];
+            if (!s.isObject()) throw McpFailure("invalid_arguments","shortcut is required");
+            const auto command = s["command"].toString();
+            const int scope = int(s["scope"]);
+            if (scope < 0 || scope > int(Scope::sampler)) throw McpFailure("invalid_arguments","Invalid scope");
+            if (action == "unbindShortcut")
+                customization.unbind(command, Scope(scope));
+            else
+            {
+                const int key = int(s["key"]);
+                if (key < 1 || key > 65535) throw McpFailure("invalid_arguments","key is 1..65535");
+                int mods = 0;
+                if (bool(s["ctrl"])) mods |= juce::ModifierKeys::ctrlModifier;
+                if (bool(s["shift"])) mods |= juce::ModifierKeys::shiftModifier;
+                if (bool(s["alt"])) mods |= juce::ModifierKeys::altModifier;
+                const auto r = customization.bind(command, Scope(scope), juce::KeyPress(key, juce::ModifierKeys(mods), 0),
+                                                  bool(s["alternate"]));
+                if (r.failed())
+                    throw McpFailure(r.getErrorMessage().startsWith("Shortcut conflicts") ? "shortcut.conflict" : "shortcut.invalid",
+                                     r.getErrorMessage());
+            }
+        }
+        if (auto r = customization.save(profileFile()); r.failed()) throw McpFailure("shortcut.saveFailed", r.getErrorMessage());
+        configurationCommitted = true;
+    }
     else if (action != "state") throw McpFailure("invalid_arguments","Unknown macro action");
     if (action == "state" && (args.hasProperty("macro") || args.hasProperty("generation")))
         throw McpFailure("invalid_arguments","state takes optional id/includeSchemas only");
@@ -194,6 +236,18 @@ juce::var Studio::mcpMacroOperation(const juce::var &args)
             supported.add(row);
         }
     set(result,"macros",macros); set(result,"supportedCommands",supported);
+    if (action.endsWith("Shortcut") || action == "resetShortcuts" || bool(args["includeShortcuts"]))
+    {
+        juce::Array<juce::var> shortcuts;
+        for (const auto &b : customization.bindings)
+        {
+            auto row = obj(); set(row,"command",b.action); set(row,"scope",int(b.scope));
+            set(row,"key",b.key.getKeyCode()); set(row,"ctrl",b.key.getModifiers().isCtrlDown());
+            set(row,"shift",b.key.getModifiers().isShiftDown()); set(row,"alt",b.key.getModifiers().isAltDown());
+            set(row,"text",b.key.getTextDescription()); shortcuts.add(row);
+        }
+        set(result,"shortcuts",shortcuts);
+    }
     set(result,"projectRevision",juce::int64(controller.revision)); set(result,"projectIdentity",controller.projectIdentity);
     return textResult(result);
 }

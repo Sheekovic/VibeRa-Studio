@@ -362,9 +362,15 @@ class ControllerPage final : public juce::Component, private juce::ListBoxModel,
         {
             if (!owner || row < 0 || row >= getNumRows())
                 return;
-            owner->midiController.bindings.erase(owner->midiController.bindings.begin() + row);
-            owner->midiController.publish();
-            owner->midiController.save();
+            juce::String token;
+            (void)owner->midiController.bindingProfileIdentity(token);
+            if (const auto removed = owner->midiController.removeBinding(size_t(row), token); removed.failed())
+            {
+                message.setText(removed.getErrorMessage(), juce::dontSendNotification);
+                return;
+            }
+            bindingProfileToken.clear();
+            (void)owner->midiController.bindingProfileIdentity(bindingProfileToken);
             list.updateContent();
             if (getNumRows())
                 list.selectRow(std::min(row, getNumRows() - 1));

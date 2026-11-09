@@ -1,15 +1,15 @@
 {
   "passed": true,
-  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
+  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
   "sourceInputs": {
-    "CMakeLists.txt": "43d8c003a7b812a954d914264c2c56ecb47334a9dbb2acf68e0bcf403dad7a35",
+    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "scripts/dev-select.py": "4eca9fe6273f887f39b394f94de78d102ef2dca10af7ff398d38f15fffb683c2",
     "scripts/distribution.py": "f6102501f12edf0f803a28b2f40b072915f041ba8a77b6b5a1996b18793f40ce",
     "scripts/verify-distribution.ps1": "decbdea57c64488c40086f7dfdf5c7c3a7805ac3dfa991fd9761e84f29c8f9d2",
     "scripts/verify-sampler-automation-mcp.py": "04a4c810ab5e445d8981749f19af463490d2f63063a00406c97ddc0a85f1cb2d",
     "scripts/verify-sampler-envelope-mcp.py": "68279532a7d7e5d0c20f9a3357f6c72e6ab9f425e7b2478598e946547ddce1e7",
-    "skills/vibera-studio/SKILL.md": "955824f5a9e458a059089000a04da09416113eea74e3e16ff429a2e8ac1208ae",
+    "skills/vibera-studio/SKILL.md": "6c47416e96fcd2fdcad8286468a89546ea6df46d59639b214bb91e42d4dcc6f6",
     "skills/vibera-studio/references/sampler-envelopes.md": "b32db042e0d29c122c4473173e54dce6599254b3e751be42e3bf5e5e4be3a674",
     "skills/vibera-studio/scripts/stdio_client.py": "c4acec16773359f2a7850734854abf2a1cf0dc1cb685f621510cea9720bccd97",
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
@@ -21,7 +21,7 @@
     "src/AutomationState.cpp": "f45588dc8d2366bab2081546e939c72a788694f31c42c978bb1cd97b9affaac3",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
+    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -30,7 +30,7 @@
     "src/LiveTimeline.h": "520071100c554a8fcf7f2d68bf47e5e3d3e80cd7a6619b3e75bd731de24942ac",
     "src/McpContracts.h": "bbaac235cb7acf5081742a0faa3e9e3c21c94593f0b5ef2ed2b00b28fdd88f79",
     "src/MixerAutomationUiIntent.h": "768d43c3d2306424b1529dc4d45e35672a18ac7ffdc9b5d9ffbf165730d24362",
-    "src/MixerMacroContracts.h": "54c4f55ea87bdb6aab8735bab81d22e6ec9c948a7b379c011cd3e427cd3fdbfc",
+    "src/MixerMacroContracts.h": "71db91fdaaa0789b72dc36a0a76b023726163c26693415a8096ef2c0fa272a39",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
     "src/Sampler.h": "f441e0778acf4d6e0e2208a191d2c50001dd8a6718787a7775351a66ef16367b",
@@ -47,9 +47,9 @@
     "src/SamplerSettings.h": "b8caf4fa414a4766e3177e65b4865060014720850501fc7a1763cf20a67c3206",
     "src/Settings.h": "ce6f33e6448f04010c0e05236cb4330e951c46fa6763b9290b5fc3a19b2b9a13",
     "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
-    "src/StudioMcp.cpp": "edc0eb8eee4415dcc351b9d9924ca19fc28ba8bd8ec3acd394ecb430bbcb4f75",
+    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
     "src/StudioMixerControls.cpp": "8f6a4f91f0535c7499a8b1367933317a61af97e4fa14723d0223d09e94451cca",
-    "src/StudioMixerMacros.inc": "8e2acb72aef73073839069806dbec2108046591fbad92d149d1846772b710259",
+    "src/StudioMixerMacros.inc": "f377965218790d1f5545cb9fda92fad93b2b3655e41c459090cfd25135235a1f",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
     "src/StudioSampler.cpp": "a903c13be242986663c5f979a5939562257ce907936bf51e33fade6dfe996002",
     "tests/Acceptance.cpp": "4b2603821a7b50e6e22b5fd8f7fefbe8a7b37f8e555a6a54b03e2cf10f4d93ee",
@@ -79,7 +79,7 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
-    "tests": 279
+    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
+    "tests": 280
   }
 }

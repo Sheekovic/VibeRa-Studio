@@ -1,10 +1,10 @@
 {
   "passed": true,
   "scope": "Channel appearance/sorting increment only; RPS-B/whole module/full FL coverage incomplete.",
-  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
+  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "43d8c003a7b812a954d914264c2c56ecb47334a9dbb2acf68e0bcf403dad7a35",
+    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
     "src/ChannelAppearance.h": "faafef6e4bbf23a2248b9a7ab59181e49971d4eb9a931438d391bda1d6254a66",
     "src/ChannelAppearanceCommands.h": "40e091ce9062af41336e3f15fae1701943edef09bee157bc9a0eaf89aea30899",
     "src/ChannelAppearanceContracts.h": "6036566e5cc29a14db31c473dee2810b2ba0952de58f34db48600068e47b34bc",
@@ -12,15 +12,15 @@
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
+    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
-    "src/Studio.cpp": "9c58d30ac5700fc88c9a29f2d9be08745c2805a59c19027d607a7c6b2175f1e0",
+    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2",
     "src/StudioRack.cpp": "e6cf4833b86218a621f7cda8502b7cde426f34563b5b30c89f19123b46983459",
-    "src/StudioMcp.cpp": "edc0eb8eee4415dcc351b9d9924ca19fc28ba8bd8ec3acd394ecb430bbcb4f75",
-    "src/StudioMixerMacros.inc": "8e2acb72aef73073839069806dbec2108046591fbad92d149d1846772b710259",
-    "src/MixerMacroContracts.h": "54c4f55ea87bdb6aab8735bab81d22e6ec9c948a7b379c011cd3e427cd3fdbfc",
+    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
+    "src/StudioMixerMacros.inc": "f377965218790d1f5545cb9fda92fad93b2b3655e41c459090cfd25135235a1f",
+    "src/MixerMacroContracts.h": "71db91fdaaa0789b72dc36a0a76b023726163c26693415a8096ef2c0fa272a39",
     "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4",
     "src/Theme.h": "0d9241672d3dd6ac76c7501a5a5e9910a1328299905b9d73b1ef2579f2e93067",
     "src/Main.cpp": "c287d05fe487e8b5073f7268b34ef1050f9c1dc08c130e3f229e5be4e366039a",
@@ -36,14 +36,14 @@
     "scripts/verify-channel-appearance-mcp.py": "7b9dcc295df63839da8dcb2b24e080eb642bcdd9324c0964830955aef61abfd1",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
     "skills/vibera-studio/references/channel-appearance.md": "db831c6973d41b9e692213a4878927477293ac34dbddf4261a178872e30942c7",
-    "skills/vibera-studio/SKILL.md": "955824f5a9e458a059089000a04da09416113eea74e3e16ff429a2e8ac1208ae",
+    "skills/vibera-studio/SKILL.md": "6c47416e96fcd2fdcad8286468a89546ea6df46d59639b214bb91e42d4dcc6f6",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/RackContracts.h": "159b97e2f343ecad930117525eeac41525703f1a76ee85293fee134104ce9c24",
     "src/ChannelSolo.h": "4e892bbec7e947252ceb57c81e1e7075f210ff8a8051a89356f07ab4bff3534f",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "2a26bc4eb4eb4d13f42af8ea2d3a8f730db86ba5440f84932eed3d586ceec0b3"
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "0e5c1f0e1bfd4b02c5a782c477adf6ca9b0a2d4ae1c08c968cd3ebbce7e1a191"
   },
   "checks": [
     "Actual UI Rack F2/dialog name/colour/icon commit and bulk/sort/Undo/Redo preserve held input in Pattern/Song; source component callbacks, not OS input.",
@@ -57,7 +57,7 @@
   "rawReceiptSha256": "3b071413a2f8e9f768cf6b64b3ee4c5b056e5e47785894072f4197daaa64b202",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
-    "tests": 279
+    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
+    "tests": 280
   }
 }

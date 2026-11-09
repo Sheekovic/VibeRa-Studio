@@ -38,9 +38,17 @@ inline juce::var mixerMacroArguments(const juce::String &id, bool context)
 }
 inline juce::var mixerMacrosTool()
 {
-    auto tool = juce::JSON::parse(R"JSON({"name":"vibera_macros","description":"Inspect/persist saved macros through the SAME Customization supported-command predicate, authoritative command schemas and Settings application service. Run the real saved-recipe runner with one history transaction, or its existing asynchronous Channel-routing service. Other shortcut/settings editing remains outside this tool. Completed means canonical history/configuration, never DSP/native readiness; routing runs return their actual pending operation for vibera_mixer routingJob polling.",
+    auto tool = juce::JSON::parse(R"JSON({"name":"vibera_macros","description":"Inspect/persist saved macros through the SAME Customization supported-command predicate, authoritative command schemas and Settings application service. Run the real saved-recipe runner with one history transaction, or its existing asynchronous Channel-routing service. bindShortcut/unbindShortcut/resetShortcuts edit keyboard shortcuts in the same profile, like Settings > Shortcuts (not Undo; generation-guarded; read back in shortcuts). Other settings editing remains outside this tool. Completed means canonical history/configuration, never DSP/native readiness; routing runs return their actual pending operation for vibera_mixer routingJob polling.",
       "inputSchema":{"type":"object","additionalProperties":false,"required":["action"],"properties":{
-        "action":{"type":"string","enum":["state","create","update","remove","run"]},
+        "action":{"type":"string","enum":["state","create","update","remove","run","bindShortcut","unbindShortcut","resetShortcuts"]},
+        "includeShortcuts":{"type":"boolean","default":false,"description":"state only: also list every keyboard shortcut (shortcut actions always return them)."},
+        "shortcut":{"type":"object","additionalProperties":false,"required":["command","scope"],"properties":{
+          "command":{"type":"string","minLength":1,"maxLength":256,"description":"Registered action or saved macro.* ID."},
+          "scope":{"type":"integer","minimum":0,"maximum":7,"description":"Command scope, as in vibera_commands (0 global)."},
+          "key":{"type":"integer","minimum":1,"maximum":65535,"description":"bindShortcut: JUCE key code (letters upper-case, e.g. 75 = K)."},
+          "ctrl":{"type":"boolean","default":false},"shift":{"type":"boolean","default":false},"alt":{"type":"boolean","default":false},
+          "alternate":{"type":"boolean","default":false,"description":"bindShortcut: keep the existing shortcut and add this one."}},
+          "description":"bindShortcut/unbindShortcut. A key already used by another command in the same scope is refused (shortcut.conflict). unbind removes every shortcut of the command in that scope; resetShortcuts restores the familiar defaults and keeps macros."},
         "id":{"type":"string","minLength":6,"maxLength":256,"description":"Stable macro.* ID; state optionally returns its complete recipe, remove/run require it. No name or row alias."},
         "generation":{"type":"string","minLength":64,"maxLength":64,"pattern":"^[0-9a-f]{64}$","description":"Required unchanged state generation for create/update/remove/run. Includes canonical settings and exact saved-profile identity. Re-read after any profile edit; stale refuses before work."},
         "includeSchemas":{"type":"boolean","default":false,"description":"state only: registry-derived explicit/current-context command schemas for this bounded Mixer recipe subset."},
@@ -72,6 +80,8 @@ inline juce::var mixerMacrosTool()
             "editable":{"type":"boolean"},"persisted":{"type":"boolean"},
             "steps":{"type":"array","maxItems":64,"items":{"type":"object","required":["action","parameters","currentContext"],"properties":{
               "action":{"type":"string"},"parameters":{"type":"object"},"currentContext":{"type":"boolean"}}}}}}},
+        "shortcuts":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["command","scope","key","ctrl","shift","alt","text"],"properties":{
+          "command":{"type":"string"},"scope":{"type":"integer"},"key":{"type":"integer"},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"},"text":{"type":"string"}}}},
         "supportedCommands":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["id"],"properties":{
           "id":{"type":"string"},"explicitArguments":{"type":"object"},"currentArguments":{"type":"object"}}}}
       }})JSON"));

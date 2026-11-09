@@ -4414,6 +4414,16 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         showDrumPads();
         return true;
     }
+    if (action == "view.browser")
+    {
+        browserButton.onClick();
+        return true;
+    }
+    if (action == "view.coProducer")
+    {
+        coProducerButton.onClick();
+        return true;
+    }
     if (action == "view.chordProgression")
     {
         showChordProgression();

@@ -156,7 +156,8 @@ class MidiController final : private juce::MidiInputCallback
     void close();
     juce::var stateForBindings(const std::vector<ControllerBinding> &) const;
     juce::Result bindingIdentity(const juce::File *, juce::String &) const;
-    juce::Result setBindingImpl(size_t, const ControllerBinding &, const juce::String &, const juce::File *);
+    // binding nullptr removes the row (same profile guard, validation and atomic save).
+    juce::Result setBindingImpl(size_t, const ControllerBinding *, const juce::String &, const juce::File *);
     void publishValidatedBindings(std::shared_ptr<EffectiveProjection>) noexcept;
 
   public:
@@ -209,6 +210,7 @@ class MidiController final : private juce::MidiInputCallback
     // CONTROL-only full-binding edit. Exact append at size is allowed; never gaps.
     // Save candidate BEFORE noexcept mapping publication; no MIDI port reconfiguration.
     juce::Result setBinding(size_t, const ControllerBinding &, const juce::String &expectedProfile);
+    juce::Result removeBinding(size_t, const juce::String &expectedProfile);
     juce::Result bindingProfileIdentity(juce::String &) const;
     bool bindingChangesPersisted() const noexcept
     {

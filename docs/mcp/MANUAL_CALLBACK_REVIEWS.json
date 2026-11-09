@@ -1428,18 +1428,6 @@
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   },
-  "src/ControllerPage.h:348:cb97681ad064": {
-    "operations": [
-      "controller.binding"
-    ],
-    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
-  },
-  "src/ControllerPage.h:374:dd9ebb27309f": {
-    "operations": [
-      "controller.binding"
-    ],
-    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
-  },
   "src/StudioPluginParameters.cpp:935:9013ad340cb8": {
     "operations": [
       "automation.plugin.create"
@@ -1635,6 +1623,109 @@
     "operations": [
       "coproducer.accept",
       "coproducer.replace"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:348:fdcdafd96adc": {
+    "operations": [
+      "controller.binding"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:380:dd9ebb27309f": {
+    "operations": [
+      "controller.binding"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:361:140e41e82450": {
+    "operations": [
+      "controller.binding.remove"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:149:685e8fe06f9f": {
+    "operations": [
+      "shortcut.bind"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:156:87fe13163f4f": {
+    "operations": [
+      "shortcut.bind"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:163:7674255989ed": {
+    "operations": [
+      "shortcut.unbind"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:172:9dc5dcf81064": {
+    "operations": [
+      "shortcut.reset"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:724:a11c9ee65270": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:898:d473bed802ef": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:905:0f7517c67aa2": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:915:49370c70e23b": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:925:81ebb738ca87": {
+    "operations": [
+      "userMacro.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:937:211fa78a68cf": {
+    "operations": [
+      "userMacro.save",
+      "userMacro.run"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:994:54fc7418af2c": {
+    "operations": [
+      "userMacro.delete"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:529:e52faebc9b5c": {
+    "operations": [
+      "view.browser"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:541:341e188bbf27": {
+    "operations": [
+      "view.snap"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:574:77a0057396c4": {
+    "operations": [
+      "view.coProducer"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }

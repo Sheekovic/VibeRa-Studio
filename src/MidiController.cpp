@@ -1176,9 +1176,9 @@ juce::Result MidiController::setBinding(size_t index, const ControllerBinding &b
     try
     {
         if (!persistent)
-            return setBindingImpl(index, binding, expectedProfile, nullptr);
+            return setBindingImpl(index, &binding, expectedProfile, nullptr);
         const auto file = controllerPrefs();
-        return setBindingImpl(index, binding, expectedProfile, &file);
+        return setBindingImpl(index, &binding, expectedProfile, &file);
     }
     catch (...)
     {
@@ -1189,24 +1189,39 @@ juce::Result MidiController::setBinding(size_t index, const ControllerBinding &b
 juce::Result MidiController::setBinding(size_t index, const ControllerBinding &binding,
                                         const juce::String &expectedProfile, const juce::File &ownedProfile)
 {
-    return setBindingImpl(index, binding, expectedProfile, &ownedProfile);
+    return setBindingImpl(index, &binding, expectedProfile, &ownedProfile);
+}
+juce::Result MidiController::removeBinding(size_t index, const juce::String &expectedProfile)
+{
+    try
+    {
+        if (!persistent)
+            return setBindingImpl(index, nullptr, expectedProfile, nullptr);
+        const auto file = controllerPrefs();
+        return setBindingImpl(index, nullptr, expectedProfile, &file);
+    }
+    catch (...)
+    {
+        return juce::Result::fail("controller.preparationFailed: Mapping removal failed; mappings preserved");
+    }
 }
 void MidiController::publishValidatedBindings(std::shared_ptr<EffectiveProjection> prepared) noexcept
 {
     cancelLearn();
     publishPrepared(std::move(prepared), true);
 }
-juce::Result MidiController::setBindingImpl(size_t index, const ControllerBinding &binding,
+juce::Result MidiController::setBindingImpl(size_t index, const ControllerBinding *binding,
                                             const juce::String &expectedProfile, const juce::File *file)
 {
     try
     {
         if (projectLearnToken)
             return juce::Result::fail("controller.learnBusy: Project Learn owns capture");
-        if (index >= 512 || index > bindings.size())
+        if (index >= 512 || index > bindings.size() || (!binding && index >= bindings.size()))
             return juce::Result::fail(
-                "controller.invalidIndex: Existing row or exact append position required");
-        if (!valid(binding))
+                binding ? "controller.invalidIndex: Existing row or exact append position required"
+                        : "controller.invalidIndex: Existing row required");
+        if (binding && !valid(*binding))
             return juce::Result::fail(
                 "controller.invalidBinding: Complete supported binding and range required");
         juce::String current;
@@ -1216,10 +1231,12 @@ juce::Result MidiController::setBindingImpl(size_t index, const ControllerBindin
             return juce::Result::fail(
                 "controller.staleProfile: Mappings or saved bytes changed; read state again");
         auto next = bindings;
-        if (index == next.size())
-            next.push_back(binding);
+        if (!binding)
+            next.erase(next.begin() + std::ptrdiff_t(index));
+        else if (index == next.size())
+            next.push_back(*binding);
         else
-            next[index] = binding;
+            next[index] = *binding;
         for (size_t i = 0; i < next.size(); ++i)
         {
             if (!valid(next[i]))

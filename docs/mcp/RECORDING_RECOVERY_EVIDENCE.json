@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
+  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
   "sourceInputs": {
-    "CMakeLists.txt": "43d8c003a7b812a954d914264c2c56ecb47334a9dbb2acf68e0bcf403dad7a35",
-    "src/Studio.cpp": "9c58d30ac5700fc88c9a29f2d9be08745c2805a59c19027d607a7c6b2175f1e0",
+    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
+    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2",
     "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
-    "src/StudioMcp.cpp": "edc0eb8eee4415dcc351b9d9924ca19fc28ba8bd8ec3acd394ecb430bbcb4f75",
-    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
+    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
+    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
@@ -29,7 +29,7 @@
     "src/BuildAcceptanceOutput.h": "5a93f55dafc86365f537a23ceb8e7c4c2047cb8c53c60b89d6c5c8c3f9b3cd95",
     "tests/MidiTakeRecoveryAcceptance.h": "6bb351c1899cda6a40fa37375f9ef74ab435fe090809617b32be586ab5138761",
     "tests/mcp_acceptance.py": "30979aeef30491ea8cf67f69fa78ef32097e5c905f3d41ba93ec268c87d69012",
-    "skills/vibera-studio/SKILL.md": "955824f5a9e458a059089000a04da09416113eea74e3e16ff429a2e8ac1208ae",
+    "skills/vibera-studio/SKILL.md": "6c47416e96fcd2fdcad8286468a89546ea6df46d59639b214bb91e42d4dcc6f6",
     "skills/vibera-studio/references/take-recovery.md": "cb49c00d0b8d70d47ce22a529a736d9b51cefaa208004c7f54284f04b1f76b71"
   },
   "checks": [
@@ -51,7 +51,7 @@
   "sourceHashMode": "text-lf-v1",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
-    "tests": 279
+    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
+    "tests": 280
   }
 }

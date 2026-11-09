@@ -957,6 +957,9 @@ set_tests_properties(center_playhead_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME guide_midi_input_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-guide-midi-input-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/guide_midi_input_mcp")
 set_tests_properties(guide_midi_input_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME shortcuts_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-shortcuts-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/shortcuts_mcp")
+set_tests_properties(shortcuts_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME controller_interpolate_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-controller-interpolate-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/controller_interpolate_mcp")
 set_tests_properties(controller_interpolate_mcp PROPERTIES TIMEOUT 120)

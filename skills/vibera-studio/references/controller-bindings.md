@@ -73,7 +73,11 @@ no cross-process guarantee against an external writer racing the final atomic
 replacement after the last check. Use optional current projectIdentity guard for
 ID-sensitive project intent, and re-query current targets after project changes.
 
-UI Add/Remove/preset/port/learn workflows and their inherited broader persistence
+`removeBinding` (`index`, `expectedProfile`) deletes one row through the same guarded
+service as the Settings Remove button: a stale profile or a missing row is refused, later rows
+move up, the profile saves atomically (not Undo). Read the identity again afterwards.
+
+UI preset/port/learn workflows and their inherited broader persistence
 or semantic gaps remain separate; this increment closes the changed single-binding
 Apply/send-target operation, not the full legacy controller/MCP campaign. Actual
 physical hardware, pickup response and production-port lifecycle need separate

@@ -190,7 +190,7 @@ juce::var Studio::mcpTools()
       {"name":"vibera_snapshot","description":"Capture this instance as a bounded JUCE component PNG including the header. With channel: that local Channel's settings window instead (opened if needed) (page 0 Sample, 1 Envelope, 2 Miscellaneous). Not native PrintWindow, physical input or listening evidence.","inputSchema":{"type":"object","properties":{"channel":{"type":"integer","minimum":1},"page":{"type":"integer","minimum":0,"maximum":2}},"additionalProperties":false}},
       {"name":"vibera_key","description":"Run an allowed contextual shortcut through the real JUCE handler. File/dialog/macro commands and held typing-performance input are excluded. Not OS keyboard input.","inputSchema":{"type":"object","properties":{"key":{"type":"integer","minimum":1,"maximum":65535},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["key"],"additionalProperties":false}},
       {"name":"vibera_pointer","description":"Run paired down/drag/up or cancel through actual editor/child mouse handlers, or one wheel step (phase wheel, deltaY; positive is up/away). Logical editor pixels from state; left/right/middle/x1 buttons. Not global or physical mouse input.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":3},"phase":{"type":"string","enum":["down","drag","up","cancel","wheel"]},"deltaY":{"type":"number","minimum":-4,"maximum":4},"x":{"type":"number"},"y":{"type":"number"},"button":{"type":"string","enum":["left","right","middle","x1"]},"clicks":{"type":"integer","minimum":1,"maximum":3},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["editor","phase"],"additionalProperties":false}}
-      ,{"name":"vibera_controller","description":"Production state/setBinding use the same validated Settings mapping service. Full binding edits save atomically before metadata publication, never Project Undo or MIDI port reopen. Selected/fixed/banked source and explicit mixer.send destination are preserved; invocation validates actual project targets. Preset/configure/learn/cancel/inject remain owned --mcp-test diagnostics only; no production MIDI injection/ports/filesystem arguments.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["state","setBinding","preset","configure","learn","cancel","inject"]},"profile":{"type":"object"},"index":{"type":"integer","minimum":0,"maximum":511,"description":"setBinding: existing row or exact append(size), no gaps; at most512 mappings."},"port":{"type":"integer","minimum":0,"maximum":1},"kind":{"type":"integer","minimum":0,"maximum":6},"channel":{"type":"integer","minimum":0,"maximum":16},"number":{"type":"integer","minimum":0,"maximum":127},"value":{"type":"integer","minimum":0,"maximum":16383},"binding":{"type":"object","description":"Complete mapping; authoritative schema supplied from MidiController validator."},"expectedProfile":{"type":"string","minLength":64,"maxLength":64,"pattern":"^[0-9a-f]{64}$","description":"Required for setBinding. Exact controllerProfileIdentity from state; binds runtime mappings and available saved bytes. Re-read after any mapping/bank/profile change."}},"required":["action"],"additionalProperties":false}}
+      ,{"name":"vibera_controller","description":"Production state/setBinding use the same validated Settings mapping service. Full binding edits save atomically before metadata publication, never Project Undo or MIDI port reopen. Selected/fixed/banked source and explicit mixer.send destination are preserved; invocation validates actual project targets. Preset/configure/learn/cancel/inject remain owned --mcp-test diagnostics only; no production MIDI injection/ports/filesystem arguments.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["state","setBinding","removeBinding","preset","configure","learn","cancel","inject"]},"profile":{"type":"object"},"index":{"type":"integer","minimum":0,"maximum":511,"description":"setBinding: existing row or exact append(size), no gaps; at most512 mappings. removeBinding: the existing row to delete (later rows move up)."},"port":{"type":"integer","minimum":0,"maximum":1},"kind":{"type":"integer","minimum":0,"maximum":6},"channel":{"type":"integer","minimum":0,"maximum":16},"number":{"type":"integer","minimum":0,"maximum":127},"value":{"type":"integer","minimum":0,"maximum":16383},"binding":{"type":"object","description":"Complete mapping; authoritative schema supplied from MidiController validator."},"expectedProfile":{"type":"string","minLength":64,"maxLength":64,"pattern":"^[0-9a-f]{64}$","description":"Required for setBinding/removeBinding. Exact controllerProfileIdentity from state; binds runtime mappings and available saved bytes. Re-read after any mapping/bank/profile change."}},"required":["action"],"additionalProperties":false}}
     ])JSON");
     const auto additions = juce::JSON::parse(R"JSON([
       {"name":"vibera_picker","description":"Semantic Playlist Picker selection, filtering, navigation and source placement. Uses the same component model/canonical commands as UI, without mouse simulation.","inputSchema":{"type":"object","additionalProperties":false,"properties":{"action":{"type":"string","enum":["state","type","filter","groupFilter","select","place","width","visible","openRack","scroll"]},"kind":{"type":"string","enum":["pattern","audio","automation"]},"text":{"type":"string","maxLength":128},"ids":{"type":"array","maxItems":128,"uniqueItems":true,"items":{"type":"integer","minimum":1}},"beat":{"type":"number","minimum":0,"maximum":1000000,"default":0},"lane":{"type":"integer","minimum":0,"maximum":127,"default":0},"width":{"type":"integer","minimum":120,"maximum":280},"scrollY":{"type":"integer","minimum":0,"description":"Logical vertical pixels; maximumScrollY is returned in state."},"visible":{"type":"boolean"},"revision":{"type":"integer","minimum":0}},"required":["action"]}},
@@ -1559,18 +1559,30 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             }
             return textResult(current);
         };
-        if (action == "state" || action == "setBinding")
+        if (action == "state" || action == "setBinding" || action == "removeBinding")
         {
             const juce::StringArray allowed =
-                action == "state"
-                    ? juce::StringArray{"action", "projectIdentity"}
-                    : juce::StringArray{"action", "index", "binding", "expectedProfile", "projectIdentity"};
+                action == "state"           ? juce::StringArray{"action", "projectIdentity"}
+                : action == "removeBinding" ? juce::StringArray{"action", "index", "expectedProfile", "projectIdentity"}
+                                            : juce::StringArray{"action", "index", "binding", "expectedProfile", "projectIdentity"};
             for (const auto &property : args.getDynamicObject()->getProperties())
                 if (!allowed.contains(property.name.toString()))
                     throw McpFailure("controller.invalidArguments",
                                      "Unknown argument for controller operation");
             if (action == "state")
                 return readback();
+            if (action == "removeBinding")
+            {
+                // Same guarded service as Settings > Controllers Remove.
+                if (!args.hasProperty("index") || !args["expectedProfile"].isString())
+                    throw McpFailure("controller.invalidArguments", "index/expectedProfile required");
+                const auto removed = midiController.removeBinding(size_t(integer(args, "index", -1, 0, 511)),
+                                                                  args["expectedProfile"].toString());
+                if (removed.failed())
+                    throw McpFailure(removed.getErrorMessage().upToFirstOccurrenceOf(":", false, false),
+                                     removed.getErrorMessage());
+                return readback();
+            }
             if (!args.hasProperty("index") || !args["expectedProfile"].isString() ||
                 !args.hasProperty("binding"))
                 throw McpFailure("controller.invalidArguments",
@@ -4063,6 +4075,8 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "metronome", audio.metronome());
     set(state, "countInBars", audio.countInBars());
     set(state, "guideSound", audio.guideSound());
+    set(state, "browserShown", browserShown);
+    set(state, "coProducerShown", coProducerShown);
     set(state, "guideGain", double(audio.guideGain()));
     {
         auto input = obj();

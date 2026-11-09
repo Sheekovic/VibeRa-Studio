@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
+  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
   "sourceInputs": {
     "scripts/verify-plugins-page-mcp.py": "bcd86eac30636b7395ee70a71cbaa0fe6f92f73efe8594479e1414eb8e61a255",
     "src/PluginPage.h": "0f0d7330e4a645a5b47b72fe384846d0da40bef5473c58da9cb6b59a4e45c56b",
-    "src/StudioMcp.cpp": "edc0eb8eee4415dcc351b9d9924ca19fc28ba8bd8ec3acd394ecb430bbcb4f75",
+    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
-    "src/Commands.cpp": "c74cc44dc4c12f33df3e458b06686b17f13a3141fd7f9983218a0f78a15d9a6d",
+    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
     "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c"
   },
   "sourceHashMode": "text-lf-v1",
@@ -19,13 +19,13 @@
     "channelTargetSelection: vibera_select selects the Channel",
     "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
     "manualValue: the effect exposes its native parameters",
-    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'f9b9b92f26254d47876fb9a50d2d1de5', 'revision': 3, 'operation': '5598e809175244c081fe70defc39d796', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': '3aab7943400d45dfadccd6a7f7c95b8a', 'revision': 3, 'operation': 'a09b066727fb429da67d7b783d862c86', 'kind': 'set', 'plugin': 46, 'requestedI",
     "manualValue: the parameter edit enters project history"
   ],
   "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-060440/affected-tests.log",
-    "tests": 279
+    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
+    "tests": 280
   }
 }
