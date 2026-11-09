@@ -150,6 +150,12 @@ double modulatorUnit(ModulatorShape shape, double cycles, std::uint64_t seed) no
 }
 float AutomationProgram::Span::valueAt(double position) const noexcept
 {
+    if (shape == modulatorBase + unsigned(ModulatorShape::follower))
+    {
+        // from: base value, delta: full swing, coefficients[3]: source insert.
+        const double level = InsertLevels::instance().level(std::int64_t(coefficients[3]));
+        return float(std::clamp(from + delta * level, coefficients[0], coefficients[1]));
+    }
     if (shape >= modulatorBase)
     {
         // from: centre, delta: half swing, count: cycles per beat, origin: phase in cycles,
@@ -368,7 +374,8 @@ bool AutomationProgram::compile(const AutomationDocument &doc, bool songMode, Au
     {
         if (!unique(m.id) || !validKey(m.link.key) || !validValue(m.link.key, m.link.minimum) ||
             !validValue(m.link.key, m.link.maximum) || !(m.link.minimum < m.link.maximum) ||
-            unsigned(m.shape) > unsigned(ModulatorShape::smoothRandom) || !std::isfinite(m.period) ||
+            unsigned(m.shape) > unsigned(ModulatorShape::follower) || !std::isfinite(m.period) ||
+            m.source < 0 || m.source > std::numeric_limits<int>::max() || !std::isfinite(m.period) ||
             m.period < minimumModulatorPeriod || m.period > maximumModulatorPeriod || !std::isfinite(m.depth) ||
             m.depth < 0 || m.depth > 1 || !std::isfinite(m.phase) || m.phase < 0 || m.phase >= 1 ||
             m.name.empty() || m.name.size() > 1024)
@@ -391,6 +398,9 @@ bool AutomationProgram::compile(const AutomationDocument &doc, bool songMode, Au
         span.coefficients[0] = m.link.minimum;
         span.coefficients[1] = m.link.maximum;
         span.coefficients[2] = double(std::uint32_t(m.id));
+        span.coefficients[3] = double(m.source);
+        if (m.shape == ModulatorShape::follower)
+            span.delta = double(m.depth) * (double(m.link.maximum) - m.link.minimum); // Unipolar swing upward.
         Lane lane{m.link.key, centre->second, {span}};
         const auto existing = std::find_if(result.lanes.begin(), result.lanes.end(),
                                            [&](const Lane &l) { return l.key == m.link.key; });

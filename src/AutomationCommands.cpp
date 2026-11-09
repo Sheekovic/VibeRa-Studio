@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "AutomationCommands.h"
+#include "MixerRouting.h"
 #include <algorithm>
 #include <cmath>
+#include <limits>
 
 namespace vibera
 {
@@ -145,7 +147,7 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
         const auto shape = modulatorShapeFromName((a.text.isEmpty() ? juce::String("sine") : a.text).toStdString());
         const double period = a.value == 0 ? 4. : a.value;
         if (!shape)
-            return juce::Result::fail("modulator.invalidShape: sine, triangle, sawUp, sawDown, square, random or smoothRandom");
+            return juce::Result::fail("modulator.invalidShape: sine, triangle, sawUp, sawDown, square, random, smoothRandom or follower");
         if (!std::isfinite(period) || period < minimumModulatorPeriod || period > maximumModulatorPeriod)
             return juce::Result::fail("modulator.invalidPeriod: Period is 1/64..1024 beats");
         if (!std::isfinite(a.strength) || a.strength < 0 || a.strength > 1)
@@ -154,6 +156,19 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
             return juce::Result::fail("modulator.invalidPhase: Phase is 0..1 (below one cycle)");
         AutomationModulator next = adding ? AutomationModulator{} : *found;
         next.shape = *shape;
+        if (*shape == ModulatorShape::follower)
+        {
+            // The source is chosen when the follower is added (target = source insert, 0 Master);
+            // set keeps it. To follow another insert, delete and add again.
+            if (adding)
+            {
+                if (a.target < 0 || a.target > std::numeric_limits<int>::max() || !mixerInsert(project, int(a.target)))
+                    return juce::Result::fail("modulator.invalidSource: The follower source is an existing Mixer insert (target)");
+                next.source = a.target;
+            }
+            else if (found->shape != ModulatorShape::follower)
+                return juce::Result::fail("modulator.followerSource: Add a new follower modulator to choose its source");
+        }
         next.period = period;
         next.depth = float(a.strength);
         next.phase = float(a.offset);

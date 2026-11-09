@@ -15,7 +15,7 @@ inline juce::var mixerAutomationResultSchema()
 // Modulator shape/rate/depth/phase fields shared by add and set.
 inline void addModulatorFields(juce::DynamicObject &properties)
 {
-    properties.setProperty("text", juce::JSON::parse(R"({"type":"string","enum":["sine","triangle","sawUp","sawDown","square","random","smoothRandom"],"default":"sine","description":"Modulator shape. random holds a new random value each cycle; smoothRandom glides between them."})"));
+    properties.setProperty("text", juce::JSON::parse(R"({"type":"string","enum":["sine","triangle","sawUp","sawDown","square","random","smoothRandom","follower"],"default":"sine","description":"Modulator shape. random holds a new random value each cycle; smoothRandom glides between them; follower rises with the live level of a source Mixer insert (target; set when added)."})"));
     properties.setProperty("value", juce::JSON::parse(R"({"type":"number","minimum":0,"maximum":1024,"default":4,"description":"Period in quarter-note beats per cycle, tempo-synced (0.25 a sixteenth note cycle, 4 one 4/4 bar). 0 means the default 4; otherwise 1/64..1024."})"));
     properties.setProperty("strength", juce::JSON::parse(R"({"type":"number","minimum":0,"maximum":1,"default":1,"description":"Depth: peak-to-peak swing as a fraction of the control's full range, centred on its manual (or initialized) value and clamped to the range."})"));
     properties.setProperty("offset", juce::JSON::parse(R"({"type":"number","minimum":0,"exclusiveMaximum":1,"default":0,"description":"Phase: 0..1 of a cycle at Song/Pattern beat 0."})"));
@@ -101,7 +101,10 @@ inline juce::var mixerAutomationArguments(const juce::String &id)
         properties->setProperty("lane", juce::JSON::parse(R"({"type":"integer","minimum":0,"maximum":127,"default":0})"));
     }
     else if (id == "automation.modulator")
+    {
         addModulatorFields(*properties);
+        properties->setProperty("target", juce::JSON::parse(R"({"type":"integer","minimum":0,"maximum":2147483647,"default":0,"description":"Only shape follower: the source Mixer insert whose level drives the control (0 = Master)."})"));
+    }
     else if (id == "automation.macro.link")
     {
         properties->setProperty("ids", juce::JSON::parse(R"({"type":"array","minItems":1,"maxItems":1,"items":{"type":"integer","minimum":1},"description":"The macro ID (vibera_inspect macros)."})"));

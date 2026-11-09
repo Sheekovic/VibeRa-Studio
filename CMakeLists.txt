@@ -969,6 +969,9 @@ set_tests_properties(magic_lasso_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME macros_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-macros-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/macros_mcp")
 set_tests_properties(macros_mcp PROPERTIES TIMEOUT 400)
+add_test(NAME envelope_follower_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-envelope-follower-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/envelope_follower_mcp")
+set_tests_properties(envelope_follower_mcp PROPERTIES TIMEOUT 300)
 add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
 set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)

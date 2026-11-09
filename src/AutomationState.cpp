@@ -173,6 +173,8 @@ juce::ValueTree automationState(const AutomationDocument &doc)
             v.setProperty("phase", double(m.phase), nullptr);
             v.setProperty("enabled", m.enabled, nullptr);
             v.setProperty("name", juce::String::fromUTF8(m.name.c_str()), nullptr);
+            if (m.shape == ModulatorShape::follower)
+                v.setProperty("source", juce::int64(m.source), nullptr);
             modulators.appendChild(v, nullptr);
         }
         root.appendChild(modulators, nullptr);
@@ -303,9 +305,14 @@ juce::Result parseAutomationState(const juce::ValueTree &root, AutomationDocumen
         else if (!integer(v["enabled"], enabled) || (enabled != 0 && enabled != 1))
             return fail();
         const auto shape = modulatorShapeFromName(v["shape"].toString().toStdString());
+        const bool follower = shape && *shape == ModulatorShape::follower;
+        if (follower && !integer(v["source"], m.source))
+            return fail();
         if (!v.hasType("MODULATOR") ||
-            !fields(v, {"id", "kind", "owner", "parameter", "minimum", "maximum", "shape", "period", "depth",
-                        "phase", "enabled", "name"}) ||
+            (follower ? !fields(v, {"id", "kind", "owner", "parameter", "minimum", "maximum", "shape", "period", "depth",
+                                    "phase", "enabled", "name", "source"})
+                      : !fields(v, {"id", "kind", "owner", "parameter", "minimum", "maximum", "shape", "period", "depth",
+                                    "phase", "enabled", "name"})) ||
             v.getNumChildren() || !integer(v["id"], m.id) || !key(v, m.link.key, projectVersion) ||
             !targetScalar(v["minimum"], m.link.key, m.link.minimum) ||
             !targetScalar(v["maximum"], m.link.key, m.link.maximum) || !shape || !number(v["period"], period) ||

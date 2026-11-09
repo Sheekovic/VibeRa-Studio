@@ -27,6 +27,7 @@ class AutomationGain final : public tracktion::Plugin
         MixerEqProcessor eq;
         std::vector<float> delayLine; // 2 x capacity, allocated in initialise only.
         int delayCapacity = 0, delayWrite = 0;
+        float follow = 0; // Envelope follower state (DSP writer only).
         double activeRate = 0;
         int insert = 0;
         tracktion::PanLaw law = tracktion::PanLawLinear;
@@ -312,6 +313,16 @@ class AutomationGain final : public tracktion::Plugin
         }
         runtime->reportedGain.store(displayed, std::memory_order_relaxed);
         runtime->meter.publish(*fc.destBuffer, fc.bufferStartSample, fc.bufferNumSamples, sampleRate);
+        {
+            // Envelope follower source: block peak through 10 ms attack / 150 ms release.
+            float peak = 0;
+            for (int ch = 0; ch < fc.destBuffer->getNumChannels(); ++ch)
+                peak = std::max(peak, fc.destBuffer->getMagnitude(ch, fc.bufferStartSample, fc.bufferNumSamples));
+            const double seconds = fc.bufferNumSamples / std::max(1., sampleRate);
+            const float coefficient = float(1 - std::exp(-seconds / (peak > runtime->follow ? .01 : .15)));
+            runtime->follow += (std::min(1.f, peak) - runtime->follow) * coefficient;
+            InsertLevels::instance().publish(runtime->insert, runtime->follow);
+        }
     }
 };
 } // namespace vibera

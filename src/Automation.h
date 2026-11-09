@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
+#include <atomic>
 #include <cmath>
 #include <cstdint>
 #include <compare>
@@ -106,8 +107,9 @@ enum class ModulatorShape : unsigned
     sawUp,
     sawDown,
     square,
-    random,      // Sample and hold: a new random value every cycle.
-    smoothRandom // Random values joined by smooth curves.
+    random,       // Sample and hold: a new random value every cycle.
+    smoothRandom, // Random values joined by smooth curves.
+    follower      // Envelope follower: rises with the live level of a source Mixer insert.
 };
 inline const char *modulatorShapeName(ModulatorShape shape) noexcept
 {
@@ -119,16 +121,65 @@ inline const char *modulatorShapeName(ModulatorShape shape) noexcept
     case ModulatorShape::square: return "square";
     case ModulatorShape::random: return "random";
     case ModulatorShape::smoothRandom: return "smoothRandom";
+    case ModulatorShape::follower: return "follower";
     default: return "sine";
     }
 }
 inline std::optional<ModulatorShape> modulatorShapeFromName(const std::string &name) noexcept
 {
-    for (unsigned i = 0; i <= unsigned(ModulatorShape::smoothRandom); ++i)
+    for (unsigned i = 0; i <= unsigned(ModulatorShape::follower); ++i)
         if (name == modulatorShapeName(ModulatorShape(i)))
             return ModulatorShape(i);
     return {};
 }
+// Envelope follower levels: each Mixer insert's gain stage publishes its smoothed output level
+// (0..1) here every block; follower modulators read it. Open-addressed, lock-free, fixed size.
+class InsertLevels
+{
+  public:
+    static InsertLevels &instance() noexcept
+    {
+        static InsertLevels table;
+        return table;
+    }
+    void publish(std::int64_t insert, float level) noexcept
+    {
+        for (std::size_t probe = 0; probe < size; ++probe)
+        {
+            auto &slot = slots[(std::size_t(insert) + probe) % size];
+            auto key = slot.key.load(std::memory_order_acquire);
+            if (key == insert + 1 ||
+                (key == 0 && slot.key.compare_exchange_strong(key, insert + 1, std::memory_order_acq_rel)) ||
+                key == insert + 1)
+            {
+                slot.level.store(level, std::memory_order_relaxed);
+                return;
+            }
+        }
+    }
+    float level(std::int64_t insert) const noexcept
+    {
+        for (std::size_t probe = 0; probe < size; ++probe)
+        {
+            const auto &slot = slots[(std::size_t(insert) + probe) % size];
+            const auto key = slot.key.load(std::memory_order_acquire);
+            if (key == insert + 1)
+                return slot.level.load(std::memory_order_relaxed);
+            if (key == 0)
+                return 0;
+        }
+        return 0;
+    }
+
+  private:
+    static constexpr std::size_t size = 512;
+    struct Slot
+    {
+        std::atomic<std::int64_t> key{0};
+        std::atomic<float> level{0};
+    };
+    Slot slots[size];
+};
 // Bipolar unit value (-1..1) of a modulator shape at a cycle position; seed varies random shapes.
 double modulatorUnit(ModulatorShape, double cycles, std::uint64_t seed) noexcept;
 struct AutomationModulator
@@ -141,6 +192,7 @@ struct AutomationModulator
     float phase = 0;     // 0..1 cycle offset.
     bool enabled = true;
     std::string name = "Modulator";
+    std::int64_t source = 0; // follower: the Mixer insert whose level drives it (0 = Master).
 };
 inline constexpr double minimumModulatorPeriod = 1. / 64, maximumModulatorPeriod = 1024;
 // Macro knob (version 57): one 0..1 value driving several targets, each through its own range

@@ -381,6 +381,12 @@ void Studio::mixerAutomationMenu(int insert, MixerAutomationControl control, std
             macroMenu.addItem(7200 + int(k), "Link to " + juce::String::fromUTF8(macros[k].name.c_str()));
         macroMenu.addItem(7299, "New macro knob and link");
         menu.addSubMenu("Macro knob", macroMenu);
+        juce::PopupMenu follow;
+        const auto &rows = controller.project.mixer;
+        for (size_t k = 0; k < rows.size() && k < 129; ++k)
+            if (rows[k].index != insert)
+                follow.addItem(7400 + int(k), rows[k].name.isNotEmpty() ? rows[k].name : "Insert " + juce::String(rows[k].index));
+        menu.addSubMenu("Envelope follower from", follow, modulator == nullptr || modulator->shape == ModulatorShape::follower);
     }
     menu.showMenuAsync(
         {},
@@ -388,6 +394,29 @@ void Studio::mixerAutomationMenu(int insert, MixerAutomationControl control, std
         {
             if (!safe || choice == 0)
                 return;
+            if (choice >= 7400 && choice < 7400 + 129)
+            {
+                const auto &rows = safe->controller.project.mixer;
+                if (size_t(choice - 7400) >= rows.size())
+                    return;
+                CommandArgs a;
+                a.text = "follower";
+                a.target = rows[size_t(choice - 7400)].index;
+                a.value = 4;
+                a.strength = 1;
+                if (modulatorId)
+                {
+                    // A follower's source is chosen on creation: replace the existing one.
+                    CommandArgs removal;
+                    removal.target = modulatorId;
+                    safe->command("automation.modulator.delete", removal);
+                }
+                a.mixer = intent.insert;
+                a.automationControl = intent.control;
+                a.automationSendTarget = intent.sendTarget;
+                safe->command("automation.modulator", a);
+                return;
+            }
             if (choice >= 7200 && choice <= 7299)
             {
                 CommandArgs a;

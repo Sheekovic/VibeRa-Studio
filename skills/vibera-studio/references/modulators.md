@@ -13,7 +13,7 @@ Project schema 57; one Undo step per command.
 - `automation.plugin.modulator`: plugin parameter. `target` = plugin ID, `binding` = the
   parameter binding (same object as native plugin automation); a missing binding is declared.
 - Shared fields: `text` shape (sine, triangle, sawUp, sawDown, square, random,
-  smoothRandom), `value` period in beats per cycle (0 = 4; 1/64..1024), `strength`
+  smoothRandom, follower), `value` period in beats per cycle (0 = 4; 1/64..1024), `strength`
   depth 0..1 (peak-to-peak swing as a fraction of the range; default 1), `offset`
   phase 0..1.
 - `automation.modulator.set` (`target` = modulator ID plus all shared fields),
@@ -23,6 +23,11 @@ Refusals: a second modulator on one control (`modulator.duplicateTarget`), a con
 that an Automation Clip links (`modulator.targetAutomated`), invalid shape, period,
 depth or phase. Deleting a Channel or Mixer insert removes its modulators; removing a
 plugin binding or replacing an effect requires removing the modulator first.
+
+Envelope follower: shape `follower` with `target` = source Mixer insert (0 Master),
+chosen when added. The control rises from its manual value by depth x range with the
+source insert's live level (10 ms attack, 150 ms release, block peak), in playback and
+export. UI: Mixer control right-click > Envelope follower from.
 
 ## Readback
 
