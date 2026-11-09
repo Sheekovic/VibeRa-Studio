@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/Editors.h": "15fa08dbdb504bdb7237e1e1f02e1d424c7e430a4635eaa9e3bbb465f4f76c00"
+    "src/Editors.h": "193b056351c8b5ecbc5866dd64e999e9c0c524344f1993857c558963576977b8"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
+  "applicationSha256": "73f0842bfc956a5ce4399fce47d52298321167a18441f3c15c280e3df2e7924c",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -54,7 +54,9 @@
     "development_workflow",
     "drop_targets_gui",
     "envelope_follower_mcp",
+    "envelope_presets_mcp",
     "export_formats_mcp",
+    "export_options_mcp",
     "expression_maps_mcp",
     "fixed_initialisation_lifecycle",
     "flp_import",
@@ -71,6 +73,7 @@
     "macros_mcp",
     "magic_lasso_mcp",
     "marker_actions_mcp",
+    "master_pitch_mcp",
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
@@ -245,6 +248,7 @@
     "project_number_text",
     "quantizer_mcp",
     "rack_groups_mcp",
+    "record_filter_mcp",
     "rps_gaps_mcp",
     "sampler_automation_mcp",
     "sampler_controller_links",
@@ -292,7 +296,7 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-191202/affected-tests.log",
+  "sourceLog": "build/dev/20261109-223545/affected-tests.log",
   "rerunLogs": [],
   "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."

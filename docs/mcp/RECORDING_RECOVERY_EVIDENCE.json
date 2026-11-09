@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "d18867a943fb1e7b7868858be2976fcddb79b81850009615ba95f14f70c46271",
+  "applicationSha256": "73f0842bfc956a5ce4399fce47d52298321167a18441f3c15c280e3df2e7924c",
   "sourceInputs": {
-    "CMakeLists.txt": "0d1696c0658796744e7f6c935181f978b659b7375404add218bc44206dd8fa53",
-    "src/Studio.cpp": "205bad1e303d808d72f9da3da5ae216ed060fae7d08b7cbc28fb5e9fa887bb9f",
-    "src/Studio.h": "2da68624b9f543250b09e0cd34152fe5b1288a1571a9a5fd2aeff01b5945ad25",
-    "src/StudioMcp.cpp": "ed6783d2301793eeda812bdea3b04e9d819b28d3f8cb42ce8e005074f8920f0b",
-    "src/Commands.cpp": "0370659c2d4ed76c80776048652eb1a2e8dd94cf3b486d702709dd69495fcade",
+    "CMakeLists.txt": "7106469c5e77f821e7f55c8a6f54c06c18ae0df303b2add2aff54216c1b48667",
+    "src/Studio.cpp": "03747e59fef7226b5cb3ce8740994983c2c19c7266c7731072807675f32bd118",
+    "src/Studio.h": "0c13467f3d53b195d013ec2c0ddc2cbdf79fc3ce75146f29b27ed5d48ef65f4d",
+    "src/StudioMcp.cpp": "09b70fe84b6be0cc1c78361b953570c39cc0801bb371fbd4d3f942dd83196adf",
+    "src/Commands.cpp": "bd0849dfa269669d175607d084fb736d500bc0da2cc8fa461b1d88a66b0e987c",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Project.cpp": "acae70f39d3fb5457665a11c65537ef59abcc49e19f3bf98bfea9063c375a7ad",
     "src/Project.h": "751a4591af47b7552ff97041d44b5e07bc048cdac2c4853988e83b29133fd49f",
@@ -16,15 +16,15 @@
     "src/MidiInput.h": "0d9bdd0bfbead35f050e1ecb8601a228d7e134eb7f52eda577fb213b28004d9e",
     "src/LiveTimeline.cpp": "956c556ee1a443d65e3aeded11ecefccc6fc9f739ded2d918a2c5207f0eebf2c",
     "src/LiveTimeline.h": "520071100c554a8fcf7f2d68bf47e5e3d3e80cd7a6619b3e75bd731de24942ac",
-    "src/AudioEngine.cpp": "2de1fd5a44f1be460a21891eec1238dff44cdf6e7ba8a4f37a6484ab6316b842",
-    "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
+    "src/AudioEngine.cpp": "f418ebdf0ccc877f938bdc89be6a925ed9d92927bb67aa905e35d7e21536061c",
+    "src/AudioEngine.h": "10eca98c9e60f4bb2cccc03219ad8fb62c47b9f534acf3abcd2f44ac047dbe2a",
     "src/RecordingContracts.h": "e150c8e13d952fd327716d35bb017fb47e5bcd68f86cbd9a0065109d54b2df7e",
     "src/McpContracts.h": "af57244721f218aac54bf644e5308405d8c62a3e81482ca89a0e7fad073c20e5",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
     "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
     "src/StudioChannels.cpp": "1021cb175b4c03e5f205c503069957b99fbc0dee97e8773aa3c969c331265408",
-    "src/Editors.h": "15fa08dbdb504bdb7237e1e1f02e1d424c7e430a4635eaa9e3bbb465f4f76c00",
+    "src/Editors.h": "193b056351c8b5ecbc5866dd64e999e9c0c524344f1993857c558963576977b8",
     "src/StudioMidiTakeRecoveryAcceptance.cpp": "db176e5c066433a5edcd60ad794927450c598c7736369cab24c4ea9aa6804829",
     "src/BuildAcceptanceOutput.h": "5a93f55dafc86365f537a23ceb8e7c4c2047cb8c53c60b89d6c5c8c3f9b3cd95",
     "tests/MidiTakeRecoveryAcceptance.h": "6bb351c1899cda6a40fa37375f9ef74ab435fe090809617b32be586ab5138761",
@@ -51,9 +51,9 @@
   "sourceHashMode": "text-lf-v1",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-211833/affected-tests.log",
+    "sourceLog": "build/dev/20261109-223545/affected-tests.log",
     "rerunLogs": [],
     "rerunNote": "",
-    "tests": 288
+    "tests": 289
   }
 }
