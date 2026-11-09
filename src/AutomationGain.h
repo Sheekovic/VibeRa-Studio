@@ -2,6 +2,7 @@
 #pragma once
 #include "LiveTimeline.h"
 #include "GraphControlRuntime.h"
+#include "AudioLogger.h"
 #include "MixerMeter.h"
 #include "PreparedBalance.h"
 #include "PreparedStereo.h"
@@ -313,6 +314,8 @@ class AutomationGain final : public tracktion::Plugin
         }
         runtime->reportedGain.store(displayed, std::memory_order_relaxed);
         runtime->meter.publish(*fc.destBuffer, fc.bufferStartSample, fc.bufferNumSamples, sampleRate);
+        if (runtime->insert == 0 && !fc.isRendering) // Master post-fader into the audio logger (live only).
+            AudioLogger::instance().write(*fc.destBuffer, fc.bufferStartSample, fc.bufferNumSamples, sampleRate);
         {
             // Envelope follower source: block peak through 10 ms attack / 150 ms release.
             float peak = 0;

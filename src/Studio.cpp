@@ -2,6 +2,7 @@
 #include "FlpImport.h"
 #include "Studio.h"
 #include "SliceDetect.h"
+#include "AudioLogger.h"
 #include "VideoPlayer.h"
 #include "StudioDevicePreparation.h"
 #include "EffectChainPresetFiles.h"
@@ -3670,6 +3671,17 @@ void Studio::toolsMenu()
         filter.addItem(217, "Automation: arm it on a Mixer/plugin control", false, automationRecordingActive());
         menu.addSubMenu("Recording filter", filter);
     }
+    {
+        juce::PopupMenu logger;
+        const bool on = AudioLogger::instance().enabled();
+        logger.addItem(218, "Off", true, !on);
+        for (const int minutes : {1, 2, 5})
+            logger.addItem(218 + minutes, "Keep the last " + juce::String(minutes) + " minute" + (minutes > 1 ? "s" : ""),
+                           true, on && std::abs(AudioLogger::instance().capacitySeconds() - minutes * 60.) < 1);
+        logger.addSeparator();
+        logger.addItem(225, "Save the logged audio...", on);
+        menu.addSubMenu("Audio logger (master output)", logger);
+    }
     menu.addItem(208, "Step record: insert a rest", stepRecord);
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
@@ -3734,6 +3746,20 @@ void Studio::toolsMenu()
             }
             if (choice == 213)
                 return safe->masterPitchDialog();
+            if (choice == 218 || choice == 219 || choice == 220 || choice == 223)
+            {
+                if (auto r = safe->setAudioLogger(choice != 218, choice - 218); r.failed())
+                    safe->status = r.getErrorMessage().fromFirstOccurrenceOf(": ", false, false);
+                else
+                    safe->status = choice == 218 ? "Audio logger off" : "Audio logger keeps the last " + juce::String(choice - 218) + " min of the master output";
+                safe->repaint();
+                return;
+            }
+            if (choice == 225)
+            {
+                safe->saveAudioLogDialog();
+                return;
+            }
             if (choice == 215)
             {
                 safe->performAction("transport.recordNotes");

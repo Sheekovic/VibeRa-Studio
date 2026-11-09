@@ -106,6 +106,12 @@ the pointer tool or invent native parameter identities.
 `vibera_transport` starts/stops/seeks and switches Pattern/Song. Physical MIDI
 input must already be configured. `notes.record` commits a supplied typed take
 through canonical validation; it is not evidence of live hardware capture.
+Audio logger: `vibera_project {"action":"audioLogger","enabled":true,"minutes":1..5}` keeps
+the last minutes of the master output (post-fader, live playback only; needs an audio device,
+else `audioLog.noDevice`). `{"action":"audioLoggerSave","path":<abs .wav>,"seconds":0}` writes
+the held audio (0 = all) as 24-bit stereo. Read `state.audioLogger` {enabled, minutes,
+recordedSeconds}.
+
 Recording filter: `vibera_command transport.recordNotes` toggles whether Record opens a MIDI
 note take (`state.recordNotes`, default on); audio takes follow the audio-input switch and
 automation recording is armed on its own control.

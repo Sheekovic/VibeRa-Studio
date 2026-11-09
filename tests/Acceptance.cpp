@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "StoppedEffectChangePlanAcceptance.h"
+#include "AudioLogger.h"
 #include "NativeEffectModelAcceptance.h"
 #include "Commands.h"
 #include "AudioEngine.h"
@@ -317,6 +318,48 @@ static juce::Result awaitProjection(AudioEngine &, const Project &, bool, Id);
 #include "AutomationProjectAcceptance.h"
 #include "OwnedGestureAcceptance.h"
 #include "AutomationPlaybackAcceptance.h"
+static void audioLoggerTests(const juce::File &folder)
+{
+    // Ring buffer: 10 s at 8 kHz; 25 s of a known ramp wrap it; the last 2 s are saved exactly.
+    auto &logger = AudioLogger::instance();
+    double saved = 0;
+    require(logger.save(folder.getChildFile("off.wav"), 0, saved).failed(), "audio logger refuses to save while off");
+    require(logger.enable(10, 8000).wasOk() && logger.enabled() && logger.capacitySeconds() == 10,
+            "audio logger allocates 10 s at 8 kHz");
+    require(logger.save(folder.getChildFile("empty.wav"), 0, saved).failed(), "an empty logger refuses to save");
+    juce::AudioBuffer<float> block(2, 800);
+    int frame = 0;
+    for (int b = 0; b < 250; ++b)
+    {
+        for (int i = 0; i < 800; ++i, ++frame)
+        {
+            block.setSample(0, i, float((frame % 1000) / 1000.0));
+            block.setSample(1, i, -float((frame % 1000) / 1000.0));
+        }
+        logger.write(block, 0, 800, 8000);
+    }
+    logger.write(block, 0, 800, 44100); // Wrong rate: ignored, never mixed in.
+    require(std::abs(logger.recordedSeconds() - 10) < 1e-9, "the ring holds exactly its capacity after wrapping");
+    const auto file = folder.getChildFile("audio-log.wav");
+    require(logger.save(file, 2, saved).wasOk() && std::abs(saved - 2) < 1e-9, "the last 2 s save");
+    juce::AudioFormatManager formats;
+    formats.registerBasicFormats();
+    std::unique_ptr<juce::AudioFormatReader> reader(formats.createReaderFor(file));
+    require(reader && reader->numChannels == 2 && reader->lengthInSamples == 16000 && reader->sampleRate == 8000,
+            "saved WAV: stereo, 16000 frames at 8 kHz");
+    juce::AudioBuffer<float> back(2, 16000);
+    reader->read(&back, 0, 16000, 0, true, true);
+    bool exact = true;
+    for (int i = 0; i < 16000; ++i)
+    {
+        const int source = frame - 16000 + i;
+        const float expected = float((source % 1000) / 1000.0);
+        exact = exact && std::abs(back.getSample(0, i) - expected) < 1e-4f && std::abs(back.getSample(1, i) + expected) < 1e-4f;
+    }
+    require(exact, "the saved audio is the newest 2 s, both channels, in order");
+    logger.disable();
+    require(!logger.enabled() && logger.recordedSeconds() == 0, "disable frees the buffer");
+}
 static void scoreLogTests(const juce::File &folder)
 {
     auto p = Project::empty();
@@ -5621,6 +5664,7 @@ int main(int argc, char **argv)
         runStage("samplerPreviewTests", [&] { samplerPreviewTests(folder); });
         runStage("precisionPersistenceTests", [&] { precisionPersistenceTests(folder); });
         runStage("scoreLogTests", [&] { scoreLogTests(folder); });
+        runStage("audioLoggerTests", [&] { audioLoggerTests(folder); });
         runStage("midiScoreTests", [&] { midiScoreTests(folder); });
         runStage("midiScoreLiveTests", [&] { midiScoreLiveTests(folder); });
         runStage("scoreToolsTests", [&] { scoreToolsTests(folder); });

@@ -60,6 +60,17 @@ try:
 
     call("vibera_command", {"command": "transport.recordNotes"})
     check(state().get("recordNotes") is True, "transport.recordNotes turns Notes back on")
+
+    # Audio logger: without an audio device it is refused truthfully; save refuses while off.
+    logger = state().get("audioLogger", {})
+    check(logger.get("enabled") is False and logger.get("recordedSeconds") == 0, "Audio logger reads back off")
+    raw = lambda tool, args: client.call(tool, args, allow_failure=True)
+    refused = raw("vibera_project", {"action": "audioLogger", "enabled": True, "minutes": 1})
+    check(refused.get("isError") and "noDevice" in json.dumps(refused), "Enabling without an audio device is refused (audioLog.noDevice)")
+    check(raw("vibera_project", {"action": "audioLoggerSave", "path": str(output / "log.wav")}).get("isError"),
+          "Saving while the logger is off is refused")
+    check(raw("vibera_project", {"action": "audioLogger", "enabled": True, "minutes": 9}).get("isError"),
+          "More than 5 minutes is refused")
     passed = True
 finally:
     client.close()

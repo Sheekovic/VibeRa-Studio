@@ -2,6 +2,7 @@
 #include "Studio.h"
 #include "Editors.h"
 #include "Swing.h"
+#include "AudioLogger.h"
 #include <cstdlib>
 
 namespace vibera
@@ -12,6 +13,48 @@ juce::Result Studio::finishRackSwing()
         if (auto *slider = static_cast<Editor *>(windows[0]->getContentComponent())->rackSwingControl())
             return slider->finish();
     return juce::Result::ok();
+}
+juce::Result Studio::setAudioLogger(bool enabled, double minutes)
+{
+    auto &logger = AudioLogger::instance();
+    if (!enabled)
+    {
+        logger.disable();
+        return juce::Result::ok();
+    }
+    auto *device = audio.engine.getDeviceManager().deviceManager.getCurrentAudioDevice();
+    if (!device)
+        return juce::Result::fail("audioLog.noDevice: The audio logger needs an audio device");
+    return logger.enable(minutes * 60, device->getCurrentSampleRate());
+}
+void Studio::saveAudioLogDialog()
+{
+    audioLogChooser = std::make_unique<juce::FileChooser>(
+        "Save the logged audio", juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
+                                     .getChildFile("Audio log " + juce::Time::getCurrentTime().formatted("%Y-%m-%d %H-%M") + ".wav"),
+        "*.wav");
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    audioLogChooser->launchAsync(juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::warnAboutOverwriting,
+                                 [safe](const juce::FileChooser &chooser)
+                                 {
+                                     if (!safe || chooser.getResult() == juce::File{})
+                                         return;
+                                     double saved = 0;
+                                     const auto file = chooser.getResult().withFileExtension("wav");
+                                     const auto r = AudioLogger::instance().save(file, 0, saved);
+                                     safe->status = r.wasOk() ? "Saved " + juce::String(saved, 1) + " s of audio to " + file.getFileName()
+                                                              : r.getErrorMessage().fromFirstOccurrenceOf(": ", false, false);
+                                     safe->repaint();
+                                 });
+}
+juce::var Studio::audioLoggerState() const
+{
+    auto *o = new juce::DynamicObject;
+    const auto &logger = AudioLogger::instance();
+    o->setProperty("enabled", logger.enabled());
+    o->setProperty("minutes", logger.capacitySeconds() / 60);
+    o->setProperty("recordedSeconds", logger.recordedSeconds());
+    return juce::var(o);
 }
 void Studio::armWaitForInput(bool on)
 {
