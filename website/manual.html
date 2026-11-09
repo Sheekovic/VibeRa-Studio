@@ -283,6 +283,8 @@
         <p><kbd>Shift</kbd>+<kbd>M</kbd> switches to stretch mode, so dragging an audio clip's end time-stretches it.</p>
         <p><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> clones the selected track with its clips.</p>
         <p>Render selected clips to one audio clip, or consolidate a whole track to audio to free CPU.</p>
+        <p>Right-click an audio clip &gt; <b>Make unique as sample</b> to edit it without touching the other clips that share the file.</p>
+        <p>Automation clip <b>Tools</b>: <b>Decimate points</b> thins a dense recording, <b>Filter</b> and <b>Smooth up</b> soften it, <b>Create sequence</b> writes a stepped rhythm, and <b>Analyze audio file</b> turns a drum loop's loudness into a ready-made curve.</p>
       </div>
     </div>
   </section>
@@ -405,6 +407,9 @@
           <li><b>Step record</b>: write played notes at a cursor; insert rests from the Tools menu.</li>
           <li><b>Typing keyboard</b> <kbd>Ctrl</kbd>+<kbd>T</kbd>: play notes with your computer keys.</li>
           <li><b>Automation recording</b>: knob moves while recording become automation.</li>
+          <li><b>Wait for input</b> (Tools): arm Record, press Play, and recording starts on the first note you play, keeping that note.</li>
+          <li><b>Recording filter</b> (Tools): choose whether Record captures MIDI notes, audio, or both.</li>
+          <li><b>Audio logger</b> (Tools): VibeRa keeps the last 1, 2 or 5 minutes of the master output; <i>Save the logged audio</i> rescues a jam you never recorded.</li>
         </ul>
       </div>
     </div>
@@ -454,6 +459,7 @@
       <li>Maqams include Rast, Bayati, Saba, Sikah, Huzam, Hijaz, Nahawand, Kurd, Athar and Jiharkah.</li>
       <li>The <b>Tune</b> effect corrects pitch to a maqam on any key.</li>
       <li>Plugin instruments receive tuning through <b>MPE</b> or <b>MTS-ESP</b>.</li>
+      <li><b>Master pitch</b> (Tools) retunes every instrument at once, in cents: match a band tuned to A = 432 Hz with about -32 cents.</li>
     </ul>
     <div class="hack"><b>Hack</b> In a rendered test, Rast E measured exactly 50 cents flat: what you see in the
       guide is what you hear.</div>
