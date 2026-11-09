@@ -14,7 +14,8 @@ per-note transposition rendered offline with Signalsmith Stretch (length kept).
 - `{"action":"vocalPitchApply","clip":..,"snap":0..1,"shifts":[{"note":i,"semitones":s}]}`
   renders a new source where each note moves by its shift (each shift may also carry
   `formant`, -12..12 semitones of voice character without changing pitch;
-  `preserveFormants` (default true) keeps the character when the pitch moves) (snap pulls every other
+  `preserveFormants` (default true) keeps the character when the pitch moves; `time`
+  moves the note by -1..1 seconds, neighbours stay and only the gaps next to it stretch) (snap pulls every other
   note that fraction of the way to its nearest semitone). It is a job: poll
   `{"action":"job","operation":..}` until completed. The clip then plays the new file
   (Edited folder); one Undo restores the previous source. Shifts are -24..24 semitones;
@@ -27,5 +28,7 @@ or down (semitone steps, Alt for fine), double-click to snap it, Snap to semiton
 Snap 50 % for all (or the selected) notes, Formant - / + for the selected note,
 Preserve formants on by default; Apply renders.
 
-Limits: one voice at a time; note timing and vibrato editing are not implemented.
+Ctrl+drag moves a note in time (10 ms steps, between its neighbours).
+
+Limits: one voice at a time; vibrato editing is not implemented.
 Analysis values are model readings, not listening evidence.

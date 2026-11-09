@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "VocalPitch.h"
+#include "AudioStretch.h"
 #include <algorithm>
 #include <cmath>
 #include <signalsmith-stretch.h>
 
 namespace vibera::vocal
 {
+juce::Result renderPitch(const juce::File &, double, double, const std::vector<Shift> &, const juce::File &, bool);
 namespace
 {
 constexpr double minimumHz = 65, maximumHz = 1050;
@@ -181,7 +183,45 @@ juce::Result analyze(const juce::File &source, double offsetSeconds, double dura
 }
 
 juce::Result render(const juce::File &source, double offsetSeconds, double durationSeconds,
-                    const std::vector<Shift> &shifts, const juce::File &target, bool preserveFormants)
+                    const std::vector<Shift> &original, const juce::File &target, bool preserveFormants)
+{
+    // Timing first: a time map moves every shifted note whole; the gaps around it stretch. Then the
+    // pitch pass runs on the retimed audio with each note at its new place.
+    auto shifts = original;
+    std::sort(shifts.begin(), shifts.end(), [](const Shift &x, const Shift &y) { return x.start < y.start; });
+    const bool timing = std::any_of(shifts.begin(), shifts.end(), [](const Shift &s) { return s.time != 0; });
+    juce::File retimed;
+    if (timing)
+    {
+        std::vector<std::pair<double, double>> map{{0, 0}};
+        for (const auto &s : shifts)
+        {
+            if (!std::isfinite(s.time) || std::abs(s.time) > 1)
+                return juce::Result::fail("Note timing moves are -1..1 seconds");
+            // Every listed note is an anchor (unmoved ones stay put), so only the gaps next to a
+            // moved note stretch.
+            map.push_back({s.start, s.start + s.time});
+            map.push_back({s.end, s.end + s.time});
+        }
+        map.push_back({durationSeconds, durationSeconds});
+        for (size_t i = 1; i < map.size(); ++i)
+            if (!(map[i].first > map[i - 1].first) || !(map[i].second > map[i - 1].second))
+                return juce::Result::fail("Moved notes cannot cross each other or the clip edges");
+        retimed = target.getSiblingFile(target.getFileNameWithoutExtension() + " timing.wav");
+        if (auto warped = warpAudioFile(source, offsetSeconds, durationSeconds, map, retimed); warped.failed())
+            return warped;
+        for (auto &s : shifts)
+            s.start += s.time, s.end += s.time, s.time = 0;
+    }
+    const auto input = timing ? retimed : source;
+    const double from = timing ? 0. : offsetSeconds;
+    auto result = renderPitch(input, from, durationSeconds, shifts, target, preserveFormants);
+    if (timing)
+        retimed.deleteFile();
+    return result;
+}
+juce::Result renderPitch(const juce::File &source, double offsetSeconds, double durationSeconds,
+                         const std::vector<Shift> &shifts, const juce::File &target, bool preserveFormants)
 {
     for (const auto &s : shifts)
         if (!std::isfinite(s.semitones) || std::abs(s.semitones) > 24 || !(s.end > s.start) ||

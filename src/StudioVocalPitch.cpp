@@ -32,7 +32,11 @@ juce::Result Studio::applyVocalPitch(Id clip, std::vector<vocal::Shift> shifts, 
     const auto *source = controller.project.channel(found->channel);
     if (!source)
         return juce::Result::fail("vocalPitch.missingClip: The clip has no source");
-    std::erase_if(shifts, [](const auto &s) { return s.semitones == 0 && s.formant == 0; });
+    // With a timing move every note stays as an anchor; otherwise unchanged notes are dropped.
+    if (std::none_of(shifts.begin(), shifts.end(), [](const auto &s) { return s.time != 0; }))
+        std::erase_if(shifts, [](const auto &s) { return s.semitones == 0 && s.formant == 0; });
+    if (std::all_of(shifts.begin(), shifts.end(), [](const auto &s) { return s.semitones == 0 && s.formant == 0 && s.time == 0; }))
+        shifts.clear();
     if (shifts.empty())
         return juce::Result::fail("vocalPitch.noChange: No note was moved");
     for (const auto &s : shifts)
@@ -72,7 +76,8 @@ class VocalPitchEditor final : public juce::Component
 {
   public:
     VocalPitchEditor(Studio &owner, Id clipId, vocal::Analysis analysis)
-        : studio(&owner), clip(clipId), a(std::move(analysis)), shift(a.notes.size(), 0.), formant(a.notes.size(), 0.)
+        : studio(&owner), clip(clipId), a(std::move(analysis)), shift(a.notes.size(), 0.), formant(a.notes.size(), 0.),
+          timing(a.notes.size(), 0.)
     {
         for (auto *b : {&formantDown, &formantUp})
             addAndMakeVisible(b);
@@ -100,14 +105,14 @@ class VocalPitchEditor final : public juce::Component
         {
             std::fill(shift.begin(), shift.end(), 0.);
             std::fill(formant.begin(), formant.end(), 0.);
+            std::fill(timing.begin(), timing.end(), 0.);
             repaint();
         };
         apply.onClick = [this]
         {
             std::vector<vocal::Shift> shifts;
             for (size_t i = 0; i < a.notes.size(); ++i)
-                if (shift[i] != 0 || formant[i] != 0)
-                    shifts.push_back({a.notes[i].start, a.notes[i].end, shift[i], formant[i]});
+                shifts.push_back({a.notes[i].start, a.notes[i].end, shift[i], formant[i], timing[i]});
             if (studio)
             {
                 if (auto r = studio->applyVocalPitch(clip, shifts, {}, preserve.getToggleState()); r.failed())
@@ -117,8 +122,8 @@ class VocalPitchEditor final : public juce::Component
             close();
         };
         cancel.onClick = [this] { close(); };
-        info.setText(juce::String(int(a.notes.size())) + " notes. Drag a note up or down (Alt: fine), double-click "
-                                                         "to snap it, then Apply.",
+        info.setText(juce::String(int(a.notes.size())) + " notes. Drag up/down (Alt: fine), Ctrl+drag to move in time, "
+                                                         "double-click to snap, then Apply.",
                      juce::dontSendNotification);
         addAndMakeVisible(info);
         setSize(980, 560);
@@ -128,7 +133,8 @@ class VocalPitchEditor final : public juce::Component
     juce::Component::SafePointer<Studio> studio;
     Id clip;
     vocal::Analysis a;
-    std::vector<double> shift, formant;
+    std::vector<double> shift, formant, timing;
+    double dragStartX = 0, timingStart = 0;
     juce::TextButton formantDown{"Formant -"}, formantUp{"Formant +"};
     juce::ToggleButton preserve{"Preserve formants"};
     void nudgeFormant(double amount)
@@ -173,7 +179,7 @@ class VocalPitchEditor final : public juce::Component
     {
         const auto &n = a.notes[i];
         const float y = yOf(n.pitch + shift[i]);
-        return {xOf(n.start), y - row() * .45f, std::max(3.f, xOf(n.end) - xOf(n.start)), row() * .9f};
+        return {xOf(n.start + timing[i]), y - row() * .45f, std::max(3.f, xOf(n.end) - xOf(n.start)), row() * .9f};
     }
     void snapNotes(double amount)
     {
@@ -292,6 +298,8 @@ class VocalPitchEditor final : public juce::Component
         {
             dragStart = e.position.y;
             shiftStart = shift[size_t(selected)];
+            dragStartX = e.position.x;
+            timingStart = timing[size_t(selected)];
         }
         repaint();
     }
@@ -299,6 +307,26 @@ class VocalPitchEditor final : public juce::Component
     {
         if (selected < 0)
             return;
+        if (e.mods.isCtrlDown())
+        {
+            // Ctrl+drag: move the note in time (10 ms steps), keeping it between its neighbours.
+            const double seconds = (e.position.x - dragStartX) / grid().getWidth() * length();
+            auto &t = timing[size_t(selected)];
+            t = std::clamp(std::round((timingStart + seconds) * 100) / 100, -1., 1.);
+            const auto &n = a.notes[size_t(selected)];
+            if (selected > 0)
+            {
+                const auto &prev = a.notes[size_t(selected - 1)];
+                t = std::max(t, prev.end + timing[size_t(selected - 1)] - n.start + .01);
+            }
+            if (selected + 1 < int(a.notes.size()))
+            {
+                const auto &next = a.notes[size_t(selected + 1)];
+                t = std::min(t, next.start + timing[size_t(selected + 1)] - n.end - .01);
+            }
+            repaint();
+            return;
+        }
         const double moved = (dragStart - e.position.y) / row();
         const double base = a.notes[size_t(selected)].pitch + shiftStart;
         double target = base + moved;

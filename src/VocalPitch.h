@@ -30,6 +30,7 @@ struct Shift
     double start = 0, end = 0; // Seconds from the window start.
     double semitones = 0;      // -24..24.
     double formant = 0;        // Formant shift in semitones, -12..12 (voice character, not pitch).
+    double time = 0;           // Move the note by this many seconds (-1..1); neighbours stretch to fit.
 };
 // Pitch range 65..1050 Hz (C2..C6), windows up to ten minutes.
 juce::Result analyze(const juce::File &source, double offsetSeconds, double durationSeconds, Analysis &out);

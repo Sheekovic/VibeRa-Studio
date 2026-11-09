@@ -138,6 +138,17 @@ try:
     darker = centroid(clip_source(clip), 1.25, 1.65)
     check(job.get("completionState") == "completed" and darker < before * .95,
           f"Formant -6 darkens the voice (centroid {before:.0f} -> {darker:.0f} Hz)")
+    # Timing: move note 1 later by 50 ms; its neighbours stay, the clip length stays.
+    call("vibera_command", {"command": "edit.undo", "args": {}})
+    job = wait(call("vibera_project", {"action": "vocalPitchApply", "clip": clip, "shifts": [{"note": 1, "time": .05}]}))
+    check(job.get("completionState") == "completed", "A timing move renders: " + str(job)[:160])
+    moved = call("vibera_project", {"action": "vocalPitch", "clip": clip}).get("notes", [])
+    starts = [round(n["start"], 3) for n in moved]
+    check(len(moved) == 4 and abs(moved[1]["start"] - (.6 + .05)) < .03 and abs(moved[2]["start"] - 1.2) < .03 and
+          abs(moved[0]["start"]) < .03, f"Note 1 starts 50 ms later, its neighbours stay ({starts})")
+    check(abs(moved[1]["pitch"] - sung[1]) < .1, "The moved note keeps its pitch")
+    with wave.open(clip_source(clip)) as w:
+        check(abs(w.getnframes() / w.getframerate() - duration) < .01, "The retimed clip keeps its length")
     (output / "formant.json").write_text(json.dumps(dict(before=before, up=after, down=darker, pitch=pitch_after)),
                                          encoding="utf-8")
     (output / "pitches.json").write_text(json.dumps(dict(sung=sung, found=found, edited=pitches), indent=2), encoding="utf-8")
