@@ -673,6 +673,213 @@ class CoProducerPanel final : public juce::Component, private juce::Timer
     }
 
   public:
+    // MCP (vibera_ai idea* actions): the same controls, handlers and prerequisites as the panel.
+    // Every change goes through the control's own handler; a button that is disabled in the UI
+    // is refused here too. Generation and context reading stay asynchronous (poll ideaState).
+    juce::Result mcpIdea(const juce::String &action, const juce::var &args, juce::var &out)
+    {
+        if (!studio)
+            return juce::Result::fail("Project window closed.");
+        auto press = [](juce::Button &button, const char *what) -> juce::Result
+        {
+            if (!button.isEnabled())
+                return juce::Result::fail(juce::String("coproducer.unavailable: ") + what +
+                                          " is not available now (busy, no candidates or no provider)");
+            button.onClick();
+            return juce::Result::ok();
+        };
+        auto candidate = [this](const juce::var &value) -> juce::Result
+        {
+            const int index = value.isVoid() ? 0 : int(value);
+            if (index < 0 || index >= int(candidates.size()))
+                return juce::Result::fail("coproducer.invalidCandidate: candidate is 0.." +
+                                          juce::String(int(candidates.size()) - 1));
+            candidateChoice.setSelectedId(index + 1, juce::sendNotificationSync);
+            return juce::Result::ok();
+        };
+        juce::Result result = juce::Result::ok();
+        if (action == "ideaConfigure")
+        {
+            if (work || generation)
+                return juce::Result::fail("coproducer.busy: Wait for or cancel the current work");
+            if (args.hasProperty("model"))
+            {
+                const auto name = args["model"].toString();
+                const int id = name == "melody" ? 1 : name == "multitrack" ? 2 : name == "anticipation" ? 3 : 0;
+                if (!id)
+                    return juce::Result::fail("invalid_arguments: model is melody, multitrack or anticipation");
+                model.setSelectedId(id, juce::sendNotificationSync);
+            }
+            if (args.hasProperty("destination"))
+            {
+                const auto found = std::find(destinationIds.begin(), destinationIds.end(), Id(juce::int64(args["destination"])));
+                if (found == destinationIds.end())
+                    return juce::Result::fail("invalid_arguments: destination is a Channel ID from ideaState.destinations");
+                destination.setSelectedId(int(found - destinationIds.begin()) + 1, juce::sendNotificationSync);
+            }
+            auto setSlider = [](juce::Slider &slider, const juce::var &value, const char *name) -> juce::Result
+            {
+                const double v = double(value);
+                if (!std::isfinite(v) || v < slider.getMinimum() || v > slider.getMaximum())
+                    return juce::Result::fail(juce::String("invalid_arguments: ") + name + " is " +
+                                              juce::String(slider.getMinimum()) + ".." + juce::String(slider.getMaximum()));
+                slider.setValue(v, juce::sendNotificationSync);
+                return juce::Result::ok();
+            };
+            for (auto [slider, name] : std::initializer_list<std::pair<juce::Slider *, const char *>>{
+                     {&start, "start"}, {&bars, "bars"}, {&seed, "seed"}, {&variationAmount, "variationAmount"}})
+                if (args.hasProperty(name))
+                    if (auto r = setSlider(*slider, args[name], name); r.failed())
+                        return r;
+            auto choose = [](juce::ComboBox &box, const juce::var &value, const char *name) -> juce::Result
+            {
+                for (int i = 0; i < box.getNumItems(); ++i)
+                    if (box.getItemText(i).equalsIgnoreCase(value.toString()))
+                    {
+                        box.setSelectedItemIndex(i, juce::sendNotificationSync);
+                        return juce::Result::ok();
+                    }
+                return juce::Result::fail(juce::String("invalid_arguments: ") + name + " is not offered for this model (ideaState lists them)");
+            };
+            if (args.hasProperty("family"))
+                if (auto r = choose(family, args["family"], "family"); r.failed())
+                    return r;
+            if (args.hasProperty("variation"))
+                if (auto r = choose(variation, args["variation"], "variation"); r.failed())
+                    return r;
+            if (args.hasProperty("chord") || args.hasProperty("pitchClasses"))
+            {
+                juce::StringArray classes;
+                if (const auto *list = args["pitchClasses"].getArray())
+                    for (const auto &value : *list)
+                        classes.add(value.toString());
+                dropCandidates();
+                chord.setText(args["chord"].toString(), true);
+                pitchClasses.setText(classes.joinIntoString(","), true);
+            }
+            for (auto [toggle, name] : std::initializer_list<std::pair<juce::ToggleButton *, const char *>>{
+                     {&lockSelection, "lockSelection"}, {&replaceRegion, "replaceRegion"}})
+                if (args.hasProperty(name) && toggle->getToggleState() != bool(args[name]))
+                {
+                    toggle->setToggleState(bool(args[name]), juce::dontSendNotification);
+                    if (toggle->onClick)
+                        toggle->onClick();
+                }
+            if (args.hasProperty("context"))
+            {
+                const auto context = args["context"];
+                if (context.toString() == "auto")
+                    chooseContext(1, {});
+                else if (context.toString() == "all")
+                    chooseContext(2, {});
+                else if (const auto *ids = context.getArray())
+                {
+                    std::vector<Id> wanted;
+                    for (const auto &value : *ids)
+                    {
+                        const Id id = Id(juce::int64(value));
+                        if (!studio->controller.project.channel(id))
+                            return juce::Result::fail("invalid_arguments: context lists existing Channel IDs");
+                        wanted.push_back(id);
+                    }
+                    if (wanted.empty())
+                        return juce::Result::fail("invalid_arguments: context needs at least one Channel");
+                    contextMode = ContextMode::custom; // Start from an empty custom set, then add each.
+                    chosenContext.clear();
+                    for (auto id : wanted)
+                        if (std::find(chosenContext.begin(), chosenContext.end(), id) == chosenContext.end())
+                            chooseContext(100, {id});
+                }
+                else
+                    return juce::Result::fail("invalid_arguments: context is auto, all or Channel IDs");
+            }
+        }
+        else if (action == "ideaInspect")
+            result = press(inspect, "Inspect context");
+        else if (action == "ideaGenerate")
+            result = press(generate, "Generate");
+        else if (action == "ideaCancel")
+            result = press(cancel, "Cancel");
+        else if (action == "ideaAudition")
+        {
+            if (result = candidate(args["candidate"]); result.wasOk())
+                result = press(preview, "Audition");
+        }
+        else if (action == "ideaStopAudition")
+            result = press(stopPreviewButton, "Stop preview");
+        else if (action == "ideaAccept")
+        {
+            if (result = candidate(args["candidate"]); result.wasOk())
+            {
+                const auto revision = studio->controller.revision;
+                result = press(acceptButton, "Accept");
+                if (result.wasOk() && studio->controller.revision == revision)
+                    result = juce::Result::fail("coproducer.acceptFailed: " + summary.getText());
+            }
+        }
+        else if (action == "ideaDiscard")
+            result = press(discard, "Discard");
+        else if (action == "ideaMapping")
+        {
+            const auto found = std::find(destinationIds.begin(), destinationIds.end(), Id(juce::int64(args["channel"])));
+            if (found == destinationIds.end())
+                return juce::Result::fail("invalid_arguments: channel is a Channel ID from ideaState.destinations");
+            mappingChannel.setSelectedId(int(found - destinationIds.begin()) + 1, juce::sendNotificationSync);
+            if (bool(args["clear"]))
+                result = press(clearMapping, "Clear mapping");
+            else
+            {
+                mappingProgram.setText(args["program"].toString(), false);
+                mappingPitches.setText(args["pitches"].toString(), false);
+                result = press(saveMapping, "Set mapping");
+            }
+        }
+        else if (action != "ideaState")
+            return juce::Result::fail("invalid_arguments: unknown idea action");
+        if (result.failed())
+            return result;
+        auto *o = new juce::DynamicObject;
+        o->setProperty("busy", bool(work || generation));
+        o->setProperty("readingContext", bool(work));
+        o->setProperty("generating", bool(generation));
+        o->setProperty("candidates", int(candidates.size()));
+        o->setProperty("candidate", candidateChoice.getSelectedId() - 1);
+        o->setProperty("auditioning", previewActive);
+        o->setProperty("summary", summary.getText());
+        o->setProperty("provider", providerLabel.getText());
+        o->setProperty("model", juce::StringArray{"", "melody", "multitrack", "anticipation"}[juce::jlimit(0, 3, model.getSelectedId())]);
+        juce::Array<juce::var> destinations, families, variations, context;
+        for (auto id : destinationIds)
+            destinations.add(juce::int64(id));
+        for (int i = 0; i < family.getNumItems(); ++i)
+            families.add(family.getItemText(i));
+        for (int i = 0; i < variation.getNumItems(); ++i)
+            variations.add(variation.getItemText(i));
+        for (auto id : effectiveContext())
+            context.add(juce::int64(id));
+        const int chosen = destination.getSelectedId() - 1;
+        o->setProperty("destination", chosen >= 0 && chosen < int(destinationIds.size()) ? juce::var(juce::int64(destinationIds[size_t(chosen)])) : juce::var());
+        o->setProperty("destinations", destinations);
+        o->setProperty("family", family.getText());
+        o->setProperty("families", families);
+        o->setProperty("variation", variation.getText());
+        o->setProperty("variations", variations);
+        o->setProperty("variationAmount", variationAmount.getValue());
+        o->setProperty("start", start.getValue());
+        o->setProperty("bars", bars.getValue());
+        o->setProperty("seed", seed.getValue());
+        o->setProperty("chord", chord.getText());
+        o->setProperty("pitchClasses", pitchClasses.getText());
+        o->setProperty("lockSelection", lockSelection.getToggleState());
+        o->setProperty("replaceRegion", replaceRegion.getToggleState());
+        o->setProperty("contextMode", contextMode == ContextMode::automatic ? "auto" : contextMode == ContextMode::all ? "all" : "custom");
+        o->setProperty("context", context);
+        o->setProperty("mappings", int(mappings.size()));
+        o->setProperty("canGenerate", generate.isEnabled());
+        o->setProperty("canAccept", acceptButton.isEnabled());
+        out = juce::var(o);
+        return juce::Result::ok();
+    }
     juce::Result verifyGenerationForTest(const juce::File &folder, const std::function<float()> &tick,
                                          bool replaceForTest = false, bool anticipationForTest = false)
     {

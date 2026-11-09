@@ -4,7 +4,7 @@
   "passed": true,
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "CMakeLists.txt": "88fefe2733bcb54d35519e4ff2de2fcc465aef966cfb2d1cffe9fe4a07cfb118",
     "scripts/mcp-coverage.py": "c2e6917bde73f34e7ed3172cfc923739e1a0e975be299611618dd07f517442cb",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "scripts/verify-installed-mcp.py": "8f1f935f120621a334097114b6fd07eabbff24a0e15b68f4aaae8e7fee35f55c",
@@ -41,7 +41,7 @@
     "src/ChannelBalance.h": "13d8a6aa76b1032926c2d868f413d217d0001517700dde69b7e24808e7106a5c",
     "src/ChannelRouting.inc": "74ce23f6adcd77d0697c6481b595ec132e4a5c50b9269fda70cc0010a4e4c9cb",
     "src/ChannelRoutingCoordinator.h": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6",
-    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
+    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -156,7 +156,7 @@
     "tests/StoppedEffectNativeAcceptance.h": "59bbae9226079d2ceb2252a7c6ac4196319fdb641a669781ffe0c824b76f74dd",
     "tests/StoppedEffectOrdinaryForwardAcceptance.h": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
   },
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "checks": [
     {
       "id": "mixer.routing",
@@ -1205,11 +1205,11 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261109-095811/rerun-unreached.log"
+      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
-    "tests": 281
+    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+    "tests": 282
   }
 }

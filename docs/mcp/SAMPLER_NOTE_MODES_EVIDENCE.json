@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "sourceInputs": {
     "scripts/mcp-coverage.py": "c2e6917bde73f34e7ed3172cfc923739e1a0e975be299611618dd07f517442cb",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
@@ -9,7 +9,7 @@
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
-    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
+    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -70,11 +70,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261109-095811/rerun-unreached.log"
+      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
-    "tests": 281
+    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+    "tests": 282
   }
 }

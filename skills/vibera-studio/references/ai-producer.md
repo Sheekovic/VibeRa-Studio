@@ -51,6 +51,26 @@ Magenta generator).
 - `panel` shows or hides the docked CoProducer panel: `visible` (default true),
   `tab` chat|midi.
 
+## MIDI ideas (local models)
+
+The panel's MIDI ideas tab is driven with `idea*` actions, through its own controls and
+prerequisites (a button disabled in the panel is refused with `coproducer.unavailable`):
+
+- `ideaState`: `busy`, `candidates`, `summary`, `model`, `destination`/`destinations` (Channel IDs),
+  `families`, `variations`, region (`start` quarter notes, `bars`), `seed`, `context`, `canGenerate`.
+- `ideaConfigure`: `model` melody (MelodyRNN continuation) | multitrack (MusicVAE parts) |
+  anticipation (experimental), `destination`, `start`, `bars` 1..64, `family`, `variation`,
+  `variationAmount` 0..100, `seed`, `chord` + `pitchClasses` (0..11), `lockSelection`,
+  `replaceRegion`, `context` auto | all | [Channel IDs]. Refused while busy.
+- `ideaGenerate` (or `ideaInspect` to read context only) runs asynchronously; poll `ideaState` until
+  `busy` is false. The project is unchanged until accept.
+- `ideaAudition` / `ideaStopAudition` `{candidate}`, `ideaAccept {candidate}` (one Undo step:
+  `coproducer.accept`, or `coproducer.replace` with `replaceRegion`), `ideaDiscard`, `ideaCancel`.
+- `ideaMapping {channel, program, pitches, clear}`: explicit GM mapping for Anticipation.
+
+Channel or project changes rebuild an idle panel with default settings, as in the UI. Generated
+notes are model output, not listening evidence.
+
 The in-app agent receives every MCP tool except `vibera_ai`, `vibera_pointer` and
 `vibera_key`, plus `vibera_generate_music`. UI: the CoProducer toolbar button (or Tools >
 CoProducer panel) opens the right-side panel; its composer picks model and effort;

@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "sourceInputs": {
-    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "CMakeLists.txt": "88fefe2733bcb54d35519e4ff2de2fcc465aef966cfb2d1cffe9fe4a07cfb118",
     "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
-    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
+    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
@@ -51,11 +51,11 @@
   "sourceHashMode": "text-lf-v1",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261109-095811/rerun-unreached.log"
+      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
-    "tests": 281
+    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+    "tests": 282
   }
 }

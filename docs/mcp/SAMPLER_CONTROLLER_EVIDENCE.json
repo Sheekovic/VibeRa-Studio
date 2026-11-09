@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "sourceInputs": {
-    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "CMakeLists.txt": "88fefe2733bcb54d35519e4ff2de2fcc465aef966cfb2d1cffe9fe4a07cfb118",
     "scripts/dev_support.py": "f4e99deebe8388b42ca4f74a68d4425a82c87b3f74f60cb64a76d43842c56a78",
     "scripts/mcp-coverage.py": "7db79a8bafe01c5395231209a4444b2b8664e3a770b5b5733f48eed1c50994cd",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
@@ -13,7 +13,7 @@
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
-    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
+    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/ControllerPage.h": "0eaeea82572f467f4ba4fe8fbc56999d8ab56681f983cd820b91c6a2d640b954",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
@@ -65,11 +65,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261109-095811/rerun-unreached.log"
+      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
-    "tests": 281
+    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+    "tests": 282
   }
 }

@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/CoProducerPanel.h": "cd6ce9600be1196d2d7bb15b0be6fff81ad247eda746e931716361c050c8eaa6"
+    "src/CoProducerPanel.h": "bcd84ba2553e547f2f9547ba4b9a669f392ec5d04153842f5f9a57fb6187e657"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "1df29f85a5d0d4e0d793d2daa1ab3c7b9ffaa00b073dc90bf40bd85970df514f",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -12,6 +12,7 @@
     "ai_model",
     "ai_producer_mcp",
     "ai_ui_gui",
+    "appearance_mcp",
     "arrangements",
     "audio_capture",
     "audio_playlist_gui",
@@ -47,6 +48,7 @@
     "controller_recording",
     "controller_routing_capture",
     "coproducer_context",
+    "coproducer_ideas_mcp",
     "deferred_device_candidate_fault",
     "development_fixture_profiles",
     "development_workflow",
@@ -261,6 +263,7 @@
     "sampler_voice_modes",
     "sampler_voice_modes_mcp",
     "sampler_voices_mcp",
+    "shortcuts_mcp",
     "slicer",
     "song_meter",
     "step_composition",
@@ -286,6 +289,10 @@
     "vibera_synth_processor",
     "vocal_pitch_mcp"
   ],
-  "sourceLog": "build/dev/20261109-060440/affected-tests.log",
+  "sourceLog": "build/dev/20261109-104843/affected-tests.log",
+  "rerunLogs": [
+    "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
+  ],
+  "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

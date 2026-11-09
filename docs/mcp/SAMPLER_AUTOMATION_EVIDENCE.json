@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "sourceInputs": {
-    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "CMakeLists.txt": "88fefe2733bcb54d35519e4ff2de2fcc465aef966cfb2d1cffe9fe4a07cfb118",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "scripts/dev-select.py": "4eca9fe6273f887f39b394f94de78d102ef2dca10af7ff398d38f15fffb683c2",
     "scripts/distribution.py": "f6102501f12edf0f803a28b2f40b072915f041ba8a77b6b5a1996b18793f40ce",
@@ -21,7 +21,7 @@
     "src/AutomationState.cpp": "f45588dc8d2366bab2081546e939c72a788694f31c42c978bb1cd97b9affaac3",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
+    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -79,11 +79,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261109-095811/rerun-unreached.log"
+      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
-    "tests": 281
+    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+    "tests": 282
   }
 }

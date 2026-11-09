@@ -1,15 +1,15 @@
 {
   "passed": true,
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "sourceInputs": {
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "d89884e9208ca8a6b41e6e653c9d2048ba703e0c5f97070389efccec940ce4d8",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "6e8b2ec13971b3c5460d639438b46c2f037323ecc08fc95d5ad65f326cf75e3d",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
     "scripts/verify-mixer-controls-desktop.py": "96dc51a8941f3c8bcb5988372f63341651f1a11476ac9af856b866c796a98545",
     "scripts/verify-mixer-controls-mcp.py": "d7983a6c5cfbd76f8c29df43065edb52a6c52ba60270337faf6ec3700b0d5c2f",
     "skills/vibera-studio/references/mixer-controls.md": "05c7cd87ad2abb980af6f24d9c652656c3dc8aed754c9638795e8d9b8cdb7dce",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
-    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
+    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Editors.h": "bb94aadceafd9c42e2d22780ec0c433b824dc5bb4e9494fafbcf27708b1c51f4",
     "src/McpContracts.h": "bbaac235cb7acf5081742a0faa3e9e3c21c94593f0b5ef2ed2b00b28fdd88f79",
@@ -35,11 +35,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261109-095811/rerun-unreached.log"
+      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
-    "tests": 281
+    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+    "tests": 282
   }
 }

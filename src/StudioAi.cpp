@@ -75,8 +75,20 @@ ai::LlmConfig Studio::aiLlmConfig() const
 
 juce::var Studio::aiToolDefinition()
 {
-    return juce::JSON::parse(R"JSON({"name":"vibera_ai","description":"CoProducer (AI chat producer) and local AI music. state: provider/engine/job/chat status (never API keys), state.panel (docked CoProducer side panel) state.codex (local Codex CLI install/ChatGPT sign-in, models[] with slug/name/efforts/defaultEffort) and state.claudeCli (local Claude Code CLI install/sign-in/subscription, models aliases). Presets codex-cli and claude-cli use the user's ChatGPT or Claude subscription through the signed-in CLI instead of an API key; detectAgents re-checks both in the background (state.agent.detecting). configure: provider {preset, baseUrl, model, effort: \"\" (model default)|low|medium|high|xhigh|max|ultra; Codex sends it only when the model supports it; Claude Code accepts low..max}, write-only apiKey, music {aceStepUrl, aceStepAutoStart, aceDit, aceLm (ACE-Step models, \"\" automatic), engineRoot (absolute folder), yueLowVram, yueLicenseAccepted}, maxAgentSteps, agentMayEditProject. testConnection then state.connection: lists models. generateMusic: engine ace-step|yue2, prompt, lyrics, language, seconds 10..600, bpm 0|30..300, key, seed, instrumental, beat, lane; installs/starts the engine automatically on first use (large downloads), then places the audio as a Playlist clip (own Undo step); poll state.music. prepareEngine: install/check an engine without generating. cancelMusic, stopServer. chat: message to the in-app producer agent (it edits the project with the same canonical tools); events: since index; cancelChat; resetChat. panel: show/hide the docked CoProducer panel {visible, tab chat|midi}.","inputSchema":{"type":"object","additionalProperties":false,"properties":{
-      "action":{"type":"string","enum":["state","configure","testConnection","generateMusic","prepareEngine","cancelMusic","stopServer","chat","events","cancelChat","resetChat","detectAgents","panel"]},
+    return juce::JSON::parse(R"JSON({"name":"vibera_ai","description":"CoProducer (AI chat producer) and local AI music. state: provider/engine/job/chat status (never API keys), state.panel (docked CoProducer side panel) state.codex (local Codex CLI install/ChatGPT sign-in, models[] with slug/name/efforts/defaultEffort) and state.claudeCli (local Claude Code CLI install/sign-in/subscription, models aliases). Presets codex-cli and claude-cli use the user's ChatGPT or Claude subscription through the signed-in CLI instead of an API key; detectAgents re-checks both in the background (state.agent.detecting). configure: provider {preset, baseUrl, model, effort: \"\" (model default)|low|medium|high|xhigh|max|ultra; Codex sends it only when the model supports it; Claude Code accepts low..max}, write-only apiKey, music {aceStepUrl, aceStepAutoStart, aceDit, aceLm (ACE-Step models, \"\" automatic), engineRoot (absolute folder), yueLowVram, yueLicenseAccepted}, maxAgentSteps, agentMayEditProject. testConnection then state.connection: lists models. generateMusic: engine ace-step|yue2, prompt, lyrics, language, seconds 10..600, bpm 0|30..300, key, seed, instrumental, beat, lane; installs/starts the engine automatically on first use (large downloads), then places the audio as a Playlist clip (own Undo step); poll state.music. prepareEngine: install/check an engine without generating. cancelMusic, stopServer. chat: message to the in-app producer agent (it edits the project with the same canonical tools); events: since index; cancelChat; resetChat. panel: show/hide the docked CoProducer panel {visible, tab chat|midi}. MIDI ideas (the panel's MIDI tab, same controls and prerequisites): ideaState; ideaConfigure {model, destination, start, bars, family, variation, variationAmount, seed, chord, pitchClasses, lockSelection, replaceRegion, context}; ideaInspect reads context and ideaGenerate generates locally (asynchronous: poll ideaState busy/candidates/summary; the project is unchanged); ideaCancel; ideaAudition / ideaStopAudition {candidate}; ideaAccept {candidate} places it as one Undo step (coproducer.accept or, with replaceRegion, coproducer.replace); ideaDiscard; ideaMapping {channel, program, pitches, clear} for Anticipation. A disabled panel button is refused (coproducer.unavailable). Channel or project changes rebuild an idle panel to defaults, as in the UI.","inputSchema":{"type":"object","additionalProperties":false,"properties":{
+      "action":{"type":"string","enum":["state","configure","testConnection","generateMusic","prepareEngine","cancelMusic","stopServer","chat","events","cancelChat","resetChat","detectAgents","panel","ideaState","ideaConfigure","ideaInspect","ideaGenerate","ideaCancel","ideaAudition","ideaStopAudition","ideaAccept","ideaDiscard","ideaMapping"]},
+      "model":{"type":"string","enum":["melody","multitrack","anticipation"],"description":"ideaConfigure: local MIDI idea model (MelodyRNN lead continuation, MusicVAE instrument parts, Anticipation experimental)."},
+      "destination":{"type":"integer","minimum":1,"description":"ideaConfigure: destination Channel ID (ideaState.destinations)."},
+      "start":{"type":"number","minimum":0,"description":"ideaConfigure: region start in quarter notes."},
+      "bars":{"type":"integer","minimum":1,"maximum":64},"variationAmount":{"type":"number","minimum":0,"maximum":100},
+      "family":{"type":"string","maxLength":64,"description":"ideaConfigure: instrument family offered for the model (ideaState.families)."},
+      "variation":{"type":"string","maxLength":64,"description":"ideaConfigure: ideaState.variations (New idea, Idea variation, Continuation)."},
+      "chord":{"type":"string","maxLength":64},"pitchClasses":{"type":"array","maxItems":12,"items":{"type":"integer","minimum":0,"maximum":11}},
+      "lockSelection":{"type":"boolean"},"replaceRegion":{"type":"boolean"},
+      "context":{"description":"ideaConfigure: auto, all, or an array of Channel IDs.","anyOf":[{"type":"string","enum":["auto","all"]},{"type":"array","minItems":1,"maxItems":512,"items":{"type":"integer","minimum":1}}]},
+      "candidate":{"type":"integer","minimum":0,"maximum":15,"description":"ideaAudition/ideaAccept: candidate index (default 0)."},
+      "channel":{"type":"integer","minimum":1,"description":"ideaMapping: Channel ID."},"program":{"type":"string","maxLength":8,"description":"ideaMapping: GM program 0..128 (128 percussion)."},
+      "pitches":{"type":"string","maxLength":256,"description":"ideaMapping: permitted notes, e.g. 48-83 or 36,38,42."},"clear":{"type":"boolean"},
       "provider":{"type":"object"},"apiKey":{"type":"string","maxLength":4096},"music":{"type":"object"},
       "maxAgentSteps":{"type":"integer","minimum":1,"maximum":200},"agentMayEditProject":{"type":"boolean"},
       "engine":{"type":"string","enum":["ace-step","yue2"]},"prompt":{"type":"string","maxLength":2000},
@@ -778,6 +790,18 @@ juce::var Studio::mcpAiOperation(const juce::var &args)
     {
         aiDetectAgents(); // Spawns both CLIs: never on the message thread; poll state.agent.detecting.
         return state();
+    }
+    if (action.startsWith("idea"))
+    {
+        // MIDI ideas run in the docked CoProducer panel (its MIDI tab), the same object the user sees.
+        if (!coProducerDock || !coProducerDock->midiPanel())
+            showCoProducer(1);
+        if (!coProducerDock || !coProducerDock->midiPanel())
+            throw McpFailure("unavailable", "CoProducer panel could not open");
+        juce::var out;
+        if (auto r = coProducerDock->midiPanel()->mcpIdea(action, args, out); r.failed())
+            throw McpFailure(r.getErrorMessage().upToFirstOccurrenceOf(":", false, false), r.getErrorMessage());
+        return out;
     }
     if (action == "panel")
     {

@@ -4,15 +4,15 @@
   "releaseQualification": false,
   "moduleComplete": false,
   "scope": "RPS-B scoped-solo/mute-lock internal increment; broader Channel management/module remains open",
-  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
+  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
   "workerSha256": "1fd6690c32ee073c8927d4f6bcca189a3fe71926c1834ee6aeb549b771f4e1e8",
   "testExecutableSha256": "991b9d05ad07ac0279d71b442b00f26bd6c0287aa54d1699d9a2a81f1276699c",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "d89884e9208ca8a6b41e6e653c9d2048ba703e0c5f97070389efccec940ce4d8",
-    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "6e8b2ec13971b3c5460d639438b46c2f037323ecc08fc95d5ad65f326cf75e3d",
+    "CMakeLists.txt": "88fefe2733bcb54d35519e4ff2de2fcc465aef966cfb2d1cffe9fe4a07cfb118",
     "scripts/verify-channel-scoped-solo-mcp.py": "fec7b7dd172ab675ca263a98525d94eee3bd6af0d797e364a23381a534c42719",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
     "skills/vibera-studio/references/channel-scoped-solo.md": "b6d6140d4f454b12131a7d9b34ed7979465da9ed16fe0b531cb370a283ecc92e",
@@ -47,7 +47,7 @@
     "src/ChannelSolo.h": "4e892bbec7e947252ceb57c81e1e7075f210ff8a8051a89356f07ab4bff3534f",
     "src/ClipGroups.h": "e8356a636df8268c36e87fa8ba610f2d49880823a47884e4b86769ee126159df",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
+    "src/Commands.cpp": "1461b652377b721e01620a8c528e540b5d56a5ae5e3724783f0d85aacc62cedd",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/CommandsNativeScalarHistory.inc": "e65cb51884f76407afc1362561f1fc969aabf3cccc1227a09229756d65185548",
     "src/CompensationGraph.h": "e8e954dab9a0352afc31048c40d12c9ae6cbed743628b0aadadc96f06a6f7fe6",
@@ -57,7 +57,7 @@
     "src/ControllerPage.h": "75b49544b547f231053f190ff32d6ae9a340fc3a0a7a8ddbb4fa2f060ea83ecc",
     "src/CoProducer.cpp": "4dc44abed1d35513c2fa6fccad35b695f1ebb5af24bc4a5bab8155142fb673e4",
     "src/CoProducer.h": "4f38bce3effeafc1dd997e5c40609171cd11167e3d0fc4bef01f3fefaab03d4d",
-    "src/CoProducerPanel.h": "cd6ce9600be1196d2d7bb15b0be6fff81ad247eda746e931716361c050c8eaa6",
+    "src/CoProducerPanel.h": "bcd84ba2553e547f2f9547ba4b9a669f392ec5d04153842f5f9a57fb6187e657",
     "src/CoProducerWorker.cpp": "f951b754977a2f029e781d3d0d1e8832466bd6efc8405aceac13fc83b520a23d",
     "src/CoProducerWorker.h": "6db564d49e07f3ec15704f42dfbd68bc3848293f66db675599a8f9c6f0c1dd29",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
@@ -352,11 +352,11 @@
   ],
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "sourceLog": "build/dev/20261109-104843/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261109-095811/rerun-unreached.log"
+      "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
-    "tests": 281
+    "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+    "tests": 282
   }
 }

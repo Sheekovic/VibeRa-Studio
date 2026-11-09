@@ -33,6 +33,13 @@ class CoProducerDock final : public juce::Component, private juce::Timer
         midiContext = contextKey();
         layoutMidi();
     }
+  public:
+    CoProducerPanel *midiPanel() const noexcept
+    {
+        return midi;
+    }
+
+  private:
     void layoutMidi()
     {
         if (!midi)

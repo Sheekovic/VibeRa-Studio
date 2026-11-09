@@ -23,7 +23,10 @@ def complete_passing_run(root: Path, source_log: str, rerun_logs=()):
     if not passed:
         sys.exit("Refused: the source log has no passing tests")
     exe = root / "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe"
-    start = min(p.stat().st_mtime for p in source.parent.iterdir() if p.is_file())
+    # The run builds first; the binary it tested is the one present when its compile step finished.
+    compiled = source.parent / "compiled-inputs.log"
+    start = compiled.stat().st_mtime if compiled.is_file() else min(
+        p.stat().st_mtime for p in source.parent.iterdir() if p.is_file())
     note = ""
     if rerun_logs:
         if exe.stat().st_mtime > start:
