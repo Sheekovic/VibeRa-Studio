@@ -5974,6 +5974,9 @@ class Studio::Editor final : public juce::Component,
                     tools.addItem(95, "Decimate points");
                     tools.addItem(98, "Filter (smooth the levels)");
                     tools.addItem(99, "Analyze audio file...");
+                    tools.addItem(100, "Smooth up (attack 50 %, release 50 %)");
+                    tools.addItem(101, "Level scale tension +50 %");
+                    tools.addItem(102, "Create sequence (1/4 steps: 1, 0, 0.5, 0)");
                     m.addSubMenu("Articulator tools", tools);
                     m.addItem(96, "Merge selected Automation Clips", s.selectedClips.size() >= 2);
                 }
@@ -6078,6 +6081,18 @@ class Studio::Editor final : public juce::Component,
                                     if (n == 99)
                                         if (const auto *clip = safe->automationClip(id))
                                             safe->s.analyzeAudioIntoAutomation(clip->source);
+                                    if (n >= 100 && n <= 102)
+                                        if (const auto *clip = safe->automationClip(id))
+                                        {
+                                            a.target = clip->source;
+                                            a.value = n == 100 ? .5 : n == 101 ? .5 : .25;
+                                            a.offset = n == 100 ? .5 : 0.;
+                                            a.text = n == 102 ? "[1, 0, 0.5, 0]" : "";
+                                            safe->s.command(n == 100   ? "automation.source.smoothUp"
+                                                            : n == 101 ? "automation.source.tension"
+                                                                       : "automation.source.sequence",
+                                                            a);
+                                        }
                                     if (n == 2)
                                         safe->s.command("clip.delete", a);
                                     if (n == 90)

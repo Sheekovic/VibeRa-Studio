@@ -142,6 +142,6 @@ the third pass:
 | --- | --- | --- |
 | Automation Clip: Filter | done | `automation.source.filter` (moving average, width 2..32); clip Tools menu; playlist_tools_mcp |
 | Automation Clip: Analyze audio file | done | `automation.source.fromAudio` (RMS per step, normalised) via `automation.source.points`; clip Tools menu; playlist_tools_mcp |
-| Automation Clip: Smooth up (attack/release smoothing) | missing | |
-| Automation Clip: Create sequence (envelope step sequencer) | missing | |
-| Level Scale: Center / Tension | partial | `automation.source.scale` has multiply and offset only |
+| Automation Clip: Smooth up (attack/release smoothing) | done | `automation.source.smoothUp` (value attack, offset release); clip Tools menu; playlist_tools_mcp |
+| Automation Clip: Create sequence (envelope step sequencer) | done | `automation.source.sequence` (levels list repeated, held steps); clip Tools menu; playlist_tools_mcp |
+| Level Scale: Center / Tension | done | `automation.source.tension` (-1..1); Center = multiply + offset in `automation.source.scale` |

@@ -193,5 +193,9 @@ of the straight line between kept neighbours; 0 = 0.01, max 0.5; ends and curved
 refused when nothing would change), `automation.source.filter` (centred moving average over
 `value` points, 2..32, default 3; ends stay), `automation.source.fromAudio` (`text` = absolute audio
 path, `value` = step in beats, default 0.25: RMS per step normalised to the loudest step becomes the
-curve over the source length at the project tempo). `automation.merge` joins selected clips of one target.
+curve over the source length at the project tempo), `automation.source.tension` (`value` -1..1:
+level^(4^-value)), `automation.source.smoothUp` (`value` attack, `offset` release, 0..0.99: rises and
+falls spread over the following points), `automation.source.sequence` (`text` = [levels 0..1],
+`value` = step beats, default 0.25: held steps repeated over the source). Scaling around a centre c
+is `scale` with value m and offset c(1-m). `automation.merge` joins selected clips of one target.
 Read points back with `vibera_inspect {"entity":"automationPoints","source":id}`.

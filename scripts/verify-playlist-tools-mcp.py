@@ -117,6 +117,23 @@ try:
           "A missing audio file is refused")
     command("edit.undo")
     check(points(line) == after, "Analyze audio file is one Undo step")
+    # Create sequence / tension / smooth up on the same curve.
+    seq = command("automation.source.sequence", target=line, text="[1, 0, 0.5, 0]", value=.5)
+    curve = points(line)
+    check(seq.get("completionState") == "completed" and [b for b, _, _ in curve] == [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4]
+          and [v for _, v, _ in curve] == [1, 0, .5, 0, 1, 0, .5, 0, 0] and all(s in (1, "hold") for _, _, s in curve[1:]),
+          f"Create sequence writes held steps repeated over the clip ({curve})")
+    command("automation.source.tension", target=line, value=.5)
+    bent = [v for _, v, _ in points(line)]
+    check(abs(bent[2] - .5 ** .5) < 1e-3 and bent[0] == 1 and bent[1] == 0, f"Tension +0.5 lifts 0.5 to ~0.707 ({bent[:3]})")
+    check(command("automation.source.tension", target=line, value=0).get("completionState") == "failed", "Tension 0 is refused")
+    command("edit.undo")
+    command("automation.source.smoothUp", target=line, value=0, offset=.5)
+    smoothed = [v for _, v, _ in points(line)]
+    check(abs(smoothed[1] - .5) < 1e-3 and smoothed[0] == 1, f"Smooth up softens the fall by the release ({smoothed[:3]})")
+    command("edit.undo")
+    command("edit.undo")
+    check(points(line) == after, "Each tool is one Undo step")
     command("clip.delete", ids=[c["id"] for c in clips("automation") if c["lane"] == 3])
     check(not [c for c in clips("automation") if c["lane"] == 3], "The decimate test clip is removed")
 

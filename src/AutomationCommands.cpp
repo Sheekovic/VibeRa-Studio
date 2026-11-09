@@ -331,7 +331,8 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
     else if (operation == "automation.source.flip" || operation == "automation.source.normalize" ||
              operation == "automation.source.smooth" || operation == "automation.source.scale" ||
              operation == "automation.source.decimate" || operation == "automation.source.filter" ||
-             operation == "automation.source.points")
+             operation == "automation.source.points" || operation == "automation.source.tension" ||
+             operation == "automation.source.smoothUp" || operation == "automation.source.sequence")
     {
         // Articulator tools on one curve (every linked placement follows): flip vertically,
         // normalize to the full 0..1 range, turn every point smooth, or value * value + offset.
@@ -347,6 +348,58 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
                 points[i].incoming = AutomationShape::smooth;
                 points[i].tension = 0;
             }
+        else if (operation == "automation.source.tension")
+        {
+            // FL Level Scale tension: level^(4^-t); t > 0 lifts the levels toward 1, t < 0 lowers them.
+            if (!std::isfinite(a.value) || std::abs(a.value) > 1 || a.value == 0)
+                return juce::Result::fail("automation.invalidTension: tension is -1..1, not 0");
+            const double exponent = std::pow(4., -a.value);
+            for (auto &p : points)
+                p.value = float(std::pow(double(std::clamp(p.value, 0.f, 1.f)), exponent));
+        }
+        else if (operation == "automation.source.smoothUp")
+        {
+            // FL Smooth up: rises follow `value` (attack 0..1), falls follow `offset` (release 0..1);
+            // 0 keeps the step, toward 1 the change spreads over the following points.
+            if (!std::isfinite(a.value) || !std::isfinite(a.offset) || a.value < 0 || a.value >= 1 || a.offset < 0 ||
+                a.offset >= 1 || (a.value == 0 && a.offset == 0))
+                return juce::Result::fail("automation.invalidSmoothing: attack (value) and release (offset) are 0..0.99, not both 0");
+            double level = points.front().value;
+            for (size_t i = 1; i < points.size(); ++i)
+            {
+                const double coefficient = points[i].value > level ? a.value : a.offset;
+                level += (points[i].value - level) * (1 - coefficient);
+                points[i].value = float(level);
+            }
+        }
+        else if (operation == "automation.source.sequence")
+        {
+            // FL Create sequence: text = [levels 0..1] repeated over the source, `value` = step beats
+            // (0 = 1/4). Each step holds its level (hold shape) until the next.
+            const auto list = juce::JSON::parse(a.text);
+            const auto *levels = list.getArray();
+            const double step = a.value == 0 ? .25 : a.value;
+            if (!levels || levels->isEmpty() || levels->size() > 64)
+                return juce::Result::fail("automation.invalidSequence: text is a list of 1..64 levels 0..1");
+            if (!std::isfinite(step) || step < 1. / 64 || step > 4 || source->length / step > 4095)
+                return juce::Result::fail("automation.invalidSequence: value is the step in beats (1/64..4)");
+            std::vector<float> values;
+            for (const auto &v : *levels)
+            {
+                const double level = v;
+                if (!std::isfinite(level) || level < 0 || level > 1)
+                    return juce::Result::fail("automation.invalidSequence: levels are 0..1");
+                values.push_back(float(level));
+            }
+            std::vector<AutomationPoint> next;
+            const int steps = int(std::ceil(source->length / step - 1e-9));
+            for (int k = 0; k < steps; ++k)
+                next.push_back({project.allocate(), k * step, values[size_t(k) % values.size()],
+                                k == 0 ? AutomationShape::single : AutomationShape::hold});
+            next.push_back({project.allocate(), source->length, values[size_t(steps - 1) % values.size()],
+                            AutomationShape::hold});
+            points = std::move(next);
+        }
         else if (operation == "automation.source.filter")
         {
             // FL automation Filter: centred moving average over `value` points (0 = 3); ends stay put.
