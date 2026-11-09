@@ -705,6 +705,14 @@ juce::ValueTree Project::state() const
             set(t, "followAction", p.followAction);
             set(t, "followAfter", p.followAfter);
         }
+        for (const auto &marker : p.markers)
+        {
+            juce::ValueTree m("PATTERN_MARKER");
+            set(m, "id", juce::int64(marker.id));
+            set(m, "beat", marker.beat);
+            set(m, "name", marker.name);
+            t.appendChild(m, nullptr);
+        }
         if (p.generation.isNotEmpty())
             set(t, "generation", p.generation);
         for (const auto &loop : p.channelLoops)
@@ -1771,6 +1779,15 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
                 window.offset = n.hasProperty("offset") ? exactNumber(n["offset"]) : 0.;
                 window.muted = bool(n["muted"]);
                 pat.automation.push_back(window);
+                continue;
+            }
+            if (n.hasType("PATTERN_MARKER"))
+            {
+                const double id = exactNumber(n["id"]), beat = exactNumber(n["beat"]);
+                if (fileVersion < 57 || !std::isfinite(id) || id < 1 || std::floor(id) != id || !std::isfinite(beat) ||
+                    beat < 0 || n["name"].toString().length() > 128 || pat.markers.size() >= 1000)
+                    return juce::Result::fail("Invalid Pattern marker");
+                pat.markers.push_back({Id(id), beat, n["name"].toString()});
                 continue;
             }
             if (n.hasType("CONTROLLER"))

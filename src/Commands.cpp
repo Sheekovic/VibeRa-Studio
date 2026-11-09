@@ -849,6 +849,9 @@ const std::vector<CommandInfo> &commandRegistry()
         {"marker.action", "Set a marker's playback action (start, loop, skip, pause)", Scope::playlist, true, true, "command"},
         {"channel.articulations", "Set the Channel expression map (articulations and keyswitches)", Scope::rack, true, true, "command"},
         {"channel.receiveMidi", "Receive notes from a MIDI channel (multitimbral live input)", Scope::rack, true, true, "command"},
+        {"pattern.marker.add", "Add a Pattern marker (Piano roll ruler)", Scope::piano, true, true, "command"},
+        {"pattern.marker.rename", "Rename a Pattern marker", Scope::piano, true, true, "command"},
+        {"pattern.marker.delete", "Delete a Pattern marker", Scope::piano, true, true, "command"},
         {"notes.articulation", "Set the articulation of notes (expression map)", Scope::piano, true, true, "command"},
         {"rack.group.create", "Add Channel filter group", Scope::rack, true, true, "command"},
         {"rack.group.rename", "Rename Channel filter group", Scope::rack, true, true, "command"},
@@ -6683,6 +6686,31 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             next.tempoChanges.erase(found);
         std::sort(next.tempoChanges.begin(), next.tempoChanges.end(),
                   [](const auto &x, const auto &y) { return x.beat < y.beat; });
+    }
+    if (id == "pattern.marker.add" || id == "pattern.marker.rename" || id == "pattern.marker.delete")
+    {
+        // Pattern markers: named positions inside a Pattern (Piano roll ruler). add: beat, text;
+        // rename: target, text; delete: target. One Undo step.
+        auto *part = next.pattern(a.pattern);
+        if (!part)
+            return missing();
+        auto found = std::find_if(part->markers.begin(), part->markers.end(), [&](const auto &m) { return m.id == a.target; });
+        if (a.text.length() > 128)
+            return juce::Result::fail("Marker names are at most 128 characters");
+        if (id == "pattern.marker.add")
+        {
+            if (!std::isfinite(a.beat) || a.beat < 0 || a.beat > 1000000 || part->markers.size() >= 1000)
+                return juce::Result::fail("patternMarker.invalid: Beat 0..1000000, at most 1000 markers");
+            part->markers.push_back({next.allocate(), a.beat,
+                                     a.text.isNotEmpty() ? a.text : "Marker " + juce::String(int(part->markers.size()) + 1)});
+            std::stable_sort(part->markers.begin(), part->markers.end(), [](const auto &x, const auto &y) { return x.beat < y.beat; });
+        }
+        else if (found == part->markers.end())
+            return missing();
+        else if (id == "pattern.marker.rename")
+            found->name = a.text;
+        else
+            part->markers.erase(found);
     }
     if (id == "channel.receiveMidi")
     {

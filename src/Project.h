@@ -196,6 +196,20 @@ struct ControllerEvent
     double beat = 0, value = 0;
     int type = 0, number = 0, midiChannel = 0;
 };
+struct Marker
+{
+    Id id = 0;
+    double beat = 0;    // Song position in quarter-note beats.
+    juce::String name;  // At most 128 characters.
+    // Playback action (version 57): "" none, "start" (Play from the Song start begins here),
+    // "loop" (the section up to the next marker repeats), "skip" (jump to the next marker),
+    // "pause" (playback pauses here).
+    juce::String action;
+};
+inline bool validMarkerAction(const juce::String &action)
+{
+    return action.isEmpty() || action == "start" || action == "loop" || action == "skip" || action == "pause";
+}
 struct Pattern
 {
     Id id = 0;
@@ -214,6 +228,8 @@ struct Pattern
     // to another Pattern. Actions: "" none, again, next, previous, first, last, any, other, stop.
     juce::String followAction;
     int followAfter = 1;
+    // Pattern markers (version 57): named positions in Pattern beats, shown on the Piano roll ruler.
+    std::vector<Marker> markers;
     // Pattern automation (v56): windows of project automation sources at Pattern beats (lane and
     // id unused). Plays with the Pattern in Song and Pattern mode (PatternAutomation.h).
     std::vector<AutomationPlacement> automation;
@@ -309,20 +325,6 @@ struct ChordEvent
     double beat = 0;
     juce::String symbol; // At most 32 characters; must parse with score::chordPitchClasses.
 };
-struct Marker
-{
-    Id id = 0;
-    double beat = 0;    // Song position in quarter-note beats.
-    juce::String name;  // At most 128 characters.
-    // Playback action (version 57): "" none, "start" (Play from the Song start begins here),
-    // "loop" (the section up to the next marker repeats), "skip" (jump to the next marker),
-    // "pause" (playback pauses here).
-    juce::String action;
-};
-inline bool validMarkerAction(const juce::String &action)
-{
-    return action.isEmpty() || action == "start" || action == "loop" || action == "skip" || action == "pause";
-}
 // Playlist track settings by lane (version 50); lanes without an entry use the defaults.
 struct PlaylistTrack
 {

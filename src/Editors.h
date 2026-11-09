@@ -3696,6 +3696,20 @@ class Studio::Editor final : public juce::Component,
                           type == 2 ? ink.withAlpha(.85f) : muted, 11);
                 }
             }
+            if (type == 1)
+                if (const auto *part = s.controller.project.pattern(s.selectedPattern))
+                    for (const auto &marker : part->markers)
+                    {
+                        // Pattern markers on the Piano roll ruler, next to the bar numbers.
+                        const float x = float(left + (marker.beat - scroll) * spacing());
+                        if (x < left || x > getWidth() - scrollBarThickness)
+                            continue;
+                        g.setColour(orange);
+                        g.fillRect(x, float(top - 18), 1.5f, 18.f);
+                        g.setFont(juce::Font(vibera::uiFont, 10.5f, juce::Font::bold));
+                        g.drawText(marker.name, juce::Rectangle<float>(x + 4, float(top - 18), 120, 12),
+                                   juce::Justification::centredLeft, true);
+                    }
             if (type == 1 && s.quantizerGuide && s.quantizerGuidePattern == s.selectedPattern)
             {
                 g.setColour(orange.withAlpha(.6f));

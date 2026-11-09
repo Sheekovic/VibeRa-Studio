@@ -275,6 +275,14 @@ void Studio::midiFileMenu()
     menu.addItem(44003, "Auto-scroll with the playhead", true, pianoFollowPlayhead);
     menu.addItem(44004, "Center the playhead while scrolling", true, followCenter);
     menu.addItem(44010, "Snap incoming MIDI to the scale guide", true, snapIncomingMidi);
+    {
+        juce::PopupMenu markersMenu;
+        markersMenu.addItem(44020, "Add Pattern marker at the playhead");
+        if (const auto *part = controller.project.pattern(selectedPattern))
+            for (size_t k = 0; k < part->markers.size() && k < 64; ++k)
+                markersMenu.addItem(44100 + int(k), "Delete " + part->markers[k].name);
+        menu.addSubMenu("Pattern markers", markersMenu);
+    }
     menu.addItem(44005, "Background waveform (Playlist audio clips)", true, pianoBackgroundWaveform);
     menu.addItem(44006, "Preview notes during playback", true, previewDuringPlayback);
     menu.addItem(69, "Export as score sheet (PDF)...");
@@ -550,6 +558,23 @@ void Studio::midiFileMenu()
                 args.value = result == 56 ? .35 : result == 57 ? .6 : .7;
                 args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                 safe->command("notes.randomize", args);
+                return;
+            }
+            if (result == 44020 || (result >= 44100 && result < 44164))
+            {
+                CommandArgs a;
+                a.pattern = safe->selectedPattern;
+                if (result == 44020)
+                {
+                    a.beat = std::max(0., safe->audio.positionBeat());
+                    safe->command("pattern.marker.add", a);
+                }
+                else if (const auto *part = safe->controller.project.pattern(a.pattern);
+                         part && size_t(result - 44100) < part->markers.size())
+                {
+                    a.target = part->markers[size_t(result - 44100)].id;
+                    safe->command("pattern.marker.delete", a);
+                }
                 return;
             }
             if (result == 44010)

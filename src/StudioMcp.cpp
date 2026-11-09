@@ -2025,6 +2025,18 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 set(row, "effectiveDenominator", patternDenominator(controller.project, p));
                 set(row, "barBeats", patternBarBeats(controller.project, p));
                 set(row, "noteCount", int(p.notes.size()));
+                {
+                    juce::Array<juce::var> marks;
+                    for (const auto &m : p.markers)
+                    {
+                        auto entry = obj();
+                        set(entry, "id", juce::int64(m.id));
+                        set(entry, "beat", m.beat);
+                        set(entry, "name", m.name);
+                        marks.add(entry);
+                    }
+                    set(row, "markers", marks);
+                }
                 juce::Array<juce::var> loops;
                 for (const auto &loop : p.channelLoops)
                 {
