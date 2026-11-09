@@ -194,8 +194,13 @@ class EditorWindow final : public juce::DocumentWindow
                 if (const auto *display =
                         juce::Desktop::getInstance().getDisplays().getDisplayForRect(getBounds()))
                     workArea = display->userArea; // Copy before native reposition/DPI re-entry.
+                // Fixed limits left by a fixed-size native editor would clamp the native window
+                // (WM_WINDOWPOSCHANGING) while the component records the new size; relax them first.
+                setResizeLimits(1, 1, 8192, 8192);
                 setContentComponentSize(wrapper->getWidth(), wrapper->getHeight());
                 updateResizeLimits();
+                if (wrapper->selectedView() != PluginWrapperView::plugin)
+                    settleViewSize();
                 if (workArea && wrapper->selectedView() != PluginWrapperView::plugin)
                     setTopLeftPosition(
                         pluginWrapperBoundsWithinWorkArea(getBounds(), *workArea).getPosition());
@@ -220,6 +225,28 @@ class EditorWindow final : public juce::DocumentWindow
                         peer->setCurrentRenderingEngine(i);
             }
         roundNativeWindow(*this);
+    }
+    // A reopened editor can switch views (plugin -> Settings) while the earlier native resize is
+    // still being applied; the native window then keeps the plugin-view size although the
+    // component reports the Settings size, and JUCE later syncs the component down to it (clipping
+    // Settings). Re-push the component bounds to the native window until they agree.
+    void settleViewSize()
+    {
+        for (const int delay : {50, 200, 500, 1200})
+            juce::Timer::callAfterDelay(
+                delay,
+                [safe = juce::Component::SafePointer<EditorWindow>(this)]
+                {
+                    if (!safe || !safe->wrapper || safe->wrapper->selectedView() == PluginWrapperView::plugin)
+                        return;
+                    auto *peer = safe->getPeer();
+                    if (!peer)
+                        return;
+                    safe->wrapper->reapplyViewSize();
+                    safe->setContentComponentSize(safe->wrapper->getWidth(), safe->wrapper->getHeight());
+                    if (peer->getBounds() != safe->getScreenBounds())
+                        peer->setBounds(safe->getScreenBounds(), false);
+                });
     }
     ~EditorWindow() override
     {

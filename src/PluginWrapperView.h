@@ -488,6 +488,14 @@ class PluginWrapperViewComponent final : public juce::Component, private juce::C
         refreshEnabled();
     }
 
+    // Recompute this host view's own size (Settings/Parameters) after the host window was synced
+    // down to an older native size. The plugin view keeps the native editor's size.
+    void reapplyViewSize()
+    {
+        if (view != PluginWrapperView::plugin)
+            resizeForView();
+    }
+
     void setView(PluginWrapperView next)
     {
         if (next != PluginWrapperView::plugin && next != PluginWrapperView::settings &&
