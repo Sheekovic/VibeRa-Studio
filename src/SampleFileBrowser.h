@@ -865,6 +865,25 @@ class SampleFileBrowser final : public juce::Component,
     }
     int resultSortForTest() const { return resultSort; }
     // Shared read-only state for vibera_state.browser (MCP readback of the browser.* actions).
+    // MCP: the same calls as the folder chooser / saved-folder list / Remove button.
+    juce::Result openFolder(const juce::File &root, bool remember)
+    {
+        if (!root.isDirectory())
+            return juce::Result::fail("Not an existing folder");
+        setRoot(root, remember);
+        return juce::Result::ok();
+    }
+    juce::Result forgetFolder(const juce::String &path)
+    {
+        const int index = roots.indexOf(path, true);
+        if (index < 0)
+            return juce::Result::fail("Not a saved Browser folder");
+        roots.remove(index);
+        updateLibraries();
+        saveLibraries();
+        updateSearch(true);
+        return juce::Result::ok();
+    }
     juce::var mcpState() const
     {
         auto *state = new juce::DynamicObject;
@@ -886,6 +905,10 @@ class SampleFileBrowser final : public juce::Component,
         state->setProperty("columns", detailColumns);
         state->setProperty("fullPreview", studio.audio.fullAudition());
         state->setProperty("previewVolume", studio.audio.auditionVolume());
+        juce::Array<juce::var> saved;
+        for (const auto &root : roots)
+            saved.add(root);
+        state->setProperty("libraries", saved);
         return juce::var(state);
     }
     // Columns layout: compact one-line rows with type, size and date.

@@ -441,6 +441,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"view.browser", "Show / hide the Browser", Scope::global, false, true, "action"},
         {"view.editorWindow", "Show, hide, maximise, detach, dock or move an editor window", Scope::global, false, true, "vibera_editor"},
         {"view.workspaceLayout", "Workspace splitter sizes", Scope::global, false, true, "vibera_editor"},
+        {"browser.openFolder", "Open a folder in the Browser (and save it)", Scope::browser, false, true, "vibera_editor"},
+        {"browser.forgetFolder", "Remove a saved Browser folder", Scope::browser, false, true, "vibera_editor"},
         {"rack.stepMemory", "Keep removed steps as muted steps", Scope::rack, false, true, "vibera_rack"},
         {"settings.appearance", "Interface colours, preset and font", Scope::global, false, true, "vibera_appearance"},
         {"ai.configure", "AI provider, model, key and music engine settings", Scope::global, false, true, "vibera_ai"},

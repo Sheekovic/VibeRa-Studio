@@ -54,6 +54,21 @@ try:
     check(layout["mixerHeight"] == 360, "Out-of-range sizes clamp like the splitter")
     check(editor(editor=0, action="layout", rackWidth="wide").get("isError"), "A non-number is refused")
 
+    # Browser folders (editor 4): open and remember, open without remembering, forget.
+    first, second = output / "folder-one", output / "folder-two"
+    first.mkdir(); second.mkdir()
+    check(not editor(editor=4, action="browserFolder", path=str(first)).get("isError"), "browserFolder opens a folder")
+    browser = call("vibera_state")["browser"]
+    check(Path(browser["folder"]) == first and str(first) in browser["libraries"], "The folder is open and saved")
+    editor(editor=4, action="browserFolder", path=str(second), remember=False)
+    browser = call("vibera_state")["browser"]
+    check(Path(browser["folder"]) == second and str(second) not in browser["libraries"], "remember:false only opens it")
+    check(not editor(editor=4, action="browserForget", path=str(first)).get("isError"), "browserForget removes a saved folder")
+    check(str(first) not in call("vibera_state")["browser"]["libraries"] and first.is_dir(), "Forgotten, files untouched")
+    check(editor(editor=4, action="browserFolder", path=str(output / "missing")).get("isError"), "A missing folder is refused")
+    check(editor(editor=4, action="browserForget", path=str(first)).get("isError"), "Forgetting an unsaved folder is refused")
+    check(editor(editor=1, action="browserFolder", path=str(first)).get("isError"), "Browser actions need editor 4")
+
     editor(editor=1, action="detach")
     check(editor(editor=1, action="move", bounds=[100, 100, 500, 300]).get("isError"), "A detached window cannot move")
     editor(editor=1, action="dock")

@@ -2378,5 +2378,23 @@
       "view.editorWindow"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1080:116b1da2a5bc": {
+    "operations": [
+      "browser.openFolder"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1099:c88ac466feb4": {
+    "operations": [
+      "browser.openFolder"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1113:8396e65ebb59": {
+    "operations": [
+      "browser.forgetFolder"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }
 }

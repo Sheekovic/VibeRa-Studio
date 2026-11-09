@@ -39,3 +39,8 @@ detached window first); `detach` / `dock` also accept the Browser. `layout` sets
 `browserWidth` 180..360, `playlistRatio` 0.12..0.8, `rackWidth` 330..900, `mixerHeight` 168..360,
 `coProducerWidth` 340..760 (clamped like dragging). Read back `state.editorBounds` (five
 [x,y,w,h]) and `state.workspaceLayout`.
+
+Browser folders: `vibera_editor {"editor":4,"action":"browserFolder","path":<absolute folder>,"remember":true}`
+opens a folder in the Browser (remember adds it to the saved folders, like the folder chooser);
+`browserForget` removes a saved folder (files untouched). Read back `state.browser.folder` and
+`state.browser.libraries`.
