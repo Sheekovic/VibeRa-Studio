@@ -1038,6 +1038,11 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Marker actions while the Song plays (StudioMarkers in Studio.cpp): Start, Loop, Skip, Pause.
     // Skip and Pause act on the 20 Hz UI timer, so they can land up to one tick late.
     void pollMarkerActions();
+    // Quantize song jumps: 0 off, -1 next beat, n > 0 next n-bar line. A jump requested while the
+    // Song plays (marker or ruler click) waits for that boundary (20 Hz timer, up to one tick late).
+    int songJumpQuantize = 0;
+    std::optional<std::pair<double, double>> pendingSongJump; // (target, boundary)
+    void songJump(double target);
     std::optional<std::pair<double, double>> markerLoop;
     bool markerLoopEnabledLooping = false, markerWasPlaying = false;
     double markerLastBeat = 0;

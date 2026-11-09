@@ -990,8 +990,43 @@ void Studio::resized()
         component->toFront(false);
     repaint();
 }
+void Studio::songJump(double target)
+{
+    target = std::max(0., target);
+    if (songJumpQuantize == 0 || !audio.playing() || patternMode)
+    {
+        pendingSongJump.reset();
+        audio.seekBeat(target);
+        return;
+    }
+    const double now = audio.positionBeat();
+    double at = now;
+    if (songJumpQuantize < 0)
+        at = std::floor(now + 1.e-9) + 1;
+    else
+    {
+        // The first bar line of an n-bar group: count bars from the Song start (meter changes respected).
+        at = controller.project.nextBarLine(now);
+        int bar = controller.project.barPosition(at).bar;
+        while (bar % songJumpQuantize != 0 && at < 1.e6)
+        {
+            at = controller.project.nextBarLine(at);
+            bar = controller.project.barPosition(at).bar;
+        }
+    }
+    pendingSongJump = std::pair{target, at};
+    status = "Jump to beat " + juce::String(target, 2) + " at beat " + juce::String(at, 2);
+}
 void Studio::pollMarkerActions()
 {
+    if (pendingSongJump && (!audio.playing() || patternMode))
+        pendingSongJump.reset();
+    else if (pendingSongJump && audio.positionBeat() >= pendingSongJump->second - 1.e-6)
+    {
+        const auto target = pendingSongJump->first;
+        pendingSongJump.reset();
+        audio.seekBeat(target);
+    }
     const bool playing = audio.playing() && !patternMode;
     const double now = audio.positionBeat();
     auto sorted = controller.project.markers;

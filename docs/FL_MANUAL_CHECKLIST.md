@@ -86,7 +86,7 @@ did not list.
 | Playlist: Automation Clip articulator tools (flip, normalize, smooth, scale levels) | done | `automation.source.flip/normalize/smooth/scale` |
 | Playlist: Merge automation clips | done | `automation.merge` (keeps the first clip's links) |
 | Playlist: ripple editing (close the gap) | done | `clip.rippleDelete` |
-| Playlist: marker actions (loop, skip, pause, start) | done | `marker.action`; real-device check: Start 4, Loop 8..16, Skip 20 to 28, Pause at 32. Skip/Pause act on the 20 Hz timer. Quantized song jumps: missing |
+| Playlist: marker actions (loop, skip, pause, start) | done | `marker.action`; real-device check: Start 4, Loop 8..16, Skip 20 to 28, Pause at 32. Skip/Pause act on the 20 Hz timer |
 | Piano roll: snap incoming MIDI to scale | done | Piano roll menu, `view.snapIncomingMidi`, `vibera_editor` guide; hardware and typing keyboard |
 | Piano roll: Interpolate tool (event data) | done | `notes.controller.interpolate`; Piano roll Edit > Interpolate events in the time selection (menu, not the drag tool) |
 | Piano roll / Playlist: nudge with mouse wheel, Center (Shift+0) | done | Shift+Alt+wheel nudges selected notes/clips (pointer only, not MCP-tested); `view.centerPlayhead` Shift+0 |
@@ -97,3 +97,5 @@ did not list.
 | Channel Rack: declicking mode, Restretch all, name alignment, auto resize | out of scope | FL sampler/display specifics |
 | Loop Starter, FL Cloud, Patcherize, DirectWave, NewTone/NewTime, stem extraction, Deverb | out of scope | FL-only plugins and services |
 | View cosmetics (grid colour/contrast, keyboard styles, note shadows, Behind clips) | out of scope | theme handles appearance |
+| Playlist: Quantize song jumps (Off, beat, 1/2/4/8 bars) | done | Playlist menu, `vibera_transport` jumpQuantize/jump; real-device check: jump at 1.06 waits for 4, lands at 16 |
+| Expression maps: CC / program change articulations | done | `Name=CC32:64`, `Name=PC5`; sent 0.1 ms before the note |

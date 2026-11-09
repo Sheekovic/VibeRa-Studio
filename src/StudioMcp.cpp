@@ -184,7 +184,7 @@ juce::var Studio::mcpTools()
       {"name":"vibera_commands","description":"Discover registered operations, explicit mappings/gaps and optional typed argument contracts. Paginated; includeSchemas=true with a command ID retrieves its contract.","inputSchema":{"type":"object","properties":{"command":{"type":"string"},"includeSchemas":{"type":"boolean","default":false},"offset":{"type":"integer","minimum":0,"default":0},"limit":{"type":"integer","minimum":1,"maximum":64,"default":32}},"additionalProperties":false}},
       {"name":"vibera_command","description":"Execute an undoable document edit, undo or redo on this owned instance. Optional revision rejects stale edits.","inputSchema":{"type":"object","properties":{"command":{"type":"string"},"args":{"type":"object"},"revision":{"type":"integer","minimum":0}},"required":["command"],"additionalProperties":false}},
       {"name":"vibera_select","description":"Select existing Pattern/Channel/editor scope or an already loaded project plugin UI. Plugin requests are separate from Pattern/Channel selection; no discovery, plugin loading, parameter writes or filesystem access.","inputSchema":{"type":"object","properties":{"pattern":{"type":"integer"},"channel":{"type":"integer"},"scope":{"type":"integer","minimum":0,"maximum":8},"plugin":{"type":"integer","minimum":1,"maximum":1000000000},"pluginView":{"type":"string","enum":["controls","native","closeNative"]},"parameter":{"type":"integer","minimum":0,"maximum":4294967295},"lastTweaked":{"type":"boolean"},"instance":{"type":"string","maxLength":100}},"additionalProperties":false}},
-      {"name":"vibera_transport","description":"Play, stop, seek, set whole-Pattern/Song looping or switch mode through shared application actions. previewNote (stopped transport only) plays one note on a Channel through every current setting, like the sampler Preview processed button; pitch defaults to the sampler root (60 when Auto). State is not listening evidence.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["play","stop","seek","pattern","song","loop","previewNote"]},"channel":{"type":"integer","minimum":1},"pitch":{"type":"integer","minimum":0,"maximum":127},"seconds":{"type":"number","minimum":0.05,"maximum":4,"default":1.5},"beat":{"type":"number","minimum":0},"enabled":{"type":"boolean","default":true,"description":"For action loop: idempotently enable/disable entire current Pattern or Song looping. No recording take may be active when changing it."},"range":{"type":["array","null"],"items":{"type":"number","minimum":0},"minItems":2,"maxItems":2,"description":"For action loop: set the Playlist time selection [startBeat, endBeat] (null clears it). In Song mode looping plays only the selection; it is also the audio punch range."}},"required":["action"],"additionalProperties":false}},
+      {"name":"vibera_transport","description":"Play, stop, seek, set whole-Pattern/Song looping or switch mode through shared application actions. previewNote (stopped transport only) plays one note on a Channel through every current setting, like the sampler Preview processed button; pitch defaults to the sampler root (60 when Auto). State is not listening evidence.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["play","stop","seek","pattern","song","loop","previewNote","jump","jumpQuantize"]},"quantize":{"type":"integer","enum":[0,-1,1,2,4,8],"description":"Only action jumpQuantize: Quantize song jumps (0 off, -1 next beat, 1/2/4/8 next bar group). action jump moves the playhead to beat now, or at that boundary while the Song plays; read state.pendingSongJump."},"channel":{"type":"integer","minimum":1},"pitch":{"type":"integer","minimum":0,"maximum":127},"seconds":{"type":"number","minimum":0.05,"maximum":4,"default":1.5},"beat":{"type":"number","minimum":0},"enabled":{"type":"boolean","default":true,"description":"For action loop: idempotently enable/disable entire current Pattern or Song looping. No recording take may be active when changing it."},"range":{"type":["array","null"],"items":{"type":"number","minimum":0},"minItems":2,"maxItems":2,"description":"For action loop: set the Playlist time selection [startBeat, endBeat] (null clears it). In Song mode looping plays only the selection; it is also the audio punch range."}},"required":["action"],"additionalProperties":false}},
       {"name":"vibera_editor","description":"Show, hide or maximize a native JUCE editor: 0 Rack, 1 Piano, 2 Playlist, 3 Mixer.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":3},"action":{"type":"string","enum":["show","hide","maximize","detach","dock","grouping","snap","stamp","laneTarget","guide"]},"scale":{"type":"string","description":"Only action guide: a scale (major, minor, dorian, ...) or, with maqam:true, a maqam (rast, bayati, ...); empty clears the guide."},"root":{"type":"integer","minimum":0,"maximum":11,"description":"Only action guide: root pitch class, 0 = C."},"maqam":{"type":"boolean","description":"Only action guide: scale names a maqam."},"snapIncoming":{"type":"boolean","description":"Only action guide: snap incoming MIDI (hardware and typing keyboard) to the guide before it plays and records; read back as state.pianoGuide."},"target":{"type":"string","enum":["velocity","release","pan","modX","modY","fine"],"description":"Only editor1/action laneTarget: the note property the Piano roll event lane shows and paints (notes.velocity args.text). Read back as state.pianoLaneTarget."},"chord":{"type":"string","description":"Only action stamp: a Chordify shape name (e.g. major, minor) so drawing a Piano roll note places that chord; empty turns the stamp off. Read back as state.pianoStamp."},"enabled":{"type":"boolean","default":true,"description":"Only editor2/action grouping: temporarily enable/disable group targeting; retain membership. Refused during active gestures."},"snap":{"type":"number","minimum":0,"maximum":32,"description":"Only action snap: the shared Piano roll/Playlist grid in beats (0 = none; e.g. 0.25 step, 1/3 triplet, 4 bar). Read back as state.snap."},"line":{"type":"boolean","description":"Only action snap: true snaps pointer edits to the visible grid lines (zoom dependent) instead of snap; read back as state.snapLine."},"markers":{"type":"boolean","description":"Only action snap: true snaps Playlist positions to markers (distances to bars); read back as state.snapMarkers."}},"required":["editor","action"],"additionalProperties":false}},
       {"name":"vibera_update","description":"In-app updates from the project's GitHub Releases. status reads the phase (idle, checking, upToDate, available, downloading, ready, installing, failed), the current version, the newest available release with its notes and installable asset, download progress and the update settings. check starts a background check (poll status; completes as upToDate, available or failed) without opening dialogs. Downloading and installing need the user's approval in the app (Tools > Check for updates), so they are not MCP actions.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["status","check"]}},"required":["action"],"additionalProperties":false}},
       {"name":"vibera_snapshot","description":"Capture this instance as a bounded JUCE component PNG including the header. With channel: that local Channel's settings window instead (opened if needed) (page 0 Sample, 1 Envelope, 2 Miscellaneous). Not native PrintWindow, physical input or listening evidence.","inputSchema":{"type":"object","properties":{"channel":{"type":"integer","minimum":1},"page":{"type":"integer","minimum":0,"maximum":2}},"additionalProperties":false}},
@@ -3567,6 +3567,22 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             if (hasPendingMidiTake())
                 throw McpFailure("take_pending", status);
         }
+        else if (action == "jumpQuantize")
+        {
+            const int value = integer(args, "quantize", 0, -1, 8);
+            if (value != 0 && value != -1 && value != 1 && value != 2 && value != 4 && value != 8)
+                throw McpFailure("invalid_arguments", "quantize is 0 off, -1 beat, or 1/2/4/8 bars");
+            songJumpQuantize = value;
+            pendingSongJump.reset();
+        }
+        else if (action == "jump")
+        {
+            auto beat = number(args, "beat", -1);
+            if (beat < 0 || beat > 1000000)
+                throw std::runtime_error("Invalid jump position");
+            requireFinishedTake();
+            songJump(beat);
+        }
         else if (action == "seek")
         {
             auto beat = number(args, "beat", -1);
@@ -3874,6 +3890,14 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "snapMarkers", snapMarkers);
     set(state, "audioStretchMode", audioStretchMode);
     set(state, "pianoStamp", pianoStamp);
+    set(state, "songJumpQuantize", songJumpQuantize);
+    if (pendingSongJump)
+    {
+        auto jump = obj();
+        set(jump, "target", pendingSongJump->first);
+        set(jump, "at", pendingSongJump->second);
+        set(state, "pendingSongJump", jump);
+    }
     {
         auto guide = obj();
         set(guide, "scale", pianoGuide.name);

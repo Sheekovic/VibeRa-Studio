@@ -1681,6 +1681,14 @@ class Studio::Editor final : public juce::Component,
                 menu.addItem(10, "Enable Clip grouping", true, s.controller.clipGroupingEnabled);
                 menu.addItem(16, "Auto-scroll with the playhead", true, s.followPlayhead);
                 menu.addItem(18, "Center the playhead while scrolling", true, s.followCenter);
+                {
+                    juce::PopupMenu jumps;
+                    const int codes[] = {0, -1, 1, 2, 4, 8};
+                    const char *labels[] = {"Off", "Next beat", "Next bar", "Next 2 bars", "Next 4 bars", "Next 8 bars"};
+                    for (int k = 0; k < 6; ++k)
+                        jumps.addItem(70 + k, labels[k], true, s.songJumpQuantize == codes[k]);
+                    menu.addSubMenu("Quantize song jumps", jumps);
+                }
                 menu.addItem(17, "Stretch audio clips by dragging (Shift+M)", true, s.audioStretchMode);
                 menu.addSeparator();
                 {
@@ -1820,6 +1828,13 @@ class Studio::Editor final : public juce::Component,
                         if (result == 18)
                         {
                             safe->s.performAction("view.followCenter");
+                            return;
+                        }
+                        if (result >= 70 && result <= 75)
+                        {
+                            const int codes[] = {0, -1, 1, 2, 4, 8};
+                            safe->s.songJumpQuantize = codes[result - 70];
+                            safe->s.pendingSongJump.reset();
                             return;
                         }
                         if (result == 16 || result == 17)
@@ -5697,7 +5712,7 @@ class Studio::Editor final : public juce::Component,
                     });
                 }
                 else
-                    s.audio.seekBeat(marker.beat);
+                    s.songJump(marker.beat);
                 repaint();
                 return;
             }
@@ -5761,7 +5776,10 @@ class Studio::Editor final : public juce::Component,
                     s.status = result.getErrorMessage();
                     return;
                 }
-                s.audio.seekBeat(beatAt(e.x));
+                if (type == 2)
+                    s.songJump(beatAt(e.x));
+                else
+                    s.audio.seekBeat(beatAt(e.x));
                 rulerScrubbing = type == 2 && e.mods.isLeftButtonDown();
                 if (type == 2 && s.playlistRange &&
                     (beatAt(e.x) < s.playlistRange->first || beatAt(e.x) > s.playlistRange->second))
