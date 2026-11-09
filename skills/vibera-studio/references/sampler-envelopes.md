@@ -232,3 +232,11 @@ pass them to loopPoints to use the file's loop (UI: Use file loop).
 `vibera_transport` `{"action":"previewNote","channel":1}` plays one note through the
 Channel's current settings while stopped (pitch defaults to the root; seconds
 0.05..4, default 1.5), the same as the sampler window's Preview processed button.
+
+## Envelope presets
+
+`vibera_project {"action":"saveEnvelopePreset","channel":id,"name":"Pad"}` stores the Channel's
+volume envelope (on, attack, decay, sustain, release) as a named preset;
+`{"action":"loadEnvelopePreset","channel":id,"name":"Pad"}` applies it as one Undo step through
+`channel.sampler.envelopeApply`; `{"action":"envelopePresets"}` lists the names. UI: Channel menu >
+Envelope presets. Missing presets, bad names and out-of-range values are refused.

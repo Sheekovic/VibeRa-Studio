@@ -529,6 +529,11 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool recordNotes = true;     // Recording filter: Record opens a MIDI note take (FL "Notes").
     juce::Result setAudioLogger(bool enabled, double minutes); // Tools > Audio logger.
     juce::var audioLoggerState() const;
+    // Sampler envelope presets (FL): volume envelope only, JSON files by name.
+    juce::File envelopePresetFolder() const;
+    juce::StringArray envelopePresetNames() const;
+    juce::Result saveEnvelopePreset(Id channel, const juce::String &name);
+    juce::Result loadEnvelopePreset(Id channel, const juce::String &name);
     void saveAudioLogDialog();
     std::unique_ptr<juce::FileChooser> audioLogChooser;
     bool waitingForInput = false; // A take is open and the transport waits for that note.

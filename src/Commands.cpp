@@ -424,6 +424,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"score.clear", "Clear score log", Scope::global, false, true, "action"},
         {"midi.typing", "Typing keyboard to piano", Scope::global, false, true, "action"},
         {"transport.countIn", "Recording count-in", Scope::global, false, true, "action"},
+        {"channel.sampler.envelopePresets", "Save / load sampler envelope presets", Scope::rack, false, true, "vibera_project"},
         {"audio.logger", "Audio logger: keep the last minutes of the master output", Scope::global, false, true, "vibera_project"},
         {"audio.loggerSave", "Audio logger: save the last minutes to a WAV", Scope::global, false, true, "vibera_project"},
         {"transport.recordNotes", "Recording filter: record MIDI notes", Scope::global, false, true, "action"},
@@ -681,6 +682,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.sampler.modulation.lfoShape", "Sampler modulation lfoShape", Scope::rack, true, true,
          "command"},
         {"channel.sampler.envelope", "Sampler volume envelope", Scope::rack, true, true, "command"},
+        {"channel.sampler.envelopeApply", "Apply a sampler envelope preset (on, attack, decay, sustain, release)", Scope::rack, true, true, "command"},
         {"channel.sampler.attack", "Sampler volume attack", Scope::rack, true, true, "command"},
         {"channel.sampler.decay", "Sampler volume decay", Scope::rack, true, true, "command"},
         {"channel.sampler.sustain", "Sampler volume sustain", Scope::rack, true, true, "command"},
@@ -3344,6 +3346,23 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             }
             if (id == "channel.sampler.envelope")
                 s.envelope = a.enabled;
+            if (id == "channel.sampler.envelopeApply")
+            {
+                // Envelope preset: {"envelope":bool,"attack":s,"decay":s,"sustain":0..1,"release":s}.
+                const auto preset = juce::JSON::parse(a.text);
+                const double attack = preset["attack"], decay = preset["decay"], sustain = preset["sustain"],
+                             release = preset["release"];
+                auto inRange = [](double v, double high) { return std::isfinite(v) && v >= 0 && v <= high; };
+                if (!preset.isObject() || !preset["envelope"].isBool() || !inRange(attack, 10) || !inRange(decay, 10) ||
+                    !inRange(sustain, 1) || !inRange(release, 10))
+                    return juce::Result::fail("channel.sampler.envelopeApply: text is {envelope, attack 0..10, decay 0..10, "
+                                              "sustain 0..1, release 0..10}");
+                s.envelope = bool(preset["envelope"]);
+                s.attack = attack;
+                s.decay = decay;
+                s.sustain = sustain;
+                s.release = release;
+            }
             if (id == "channel.sampler.attack")
                 s.attack = a.value;
             if (id == "channel.sampler.decay")

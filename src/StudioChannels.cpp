@@ -424,6 +424,93 @@ void Studio::addChannelPresetItems(juce::PopupMenu &menu, Id channel)
                  { if (safe) safe->saveChannelPreset(channel); });
     menu.addItem("Load Channel preset...", supported, false, [safe, channel]
                  { if (safe) safe->loadChannelPreset(channel); });
+    // FL envelope presets: the volume envelope alone, saved by name.
+    juce::PopupMenu envelopes;
+    envelopes.addItem("Save envelope as preset...", supported, false, [safe, channel]
+                      {
+                          if (!safe)
+                              return;
+                          auto *dialog = new juce::AlertWindow("Save envelope preset", "Name for this volume envelope",
+                                                               juce::MessageBoxIconType::NoIcon);
+                          dialog->addTextEditor("name", "My envelope", "Name");
+                          dialog->addButton("Save", 1);
+                          dialog->addButton("Cancel", 0);
+                          auto alert = juce::Component::SafePointer<juce::AlertWindow>(dialog);
+                          dialog->enterModalState(true, juce::ModalCallbackFunction::create([safe, alert, channel](int result)
+                          {
+                              if (!safe || !alert || result != 1)
+                                  return;
+                              const auto saved = safe->saveEnvelopePreset(channel, alert->getTextEditorContents("name"));
+                              safe->status = saved.wasOk() ? "Envelope preset saved" : saved.getErrorMessage();
+                              safe->repaint();
+                          }), true);
+                      });
+    const auto names = envelopePresetNames();
+    if (!names.isEmpty())
+        envelopes.addSeparator();
+    for (const auto &name : names)
+        envelopes.addItem(name, supported, false, [safe, channel, name]
+                          {
+                              if (!safe)
+                                  return;
+                              if (const auto loaded = safe->loadEnvelopePreset(channel, name); loaded.failed())
+                              {
+                                  safe->status = loaded.getErrorMessage();
+                                  safe->repaint();
+                              }
+                          });
+    menu.addSubMenu("Envelope presets", envelopes);
+}
+juce::File Studio::envelopePresetFolder() const
+{
+    if (workflowTestSettings)
+        return workflowTestSettings->getFile().getSiblingFile(workflowTestSettings->getFile().getFileNameWithoutExtension() +
+                                                             " envelope presets");
+    return juce::File::getSpecialLocation(juce::File::userDocumentsDirectory)
+        .getChildFile("VibeRa Studio")
+        .getChildFile("Envelope presets");
+}
+juce::StringArray Studio::envelopePresetNames() const
+{
+    juce::StringArray names;
+    for (const auto &file : envelopePresetFolder().findChildFiles(juce::File::findFiles, false, "*.json"))
+        names.add(file.getFileNameWithoutExtension());
+    names.sort(true);
+    return names;
+}
+juce::Result Studio::saveEnvelopePreset(Id channel, const juce::String &name)
+{
+    const auto *target = controller.project.channel(channel);
+    if (!target || target->audioClip)
+        return juce::Result::fail("envelopePreset.invalidChannel: Choose a sampler or instrument Channel");
+    const auto legal = juce::File::createLegalFileName(name.trim());
+    if (legal.isEmpty() || legal.length() > 64)
+        return juce::Result::fail("envelopePreset.invalidName: Use a name of 1..64 characters");
+    const auto &s = target->sampler;
+    auto *o = new juce::DynamicObject;
+    o->setProperty("envelope", s.envelope);
+    o->setProperty("attack", s.attack);
+    o->setProperty("decay", s.decay);
+    o->setProperty("sustain", s.sustain);
+    o->setProperty("release", s.release);
+    const auto folder = envelopePresetFolder();
+    if (folder.createDirectory().failed() ||
+        !folder.getChildFile(legal + ".json").replaceWithText(juce::JSON::toString(juce::var(o))))
+        return juce::Result::fail("envelopePreset.write: Cannot write to " + folder.getFullPathName());
+    return juce::Result::ok();
+}
+juce::Result Studio::loadEnvelopePreset(Id channel, const juce::String &name)
+{
+    const auto file = envelopePresetFolder().getChildFile(juce::File::createLegalFileName(name) + ".json");
+    if (!file.existsAsFile())
+        return juce::Result::fail("envelopePreset.missing: No envelope preset named " + name);
+    CommandArgs a;
+    a.channel = channel;
+    a.text = file.loadFileAsString();
+    const auto revision = controller.revision;
+    command("channel.sampler.envelopeApply", a);
+    return controller.revision != revision ? juce::Result::ok()
+                                           : juce::Result::fail("envelopePreset.refused: " + status);
 }
 static juce::File channelPresetFolder()
 {
