@@ -115,7 +115,7 @@ ping-pong loop, reverse, smart disable, score log, half speed, split by channel,
 | Item | Status | Notes |
 | --- | --- | --- |
 | Recording: Wait for input (start on the first MIDI note, keeping that note) | missing | needs take capture of the triggering note |
-| Master pitch (global tuning offset for every instrument) | missing | add a project-wide cents offset to the per-Channel tuning tables and MTS-ESP |
+| Master pitch (global tuning offset for every instrument) | done | `project.masterPitch` -1200..1200 cents, Tools > Master pitch; sampler, MPE, MTS-ESP; master_pitch_mcp checks 440/880/466 Hz in exports |
 | Audio logger (rolling master-mix buffer, save the last minutes) | missing | real-time-safe preallocated ring buffer on the master output |
 | Recording filter (choose automation / notes / audio / clips) | missing | |
 | Sampler envelope presets | missing | Channel presets (.vibch) already save full settings |

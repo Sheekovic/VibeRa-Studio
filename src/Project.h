@@ -359,6 +359,9 @@ struct Project
     juce::String name = "Untitled";
     double tempo = 120;
     double swing = 0; // Normalized 0..1, all score Patterns/Channels.
+    // Master pitch (version 57): cents added to every tunable instrument (local sampler, MPE
+    // plugins, MTS-ESP), -1200..1200. Plugins without MPE/MTS-ESP keep their own tuning.
+    double masterPitch = 0;
     int numerator = 4, denominator = 4;
     std::vector<Channel> channels;
     std::vector<ChannelGroup> channelGroups;

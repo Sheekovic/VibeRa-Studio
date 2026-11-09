@@ -112,20 +112,24 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
         channel.sampler = PreparedSamplerSettings(c.sampler, p.tempo);
         channel.sampleInstrument = !c.instrument && !c.audioClip;
         channel.mpe = c.instrument && c.mpe;
+        // Master pitch: whole semitones move the key, the remainder joins the note's cents.
+        const int masterSemitones = juce::roundToInt(p.masterPitch / 100.);
+        const double masterCents = p.masterPitch - 100. * masterSemitones;
         if (channel.sampleInstrument &&
-            (!c.scale.empty() || std::any_of(c.tuning.begin(), c.tuning.end(), [](double cents) { return cents != 0; })))
+            (p.masterPitch != 0 || !c.scale.empty() ||
+             std::any_of(c.tuning.begin(), c.tuning.end(), [](double cents) { return cents != 0; })))
         {
             channel.liveTuned = true;
             for (int key = 0; key < 128; ++key)
             {
-                double cents = c.tuning[size_t(key % 12)];
-                int sounding = key;
+                double cents = c.tuning[size_t(key % 12)] + masterCents;
+                int sounding = juce::jlimit(0, 127, key + masterSemitones);
                 if (!c.scale.empty())
                 {
                     const double deviation = tuning::scaleDeviation(c.scale, c.scaleRoot, key);
                     const int semitones = juce::roundToInt(deviation / 100.);
-                    sounding = juce::jlimit(0, 127, key + semitones);
-                    cents = deviation - 100. * semitones;
+                    sounding = juce::jlimit(0, 127, key + semitones + masterSemitones);
+                    cents = deviation - 100. * semitones + masterCents;
                 }
                 channel.liveKey[size_t(key)] = std::uint8_t(sounding);
                 channel.liveExpression[size_t(key)] = PreparedNoteExpression::prepare(0, juce::jlimit(-100., 100., cents));
@@ -146,20 +150,21 @@ std::unique_ptr<LiveDocument> compileLiveDocument(const Project &p, bool pattern
             if (n.channel == c.id)
                 channel.notes.push_back(
                     {n.note, n.placement, map.secondsAt(n.beat), map.secondsAt(n.beat + n.length),
-                     c.scale.empty() ? n.pitch : scaled(n).first,
+                     juce::jlimit(0, 127, (c.scale.empty() ? n.pitch : scaled(n).first) +
+                                              (channel.sampleInstrument ? masterSemitones : 0)),
                      float(juce::jlimit(n.slide ? 0 : 1, 127, juce::roundToInt(n.velocity * 127))) / 127,
                      n.step,
                      channel.sampleInstrument
                          ? PreparedNoteExpression::prepare(
                                n.pan,
                                juce::jlimit(-100., 100.,
-                                            n.fineCents + (c.scale.empty() ? c.tuning[size_t(n.pitch % 12)]
-                                                                           : scaled(n).second)),
+                                            n.fineCents + masterCents +
+                                                (c.scale.empty() ? c.tuning[size_t(n.pitch % 12)] : scaled(n).second)),
                                n.modX,
                                n.modY)
                          : PreparedNoteExpression{},
-                     float(channel.mpe ? n.fineCents + (c.scale.empty() ? c.tuning[size_t(n.pitch % 12)]
-                                                                         : scaled(n).second)
+                     float(channel.mpe ? n.fineCents + p.masterPitch +
+                                             (c.scale.empty() ? c.tuning[size_t(n.pitch % 12)] : scaled(n).second)
                                        : 0.),
                      n.repeatOrdinal, noteReleaseMidiVelocity(n.releaseVelocity), n.slide, n.portamento,
                      n.colourGroup});

@@ -6,14 +6,14 @@
 
 namespace vibera
 {
-std::array<double, 128> channelFrequencies(const Channel &channel)
+std::array<double, 128> channelFrequencies(const Channel &channel, double masterCents)
 {
     std::array<double, 128> freqs{};
     for (int key = 0; key < 128; ++key)
     {
         const double cents = channel.scale.empty() ? channel.tuning[size_t(key % 12)]
                                                    : tuning::scaleDeviation(channel.scale, channel.scaleRoot, key);
-        freqs[size_t(key)] = 440. * std::pow(2., (key - 69 + cents / 100.) / 12.);
+        freqs[size_t(key)] = 440. * std::pow(2., (key - 69 + (cents + masterCents) / 100.) / 12.);
     }
     return freqs;
 }
@@ -48,7 +48,7 @@ void MtsEspMaster::sync(const Project &project)
         active = true;
         sent.fill(0);
     }
-    if (const auto freqs = channelFrequencies(*source); freqs != sent)
+    if (const auto freqs = channelFrequencies(*source, project.masterPitch); freqs != sent)
     {
         MTS_SetNoteTunings(freqs.data());
         sent = freqs;

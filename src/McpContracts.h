@@ -782,6 +782,14 @@ inline juce::var commandArgumentSchema(const juce::String &id)
                "True assigns the same unused Cut/Cut-by group1..99, retaining an already unique pair. False "
                "clears both. One Undo; no available group fails atomically. Sample/original-instrument "
                "Channels only; self-cut triggers from steps, not Piano notes.");
+    if (id == "project.masterPitch")
+    {
+        change("value", "minimum", -1200);
+        change("value", "maximum", 1200);
+        change("value", "description",
+               "Cents added to every tunable instrument (local sampler, MPE plugins, MTS-ESP); 0 = A440. "
+               "One Undo step; read back as project masterPitch.");
+    }
     if (id == "project.swing" || id == "channel.swingMix" || id == "rack.swingMix")
     {
         change("value", "minimum", 0);

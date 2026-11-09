@@ -75,6 +75,11 @@ All take `ids` (empty = the whole selected/explicit Channel part) plus `pattern`
 - MTS-ESP: `vibera_command channel.mtsEsp {channel, enabled}` broadcasts that Channel's
   tuning to every MTS-ESP client plugin (one source Channel). Needs the user-installed
   LIBMTS.dll; `vibera_inspect channels` shows `mtsEspActive` and `mtsEspClients`.
+- Master pitch: `vibera_command project.masterPitch {value: cents -1200..1200}` (0 = A440) adds the
+  offset to every tunable instrument: the local sampler (whole semitones move the key, the rest is
+  fine pitch), MPE plugin instruments and the MTS-ESP broadcast. Plugins without MPE/MTS-ESP keep
+  their own tuning. One Undo step, saved in the project; read back `state.masterPitch`. Tools menu >
+  Master pitch.
 
 ## Chord Track
 

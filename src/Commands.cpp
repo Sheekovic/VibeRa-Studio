@@ -549,6 +549,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"notes.octaveDown", "Transpose octave down", Scope::piano, false, true, "action"},
         {"project.tempo", "Tempo", Scope::global, true, true, "command"},
         {"project.swing", "Global Swing", Scope::rack, true, true, "command"},
+        {"project.masterPitch", "Master pitch (cents)", Scope::global, true, true, "command"},
         {"channel.swingMix", "Channel Swing Mix", Scope::rack, true, true, "command"},
         {"channel.truncateSwing", "Truncate swung notes", Scope::rack, true, false, "command"},
         {"rack.swingMix", "Swing Mix for selected Channels", Scope::rack, true, false, "command"},
@@ -2994,6 +2995,12 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
     }
     else if (id == "project.tempo")
         next.tempo = a.value;
+    else if (id == "project.masterPitch")
+    {
+        if (!std::isfinite(a.value) || std::abs(a.value) > 1200)
+            return juce::Result::fail("project.masterPitch: value is -1200..1200 cents");
+        next.masterPitch = a.value;
+    }
     else if (isSwingCommand(id))
     {
         if (auto result = applySwingCommand(next, id, a); result.failed())

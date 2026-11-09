@@ -389,6 +389,8 @@ juce::ValueTree Project::state() const
     set(root, "name", name);
     set(root, "tempo", tempo);
     set(root, "swing", swing);
+    if (masterPitch != 0)
+        set(root, "masterPitch", masterPitch);
     set(root, "numerator", numerator);
     set(root, "denominator", denominator);
     juce::ValueTree soloTree("CHANNEL_SOLO");
@@ -1298,6 +1300,14 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
     }
     else if (t.hasProperty("swing") && exactNumber(t["swing"]) != 0)
         return juce::Result::fail("Global Swing requires project version 13");
+    if (t.hasProperty("masterPitch"))
+    {
+        if (fileVersion < 57)
+            return juce::Result::fail("Master pitch requires project version 57");
+        p.masterPitch = exactNumber(t["masterPitch"]);
+        if (!std::isfinite(p.masterPitch) || std::abs(p.masterPitch) > 1200)
+            return juce::Result::fail("Master pitch is -1200..1200 cents");
+    }
     p.numerator = int(t["numerator"]);
     p.denominator = int(t["denominator"]);
     if (!t.getChildWithName("CHANNELS").isValid() || !t.getChildWithName("PATTERNS").isValid() ||

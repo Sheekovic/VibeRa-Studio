@@ -13,6 +13,30 @@ juce::Result Studio::finishRackSwing()
             return slider->finish();
     return juce::Result::ok();
 }
+void Studio::masterPitchDialog()
+{
+    auto *dialog = new juce::AlertWindow("Master pitch",
+                                         "Cents (-1200..1200) for every tunable instrument: the sampler, MPE plugins "
+                                         "and MTS-ESP clients. 0 = A440.",
+                                         juce::MessageBoxIconType::NoIcon);
+    dialog->addTextEditor("cents", juce::String(controller.project.masterPitch, 1), "Cents");
+    dialog->addButton("Apply", 1);
+    dialog->addButton("Cancel", 0);
+    const auto identity = controller.projectIdentity;
+    auto safe = juce::Component::SafePointer<Studio>(this);
+    auto alert = juce::Component::SafePointer<juce::AlertWindow>(dialog);
+    dialog->enterModalState(true,
+                            juce::ModalCallbackFunction::create(
+                                [safe, alert, identity](int result)
+                                {
+                                    if (!safe || !alert || result != 1 || safe->controller.projectIdentity != identity)
+                                        return;
+                                    CommandArgs a;
+                                    a.value = alert->getTextEditorContents("cents").getDoubleValue();
+                                    safe->command("project.masterPitch", a);
+                                }),
+                            true);
+}
 void Studio::swingDialog(const juce::String &action, const std::vector<Id> &ids)
 {
     if (finishRackVelocity().failed() || finishRackSwing().failed())

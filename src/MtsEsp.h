@@ -21,5 +21,6 @@ class MtsEspMaster
     std::array<double, 128> sent{};
 };
 // Frequencies (Hz) of MIDI keys 0..127 under a Channel's tuning (A4 = 440 Hz).
-std::array<double, 128> channelFrequencies(const Channel &channel);
+// masterCents: the project Master pitch added to every key.
+std::array<double, 128> channelFrequencies(const Channel &channel, double masterCents = 0);
 } // namespace vibera

@@ -3627,6 +3627,7 @@ void Studio::toolsMenu()
     menu.addItem(206, "Create a chord progression...");
     menu.addItem(207, "Step record (write played notes at a cursor)", true, stepRecord);
     menu.addItem(209, "MIDI recording replaces notes (off = overdub)", true, midiRecordReplace);
+    menu.addItem(213, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
     menu.addItem(208, "Step record: insert a rest", stepRecord);
     const auto missingCount = int(missingMedia(controller.project).size());
     menu.addItem(204, "Find missing samples..." +
@@ -3689,6 +3690,8 @@ void Studio::toolsMenu()
                 }
                 return;
             }
+            if (choice == 213)
+                return safe->masterPitchDialog();
             if (choice == 226)
                 return safe->promptSaveTemplate();
             if (choice == 227)

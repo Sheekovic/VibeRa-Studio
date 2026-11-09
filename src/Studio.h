@@ -524,6 +524,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     static juce::Result templateFileName(const juce::String &name, juce::String &legal);
     void saveProfile();
     juce::String macroConfigurationGeneration() const;
+    void masterPitchDialog(); // Tools > Master pitch: cents for every tunable instrument (project.masterPitch).
     juce::Result changeMacro(MacroConfigurationChange, const Macro &, const juce::String &id,
                               const juce::String &generation);
     juce::Result runSavedMixerMacro(const juce::String &, const juce::String &generation);

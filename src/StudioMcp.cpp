@@ -4233,6 +4233,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "positionBeat", audio.positionBeat());
     set(state, "playlistRange", playlistRange ? juce::var(juce::Array<juce::var>{playlistRange->first, playlistRange->second}) : juce::var());
     set(state, "tempo", controller.project.tempo);
+    set(state, "masterPitch", controller.project.masterPitch);
     set(state, "pianoNoteModes",
         static_cast<Editor *>(windows[1]->getContentComponent())
             ->noteModes(juce::JSON::parse("{\"action\":\"state\"}")));
