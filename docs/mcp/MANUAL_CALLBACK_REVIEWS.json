@@ -3533,5 +3533,68 @@
       "view.editorWindow"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:502:a532250670c0": {
+    "operations": [
+      "transport.stop"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:361:1278899000a9": {
+    "operations": [
+      "view.settings"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:147:877ba5fe9d72": {
+    "operations": [
+      "shortcut.bind"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioAudioTake.cpp:981:7c423b48ce5e": {
+    "operations": [
+      "pattern.followAction",
+      "pattern.launchQuantum",
+      "performance.assignPad",
+      "performance.pad1",
+      "performance.pad10",
+      "performance.pad11",
+      "performance.pad12",
+      "performance.pad13",
+      "performance.pad14",
+      "performance.pad15",
+      "performance.pad16",
+      "performance.pad2",
+      "performance.pad3",
+      "performance.pad4",
+      "performance.pad5",
+      "performance.pad6",
+      "performance.pad7",
+      "performance.pad8",
+      "performance.pad9"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/StudioAudioTake.cpp:963:ce451f676db8": {
+    "operations": [
+      "performance.saveScene",
+      "performance.scene1",
+      "performance.scene2",
+      "performance.scene3",
+      "performance.scene4",
+      "performance.scene5",
+      "performance.scene6",
+      "performance.scene7",
+      "performance.scene8"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8356:05ecf74fe0dd": {
+    "operations": [
+      "channel.openInstrument",
+      "plugin.editor.open"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }
 }
