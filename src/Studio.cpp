@@ -3619,6 +3619,8 @@ void Studio::toolsMenu()
     menu.addSeparator();
     menu.addItem(230, "Chord Track: write a chord progression...");
     menu.addItem(231, "Chord Track: selected notes / Channel follow the chords", !controller.project.chords.empty());
+    menu.addSeparator();
+    menu.addItem(232, "Macro knobs...");
     menu.addItem(225, updatePhase == "available" ? "Update available: " + (availableUpdate ? availableUpdate->name : juce::String()) + "..."
                       : updatePhase == "downloading" ? "Downloading update..."
                       : updatePhase == "ready"       ? "Install downloaded update..."
@@ -3681,6 +3683,11 @@ void Studio::toolsMenu()
                             safe->repaint();
                         }
                     });
+                return;
+            }
+            if (choice == 232)
+            {
+                safe->openMacroKnobs();
                 return;
             }
             if (choice == 230)

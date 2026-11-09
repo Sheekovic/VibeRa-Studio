@@ -330,6 +330,8 @@ inline juce::var commandArgumentSchema(const juce::String &id)
     auto properties = schema["properties"];
     if (id == "automation.plugin.modulator" || id.startsWith("automation.modulator."))
         return modulatorArguments(id, properties["binding"]);
+    if ((id.startsWith("automation.macro.") && id != "automation.macro.link") || id == "automation.plugin.macro.link")
+        return macroArguments(id, properties["binding"]);
     if (id == "notes.add")
     {
         properties.getDynamicObject()->setProperty(

@@ -1001,7 +1001,14 @@ const std::vector<CommandInfo> &commandRegistry()
         {"automation.modulator.set", "Change a modulator's shape, rate, depth and phase", Scope::mixer, true, true,
          "command"},
         {"automation.modulator.enable", "Turn a modulator on or off", Scope::mixer, true, true, "command"},
-        {"automation.modulator.delete", "Remove a modulator", Scope::mixer, true, true, "command"}};
+        {"automation.modulator.delete", "Remove a modulator", Scope::mixer, true, true, "command"},
+        {"automation.macro.add", "Add a macro knob", Scope::mixer, true, true, "command"},
+        {"automation.macro.set", "Turn a macro knob (0..1)", Scope::mixer, true, true, "command"},
+        {"automation.macro.rename", "Rename a macro knob", Scope::mixer, true, true, "command"},
+        {"automation.macro.delete", "Delete a macro knob", Scope::mixer, true, true, "command"},
+        {"automation.macro.link", "Link a Mixer or Channel control to a macro knob", Scope::mixer, true, true, "command"},
+        {"automation.plugin.macro.link", "Link a plugin parameter to a macro knob", Scope::playlist, true, false, "command"},
+        {"automation.macro.unlink", "Unlink a macro knob target", Scope::mixer, true, true, "command"}};
     return commands;
 }
 namespace

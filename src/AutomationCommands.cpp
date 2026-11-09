@@ -173,6 +173,72 @@ juce::Result applyAutomationCommand(Project &project, const juce::String &id, co
         else
             *found = std::move(next);
     }
+    else if (operation.startsWith("automation.macro.") || operation == "automation.plugin.macro.link")
+    {
+        // Macro knobs. add: text name. set: target macro, value 0..1. rename: target, text. delete:
+        // target. link (Mixer/Channel target fields, or plugin target + binding): ids = {macro};
+        // text "range" uses beat..length as the target values at 0 and 1, otherwise the full range.
+        // unlink: target macro, value = target index.
+        auto &macros = doc.macros;
+        const auto findMacro = [&](Id macroId)
+        { return std::find_if(macros.begin(), macros.end(), [&](const auto &m) { return m.id == macroId; }); };
+        if (operation == "automation.macro.add")
+        {
+            if (macros.size() >= 256 || a.text.length() > 64)
+                return juce::Result::fail("macro.invalid: At most 256 macros, names up to 64 characters");
+            AutomationMacro macro;
+            macro.id = project.allocate();
+            macro.name = (a.text.isNotEmpty() ? a.text : "Macro " + juce::String(int(macros.size()) + 1)).toStdString();
+            macros.push_back(std::move(macro));
+            return juce::Result::ok();
+        }
+        const bool linking = operation == "automation.macro.link" || operation == "automation.plugin.macro.link";
+        const auto found = findMacro(linking ? (a.ids.empty() ? 0 : a.ids.front()) : a.target);
+        if (found == macros.end())
+            return juce::Result::fail("macro.missing: Existing macro ID required");
+        if (operation == "automation.macro.set")
+        {
+            if (!std::isfinite(a.value) || a.value < 0 || a.value > 1)
+                return juce::Result::fail("macro.invalidValue: Macro value is 0..1");
+            found->value = float(a.value);
+        }
+        else if (operation == "automation.macro.rename")
+        {
+            if (a.text.isEmpty() || a.text.length() > 64)
+                return juce::Result::fail("macro.invalidName: 1..64 characters");
+            found->name = a.text.toStdString();
+        }
+        else if (operation == "automation.macro.delete")
+            macros.erase(found);
+        else if (operation == "automation.macro.unlink")
+        {
+            const int index = int(a.value);
+            if (index < 0 || index >= int(found->targets.size()))
+                return juce::Result::fail("macro.missingTarget: Target index of the macro required");
+            found->targets.erase(found->targets.begin() + index);
+        }
+        else if (linking)
+        {
+            if (!native && !mixerTarget)
+                return fail();
+            if (found->targets.size() >= 64)
+                return juce::Result::fail("macro.tooManyTargets: At most 64 targets per macro");
+            const float minimum = native ? 0.f : mixer.minimum, maximum = native ? 1.f : mixer.maximum;
+            AutomationLink link{key, minimum, maximum};
+            if (a.text == "range")
+            {
+                const bool ok = native ? (a.beat >= 0 && a.beat <= 1 && a.length >= 0 && a.length <= 1)
+                                       : (mixer.contains(a.beat) && mixer.contains(a.length));
+                if (!ok)
+                    return juce::Result::fail("macro.invalidRange: Both range ends must be inside the target's values");
+                link.minimum = float(a.beat);
+                link.maximum = float(a.length);
+            }
+            found->targets.push_back(link);
+        }
+        else
+            return fail();
+    }
     else if (id.startsWith("automation.point."))
     {
         AutomationPoint *point = nullptr;

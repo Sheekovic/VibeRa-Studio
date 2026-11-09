@@ -64,7 +64,7 @@ inline bool isMixerAutomationTargetCommand(const juce::String &id)
 {
     return id == "automation.create" || id == "automation.init" || id == "automation.init.remove" ||
            id == "automation.link" || id == "automation.unlink" || id == "automation.range" ||
-           id == "automation.modulator";
+           id == "automation.modulator" || id == "automation.macro.link";
 }
 struct MixerAutomationTarget
 {

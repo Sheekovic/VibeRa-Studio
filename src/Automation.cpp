@@ -399,6 +399,32 @@ bool AutomationProgram::compile(const AutomationDocument &doc, bool songMode, Au
         else
             result.lanes.push_back(std::move(lane));
     }
+    // Macros: a constant lane per target at the macro's position in the target range.
+    if (doc.macros.size() > 256)
+        return fail("Too many macros");
+    for (const auto &macro : doc.macros)
+    {
+        if (!unique(macro.id) || macro.name.empty() || macro.name.size() > 1024 || !std::isfinite(macro.value) ||
+            macro.value < 0 || macro.value > 1 || macro.targets.size() > 64)
+            return fail("Invalid macro");
+        for (const auto &link : macro.targets)
+        {
+            if (!validKey(link.key) || !validValue(link.key, link.minimum) || !validValue(link.key, link.maximum))
+                return fail("Invalid macro target or range");
+            if (clipTargets.contains(link.key) || !modulated.insert(link.key).second)
+                return fail("macro.targetDriven: A macro target cannot also have an Automation Clip, a modulator or another macro");
+            Span span;
+            span.beat = std::numeric_limits<double>::lowest();
+            span.coefficients[0] = link.minimum + (double(link.maximum) - link.minimum) * macro.value;
+            Lane lane{link.key, float(span.coefficients[0]), {span}};
+            const auto existing = std::find_if(result.lanes.begin(), result.lanes.end(),
+                                               [&](const Lane &l) { return l.key == link.key; });
+            if (existing != result.lanes.end())
+                *existing = std::move(lane);
+            else
+                result.lanes.push_back(std::move(lane));
+        }
+    }
     std::sort(result.lanes.begin(), result.lanes.end(),
               [](const Lane &a, const Lane &b) { return a.key < b.key; });
     output = std::move(result);

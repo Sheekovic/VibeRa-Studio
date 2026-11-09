@@ -1222,7 +1222,8 @@ juce::Result Project::parse(const juce::ValueTree &t, Project &result)
         if (auto parsed = parseAutomationState(automated, p.automation, int(fileVersion)); parsed.failed())
             return parsed;
         if (int(fileVersion) < 8 && (!p.automation.sources.empty() || !p.automation.placements.empty() ||
-                                     !p.automation.initialValues.empty() || !p.automation.modulators.empty()))
+                                     !p.automation.initialValues.empty() || !p.automation.modulators.empty() ||
+                                     !p.automation.macros.empty()))
             return juce::Result::fail("Automation data requires project version 8");
     }
     p.nextId = juce::int64(t["nextId"]);
@@ -2553,6 +2554,14 @@ juce::Result Project::validate() const
     for (const auto &value : automation.initialValues)
         if (!validAutomationTarget(value.key))
             return fail("Unavailable initialized automation target");
+    for (const auto &macro : automation.macros)
+    {
+        if (!unique(macro.id) || !juce::CharPointer_UTF8::isValidString(macro.name.data(), int(macro.name.size())))
+            return fail("Invalid macro identity or name");
+        for (const auto &link : macro.targets)
+            if (!validAutomationTarget(link.key))
+                return fail("macro.targetUnavailable: Unlink the macro target before removing it");
+    }
     for (const auto &modulator : automation.modulators)
         if (!unique(modulator.id) || !validAutomationTarget(modulator.link.key) ||
             !juce::CharPointer_UTF8::isValidString(modulator.name.data(), int(modulator.name.size())) ||

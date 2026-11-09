@@ -20,6 +20,47 @@ inline void addModulatorFields(juce::DynamicObject &properties)
     properties.setProperty("strength", juce::JSON::parse(R"({"type":"number","minimum":0,"maximum":1,"default":1,"description":"Depth: peak-to-peak swing as a fraction of the control's full range, centred on its manual (or initialized) value and clamped to the range."})"));
     properties.setProperty("offset", juce::JSON::parse(R"({"type":"number","minimum":0,"exclusiveMaximum":1,"default":0,"description":"Phase: 0..1 of a cycle at Song/Pattern beat 0."})"));
 }
+inline juce::var macroArguments(const juce::String &id, const juce::var &bindingSchema)
+{
+    auto schema = juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{}})");
+    auto *properties = schema["properties"].getDynamicObject();
+    juce::Array<juce::var> required;
+    const auto macroTarget = juce::JSON::parse(R"({"type":"integer","minimum":1,"description":"Macro ID from vibera_inspect macros."})");
+    if (id == "automation.macro.add")
+        properties->setProperty("text", juce::JSON::parse(R"({"type":"string","maxLength":64,"description":"Macro name (default Macro N)."})"));
+    else if (id == "automation.plugin.macro.link")
+    {
+        properties->setProperty("target", juce::JSON::parse(R"({"type":"integer","minimum":1,"description":"Plugin ID."})"));
+        properties->setProperty("binding", bindingSchema);
+        properties->setProperty("ids", juce::JSON::parse(R"({"type":"array","minItems":1,"maxItems":1,"items":{"type":"integer","minimum":1},"description":"The macro ID."})"));
+        properties->setProperty("text", juce::JSON::parse(R"({"type":"string","enum":["","range"],"default":""})"));
+        properties->setProperty("beat", juce::JSON::parse(R"({"type":"number","minimum":0,"maximum":1,"description":"With text range: normalized value at macro 0."})"));
+        properties->setProperty("length", juce::JSON::parse(R"({"type":"number","minimum":0,"maximum":1,"description":"With text range: normalized value at macro 1."})"));
+        required.addArray({"target", "binding", "ids"});
+    }
+    else
+    {
+        properties->setProperty("target", macroTarget);
+        required.add("target");
+        if (id == "automation.macro.set")
+        {
+            properties->setProperty("value", juce::JSON::parse(R"({"type":"number","minimum":0,"maximum":1,"description":"Macro position: each target moves to minimum + (maximum - minimum) * value."})"));
+            required.add("value");
+        }
+        if (id == "automation.macro.rename")
+        {
+            properties->setProperty("text", juce::JSON::parse(R"({"type":"string","minLength":1,"maxLength":64})"));
+            required.add("text");
+        }
+        if (id == "automation.macro.unlink")
+        {
+            properties->setProperty("value", juce::JSON::parse(R"({"type":"integer","minimum":0,"maximum":63,"description":"Target index in the macro."})"));
+            required.add("value");
+        }
+    }
+    schema.getDynamicObject()->setProperty("required", required);
+    return schema;
+}
 inline juce::var modulatorArguments(const juce::String &id, const juce::var &bindingSchema)
 {
     auto schema = juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{}})");
@@ -61,6 +102,14 @@ inline juce::var mixerAutomationArguments(const juce::String &id)
     }
     else if (id == "automation.modulator")
         addModulatorFields(*properties);
+    else if (id == "automation.macro.link")
+    {
+        properties->setProperty("ids", juce::JSON::parse(R"({"type":"array","minItems":1,"maxItems":1,"items":{"type":"integer","minimum":1},"description":"The macro ID (vibera_inspect macros)."})"));
+        properties->setProperty("text", juce::JSON::parse(R"({"type":"string","enum":["","range"],"default":"","description":"range: beat and length are the target values at macro 0 and 1 (may be inverted); otherwise the full range."})"));
+        properties->setProperty("beat", juce::JSON::parse(R"({"type":"number","description":"With text range: target value at macro 0."})"));
+        properties->setProperty("length", juce::JSON::parse(R"({"type":"number","description":"With text range: target value at macro 1."})"));
+        required.add("ids");
+    }
     else if (id == "automation.init")
     {
         properties->setProperty(

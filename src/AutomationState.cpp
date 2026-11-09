@@ -177,6 +177,27 @@ juce::ValueTree automationState(const AutomationDocument &doc)
         }
         root.appendChild(modulators, nullptr);
     }
+    if (!doc.macros.empty())
+    {
+        juce::ValueTree macros("MACROS");
+        for (const auto &m : doc.macros)
+        {
+            juce::ValueTree v("MACRO");
+            v.setProperty("id", juce::int64(m.id), nullptr);
+            v.setProperty("name", juce::String::fromUTF8(m.name.c_str()), nullptr);
+            v.setProperty("value", double(m.value), nullptr);
+            for (const auto &link : m.targets)
+            {
+                juce::ValueTree l("LINK");
+                putKey(l, link.key);
+                l.setProperty("minimum", double(link.minimum), nullptr);
+                l.setProperty("maximum", double(link.maximum), nullptr);
+                v.appendChild(l, nullptr);
+            }
+            macros.appendChild(v, nullptr);
+        }
+        root.appendChild(macros, nullptr);
+    }
     return root;
 }
 juce::Result parseAutomationState(const juce::ValueTree &root, AutomationDocument &out, int projectVersion)
@@ -184,8 +205,11 @@ juce::Result parseAutomationState(const juce::ValueTree &root, AutomationDocumen
     auto fail = []
     { return juce::Result::fail("Malformed or unsupported automation data; project was not changed"); };
     const auto modulatorTree = root.getChildWithName("MODULATORS");
+    const auto macroTree = root.getChildWithName("MACROS");
+    if (macroTree.isValid() && (projectVersion < 57 || macroTree.getNumProperties() != 0 || macroTree.getNumChildren() > 256))
+        return fail();
     if (!root.hasType("AUTOMATION") || root.getNumProperties() != 0 ||
-        root.getNumChildren() != (modulatorTree.isValid() ? 4 : 3) ||
+        root.getNumChildren() != (modulatorTree.isValid() ? 4 : 3) + (macroTree.isValid() ? 1 : 0) ||
         (modulatorTree.isValid() && (projectVersion < 57 || modulatorTree.getNumProperties() != 0 ||
                                      modulatorTree.getNumChildren() > 4096)))
         return fail();
@@ -294,6 +318,26 @@ juce::Result parseAutomationState(const juce::ValueTree &root, AutomationDocumen
         m.enabled = enabled != 0;
         m.name = v["name"].toString().toStdString();
         doc.modulators.push_back(std::move(m));
+    }
+    for (const auto &v : macroTree)
+    {
+        AutomationMacro m;
+        double value = 0;
+        if (!v.hasType("MACRO") || !fields(v, {"id", "name", "value"}) || !integer(v["id"], m.id) ||
+            !v["name"].isString() || !number(v["value"], value) || v.getNumChildren() > 64)
+            return fail();
+        m.name = v["name"].toString().toStdString();
+        m.value = float(value);
+        for (const auto &l : v)
+        {
+            AutomationLink link;
+            if (!l.hasType("LINK") || !fields(l, {"kind", "owner", "parameter", "minimum", "maximum"}) ||
+                l.getNumChildren() || !key(l, link.key, projectVersion) ||
+                !targetScalar(l["minimum"], link.key, link.minimum) || !targetScalar(l["maximum"], link.key, link.maximum))
+                return fail();
+            m.targets.push_back(link);
+        }
+        doc.macros.push_back(std::move(m));
     }
     out = std::move(doc);
     return juce::Result::ok(); // Parent Project performs ownership/global-ID/domain validation.

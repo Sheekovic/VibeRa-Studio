@@ -21,6 +21,102 @@ const char *const modulatorPeriodLabels[] = {"1/16 note", "1/8 note", "1 beat", 
                                              "4 bars"};
 const double modulatorDepths[] = {.1, .25, .5, .75, 1};
 } // namespace
+namespace
+{
+// Macro knobs window: a rotary per macro (release commits automation.macro.set), its targets
+// listed below, plus Add. Rebuilt when the project revision changes.
+class MacroKnobs final : public juce::Component, private juce::Timer
+{
+  public:
+    explicit MacroKnobs(Studio &owner) : studio(&owner)
+    {
+        add.onClick = [this]
+        {
+            if (studio)
+                studio->command("automation.macro.add", {});
+        };
+        addAndMakeVisible(add);
+        addAndMakeVisible(hint);
+        hint.setText("Link Mixer controls with right-click > Macro knob. Turn a knob to move all its targets.",
+                     juce::dontSendNotification);
+        rebuild();
+        startTimerHz(10);
+        setSize(640, 300);
+    }
+
+  private:
+    juce::Component::SafePointer<Studio> studio;
+    juce::TextButton add{"Add macro"};
+    juce::Label hint;
+    juce::OwnedArray<juce::Slider> knobs;
+    juce::OwnedArray<juce::Label> names;
+    std::vector<Id> ids;
+    std::uint64_t revision = ~std::uint64_t(0);
+    void rebuild()
+    {
+        if (!studio)
+            return;
+        revision = studio->controller.revision;
+        knobs.clear();
+        names.clear();
+        ids.clear();
+        for (const auto &macro : studio->controller.project.automation.macros)
+        {
+            auto *knob = knobs.add(new juce::Slider(juce::Slider::RotaryHorizontalVerticalDrag, juce::Slider::TextBoxBelow));
+            knob->setRange(0, 1, .001);
+            knob->setValue(macro.value, juce::dontSendNotification);
+            knob->setName(juce::String::fromUTF8(macro.name.c_str()));
+            const Id id = macro.id;
+            knob->onDragEnd = [this, knob, id]
+            {
+                if (!studio)
+                    return;
+                CommandArgs a;
+                a.target = id;
+                a.value = knob->getValue();
+                studio->command("automation.macro.set", a);
+            };
+            addAndMakeVisible(knob);
+            auto *name = names.add(new juce::Label({}, juce::String::fromUTF8(macro.name.c_str()) + "\n" +
+                                                         juce::String(int(macro.targets.size())) + " targets"));
+            name->setJustificationType(juce::Justification::centred);
+            addAndMakeVisible(name);
+            ids.push_back(id);
+        }
+        resized();
+    }
+    void timerCallback() override
+    {
+        if (studio && studio->controller.revision != revision && !isMouseButtonDown(true))
+            rebuild();
+    }
+    void resized() override
+    {
+        auto area = getLocalBounds().reduced(12);
+        auto top = area.removeFromTop(28);
+        add.setBounds(top.removeFromLeft(110));
+        top.removeFromLeft(10);
+        hint.setBounds(top);
+        area.removeFromTop(10);
+        for (int i = 0; i < knobs.size(); ++i)
+        {
+            auto cell = juce::Rectangle<int>(area.getX() + (i % 6) * 100, area.getY() + (i / 6) * 150, 96, 146);
+            names[i]->setBounds(cell.removeFromBottom(36));
+            knobs[i]->setBounds(cell);
+        }
+    }
+};
+} // namespace
+void Studio::openMacroKnobs()
+{
+    juce::DialogWindow::LaunchOptions options;
+    options.content.setOwned(new MacroKnobs(*this));
+    options.dialogTitle = "Macro knobs";
+    options.dialogBackgroundColour = juce::Colour(0xff10191f);
+    options.resizable = true;
+    options.useNativeTitleBar = true;
+    options.launchAsync();
+}
 juce::PopupMenu Studio::modulatorMenu(const AutomationModulator *m)
 {
     juce::PopupMenu menu, rate, depth;
@@ -278,12 +374,41 @@ void Studio::mixerAutomationMenu(int insert, MixerAutomationControl control, std
         [&](const auto &s) { return std::any_of(s.links.begin(), s.links.end(),
                                                 [&](const auto &l) { return l.key == target.key; }); }));
     const Id modulatorId = modulator ? modulator->id : 0;
+    {
+        juce::PopupMenu macroMenu;
+        const auto &macros = controller.project.automation.macros;
+        for (size_t k = 0; k < macros.size() && k < 90; ++k)
+            macroMenu.addItem(7200 + int(k), "Link to " + juce::String::fromUTF8(macros[k].name.c_str()));
+        macroMenu.addItem(7299, "New macro knob and link");
+        menu.addSubMenu("Macro knob", macroMenu);
+    }
     menu.showMenuAsync(
         {},
         [safe = juce::Component::SafePointer<Studio>(this), intent, sourceIds, recordingToken, modulatorId](int choice)
         {
             if (!safe || choice == 0)
                 return;
+            if (choice >= 7200 && choice <= 7299)
+            {
+                CommandArgs a;
+                a.mixer = intent.insert;
+                a.automationControl = intent.control;
+                a.automationSendTarget = intent.sendTarget;
+                auto &macros = safe->controller.project.automation.macros;
+                if (choice == 7299)
+                {
+                    safe->command("automation.macro.add", {});
+                    if (macros.empty())
+                        return;
+                    a.ids = {macros.back().id};
+                }
+                else if (size_t(choice - 7200) < macros.size())
+                    a.ids = {macros[size_t(choice - 7200)].id};
+                else
+                    return;
+                safe->command("automation.macro.link", a);
+                return;
+            }
             if (choice >= modulatorMenuFirst && choice < modulatorMenuLast)
             {
                 CommandArgs a;

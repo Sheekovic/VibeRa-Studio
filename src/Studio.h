@@ -1048,6 +1048,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // closed (beat, pitch) path; selected Channel only unless allChannels.
     std::vector<Id> lassoNotes(const std::vector<std::pair<double, double>> &path, bool allChannels) const;
     bool pianoLasso = false; // Piano roll: the next drag draws a magic lasso.
+    void openMacroKnobs(); // Tools > Macro knobs: one slider per macro (StudioMixerControls.cpp).
     std::optional<std::pair<double, double>> markerLoop;
     bool markerLoopEnabledLooping = false, markerWasPlaying = false;
     double markerLastBeat = 0;

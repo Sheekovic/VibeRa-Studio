@@ -143,6 +143,16 @@ struct AutomationModulator
     std::string name = "Modulator";
 };
 inline constexpr double minimumModulatorPeriod = 1. / 64, maximumModulatorPeriod = 1024;
+// Macro knob (version 57): one 0..1 value driving several targets, each through its own range
+// (link.minimum at 0, link.maximum at 1; inverted ranges allowed). A macro target cannot also be
+// driven by an Automation Clip or a modulator.
+struct AutomationMacro
+{
+    std::int64_t id = 0;
+    std::string name = "Macro";
+    float value = 0;
+    std::vector<AutomationLink> targets;
+};
 // Original source/placement/initialization model; Project rejects unsupported targets.
 struct AutomationDocument
 {
@@ -150,6 +160,7 @@ struct AutomationDocument
     std::vector<AutomationPlacement> placements;
     std::vector<AutomationInitialValue> initialValues;
     std::vector<AutomationModulator> modulators;
+    std::vector<AutomationMacro> macros;
 };
 class AutomationProgram
 {
