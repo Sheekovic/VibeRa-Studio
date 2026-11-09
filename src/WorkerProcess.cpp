@@ -9,6 +9,14 @@
 
 namespace vibera
 {
+void disableProcessPowerThrottling() noexcept
+{
+    PROCESS_POWER_THROTTLING_STATE throttling{};
+    throttling.Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION;
+    throttling.ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED;
+    throttling.StateMask = 0;
+    SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &throttling, sizeof(throttling));
+}
 struct WorkerProcess::Impl
 {
     HANDLE process = nullptr, thread = nullptr, job = nullptr;
@@ -170,6 +178,7 @@ extern char **environ;
 
 namespace vibera
 {
+void disableProcessPowerThrottling() noexcept {}
 struct WorkerProcess::Impl
 {
     mutable std::mutex mutex;

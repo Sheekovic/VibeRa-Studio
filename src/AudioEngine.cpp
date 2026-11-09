@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "AudioEngine.h"
+#include "WorkerProcess.h"
 #include <juce_cryptography/juce_cryptography.h>
 #include "Commands.h"
 #include "PatternExtent.h"
@@ -1537,6 +1538,7 @@ AudioEngine::AudioEngine(bool enableDevice, juce::File guidePreferences, int exp
 {
     if (explicitProviderFrames < 0)
         throw std::invalid_argument("Negative physical provider frame bound");
+    disableProcessPowerThrottling(); // Hidden test/MCP hosts are otherwise throttled like background apps.
     channelRouting = std::make_unique<ChannelRoutingState>();
     // Keep rendering/MIDI advancing after an overrun. The upstream cached CPU
     // guard otherwise inserts whole silent callbacks during meter recovery.

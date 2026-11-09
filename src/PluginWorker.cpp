@@ -1005,6 +1005,16 @@ class WorkerApp final : public juce::JUCEApplication,
     }
     void initialise(const juce::String &) override
     {
+#if JUCE_WINDOWS
+        // The worker has no visible window, so Windows may treat it as a background process and
+        // apply EcoQoS power throttling (lower clocks / efficiency cores), which makes it miss the
+        // host's per-block deadlines. Audio processing must never be throttled: opt out.
+        PROCESS_POWER_THROTTLING_STATE throttling{};
+        throttling.Version = PROCESS_POWER_THROTTLING_CURRENT_VERSION;
+        throttling.ControlMask = PROCESS_POWER_THROTTLING_EXECUTION_SPEED;
+        throttling.StateMask = 0;
+        SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &throttling, sizeof(throttling));
+#endif
         formats.addFormat(std::make_unique<juce::VST3PluginFormat>());
         auto args = getCommandLineParameterArray();
         if (args.size() == 3 && args[0] == "--scan")

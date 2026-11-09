@@ -29,4 +29,8 @@ class WorkerProcess
     void requestGracefulShutdown();
     bool kill(); // requires the explicitly approved owned-worker timeout exception
 };
+// Real-time audio processes opt out of Windows EcoQoS execution-speed throttling, which Windows
+// may apply to windowless or background processes and which makes callbacks miss deadlines.
+// No effect elsewhere.
+void disableProcessPowerThrottling() noexcept;
 } // namespace vibera
