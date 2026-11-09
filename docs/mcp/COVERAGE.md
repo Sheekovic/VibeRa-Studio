@@ -768,7 +768,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 60.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 156; gaps: 0.
+Explicit UI inventory complete: False; known controls: 160; gaps: 0.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -929,6 +929,10 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `piano.noteModes.propertiesEscape` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
 | `piano.noteModes.propertiesInvalid` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
 | `piano.noteModes.creationPayload` | Shared captured Piano session and canonical Note command/model/history; staged settings are not DSP completion | vibera_note_modes; reviewed |
+| `tools.masterPitch` | project.masterPitch | vibera_command; reviewed |
+| `tools.waitForInput` | transport.waitForInput | vibera_command; reviewed |
+| `tools.recordingFilter.notes` | transport.recordNotes | vibera_command; reviewed |
+| `tools.audioLogger` | audio.logger / audio.loggerSave | vibera_project; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

@@ -61,6 +61,14 @@ try:
     call("vibera_command", {"command": "transport.recordNotes"})
     check(state().get("recordNotes") is True, "transport.recordNotes turns Notes back on")
 
+    # Wait for input (Tools menu): the option toggles and reads back; it never starts a take by itself.
+    check(state().get("waitForInput") is False and state().get("waitingForInput") is False, "Wait for input is off by default")
+    call("vibera_command", {"command": "transport.waitForInput"})
+    check(state().get("waitForInput") is True and state().get("waitingForInput") is False,
+          "transport.waitForInput turns the option on without opening a take")
+    call("vibera_command", {"command": "transport.waitForInput"})
+    check(state().get("waitForInput") is False, "transport.waitForInput turns it off again")
+
     # Audio logger: without an audio device it is refused truthfully; save refuses while off.
     logger = state().get("audioLogger", {})
     check(logger.get("enabled") is False and logger.get("recordedSeconds") == 0, "Audio logger reads back off")
