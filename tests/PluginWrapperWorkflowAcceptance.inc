@@ -686,6 +686,21 @@ if (!audio.playing() || host->processId() != originalWorker ||
     if (!accessibleAction(L"Chain directory", false, 0, true))
     {
         capture("chain-directory-failure");
+        RECT outer{}, client{};
+        GetWindowRect(window, &outer);
+        GetClientRect(window, &client);
+        MONITORINFO monitor{};
+        monitor.cbSize = sizeof(monitor);
+        GetMonitorInfoW(MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST), &monitor);
+        auto diagnostic = pluginEditorState(pluginId);
+        auto *d = diagnostic.getDynamicObject();
+        d->setProperty("windowRect", juce::Array<juce::var>{int(outer.left), int(outer.top), int(outer.right), int(outer.bottom)});
+        d->setProperty("clientSize", juce::Array<juce::var>{int(client.right), int(client.bottom)});
+        d->setProperty("dpi", int(GetDpiForWindow(window)));
+        d->setProperty("ms", juce::int64(juce::Time::getMillisecondCounter()));
+        d->setProperty("monitorWork", juce::Array<juce::var>{int(monitor.rcWork.left), int(monitor.rcWork.top),
+                                                             int(monitor.rcWork.right), int(monitor.rcWork.bottom)});
+        folder.getChildFile("chain-directory-failure.json").replaceWithText(juce::JSON::toString(diagnostic, true));
         return fail("Actual worker Chain directory button invokes retained interactive parent (" +
                     juce::String(accessibleFailure) + ")");
     }
