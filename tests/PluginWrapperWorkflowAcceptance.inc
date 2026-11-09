@@ -173,11 +173,16 @@ if (!terminal(pluginCall("wrapper", "settings")) || !capture("wrapper-settings")
     return fail("Settings view shares the native wrapper");
 // UI Automation runs on a windowless MTA, keeping message dispatch and virtual
 // audio moving while Windows calls the worker's accessibility provider.
+std::string accessibleFailure; // Why the last accessibleAction returned false (diagnostics only).
 auto accessibleAction = [&](const wchar_t *name, bool toggleControl, double desired,
                             bool invokeControl = false, bool allowExpectedClose = false)
 {
+    accessibleFailure.clear();
     if (!ownedWindow())
+    {
+        accessibleFailure = "target window not owned before the action";
         return false;
+    }
     std::atomic<bool> done{false}, success{false};
     std::thread worker(
         [&]
@@ -206,7 +211,21 @@ auto accessibleAction = [&](const wchar_t *name, bool toggleControl, double desi
                         SUCCEEDED(automation->ElementFromHandle(window, root.GetAddressOf())) &&
                         SUCCEEDED(
                             root->FindFirst(TreeScope_Descendants, condition.Get(), element.GetAddressOf()));
+                    // A just-reopened window may not expose its accessibility tree yet. Retry the
+                    // read-only lookup within the same 2 s budget; the action is still invoked once.
+                    const auto lookupBegan = juce::Time::getMillisecondCounter();
+                    while (ready && !element && juce::Time::getMillisecondCounter() - lookupBegan < 2000u)
+                    {
+                        Sleep(20);
+                        root.Reset();
+                        if (SUCCEEDED(automation->ElementFromHandle(window, root.GetAddressOf())))
+                            root->FindFirst(TreeScope_Descendants, condition.Get(), element.GetAddressOf());
+                    }
                     VariantClear(&text);
+                    if (!ready && !element)
+                        accessibleFailure = target ? "UI Automation lookup failed" : "window is not the original worker's";
+                    else if (!element)
+                        accessibleFailure = "control not found in the accessibility tree within 2 s";
                     if (ready && element)
                     {
                         BOOL enabled = FALSE;
@@ -214,12 +233,16 @@ auto accessibleAction = [&](const wchar_t *name, bool toggleControl, double desi
                         while (SUCCEEDED(element->get_CurrentIsEnabled(&enabled)) && !enabled &&
                                juce::Time::getMillisecondCounter() - began < 2000u)
                             Sleep(10); // Read-only prerequisite; never repeat the mutation.
+                        if (!enabled)
+                            accessibleFailure = "control stayed disabled for 2 s";
                         if (enabled && invokeControl)
                         {
                             Microsoft::WRL::ComPtr<IUIAutomationInvokePattern> action;
                             success = SUCCEEDED(element->GetCurrentPatternAs(
                                           UIA_InvokePatternId, IID_PPV_ARGS(action.GetAddressOf()))) &&
                                       SUCCEEDED(action->Invoke());
+                            if (!success)
+                                accessibleFailure = "Invoke pattern failed";
                         }
                         else if (enabled && toggleControl)
                         {
@@ -243,6 +266,10 @@ auto accessibleAction = [&](const wchar_t *name, bool toggleControl, double desi
         });
     const bool completed = await([&] { return done.load(std::memory_order_acquire); });
     worker.join(); // Never detach a provider call borrowing fixture state.
+    if (!completed)
+        accessibleFailure = "accessibility worker did not finish";
+    else if (success.load() && !ownedWindow() && !allowExpectedClose)
+        accessibleFailure = "window closed after the action";
     return completed && success.load() &&
            (ownedWindow() || (allowExpectedClose && !IsWindow(window) && host->alive() &&
                               host->processId() == originalWorker));
@@ -657,7 +684,11 @@ if (!audio.playing() || host->processId() != originalWorker ||
     const auto directoryBefore = mixerChainReadback()["state"]["directory"].toString();
     const auto clipboardBefore = juce::JSON::toString(mixerChainReadback()["state"]["clipboard"]);
     if (!accessibleAction(L"Chain directory", false, 0, true))
-        return fail("Actual worker Chain directory button invokes retained interactive parent");
+    {
+        capture("chain-directory-failure");
+        return fail("Actual worker Chain directory button invokes retained interactive parent (" +
+                    juce::String(accessibleFailure) + ")");
+    }
     juce::String choosing;
     if (!await(
             [&]
