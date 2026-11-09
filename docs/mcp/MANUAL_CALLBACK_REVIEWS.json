@@ -224,6 +224,54 @@
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   },
+  "src/PianoNoteModes.h:120:4600ea135099": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PianoNoteModes.h:133:faf5da758b77": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PianoNoteModes.h:150:d8386224a079": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PianoNoteModes.h:151:46411c8df235": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PianoNoteModes.h:156:9acb2f5fc8d7": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PianoNoteModes.h:167:b9a1d30b40ef": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PianoNoteModes.h:181:28d0cfddbd1c": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/PianoNoteModes.h:186:1f43c9a69f9f": {
+    "operations": [
+      "notes.properties"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
   "src/PluginWrapperView.h:103:94a4b3018e57": {
     "operations": [
       "plugin.effect.mix"
@@ -415,6 +463,339 @@
       "plugin.bypass"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1003:69b3a9bc31a6": {
+    "operations": [
+      "browser.showTags"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1004:62a4a8749c7e": {
+    "operations": [
+      "browser.matchAllTags"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1007:07c57a9c996a": {
+    "operations": [
+      "browser.clearTagFilters"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1023:f12d1823fdf0": {
+    "operations": [
+      "browser.playPreview"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1026:52e00a27895f": {
+    "operations": [
+      "browser.stopPreview"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1029:fb159c6d3b4a": {
+    "operations": [
+      "browser.fullPreview"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1035:733b2759940f": {
+    "operations": [
+      "browser.previewLouder",
+      "browser.previewSofter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1042:4ece84bd2bd8": {
+    "operations": [
+      "browser.back"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1043:b40ef06e24b1": {
+    "operations": [
+      "browser.forward"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1045:ea9e704199c9": {
+    "operations": [
+      "browser.find"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1046:cd4843c1f7fe": {
+    "operations": [
+      "browser.up"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1051:2d365f4fa9ed": {
+    "operations": [
+      "browser.reindex"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1273:faaab3083845": {
+    "operations": [
+      "browser.collectionsMenu"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:576:fc7724e5a1b1": {
+    "operations": [
+      "browser.playPreview"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:580:69adcd597b63": {
+    "operations": [
+      "browser.playPreview",
+      "channel.source",
+      "channel.add",
+      "notes.import",
+      "browser.toggleFavorite",
+      "browser.editTags"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:584:8cec966a2b32": {
+    "operations": [
+      "channel.add",
+      "notes.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:981:f3faca25fe5c": {
+    "operations": [
+      "browser.find"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:999:091489e754e0": {
+    "operations": [
+      "browser.collectionsMenu"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:112:226ecc1b7e8e": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:117:9e3e50e7bc85": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:122:3e7230b9f645": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:131:eefb38715a4b": {
+    "operations": [
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:143:bd762dde0118": {
+    "operations": [
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:33:38aaca6e864f": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:440:52c5c51c29d1": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:452:16ba1334c29b": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:457:d52ddb7dfd84": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:48:fd663d6db5be": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:563:dc12991f6584": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:65:7b93da37ee5a": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:83:fcc73a435374": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:88:1426c10522ab": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:93:96ededa282a4": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StepComposePanel.h:98:7a56ad79e328": {
+    "operations": [
+      "steps.compose",
+      "steps.composeDialog"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioChords.cpp:105:ebf8d4b39b57": {
+    "operations": [
+      "view.chordProgression"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioChords.cpp:54:dd3449c39402": {
+    "operations": [
+      "view.chordProgression"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioChords.cpp:55:9ee5091ee988": {
+    "operations": [
+      "view.chordProgression"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioChords.cpp:56:c09bca4f3dd8": {
+    "operations": [
+      "view.chordProgression"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioChords.cpp:57:a90961a20ef6": {
+    "operations": [
+      "view.chordProgression"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioChords.cpp:62:704e98fa795e": {
+    "operations": [
+      "notes.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioChords.cpp:63:3e2cf0aa0678": {
+    "operations": [
+      "view.chordProgression"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:292:4859865d0d5c": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:315:8e66d5246c71": {
+    "operations": [
+      "quantizer.groove.capture"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:316:a1dc0d32816f": {
+    "operations": [
+      "quantizer.groove.load"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:317:947784134b55": {
+    "operations": [
+      "quantizer.groove.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:318:21dae42656de": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:320:b882aa65752e": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:323:4b7ac359dea3": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:323:a0552d5f2c45": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:324:1cfae7197d67": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:335:b9629998c0a6": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/StudioQuantizer.cpp:336:a546ad81d0b0": {
+    "operations": [
+      "notes.quantize"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
   },
   "src/synth/SynthEditor.cpp:560:32d7cd22ff97": {
     "operations": [
