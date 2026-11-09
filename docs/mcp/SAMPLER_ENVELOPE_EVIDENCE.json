@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
+  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
   "sourceInputs": {
     "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
@@ -12,7 +12,7 @@
     "skills/vibera-studio/scripts/stdio_client.py": "c4acec16773359f2a7850734854abf2a1cf0dc1cb685f621510cea9720bccd97",
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
-    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
+    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/InstrumentWindow.h": "95e52300362aea7bfeeaf400ed98cd27817b86a2c6618dcaf617d96f3a1f1244",
     "src/LiveTimeline.cpp": "369f5096101b445529d54317ea5df754a2e632f130b0fa04d952b55c19fe5cb8",
@@ -53,7 +53,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "rerunLogs": [
+      "build/dev/20261109-095811/rerun-unreached.log"
+    ],
+    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
     "tests": 281
   }
 }

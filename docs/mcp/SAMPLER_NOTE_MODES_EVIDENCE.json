@@ -1,15 +1,15 @@
 {
   "passed": true,
-  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
+  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
   "sourceInputs": {
-    "scripts/mcp-coverage.py": "8e7e1d4fd2f17aa1f99f986ddbdae5ca840bcabe674f860154c352b0fa8a62e1",
+    "scripts/mcp-coverage.py": "c2e6917bde73f34e7ed3172cfc923739e1a0e975be299611618dd07f517442cb",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
     "scripts/verify-sampler-note-modes-mcp.py": "1051f368d762d530a756eec35601940435c60baf2d347c8393444f75efad9b60",
     "skills/vibera-studio/references/piano-note-modes.md": "061d956c33f8afec0ab762a103b7853d0d71cea858fcc243412eb23ffe4e74f4",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
-    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
+    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -25,7 +25,7 @@
     "src/MidiInput.h": "0d9bdd0bfbead35f050e1ecb8601a228d7e134eb7f52eda577fb213b28004d9e",
     "src/MidiRecording.h": "865ec42fd11171ac21aeda3a3ac2f6194eee469fbe8839e3f3f42c570b1e6188",
     "src/MidiScore.h": "c59e880b87a57ea83b7965ada4db3ee42840d53e5480f587fd945c5efdd9fe7d",
-    "src/MixerMacroContracts.h": "71db91fdaaa0789b72dc36a0a76b023726163c26693415a8096ef2c0fa272a39",
+    "src/MixerMacroContracts.h": "fc7586f10ea627f11ebacd087f21686a6bd73813b84fec8369359c531369b297",
     "src/NoteExpression.h": "6ffd2de4bfa6624d255b5467654440b3e3174a6ef39944748f9154e3d6a067b0",
     "src/NoteRelease.h": "cfc19cc6212b9ad3ae3b96b31e1962016f8a99633ff60aa64997b3dfaf742d22",
     "src/NoteRepeat.h": "3e70cc5f1d5f57ba596f1650116cdaf5288e24e87c4d09a92f5d54507ca0bcd2",
@@ -51,7 +51,7 @@
     "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
     "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
-    "src/StudioMixerMacros.inc": "f377965218790d1f5545cb9fda92fad93b2b3655e41c459090cfd25135235a1f",
+    "src/StudioMixerMacros.inc": "bfe64ba23bdefd22b12dd0b2c8bf5d26dc2dd97388f4c860f799db6bc75d858b",
     "tests/Acceptance.cpp": "4b2603821a7b50e6e22b5fd8f7fefbe8a7b37f8e555a6a54b03e2cf10f4d93ee",
     "tests/PianoNoteModesAcceptance.inc": "a96de45fb0b7df8dcf94610754c13570ec00d6f4f6f95920c6c22d627893ea4a",
     "tests/SamplerNoteModesAudioAcceptance.h": "fb284b72bbe52ae35b36465729d13beae636398a272500ef123594ff9c8350b5",
@@ -70,7 +70,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "rerunLogs": [
+      "build/dev/20261109-095811/rerun-unreached.log"
+    ],
+    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
     "tests": 281
   }
 }

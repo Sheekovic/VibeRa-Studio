@@ -38,9 +38,11 @@ inline juce::var mixerMacroArguments(const juce::String &id, bool context)
 }
 inline juce::var mixerMacrosTool()
 {
-    auto tool = juce::JSON::parse(R"JSON({"name":"vibera_macros","description":"Inspect/persist saved macros through the SAME Customization supported-command predicate, authoritative command schemas and Settings application service. Run the real saved-recipe runner with one history transaction, or its existing asynchronous Channel-routing service. bindShortcut/unbindShortcut/resetShortcuts edit keyboard shortcuts in the same profile, like Settings > Shortcuts (not Undo; generation-guarded; read back in shortcuts). Other settings editing remains outside this tool. Completed means canonical history/configuration, never DSP/native readiness; routing runs return their actual pending operation for vibera_mixer routingJob polling.",
+    auto tool = juce::JSON::parse(R"JSON({"name":"vibera_macros","description":"Inspect/persist saved macros through the SAME Customization supported-command predicate, authoritative command schemas and Settings application service. Run the real saved-recipe runner with one history transaction, or its existing asynchronous Channel-routing service. bindShortcut/unbindShortcut/resetShortcuts/exportProfile/importProfile edit keyboard shortcuts in the same profile, like Settings > Shortcuts (not Undo; generation-guarded; read back in shortcuts). Other settings editing remains outside this tool. Completed means canonical history/configuration, never DSP/native readiness; routing runs return their actual pending operation for vibera_mixer routingJob polling.",
       "inputSchema":{"type":"object","additionalProperties":false,"required":["action"],"properties":{
-        "action":{"type":"string","enum":["state","create","update","remove","run","bindShortcut","unbindShortcut","resetShortcuts"]},
+        "action":{"type":"string","enum":["state","create","update","remove","run","bindShortcut","unbindShortcut","resetShortcuts","exportProfile","importProfile"]},
+        "path":{"type":"string","minLength":3,"maxLength":32767,"description":"exportProfile/importProfile: absolute .json path, like Settings > Shortcuts Export / Import. Export never overwrites unless overwrite:true; import replaces shortcuts and macros (generation-guarded)."},
+        "overwrite":{"type":"boolean","default":false},
         "includeShortcuts":{"type":"boolean","default":false,"description":"state only: also list every keyboard shortcut (shortcut actions always return them)."},
         "shortcut":{"type":"object","additionalProperties":false,"required":["command","scope"],"properties":{
           "command":{"type":"string","minLength":1,"maxLength":256,"description":"Registered action or saved macro.* ID."},

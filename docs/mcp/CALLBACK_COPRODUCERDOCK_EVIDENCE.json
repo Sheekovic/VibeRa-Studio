@@ -4,7 +4,7 @@
     "src/CoProducerDock.h": "ed9a914023f5d9146da0f9febca0cf44c59a90801d7d4c67c07e556fb4777473"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "b286e3d8dc22c32878dd5895656725f2665c056d6270ca1e5befeed8dc707e60",
+  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -12,6 +12,7 @@
     "ai_model",
     "ai_producer_mcp",
     "ai_ui_gui",
+    "appearance_mcp",
     "arrangements",
     "audio_capture",
     "audio_playlist_gui",
@@ -58,6 +59,7 @@
     "flp_import",
     "groove_mcp",
     "gui_workflow",
+    "guide_midi_input_mcp",
     "history_destination_admission",
     "history_ui_recovery",
     "installer_package",
@@ -260,6 +262,7 @@
     "sampler_voice_modes",
     "sampler_voice_modes_mcp",
     "sampler_voices_mcp",
+    "shortcuts_mcp",
     "slicer",
     "song_meter",
     "step_composition",
@@ -285,6 +288,10 @@
     "vibera_synth_processor",
     "vocal_pitch_mcp"
   ],
-  "sourceLog": "build/dev/20261109-043521/affected-tests.log",
+  "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+  "rerunLogs": [
+    "build/dev/20261109-095811/rerun-unreached.log"
+  ],
+  "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

@@ -109,7 +109,7 @@ def main():
             check(path.is_file() and int(ET.parse(path).getroot().attrib["version"])==version,"Real current-schema project file")
         tools=client.request("tools/list",{})["tools"];retain("tools.json",tools)
         macros_tool=next(tool for tool in tools if tool["name"]=="vibera_macros")
-        check(set(macros_tool["inputSchema"]["properties"]["action"]["enum"])=={"state","create","update","remove","run","bindShortcut","unbindShortcut","resetShortcuts"},"Discoverable bounded saved-recipe and shortcut service")
+        check(set(macros_tool["inputSchema"]["properties"]["action"]["enum"])=={"state","create","update","remove","run","bindShortcut","unbindShortcut","resetShortcuts","exportProfile","importProfile"},"Discoverable bounded saved-recipe and shortcut service")
         fields=next(tool for tool in tools if tool["name"]=="vibera_mixer")["inputSchema"]["properties"]
         check({"selectMany","selectAll","selectGroup"}<=set(fields["action"]["enum"]),"Shared multiple/group selection discoverable")
         baseline=mixer();initial=state()

@@ -74,6 +74,24 @@ try:
                                 "shortcut": {"command": "no.such.command", "scope": 0, "key": k}}).get("isError"),
           "An unknown command is refused")
 
+    # Profile export / import.
+    profile = output / "profile.json"
+    exported = call("vibera_macros", {"action": "exportProfile", "path": str(profile), "generation": reset["generation"]})
+    check(profile.is_file() and exported.get("configurationCommitted") is False, "exportProfile writes the file")
+    check(raw("vibera_macros", {"action": "exportProfile", "path": str(profile), "generation": exported["generation"]}).get("isError"),
+          "exportProfile refuses to overwrite without overwrite:true")
+    changed = call("vibera_macros", {"action": "bindShortcut", "generation": exported["generation"],
+                                     "shortcut": {"command": "view.mixer", "scope": 0, "key": k, "ctrl": True, "alt": True}})
+    check(any(s["key"] == k and s["command"] == "view.mixer" for s in changed["shortcuts"]), "A shortcut changed after export")
+    check(raw("vibera_macros", {"action": "importProfile", "path": str(profile),
+                                "generation": exported["generation"]}).get("isError"), "importProfile needs the current generation")
+    imported = call("vibera_macros", {"action": "importProfile", "path": str(profile), "generation": changed["generation"]})
+    check(imported.get("configurationCommitted") is True and
+          sorted(map(json.dumps, imported["shortcuts"])) == sorted(map(json.dumps, shortcuts)),
+          "importProfile restores the exported shortcuts")
+    check(raw("vibera_macros", {"action": "importProfile", "path": str(output / "missing.json"),
+                                "generation": imported["generation"]}).get("isError"), "A missing file is refused")
+
     # Controller mapping removal.
     ctl = call("vibera_controller", {"action": "state"})
     count = len(ctl["controllerProfile"]["bindings"])

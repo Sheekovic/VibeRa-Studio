@@ -1884,5 +1884,102 @@
       "settings.appearance"
     ],
     "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/CoProducerChat.h:481:c966b740d9af": {
+    "operations": [
+      "ai.chat",
+      "ai.cancelChat",
+      "ai.cancelMusic"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/CoProducerChat.h:488:eb8b2b3bca24": {
+    "operations": [
+      "ai.chat",
+      "ai.cancelChat",
+      "ai.cancelMusic"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/CoProducerChat.h:490:886bdbfc82ad": {
+    "operations": [
+      "ai.configure"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/CoProducerChat.h:499:01c417229c80": {
+    "operations": [
+      "ai.configure"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/CoProducerDock.h:71:42ac87ab60ea": {
+    "operations": [
+      "ai.panel"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8016:360ef80c63b1": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8021:c388b5285c7a": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8024:3f623484e630": {
+    "operations": [
+      "view.rack",
+      "view.piano",
+      "view.playlist",
+      "view.mixer"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8025:61592bf1cb95": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Editors.h:8110:f0a4537b85a8": {
+    "operations": [
+      "view.editorWindow"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/RackPage.h:42:67252e530cc1": {
+    "operations": [
+      "rack.soloRestore"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/RackPage.h:50:02cd0bb8f95d": {
+    "operations": [
+      "rack.stepMemory"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/RackVelocityGraph.h:226:9dfcf6ff4e75": {
+    "operations": [
+      "rack.graphProperty"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:184:d9bede407b7e": {
+    "operations": [
+      "shortcut.export"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Settings.h:199:6490190f4e91": {
+    "operations": [
+      "shortcut.import"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }
 }

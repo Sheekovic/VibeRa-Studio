@@ -32,18 +32,13 @@ spec.loader.exec_module(coverage)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source-log", required=True)
+parser.add_argument("--rerun-log", action="append", default=[],
+                    help="log of a failed test re-run alone (repeatable); see scripts/test_run_evidence.py")
 parser.add_argument("--apply", action="store_true")
 args = parser.parse_args()
 
-log = (ROOT / args.source_log).read_text(encoding="utf-8-sig", errors="replace")
-summary = re.search(r"100% tests passed, 0 tests failed out of (\d+)", log)
-registered = re.findall(r"^\s*add_test\(NAME (\S+)", (ROOT / "CMakeLists.txt").read_text(encoding="utf-8"), re.M)
-passed_tests = re.findall(r"Test\s+#\d+: (\S+) \.+\s+Passed", log)
-if not summary or not passed_tests:
-    raise SystemExit("Refused: the log is not a complete 100 % passing run")
-missing = sorted(set(registered) - set(passed_tests))
-if missing:
-    print(json.dumps(dict(note="Tests registered after this run (not evidence)", tests=missing[:20])))
+from test_run_evidence import complete_passing_run  # noqa: E402
+passed_tests, rerun_note = complete_passing_run(ROOT, args.source_log, args.rerun_log)
 
 state = coverage.inventory(ROOT)
 mapped = {c["id"] for c in state["registeredOperations"] if c["implementedMapping"]}
@@ -83,7 +78,7 @@ for surface in state["customSurfaceCandidates"]:
                  "semantics are covered by the complete passing run named in the receipt.")
 checks = sorted(set(passed_tests))
 receipt = {"passed": True, "sourceInputs": inputs, "sourceHashMode": "raw", "applicationSha256": app_sha,
-           "checks": checks, "sourceLog": args.source_log,
+           "checks": checks, "sourceLog": args.source_log, "rerunLogs": args.rerun_log, "rerunNote": rerun_note,
            "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer "
                     "input, listening or hardware evidence."}
 for key, entry in entries.items():

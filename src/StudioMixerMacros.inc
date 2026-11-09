@@ -130,6 +130,29 @@ juce::var Studio::mcpMacroOperation(const juce::var &args)
                                         : runSavedMixerMacro(id,view.generation); r.failed()) fail(r);
         configurationCommitted = action == "remove";
     }
+    else if (action == "exportProfile" || action == "importProfile")
+    {
+        // Same Customization save/load as the Settings > Shortcuts Export / Import buttons.
+        if (args.hasProperty("macro") || args.hasProperty("id") || args.hasProperty("shortcut"))
+            throw McpFailure("invalid_arguments","Profile actions take path (and overwrite) only");
+        const auto path = args["path"].toString();
+        if (!juce::File::isAbsolutePath(path)) throw McpFailure("invalid_arguments","path must be absolute");
+        const juce::File file(path);
+        if (action == "exportProfile")
+        {
+            if (file.exists() && !bool(args["overwrite"])) throw McpFailure("exists","File exists; pass overwrite:true");
+            if (auto r = customization.save(file.withFileExtension("json")); r.failed()) throw McpFailure("shortcut.saveFailed", r.getErrorMessage());
+        }
+        else
+        {
+            if (customization.running) throw McpFailure("macro.busy","A macro is running");
+            auto candidate = customization;
+            if (auto r = candidate.load(file); r.failed()) throw McpFailure("shortcut.importFailed", r.getErrorMessage());
+            customization = std::move(candidate);
+            if (auto r = customization.save(profileFile()); r.failed()) throw McpFailure("shortcut.saveFailed", r.getErrorMessage());
+            configurationCommitted = true;
+        }
+    }
     else if (action == "bindShortcut" || action == "unbindShortcut" || action == "resetShortcuts")
     {
         // Same Customization calls as Settings > Shortcuts, then the same profile save.
@@ -236,7 +259,7 @@ juce::var Studio::mcpMacroOperation(const juce::var &args)
             supported.add(row);
         }
     set(result,"macros",macros); set(result,"supportedCommands",supported);
-    if (action.endsWith("Shortcut") || action == "resetShortcuts" || bool(args["includeShortcuts"]))
+    if (action.endsWith("Shortcut") || action == "resetShortcuts" || action.endsWith("Profile") || bool(args["includeShortcuts"]))
     {
         juce::Array<juce::var> shortcuts;
         for (const auto &b : customization.bindings)

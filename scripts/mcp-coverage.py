@@ -149,6 +149,14 @@ def inventory(root=ROOT):
             continue
         text = path.read_text(encoding="utf-8-sig")
         for match in expression.finditer(text):
+            # Not callback surfaces: a local variable declaration (auto change = ..., double change = ...)
+            # and teardown that clears callbacks (x.onClick = y.onChange = nullptr;).
+            line_start = text.rfind("\n", 0, match.start()) + 1
+            if match.group(1) and re.search(r'\b(?:auto|double|float|int|bool)\s*&?\s*$', text[line_start:match.start()]):
+                continue
+            statement = text[match.end():text.find(";", match.end())]
+            if match.group(1) and re.fullmatch(r'(?:\s*[\w>.-]+\s*=)*\s*nullptr\s*', statement):
+                continue
             line = text.count("\n", 0, match.start()) + 1
             # Nearby source is a drift fingerprint, never inferred proof of semantics.
             excerpt = text[match.start():match.start() + 800]

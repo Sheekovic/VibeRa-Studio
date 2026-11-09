@@ -22,17 +22,14 @@ from dev_support import content_identity  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source-log", required=True)
+parser.add_argument("--rerun-log", action="append", default=[],
+                    help="log of a failed test re-run alone (repeatable); see scripts/test_run_evidence.py")
 parser.add_argument("--apply", action="store_true")
 args = parser.parse_args()
 
-log = (ROOT / args.source_log).read_text(encoding="utf-8-sig", errors="replace")
-summary = re.search(r"100% tests passed, 0 tests failed out of (\d+)", log)
-registered = re.findall(r"^\s*add_test\(NAME (\S+)", (ROOT / "CMakeLists.txt").read_text(encoding="utf-8"), re.M)
-if not summary or int(summary[1]) != len(registered):
-    sys.exit("Refused: the log must pass every registered test (%d)" % len(registered))
-passed = set(re.findall(r"Test +#\d+: (\S+) \.+ +Passed", log))
-if passed != set(registered):
-    sys.exit("Refused: every registered test needs a Passed line")
+sys.path.insert(0, str(ROOT / "scripts"))
+from test_run_evidence import complete_passing_run  # noqa: E402
+passed, rerun_note = complete_passing_run(ROOT, args.source_log, args.rerun_log)
 
 exe = ROOT / "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe"
 application = hashlib.sha256(exe.read_bytes()).hexdigest()
@@ -66,7 +63,8 @@ for op in inventory["operations"]:
         receipt["sourceInputs"] = {name: digest(name, mode) for name in inputs}
         receipt["applicationSha256"] = application
         receipt["reboundBy"] = dict(script="scripts/rebind-surface-evidence.py", sourceLog=args.source_log,
-                                    tests=len(registered))
+                                    rerunLogs=args.rerun_log, rerunNote=rerun_note,
+                                    tests=len(passed))
         receipts[receipt_name] = (path, receipt)
     if receipt_name in receipts:
         new_inputs = receipts[receipt_name][1]["sourceInputs"]

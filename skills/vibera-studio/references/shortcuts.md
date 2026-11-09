@@ -14,6 +14,10 @@ are local preferences, not Undo steps. Same calls as Settings > Shortcuts.
 - `unbindShortcut` with `shortcut` `{command, scope}` removes the command's shortcuts in that scope.
 - `resetShortcuts` restores the familiar defaults and keeps saved macros.
 
+- `exportProfile` `{path, overwrite}` writes shortcuts and macros to an absolute .json file (an
+  existing file needs `overwrite:true`); `importProfile` `{path}` replaces them from one (refused
+  if the file is missing or invalid).
+
 Shortcut actions always return `shortcuts`. Run a shortcut through the real handler with
 `vibera_key` (diagnostic); prefer the canonical command.
 

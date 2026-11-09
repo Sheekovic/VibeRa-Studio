@@ -5,7 +5,7 @@
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
     "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
-    "scripts/mcp-coverage.py": "8e7e1d4fd2f17aa1f99f986ddbdae5ca840bcabe674f860154c352b0fa8a62e1",
+    "scripts/mcp-coverage.py": "c2e6917bde73f34e7ed3172cfc923739e1a0e975be299611618dd07f517442cb",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "scripts/verify-installed-mcp.py": "8f1f935f120621a334097114b6fd07eabbff24a0e15b68f4aaae8e7fee35f55c",
     "scripts/verify-mixer-automation-mcp.py": "02693ff5d6dead46e42b5b3e17c276e6c17f1c1cccb31069922542a23ea19fb5",
@@ -14,7 +14,7 @@
     "scripts/verify-mixer-controls-mcp.py": "d7983a6c5cfbd76f8c29df43065edb52a6c52ba60270337faf6ec3700b0d5c2f",
     "scripts/verify-mixer-effects-mcp.py": "a2c727cf3802cf09e8a25bc36789cf0ad0fa3e50f1985db667c31db725af181e",
     "scripts/verify-mixer-insert-order-mcp.py": "a683e18d53436d3622336b5ae0da2804852e30206be91ddedfd4bb29de44ab45",
-    "scripts/verify-mixer-organisation-mcp.py": "8acc4543491b24884817c6025e9a6535bf5dfa9d52b127bde3b6a61103d32903",
+    "scripts/verify-mixer-organisation-mcp.py": "d757de9a8e5f76e25469dde8d2cbe0dcc066580e6a97bdf8085d3ee8a6b76dc4",
     "scripts/verify-mixer-routing-desktop.py": "3dc6a571e75f7730152d520035f23cb1b775861aada3d95bdf7a5ed458b88c90",
     "scripts/verify-mixer-routing-mcp.py": "9daeccd4a41b626eb1708a3afd225087d26c4cfaf371075ea8547d5db67f568e",
     "scripts/verify-mixer-stereo-mcp.py": "22665f318b18aa02034d099b9e8df7a8a97751def05d7675ae18bfddfdbad2d7",
@@ -41,7 +41,7 @@
     "src/ChannelBalance.h": "13d8a6aa76b1032926c2d868f413d217d0001517700dde69b7e24808e7106a5c",
     "src/ChannelRouting.inc": "74ce23f6adcd77d0697c6481b595ec132e4a5c50b9269fda70cc0010a4e4c9cb",
     "src/ChannelRoutingCoordinator.h": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6",
-    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
+    "src/Commands.cpp": "631b8e8fd3e9c7d15bdd0d1720364955c3cc96099a73fcfd815c9055518c6827",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -67,7 +67,7 @@
     "src/MixerInsertLifecycle.h": "8f93354f1d2ac582459eddc024b93397f37816f55ed755a6daf79f0525f12366",
     "src/MixerInsertOrder.h": "b196962c2ef3893dad023dab938c56991ffbccd6f5f72cb64014e253f544e176",
     "src/MixerInsertOrderContracts.h": "f0b0baf11a0f5c58336fcf54e6d0d9034ce705217029142bc9d1727c0b9d2134",
-    "src/MixerMacroContracts.h": "71db91fdaaa0789b72dc36a0a76b023726163c26693415a8096ef2c0fa272a39",
+    "src/MixerMacroContracts.h": "fc7586f10ea627f11ebacd087f21686a6bd73813b84fec8369359c531369b297",
     "src/MixerMacroInput.h": "861980fb4223668dc7d0999b3074150aa45a3af4f64e4b4df665742b13fd0fe8",
     "src/MixerMeter.h": "2be29e1a3786a39a255dae064b616345e3804c3fdf19225b44f2e0ee7a4b1056",
     "src/MixerNativeIdentity.h": "45c7f30f3f59d5eb8b8ddb46e841bc206ee5fd6e22d8ebad358c9d3c42fd6389",
@@ -103,7 +103,7 @@
     "src/StudioMixerDetectorAcceptance.inc": "e6c368739a98494b98b7758f4943e5caaa5bc969a9f42f589467884ea0060870",
     "src/StudioMixerEffectOpeningAcceptance.inc": "ec0dbbc6d869f64a644a059b9316caae2c14f8b587b622ee5dfbe35628c1b202",
     "src/StudioMixerInsertLifecycleAcceptance.inc": "44f3c64b6ab598dd67aa7617bf95236b089caa9edb1da397aa626ab39d5a96e6",
-    "src/StudioMixerMacros.inc": "f377965218790d1f5545cb9fda92fad93b2b3655e41c459090cfd25135235a1f",
+    "src/StudioMixerMacros.inc": "bfe64ba23bdefd22b12dd0b2c8bf5d26dc2dd97388f4c860f799db6bc75d858b",
     "src/StudioMixerOrganisation.inc": "d12072676fab29593297208dd9f1a7786ee3c3911980f4f9dff5280a1df97577",
     "src/StudioMixerTargetAcceptance.inc": "c96b0b33d7d30e54a7532af5f3a40f4aa211b05d51e9bbb00e6bbe25c4e3ff60",
     "src/StudioNativeScalar.inc": "18480fccd03d3f69203ea04b62c70aa68f4740ba98596fb8d1a418f2b2828ece",
@@ -156,7 +156,7 @@
     "tests/StoppedEffectNativeAcceptance.h": "59bbae9226079d2ceb2252a7c6ac4196319fdb641a669781ffe0c824b76f74dd",
     "tests/StoppedEffectOrdinaryForwardAcceptance.h": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
   },
-  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
+  "applicationSha256": "cde0caf8dabb8f713a39de104ffb296b9d971fc5bf403304f498a12f6d2b0af2",
   "checks": [
     {
       "id": "mixer.routing",
@@ -1205,7 +1205,11 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "sourceLog": "build/dev/20261109-095811/affected-tests.log",
+    "rerunLogs": [
+      "build/dev/20261109-095811/rerun-unreached.log"
+    ],
+    "rerunNote": "full run build/dev/20261109-095811/affected-tests.log: failed [], not reached ['vibera_synth_content', 'vibera_synth_host', 'vibera_synth_mcp']; each passed when run alone (build/dev/20261109-095811/rerun-unreached.log) with the same application",
     "tests": 281
   }
 }

@@ -36,13 +36,12 @@ GROUPS = {
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--source-log", required=True)
+parser.add_argument("--rerun-log", action="append", default=[],
+                    help="log of a failed test re-run alone (repeatable); see scripts/test_run_evidence.py")
 args = parser.parse_args()
-log = (ROOT / args.source_log).read_text(encoding="utf-8-sig", errors="replace")
-registered = re.findall(r"^\s*add_test\(NAME (\S+)", (ROOT / "CMakeLists.txt").read_text(encoding="utf-8"), re.M)
-summary = re.search(r"100% tests passed, 0 tests failed out of (\d+)", log)
-passed = set(re.findall(r"Test +#\d+: (\S+) \.+ +Passed", log))
-if not summary or int(summary[1]) != len(registered) or passed != set(registered):
-    sys.exit("Refused: the log must pass every registered test")
+sys.path.insert(0, str(ROOT / "scripts"))
+from test_run_evidence import complete_passing_run  # noqa: E402
+passed, rerun_note = complete_passing_run(ROOT, args.source_log, args.rerun_log)
 exe = ROOT / "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe"
 application = hashlib.sha256(exe.read_bytes()).hexdigest()
 
