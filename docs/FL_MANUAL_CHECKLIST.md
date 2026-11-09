@@ -90,7 +90,7 @@ did not list.
 | Piano roll: snap incoming MIDI to scale | done | Piano roll menu, `view.snapIncomingMidi`, `vibera_editor` guide; hardware and typing keyboard |
 | Piano roll: Interpolate tool (event data) | done | `notes.controller.interpolate`; Piano roll Edit > Interpolate events in the time selection (menu, not the drag tool) |
 | Piano roll / Playlist: nudge with mouse wheel, Center (Shift+0) | done | Shift+Alt+wheel nudges selected notes/clips (pointer only, not MCP-tested); `view.centerPlayhead` Shift+0 |
-| Piano roll: Magic lasso selection | missing | |
+| Piano roll: Magic lasso selection | done | Piano roll Menu > Magic lasso (draw around notes; Shift includes ghost Channels); `vibera_selection` action lasso. Drawing is pointer-only, the selection function is MCP-tested |
 | Piano roll: time markers in Pattern mode | done | `pattern.marker.add/rename/delete`, Piano roll Menu > Pattern markers; drawn on the ruler. Key markers: use the scale guide; time signature: Pattern meter |
 | Channel Rack: Mute removed steps | done | existing Workflow setting (`retainSteps`, muted notes kept) |
 | Channel Rack: Receive notes from | done | `channel.receiveMidi` (MIDI channel 1..16 per Channel, multitimbral live input); right-click > Receive notes from. Cut self already existed (Cut itself) |

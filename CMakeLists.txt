@@ -963,6 +963,9 @@ set_tests_properties(midi_receive_mcp PROPERTIES TIMEOUT 150)
 add_test(NAME pattern_markers_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-pattern-markers-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/pattern_markers_mcp")
 set_tests_properties(pattern_markers_mcp PROPERTIES TIMEOUT 150)
+add_test(NAME magic_lasso_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-magic-lasso-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/magic_lasso_mcp")
+set_tests_properties(magic_lasso_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME loudness_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-loudness-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/loudness_mcp")
 set_tests_properties(loudness_mcp PROPERTIES TIMEOUT 180)

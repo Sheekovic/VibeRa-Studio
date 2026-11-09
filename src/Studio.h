@@ -1043,6 +1043,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     int songJumpQuantize = 0;
     std::optional<std::pair<double, double>> pendingSongJump; // (target, boundary)
     void songJump(double target);
+    // Magic lasso: notes of the selected Pattern whose start (beat, pitch centre) lies inside the
+    // closed (beat, pitch) path; selected Channel only unless allChannels.
+    std::vector<Id> lassoNotes(const std::vector<std::pair<double, double>> &path, bool allChannels) const;
+    bool pianoLasso = false; // Piano roll: the next drag draws a magic lasso.
     std::optional<std::pair<double, double>> markerLoop;
     bool markerLoopEnabledLooping = false, markerWasPlaying = false;
     double markerLastBeat = 0;

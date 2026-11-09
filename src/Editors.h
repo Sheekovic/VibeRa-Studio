@@ -4605,7 +4605,20 @@ class Studio::Editor final : public juce::Component,
             g.setColour(accent);
             g.drawRect(rectangle, 1);
         }
+        if (lassoPath.size() > 1)
+        {
+            juce::Path path;
+            path.startNewSubPath(lassoPath.front());
+            for (const auto &point : lassoPath)
+                path.lineTo(point);
+            path.closeSubPath();
+            g.setColour(accent.withAlpha(.12f));
+            g.fillPath(path);
+            g.setColour(accent);
+            g.strokePath(path, juce::PathStrokeType(1.5f));
+        }
     }
+    std::vector<juce::Point<float>> lassoPath; // Magic lasso being drawn (Piano roll).
     // Playlist track header: the LED toggles mute (FL's track switch), right-click edits.
     // Rename dialog for a Playlist track (track menu, or double-click its name).
     void renameTrack(int lane)
@@ -4861,6 +4874,12 @@ class Studio::Editor final : public juce::Component,
     {
         if (e.y >= getHeight() - scrollBarThickness || (type != 3 && e.x >= getWidth() - rightInset()))
             return;
+        if (type == 1 && s.pianoLasso && e.mods.isLeftButtonDown() && e.y >= gridTop() && e.y < noteBottom() &&
+            e.x >= leftEdge())
+        {
+            lassoPath = {e.position};
+            return;
+        }
         if (type == 1)
             if (auto *channel = s.controller.project.channel(s.selectedChannel);
                 channel && channel->audioClip)
@@ -6574,6 +6593,13 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseDrag(const juce::MouseEvent &e) override
     {
+        if (!lassoPath.empty())
+        {
+            if (lassoPath.back().getDistanceFrom(e.position) >= 3.f && lassoPath.size() < 4096)
+                lassoPath.push_back(e.position);
+            repaint();
+            return;
+        }
         if (rackKnobDrag)
         {
             // 150 px for the full range; Shift for fine steps.
@@ -7141,6 +7167,22 @@ class Studio::Editor final : public juce::Component,
     }
     void mouseUp(const juce::MouseEvent &e) override
     {
+        if (!lassoPath.empty())
+        {
+            std::vector<std::pair<double, double>> path;
+            for (const auto &point : lassoPath)
+                path.push_back({(point.x - leftEdge()) / spacing() + scroll,
+                                double(topPitch) + 1 - (point.y - gridTop()) / height()});
+            lassoPath.clear();
+            s.pianoLasso = false; // One lasso per menu choice, like a tool shot.
+            const auto ids = s.lassoNotes(path, e.mods.isShiftDown());
+            if (auto result = s.selectItems(false, ids, "replace"); result.failed())
+                s.status = result.getErrorMessage();
+            else
+                s.status = "Magic lasso selected " + juce::String(int(ids.size())) + " notes";
+            repaint();
+            return;
+        }
         if (std::exchange(rackKnobDrag, 0))
         {
             if (std::exchange(rackKnobGesture, false))

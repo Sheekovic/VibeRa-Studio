@@ -275,6 +275,7 @@ void Studio::midiFileMenu()
     menu.addItem(44003, "Auto-scroll with the playhead", true, pianoFollowPlayhead);
     menu.addItem(44004, "Center the playhead while scrolling", true, followCenter);
     menu.addItem(44010, "Snap incoming MIDI to the scale guide", true, snapIncomingMidi);
+    menu.addItem(44011, "Magic lasso (draw around notes to select them)", true, pianoLasso);
     {
         juce::PopupMenu markersMenu;
         markersMenu.addItem(44020, "Add Pattern marker at the playhead");
@@ -575,6 +576,12 @@ void Studio::midiFileMenu()
                     a.target = part->markers[size_t(result - 44100)].id;
                     safe->command("pattern.marker.delete", a);
                 }
+                return;
+            }
+            if (result == 44011)
+            {
+                safe->pianoLasso = !safe->pianoLasso;
+                safe->status = safe->pianoLasso ? "Magic lasso: drag around notes in the Piano roll" : "Ready";
                 return;
             }
             if (result == 44010)

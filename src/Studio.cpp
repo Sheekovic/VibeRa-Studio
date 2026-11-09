@@ -990,6 +990,29 @@ void Studio::resized()
         component->toFront(false);
     repaint();
 }
+std::vector<Id> Studio::lassoNotes(const std::vector<std::pair<double, double>> &path, bool allChannels) const
+{
+    std::vector<Id> ids;
+    const auto *pattern = controller.project.pattern(selectedPattern);
+    if (!pattern || path.size() < 3)
+        return ids;
+    const auto inside = [&](double x, double y)
+    {
+        bool in = false;
+        for (size_t i = 0, j = path.size() - 1; i < path.size(); j = i++)
+        {
+            const auto [xi, yi] = path[i];
+            const auto [xj, yj] = path[j];
+            if ((yi > y) != (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi)
+                in = !in;
+        }
+        return in;
+    };
+    for (const auto &note : pattern->notes)
+        if ((allChannels || note.channel == selectedChannel) && inside(note.beat, note.pitch + .5))
+            ids.push_back(note.id);
+    return ids;
+}
 void Studio::songJump(double target)
 {
     target = std::max(0., target);
