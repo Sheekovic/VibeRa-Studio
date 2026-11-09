@@ -4,8 +4,8 @@
   "passed": true,
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
-    "scripts/mcp-coverage.py": "fb6d490161c26511ce394709594388a55a73c3081a80cd3b8b3f91fc1acf4169",
+    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "scripts/mcp-coverage.py": "8e7e1d4fd2f17aa1f99f986ddbdae5ca840bcabe674f860154c352b0fa8a62e1",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "scripts/verify-installed-mcp.py": "8f1f935f120621a334097114b6fd07eabbff24a0e15b68f4aaae8e7fee35f55c",
     "scripts/verify-mixer-automation-mcp.py": "02693ff5d6dead46e42b5b3e17c276e6c17f1c1cccb31069922542a23ea19fb5",
@@ -41,7 +41,7 @@
     "src/ChannelBalance.h": "13d8a6aa76b1032926c2d868f413d217d0001517700dde69b7e24808e7106a5c",
     "src/ChannelRouting.inc": "74ce23f6adcd77d0697c6481b595ec132e4a5c50b9269fda70cc0010a4e4c9cb",
     "src/ChannelRoutingCoordinator.h": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6",
-    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
+    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -91,10 +91,10 @@
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
     "src/RemoteEffect.h": "1c8d35bfa24cdda48a792efe818785b729561543d492ec24ad36743583f82801",
-    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2",
-    "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
+    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioDevicePreparation.inc": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352",
-    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
+    "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
     "src/StudioMixer.cpp": "82b67f8f8a61dda38598a5f12ac4df760180d5602566ed7f1377a61b8a35d0a7",
     "src/StudioMixerChainApplyAcceptance.inc": "81ab596669ab3f93006c8ffd51b931840e45c8aa52ea91f2af6f70cebfacec25",
     "src/StudioMixerChainWorkflowAcceptance.cpp": "5a9cb4087c66e689397dbf50bfa229762a604baba7ff2d1d1d8fe7aa3b9b8a3d",
@@ -156,7 +156,7 @@
     "tests/StoppedEffectNativeAcceptance.h": "59bbae9226079d2ceb2252a7c6ac4196319fdb641a669781ffe0c824b76f74dd",
     "tests/StoppedEffectOrdinaryForwardAcceptance.h": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
   },
-  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
+  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
   "checks": [
     {
       "id": "mixer.routing",
@@ -1205,7 +1205,7 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
-    "tests": 280
+    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "tests": 281
   }
 }

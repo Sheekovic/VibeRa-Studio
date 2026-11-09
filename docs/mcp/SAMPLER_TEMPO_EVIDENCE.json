@@ -1,19 +1,19 @@
 {
   "passed": true,
   "scope": "Verified sampler tempo increment only; RPS-J and the whole module remain incomplete. No full-FL, native input, listening or hardware claim.",
-  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
+  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
-    "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
-    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2",
-    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
+    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
+    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
     "src/StudioSampler.cpp": "a903c13be242986663c5f979a5939562257ce907936bf51e33fade6dfe996002",
     "src/InstrumentWindow.h": "07770b0b75bdfb19506febdf8b90c67efe983f49ecfc92b575719216ad877252",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
+    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
     "src/McpContracts.h": "bbaac235cb7acf5081742a0faa3e9e3c21c94593f0b5ef2ed2b00b28fdd88f79",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Sampler.h": "f441e0778acf4d6e0e2208a191d2c50001dd8a6718787a7775351a66ef16367b",
@@ -30,7 +30,7 @@
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
     "skills/vibera-studio/references/sampler-tempo.md": "c4295e39be254815779e51f95ac1068746757ca565a74170b81c868ea6827270",
-    "tests/mcp_acceptance.py": "30979aeef30491ea8cf67f69fa78ef32097e5c905f3d41ba93ec268c87d69012"
+    "tests/mcp_acceptance.py": "e7dcd6ed31b2a27eb930926f6040b422664c5bb8dffab1b68baec3c4c750cace"
   },
   "checks": [
     "Discovery exposes typed source-bound analysis/confirmation and BPM/quarter-note/bar units",
@@ -188,7 +188,7 @@
   "receipt": "build/sampler-tempo-semantic-20261019/verification.json",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
-    "tests": 280
+    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "tests": 281
   }
 }

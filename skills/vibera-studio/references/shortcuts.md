@@ -19,3 +19,10 @@ Shortcut actions always return `shortcuts`. Run a shortcut through the real hand
 
 Panels: `vibera_command view.browser` and `view.coProducer` toggle the Browser and CoProducer
 panel; read back `state.browserShown` / `state.coProducerShown`.
+
+## Appearance
+
+`vibera_appearance {"action":"state"}` lists `font`, every colour role (`colours`, AARRGGBB) and
+`presets`. `set` applies `preset` (`default` keeps the font, or a listed palette), `font` (an
+installed typeface) and `colours` `{role: AARRGGBB}` live; `save:true` keeps it after restart
+(`saved`). `reset` restores the default palette and font. Local preference, not Undo.

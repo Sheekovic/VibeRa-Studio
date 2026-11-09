@@ -6,16 +6,16 @@
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
     "src/StudioPluginIo.inc": "ff3f53993520dcc21dc018ab35c826e4dc5d84e59473c0596fb076032eb9b4dc",
-    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2",
-    "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
-    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
+    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
+    "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
     "src/StudioMixerChains.inc": "421cac7ff6fe44d131fedd1e6abd20b39e008a14df997821d89594d5450a6abb",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
     "src/PluginIoContracts.h": "4ac6273851e90eab44c28b4541d2d77c3546e617559cc4f9eab0d5f1881d63cc",
     "src/McpContracts.h": "bbaac235cb7acf5081742a0faa3e9e3c21c94593f0b5ef2ed2b00b28fdd88f79",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
+    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
     "src/Project.h": "2d8bfc2dae2fc8736adaadff08adb7b1d19b07b9a46585befdfb11b0b910a3b8",
     "src/Project.cpp": "fce43753ecd92a537378871df2517a45863a57b94862e0aba9463bef833ef938",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
@@ -39,12 +39,12 @@
     "skills/vibera-studio/references/plugin-audio-io.md": "b16c09aff13a7853587a7ee797fb111eafd6bf003c13924d3a1a410c5a7d8de4",
     "skills/vibera-studio/references/effect-chains.md": "ec30d226e977d294ee293825a0dd83c29789fc5de892b96de98c3c576d9c4131",
     "skills/vibera-studio/scripts/stdio_client.py": "56b0f41ce9d83452abb8aab0d44ad6fdf335840c0c13c7a7a3f7a8ef92762a81",
-    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
-    "scripts/mcp-coverage.py": "fb6d490161c26511ce394709594388a55a73c3081a80cd3b8b3f91fc1acf4169",
+    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
+    "scripts/mcp-coverage.py": "8e7e1d4fd2f17aa1f99f986ddbdae5ca840bcabe674f860154c352b0fa8a62e1",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "src/MixerChainWorkflowContracts.h": "d1dbd9357f9305824ab3a922a4550d3cf0a73e38a5705964bb3e6fcc0d36ad8c"
   },
-  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
+  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
   "workerSha256": "6e02557aad3bf9e805b95167609d75db09d021ad329d91e7830ab6d1bf8fbfda",
   "checks": [
     "Actual instrument/effect Audio input/output contextual menu dispatch reaches canonical plugin.io; component dispatch, not native OS input.",
@@ -391,7 +391,7 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
-    "tests": 280
+    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "tests": 281
   }
 }

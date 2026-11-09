@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
+  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
   "sourceInputs": {
-    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
+    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "scripts/verify-mixer-chain-mcp.py": "e3be80fbb9eb4e3549e3830a201b356cdfd83c18c17bfa6e29c68366b6ac6f2d",
     "scripts/verify-mixer-effects-mcp.py": "a2c727cf3802cf09e8a25bc36789cf0ad0fa3e50f1985db667c31db725af181e",
@@ -12,7 +12,7 @@
     "skills/vibera-studio/scripts/stdio_client.py": "c4acec16773359f2a7850734854abf2a1cf0dc1cb685f621510cea9720bccd97",
     "src/AudioEngine.cpp": "12ab8e0481c5eb075ddb899584c95dfe0ef594a46b2ef8d99dff2a14a4e24431",
     "src/AudioEngine.h": "f160e5869202cb363af5206b49ce155f4b2dffaf986931c8de0ea4256db997f3",
-    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
+    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/InstrumentWindow.h": "95e52300362aea7bfeeaf400ed98cd27817b86a2c6618dcaf617d96f3a1f1244",
     "src/LiveTimeline.cpp": "369f5096101b445529d54317ea5df754a2e632f130b0fa04d952b55c19fe5cb8",
@@ -29,11 +29,11 @@
     "src/SamplerModulationSettings.h": "26d887c347fbba1929e215b44bacac3028ec430f3542b0235432ad6fc0b30928",
     "src/SamplerModulationTables.h": "8662cbbc77fc324bff65c8b60eaffe14671169926d42d96f30739d248d6a6555",
     "src/SamplerSettings.h": "b8caf4fa414a4766e3177e65b4865060014720850501fc7a1763cf20a67c3206",
-    "src/Settings.h": "ce6f33e6448f04010c0e05236cb4330e951c46fa6763b9290b5fc3a19b2b9a13",
-    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2",
-    "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
+    "src/Settings.h": "bc213f35cd515e3aa42df1b9bd41344281b79d452b519f49446c779149e2ada4",
+    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioController.cpp": "fc3246bc52f03a9f6a8e8841091ac58ccd74e8e08c2a943a9b0dd4c562a4c156",
-    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
+    "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
     "src/StudioSampler.cpp": "a903c13be242986663c5f979a5939562257ce907936bf51e33fade6dfe996002",
     "src/Theme.h": "0d9241672d3dd6ac76c7501a5a5e9910a1328299905b9d73b1ef2579f2e93067",
     "tests/Acceptance.cpp": "4b2603821a7b50e6e22b5fd8f7fefbe8a7b37f8e555a6a54b03e2cf10f4d93ee",
@@ -53,7 +53,7 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
-    "tests": 280
+    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "tests": 281
   }
 }

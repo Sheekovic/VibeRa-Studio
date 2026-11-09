@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2"
+    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
+  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -12,6 +12,7 @@
     "ai_model",
     "ai_producer_mcp",
     "ai_ui_gui",
+    "appearance_mcp",
     "arrangements",
     "audio_capture",
     "audio_playlist_gui",
@@ -287,6 +288,6 @@
     "vibera_synth_processor",
     "vocal_pitch_mcp"
   ],
-  "sourceLog": "build/dev/20261109-072747/affected-tests.log",
+  "sourceLog": "build/dev/20261109-084724/affected-tests.log",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

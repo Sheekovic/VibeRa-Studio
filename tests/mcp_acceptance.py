@@ -86,10 +86,10 @@ try:
         "vibera_picker", "vibera_project", "vibera_batch", "vibera_mixer", "vibera_inspect",
         "vibera_rack", "vibera_groove", "vibera_recording", "vibera_mixerchain", "vibera_samplerTempo",
         "vibera_stepCompose", "vibera_synth", "vibera_note_modes", "vibera_ai", "vibera_audioRecording",
-        "vibera_update", "vibera_dialog"
+        "vibera_update", "vibera_dialog", "vibera_appearance"
     }
-    check(len(tools) == 36 and set(tool_names) == expected_tools,
-          "Expected all28 released tools plus sampler tempo, Advanced Fill, Synth, Note modes, AI, audio recording and test-mode dialogs, without duplicates")
+    check(len(tools) == 37 and set(tool_names) == expected_tools,
+          "Expected all28 released tools plus sampler tempo, Advanced Fill, Synth, Note modes, AI, audio recording, appearance and test-mode dialogs, without duplicates")
     effects_tool = next(t for t in tools if t["name"] == "vibera_effects")
     effects_schema = effects_tool["inputSchema"]
     check(effects_tool["annotations"]["readOnlyHint"] is True and

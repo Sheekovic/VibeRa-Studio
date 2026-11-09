@@ -178,6 +178,17 @@ Callback candidates require manual expansion into individual controls and gestur
 | `view.settings` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.drumPads` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.browser` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `settings.appearance` | vibera_appearance | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.configure` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.testConnection` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.prepareEngine` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.generateMusic` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.cancelMusic` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.stopServer` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.chat` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.cancelChat` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.resetChat` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `ai.panel` | vibera_ai | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.coProducer` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.snap` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.chordProgression` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -724,7 +735,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `automation.plugin.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.macro.unlink` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 
-Custom callback candidates: 473; unreviewed: 187.
+Custom callback candidates: 473; unreviewed: 161.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
 Explicit UI inventory complete: False; known controls: 156; gaps: 0.
@@ -894,6 +905,28 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 
 | Callback | Canonical operations | Semantic readback | Skill / receipt |
 | --- | --- | --- | --- |
+| `src/AiPage.h:191:49b927179062` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:200:466b3d213dc2` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:206:de9963a6432e` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:216:079d69b01163` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:229:c2fe95271dac` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:238:4d1d543a09ea` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:243:082f7741f835` | ai.testConnection | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:243:77ce86bdc0c9` | ai.testConnection | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:250:d16be54ee3b2` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:299:5542051abb47` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:305:bfa68ad8e81f` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:315:a440c19afaa5` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:322:0f21034f8729` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:327:1628689c0052` | ai.prepareEngine | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:333:84886a6eeb3e` | ai.stopServer | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:340:bd9924b8f41a` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:346:b150f6b85b32` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:351:692ccdda8fa5` | ai.prepareEngine | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:357:b6c411a8d852` | ai.cancelMusic | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:366:030de0e32604` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:376:626d844865cc` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/AiPage.h:381:35e3a5405545` | ai.panel | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
 | `src/ClipPicker.h:40:0677c6744d20` | picker.width | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
 | `src/ClipPicker.h:44:677823569f56` | picker.width | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
 | `src/ClipPicker.h:167:3e2fe6462e21` | picker.select | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
@@ -1081,6 +1114,10 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/Settings.h:925:81ebb738ca87` | userMacro.save | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SETTINGS_EVIDENCE.json) |
 | `src/Settings.h:937:211fa78a68cf` | userMacro.run, userMacro.save | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SETTINGS_EVIDENCE.json) |
 | `src/Settings.h:994:54fc7418af2c` | userMacro.delete | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SETTINGS_EVIDENCE.json) |
+| `src/Settings.h:1102:ddbdb1fda9c0` | settings.appearance | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SETTINGS_EVIDENCE.json) |
+| `src/Settings.h:1129:38a71fc2544e` | settings.appearance | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SETTINGS_EVIDENCE.json) |
+| `src/Settings.h:1140:4a042979b22f` | settings.appearance | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SETTINGS_EVIDENCE.json) |
+| `src/Settings.h:1146:91115107be2e` | settings.appearance | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SETTINGS_EVIDENCE.json) |
 | `src/StepComposePanel.h:33:38aaca6e864f` | steps.compose, steps.composeDialog | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STEPCOMPOSEPANEL_EVIDENCE.json) |
 | `src/StepComposePanel.h:48:fd663d6db5be` | steps.compose, steps.composeDialog | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STEPCOMPOSEPANEL_EVIDENCE.json) |
 | `src/StepComposePanel.h:65:7b93da37ee5a` | steps.compose, steps.composeDialog | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STEPCOMPOSEPANEL_EVIDENCE.json) |

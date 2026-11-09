@@ -1139,7 +1139,7 @@ class ColourPage final : public juce::Component, private juce::ListBoxModel, pri
         picker.addChangeListener(this);
         save.onClick = [this]
         {
-            auto result = saveTheme(themeFile());
+            auto result = saveTheme(studio.appearanceFile());
             message.setText(result.wasOk() ? "Appearance saved" : result.getErrorMessage(),
                             juce::dontSendNotification);
         };

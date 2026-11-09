@@ -177,6 +177,76 @@ void Studio::pollMcpGesture()
                                           : "Idle lease expired; starting project restored";
     }
 }
+juce::var Studio::mcpAppearanceOperation(const juce::var &args)
+{
+    // Same theme calls as Settings > Appearance: preset, font, single colours, reset, Save.
+    const auto action = args["action"].toString();
+    if (action == "set" || action == "reset")
+    {
+        if (action == "reset")
+            resetTheme();
+        if (args.hasProperty("preset"))
+        {
+            const auto name = args["preset"].toString();
+            if (name == "default")
+            {
+                const auto kept = uiFont;
+                resetTheme();
+                uiFont = kept;
+            }
+            else
+            {
+                const auto found = std::find_if(themePresets.begin(), themePresets.end(),
+                                                 [&](const auto &p) { return name == p.name; });
+                if (found == themePresets.end())
+                    throw McpFailure("invalid_arguments", "Unknown preset; see state.presets");
+                applyThemePreset(*found);
+            }
+        }
+        if (args.hasProperty("font"))
+        {
+            const auto font = args["font"].toString();
+            if (font != defaultUiFont && !juce::Font::findAllTypefaceNames().contains(font))
+                throw McpFailure("invalid_arguments", "The font is not installed");
+            uiFont = font;
+        }
+        if (const auto *colours = args["colours"].getDynamicObject())
+        {
+            std::vector<std::pair<juce::Colour *, juce::Colour>> next;
+            for (const auto &entry : colours->getProperties())
+            {
+                const auto role = std::find_if(themeRoles.begin(), themeRoles.end(),
+                                                [&](const auto &r) { return entry.name.toString() == r.name; });
+                const auto text = entry.value.toString();
+                if (role == themeRoles.end())
+                    throw McpFailure("invalid_arguments", "Unknown colour role " + entry.name.toString());
+                if (text.length() != 8 || !text.containsOnly("0123456789abcdefABCDEF"))
+                    throw McpFailure("invalid_arguments", "Colours are 8 hex digits AARRGGBB");
+                next.push_back({role->colour, juce::Colour::fromString(text)});
+            }
+            for (const auto &[colour, value] : next)
+                *colour = value;
+        }
+        applyAppearance();
+        if (bool(args["save"]))
+            if (auto saved = saveTheme(appearanceFile()); saved.failed())
+                throw McpFailure("appearance.saveFailed", saved.getErrorMessage());
+    }
+    else if (action != "state")
+        throw McpFailure("invalid_arguments", "Unknown appearance action");
+    auto result = obj(), colours = obj();
+    for (const auto &role : themeRoles)
+        set(colours, role.name, role.colour->toString());
+    juce::Array<juce::var> presets{"default"};
+    for (const auto &p : themePresets)
+        presets.add(p.name);
+    set(result, "completionState", "completed");
+    set(result, "font", uiFont);
+    set(result, "colours", colours);
+    set(result, "presets", presets);
+    set(result, "saved", appearanceFile().existsAsFile());
+    return result;
+}
 juce::var Studio::mcpTools()
 {
     auto tools = juce::JSON::parse(R"JSON([
@@ -200,6 +270,8 @@ juce::var Studio::mcpTools()
       {"name":"vibera_inspect","description":"Paginated canonical project state, using stable IDs. Notes and noteOccurrences use the supplied or active Pattern. noteOccurrences exposes raw sources plus non-persistent Channel-loop appearances with real sourceId, iteration and display geometry; edits always target sourceId, never display beat or iteration. Does not expose opaque plugin state blobs.","inputSchema":{"type":"object","additionalProperties":false,"properties":{"entity":{"type":"string","enum":["patterns","notes","noteOccurrences","channels","clips","mixer","clipGroups","clipGroupMembers","markers","chords","tracks","meters","tempo","controllers","arrangements","automationSources","automationPoints","automationLinks","automationInitialValues","modulators","macros","scheduledNotes","scheduledControls"]},"group":{"type":"integer","minimum":1,"description":"Required for clipGroupMembers; paginated stable member IDs."},"source":{"type":"integer","minimum":1,"maximum":1000000000,"description":"Required only for automationPoints/automationLinks; stable Automation source ID, not placement."},"pattern":{"type":"integer","minimum":1},"offset":{"type":"integer","minimum":0,"default":0},"limit":{"type":"integer","minimum":1,"maximum":512,"default":128}},"required":["entity"]}}
     ])JSON");
     tools.getArray()->add(mixerMacrosTool());
+    tools.getArray()->add(juce::JSON::parse(
+        R"JSON({"name":"vibera_appearance","description":"Interface appearance, like Settings > Appearance: state lists the font, every colour role (AARRGGBB) and the built-in presets. set applies preset (default or a listed palette; keeps the font), font (an installed typeface) and colours {role: AARRGGBB} live; save:true also keeps it after restart. reset restores the default palette and font. Not Undo steps; not project data.","inputSchema":{"type":"object","additionalProperties":false,"required":["action"],"properties":{"action":{"type":"string","enum":["state","set","reset"]},"preset":{"type":"string","maxLength":64},"font":{"type":"string","maxLength":128},"colours":{"type":"object","additionalProperties":{"type":"string","pattern":"^[0-9a-fA-F]{8}$"}},"save":{"type":"boolean","default":false}}}})JSON"));
     tools.getArray()->add(samplerTempoTool());
     tools.getArray()->add(automationRecordingTool());
     tools.getArray()->add(juce::JSON::parse(
@@ -557,6 +629,8 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     // edits go through the same canonical paths as every other caller.
     if (name == "vibera_ai")
         return textResult(mcpAiOperation(args));
+    if (name == "vibera_appearance")
+        return textResult(mcpAppearanceOperation(args));
     // Input/monitor preferences and the take readback; takes themselves follow the transport.
     if (name == "vibera_audioRecording")
         return textResult(audioRecordingOperation(args));

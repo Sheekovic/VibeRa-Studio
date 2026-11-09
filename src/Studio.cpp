@@ -9016,6 +9016,13 @@ void Studio::saveProfile()
     if (result.failed())
         status = result.getErrorMessage();
 }
+juce::File Studio::appearanceFile() const
+{
+    if (workflowTestSettings)
+        return workflowTestSettings->getFile().getSiblingFile(
+            workflowTestSettings->getFile().getFileNameWithoutExtension() + "-appearance.json");
+    return themeFile();
+}
 void Studio::applyAppearance()
 {
     // Fonts made without an explicit name (and every vibera::uiFont use) follow the choice.

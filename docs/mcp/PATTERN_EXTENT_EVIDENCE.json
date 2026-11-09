@@ -6,11 +6,11 @@
   "scope": "Partial RPS-D/L/M Pattern extent and meter",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "d13511f1e7c6d6f8f51c115dee34809da4d2f2d3b860ed5154d7f274e9aeb8a5",
+    "CMakeLists.txt": "3508e1a8c60c47a4b8320b7e82cfa5d848e9687910431f78abec83625cf7023c",
     "CMakePresets.json": "a17190f02b339b6aecc8c8802b7c082a82bb67992153a290d04f5e441e876400",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "0e5c1f0e1bfd4b02c5a782c477adf6ca9b0a2d4ae1c08c968cd3ebbce7e1a191",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "f72db8c70ce228ed91625768685dc3973583b839a9660707511a0d88ff879bab",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "4d512beb0c1ce1d3607b9ec2b466784565e2d3245d5fe7c24235cb4db4f976f0",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "docs/PATTERN_EXTENT.md": "9a613d2921be1cb25d6b515d48b0436c3574aac2a285a25620b15da7d50f8cbe",
     "scripts/dev_support.py": "498169f5457fb526aa7ca60e1c881e77375004b17056a7a5320eebcd0269959d",
@@ -56,7 +56,7 @@
     "src/CoProducerPanel.h": "cd6ce9600be1196d2d7bb15b0be6fff81ad247eda746e931716361c050c8eaa6",
     "src/CoProducerWorker.cpp": "f951b754977a2f029e781d3d0d1e8832466bd6efc8405aceac13fc83b520a23d",
     "src/CoProducerWorker.h": "6db564d49e07f3ec15704f42dfbd68bc3848293f66db675599a8f9c6f0c1dd29",
-    "src/Commands.cpp": "f08604f3e60f70215bb8e9ad0b7ba757f3b357c86ef07f426efe6c70fe93fab8",
+    "src/Commands.cpp": "3d2160bcf0e0a0e304d129530a272886b87d2f0f0649c469207ec967e0d709da",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/CommandsNativeScalarHistory.inc": "e65cb51884f76407afc1362561f1fc969aabf3cccc1227a09229756d65185548",
     "src/CompensationGraph.h": "e8e954dab9a0352afc31048c40d12c9ae6cbed743628b0aadadc96f06a6f7fe6",
@@ -228,14 +228,14 @@
     "src/SamplerWaveform.h": "974414924540f64588a1a656ca36a9c6e67034953e0b74200927e14d7803de33",
     "src/ScoreLog.h": "f844b57099970d0b505c3ac331cfa71cc64f07545622219fa3880415a887935b",
     "src/SendAutomationBlockProbe.h": "6f143ab689ad4f7848e0f37dcc79d3be7420ab17d4c703b8429f82f99447e8f6",
-    "src/Settings.h": "8a988e49a3ef34d1485059487fdf8236f50e29d3e04d7749593276bf4a7cbd83",
+    "src/Settings.h": "a2037345b07d29665ee512b2845de72f4e39653cd3f67c246e193f3a4714113b",
     "src/StepSequence.h": "b082867add115e5b4e4f0ed72a7b04cfabe5b51eb0516457e0981cd46fe62cc5",
     "src/StepVelocity.h": "a1f14138d50e44780f3100f2ff83bf15b7172f3ae1f5cf23dc984cc9e085797d",
     "src/StoppedEffectChangePlan.h": "20bef5b031a7a0567712fabaca0fe3dfbeade44d74ebb6f5bc07166d80791f46",
     "src/StoppedEffectWorkers.cpp": "0fb3b974f6d4466f9d2c8be031e0c069bf9856709896ce81b9d156eab1839588",
     "src/StoppedEffectWorkers.h": "38c8cd27fd58879b0cfddc76c7d304e9c8e59833d67ce46d349177ba6ab7fd69",
-    "src/Studio.cpp": "999ea299c17091581974aa5c86fc83d52eb133a0f2e402bccc8d0554ced934e2",
-    "src/Studio.h": "615c881afd833a556126cbbb5cb2ae9ed074883920ea4a1e20870a8600954aa8",
+    "src/Studio.cpp": "5ebdfac98c9d6cd050448ca2ea7dcd3f5a4e3aa6fec02b343dae27c16b207a55",
+    "src/Studio.h": "d3eca6fa6246eb42d85acaaa251d61176d6088c06e980e128ff8180273813e16",
     "src/StudioAutomation.cpp": "459c9c035595d2dbe9a9a09f66a796a17565630c2b998aeaea04456e6bb7d708",
     "src/StudioAutomationRecording.inc": "ff38f154fa499aadc398e7009b94e0cba9fde644bcc78f53bf5962b6bec84db1",
     "src/StudioAutomationTouchAcceptance.inc": "2bcd390f29055f159babcd86f86fd7803855abffd1638c6088aa89af930ccfde",
@@ -245,7 +245,7 @@
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
     "src/StudioDevicePreparation.h": "61cddfd7349c1d6ee49101996180953587c6ff0fc129927e2a9f0b3b4a55a7dd",
     "src/StudioDevicePreparation.inc": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352",
-    "src/StudioMcp.cpp": "664c90e464ccca114f456b5b50ec3822cb4e2248b90c1ff830a2c1154b397bc6",
+    "src/StudioMcp.cpp": "e3123643149829b59476fee766970e68f16fcd100673c7ee45a5ffc8a43c46b2",
     "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
     "src/StudioMidiTakeRecoveryAcceptance.cpp": "db176e5c066433a5edcd60ad794927450c598c7736369cab24c4ea9aa6804829",
     "src/StudioMixer.cpp": "82b67f8f8a61dda38598a5f12ac4df760180d5602566ed7f1377a61b8a35d0a7",
@@ -569,7 +569,7 @@
     "tests/ZeroStageExchangeAcceptance.h": "1b5af4d0eee337b4b578e20d9fead9a7add7e58dd4816551165e86b224186ac0",
     "tests/effects/AllocationGuard.h": "aca46c91fb96e9c11abc57f25fef8f6d05318093bfbcf7545748ead869b9b968",
     "tests/effects/DspTests.cpp": "fb7ef4370424e43d8cd6e62936001f557b76bedcf54fe936fa51e4214010098b",
-    "tests/mcp_acceptance.py": "30979aeef30491ea8cf67f69fa78ef32097e5c905f3d41ba93ec268c87d69012",
+    "tests/mcp_acceptance.py": "e7dcd6ed31b2a27eb930926f6040b422664c5bb8dffab1b68baec3c4c750cace",
     "tests/mcp_sdk_acceptance.mjs": "718d3419130898ea277f4a89707434098a9f54d4861a040dde0b2e1680af53c8",
     "tests/test_dev_cmake_inputs.py": "b07ddeab4897ba4c7fdff002ad31bfa01d614fdb709a24e43e4331b36344d114",
     "tests/test_dev_cpp_probe.py": "b189d0df487e6d7baf8e8d371bc22b4238a27b97df581248d62f9de204cb2fed",
@@ -593,7 +593,7 @@
     "tests/test_fixture_profiles.py": "efad3b8a16aecc0b40af0861b4bb192a36d6f8d5e36946f54c2e1aafa6fec589",
     "tests/test_mixer_effects_verifier.py": "5b51aeb5ce12dc71bfb02a42d437800bd86d250816b781aba8defa183155928f"
   },
-  "applicationSha256": "b747515b22b56b969f138a47b261ee0f5f50c0b48f3f815d23680f229fe914a5",
+  "applicationSha256": "2bd60d67ef343cd5563ac4f297cdef28dec316190984a6185885b3075499a499",
   "workerSha256": "1fd6690c32ee073c8927d4f6bcca189a3fe71926c1834ee6aeb549b771f4e1e8",
   "checks": [
     "Canonical Auto/manual extent, local/inherited meter, dormant source data and exact note/history/placement identities",
@@ -706,7 +706,7 @@
   ],
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-072747/affected-tests.log",
-    "tests": 280
+    "sourceLog": "build/dev/20261109-084724/affected-tests.log",
+    "tests": 281
   }
 }

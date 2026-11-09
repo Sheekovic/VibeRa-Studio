@@ -506,6 +506,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Result newProject(bool demo = false, bool discardChanges = false);
     void runMacro(const juce::String &);
     juce::File profileFile() const;
+    // Appearance profile: the user's file, or a sibling of the isolated test settings.
+    juce::File appearanceFile() const;
+    juce::var mcpAppearanceOperation(const juce::var &);
     // Project templates (File > New from template): .vibra files in the profile's templates
     // folder. A template opens as a new, untitled project; Save as template writes the current
     // project (fresh plugin state) there without changing the project's own file.
