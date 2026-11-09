@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/Studio.cpp": "ceb4b08906a735f98137dbfb162c51ec38186c70c385e84f481c81e510c80599"
+    "src/Studio.cpp": "205bad1e303d808d72f9da3da5ae216ed060fae7d08b7cbc28fb5e9fa887bb9f"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "b9b7d8e153bd66da1d1c3740003b756f59e5ceb5d68d445a460b57d8fe4d818d",
+  "applicationSha256": "d18867a943fb1e7b7868858be2976fcddb79b81850009615ba95f14f70c46271",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -54,6 +54,7 @@
     "development_workflow",
     "drop_targets_gui",
     "envelope_follower_mcp",
+    "envelope_presets_mcp",
     "export_formats_mcp",
     "expression_maps_mcp",
     "fixed_initialisation_lifecycle",
@@ -71,6 +72,7 @@
     "macros_mcp",
     "magic_lasso_mcp",
     "marker_actions_mcp",
+    "master_pitch_mcp",
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
@@ -245,6 +247,7 @@
     "project_number_text",
     "quantizer_mcp",
     "rack_groups_mcp",
+    "record_filter_mcp",
     "rps_gaps_mcp",
     "sampler_automation_mcp",
     "sampler_controller_links",
@@ -292,7 +295,7 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-191202/affected-tests.log",
+  "sourceLog": "build/dev/20261109-211833/affected-tests.log",
   "rerunLogs": [],
   "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."

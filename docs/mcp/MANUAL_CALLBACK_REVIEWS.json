@@ -2539,6 +2539,8 @@
       "channel.sampler.cut",
       "channel.sampler.cutBy",
       "channel.sampler.cutItself",
+      "channel.sampler.envelopeApply",
+      "channel.sampler.envelopePresets",
       "channel.sampler.filterCutoff",
       "channel.sampler.filterResonance",
       "channel.sampler.filterType",
@@ -3064,13 +3066,18 @@
   },
   "src/Studio.cpp:400:bab544ddabc6": {
     "operations": [
+      "audio.logger",
+      "audio.loggerSave",
       "automation.plugin.create",
       "automation.plugin.init",
       "automation.plugin.init.remove",
       "chord.fill",
       "notes.followChords",
+      "project.masterPitch",
+      "transport.recordNotes",
       "transport.stepRecord",
       "transport.stepRest",
+      "transport.waitForInput",
       "workspace.free",
       "workspace.tileBalanced",
       "workspace.tileDetached",
@@ -3217,5 +3224,168 @@
       "mixer.send"
     ],
     "reviewer": "Handler body read 2026-11-09 (lines 7532-7642): every document edit goes through these registered commands; no direct project writes."
+  },
+  "src/SampleFileBrowser.h:1004:f3faca25fe5c": {
+    "operations": [
+      "browser.find"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1022:091489e754e0": {
+    "operations": [
+      "browser.collectionsMenu"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1058:733b2759940f": {
+    "operations": [
+      "browser.previewLouder",
+      "browser.previewSofter"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1068:ea9e704199c9": {
+    "operations": [
+      "browser.find"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1069:cd4843c1f7fe": {
+    "operations": [
+      "browser.up"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1074:2d365f4fa9ed": {
+    "operations": [
+      "browser.reindex"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/SampleFileBrowser.h:1296:faaab3083845": {
+    "operations": [
+      "browser.collectionsMenu"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs (or drafts and then applies) exactly these canonical operations."
+  },
+  "src/Studio.cpp:197:bcfe17c3d93e": {
+    "operations": [
+      "project.tapTempo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:199:b6fe2307883f": {
+    "operations": [
+      "transport.play"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:358:569c58e881d4": {
+    "operations": [
+      "project.save"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:359:32acf0e661fd": {
+    "operations": [
+      "project.open"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:360:f9b7afebdc39": {
+    "operations": [
+      "project.export"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:362:12311c530e57": {
+    "operations": [
+      "project.new"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:369:0f24f5c6342a": {
+    "operations": [
+      "transport.metronome"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:374:16b4d9a615c4": {
+    "operations": [
+      "transport.countIn"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:416:60d9800f0352": {
+    "operations": [
+      "midi.typing"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:423:bab544ddabc6": {
+    "operations": [
+      "audio.logger",
+      "audio.loggerSave",
+      "automation.plugin.create",
+      "automation.plugin.init",
+      "automation.plugin.init.remove",
+      "chord.fill",
+      "notes.followChords",
+      "project.masterPitch",
+      "transport.recordNotes",
+      "transport.stepRecord",
+      "transport.stepRest",
+      "transport.waitForInput",
+      "workspace.free",
+      "workspace.tileBalanced",
+      "workspace.tileDetached",
+      "workspace.tileFocused"
+    ],
+    "reviewer": "Handler read 2026-11-09 (with its Studio helpers three levels deep): every document/view operation goes through these registered commands; no direct project writes."
+  },
+  "src/Studio.cpp:439:9fce6795e4a4": {
+    "operations": [
+      "transport.record"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:534:76b9f4397c39": {
+    "operations": [
+      "edit.undo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:548:cc9c961c19fd": {
+    "operations": [
+      "edit.redo"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:562:e52faebc9b5c": {
+    "operations": [
+      "view.browser"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:574:341e188bbf27": {
+    "operations": [
+      "view.snap"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:603:86f709af3559": {
+    "operations": [
+      "view.rack",
+      "view.piano",
+      "view.playlist",
+      "view.mixer"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.cpp:607:77a0057396c4": {
+    "operations": [
+      "view.coProducer"
+    ],
+    "reviewer": "Handler read 2026-11-09; the gesture performs exactly these canonical operations."
   }
 }

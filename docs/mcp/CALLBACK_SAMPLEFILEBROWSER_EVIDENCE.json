@@ -4,7 +4,7 @@
     "src/SampleFileBrowser.h": "b491edf6a48014d0b7cf91dbf64e3c50e4842488fb2550a72c14e33b248e83b6"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "d18867a943fb1e7b7868858be2976fcddb79b81850009615ba95f14f70c46271",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -54,6 +54,7 @@
     "development_workflow",
     "drop_targets_gui",
     "envelope_follower_mcp",
+    "envelope_presets_mcp",
     "export_formats_mcp",
     "expression_maps_mcp",
     "fixed_initialisation_lifecycle",
@@ -71,6 +72,7 @@
     "macros_mcp",
     "magic_lasso_mcp",
     "marker_actions_mcp",
+    "master_pitch_mcp",
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
@@ -245,6 +247,7 @@
     "project_number_text",
     "quantizer_mcp",
     "rack_groups_mcp",
+    "record_filter_mcp",
     "rps_gaps_mcp",
     "sampler_automation_mcp",
     "sampler_controller_links",
@@ -279,6 +282,7 @@
     "tempo_map",
     "tempo_warp_mcp",
     "tuning_render_mcp",
+    "unique_sample_mcp",
     "vibera_effects_dsp",
     "vibera_native_effect_model",
     "vibera_native_effects",
@@ -291,7 +295,7 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-174522/affected-tests.log",
+  "sourceLog": "build/dev/20261109-211833/affected-tests.log",
   "rerunLogs": [],
   "rerunNote": "",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
