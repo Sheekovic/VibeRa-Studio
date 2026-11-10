@@ -9,6 +9,41 @@ namespace vibera
 // MIDI recording. Velocity follows where the pad is struck (top = loudest). Keys
 // 1-4 / Q-R / A-F / Z-V play the pads while the window has focus. "Load kit folder..."
 // adds up to 16 samples from a folder as new Channels in one step each.
+std::vector<Id> Studio::drumPadChannels() const
+{
+    std::vector<Id> result;
+    for (const auto &c : controller.project.channels)
+        if (!c.audioClip && !c.instrument && result.size() < 16)
+            result.push_back(c.id);
+    return result;
+}
+// One pad note (Drum Pads window, vibera_transport drumPad): on selects the pad's Channel as the
+// live input target and holds its root key on the performance input; off releases the held key.
+juce::Result Studio::drumPadNote(int index, float velocity, bool on)
+{
+    if (drumPadPitch >= 0)
+        performanceInput.set(1, drumPadPitch, false, 0);
+    drumPadPitch = drumPadIndex = -1;
+    if (!on)
+        return juce::Result::ok();
+    const auto ids = drumPadChannels();
+    if (index < 0 || index >= int(ids.size()))
+        return juce::Result::fail("drumPads.emptyPad: pad " + juce::String(index + 1) + " has no sampler Channel");
+    if (!std::isfinite(velocity) || velocity <= 0 || velocity > 1)
+        return juce::Result::fail("drumPads.invalidVelocity: velocity is 0..1");
+    const auto *channel = controller.project.channel(ids[size_t(index)]);
+    if (!channel)
+        return juce::Result::fail("drumPads.emptyPad: the pad's Channel was removed");
+    if (selectedChannel != channel->id)
+    {
+        selectedChannel = channel->id;
+        audio.setMidiTarget(channel->id);
+    }
+    drumPadPitch = channel->sampler.root < 0 ? 60 : channel->sampler.root;
+    drumPadIndex = index;
+    performanceInput.set(1, drumPadPitch, true, juce::jlimit(1, 127, juce::roundToInt(velocity * 127)));
+    return juce::Result::ok();
+}
 void Studio::showDrumPads()
 {
     struct Pads final : juce::Component, juce::Timer
@@ -16,7 +51,6 @@ void Studio::showDrumPads()
         Studio &s;
         juce::TextButton loadKit{"Load kit folder..."};
         std::unique_ptr<juce::FileChooser> chooser;
-        int down = -1;
         std::array<float, 16> flash{};
         const char *keys = "1234qwerasdfzxcv"; // Keyboard rows, top to bottom.
 
@@ -29,11 +63,7 @@ void Studio::showDrumPads()
         }
         std::vector<Id> channels() const
         {
-            std::vector<Id> result;
-            for (const auto &c : s.controller.project.channels)
-                if (!c.audioClip && !c.instrument && result.size() < 16)
-                    result.push_back(c.id);
-            return result;
+            return s.drumPadChannels();
         }
         juce::Rectangle<int> padBounds(int index) const
         {
@@ -45,29 +75,15 @@ void Studio::showDrumPads()
         }
         void hit(int index, float velocity)
         {
-            const auto ids = channels();
-            if (index < 0 || index >= int(ids.size()))
+            if (s.drumPadNote(index, velocity, true).failed())
                 return;
-            release();
-            const auto *channel = s.controller.project.channel(ids[size_t(index)]);
-            if (!channel)
-                return;
-            if (s.selectedChannel != channel->id)
-            {
-                s.selectedChannel = channel->id;
-                s.audio.setMidiTarget(channel->id);
-            }
-            const int pitch = channel->sampler.root < 0 ? 60 : channel->sampler.root;
-            down = pitch;
-            s.performanceInput.set(1, pitch, true, juce::jlimit(1, 127, juce::roundToInt(velocity * 127)));
             flash[size_t(index)] = 1;
             repaint();
         }
         void release()
         {
-            if (down >= 0)
-                s.performanceInput.set(1, down, false, 0);
-            down = -1;
+            if (s.drumPadIndex >= 0)
+                s.drumPadNote(-1, 0, false);
         }
         int padAt(juce::Point<int> p) const
         {

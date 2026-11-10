@@ -192,16 +192,22 @@ class SampleFileBrowser final : public juce::Component,
     {
         if (!juce::isPositiveAndBelow(row, visibleTags.size()))
             return;
+        if (const auto result = toggleFilterTagNamed(visibleTags[row]); result.failed())
+            studio.status = result.getErrorMessage();
+    }
+    // Clicking a tag in the tag filter list (browser.tagFilter): selects or clears that tag.
+    juce::Result toggleFilterTagNamed(const juce::String &name)
+    {
+        refreshTagChoices();
+        if (!tagUniverse.contains(name, true) && !activeFilter.selected.contains(name, true))
+            return juce::Result::fail("browser.unknownTag: No file carries the tag '" + name + "'");
         auto changed = activeFilter;
-        const auto name = visibleTags[row];
         const int at = changed.selected.indexOf(name, true);
         if (at >= 0)
             changed.selected.remove(at);
         else
             changed.selected.add(name);
-        const auto result = setTagFilter(std::move(changed));
-        if (result.failed())
-            studio.status = result.getErrorMessage();
+        return setTagFilter(std::move(changed));
     }
     juce::Result setFileTags(const juce::File &file, const juce::StringArray &names)
     {
@@ -905,6 +911,10 @@ class SampleFileBrowser final : public juce::Component,
         state->setProperty("columns", detailColumns);
         state->setProperty("fullPreview", studio.audio.fullAudition());
         state->setProperty("previewVolume", studio.audio.auditionVolume());
+        state->setProperty("previewReady", studio.audio.canReplayAudition());
+        state->setProperty("previewPosition", double(studio.audio.auditionPosition()));
+        state->setProperty("previewSerial", juce::int64(studio.audio.auditionRequestId()));
+        state->setProperty("tags", collections.tags ? collections.tags->allTags() : juce::StringArray{});
         juce::Array<juce::var> saved;
         for (const auto &root : roots)
             saved.add(root);
@@ -1514,6 +1524,14 @@ class SampleFileBrowser final : public juce::Component,
         const auto id =
             currentView >= 2 ? collections.searches[std::size_t(currentView - 2)].id : juce::String{};
         collectionAction(selectedFile(), id)(choice);
+    }
+    juce::Result tagFilter(const juce::String &name) // Same as clicking the tag in the tag filter list.
+    {
+        return toggleFilterTagNamed(name);
+    }
+    juce::Result setTags(const juce::File &file, const juce::StringArray &tags) // Edit tags dialog result.
+    {
+        return setFileTags(file, tags);
     }
     juce::Result setTagsForTest(const juce::File &file, const juce::StringArray &tags)
     {

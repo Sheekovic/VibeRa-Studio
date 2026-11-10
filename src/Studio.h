@@ -1021,6 +1021,9 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Newest autosave left by a VibeRa that did not exit cleanly; older markers are removed.
     std::optional<CrashedSession> findCrashedSession();
     void showDrumPads();
+    std::vector<Id> drumPadChannels() const;           // The first 16 sampler Channels, pad 1 first.
+    juce::Result drumPadNote(int index, float velocity, bool on); // Drum Pads hit / release.
+    int drumPadPitch = -1, drumPadIndex = -1;
     std::unique_ptr<juce::DocumentWindow> chordWindow;
     void showChordProgression();
     juce::var performanceState() const;

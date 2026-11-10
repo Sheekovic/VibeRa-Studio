@@ -676,6 +676,35 @@ class CoProducerPanel final : public juce::Component, private juce::Timer
     // MCP (vibera_ai idea* actions): the same controls, handlers and prerequisites as the panel.
     // Every change goes through the control's own handler; a button that is disabled in the UI
     // is refused here too. Generation and context reading stay asynchronous (poll ideaState).
+    // "Models..." / "Runtime..." buttons (and ideaConfigure installation / runtime).
+    juce::Result chooseInstallation(const juce::File &folder)
+    {
+        if (work || generation)
+            return juce::Result::fail("coproducer.busy: Wait for or cancel the current work");
+        if (!folder.isDirectory())
+            return juce::Result::fail("invalid_arguments: installation is an existing folder");
+        dropCandidates();
+        provider.installation = folder;
+        if (model.getSelectedId() == 3)
+        {
+            const auto python = folder.getChildFile("env/Scripts/python.exe");
+            if (python.existsAsFile())
+                provider.executable = python;
+        }
+        providerLabel.setText("Local installation selected. No network inference is used.", juce::dontSendNotification);
+        return juce::Result::ok();
+    }
+    juce::Result chooseRuntime(const juce::File &executable)
+    {
+        if (work || generation)
+            return juce::Result::fail("coproducer.busy: Wait for or cancel the current work");
+        if (!executable.existsAsFile())
+            return juce::Result::fail("invalid_arguments: runtime is an existing executable");
+        dropCandidates();
+        provider.executable = executable;
+        providerLabel.setText("Local runtime selected. Inspect/generate to verify availability.", juce::dontSendNotification);
+        return juce::Result::ok();
+    }
     juce::Result mcpIdea(const juce::String &action, const juce::var &args, juce::var &out)
     {
         if (!studio)
@@ -710,6 +739,17 @@ class CoProducerPanel final : public juce::Component, private juce::Timer
                     return juce::Result::fail("invalid_arguments: model is melody, multitrack or anticipation");
                 model.setSelectedId(id, juce::sendNotificationSync);
             }
+            for (const char *name : {"installation", "runtime"})
+                if (args.hasProperty(name))
+                {
+                    const juce::String path = args[name].toString();
+                    if (!juce::File::isAbsolutePath(path))
+                        return juce::Result::fail(juce::String("invalid_arguments: ") + name + " is an absolute path");
+                    const auto chosen = juce::String(name) == "installation" ? chooseInstallation(juce::File(path))
+                                                                              : chooseRuntime(juce::File(path));
+                    if (chosen.failed())
+                        return chosen;
+                }
             if (args.hasProperty("destination"))
             {
                 const auto found = std::find(destinationIds.begin(), destinationIds.end(), Id(juce::int64(args["destination"])));
@@ -847,6 +887,8 @@ class CoProducerPanel final : public juce::Component, private juce::Timer
         o->setProperty("auditioning", previewActive);
         o->setProperty("summary", summary.getText());
         o->setProperty("provider", providerLabel.getText());
+        o->setProperty("installation", provider.installation.getFullPathName());
+        o->setProperty("runtime", provider.executable.getFullPathName());
         o->setProperty("model", juce::StringArray{"", "melody", "multitrack", "anticipation"}[juce::jlimit(0, 3, model.getSelectedId())]);
         juce::Array<juce::var> destinations, families, variations, context;
         for (auto id : destinationIds)
@@ -1573,19 +1615,8 @@ class CoProducerPanel final : public juce::Component, private juce::Timer
                 juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectDirectories,
                 [safe, selectedProvider](const juce::FileChooser &chooser)
                 {
-                    if (!safe || safe->model.getSelectedId() != selectedProvider || safe->work ||
-                        safe->generation || !chooser.getResult().isDirectory())
-                        return;
-                    safe->dropCandidates();
-                    safe->provider.installation = chooser.getResult();
-                    if (safe->model.getSelectedId() == 3)
-                    {
-                        const auto python = chooser.getResult().getChildFile("env/Scripts/python.exe");
-                        if (python.existsAsFile())
-                            safe->provider.executable = python;
-                    }
-                    safe->providerLabel.setText("Local installation selected. No network inference is used.",
-                                                juce::dontSendNotification);
+                    if (safe && safe->model.getSelectedId() == selectedProvider)
+                        (void)safe->chooseInstallation(chooser.getResult());
                 });
         };
         runtimeButton.onClick = [this]
@@ -1598,14 +1629,8 @@ class CoProducerPanel final : public juce::Component, private juce::Timer
                 juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
                 [safe, selectedProvider](const juce::FileChooser &chooser)
                 {
-                    if (!safe || safe->model.getSelectedId() != selectedProvider || safe->work ||
-                        safe->generation || !chooser.getResult().existsAsFile())
-                        return;
-                    safe->dropCandidates();
-                    safe->provider.executable = chooser.getResult();
-                    safe->providerLabel.setText(
-                        "Local runtime selected. Inspect/generate to verify availability.",
-                        juce::dontSendNotification);
+                    if (safe && safe->model.getSelectedId() == selectedProvider)
+                        (void)safe->chooseRuntime(chooser.getResult());
                 });
         };
         preview.setEnabled(false);

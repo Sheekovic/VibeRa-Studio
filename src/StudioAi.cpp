@@ -79,6 +79,8 @@ juce::var Studio::aiToolDefinition()
       "action":{"type":"string","enum":["state","configure","testConnection","generateMusic","prepareEngine","cancelMusic","stopServer","chat","events","cancelChat","resetChat","detectAgents","panel","ideaState","ideaConfigure","ideaInspect","ideaGenerate","ideaCancel","ideaAudition","ideaStopAudition","ideaAccept","ideaDiscard","ideaMapping"]},
       "model":{"type":"string","enum":["melody","multitrack","anticipation"],"description":"ideaConfigure: local MIDI idea model (MelodyRNN lead continuation, MusicVAE instrument parts, Anticipation experimental)."},
       "destination":{"type":"integer","minimum":1,"description":"ideaConfigure: destination Channel ID (ideaState.destinations)."},
+      "installation":{"type":"string","maxLength":32767,"description":"ideaConfigure: absolute folder of the local model installation, like the panel's Models... button (ideaState.installation)."},
+      "runtime":{"type":"string","maxLength":32767,"description":"ideaConfigure: absolute path of the local Python/Node runtime executable, like the Runtime... button (ideaState.runtime)."},
       "start":{"type":"number","minimum":0,"description":"ideaConfigure: region start in quarter notes."},
       "bars":{"type":"integer","minimum":1,"maximum":64},"variationAmount":{"type":"number","minimum":0,"maximum":100},
       "family":{"type":"string","maxLength":64,"description":"ideaConfigure: instrument family offered for the model (ideaState.families)."},

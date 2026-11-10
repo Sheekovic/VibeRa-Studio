@@ -255,8 +255,8 @@ juce::var Studio::mcpTools()
       {"name":"vibera_commands","description":"Discover registered operations, explicit mappings/gaps and optional typed argument contracts. Paginated; includeSchemas=true with a command ID retrieves its contract.","inputSchema":{"type":"object","properties":{"command":{"type":"string"},"includeSchemas":{"type":"boolean","default":false},"offset":{"type":"integer","minimum":0,"default":0},"limit":{"type":"integer","minimum":1,"maximum":64,"default":32}},"additionalProperties":false}},
       {"name":"vibera_command","description":"Execute an undoable document edit, undo or redo on this owned instance. Optional revision rejects stale edits.","inputSchema":{"type":"object","properties":{"command":{"type":"string"},"args":{"type":"object"},"revision":{"type":"integer","minimum":0}},"required":["command"],"additionalProperties":false}},
       {"name":"vibera_select","description":"Select existing Pattern/Channel/editor scope or an already loaded project plugin UI. Plugin requests are separate from Pattern/Channel selection; no discovery, plugin loading, parameter writes or filesystem access.","inputSchema":{"type":"object","properties":{"pattern":{"type":"integer"},"channel":{"type":"integer"},"scope":{"type":"integer","minimum":0,"maximum":8},"plugin":{"type":"integer","minimum":1,"maximum":1000000000},"pluginView":{"type":"string","enum":["controls","native","closeNative"]},"parameter":{"type":"integer","minimum":0,"maximum":4294967295},"lastTweaked":{"type":"boolean"},"instance":{"type":"string","maxLength":100}},"additionalProperties":false}},
-      {"name":"vibera_transport","description":"Play, stop, seek, set whole-Pattern/Song looping or switch mode through shared application actions. previewNote (stopped transport only) plays one note on a Channel through every current setting, like the sampler Preview processed button; pitch defaults to the sampler root (60 when Auto). State is not listening evidence.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["play","stop","seek","pattern","song","loop","previewNote","jump","jumpQuantize","guide","midiInput"]},"countInBars":{"type":"integer","minimum":0,"maximum":2,"description":"Only action guide: recording count-in bars (0 off). Read back as state.countInBars."},"sound":{"type":"integer","minimum":0,"maximum":2,"description":"Only action guide: metronome / count-in sound (0 Click, 1 Wood, 2 Beep); state.guideSound."},"gain":{"type":"number","minimum":0,"maximum":1,"description":"Only action guide: metronome / count-in volume; state.guideGain."},"metronome":{"type":"boolean","description":"Only action guide: metronome on or off; state.metronome."},"midiChannel":{"type":"integer","minimum":0,"maximum":16,"description":"Only action midiInput: MIDI input channel filter (0 all channels, 1..16); state.midiInput.channel. Refused while a take is active."},"quantizeStart":{"type":"boolean","description":"Only action midiInput: quantize recorded note starts; state.midiInput.quantizeStart."},"quantizeEnd":{"type":"boolean","description":"Only action midiInput: quantize recorded note ends; state.midiInput.quantizeEnd."},"quantize":{"type":"integer","enum":[0,-1,1,2,4,8],"description":"Only action jumpQuantize: Quantize song jumps (0 off, -1 next beat, 1/2/4/8 next bar group). action jump moves the playhead to beat now, or at that boundary while the Song plays; read state.pendingSongJump."},"channel":{"type":"integer","minimum":1},"pitch":{"type":"integer","minimum":0,"maximum":127},"seconds":{"type":"number","minimum":0.05,"maximum":4,"default":1.5},"beat":{"type":"number","minimum":0},"enabled":{"type":"boolean","default":true,"description":"For action loop: idempotently enable/disable entire current Pattern or Song looping. No recording take may be active when changing it."},"range":{"type":["array","null"],"items":{"type":"number","minimum":0},"minItems":2,"maxItems":2,"description":"For action loop: set the Playlist time selection [startBeat, endBeat] (null clears it). In Song mode looping plays only the selection; it is also the audio punch range."}},"required":["action"],"additionalProperties":false}},
-      {"name":"vibera_editor","description":"Show, hide or maximize a native JUCE editor: 0 Rack, 1 Piano, 2 Playlist, 3 Mixer.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":4,"description":"0 Rack, 1 Piano, 2 Playlist, 3 Mixer, 4 Browser (detach/dock/move/layout only)."},"action":{"type":"string","enum":["show","hide","maximize","detach","dock","grouping","snap","stamp","laneTarget","guide","move","layout","browserFolder","browserForget"]},"path":{"type":"string","maxLength":32767,"description":"Only editor 4 browserFolder (open this folder in the Browser; remember adds it to the saved folders, default true) / browserForget (remove a saved folder; files are not touched). Read back state.browser.folder and .libraries."},"remember":{"type":"boolean","default":true},"bounds":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"integer"},"description":"Only action move: [x, y, width, height] in the workspace, like dragging the window header; read back as state.editorBounds."},"browserWidth":{"type":"number","description":"Only action layout: Browser width 180..360 (clamped like the splitter); state.workspaceLayout."},"playlistRatio":{"type":"number","description":"Only action layout: Channel Rack share of the left column 0.12..0.8."},"rackWidth":{"type":"number","description":"Only action layout: left column width 330..900."},"mixerHeight":{"type":"number","description":"Only action layout: Mixer height 168..360."},"coProducerWidth":{"type":"number","description":"Only action layout: CoProducer dock width 340..760."},"scale":{"type":"string","description":"Only action guide: a scale (major, minor, dorian, ...) or, with maqam:true, a maqam (rast, bayati, ...); empty clears the guide."},"root":{"type":"integer","minimum":0,"maximum":11,"description":"Only action guide: root pitch class, 0 = C."},"maqam":{"type":"boolean","description":"Only action guide: scale names a maqam."},"snapIncoming":{"type":"boolean","description":"Only action guide: snap incoming MIDI (hardware and typing keyboard) to the guide before it plays and records; read back as state.pianoGuide."},"target":{"type":"string","enum":["velocity","release","pan","modX","modY","fine"],"description":"Only editor1/action laneTarget: the note property the Piano roll event lane shows and paints (notes.velocity args.text). Read back as state.pianoLaneTarget."},"chord":{"type":"string","description":"Only action stamp: a Chordify shape name (e.g. major, minor) so drawing a Piano roll note places that chord; empty turns the stamp off. Read back as state.pianoStamp."},"enabled":{"type":"boolean","default":true,"description":"Only editor2/action grouping: temporarily enable/disable group targeting; retain membership. Refused during active gestures."},"snap":{"type":"number","minimum":0,"maximum":32,"description":"Only action snap: the shared Piano roll/Playlist grid in beats (0 = none; e.g. 0.25 step, 1/3 triplet, 4 bar). Read back as state.snap."},"line":{"type":"boolean","description":"Only action snap: true snaps pointer edits to the visible grid lines (zoom dependent) instead of snap; read back as state.snapLine."},"markers":{"type":"boolean","description":"Only action snap: true snaps Playlist positions to markers (distances to bars); read back as state.snapMarkers."}},"required":["editor","action"],"additionalProperties":false}},
+      {"name":"vibera_transport","description":"Play, stop, seek, set whole-Pattern/Song looping or switch mode through shared application actions. previewNote (stopped transport only) plays one note on a Channel through every current setting, like the sampler Preview processed button; pitch defaults to the sampler root (60 when Auto). State is not listening evidence.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["play","stop","seek","pattern","song","loop","previewNote","jump","jumpQuantize","guide","midiInput","previewSample","drumPad","typing"]},"typingRoot":{"type":"integer","minimum":2,"maximum":7,"description":"Only action typing: the typing keyboard's lowest C octave (C2..C7), like the Typing keys right-click menu; state.typingKeys.root (MIDI note)."},"typingVelocity":{"type":"integer","minimum":1,"maximum":127,"description":"Only action typing: typing keyboard note velocity; state.typingKeys.velocity."},"pad":{"type":"integer","minimum":1,"maximum":16,"description":"Only action drumPad: the Drum Pads pad (1 bottom-left; pads play the first 16 sampler Channels). on:true (default) selects its Channel and holds its root key on the live input, like striking the pad (heard in playback, captured by recording); on:false releases it. velocity 0..1 (default 0.85). Read back state.drumPads."},"on":{"type":"boolean","default":true},"velocity":{"type":"number","minimum":0,"maximum":1},"device":{"type":"string","maxLength":1024,"description":"Only action midiInput: open this MIDI input (an identifier from state.midiInput.devices; empty closes the input), like the Settings > MIDI device list. Read back state.midiInput.device and .deviceStatus."},"countInBars":{"type":"integer","minimum":0,"maximum":2,"description":"Only action guide: recording count-in bars (0 off). Read back as state.countInBars."},"sound":{"type":"integer","minimum":0,"maximum":2,"description":"Only action guide: metronome / count-in sound (0 Click, 1 Wood, 2 Beep); state.guideSound."},"gain":{"type":"number","minimum":0,"maximum":1,"description":"Only action guide: metronome / count-in volume; state.guideGain."},"metronome":{"type":"boolean","description":"Only action guide: metronome on or off; state.metronome."},"midiChannel":{"type":"integer","minimum":0,"maximum":16,"description":"Only action midiInput: MIDI input channel filter (0 all channels, 1..16); state.midiInput.channel. Refused while a take is active."},"quantizeStart":{"type":"boolean","description":"Only action midiInput: quantize recorded note starts; state.midiInput.quantizeStart."},"quantizeEnd":{"type":"boolean","description":"Only action midiInput: quantize recorded note ends; state.midiInput.quantizeEnd."},"quantize":{"type":"integer","enum":[0,-1,1,2,4,8],"description":"Only action jumpQuantize: Quantize song jumps (0 off, -1 next beat, 1/2/4/8 next bar group). action jump moves the playhead to beat now, or at that boundary while the Song plays; read state.pendingSongJump."},"channel":{"type":"integer","minimum":1},"pitch":{"type":"integer","minimum":0,"maximum":127},"seconds":{"type":"number","minimum":0.05,"maximum":4,"default":1.5},"beat":{"type":"number","minimum":0},"enabled":{"type":"boolean","default":true,"description":"For action loop: idempotently enable/disable entire current Pattern or Song looping. No recording take may be active when changing it."},"range":{"type":["array","null"],"items":{"type":"number","minimum":0},"minItems":2,"maxItems":2,"description":"For action loop: set the Playlist time selection [startBeat, endBeat] (null clears it). In Song mode looping plays only the selection; it is also the audio punch range."}},"required":["action"],"additionalProperties":false}},
+      {"name":"vibera_editor","description":"Show, hide or maximize a native JUCE editor: 0 Rack, 1 Piano, 2 Playlist, 3 Mixer.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":4,"description":"0 Rack, 1 Piano, 2 Playlist, 3 Mixer, 4 Browser (detach/dock/move/layout only)."},"action":{"type":"string","enum":["show","hide","maximize","detach","dock","grouping","snap","stamp","laneTarget","guide","move","layout","browserFolder","browserForget","browserTagFilter","browserSetTags","browserPreviewSeek"]},"tag":{"type":"string","maxLength":64,"description":"Only editor 4 browserTagFilter: select or clear this tag in the Browser tag filter, like clicking it in the tag list (state.browser.tagFilter; state.browser.tags lists the known tags)."},"tags":{"type":"array","maxItems":64,"items":{"type":"string","maxLength":64},"description":"Only editor 4 browserSetTags: replace the tags of the file at path, like the Edit tags dialog (empty clears them)."},"position":{"type":"number","minimum":0,"maximum":1,"description":"Only editor 4 browserPreviewSeek: restart the current sample preview at this fraction, like Shift+click on the preview waveform (state.browser.previewPosition)."},"path":{"type":"string","maxLength":32767,"description":"Only editor 4 browserFolder (open this folder in the Browser; remember adds it to the saved folders, default true) / browserForget (remove a saved folder; files are not touched). Read back state.browser.folder and .libraries."},"remember":{"type":"boolean","default":true},"bounds":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"integer"},"description":"Only action move: [x, y, width, height] in the workspace, like dragging the window header; read back as state.editorBounds."},"browserWidth":{"type":"number","description":"Only action layout: Browser width 180..360 (clamped like the splitter); state.workspaceLayout."},"playlistRatio":{"type":"number","description":"Only action layout: Channel Rack share of the left column 0.12..0.8."},"rackWidth":{"type":"number","description":"Only action layout: left column width 330..900."},"mixerHeight":{"type":"number","description":"Only action layout: Mixer height 168..360."},"coProducerWidth":{"type":"number","description":"Only action layout: CoProducer dock width 340..760."},"scale":{"type":"string","description":"Only action guide: a scale (major, minor, dorian, ...) or, with maqam:true, a maqam (rast, bayati, ...); empty clears the guide."},"root":{"type":"integer","minimum":0,"maximum":11,"description":"Only action guide: root pitch class, 0 = C."},"maqam":{"type":"boolean","description":"Only action guide: scale names a maqam."},"snapIncoming":{"type":"boolean","description":"Only action guide: snap incoming MIDI (hardware and typing keyboard) to the guide before it plays and records; read back as state.pianoGuide."},"target":{"type":"string","enum":["velocity","release","pan","modX","modY","fine"],"description":"Only editor1/action laneTarget: the note property the Piano roll event lane shows and paints (notes.velocity args.text). Read back as state.pianoLaneTarget."},"chord":{"type":"string","description":"Only action stamp: a Chordify shape name (e.g. major, minor) so drawing a Piano roll note places that chord; empty turns the stamp off. Read back as state.pianoStamp."},"enabled":{"type":"boolean","default":true,"description":"Only editor2/action grouping: temporarily enable/disable group targeting; retain membership. Refused during active gestures."},"snap":{"type":"number","minimum":0,"maximum":32,"description":"Only action snap: the shared Piano roll/Playlist grid in beats (0 = none; e.g. 0.25 step, 1/3 triplet, 4 bar). Read back as state.snap."},"line":{"type":"boolean","description":"Only action snap: true snaps pointer edits to the visible grid lines (zoom dependent) instead of snap; read back as state.snapLine."},"markers":{"type":"boolean","description":"Only action snap: true snaps Playlist positions to markers (distances to bars); read back as state.snapMarkers."}},"required":["editor","action"],"additionalProperties":false}},
       {"name":"vibera_update","description":"In-app updates from the project's GitHub Releases. status reads the phase (idle, checking, upToDate, available, downloading, ready, installing, failed), the current version, the newest available release with its notes and installable asset, download progress and the update settings. check starts a background check (poll status; completes as upToDate, available or failed) without opening dialogs. Downloading and installing need the user's approval in the app (Tools > Check for updates), so they are not MCP actions.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["status","check"]}},"required":["action"],"additionalProperties":false}},
       {"name":"vibera_snapshot","description":"Capture this instance as a bounded JUCE component PNG including the header. With channel: that local Channel's settings window instead (opened if needed) (page 0 Sample, 1 Envelope, 2 Miscellaneous). Not native PrintWindow, physical input or listening evidence.","inputSchema":{"type":"object","properties":{"channel":{"type":"integer","minimum":1},"page":{"type":"integer","minimum":0,"maximum":2}},"additionalProperties":false}},
       {"name":"vibera_key","description":"Run an allowed contextual shortcut through the real JUCE handler. File/dialog/macro commands and held typing-performance input are excluded. Not OS keyboard input.","inputSchema":{"type":"object","properties":{"key":{"type":"integer","minimum":1,"maximum":65535},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["key"],"additionalProperties":false}},
@@ -3544,11 +3544,12 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         auto action = args["action"].toString();
         // 4 is the Browser window: only its window placement is shared with the editors.
         if (index == 4 && action != "detach" && action != "dock" && action != "move" && action != "layout" &&
-            action != "browserFolder" && action != "browserForget")
-            throw McpFailure("invalid_arguments",
-                             "editor 4 (Browser) supports detach, dock, move, layout, browserFolder and browserForget only");
-        if ((action == "browserFolder" || action == "browserForget") && index != 4)
-            throw McpFailure("invalid_arguments", "browserFolder/browserForget use editor 4 (Browser)");
+            action != "browserFolder" && action != "browserForget" && action != "browserTagFilter" &&
+            action != "browserSetTags" && action != "browserPreviewSeek")
+            throw McpFailure("invalid_arguments", "editor 4 (Browser) supports detach, dock, move, layout, browserFolder, "
+                                                  "browserForget, browserTagFilter, browserSetTags and browserPreviewSeek only");
+        if (action.startsWith("browser") && index != 4)
+            throw McpFailure("invalid_arguments", "browser actions use editor 4 (Browser)");
         if (args.hasProperty("enabled") && action != "grouping")
             throw McpFailure("invalid_arguments", "enabled is only valid for action grouping");
         if (args.hasProperty("chord") != (action == "stamp"))
@@ -3634,6 +3635,29 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             if (detachedWindows[size_t(index)] ? detachedWindows[size_t(index)]->isVisible()
                                                : windows[size_t(index)]->isVisible())
                 toggleEditor(index);
+        }
+        else if (action == "browserTagFilter" || action == "browserSetTags" || action == "browserPreviewSeek")
+        {
+            // The same Browser calls as clicking a tag, the Edit tags dialog and Shift+click on the preview.
+            auto &files = browser->filesForTest();
+            juce::Result result = juce::Result::ok();
+            if (action == "browserTagFilter")
+                result = files.tagFilter(args["tag"].toString());
+            else if (action == "browserSetTags")
+            {
+                const auto path = args["path"].toString();
+                if (!juce::File::isAbsolutePath(path) || !juce::File(path).existsAsFile())
+                    throw McpFailure("invalid_arguments", "path must be an absolute existing file");
+                juce::StringArray tags;
+                if (const auto *list = args["tags"].getArray())
+                    for (const auto &tag : *list)
+                        tags.add(tag.toString());
+                result = files.setTags(juce::File(path), tags);
+            }
+            else
+                result = audio.seekAudition(float(number(args, "position", 0)));
+            if (result.failed())
+                throw McpFailure("invalid_target", result.getErrorMessage());
         }
         else if (action == "browserFolder" || action == "browserForget")
         {
@@ -3783,10 +3807,47 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 audio.setMetronome(bool(args["metronome"]));
             refresh();
         }
+        else if (action == "typing")
+        {
+            // The Typing keys right-click menu: held typing notes are released first, then the choice is saved.
+            releaseTypingNotes();
+            if (args.hasProperty("typingRoot"))
+                typingKeys.root = integer(args, "typingRoot", 5, 2, 7) * 12;
+            if (args.hasProperty("typingVelocity"))
+                typingKeys.velocity = integer(args, "typingVelocity", 100, 1, 127);
+            saveTypingPreferences();
+        }
+        else if (action == "drumPad")
+        {
+            const bool on = !args.hasProperty("on") || bool(args["on"]);
+            const auto played = drumPadNote(integer(args, "pad", on ? 0 : 1, 1, 16) - 1,
+                                            float(args.hasProperty("velocity") ? double(args["velocity"]) : .85), on);
+            if (played.failed())
+                throw McpFailure("invalid_target", played.getErrorMessage());
+        }
+        else if (action == "previewSample")
+        {
+            // The Channel settings Preview button: audition the Channel's sample as it is on disk.
+            const auto *c = controller.project.channel(Id(integer(args, "channel", 0, 1, std::numeric_limits<int>::max())));
+            if (!c || c->instrument || c->source.isEmpty())
+                throw McpFailure("invalid_target", "channel.noSample: channel is a sampler Channel with a sample");
+            audio.requestAudition(c->source);
+        }
         else if (action == "midiInput")
         {
             // Same router calls as the Settings > MIDI page; the channel filter change sends All Notes Off.
             requireFinishedTake();
+            if (args.hasProperty("device"))
+            {
+                const auto wanted = args["device"].toString();
+                bool known = wanted.isEmpty();
+                for (const auto &device : juce::MidiInput::getAvailableDevices())
+                    known = known || device.identifier == wanted;
+                if (!known)
+                    throw McpFailure("invalid_target", "midi.unknownDevice: not in state.midiInput.devices");
+                if (const auto opened = audio.midiInput.setDevice(wanted); opened.failed())
+                    throw McpFailure("device_unavailable", opened.getErrorMessage());
+            }
             if (args.hasProperty("midiChannel"))
                 audio.midiInput.setChannel(integer(args, "midiChannel", 0, 0, 16));
             if (args.hasProperty("quantizeStart"))
@@ -4229,6 +4290,29 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         set(input, "channel", audio.midiInput.channel());
         set(input, "quantizeStart", quantizeRecordingStart);
         set(input, "quantizeEnd", quantizeRecordingEnd);
+        set(input, "device", audio.midiInput.identifier());
+        set(input, "deviceStatus", audio.midiInput.status());
+        juce::Array<juce::var> devices;
+        for (const auto &device : juce::MidiInput::getAvailableDevices())
+        {
+            auto entry = obj();
+            set(entry, "name", device.name);
+            set(entry, "identifier", device.identifier);
+            devices.add(entry);
+        }
+        set(input, "devices", devices);
+        auto pads = obj();
+        juce::Array<juce::var> padChannels;
+        for (const auto id : drumPadChannels())
+            padChannels.add(juce::int64(id));
+        set(pads, "channels", padChannels);
+        set(pads, "held", drumPadIndex + 1); // 0 = no pad held.
+        set(state, "drumPads", pads);
+        auto typing = obj();
+        set(typing, "enabled", typingKeys.enabled);
+        set(typing, "root", typingKeys.root);
+        set(typing, "velocity", typingKeys.velocity);
+        set(state, "typingKeys", typing);
         set(state, "midiInput", input);
     }
     set(state, "positionBeat", audio.positionBeat());

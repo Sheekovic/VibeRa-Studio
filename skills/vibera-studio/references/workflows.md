@@ -130,9 +130,18 @@ Settings without ports: `vibera_transport {"action":"guide","countInBars":0..2,
 "sound":0..2 (Click/Wood/Beep),"gain":0..1,"metronome":bool}` (read back `countInBars`,
 `guideSound`, `guideGain`, `metronome`) and `{"action":"midiInput","midiChannel":0..16
 (0 all),"quantizeStart":bool,"quantizeEnd":bool}` (read back `state.midiInput`; refused during
-a take; a channel change sends All Notes Off). Fields left out stay as they are. These are local
-preferences, not Undo steps. Device/port selection, monitoring and long-lived capture control
-still need broader semantic coverage and physical qualification.
+a take; a channel change sends All Notes Off). `midiInput` also takes `"device":<identifier from
+state.midiInput.devices>` (empty closes the input) like the Settings > MIDI device list; read back
+`state.midiInput.device` and `.deviceStatus`; unknown identifiers are refused. `{"action":"typing",
+"typingRoot":2..7,"typingVelocity":1..127}` is the Typing keys right-click menu (`state.typingKeys`).
+Fields left out stay as they are. These are local preferences, not Undo steps. Hardware capture
+still needs physical qualification.
+
+Drum Pads: `vibera_transport {"action":"drumPad","pad":1..16,"velocity":0..1}` strikes a pad (pad n
+plays the n-th sampler Channel: it becomes the selected input target and its root key is held on the
+live input, heard in playback and captured by recording); `{"action":"drumPad","on":false}` releases
+it. Read back `state.drumPads` (`channels`, `held` 0 = none). `{"action":"previewSample","channel":ID}`
+is the Channel settings Preview button (the sample as on disk; read `state.browser.previewReady`).
 
 ## Import a MIDI file
 

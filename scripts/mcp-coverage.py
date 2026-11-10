@@ -76,6 +76,8 @@ def inventory(root=ROOT):
     note_modes_contracts = root / "src/PianoNoteModes.h"
     if note_modes_contracts.is_file():
         tool_source += note_modes_contracts.read_text(encoding="utf-8-sig")
+    audio_take_contracts = root / "src/StudioAudioTake.cpp"  # vibera_audioRecording (listed by mcpTools)
+    tool_source += audio_take_contracts.read_text(encoding="utf-8-sig") if audio_take_contracts.is_file() else ""
     ai_contracts = root / "src/StudioAi.cpp"  # vibera_ai (aiToolDefinition, listed by mcpTools)
     if ai_contracts.is_file():
         tool_source += ai_contracts.read_text(encoding="utf-8-sig")

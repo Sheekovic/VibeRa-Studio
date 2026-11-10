@@ -981,6 +981,9 @@ set_tests_properties(master_pitch_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME record_filter_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-record-filter-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/record_filter_mcp")
 set_tests_properties(record_filter_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME browser_midi_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-browser-midi-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/browser_midi_mcp")
+set_tests_properties(browser_midi_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME envelope_presets_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-envelope-presets-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/envelope_presets_mcp")
 set_tests_properties(envelope_presets_mcp PROPERTIES TIMEOUT 120)

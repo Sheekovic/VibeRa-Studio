@@ -44,3 +44,10 @@ Browser folders: `vibera_editor {"editor":4,"action":"browserFolder","path":<abs
 opens a folder in the Browser (remember adds it to the saved folders, like the folder chooser);
 `browserForget` removes a saved folder (files untouched). Read back `state.browser.folder` and
 `state.browser.libraries`.
+
+Browser tags and preview (editor 4): `browserSetTags {"path":<absolute file>,"tags":[...]}` replaces a
+file's tags like the Edit tags dialog; `browserTagFilter {"tag":"Drum"}` selects or clears one tag in
+the tag filter like clicking it (unknown tags are refused, `browser.unknownTag`); read back
+`state.browser.tags` and `.tagFilter`. `browserPreviewSeek {"position":0..1}` restarts the current
+sample preview there like Shift+click on the preview waveform (`state.browser.previewReady`,
+`.previewPosition`, `.previewSerial`; refused with nothing previewed).

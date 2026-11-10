@@ -61,7 +61,9 @@ prerequisites (a button disabled in the panel is refused with `coproducer.unavai
 - `ideaConfigure`: `model` melody (MelodyRNN continuation) | multitrack (MusicVAE parts) |
   anticipation (experimental), `destination`, `start`, `bars` 1..64, `family`, `variation`,
   `variationAmount` 0..100, `seed`, `chord` + `pitchClasses` (0..11), `lockSelection`,
-  `replaceRegion`, `context` auto | all | [Channel IDs]. Refused while busy.
+  `replaceRegion`, `context` auto | all | [Channel IDs], `installation` (absolute model folder, the
+  Models... button) and `runtime` (absolute Python/Node executable, the Runtime... button); both read
+  back in `ideaState`. Refused while busy.
 - `ideaGenerate` (or `ideaInspect` to read context only) runs asynchronously; poll `ideaState` until
   `busy` is false. The project is unchanged until accept.
 - `ideaAudition` / `ideaStopAudition` `{candidate}`, `ideaAccept {candidate}` (one Undo step:
