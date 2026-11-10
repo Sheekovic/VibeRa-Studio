@@ -57,10 +57,11 @@ try:
     result = raw("vibera_transport", {"action": "midiInput", "midiChannel": 3, "quantizeStart": True, "quantizeEnd": False})
     check(not result.get("isError"), "midiInput applies: " + json.dumps(result)[:160])
     midi = call("vibera_state").get("midiInput", {})
-    check(midi == {"channel": 3, "quantizeStart": True, "quantizeEnd": False}, "MIDI input reads back: " + json.dumps(midi))
+    pick = lambda m: {k: m.get(k) for k in ("channel", "quantizeStart", "quantizeEnd")}  # Device fields are midi.device's.
+    check(pick(midi) == {"channel": 3, "quantizeStart": True, "quantizeEnd": False}, "MIDI input reads back: " + json.dumps(pick(midi)))
     raw("vibera_transport", {"action": "midiInput", "midiChannel": 0, "quantizeEnd": True})
     midi = call("vibera_state").get("midiInput", {})
-    check(midi == {"channel": 0, "quantizeStart": True, "quantizeEnd": True}, "Omni and end quantize read back")
+    check(pick(midi) == {"channel": 0, "quantizeStart": True, "quantizeEnd": True}, "Omni and end quantize read back")
     check(raw("vibera_transport", {"action": "midiInput", "midiChannel": 17}).get("isError"), "Channel 17 is refused")
     check(call("vibera_state").get("midiInput", {}).get("channel") == 0, "A refusal leaves the channel")
     raw("vibera_transport", {"action": "midiInput", "quantizeStart": False, "quantizeEnd": False})
