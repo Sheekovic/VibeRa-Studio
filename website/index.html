@@ -174,135 +174,225 @@
   <h2 class="section-title">What's new</h2>
   <p class="section-sub">VibeRa grows every week. Here is what landed recently.</p>
   <div class="news">
-    <article class="news-item"><time datetime="2026-11-10">10 November 2026</time>
-      <ul>
-        <li>AI assistants can now drive more of VibeRa: Browser tag filters and file tags, preview seeking, the MIDI input device, typing keyboard root and velocity, and the audio input options</li>
-        <li>Drum Pads can be played by an AI assistant too: strike and release pads, heard in playback and captured by recording</li>
-        <li>CoProducer MIDI ideas: the model folder and runtime can be set without the file dialogs</li>
-      </ul>
+    <article class="news-item news-latest">
+      <time datetime="2026-11-12"><span class="news-day">12</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>Editors and Sampler views, hands-free</h3>
+        <span class="news-count">3 changes</span>
+        <ul>
+          <li>AI assistants can scroll and zoom the Playlist, Piano roll, Channel Rack and Mixer with the editors' own scroll bars</li>
+          <li>Sampler: scroll the waveform view left and right with shortcuts, and jump to the root-note keyboard</li>
+          <li>Browser: search the tag list from an AI assistant; the Picker selects Mixer tracks through the shared selection rules</li>
+        </ul>
+      </div>
     </article>
-    <article class="news-item"><time datetime="2026-11-09">9 November 2026</time>
-      <ul>
-        <li>Modulators: put a tempo-synced LFO or random modulator on any Mixer, Channel or plugin control</li>
-        <li>Vocal pitch editor: see sung notes as blocks, drag them or snap them in tune, rendered with the length kept</li>
-        <li>Expression maps: articulations with keyswitches per Channel, chosen per note in the Piano roll</li>
-        <li>Parallel chains: add parallel effect branches to any Mixer insert in one step</li>
-        <li>Settings: the Project sampler links menu opens under its button</li>
-        <li>Playlist markers can Start, Loop, Skip or Pause playback (right-click a marker &gt; Action)</li>
-        <li>Automation Clips: flip, normalize, smooth and scale levels; merge several clips into one</li>
-        <li>Ripple delete: remove a clip and close the gap on its track</li>
-        <li>Piano roll: snap incoming MIDI to the scale guide; Shift+0 centres the view on the playhead</li>
-        <li>Piano roll: interpolate controller events across a time selection</li>
-        <li>Channel Rack: Receive notes from a MIDI channel, so several Channels play live at once</li>
-        <li>Expression maps: articulations can send a control change or program change</li>
-        <li>Playlist: Quantize song jumps to the next beat or bar</li>
-        <li>Piano roll: Pattern markers on the ruler and a Magic lasso to draw around notes</li>
-        <li>Master pitch: retune every instrument in cents from Tools &gt; Master pitch</li>
-        <li>Wait for input: armed recording starts on the first note you play, and keeps that note</li>
-        <li>Audio logger: keep the last 1, 2 or 5 minutes of the master output and save it as a WAV</li>
-        <li>Recording filter: choose whether Record captures MIDI notes, audio or both</li>
-        <li>Automation Clips: Decimate points, Filter, Smooth up, Tension and Create sequence</li>
-        <li>Automation Clips: Analyze audio file turns a recording's loudness into an automation curve</li>
-        <li>Playlist: Make unique as sample gives an audio clip its own copy of the file</li>
-        <li>Export: mono, left-only or right-only WAV, and dither for 16/24-bit files</li>
-        <li>Envelope presets: save a Channel's volume envelope and load it on any other Channel</li>
-        <li>MIDI import: choose which MIDI channels to bring in</li>
-        <li>Plugin windows: the Settings tab no longer gets cut off on scaled displays</li>
-      </ul>
+    <article class="news-item">
+      <time datetime="2026-11-10"><span class="news-day">10</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>More of VibeRa for AI assistants</h3>
+        <span class="news-count">3 changes</span>
+        <ul>
+          <li>AI assistants can now drive more of VibeRa: Browser tag filters and file tags, preview seeking, the MIDI input device, typing keyboard root and velocity, and the audio input options</li>
+          <li>Drum Pads can be played by an AI assistant too: strike and release pads, heard in playback and captured by recording</li>
+          <li>CoProducer MIDI ideas: the model folder and runtime can be set without the file dialogs</li>
+        </ul>
+      </div>
     </article>
-    <article class="news-item"><time datetime="2026-11-08">8 November 2026</time>
-      <ul>
-        <li>The VibeRa manual: a workspace tour, tutorials, all 40 effects, every shortcut and producer hacks</li>
-        <li>Chord Track: write a song-wide chord progression on the Playlist ruler and let notes follow it</li>
-        <li>Performance mode: Follow actions move a launched Pattern to the next, a random or another Pattern</li>
-        <li>Loudness report after every export: integrated LUFS, loudness range and true peak</li>
-        <li>VibeRa 0.2.0: recording, tuning and maqam, and release-quality modules are complete and tested</li>
-        <li>Maqam tuning measured in the rendered audio: Rast E sounds exactly a quarter tone flat</li>
-        <li>Tools &gt; Export diagnostics for bug reports, without personal paths</li>
-        <li>Keyboard focus ring, named controls and larger tempo buttons for accessibility</li>
-        <li>Browser: sort results, column view, Show in folder and Move to Recycle Bin</li>
-        <li>Crash recovery, old-project migration and the installer verified end to end</li>
-      </ul>
+    <article class="news-item">
+      <time datetime="2026-11-09"><span class="news-day">9</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>Modulators, vocal pitch editor and expression maps</h3>
+        <span class="news-count">25 changes</span>
+        <ul>
+          <li>Modulators: put a tempo-synced LFO or random modulator on any Mixer, Channel or plugin control</li>
+          <li>Vocal pitch editor: see sung notes as blocks, drag them or snap them in tune, rendered with the length kept</li>
+          <li>Expression maps: articulations with keyswitches per Channel, chosen per note in the Piano roll</li>
+          <li>Parallel chains: add parallel effect branches to any Mixer insert in one step</li>
+        </ul>
+        <details class="news-more">
+          <summary>Show 21 more</summary>
+          <ul>
+            <li>Settings: the Project sampler links menu opens under its button</li>
+            <li>Playlist markers can Start, Loop, Skip or Pause playback (right-click a marker &gt; Action)</li>
+            <li>Automation Clips: flip, normalize, smooth and scale levels; merge several clips into one</li>
+            <li>Ripple delete: remove a clip and close the gap on its track</li>
+            <li>Piano roll: snap incoming MIDI to the scale guide; Shift+0 centres the view on the playhead</li>
+            <li>Piano roll: interpolate controller events across a time selection</li>
+            <li>Channel Rack: Receive notes from a MIDI channel, so several Channels play live at once</li>
+            <li>Expression maps: articulations can send a control change or program change</li>
+            <li>Playlist: Quantize song jumps to the next beat or bar</li>
+            <li>Piano roll: Pattern markers on the ruler and a Magic lasso to draw around notes</li>
+            <li>Master pitch: retune every instrument in cents from Tools &gt; Master pitch</li>
+            <li>Wait for input: armed recording starts on the first note you play, and keeps that note</li>
+            <li>Audio logger: keep the last 1, 2 or 5 minutes of the master output and save it as a WAV</li>
+            <li>Recording filter: choose whether Record captures MIDI notes, audio or both</li>
+            <li>Automation Clips: Decimate points, Filter, Smooth up, Tension and Create sequence</li>
+            <li>Automation Clips: Analyze audio file turns a recording's loudness into an automation curve</li>
+            <li>Playlist: Make unique as sample gives an audio clip its own copy of the file</li>
+            <li>Export: mono, left-only or right-only WAV, and dither for 16/24-bit files</li>
+            <li>Envelope presets: save a Channel's volume envelope and load it on any other Channel</li>
+            <li>MIDI import: choose which MIDI channels to bring in</li>
+            <li>Plugin windows: the Settings tab no longer gets cut off on scaled displays</li>
+          </ul>
+        </details>
+      </div>
     </article>
-    <article class="news-item"><time datetime="2026-11-07">7 November 2026</time>
-      <ul>
-        <li>VibeRa 0.1.0: the Channel Rack, Pattern and Sampler module is complete and fully tested</li>
-        <li>Channel Rack: Ctrl+Shift+Left/Right rotates the selected Channel's steps</li>
-        <li>Mixer: link instrument plugins such as the VibeRa Synthesizer to any Mixer track, with Undo</li>
-        <li>Mixer: smart disable for VibeRa effects, render-armed tracks and multi-output instruments</li>
-        <li>Synthesizer: searching "wavetable" finds every wavetable preset</li>
-        <li>Windows: VibeRa, its tool windows and plugin windows now open in front</li>
-      </ul>
+    <details class="news-older">
+      <summary>Earlier updates</summary>
+    <article class="news-item">
+      <time datetime="2026-11-08"><span class="news-day">8</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>VibeRa 0.2.0, the manual and the Chord Track</h3>
+        <span class="news-count">10 changes</span>
+        <ul>
+          <li>The VibeRa manual: a workspace tour, tutorials, all 40 effects, every shortcut and producer hacks</li>
+          <li>Chord Track: write a song-wide chord progression on the Playlist ruler and let notes follow it</li>
+          <li>Performance mode: Follow actions move a launched Pattern to the next, a random or another Pattern</li>
+          <li>Loudness report after every export: integrated LUFS, loudness range and true peak</li>
+        </ul>
+        <details class="news-more">
+          <summary>Show 6 more</summary>
+          <ul>
+            <li>VibeRa 0.2.0: recording, tuning and maqam, and release-quality modules are complete and tested</li>
+            <li>Maqam tuning measured in the rendered audio: Rast E sounds exactly a quarter tone flat</li>
+            <li>Tools &gt; Export diagnostics for bug reports, without personal paths</li>
+            <li>Keyboard focus ring, named controls and larger tempo buttons for accessibility</li>
+            <li>Browser: sort results, column view, Show in folder and Move to Recycle Bin</li>
+            <li>Crash recovery, old-project migration and the installer verified end to end</li>
+          </ul>
+        </details>
+      </div>
     </article>
-    <article class="news-item"><time datetime="2026-11-06">6 November 2026</time>
-      <ul>
-        <li>Mixer: save and open a whole track state (effects, EQ, fader and pan)</li>
-        <li>Touch-record Mixer fader, pan and send moves into automation while playing</li>
-        <li>Automation: stairs, pulse, wave, double curve and smooth stairs shapes</li>
-        <li>Channel Rack: pan and volume knobs on every row, automation clips for them, channel button width</li>
-        <li>Piano roll: JavaScript note scripts, note groups, trim, keyboard labels, auto-scroll and centred follow</li>
-        <li>Playlist: add markers every N bars, export each track or track group as audio</li>
-        <li>Convolution reverb with your own impulse files, plus formant, frequency shifter and waveshaper effects</li>
-      </ul>
+    <article class="news-item">
+      <time datetime="2026-11-07"><span class="news-day">7</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>VibeRa 0.1.0: Rack, Pattern and Sampler complete</h3>
+        <span class="news-count">6 changes</span>
+        <ul>
+          <li>VibeRa 0.1.0: the Channel Rack, Pattern and Sampler module is complete and fully tested</li>
+          <li>Channel Rack: Ctrl+Shift+Left/Right rotates the selected Channel's steps</li>
+          <li>Mixer: link instrument plugins such as the VibeRa Synthesizer to any Mixer track, with Undo</li>
+          <li>Mixer: smart disable for VibeRa effects, render-armed tracks and multi-output instruments</li>
+        </ul>
+        <details class="news-more">
+          <summary>Show 2 more</summary>
+          <ul>
+            <li>Synthesizer: searching "wavetable" finds every wavetable preset</li>
+            <li>Windows: VibeRa, its tool windows and plugin windows now open in front</li>
+          </ul>
+        </details>
+      </div>
     </article>
-    <article class="news-item"><time datetime="2026-11-05">5 November 2026</time>
-      <ul>
-        <li>Playlist: copy, cut and paste clips; insert and delete time from a ruler selection</li>
-        <li>Chop clips into bars or beats, quick-quantize clip starts, select all similar clips</li>
-        <li>Split a Pattern clip by channel and merge Pattern clips into one</li>
-        <li>Long Pattern clips repeat their Pattern; scrub and resize selections on the ruler</li>
-        <li>Clearer Playlist: mini piano-roll previews in clips and the picker, ruler ticks</li>
-        <li>Sampler time stretching: pitch, multiply, time and mode</li>
-        <li>Render selected clips to an audio clip; trim a Pattern clip from its left edge</li>
-        <li>Song overview in the Playlist scrollbar, auto-scroll while playing, beat numbers on the ruler</li>
-        <li>Snap to triplets, finer steps, grid lines or markers</li>
-        <li>Resize tracks by dragging, Alt+wheel vertical zoom, Shift+arrows move clips between tracks</li>
-        <li>Mixer: a built-in 3-band EQ on every track with a curve editor</li>
-        <li>Piano roll: copy/paste, chord stamp, flip, rotate, limit, flam, insert/delete space, resize from the left, new selection tools</li>
-        <li>Channel Rack: random and gradient colours, select unused channels, Ctrl+click preview</li>
-        <li>Playlist: stretch audio clips by dragging, track clone/auto-name, consolidate a track to audio</li>
-        <li>Plugin window header: ON, PAN, VOL, PITCH, RANGE and the Mixer TRACK, like the familiar wrapper</li>
-        <li>Assign Mixer tracks while plugin windows are open; new default layout (Rack over Piano roll, Playlist over Mixer)</li>
-        <li>Piano roll: Riff machine, Claw machine, Randomize, Articulate, Scale levels, LFO tool, drum paint (N), play tool (Y)</li>
-        <li>Mixer: track delay, add several inserts at once, Meter-wave view, effect chain spare state</li>
-        <li>Channel spare state, zip channels, link channels to consecutive Mixer tracks (Ctrl+Shift+L)</li>
-        <li>Four new effects: Convolution Reverb (built-in rooms or your own impulse files), Formant Filter (A E I O U vowels), Frequency Shifter and Waveshaper</li>
-        <li>Piano roll: group notes (Shift+G), trim to a time selection, turn a controller lane into an automation clip, insert the current controller value (Ctrl+I)</li>
-        <li>Piano roll event lane can edit Velocity, Release, Pan, Mod X, Mod Y or Fine pitch</li>
-        <li>Export a Piano roll part as a score sheet (PDF) and copy or paste through the MIDI clipboard</li>
-        <li>Playlist: merge similar Pattern clips everywhere (Shift+Ctrl+G), pitch audio clips by semitones (7 / 8) and reverse them (9)</li>
-        <li>Channel Rack: transpose selected channels, assign them to free Mixer tracks in one step</li>
-        <li>Mixer: dock tracks to the left, middle or right; add an insert straight from a chain preset</li>
-        <li>Tap tempo button, and project templates (New from template / Save as template)</li>
-      </ul>
+    <article class="news-item">
+      <time datetime="2026-11-06"><span class="news-day">6</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>Track states and touch-recorded automation</h3>
+        <span class="news-count">7 changes</span>
+        <ul>
+          <li>Mixer: save and open a whole track state (effects, EQ, fader and pan)</li>
+          <li>Touch-record Mixer fader, pan and send moves into automation while playing</li>
+          <li>Automation: stairs, pulse, wave, double curve and smooth stairs shapes</li>
+          <li>Channel Rack: pan and volume knobs on every row, automation clips for them, channel button width</li>
+        </ul>
+        <details class="news-more">
+          <summary>Show 3 more</summary>
+          <ul>
+            <li>Piano roll: JavaScript note scripts, note groups, trim, keyboard labels, auto-scroll and centred follow</li>
+            <li>Playlist: add markers every N bars, export each track or track group as audio</li>
+            <li>Convolution reverb with your own impulse files, plus formant, frequency shifter and waveshaper effects</li>
+          </ul>
+        </details>
+      </div>
     </article>
-    <article class="news-item"><time datetime="2026-11-04">4 November 2026</time>
-      <ul>
-        <li>VibeRa Drum Synth: an original synthesized drum kit with eight pads (kick, snare, clap, hats, toms, rim)</li>
-        <li>Beat Gate: a tempo-synced gate, stutter and half-time effect that follows the song</li>
-        <li>Pump (tempo-synced volume pumping) and Lo-fi (tape wobble, hiss, crackle, tone)</li>
-        <li>Every effect window redesigned: balanced layout, lighter look and a live visual</li>
-        <li>New sampler channel window with Sample, Envelope and Misc pages</li>
-        <li>Instrument tracks and audio tracks in the Playlist</li>
-        <li>Pattern automation: record knob moves inside a Pattern and they play wherever it is placed</li>
-        <li>Autosave, rotating backups and crash recovery</li>
-        <li>Fit audio clips to the project tempo without adding a new sample</li>
-        <li>Browser view of everything in the current project</li>
-        <li>Mixer send knobs and sharper exports with latent effects</li>
-        <li>In-app updates: see what changed, approve, and the verified update installs itself</li>
-        <li>Every change is now built for Windows, Linux and macOS on GitHub (Linux and macOS are not tested yet)</li>
-      </ul>
+    <article class="news-item">
+      <time datetime="2026-11-05"><span class="news-day">5</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>A big day for the Playlist, Piano roll and Mixer</h3>
+        <span class="news-count">27 changes</span>
+        <ul>
+          <li>Playlist: copy, cut and paste clips; insert and delete time from a ruler selection</li>
+          <li>Chop clips into bars or beats, quick-quantize clip starts, select all similar clips</li>
+          <li>Split a Pattern clip by channel and merge Pattern clips into one</li>
+          <li>Long Pattern clips repeat their Pattern; scrub and resize selections on the ruler</li>
+        </ul>
+        <details class="news-more">
+          <summary>Show 23 more</summary>
+          <ul>
+            <li>Clearer Playlist: mini piano-roll previews in clips and the picker, ruler ticks</li>
+            <li>Sampler time stretching: pitch, multiply, time and mode</li>
+            <li>Render selected clips to an audio clip; trim a Pattern clip from its left edge</li>
+            <li>Song overview in the Playlist scrollbar, auto-scroll while playing, beat numbers on the ruler</li>
+            <li>Snap to triplets, finer steps, grid lines or markers</li>
+            <li>Resize tracks by dragging, Alt+wheel vertical zoom, Shift+arrows move clips between tracks</li>
+            <li>Mixer: a built-in 3-band EQ on every track with a curve editor</li>
+            <li>Piano roll: copy/paste, chord stamp, flip, rotate, limit, flam, insert/delete space, resize from the left, new selection tools</li>
+            <li>Channel Rack: random and gradient colours, select unused channels, Ctrl+click preview</li>
+            <li>Playlist: stretch audio clips by dragging, track clone/auto-name, consolidate a track to audio</li>
+            <li>Plugin window header: ON, PAN, VOL, PITCH, RANGE and the Mixer TRACK, like the familiar wrapper</li>
+            <li>Assign Mixer tracks while plugin windows are open; new default layout (Rack over Piano roll, Playlist over Mixer)</li>
+            <li>Piano roll: Riff machine, Claw machine, Randomize, Articulate, Scale levels, LFO tool, drum paint (N), play tool (Y)</li>
+            <li>Mixer: track delay, add several inserts at once, Meter-wave view, effect chain spare state</li>
+            <li>Channel spare state, zip channels, link channels to consecutive Mixer tracks (Ctrl+Shift+L)</li>
+            <li>Four new effects: Convolution Reverb (built-in rooms or your own impulse files), Formant Filter (A E I O U vowels), Frequency Shifter and Waveshaper</li>
+            <li>Piano roll: group notes (Shift+G), trim to a time selection, turn a controller lane into an automation clip, insert the current controller value (Ctrl+I)</li>
+            <li>Piano roll event lane can edit Velocity, Release, Pan, Mod X, Mod Y or Fine pitch</li>
+            <li>Export a Piano roll part as a score sheet (PDF) and copy or paste through the MIDI clipboard</li>
+            <li>Playlist: merge similar Pattern clips everywhere (Shift+Ctrl+G), pitch audio clips by semitones (7 / 8) and reverse them (9)</li>
+            <li>Channel Rack: transpose selected channels, assign them to free Mixer tracks in one step</li>
+            <li>Mixer: dock tracks to the left, middle or right; add an insert straight from a chain preset</li>
+            <li>Tap tempo button, and project templates (New from template / Save as template)</li>
+          </ul>
+        </details>
+      </div>
     </article>
-    <article class="news-item"><time datetime="2026-11-03">3 November 2026</time>
-      <ul>
-        <li>Studio Reverb, multiband, maximizer, de-esser, transient shaper and spectrum analyzer</li>
-        <li>Wavetable oscillators with 16-voice unison in VibeRa Synth</li>
-        <li>Drum Pads and a chord progression tool</li>
-        <li>Audio clips that follow tempo changes, and shaped tempo curves</li>
-        <li>MPE and MTS-ESP microtuning for plugin instruments</li>
-        <li>Open .flp project files</li>
-      </ul>
+    <article class="news-item">
+      <time datetime="2026-11-04"><span class="news-day">4</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>Drum Synth, Beat Gate and redesigned effect windows</h3>
+        <span class="news-count">13 changes</span>
+        <ul>
+          <li>VibeRa Drum Synth: an original synthesized drum kit with eight pads (kick, snare, clap, hats, toms, rim)</li>
+          <li>Beat Gate: a tempo-synced gate, stutter and half-time effect that follows the song</li>
+          <li>Pump (tempo-synced volume pumping) and Lo-fi (tape wobble, hiss, crackle, tone)</li>
+          <li>Every effect window redesigned: balanced layout, lighter look and a live visual</li>
+        </ul>
+        <details class="news-more">
+          <summary>Show 9 more</summary>
+          <ul>
+            <li>New sampler channel window with Sample, Envelope and Misc pages</li>
+            <li>Instrument tracks and audio tracks in the Playlist</li>
+            <li>Pattern automation: record knob moves inside a Pattern and they play wherever it is placed</li>
+            <li>Autosave, rotating backups and crash recovery</li>
+            <li>Fit audio clips to the project tempo without adding a new sample</li>
+            <li>Browser view of everything in the current project</li>
+            <li>Mixer send knobs and sharper exports with latent effects</li>
+            <li>In-app updates: see what changed, approve, and the verified update installs itself</li>
+            <li>Every change is now built for Windows, Linux and macOS on GitHub (Linux and macOS are not tested yet)</li>
+          </ul>
+        </details>
+      </div>
     </article>
+    <article class="news-item">
+      <time datetime="2026-11-03"><span class="news-day">3</span><span class="news-month">Nov 2026</span></time>
+      <div class="news-body">
+        <h3>Studio Reverb, wavetables and .flp import</h3>
+        <span class="news-count">6 changes</span>
+        <ul>
+          <li>Studio Reverb, multiband, maximizer, de-esser, transient shaper and spectrum analyzer</li>
+          <li>Wavetable oscillators with 16-voice unison in VibeRa Synth</li>
+          <li>Drum Pads and a chord progression tool</li>
+          <li>Audio clips that follow tempo changes, and shaped tempo curves</li>
+        </ul>
+        <details class="news-more">
+          <summary>Show 2 more</summary>
+          <ul>
+            <li>MPE and MTS-ESP microtuning for plugin instruments</li>
+            <li>Open .flp project files</li>
+          </ul>
+        </details>
+      </div>
+    </article>
+    </details>
   </div>
 </section>
 
