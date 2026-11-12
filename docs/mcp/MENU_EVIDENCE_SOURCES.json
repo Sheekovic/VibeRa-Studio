@@ -326,6 +326,39 @@
         "scripts/verify-workspace-layout-mcp.py"
       ],
       "scope": "Registered tests that exercise the operations the Browser toolbar, results menu and file menu run, each run alone on this binary. Not native popup input or listening evidence."
+    },
+    "docs/mcp/SAMPLER_MENU_EVIDENCE.json": {
+      "ctests": [
+        "sampler_tempo_mcp",
+        "mcp_ui_actions",
+        "browser_midi_mcp"
+      ],
+      "folder": "sampler-menu",
+      "sources": [
+        "src/SamplerGestures.h",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-sampler-tempo-mcp.py",
+        "scripts/verify-ui-actions-mcp.py",
+        "scripts/verify-browser-midi-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations the sampler waveform menu runs, each run alone on this binary."
+    },
+    "docs/mcp/COPRODUCER_MENU_EVIDENCE.json": {
+      "ctests": [
+        "coproducer_ideas_mcp",
+        "ai_producer_mcp"
+      ],
+      "folder": "coproducer-menu",
+      "sources": [
+        "src/CoProducerPanel.h",
+        "src/CoProducerChat.h",
+        "src/StudioAi.cpp",
+        "src/Commands.cpp",
+        "scripts/verify-coproducer-ideas-mcp.py",
+        "scripts/verify-ai-producer-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations the CoProducer context and chat menus run, each run alone on this binary."
     }
   }
 }

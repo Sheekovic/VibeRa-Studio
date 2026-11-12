@@ -269,6 +269,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `channel.previewSample` | vibera_transport | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `drumPads.hit` | vibera_transport | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `midi.typingOptions` | vibera_transport | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `audio.monitorVolume` | vibera_transport | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `recording.audioInput` | vibera_audioRecording | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `transport.guide` | vibera_transport | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `controller.binding` | vibera_controller | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -804,7 +805,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 68.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 345; gaps: 156.
+Explicit UI inventory complete: False; known controls: 351; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1154,6 +1155,12 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `browser.previewSeek` | browser.previewSeek | vibera_editor; reviewed |
 | `browser.sortColumns` | browser.sort / browser.columns | vibera_editor; reviewed |
 | `browser.folders` | browser.openFolder / browser.forgetFolder | vibera_editor; reviewed |
+| `tools.monitorVolume` | audio.monitorVolume | vibera_transport; reviewed |
+| `sampler.menu.resetRange` | channel.sampler.range | vibera_command; reviewed |
+| `sampler.menu.tempo` | channel.sampler.sourceTempo / channel.sampler.tempoDetect / channel.sampler.fitTempo / channel.sampler.tempo | vibera_samplerTempo; reviewed |
+| `sampler.menu.view` | sampler.view.all / sampler.view.range / sampler.view.zoomIn / sampler.view.zoomOut | vibera_command; reviewed |
+| `coproducer.menu.context` | ai.idea.configure | vibera_ai; reviewed |
+| `coproducer.menu.copy` | ai.chat | vibera_ai; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

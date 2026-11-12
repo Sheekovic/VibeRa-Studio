@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
+  "sourceInputs": {
+    "src/CoProducerPanel.h": "7186267e2593f49495595f4064541cbb118a960baba08ff02a58d66d01374470",
+    "src/CoProducerChat.h": "51d8ec0875499c3388b18cb1cfc7ee447d706f5f0d33159ae8f6d58a3b3d293e",
+    "src/StudioAi.cpp": "8a1651949afc3065d5ec1c24feec4d87af55cff35022767d7a888a92902d533f",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
+    "scripts/verify-coproducer-ideas-mcp.py": "24078cb4df3366bf8df9e617bd91d6336318348f9b95a5ff5d4b0c8892cda4cc",
+    "scripts/verify-ai-producer-mcp.py": "f0ae2c53b4ad6c1b1bd46b2d8239f042cb1cb79a2db1e8d0fc34f5eb3c35778f"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest ai_producer_mcp passed (run alone)",
+    "ctest coproducer_ideas_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations the CoProducer context and chat menus run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/coproducer-menu/related-ctest.log"
+}
