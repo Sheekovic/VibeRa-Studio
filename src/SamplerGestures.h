@@ -287,6 +287,8 @@ class SamplerRangeView final : public juce::Component,
             const auto span = std::min(1., viewSpan * (action == "sampler.view.zoomIn" ? .5 : 2.));
             setView(viewBegin + (viewSpan - span) * .5, span);
         }
+        else if (action == "sampler.view.left" || action == "sampler.view.right") // Shift+wheel: a quarter view.
+            setView(viewBegin + viewSpan * (action == "sampler.view.left" ? -.25 : .25), viewSpan);
     }
     void mouseWheelMove(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override
     {

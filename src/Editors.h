@@ -2822,6 +2822,25 @@ class Studio::Editor final : public juce::Component,
         navigationChanged();
         return juce::Result::ok();
     }
+    // vibera_editor scroll: the editor's own scroll bars (start/span in the bar's units: beats, steps,
+    // rows or pixels; state.editorViews reads them back as [start, span, domain]).
+    juce::Result scrollView(bool vertical, double start, double span)
+    {
+        return (vertical ? verticalBar : horizontalBar).set(start, span);
+    }
+    juce::var viewState() const
+    {
+        auto *o = new juce::DynamicObject;
+        for (const auto *bar : {&horizontalBar, &verticalBar})
+            if (bar->read)
+            {
+                const auto v = bar->read();
+                o->setProperty(bar == &horizontalBar ? "horizontal" : "vertical", juce::Array<juce::var>{v[0], v[1], v[2]});
+            }
+        o->setProperty("horizontalZoom", horizontalBar.allowZoom);
+        o->setProperty("verticalZoom", verticalBar.allowZoom);
+        return juce::var(o);
+    }
     juce::var effectSlotsState() const
     {
         const auto layout = mixerEffectLayout();
@@ -8348,7 +8367,7 @@ class Studio::Browser final : public juce::Component, public juce::FileDragAndDr
                     s.audio.requestAudition(e->source);
             }
             else if (e->kind == Kind::effect)
-                s.selectedInsert = e->insert;
+                (void)s.selectMixerInsert(e->insert);
             else if (e->kind == Kind::pattern)
                 s.selectPattern(e->id);
             s.repaint();

@@ -143,6 +143,11 @@ live input, heard in playback and captured by recording); `{"action":"drumPad","
 it. Read back `state.drumPads` (`channels`, `held` 0 = none). `{"action":"previewSample","channel":ID}`
 is the Channel settings Preview button (the sample as on disk; read `state.browser.previewReady`).
 
+Sampler waveform view (open Channel settings window): `vibera_command sampler.view.zoomIn` / `zoomOut` /
+`left` / `right` / `all` / `range`; read `state.samplerView` (`start`, `span` as fractions of the sample).
+`sampler.showKeyboard` scrolls the window to the root-note keyboard. `vibera_mixer {"action":"select",
+"insert":N}` selects a Mixer insert like clicking it in the Mixer or the Picker (`state.selectedInsert`).
+
 ## Import a MIDI file
 
 `vibera_project {"action":"importMidi","path":<absolute .mid>}` imports into the

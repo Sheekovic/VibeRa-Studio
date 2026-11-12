@@ -66,6 +66,25 @@ try:
     check(raw("vibera_editor", {"editor": 2, "action": "browserTagFilter", "tag": "Drum"}).get("isError"),
           "Browser actions need editor 4")
 
+    check(not editor("browserTagSearch", text="dr").get("isError") and browser().get("visibleTags") == ["Drum"]
+          and browser().get("tagSearch") == "dr", f"browser.tagSearch narrows the tag list ({browser().get('visibleTags')})")
+    editor("browserTagSearch", text="")
+    check({"Drum", "Low"} <= set(browser().get("visibleTags", [])), "An empty search shows every tag")
+
+    # view.scroll: the editors' own scroll bars (Playlist zooms horizontally; the others only move).
+    views = lambda: call("vibera_state")["editorViews"]
+    scroll = lambda index, **a: raw("vibera_editor", dict(editor=index, action="scroll", **a))
+    check(len(views()) == 4 and len(views()[2]["horizontal"]) == 3, f"Editor views read back ({views()[2]})")
+    check(not scroll(2, start=8).get("isError") and abs(views()[2]["horizontal"][0] - 8) < 1e-6, "view.scroll moves the Playlist to beat 8")
+    check(not scroll(2, start=4, span=16).get("isError") and abs(views()[2]["horizontal"][1] - 16) < .05
+          and abs(views()[2]["horizontal"][0] - 4) < 1e-6, f"A span zooms the Playlist to 16 beats ({views()[2]['horizontal']})")
+    piano_before = views()[1]["vertical"]
+    target = max(0, piano_before[0] - 6)
+    check(not scroll(1, vertical=True, start=target).get("isError") and abs(views()[1]["vertical"][0] - target) <= 1,
+          f"The Piano roll scrolls vertically ({piano_before} -> {views()[1]['vertical']})")
+    check(scroll(2, start=-1).get("isError"), "A negative start is refused")
+    check(scroll(4, start=0).get("isError"), "The Browser has no editor scroll bars")
+
     serial = browser().get("previewSerial")
     check(editor("browserPreviewSeek", position=.5).get("isError") or browser().get("previewReady"),
           "Seeking with no sample previewed is refused")
@@ -84,6 +103,28 @@ try:
     if instrument:
         check(raw("vibera_transport", {"action": "previewSample", "channel": instrument["id"]}).get("isError"),
               "A Channel without a sample is refused")
+
+    # Sampler waveform view (sampler.view.left / right) and the Keyboard button of the open settings window.
+    call("vibera_select", {"channel": sample["id"]})
+    call("vibera_command", {"command": "channel.openInstrument"})
+    command = lambda name: call("vibera_command", {"command": name})
+    view = lambda: call("vibera_state").get("samplerView", {})
+    check(view().get("channel") == sample["id"] and view().get("span") == 1, f"The sampler view reads back ({view()})")
+    command("sampler.view.zoomIn")
+    centred = view()
+    check(abs(centred["span"] - .5) < 1e-9 and abs(centred["start"] - .25) < 1e-9, f"Zoom in halves the view ({centred})")
+    command("sampler.view.right")
+    check(abs(view()["start"] - .375) < 1e-9, f"sampler.view.right moves a quarter view right ({view()})")
+    command("sampler.view.left")
+    command("sampler.view.left")
+    check(abs(view()["start"] - .125) < 1e-9, f"sampler.view.left moves back ({view()})")
+    command("sampler.view.all")
+    shown = command("sampler.showKeyboard")
+    check(shown.get("completionState") in ("completed", "failed"), f"sampler.showKeyboard reports its outcome ({shown.get('completionState')})")
+
+    # Picker / Mixer: select an insert (mixer.insert.select).
+    check(not raw("vibera_mixer", {"action": "select", "insert": 1}).get("isError")
+          and call("vibera_state").get("selectedInsert") == 1, "mixer.insert.select selects insert 1")
 
     # Drum Pads: pad n plays the n-th sampler Channel; striking selects it and holds its root key.
     pads = call("vibera_state")["drumPads"]

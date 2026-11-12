@@ -50,4 +50,11 @@ file's tags like the Edit tags dialog; `browserTagFilter {"tag":"Drum"}` selects
 the tag filter like clicking it (unknown tags are refused, `browser.unknownTag`); read back
 `state.browser.tags` and `.tagFilter`. `browserPreviewSeek {"position":0..1}` restarts the current
 sample preview there like Shift+click on the preview waveform (`state.browser.previewReady`,
-`.previewPosition`, `.previewSerial`; refused with nothing previewed).
+`.previewPosition`, `.previewSerial`; refused with nothing previewed). `browserTagSearch {"text":"dr"}`
+types in the tag list's search box (`state.browser.tagSearch`, `.visibleTags`; empty shows all).
+
+Editor scroll bars: `vibera_editor {"editor":0..3,"action":"scroll","vertical":false,"start":8,"span":16}`
+moves the editor's scroll bar thumb like dragging it. Read `state.editorViews[editor].horizontal` /
+`.vertical` = [start, span, domain] first: units are the bar's own (Playlist/Piano roll beats and rows,
+Rack steps and Channels, Mixer pixels and effect slots). `span` zooms only where the bar zooms
+(`horizontalZoom` / `verticalZoom`); start is clamped to the domain. View state, not an Undo step.

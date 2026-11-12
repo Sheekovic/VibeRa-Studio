@@ -25,6 +25,21 @@ class ViewportBar final : public juce::Component, public juce::SettableTooltipCl
     std::function<void(double, double)> change;
     // Optional overview drawn under the thumb (the Playlist draws its clips: a song overview).
     std::function<void(juce::Graphics &, juce::Rectangle<float>)> background;
+    // Programmatic thumb move / zoom (view.scroll): publishes the same change as dragging the thumb.
+    juce::Result set(double next, double length)
+    {
+        if (!read || !change)
+            return juce::Result::fail("view.noScrollBar: This editor has no scroll bar on that axis");
+        const auto v = read();
+        if (!allowZoom || length <= 0)
+            length = v[1];
+        if (!std::isfinite(next) || !std::isfinite(length) || next < 0)
+            return juce::Result::fail("view.invalidScroll: start is 0 or more; span is positive");
+        length = juce::jlimit(.125, std::max(.125, v[2]), length);
+        change(juce::jlimit(0., std::max(0., v[2] - length), next), length);
+        repaint();
+        return juce::Result::ok();
+    }
     explicit ViewportBar(bool v) : vertical(v)
     {
         setMouseCursor(juce::MouseCursor::PointingHandCursor);

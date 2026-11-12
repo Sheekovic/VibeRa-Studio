@@ -4682,6 +4682,19 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     }
     if (action.startsWith("sampler.view."))
         return navigateSamplerView(action);
+    if (action == "sampler.showKeyboard")
+    {
+        // The Channel settings "Keyboard" button: scroll the open window to the root-note keyboard.
+        const auto window = instrumentWindows.find(selectedChannel);
+        if (window == instrumentWindows.end() || !window->second || !window->second->isVisible())
+            return false;
+        auto *button = dynamic_cast<juce::Button *>(
+            window->second->controlsComponent()->findChildWithID("instrument.sampler.showKeyboard"));
+        if (!button || !button->isEnabled() || !button->onClick)
+            return false;
+        button->onClick();
+        return true;
+    }
     if (action == "sampler.page.sample" || action == "sampler.page.envelope" || action == "sampler.page.misc")
     {
         // Channel settings window page of the selected sampler Channel (opened if needed).

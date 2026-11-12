@@ -911,6 +911,8 @@ class SampleFileBrowser final : public juce::Component,
         state->setProperty("columns", detailColumns);
         state->setProperty("fullPreview", studio.audio.fullAudition());
         state->setProperty("previewVolume", studio.audio.auditionVolume());
+        state->setProperty("tagSearch", tagNameSearch.getText());
+        state->setProperty("visibleTags", visibleTags);
         state->setProperty("previewReady", studio.audio.canReplayAudition());
         state->setProperty("previewPosition", double(studio.audio.auditionPosition()));
         state->setProperty("previewSerial", juce::int64(studio.audio.auditionRequestId()));
@@ -1524,6 +1526,10 @@ class SampleFileBrowser final : public juce::Component,
         const auto id =
             currentView >= 2 ? collections.searches[std::size_t(currentView - 2)].id : juce::String{};
         collectionAction(selectedFile(), id)(choice);
+    }
+    void searchTags(const juce::String &text) // Same as typing in the tag list's search box.
+    {
+        tagNameSearch.setText(text, juce::sendNotificationSync);
     }
     juce::Result tagFilter(const juce::String &name) // Same as clicking the tag in the tag filter list.
     {
