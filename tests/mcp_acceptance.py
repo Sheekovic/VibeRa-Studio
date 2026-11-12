@@ -444,7 +444,7 @@ try:
     state_of(call("vibera_select", {"pattern":source_id,"scope":6}))
     check(call("vibera_key", {"key":127}).get("isError") is True, "Pattern Delete opened a dialog through MCP")
     state_of(call("vibera_select", {"scope":2}))
-    controller_profile = state_of(call("vibera_controller", {"action":"preset"}))["controllerProfile"]
+    controller_profile = state_of(call("vibera_controller", {"action":"preset","replace":True}))["controllerProfile"]
     check(len(controller_profile["bindings"]) >= 50, "Launchkey native mapping preset missing")
     base_revision = state_of(call("vibera_state"))["revision"]
     fader = state_of(call("vibera_controller", {"action":"inject","kind":0,"channel":16,"number":53,"value":0}))

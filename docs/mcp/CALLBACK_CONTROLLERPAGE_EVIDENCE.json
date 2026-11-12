@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/ControllerPage.h": "0eaeea82572f467f4ba4fe8fbc56999d8ab56681f983cd820b91c6a2d640b954"
+    "src/ControllerPage.h": "f1919772c4a2a202c1d9183784e7fb1e880f9867268286719b54dc3955360c6e"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -78,6 +78,7 @@
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
+    "menu_item_ids",
     "midi_import_extras",
     "midi_import_mcp",
     "midi_interchange_gui",
@@ -297,10 +298,10 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+  "sourceLog": "build/dev/20261112-130507/affected-tests.log",
   "rerunLogs": [
-    "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+    "build/dev/20261112-130507/rerun-mcp_semantics.log"
   ],
-  "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
+  "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

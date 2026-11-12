@@ -4,7 +4,7 @@
   "passed": true,
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
+    "CMakeLists.txt": "12469f424ecd5fe13ebf86168fa166f243a26161f8663f613484fa89103470e4",
     "scripts/mcp-coverage.py": "5528eca0233d23c7d3bb95eda39b6da9aad2213e98cb18534d1857154d40657d",
     "scripts/module-gate.py": "14163ab897e7e47368a3b9c24cda9a66a5d161b3eb6d56aad6eba06da824cef5",
     "scripts/verify-installed-mcp.py": "8f1f935f120621a334097114b6fd07eabbff24a0e15b68f4aaae8e7fee35f55c",
@@ -41,7 +41,7 @@
     "src/ChannelBalance.h": "13d8a6aa76b1032926c2d868f413d217d0001517700dde69b7e24808e7106a5c",
     "src/ChannelRouting.inc": "74ce23f6adcd77d0697c6481b595ec132e4a5c50b9269fda70cc0010a4e4c9cb",
     "src/ChannelRoutingCoordinator.h": "001d1a221bccc1b68d6a601381e03945b86d725f7e70d54ab20d8abdfb19ccd6",
-    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
+    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -91,10 +91,10 @@
     "src/Project.cpp": "acae70f39d3fb5457665a11c65537ef59abcc49e19f3bf98bfea9063c375a7ad",
     "src/Project.h": "751a4591af47b7552ff97041d44b5e07bc048cdac2c4853988e83b29133fd49f",
     "src/RemoteEffect.h": "1c8d35bfa24cdda48a792efe818785b729561543d492ec24ad36743583f82801",
-    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
-    "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
+    "src/Studio.cpp": "91e12cfd759a3e6c3926d5cf918f8d9063448fdba5654dd1dd6d5fbc65ae0b39",
+    "src/Studio.h": "7afd157a20c27959ceab9ab72de957b14bff6ad7c6d3659aeaff14bcd6b006a0",
     "src/StudioDevicePreparation.inc": "86005e8bf31a86432c78d1f860b042ac34f79b3a40589983657c956e087e5352",
-    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
+    "src/StudioMcp.cpp": "44b1adf69eea162c4f62cf1ed4a482f6430d7a8b5687fbde37440f12ee3c9f6a",
     "src/StudioMixer.cpp": "82b67f8f8a61dda38598a5f12ac4df760180d5602566ed7f1377a61b8a35d0a7",
     "src/StudioMixerChainApplyAcceptance.inc": "81ab596669ab3f93006c8ffd51b931840e45c8aa52ea91f2af6f70cebfacec25",
     "src/StudioMixerChainWorkflowAcceptance.cpp": "5a9cb4087c66e689397dbf50bfa229762a604baba7ff2d1d1d8fe7aa3b9b8a3d",
@@ -156,7 +156,7 @@
     "tests/StoppedEffectNativeAcceptance.h": "59bbae9226079d2ceb2252a7c6ac4196319fdb641a669781ffe0c824b76f74dd",
     "tests/StoppedEffectOrdinaryForwardAcceptance.h": "6f7730295bfef5dcfea2c977c044b5ba75bf6bbeb14782c1a1e80268d2e3fe50"
   },
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "checks": [
     {
       "id": "mixer.routing",
@@ -1205,11 +1205,11 @@
   },
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+      "build/dev/20261112-130507/rerun-mcp_semantics.log"
     ],
-    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
-    "tests": 290
+    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
+    "tests": 291
   }
 }

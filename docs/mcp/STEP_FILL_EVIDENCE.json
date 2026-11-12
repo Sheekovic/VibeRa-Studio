@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "sourceInputs": {
     "assets/vibera-symbol-512.png": "0101480868aab9983db92c9a150306cd5f18068d7107047edb2378af55070796",
     "assets/vibera-symbol-64.png": "b3ae8fba3ef89d80afc0f338b458ddd90c222da516159291cd2eec5b337b4e09",
     "assets/vibera-symbol.svg": "438547a5edfc3444e0cf4e134426fa6b1df86ba3044fef40d06863f2fb7b48f9",
     "assets/VibeRa.ico": "22a682db870bb641f5adae3539a5380cfe592643c7906da92c9aae30d07e1bae",
-    "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
+    "CMakeLists.txt": "12469f424ecd5fe13ebf86168fa166f243a26161f8663f613484fa89103470e4",
     "CMakePresets.json": "a17190f02b339b6aecc8c8802b7c082a82bb67992153a290d04f5e441e876400",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
     "patches/juce-vst3-parameters/juce_AudioPluginExtensions.h.patch": "cb902800f2c33b91e832e2559e295009ad4269575466667a0f16f8307795787a",
@@ -50,9 +50,9 @@
     "src/ChannelSolo.h": "4e892bbec7e947252ceb57c81e1e7075f210ff8a8051a89356f07ab4bff3534f",
     "src/ClipGroups.h": "e8356a636df8268c36e87fa8ba610f2d49880823a47884e4b86769ee126159df",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
+    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/ControllerPage.h": "0eaeea82572f467f4ba4fe8fbc56999d8ab56681f983cd820b91c6a2d640b954",
+    "src/ControllerPage.h": "f1919772c4a2a202c1d9183784e7fb1e880f9867268286719b54dc3955360c6e",
     "src/CoProducer.cpp": "0f128852d44dc685285cd03a032389256a2aff04d804e3ff4fa1ad97fb71c9de",
     "src/CoProducer.h": "4f38bce3effeafc1dd997e5c40609171cd11167e3d0fc4bef01f3fefaab03d4d",
     "src/CoProducerPanel.h": "7186267e2593f49495595f4064541cbb118a960baba08ff02a58d66d01374470",
@@ -148,15 +148,15 @@
     "src/Settings.h": "bc213f35cd515e3aa42df1b9bd41344281b79d452b519f49446c779149e2ada4",
     "src/StepSequence.h": "22b2f0ca9262c332eed78afec7d31d4212d6d92804b5f382180c14afe06b72af",
     "src/StepVelocity.h": "3856f476631ca541510929a789b469e12c87acce17e83779892bb8ac18a8775b",
-    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
-    "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
+    "src/Studio.cpp": "91e12cfd759a3e6c3926d5cf918f8d9063448fdba5654dd1dd6d5fbc65ae0b39",
+    "src/Studio.h": "7afd157a20c27959ceab9ab72de957b14bff6ad7c6d3659aeaff14bcd6b006a0",
     "src/StudioAutomation.cpp": "459c9c035595d2dbe9a9a09f66a796a17565630c2b998aeaea04456e6bb7d708",
     "src/StudioBrowser.cpp": "80755bdcf84ade89e803f13e1dd0b8b6239a9f39c79e32d528dd28036fbf33de",
     "src/StudioChannels.cpp": "1021cb175b4c03e5f205c503069957b99fbc0dee97e8773aa3c969c331265408",
     "src/StudioClipGroups.cpp": "1feea8df26e7536a30ea5cff3bfb4b78b8ce7961e34ea9ffd2bcfe1a2dc5b6e9",
-    "src/StudioController.cpp": "fc3246bc52f03a9f6a8e8841091ac58ccd74e8e08c2a943a9b0dd4c562a4c156",
-    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
-    "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
+    "src/StudioController.cpp": "e3c4ec21e4837502825c3d484deb2d5745c8183bd0338148478844b0e9cc0c43",
+    "src/StudioMcp.cpp": "44b1adf69eea162c4f62cf1ed4a482f6430d7a8b5687fbde37440f12ee3c9f6a",
+    "src/StudioMidi.cpp": "b12b4f612ad87466dad35d5f5f97956ddf894cdf3823727b9e66fe91c060f170",
     "src/StudioMixer.cpp": "c3ee9ab884992d0e40980918180db1150562c79b6f5ed0f3183a236d753866a8",
     "src/StudioNoteMute.cpp": "6dbe4f0c93583bde40ffe16027630babf86c8114a1d67bb25405d0567438b0ea",
     "src/StudioNoteSlice.cpp": "cd02d0c647eeec190b4fed650832f32dd8c5ec48d4197e30b194377a13f4741c",
@@ -208,7 +208,7 @@
     "tests/GrooveAcceptance.h": "799b1387c7bd729d5d77c512417113fc7e57eab5b563ef804d5c6102ac9545d8",
     "tests/LegacySamplerVoices.h": "e7d9a3b98c7b3b1ae95fb68e02b2c02788df389a66868175b2f55aebb614b5a7",
     "tests/LoopBoundsAcceptance.h": "1bbf6c8ffe07a748826461867d4f42e84f747ac4ed3b376f6018d35456d60841",
-    "tests/mcp_acceptance.py": "e7dcd6ed31b2a27eb930926f6040b422664c5bb8dffab1b68baec3c4c750cace",
+    "tests/mcp_acceptance.py": "f1930fc4e40d6dd66a5a00d90b2dc006a3f578378a6f14dae3c28eece638fd85",
     "tests/mcp_sdk_acceptance.mjs": "718d3419130898ea277f4a89707434098a9f54d4861a040dde0b2e1680af53c8",
     "tests/MidiScoreAcceptance.h": "b4d95c3008bb84bf28b9ee26ce6f598f4f9064bc69b87fa228414fae2f238d0c",
     "tests/MidiScoreLiveAcceptance.h": "a9db75fdfc5984d1aa25a0889cc2d9a1935a8aed657953dfa7acafdb2b326829",
@@ -288,11 +288,11 @@
   "scope": "Basic step fills only; inherited MCP/FL scope remains open",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+      "build/dev/20261112-130507/rerun-mcp_semantics.log"
     ],
-    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
-    "tests": 290
+    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
+    "tests": 291
   }
 }

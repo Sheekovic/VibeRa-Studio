@@ -255,6 +255,9 @@ Callback candidates require manual expansion into individual controls and gestur
 | `transport.guide` | vibera_transport | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `controller.binding` | vibera_controller | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `controller.binding.remove` | vibera_controller | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `controller.learn` | vibera_controller | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `controller.preset` | vibera_controller | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `controller.ports` | vibera_controller | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `shortcut.bind` | vibera_macros | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `shortcut.unbind` | vibera_macros | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `shortcut.reset` | vibera_macros | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -780,7 +783,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `automation.plugin.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.macro.unlink` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 
-Custom callback candidates: 454; unreviewed: 6.
+Custom callback candidates: 454; unreviewed: 0.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
 Explicit UI inventory complete: False; known controls: 160; gaps: 0.
@@ -993,8 +996,14 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/ControllerPage.h:348:fdcdafd96adc` | controller.binding | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
 | `src/ControllerPage.h:361:140e41e82450` | controller.binding.remove | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
 | `src/ControllerPage.h:380:dd9ebb27309f` | controller.binding | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
+| `src/ControllerPage.h:381:3dd47c0c1328` | controller.binding, controller.learn | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
+| `src/ControllerPage.h:392:36761538928d` | controller.learn | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
 | `src/ControllerPage.h:398:cdae833969f3` | controller.binding | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
 | `src/ControllerPage.h:404:604351efd8de` | controller.binding | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
+| `src/ControllerPage.h:457:d9dc270d86a3` | controller.ports | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
+| `src/ControllerPage.h:457:4e425e243bdc` | controller.ports | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
+| `src/ControllerPage.h:458:597bc7b894bb` | controller.preset | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
+| `src/ControllerPage.h:474:8c95c2700111` | controller.ports, midi.device | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
 | `src/CoProducerChat.h:165:35813fee65dd` | ai.chat | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_COPRODUCERCHAT_EVIDENCE.json) |
 | `src/CoProducerChat.h:481:c966b740d9af` | ai.cancelChat, ai.cancelMusic, ai.chat | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_COPRODUCERCHAT_EVIDENCE.json) |
 | `src/CoProducerChat.h:482:d1c2139dca2e` | ai.chat, ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_COPRODUCERCHAT_EVIDENCE.json) |
@@ -1325,9 +1334,9 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/Studio.cpp:574:341e188bbf27` | view.snap | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
 | `src/Studio.cpp:603:86f709af3559` | view.mixer, view.piano, view.playlist, view.rack | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
 | `src/Studio.cpp:607:77a0057396c4` | view.coProducer | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_EVIDENCE.json) |
-| `src/Studio.h:820:41ac5b7f77f0` | midi.typing, midi.typingOptions, transport.countIn, transport.guide, transport.metronome, view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_H_EVIDENCE.json) |
-| `src/Studio.h:837:95b0e2f679e5` | recording.audioInput, view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_H_EVIDENCE.json) |
-| `src/Studio.h:1192:2d59b2dd3652` | channel.select, pattern.add, pattern.clone, pattern.delete, pattern.findEmpty, pattern.insert, pattern.move, pattern.properties, pattern.renameDialog, pattern.splitChannels, pattern.transpose | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_H_EVIDENCE.json) |
+| `src/Studio.h:824:41ac5b7f77f0` | midi.typing, midi.typingOptions, transport.countIn, transport.guide, transport.metronome, view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_H_EVIDENCE.json) |
+| `src/Studio.h:841:95b0e2f679e5` | recording.audioInput, view.settings | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_H_EVIDENCE.json) |
+| `src/Studio.h:1196:2d59b2dd3652` | channel.select, pattern.add, pattern.clone, pattern.delete, pattern.findEmpty, pattern.insert, pattern.move, pattern.properties, pattern.renameDialog, pattern.splitChannels, pattern.transpose | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIO_H_EVIDENCE.json) |
 | `src/StudioAudioTake.cpp:960:4bca6e0920df` | performance.stopAll | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOAUDIOTAKE_EVIDENCE.json) |
 | `src/StudioAudioTake.cpp:963:ce451f676db8` | performance.saveScene, performance.scene1, performance.scene2, performance.scene3, performance.scene4, performance.scene5, performance.scene6, performance.scene7, performance.scene8 | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOAUDIOTAKE_EVIDENCE.json) |
 | `src/StudioAudioTake.cpp:981:7c423b48ce5e` | pattern.followAction, pattern.launchQuantum, performance.assignPad, performance.pad1, performance.pad10, performance.pad11, performance.pad12, performance.pad13, performance.pad14, performance.pad15, performance.pad16, performance.pad2, performance.pad3, performance.pad4, performance.pad5, performance.pad6, performance.pad7, performance.pad8, performance.pad9 | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOAUDIOTAKE_EVIDENCE.json) |

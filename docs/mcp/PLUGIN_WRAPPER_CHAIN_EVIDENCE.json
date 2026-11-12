@@ -11,13 +11,13 @@
     "src/PluginWorker.cpp": "f545e13d33206f3efdf3f2de4c79f708edccd965b520d8ad11cc3d4a306b9e39",
     "src/PluginHost.cpp": "dc9010a06a6e25547d6a61f33b5c2e50a378a30e0b7cb4cf6d8380f8d2e54741",
     "src/PluginHost.h": "36a909f41026357f9eeb9826e08ad6685d8541a6c705d4df1147d25fb2b53c1e",
-    "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
-    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
+    "src/Studio.h": "7afd157a20c27959ceab9ab72de957b14bff6ad7c6d3659aeaff14bcd6b006a0",
+    "src/StudioMcp.cpp": "44b1adf69eea162c4f62cf1ed4a482f6430d7a8b5687fbde37440f12ee3c9f6a",
     "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c",
     "src/StudioPluginWrapperChains.inc": "5db55d8f0ba4175f1c3b22c74d52f38e283160227983b85d7b3ccf8ecb0a4d9a",
     "src/StudioMixerChains.inc": "421cac7ff6fe44d131fedd1e6abd20b39e008a14df997821d89594d5450a6abb",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
-    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
+    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
     "src/Project.cpp": "acae70f39d3fb5457665a11c65537ef59abcc49e19f3bf98bfea9063c375a7ad",
     "src/AudioEngine.cpp": "f418ebdf0ccc877f938bdc89be6a925ed9d92927bb67aa905e35d7e21536061c",
     "src/EffectChain.cpp": "99bcc8cc3c454131646f68ee56bc3f666caf79039870c187c8a70eecd77fb778",
@@ -43,7 +43,7 @@
     "Active synthetic-device detector disconnect/reconnect: exact parent/child close ACK, native replacement, one history edge, active source recovery, original PCM/save/export oracles.",
     "Installed Analog Lab V/MVibratoMB: actual chain file/state/history/replacement/hosted WAV and native main-I/O jobs, exact stable binary/provider/script inputs."
   ],
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "workerSha256": "b1283235c82b0f890bbce104bd1a9cc4416f813cf73ff38fca5341777e1e31f6",
   "focused": {
     "plugin_main_io_model": 0.0592918,
@@ -83,11 +83,11 @@
   "inheritedMcpCoverageComplete": false,
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+      "build/dev/20261112-130507/rerun-mcp_semantics.log"
     ],
-    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
-    "tests": 290
+    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
+    "tests": 291
   }
 }

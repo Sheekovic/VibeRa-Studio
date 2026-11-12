@@ -1,13 +1,13 @@
 {
   "passed": true,
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "sourceInputs": {
     "scripts/verify-record-filter-mcp.py": "8e4c8ed5b8456a924bf6ebd3dc362aee64eafd6b319bd14bf0002ff85d3da8dc",
     "scripts/verify-master-pitch-mcp.py": "6e657c587bc22d096a809612a39cc937d5aa99421f1a341ee053f3a7c1095af9",
-    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
+    "src/Studio.cpp": "91e12cfd759a3e6c3926d5cf918f8d9063448fdba5654dd1dd6d5fbc65ae0b39",
     "src/StudioSwing.cpp": "4bc0b2a1d05bf05ee22b9e17c3499d17c14053708d1f4b897f2fffe94c00b55c",
-    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
-    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
+    "src/StudioMcp.cpp": "44b1adf69eea162c4f62cf1ed4a482f6430d7a8b5687fbde37440f12ee3c9f6a",
+    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
     "src/AudioLogger.h": "ac1ddc5ac7f83ca99e5b505a5a17a8bde8b354dfeee90829971d91668c0f6ba3"
   },
   "sourceHashMode": "text-lf-v1",
@@ -38,11 +38,11 @@
   "scope": "Isolated --mcp-test; Tools menu options through their canonical commands. Audio logger on a real device is covered separately by scripts/verify-audio-logger-device.py; Wait for input with a physical keyboard is not qualified.",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+      "build/dev/20261112-130507/rerun-mcp_semantics.log"
     ],
-    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
-    "tests": 290
+    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
+    "tests": 291
   }
 }

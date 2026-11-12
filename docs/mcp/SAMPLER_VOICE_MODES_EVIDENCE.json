@@ -1,24 +1,24 @@
 {
   "passed": true,
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "sourceInputs": {
-    "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
+    "CMakeLists.txt": "12469f424ecd5fe13ebf86168fa166f243a26161f8663f613484fa89103470e4",
     "scripts/dev_support.py": "f4e99deebe8388b42ca4f74a68d4425a82c87b3f74f60cb64a76d43842c56a78",
     "scripts/mcp-coverage.py": "55815fada075677ac8d6a4ccdaf748701ec9e91ba8fe07d37ac639b2b16a76cb",
     "scripts/verify-plugin-io-mcp.py": "36c80185af09d91d545dc9a8ce03571b4f0ce989f415198e7aea872fdfe151b7",
     "scripts/verify-sampler-controller-mcp.py": "3e09aba5be78ebad005a1bfd6f5bf7344158b880a9171164571da27ef2a37daa",
     "scripts/verify-sampler-voice-modes-mcp.py": "011ac3cf539b910b25e52749e3d14d269db64252d889f95e38717decc41c29fb",
     "skills/vibera-studio/SKILL.md": "6c47416e96fcd2fdcad8286468a89546ea6df46d59639b214bb91e42d4dcc6f6",
-    "skills/vibera-studio/references/controller-bindings.md": "7f367bf4c16207319cde312342da0a29dd1a9a5572b5d2b359603c1b681afc4c",
+    "skills/vibera-studio/references/controller-bindings.md": "8f8da3fa6c50d51ce1de22eac5122a3114c6d9a1dd86d45c4cbbd06875a20f25",
     "skills/vibera-studio/references/sampler-envelopes.md": "09c661e9e8acfbfaf55ed5f873820faae657624b275c2b4e274f0978260735ea",
     "skills/vibera-studio/references/sampler-voices.md": "0e70e0ffa45e980fc88a8f5c63cb50210439b434d5e5c994282446319edb7043",
     "skills/vibera-studio/scripts/stdio_client.py": "c4acec16773359f2a7850734854abf2a1cf0dc1cb685f621510cea9720bccd97",
     "src/AudioEngine.cpp": "f418ebdf0ccc877f938bdc89be6a925ed9d92927bb67aa905e35d7e21536061c",
     "src/AudioEngine.h": "10eca98c9e60f4bb2cccc03219ad8fb62c47b9f534acf3abcd2f44ac047dbe2a",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
-    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
+    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/ControllerPage.h": "0eaeea82572f467f4ba4fe8fbc56999d8ab56681f983cd820b91c6a2d640b954",
+    "src/ControllerPage.h": "f1919772c4a2a202c1d9183784e7fb1e880f9867268286719b54dc3955360c6e",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
     "src/InstrumentWindow.h": "95e52300362aea7bfeeaf400ed98cd27817b86a2c6618dcaf617d96f3a1f1244",
@@ -47,14 +47,14 @@
     "src/SamplerModulationSettings.h": "26d887c347fbba1929e215b44bacac3028ec430f3542b0235432ad6fc0b30928",
     "src/SamplerSettings.h": "b8caf4fa414a4766e3177e65b4865060014720850501fc7a1763cf20a67c3206",
     "src/Settings.h": "bc213f35cd515e3aa42df1b9bd41344281b79d452b519f49446c779149e2ada4",
-    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
-    "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
+    "src/Studio.cpp": "91e12cfd759a3e6c3926d5cf918f8d9063448fdba5654dd1dd6d5fbc65ae0b39",
+    "src/Studio.h": "7afd157a20c27959ceab9ab72de957b14bff6ad7c6d3659aeaff14bcd6b006a0",
     "src/StudioAutomationRecording.inc": "ff38f154fa499aadc398e7009b94e0cba9fde644bcc78f53bf5962b6bec84db1",
-    "src/StudioController.cpp": "fc3246bc52f03a9f6a8e8841091ac58ccd74e8e08c2a943a9b0dd4c562a4c156",
+    "src/StudioController.cpp": "e3c4ec21e4837502825c3d484deb2d5745c8183bd0338148478844b0e9cc0c43",
     "src/StudioSampler.cpp": "a903c13be242986663c5f979a5939562257ce907936bf51e33fade6dfe996002",
     "src/StudioSamplerController.inc": "e3e7bf4ef38acf187bececf1489667f6521574fa6e8093a817387e9d09f0a049",
     "tests/Acceptance.cpp": "f9da3b27c5e7f41264f6e7d1a0098eb369af4f9721a5bd37962c74d938da9204",
-    "tests/ControllerBindingAcceptance.h": "ef00e0ddf10a492f1083929e90994e1e30ddd7d2762b27a835d070b72f671087",
+    "tests/ControllerBindingAcceptance.h": "a130d4900102835c85c2f6257322ada4cd1e851d7cc4885b1bb95184381737e0",
     "tests/SamplerControllerLinksAcceptance.h": "9628410485dcba355da6ed3137f512ca5d742851a30fddba48ffafc0aaaf2475",
     "tests/SamplerControllerRuntimeAcceptance.h": "82110a888a77d79af6508ae6ff6b056923f81c2822ab643e643587b98e5efe02",
     "tests/SamplerControllerUiAcceptance.inc": "8c73e78eb3a0bc44695d99ac306e2f53f4725ba29c92289f630c4812fc6ef3cb",
@@ -75,11 +75,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+      "build/dev/20261112-130507/rerun-mcp_semantics.log"
     ],
-    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
-    "tests": 290
+    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
+    "tests": 291
   }
 }

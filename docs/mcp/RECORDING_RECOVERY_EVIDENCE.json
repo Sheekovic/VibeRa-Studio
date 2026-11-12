@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "sourceInputs": {
-    "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
-    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
-    "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
-    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
-    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
+    "CMakeLists.txt": "12469f424ecd5fe13ebf86168fa166f243a26161f8663f613484fa89103470e4",
+    "src/Studio.cpp": "91e12cfd759a3e6c3926d5cf918f8d9063448fdba5654dd1dd6d5fbc65ae0b39",
+    "src/Studio.h": "7afd157a20c27959ceab9ab72de957b14bff6ad7c6d3659aeaff14bcd6b006a0",
+    "src/StudioMcp.cpp": "44b1adf69eea162c4f62cf1ed4a482f6430d7a8b5687fbde37440f12ee3c9f6a",
+    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Project.cpp": "acae70f39d3fb5457665a11c65537ef59abcc49e19f3bf98bfea9063c375a7ad",
     "src/Project.h": "751a4591af47b7552ff97041d44b5e07bc048cdac2c4853988e83b29133fd49f",
@@ -22,13 +22,13 @@
     "src/McpContracts.h": "af57244721f218aac54bf644e5308405d8c62a3e81482ca89a0e7fad073c20e5",
     "src/McpSchema.h": "a286beee562076744725e2fc0175263e783d00fcf56202c2efb132bf12b581fa",
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
-    "src/StudioMidi.cpp": "28d209581ea2c2411b3aa903c373786c8569ebae2caede25b56af7f58d3ff798",
+    "src/StudioMidi.cpp": "b12b4f612ad87466dad35d5f5f97956ddf894cdf3823727b9e66fe91c060f170",
     "src/StudioChannels.cpp": "1021cb175b4c03e5f205c503069957b99fbc0dee97e8773aa3c969c331265408",
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/StudioMidiTakeRecoveryAcceptance.cpp": "db176e5c066433a5edcd60ad794927450c598c7736369cab24c4ea9aa6804829",
     "src/BuildAcceptanceOutput.h": "5a93f55dafc86365f537a23ceb8e7c4c2047cb8c53c60b89d6c5c8c3f9b3cd95",
     "tests/MidiTakeRecoveryAcceptance.h": "6bb351c1899cda6a40fa37375f9ef74ab435fe090809617b32be586ab5138761",
-    "tests/mcp_acceptance.py": "e7dcd6ed31b2a27eb930926f6040b422664c5bb8dffab1b68baec3c4c750cace",
+    "tests/mcp_acceptance.py": "f1930fc4e40d6dd66a5a00d90b2dc006a3f578378a6f14dae3c28eece638fd85",
     "skills/vibera-studio/SKILL.md": "6c47416e96fcd2fdcad8286468a89546ea6df46d59639b214bb91e42d4dcc6f6",
     "skills/vibera-studio/references/take-recovery.md": "cb49c00d0b8d70d47ce22a529a736d9b51cefaa208004c7f54284f04b1f76b71"
   },
@@ -51,11 +51,11 @@
   "sourceHashMode": "text-lf-v1",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+      "build/dev/20261112-130507/rerun-mcp_semantics.log"
     ],
-    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
-    "tests": 290
+    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
+    "tests": 291
   }
 }

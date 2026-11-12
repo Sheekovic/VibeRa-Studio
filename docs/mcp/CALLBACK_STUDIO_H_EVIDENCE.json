@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326"
+    "src/Studio.h": "7afd157a20c27959ceab9ab72de957b14bff6ad7c6d3659aeaff14bcd6b006a0"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -78,6 +78,7 @@
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
+    "menu_item_ids",
     "midi_import_extras",
     "midi_import_mcp",
     "midi_interchange_gui",
@@ -297,21 +298,10 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+  "sourceLog": "build/dev/20261112-130507/affected-tests.log",
   "rerunLogs": [
-    "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
-    "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
-    "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
-    "build/dev/20261110-103302/rerun-isolated_parameters.log",
-    "build/dev/20261110-103302/rerun-gui_workflow.log",
-    "build/dev/20261110-103302/rerun-audio_playlist_live.log",
-    "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
-    "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
-    "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
-    "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
-    "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
-    "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+    "build/dev/20261112-130507/rerun-mcp_semantics.log"
   ],
-  "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+  "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

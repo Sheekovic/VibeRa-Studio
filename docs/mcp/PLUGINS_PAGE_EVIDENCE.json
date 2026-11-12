@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
+  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
   "sourceInputs": {
     "scripts/verify-plugins-page-mcp.py": "bcd86eac30636b7395ee70a71cbaa0fe6f92f73efe8594479e1414eb8e61a255",
     "src/PluginPage.h": "0f0d7330e4a645a5b47b72fe384846d0da40bef5473c58da9cb6b59a4e45c56b",
-    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
-    "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
-    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
+    "src/StudioMcp.cpp": "44b1adf69eea162c4f62cf1ed4a482f6430d7a8b5687fbde37440f12ee3c9f6a",
+    "src/StudioController.cpp": "2f1bbac07ac0ec58ff0e19929414f4e92ca7905d63694c1176dc48947b8f145e",
+    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
     "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c"
   },
   "sourceHashMode": "text-lf-v1",
@@ -19,17 +19,17 @@
     "channelTargetSelection: vibera_select selects the Channel",
     "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
     "manualValue: the effect exposes its native parameters",
-    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': '2a87fe5ac3104010a5a4d744cb153cc8', 'revision': 3, 'operation': '8d5fe74e27de4923bc44ae820ad05686', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'a5d25125a8eb4cadb383318275cf7bde', 'revision': 3, 'operation': 'd75f41f57f704f37a8adaf5486097781', 'kind': 'set', 'plugin': 46, 'requestedI",
     "manualValue: the parameter edit enters project history"
   ],
   "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+      "build/dev/20261112-130507/rerun-mcp_semantics.log"
     ],
-    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
-    "tests": 290
+    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
+    "tests": 291
   }
 }
