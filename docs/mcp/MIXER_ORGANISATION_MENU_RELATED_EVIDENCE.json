@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
+  "sourceInputs": {
+    "src/StudioMixerOrganisation.inc": "d12072676fab29593297208dd9f1a7786ee3c3911980f4f9dff5280a1df97577",
+    "src/MixerGroups.h": "1dfb974785defbe0d6bf0a554d54714675d9af1b1c3b77004de10a26a750ec41",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
+    "scripts/verify-mixer-organisation-mcp.py": "d757de9a8e5f76e25469dde8d2cbe0dcc066580e6a97bdf8085d3ee8a6b76dc4"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest mixer_organisation_mcp passed (run alone)"
+  ],
+  "scope": "Registered test that exercises the Mixer group operations, run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/mixer-organisation-menu/related-ctest.log"
+}

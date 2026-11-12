@@ -359,6 +359,48 @@
         "scripts/verify-ai-producer-mcp.py"
       ],
       "scope": "Registered tests that exercise the operations the CoProducer context and chat menus run, each run alone on this binary."
+    },
+    "docs/mcp/MIXER_ORGANISATION_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-mixer-organisation-menu-mcp.py",
+      "folder": "mixer-organisation-menu",
+      "sources": [
+        "scripts/verify-mixer-organisation-menu-mcp.py",
+        "src/StudioMixerOrganisation.inc",
+        "src/MixerGroups.h",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test; the registered operations the Mixer selection / group menu runs. Not native popup input or listening evidence."
+    },
+    "docs/mcp/MIXER_ORGANISATION_MENU_RELATED_EVIDENCE.json": {
+      "ctests": [
+        "mixer_organisation_mcp"
+      ],
+      "folder": "mixer-organisation-menu",
+      "sources": [
+        "src/StudioMixerOrganisation.inc",
+        "src/MixerGroups.h",
+        "src/Commands.cpp",
+        "scripts/verify-mixer-organisation-mcp.py"
+      ],
+      "scope": "Registered test that exercises the Mixer group operations, run alone on this binary."
+    },
+    "docs/mcp/MIXER_EFFECT_SLOT_MENU_EVIDENCE.json": {
+      "ctests": [
+        "mixer_effect_slots_mcp",
+        "plugin_editors_mcp",
+        "vibera_native_effects_mcp"
+      ],
+      "folder": "mixer-effect-slot-menu",
+      "sources": [
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-mixer-effects-mcp.py",
+        "scripts/verify-plugin-editors-mcp.py",
+        "scripts/verify-native-effects-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations the Mixer effect slot menu runs, each run alone on this binary."
     }
   }
 }

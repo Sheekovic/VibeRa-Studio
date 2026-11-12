@@ -805,7 +805,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 68.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 351; gaps: 156.
+Explicit UI inventory complete: False; known controls: 361; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1161,6 +1161,16 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `sampler.menu.view` | sampler.view.all / sampler.view.range / sampler.view.zoomIn / sampler.view.zoomOut | vibera_command; reviewed |
 | `coproducer.menu.context` | ai.idea.configure | vibera_ai; reviewed |
 | `coproducer.menu.copy` | ai.chat | vibera_ai; reviewed |
+| `mixer.organisation.selectAll` | mixer.selectAll | vibera_mixer; reviewed |
+| `mixer.organisation.renameSelected` | mixer.selection.rename | vibera_command; reviewed |
+| `mixer.organisation.colourSelected` | mixer.selection.colour | vibera_command; reviewed |
+| `mixer.organisation.ungroup` | mixer.group.assign | vibera_command; reviewed |
+| `mixer.organisation.soloConnected` | mixer.group.soloConnected / mixer.group.unsolo | vibera_command; reviewed |
+| `mixer.organisation.dissolve` | mixer.group.delete | vibera_command; reviewed |
+| `mixer.organisation.groups` | mixer.group.create / mixer.group.rename / mixer.group.colour / mixer.group.mute / mixer.group.solo / mixer.organisation.menu | vibera_command; reviewed |
+| `mixer.slot.editor` | plugin.editor.open | vibera_plugin; reviewed |
+| `mixer.slot.bypassMoveMix` | plugin.bypass / plugin.effect.move / plugin.effect.mix | vibera_command; reviewed |
+| `mixer.slot.remove` | plugin.remove | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

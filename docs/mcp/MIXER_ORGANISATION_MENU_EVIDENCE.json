@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
+  "sourceInputs": {
+    "scripts/verify-mixer-organisation-menu-mcp.py": "977751bfbef0734188a81aad80323bbc4479b6e03a73a85b3ef4af0dce0c0ec5",
+    "src/StudioMixerOrganisation.inc": "d12072676fab29593297208dd9f1a7786ee3c3911980f4f9dff5280a1df97577",
+    "src/MixerGroups.h": "1dfb974785defbe0d6bf0a554d54714675d9af1b1c3b77004de10a26a750ec41",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
+    "src/StudioMcp.cpp": "24ae719a920820c8ff64d60d848a1ab58a46997df5b9367023e6f30665d01db1"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "Select all inserts selects every insert (18)",
+    "Rename selected names both inserts (mixer.selection.rename) ['Bus 1', 'Bus 2'] null",
+    "Rename selected is one Undo step",
+    "Colour selected sets both colours (mixer.selection.colour) [4281240512, 4281240512]",
+    "Follow theme clears them",
+    "A transparent colour is refused",
+    "A group of three inserts",
+    "Its members read back ([1, 2, 3])",
+    "Ungroup selected removes insert 3 from the group (mixer.group.assign) [1, 2]",
+    "Solo group with connected inputs (mixer.group.soloConnected)",
+    "A group that owns the solo cannot be dissolved",
+    "Restore group solo",
+    "Dissolve display group removes the group and keeps every insert (mixer.group.delete)",
+    "Dissolve is one Undo step"
+  ],
+  "scope": "Isolated --mcp-test; the registered operations the Mixer selection / group menu runs. Not native popup input or listening evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
+}

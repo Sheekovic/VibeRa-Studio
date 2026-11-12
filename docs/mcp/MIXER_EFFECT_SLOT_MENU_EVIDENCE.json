@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
+  "sourceInputs": {
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
+    "src/StudioMcp.cpp": "24ae719a920820c8ff64d60d848a1ab58a46997df5b9367023e6f30665d01db1",
+    "scripts/verify-mixer-effects-mcp.py": "a2c727cf3802cf09e8a25bc36789cf0ad0fa3e50f1985db667c31db725af181e",
+    "scripts/verify-plugin-editors-mcp.py": "190e77c432300cb7281bd53b98189681ec6928a3f60bade9e71b04bdac8ef946",
+    "scripts/verify-native-effects-mcp.py": "6f7116bc7684e69395f92f2c4d9cf4b52f0e04c850878cda792cd32225f7dd3a"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest mixer_effect_slots_mcp passed (run alone)",
+    "ctest plugin_editors_mcp passed (run alone)",
+    "ctest vibera_native_effects_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations the Mixer effect slot menu runs, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/mixer-effect-slot-menu/related-ctest.log"
+}
