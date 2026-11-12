@@ -2,6 +2,7 @@
 #pragma once
 #include <array>
 #include <functional>
+#include <vector>
 namespace vibera
 {
 // Message-thread ownership shared by typing and preview gestures.
@@ -20,6 +21,14 @@ class PerformanceInput
         bool after = held[0][size_t(pitch)] || held[1][size_t(pitch)];
         if (before != after && emit)
             emit(pitch, after, velocity);
+    }
+    std::vector<int> heldPitches() const // Every pitch held by either source, ascending.
+    {
+        std::vector<int> pitches;
+        for (int pitch = 0; pitch < 128; ++pitch)
+            if (held[0][size_t(pitch)] || held[1][size_t(pitch)])
+                pitches.push_back(pitch);
+        return pitches;
     }
     void release(int source)
     {

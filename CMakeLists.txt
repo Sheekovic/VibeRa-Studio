@@ -1016,6 +1016,9 @@ set_tests_properties(rack_channel_menu_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME pattern_seek_options_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-pattern-seek-options-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/pattern_seek_options_mcp")
 set_tests_properties(pattern_seek_options_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME pattern_render_replace_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-pattern-render-replace-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/pattern_render_replace_mcp")
+set_tests_properties(pattern_render_replace_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME envelope_presets_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-envelope-presets-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/envelope_presets_mcp")
 set_tests_properties(envelope_presets_mcp PROPERTIES TIMEOUT 120)

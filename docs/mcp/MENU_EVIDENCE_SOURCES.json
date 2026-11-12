@@ -298,6 +298,17 @@
         "src/StudioMcp.cpp"
       ],
       "scope": "Isolated --mcp-test (no audio device); Pattern menu and transport option operations. Not native popup input, listening or hardware evidence."
+    },
+    "docs/mcp/PATTERN_RENDER_REPLACE_EVIDENCE.json": {
+      "script": "scripts/verify-pattern-render-replace-mcp.py",
+      "folder": "pattern-render-replace",
+      "sources": [
+        "scripts/verify-pattern-render-replace-mcp.py",
+        "src/ClipPicker.h",
+        "src/Studio.cpp",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test, offline render; Picker Pattern menu render items. Not native popup input or listening evidence."
     }
   }
 }

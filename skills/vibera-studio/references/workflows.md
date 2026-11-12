@@ -150,7 +150,11 @@ and `transport.recordStartsPlayback` (arming Record while stopped also presses P
 `state.disarmOnStop` / `state.recordStartsPlayback`. `transport.quantizeKeepDuration` (or `midiInput`
 `quantizeKeepDuration`) is Leave note duration: a quantized start keeps the played length
 (`state.midiInput.quantizeKeepDuration`). `state.cpuLoad` is the audio callback load 0..1 and
-`state.detectedChord` names the chord the selected Piano roll notes spell ("" when none). `view.timeDisplay` switches the time display
+`state.detectedChord` names the chord held on the typing keyboard / Drum Pads, else the chord the
+selected Piano roll notes spell ("" when none). Render and replace: `vibera_project {"action":"export",
+"pattern":ID,"placeClip":true,"replace":true}` renders the Pattern, places the audio clip at every
+placement of it and mutes those Pattern clips (poll the job, then read clips; refused when the Pattern
+is not placed, at most 31 placements). `view.timeDisplay` switches the time display
 between beats and minutes:seconds (`state.timeDisplay`; `state.positionSeconds` is always available).
 
 Drum Pads: `vibera_transport {"action":"drumPad","pad":1..16,"velocity":0..1}` strikes a pad (pad n

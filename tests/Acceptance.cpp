@@ -1697,6 +1697,16 @@ static void midiRecordingTests(const juce::File &folder, const PluginSpec *plugi
                 score::detectChord({57, 60, 64}) == "A minor" && score::detectChord({60, 62}).isEmpty() &&
                 score::detectChord({60, 61, 62}).isEmpty(),
             "Chord detection names triads and inversions and stays empty for non-chords");
+    {
+        PerformanceInput keys;
+        for (const int pitch : {62, 65, 69})
+            keys.set(0, pitch, true);
+        keys.set(1, 65, true);
+        require(keys.heldPitches() == std::vector<int>({62, 65, 69}) && score::detectChord(keys.heldPitches()) == "D minor",
+                "Held typing-keyboard and pad keys list once each and spell their chord");
+        keys.release(0);
+        require(keys.heldPitches() == std::vector<int>({65}), "Releasing one source keeps the other source's key");
+    }
     take.begin(9, 0, 0, 120, 0);
     take.add({1, 0, 8, 1, {0x90, 60, 100}});
     take.add({1, 0, 9, 1, {0x90, 60, 100}});

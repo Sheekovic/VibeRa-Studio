@@ -3554,9 +3554,9 @@ void Studio::patternBulkAction(int action, const std::vector<Id> &ids)
         command("pattern.deleteEmpty", {});
         return;
     }
-    if (action == 11 && ids.size() == 1)
+    if ((action == 11 || action == 12) && ids.size() == 1)
     {
-        if (auto started = renderPatternToClip(ids.front()); started.failed())
+        if (auto started = renderPatternToClip(ids.front(), action == 12); started.failed())
             status = started.getErrorMessage();
         repaint();
         return;
@@ -3572,7 +3572,7 @@ void Studio::patternBulkAction(int action, const std::vector<Id> &ids)
                 [safe] { if (safe) safe->command("pattern.deleteUnplaced", {}); });
     }
 }
-juce::Result Studio::renderPatternToClip(Id patternId)
+juce::Result Studio::renderPatternToClip(Id patternId, bool replace)
 {
     const auto *pattern = controller.project.pattern(patternId);
     if (!pattern)
@@ -3604,6 +3604,27 @@ juce::Result Studio::renderPatternToClip(Id patternId)
     for (const auto &clip : controller.project.audioPlacements)
         lane = std::max(lane, clip.lane + 1);
     renderClip = RenderClipRequest{file, controller.projectIdentity, beat, std::min(lane, 127)};
+    if (replace)
+    {
+        // Render and replace: the audio clip goes wherever the Pattern is placed and those Pattern
+        // clips are muted (kept, so the swap can be undone clip by clip).
+        for (const auto &clip : controller.project.placements)
+            if (clip.pattern == patternId)
+            {
+                renderClip->muteAfter.push_back(clip.id);
+                if (clip.beat != beat)
+                    renderClip->alsoAt.push_back(clip.beat);
+            }
+        if (renderClip->muteAfter.empty() || renderClip->alsoAt.size() > 30)
+        {
+            const bool none = renderClip->muteAfter.empty();
+            renderClip.reset();
+            return juce::Result::fail(none ? "patternRender.noClips: The Pattern is not placed in the Playlist"
+                                           : "patternRender.tooManyClips: Render and replace handles up to 31 placements");
+        }
+        std::sort(renderClip->alsoAt.begin(), renderClip->alsoAt.end());
+        renderClip->alsoAt.erase(std::unique(renderClip->alsoAt.begin(), renderClip->alsoAt.end()), renderClip->alsoAt.end());
+    }
     exportTo(file, patternId);
     return juce::Result::ok();
 }
@@ -7199,6 +7220,8 @@ void Studio::completeRenderClip(const juce::Result &r)
             if (r.wasOk() && request->project == controller.projectIdentity && request->file.existsAsFile())
             {
                 importAudioClip(request->file, request->beat, request->lane); // Async import, own Undo step.
+                for (const double beat : request->alsoAt)
+                    importAudioClip(request->file, beat, request->lane);
                 if (!request->muteAfter.empty())
                 {
                     CommandArgs mute;

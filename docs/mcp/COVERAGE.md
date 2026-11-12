@@ -799,10 +799,10 @@ Callback candidates require manual expansion into individual controls and gestur
 | `automation.plugin.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.macro.unlink` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 
-Custom callback candidates: 454; unreviewed: 37.
+Custom callback candidates: 454; unreviewed: 45.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 332; gaps: 156.
+Explicit UI inventory complete: False; known controls: 333; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1139,6 +1139,7 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `tools.disarmOnStop` | transport.disarmOnStop | vibera_command; reviewed |
 | `tools.timeDisplay` | view.timeDisplay | vibera_command; reviewed |
 | `tools.quantizeKeepDuration` | transport.quantizeKeepDuration | vibera_command; reviewed |
+| `picker.pattern.renderReplace` | vibera_project export with pattern, placeClip and replace | vibera_project; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.
@@ -1167,14 +1168,6 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/AiPage.h:366:030de0e32604` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
 | `src/AiPage.h:376:626d844865cc` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
 | `src/AiPage.h:381:35e3a5405545` | ai.panel | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
-| `src/ClipPicker.h:40:0677c6744d20` | picker.width | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
-| `src/ClipPicker.h:44:677823569f56` | picker.width | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
-| `src/ClipPicker.h:167:3e2fe6462e21` | picker.select | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
-| `src/ClipPicker.h:182:b9505d79a139` | picker.select | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
-| `src/ClipPicker.h:204:8b44878d2234` | audio.add, channel.add, channel.gain, channel.mixer, channel.moveDown, channel.moveUp, channel.mute, channel.muteLock, channel.outputRoutes, channel.pan, channel.paste, channel.preset, channel.properties, channel.solo, channel.source, channel.unsolo, clip.group, clip.ungroup, clip.unique, mixer.colour, mixer.effects.bypass, mixer.gain, mixer.mute, mixer.pan, mixer.phaseInvert, mixer.rename, mixer.route, mixer.routeOnly, mixer.send, mixer.solo, mixer.soloConnected, mixer.stereoSeparation, mixer.stereoSwap, mixer.unmuteAll, mixer.unsolo, notes.chop, notes.duplicate, notes.glue, notes.import, notes.legato, notes.move, notes.mute, notes.quantize, notes.quantizeStarts, notes.quickQuantize, notes.record, notes.slice, notes.stretch, notes.unmute, notes.velocity, pattern.burnChannelLoop, pattern.channelLoop, pattern.cloneSelected, pattern.delete, pattern.deleteEmpty, pattern.deleteSelected, pattern.deleteUnplaced, pattern.extent, pattern.group, pattern.length, pattern.meter, pattern.move, pattern.properties, pattern.rename, pattern.transpose, plugin.effect.insert, plugin.effect.mix, plugin.effect.move, plugin.effect.replace, plugin.effect.sidechain, plugin.instrument.create, plugin.io, plugin.remove, project.swing, rack.group.assign, rack.group.create, rack.muteLock, rack.muteSelected, rack.properties, rack.sort, rack.swingMix, rack.truncateSwing, rack.unmuteSelected, steps.compose, steps.fill, steps.fine, steps.modX, steps.modY, steps.pan, steps.pitch, steps.release, steps.repeat, steps.set, steps.shift, steps.velocity, workspace.docked, workspace.free, workspace.tileBalanced, workspace.tileDetached, workspace.tileFocused | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
-| `src/ClipPicker.h:345:196c29b50a62` | picker.type | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
-| `src/ClipPicker.h:351:638ea6071769` | picker.filter | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
-| `src/ClipPicker.h:355:79f777b6ae62` | picker.groupFilter | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
 | `src/ControllerPage.h:150:b39699a58d4d` | controller.binding | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
 | `src/ControllerPage.h:292:fe4294cdce26` | channel.sampler.controller.create, channel.sampler.controller.remove, channel.sampler.controller.update | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |
 | `src/ControllerPage.h:336:5de27db4ab88` | controller.binding | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CONTROLLERPAGE_EVIDENCE.json) |

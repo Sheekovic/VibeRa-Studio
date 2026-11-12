@@ -1415,9 +1415,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
         double beat = 0;
         int lane = 0;
         std::vector<Id> muteAfter; // Render selected clips: the originals are muted once placed.
+        std::vector<double> alsoAt; // Render and replace: the Pattern's other placements get the clip too.
     };
     std::optional<RenderClipRequest> renderClip;
-    juce::Result renderPatternToClip(Id pattern);
+    juce::Result renderPatternToClip(Id pattern, bool replace = false); // replace: every placement, originals muted.
     juce::Result renderClipsToAudio(std::vector<Id> clips);
     void completeRenderClip(const juce::Result &rendered); // Places (or drops) a pending renderClip.
     void withPluginState(std::function<void(juce::Result, Project)>, const std::vector<Id> *only = nullptr);

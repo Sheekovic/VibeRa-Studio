@@ -239,6 +239,7 @@ class ClipPicker final : public juce::Component, private juce::ListBoxModel
         menu.addItem(7, ids.size() > 1 ? "Delete selected Patterns..." : "Delete Pattern...");
         menu.addItem(8, "Export Pattern WAV...", ids.size() == 1);
         menu.addItem(11, "Render Pattern to audio clip", ids.size() == 1);
+        menu.addItem(12, "Render and replace (audio clip at every placement, Pattern clips muted)", ids.size() == 1);
         menu.addSeparator();
         menu.addItem(9, "Delete empty unused Patterns");
         menu.addItem(10, "Delete Patterns not in Playlist...");

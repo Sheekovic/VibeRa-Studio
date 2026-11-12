@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "40cfa516459a5c1abaecf76eedf484724860b7089c1770c11e2cbb4c3078f5a1",
+  "applicationSha256": "c56b1ffe7337226a4ecdcf7438a61f887e45b634539f81acabfcd0e29e96216f",
   "sourceInputs": {
     "scripts/verify-playlist-clip-menu-mcp.py": "7e78654226c04a169d6231f4f045e382ed71339772b673b84787765e8ec2c688",
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Commands.cpp": "06f9d471a846ddda3c9ff9e76a4d6a94c2aa2850c75e02393da900c32c9976b0",
     "src/McpContracts.h": "7d455396593209469c6471b395fb76d8841b8647420d3a1fc0348cf141b16869",
-    "src/StudioMcp.cpp": "df0d050d5b3ac023b61020d3a56572a96bdfd7bc9d225a24c838c6de6da10017"
+    "src/StudioMcp.cpp": "df8a4ab0a9009b4229670eadb4969c197bd07b0620af472f1d9fcf35db403aae"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [

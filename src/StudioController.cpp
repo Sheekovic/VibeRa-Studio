@@ -40,6 +40,9 @@ bool Studio::navigateSamplerView(const juce::String &action)
 }
 juce::String Studio::detectedChord() const
 {
+    // Keys held on the typing keyboard / pads name the chord first; otherwise the selected notes do.
+    if (const auto live = score::detectChord(performanceInput.heldPitches()); live.isNotEmpty())
+        return live;
     std::vector<int> pitches;
     if (const auto *pattern = controller.project.pattern(selectedPattern))
         for (const auto &note : pattern->notes)
