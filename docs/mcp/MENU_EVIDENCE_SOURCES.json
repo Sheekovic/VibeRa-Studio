@@ -287,6 +287,17 @@
         "scripts/verify-swing-mcp.py"
       ],
       "scope": "Registered tests that exercise the operations these Channel menu items run, each run alone on this binary."
+    },
+    "docs/mcp/PATTERN_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-pattern-seek-options-mcp.py",
+      "folder": "pattern-seek-options",
+      "sources": [
+        "scripts/verify-pattern-seek-options-mcp.py",
+        "src/Studio.cpp",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test (no audio device); Pattern menu and transport option operations. Not native popup input, listening or hardware evidence."
     }
   }
 }

@@ -172,6 +172,9 @@ Callback candidates require manual expansion into individual controls and gestur
 | `project.openTemplatesFolder` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `project.openBackupsFolder` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.performance` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `transport.rememberSeek` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `pattern.selectInPlaylist` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `pattern.randomColour` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `transport.recordReplace` | action | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `app.update.check` | vibera_update | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `app.update.settings` | vibera_update | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -794,7 +797,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 324; gaps: 156.
+Explicit UI inventory complete: False; known controls: 327; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1123,6 +1126,9 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `rack.channel.fill` | steps.fill2 / steps.fill4 / steps.fill8 | vibera_command; reviewed |
 | `rack.channel.manage` | channel.clone / channel.delete | vibera_rack; reviewed |
 | `rack.channel.swing` | rack.swingMix | vibera_command; reviewed |
+| `pattern.menu.selectInPlaylist` | pattern.selectInPlaylist | vibera_command; reviewed |
+| `pattern.menu.randomColour` | pattern.randomColour | vibera_command; reviewed |
+| `tools.rememberSeek` | transport.rememberSeek | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

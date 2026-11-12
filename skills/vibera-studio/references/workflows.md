@@ -137,6 +137,13 @@ state.midiInput.devices>` (empty closes the input) like the Settings > MIDI devi
 Fields left out stay as they are. These are local preferences, not Undo steps. Hardware capture
 still needs physical qualification.
 
+Transport and Pattern options: `vibera_command transport.rememberSeek` toggles Remember seek time
+(`state.rememberSeekTime`): the first Stop returns to where Play was pressed, Stop again goes to the
+start. `pattern.selectInPlaylist` selects every Playlist clip of the selected Pattern (read
+`vibera_selection {"action":"state","target":"clips"}`; failed when it has none) and
+`pattern.randomColour` gives the selected Pattern a random opaque colour as one Undo step
+(`state.patterns[].colour`).
+
 Drum Pads: `vibera_transport {"action":"drumPad","pad":1..16,"velocity":0..1}` strikes a pad (pad n
 plays the n-th sampler Channel: it becomes the selected input target and its root key is held on the
 live input, heard in playback and captured by recording); `{"action":"drumPad","on":false}` releases

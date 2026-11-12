@@ -145,3 +145,29 @@ the third pass:
 | Automation Clip: Smooth up (attack/release smoothing) | done | `automation.source.smoothUp` (value attack, offset release); clip Tools menu; playlist_tools_mcp |
 | Automation Clip: Create sequence (envelope step sequencer) | done | `automation.source.sequence` (levels list repeated, held steps); clip Tools menu; playlist_tools_mcp |
 | Level Scale: Center / Tension | done | `automation.source.tension` (-1..1); Center = multiply + offset in `automation.source.scale` |
+
+## Seventh pass (2026-11-12, menu_patterns / toolbar_panels / menu_edit pages)
+
+Pattern management (find empty, rename / recolour, insert, clone, delete, move, split by channel,
+transpose, groups, per-Pattern time signature, render as audio clip), tap tempo, the recording filter,
+Wait for input, count-in, metronome sounds, typing keyboard, Global Snap and the Edit menu's undo / cut /
+copy / paste already exist. New and still open items from these pages:
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Patterns menu: Select in playlist | done | `pattern.selectInPlaylist`; Pattern menu; pattern_seek_options_mcp |
+| Patterns menu: Random color | done | `pattern.randomColour` (opaque random colour through `pattern.properties`, one Undo); Pattern menu; pattern_seek_options_mcp |
+| Stop: Remember seek time | done | `transport.rememberSeek`: the first Stop returns to where Play was pressed, Stop again to the start; Tools menu; `state.rememberSeekTime`; pattern_seek_options_mcp |
+| Patterns menu: Render and replace | missing | Render exists (`vibera_project export` with `pattern` and `placeClip`); replacing the Pattern's Playlist clips with the audio clip does not |
+| Patterns menu: Find next empty (no naming) | missing | The new-Pattern button already skips naming; there is no menu item or shortcut for it |
+| Recording options: Recording starts playback / Disarm on stop | missing | Stop always disarms; Record never starts playback |
+| Recording quantize: Leave note duration / Record to step sequencer | missing | Start and end quantize exist |
+| Tempo: Half speed, nudge, tap Sync / Mute | missing | Tap tempo and tempo presets exist |
+| Monitor volume (listening only, not rendered) | missing | |
+| Time panel: Bar:Beat / Minute:Second display mode | partial | Position shows bars and beats |
+| Output panel: oscilloscope, spectrograph, CPU / memory / polyphony meters | missing | Mixer meters and the Meter-wave view exist |
+| Multilink to controllers | missing | Single-control link, Link all parameters (Mixer track) and Last tweaked exist |
+| Chord panel (detected chords) | missing | |
+| Wait for input: Only when recording / Respect recording filter | missing | Wait applies to armed recording |
+| Metronome: set Mixer channel | missing | Sounds and volume exist |
+| Toolbar editing, presets, Hint panel, window controls, language, online panels | n/a | Application shell of the reference program, not music workflow |

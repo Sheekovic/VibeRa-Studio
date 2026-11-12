@@ -198,6 +198,8 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     addAndMakeVisible(tapTempoButton);
     play.onClick = [this]
     {
+        if (!audio.playing())
+            playStartBeat = audio.positionBeat(); // Remember seek time: where this playback began.
         if (automationRecordingActive() && audio.playing())
         {
             stop.onClick();
@@ -519,7 +521,9 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
         // Transport Stop must still happen when canonical take admission refuses.
         stopMidiCaptureForRecovery();
         audio.stop();
-        audio.seekBeat(0);
+        // Remember seek time: the first Stop returns to where Play was pressed; Stop again goes to the start.
+        audio.seekBeat(rememberSeekTime && playStartBeat ? *playStartBeat : 0.);
+        playStartBeat.reset();
         recordArmed = false;
         midiTakeUiPending = true; // Stop also disarms an idle armed recorder.
         const auto result =
@@ -3286,6 +3290,8 @@ void Studio::patternMenu()
     menu.addItem(6, "Delete...");
     menu.addItem(9, "Split by channel", !it->notes.empty());
     menu.addItem(10, "Transpose...", !it->notes.empty());
+    menu.addItem(11, "Select in playlist");
+    menu.addItem(12, "Random colour");
     menu.addSeparator();
     menu.addItem(7, "Move up (Ctrl+Shift+Up)", it != list.begin());
     menu.addItem(8, "Move down (Ctrl+Shift+Down)", std::next(it) != list.end());
@@ -3315,6 +3321,8 @@ void Studio::patternMenu()
             }
             else if (choice == 10)
                 safe->transposePattern();
+            else if (choice == 11 || choice == 12)
+                safe->performAction(choice == 11 ? "pattern.selectInPlaylist" : "pattern.randomColour");
             else
             {
                 CommandArgs args;
@@ -3718,6 +3726,7 @@ void Studio::toolsMenu()
     // IDs 240..251: clear of the Detach (210..214), Arrange windows (220..223) and update (225) items.
     menu.addItem(240, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
     menu.addItem(241, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
+    menu.addItem(252, "Remember seek time (Stop returns to where Play started)", true, rememberSeekTime);
     {
         // FL Recording filter: what Record captures. Audio is the audio-input switch; automation
         // recording is armed separately on its control.
@@ -3824,6 +3833,11 @@ void Studio::toolsMenu()
             if (choice == 243)
             {
                 safe->audioInputButton.onClick();
+                return;
+            }
+            if (choice == 252)
+            {
+                safe->performAction("transport.rememberSeek");
                 return;
             }
             if (choice == 241)
@@ -4600,6 +4614,38 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.drumPads")
     {
         showDrumPads();
+        return true;
+    }
+    if (action == "transport.rememberSeek")
+    {
+        rememberSeekTime = !rememberSeekTime;
+        status = rememberSeekTime ? "Stop returns to where Play started" : "Stop returns to the start";
+        repaint();
+        return true;
+    }
+    if (action == "pattern.selectInPlaylist")
+    {
+        // Patterns menu > Select in playlist: every Playlist clip of the selected Pattern.
+        selectedClips.clear();
+        for (const auto &clip : controller.project.placements)
+            if (clip.pattern == selectedPattern)
+                selectedClips.push_back(clip.id);
+        status = juce::String(int(selectedClips.size())) + " clip(s) of this Pattern selected in the Playlist";
+        refresh();
+        return !selectedClips.empty();
+    }
+    if (action == "pattern.randomColour")
+    {
+        // Patterns menu > Random colour: a new opaque colour for the selected Pattern (one Undo step).
+        const auto *pattern = controller.project.pattern(selectedPattern);
+        if (!pattern)
+            return false;
+        auto &random = juce::Random::getSystemRandom();
+        CommandArgs args;
+        args.pattern = selectedPattern;
+        args.text = pattern->name;
+        args.value = double(juce::Colour::fromHSV(random.nextFloat(), .45f + .3f * random.nextFloat(), .85f, 1.f).getARGB());
+        command("pattern.properties", args);
         return true;
     }
     if (action == "view.performance")

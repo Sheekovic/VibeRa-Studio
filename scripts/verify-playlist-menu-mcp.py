@@ -60,7 +60,7 @@ try:
     patterns = lambda: len(items("patterns"))
     count_before = patterns()
     made = done("clip.unique", target=first)
-    unique_pattern = next(c for c in items("clips") if c["id"] == first).get("pattern")
+    unique_pattern = next(c for c in items("clips") if c["id"] == first)["source"]  # A Pattern clip's source is its Pattern.
     check(made == "completed" and patterns() == count_before + 1 and unique_pattern != pattern,
           f"Make Unique gives the clip its own copy of the Pattern (clip.unique, {count_before} -> {patterns()} Patterns)")
     command("edit.undo")

@@ -532,6 +532,8 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::String macroConfigurationGeneration() const;
     void masterPitchDialog(); // Tools > Master pitch: cents for every tunable instrument (project.masterPitch).
     bool waitForInput = false;   // Transport option: armed recording waits for the first MIDI note.
+    bool rememberSeekTime = false; // Transport option: Stop returns to where Play was pressed, not to the start.
+    std::optional<double> playStartBeat; // Playhead when Play was last pressed (for rememberSeekTime).
     bool recordNotes = true;     // Recording filter: Record opens a MIDI note take (FL "Notes").
     juce::Result setAudioLogger(bool enabled, double minutes); // Tools > Audio logger.
     juce::var audioLoggerState() const;
