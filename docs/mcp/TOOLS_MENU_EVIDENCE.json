@@ -1,14 +1,17 @@
 {
   "passed": true,
-  "applicationSha256": "adc80dd45f18987a89f1a38cbf3ff389a9612ce0c8dba94f9fab7f8042896a2f",
+  "applicationSha256": "d9c084fd794e3e38e4b6316ddb5486ed41ce4adcb704d80fb2959cb27ecde748",
   "sourceInputs": {
     "scripts/verify-record-filter-mcp.py": "8e4c8ed5b8456a924bf6ebd3dc362aee64eafd6b319bd14bf0002ff85d3da8dc",
     "scripts/verify-master-pitch-mcp.py": "6e657c587bc22d096a809612a39cc937d5aa99421f1a341ee053f3a7c1095af9",
-    "src/Studio.cpp": "91e12cfd759a3e6c3926d5cf918f8d9063448fdba5654dd1dd6d5fbc65ae0b39",
+    "scripts/verify-tools-menu-mcp.py": "457f408597a20040efe2d63101bd7385c0af169f761ea97796d8c200e3aabdd3",
+    "src/Studio.cpp": "23133b1382167ce2ff23aa3f0f5d1089ca539bfc0b002b0db902e83a527d9376",
     "src/StudioSwing.cpp": "4bc0b2a1d05bf05ee22b9e17c3499d17c14053708d1f4b897f2fffe94c00b55c",
-    "src/StudioMcp.cpp": "44b1adf69eea162c4f62cf1ed4a482f6430d7a8b5687fbde37440f12ee3c9f6a",
-    "src/Commands.cpp": "744b13839eeb9a5a7e995b2167b911d81e7ccc0d67c36fe95a04c62dbf34e7e3",
-    "src/AudioLogger.h": "ac1ddc5ac7f83ca99e5b505a5a17a8bde8b354dfeee90829971d91668c0f6ba3"
+    "src/StudioMcp.cpp": "6496a1c692cd6e476afc74c4e47415da74b65cdf447e81a583386df969e9af80",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/AudioLogger.h": "ac1ddc5ac7f83ca99e5b505a5a17a8bde8b354dfeee90829971d91668c0f6ba3",
+    "src/StudioUpdater.cpp": "ec148af166a087a21033e205687a40d70664a82d631a1482807f72979a8374bc",
+    "src/StudioController.cpp": "ba00849568582fe3db6163521bfc0ed2d13e68cd9b67d4323c220fa47d4c5009"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
@@ -33,16 +36,28 @@
     "masterPitch: 1300 cents is refused",
     "masterPitch: A refusal leaves the value",
     "masterPitch: Undo restores the previous value",
-    "masterPitch: Master pitch survives save and reopen"
+    "masterPitch: Master pitch survives save and reopen",
+    "toolsMenu: CoProducer panel toggles (view.coProducer)",
+    "toolsMenu: The Performance window starts closed",
+    "toolsMenu: Performance mode opens its window (view.performance)",
+    "toolsMenu: Drum pads opens (view.drumPads)",
+    "toolsMenu: workspace.tileBalanced sets the tiling mode 1",
+    "toolsMenu: workspace.tileFocused sets the tiling mode 2",
+    "toolsMenu: workspace.free sets the tiling mode 0",
+    "toolsMenu: Restore docked workspace layout runs",
+    "toolsMenu: MIDI recording replace reads back",
+    "toolsMenu: transport.recordReplace toggles replace / overdub",
+    "toolsMenu: A second toggle restores it",
+    "toolsMenu: Clear log runs (score.clear)",
+    "toolsMenu: Template and backup folders read back ({'templates': 'C:\\\\Users\\\\PC\\\\AppData\\\\Local\\\\Temp\\\\templates', 'backups': 'C:\\\\Users\\\\PC\\\\AppData\\\\Local\\\\Temp\\\\backups'})",
+    "toolsMenu: project.openTemplatesFolder reports failed for its folder",
+    "toolsMenu: project.openBackupsFolder reports failed for its folder",
+    "toolsMenu: Update status reads back (idle)",
+    "toolsMenu: app.update.settings changes Include preview releases",
+    "toolsMenu: and restores it",
+    "toolsMenu: settings without a field is refused",
+    "toolsMenu: showOffer is refused with no release available",
+    "toolsMenu: offerInstall is refused with no download ready"
   ],
-  "scope": "Isolated --mcp-test; Tools menu options through their canonical commands. Audio logger on a real device is covered separately by scripts/verify-audio-logger-device.py; Wait for input with a physical keyboard is not qualified.",
-  "reboundBy": {
-    "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261112-130507/affected-tests.log",
-    "rerunLogs": [
-      "build/dev/20261112-130507/rerun-mcp_semantics.log"
-    ],
-    "rerunNote": "full run build/dev/20261112-130507/affected-tests.log: failed ['mcp_semantics'], not reached []; each passed when run alone (build/dev/20261112-130507/rerun-mcp_semantics.log) with the same application",
-    "tests": 291
-  }
+  "scope": "Isolated --mcp-test; the registered operations the Tools menu items run. Not native popup input, listening or hardware evidence."
 }

@@ -986,6 +986,9 @@ add_test(NAME browser_midi_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_
 set_tests_properties(browser_midi_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME menu_item_ids COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/check-menu-ids.py")
 set_tests_properties(menu_item_ids PROPERTIES TIMEOUT 60)
+add_test(NAME tools_menu_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-tools-menu-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/tools_menu_mcp")
+set_tests_properties(tools_menu_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME envelope_presets_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-envelope-presets-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/envelope_presets_mcp")
 set_tests_properties(envelope_presets_mcp PROPERTIES TIMEOUT 120)

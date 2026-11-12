@@ -3835,7 +3835,7 @@ void Studio::toolsMenu()
                 return safe->promptSaveTemplate();
             if (choice == 227)
             {
-                safe->templatesFolder().startAsProcess();
+                safe->performAction("project.openTemplatesFolder");
                 return;
             }
             if (choice >= 260 && choice < 290)
@@ -3942,14 +3942,14 @@ void Studio::toolsMenu()
             }
             if (choice == 224)
             {
-                const auto folder = safe->profileFile().getSiblingFile("backups");
-                const auto own = safe->projectFile == juce::File{} ? juce::File{}
-                                 : folder.getChildFile(safe->projectFile.getFileNameWithoutExtension());
-                (own.isDirectory() ? own : folder).startAsProcess();
+                safe->performAction("project.openBackupsFolder");
                 return;
             }
             if (choice == 203)
-                return safe->showPerformance();
+            {
+                safe->performAction("view.performance");
+                return;
+            }
             if (choice == 205)
                 return safe->showDrumPads();
             if (choice == 206)
@@ -3961,9 +3961,7 @@ void Studio::toolsMenu()
             }
             if (choice == 209)
             {
-                safe->midiRecordReplace = !safe->midiRecordReplace;
-                safe->status = safe->midiRecordReplace ? "MIDI recording: replace notes in the recorded span"
-                                                       : "MIDI recording: overdub (merge with existing notes)";
+                safe->performAction("transport.recordReplace");
                 return;
             }
             if (choice == 208)
@@ -4602,6 +4600,35 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.drumPads")
     {
         showDrumPads();
+        return true;
+    }
+    if (action == "view.performance")
+    {
+        showPerformance();
+        return true;
+    }
+    if (action == "transport.recordReplace")
+    {
+        // Tools > MIDI recording replaces notes (off = overdub).
+        midiRecordReplace = !midiRecordReplace;
+        status = midiRecordReplace ? "MIDI recording: replace notes in the recorded span"
+                                   : "MIDI recording: overdub (merge with existing notes)";
+        repaint();
+        return true;
+    }
+    if (action == "project.openTemplatesFolder" || action == "project.openBackupsFolder")
+    {
+        // Tools > Open templates / project backups folder. Test instances report the folder
+        // without starting the file manager.
+        const auto folder = action.endsWith("TemplatesFolder") ? templatesFolder() : projectBackupsFolder();
+        if (!folder.isDirectory())
+        {
+            status = "The folder does not exist yet: " + folder.getFullPathName();
+            return false;
+        }
+        if (!controllerTestMode)
+            folder.startAsProcess();
+        status = "Opened " + folder.getFullPathName();
         return true;
     }
     if (action == "view.browser")

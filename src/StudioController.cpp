@@ -37,6 +37,13 @@ bool Studio::navigateSamplerView(const juce::String &action)
     range->navigation(action);
     return true;
 }
+juce::File Studio::projectBackupsFolder() const
+{
+    const auto folder = profileFile().getSiblingFile("backups");
+    const auto own = projectFile == juce::File{} ? juce::File{}
+                                                 : folder.getChildFile(projectFile.getFileNameWithoutExtension());
+    return own.isDirectory() ? own : folder;
+}
 juce::Result Studio::setControllerPorts(const juce::String &input, const juce::String &output)
 {
     // The control port must not be the performance input: its notes would also play the Channel.

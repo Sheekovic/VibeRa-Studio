@@ -379,11 +379,18 @@ void Studio::updateSettingsMenu()
                                return safe->showUpdateOffer();
                            if (choice == 3)
                                return safe->offerUpdateInstall();
-                           auto settings = safe->loadUpdateSettings();
-                           const juce::Identifier key = choice == 4 ? "autoCheck" : "includePreview";
-                           settings.getDynamicObject()->setProperty(key, !bool(settings[key]));
-                           safe->saveUpdateSettings(settings);
+                           const juce::String key = choice == 4 ? "autoCheck" : "includePreview";
+                           (void)safe->setUpdateSetting(key, !bool(safe->loadUpdateSettings()[juce::Identifier(key)]));
                        });
+}
+juce::Result Studio::setUpdateSetting(const juce::String &key, bool on)
+{
+    if (key != "autoCheck" && key != "includePreview")
+        return juce::Result::fail("update.invalidSetting: autoCheck or includePreview");
+    auto settings = loadUpdateSettings();
+    settings.getDynamicObject()->setProperty(juce::Identifier(key), on);
+    saveUpdateSettings(settings);
+    return juce::Result::ok();
 }
 
 juce::var Studio::updateStatus() const
