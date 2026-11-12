@@ -295,7 +295,8 @@
         "scripts/verify-pattern-seek-options-mcp.py",
         "src/Studio.cpp",
         "src/Commands.cpp",
-        "src/StudioMcp.cpp"
+        "src/StudioMcp.cpp",
+        "src/OutputScope.h"
       ],
       "scope": "Isolated --mcp-test (no audio device); Pattern menu and transport option operations. Not native popup input, listening or hardware evidence."
     },

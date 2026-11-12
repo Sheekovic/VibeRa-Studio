@@ -5,14 +5,15 @@
     "scripts/verify-pattern-seek-options-mcp.py": "e078ebaa2a12e0eb073549045bde3e13f0c235e78983aa46f86e19b790f43822",
     "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",
     "src/Commands.cpp": "fd1e77c20a779dae187176d4093d3c0f75d2b4e928f818ed82b40ef2dd86d536",
-    "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31"
+    "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31",
+    "src/OutputScope.h": "d49c523d5ddfcc34e49e295762c63af7e9226eb444941341f5f1627a00d64c52"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
     "Two clips of the first Pattern and one of the second",
     "Select in playlist selects exactly the Pattern's clips (pattern.selectInPlaylist)",
     "A Pattern without clips selects nothing and says so",
-    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ff64d9b0)",
+    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ffd93a74)",
     "The Pattern keeps its name",
     "Random colour is one Undo step",
     "Remember seek time is off by default",
