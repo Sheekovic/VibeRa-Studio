@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "applicationSha256": "82671cc098ddf41b8ff80a519906a190c28ac272314346db514b4998c8d5b071",
+  "sourceInputs": {
+    "src/SampleFileBrowser.h": "83e3c6f86b476f84eb3299e3a0b8c40a47ea9d669ea3091be28d1cc5a7190ce7",
+    "src/Commands.cpp": "3a346ebe804c756d88da0f085f771655f93dde738009e56354d0e9b534cefc5a",
+    "src/StudioMcp.cpp": "9d50ec1b1dc89dad6d391d350c945e0673e499fe5ba7096798084fd188c9007e",
+    "scripts/verify-ui-actions-mcp.py": "60c3e17cccf74b85088b4b27ddcb2021cebac472de9b356e1c255217550deaab",
+    "scripts/verify-browser-midi-mcp.py": "8b8148801d426e969f47eb7f20ad84f8f651088b9438839453f8759bb0c122cb",
+    "scripts/verify-workspace-layout-mcp.py": "257b32a21d75cadd39e521ea99c79e858d254caea5daff860ddae0d50f4ec1e2"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest browser_midi_mcp passed (run alone)",
+    "ctest mcp_ui_actions passed (run alone)",
+    "ctest workspace_layout_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations the Browser toolbar, results menu and file menu run, each run alone on this binary. Not native popup input or listening evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/browser-menu/related-ctest.log"
+}

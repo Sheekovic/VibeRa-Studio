@@ -309,6 +309,23 @@
         "src/StudioMcp.cpp"
       ],
       "scope": "Isolated --mcp-test, offline render; Picker Pattern menu render items. Not native popup input or listening evidence."
+    },
+    "docs/mcp/BROWSER_MENU_EVIDENCE.json": {
+      "ctests": [
+        "mcp_ui_actions",
+        "browser_midi_mcp",
+        "workspace_layout_mcp"
+      ],
+      "folder": "browser-menu",
+      "sources": [
+        "src/SampleFileBrowser.h",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-ui-actions-mcp.py",
+        "scripts/verify-browser-midi-mcp.py",
+        "scripts/verify-workspace-layout-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations the Browser toolbar, results menu and file menu run, each run alone on this binary. Not native popup input or listening evidence."
     }
   }
 }

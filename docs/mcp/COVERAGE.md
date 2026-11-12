@@ -210,6 +210,8 @@ Callback candidates require manual expansion into individual controls and gestur
 | `browser.tagFilter` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `browser.setTags` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `browser.tagSearch` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `browser.sort` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
+| `browser.columns` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `view.scroll` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `mixer.insert.select` | vibera_mixer | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `browser.previewSeek` | vibera_editor | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
@@ -799,10 +801,10 @@ Callback candidates require manual expansion into individual controls and gestur
 | `automation.plugin.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.macro.unlink` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 
-Custom callback candidates: 454; unreviewed: 45.
+Custom callback candidates: 454; unreviewed: 68.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 333; gaps: 156.
+Explicit UI inventory complete: False; known controls: 345; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1140,6 +1142,18 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `tools.timeDisplay` | view.timeDisplay | vibera_command; reviewed |
 | `tools.quantizeKeepDuration` | transport.quantizeKeepDuration | vibera_command; reviewed |
 | `picker.pattern.renderReplace` | vibera_project export with pattern, placeClip and replace | vibera_project; reviewed |
+| `browser.nav` | browser.back / browser.forward / browser.up | vibera_command; reviewed |
+| `browser.tabs` | browser.showAll / browser.showStarred | vibera_command; reviewed |
+| `browser.search` | browser.find / browser.clearSearch / browser.nextMatch / browser.previousMatch / browser.reindex | vibera_command; reviewed |
+| `browser.collectionsMenu` | browser.collectionsMenu | vibera_command; reviewed |
+| `browser.star` | browser.toggleFavorite | vibera_command; reviewed |
+| `browser.tagsPanel` | browser.showTags / browser.matchAllTags / browser.clearTagFilters | vibera_command; reviewed |
+| `browser.tagDialogs` | browser.addTags / browser.editTags / browser.setTags | vibera_command; reviewed |
+| `browser.tagList` | browser.tagFilter / browser.tagSearch | vibera_editor; reviewed |
+| `browser.preview` | browser.playPreview / browser.stopPreview / browser.fullPreview / browser.previewLouder / browser.previewSofter | vibera_command; reviewed |
+| `browser.previewSeek` | browser.previewSeek | vibera_editor; reviewed |
+| `browser.sortColumns` | browser.sort / browser.columns | vibera_editor; reviewed |
+| `browser.folders` | browser.openFolder / browser.forgetFolder | vibera_editor; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.
@@ -1400,29 +1414,6 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/RackVelocityGraph.h:392:47a6ec64ed16` | steps.fine, steps.modX, steps.modY, steps.pan, steps.pitch, steps.release, steps.repeat, steps.shift, steps.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKVELOCITYGRAPH_EVIDENCE.json) |
 | `src/RackVelocityGraph.h:492:8b8a18f493cc` | steps.fine, steps.modX, steps.modY, steps.pan, steps.pitch, steps.release, steps.repeat, steps.shift, steps.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKVELOCITYGRAPH_EVIDENCE.json) |
 | `src/RackVelocityGraph.h:497:d2f3322eb5dd` | steps.fine, steps.modX, steps.modY, steps.pan, steps.pitch, steps.release, steps.repeat, steps.shift, steps.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKVELOCITYGRAPH_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:102:45ccd61ba4bc` | browser.tagFilter | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:582:fc7724e5a1b1` | browser.playPreview | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:586:69adcd597b63` | browser.editTags, browser.playPreview, browser.toggleFavorite, channel.add, channel.source, notes.import | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:590:8cec966a2b32` | channel.add, notes.import | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1016:f3faca25fe5c` | browser.find | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1034:091489e754e0` | browser.collectionsMenu | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1038:69b3a9bc31a6` | browser.showTags | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1039:62a4a8749c7e` | browser.matchAllTags | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1042:07c57a9c996a` | browser.clearTagFilters | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1045:5286bcbf882c` | browser.tagSearch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1058:f12d1823fdf0` | browser.playPreview | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1061:52e00a27895f` | browser.stopPreview | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1064:fb159c6d3b4a` | browser.fullPreview | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1070:733b2759940f` | browser.previewLouder, browser.previewSofter | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1077:4ece84bd2bd8` | browser.back | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1078:b40ef06e24b1` | browser.forward | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1080:ea9e704199c9` | browser.find | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1081:cd4843c1f7fe` | browser.up | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1086:2d365f4fa9ed` | browser.reindex | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1092:116b1da2a5bc` | browser.openFolder | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1111:c88ac466feb4` | browser.openFolder | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1125:8396e65ebb59` | browser.forgetFolder | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
-| `src/SampleFileBrowser.h:1308:faaab3083845` | browser.collectionsMenu | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
 | `src/SamplerGestures.h:293:ea9ab885b2b2` | sampler.view.left, sampler.view.right, sampler.view.zoomIn, sampler.view.zoomOut | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLERGESTURES_EVIDENCE.json) |
 | `src/SamplerGestures.h:396:9c4219c06c7f` | sampler.view.all, sampler.view.range, sampler.view.zoomIn, sampler.view.zoomOut | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLERGESTURES_EVIDENCE.json) |
 | `src/SamplerGestures.h:460:cfd0d6be6d11` | channel.sampler.end, channel.sampler.loopEnd, channel.sampler.loopRange, channel.sampler.loopStart, channel.sampler.range, channel.sampler.start | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLERGESTURES_EVIDENCE.json) |

@@ -1527,6 +1527,19 @@ class SampleFileBrowser final : public juce::Component,
             currentView >= 2 ? collections.searches[std::size_t(currentView - 2)].id : juce::String{};
         collectionAction(selectedFile(), id)(choice);
     }
+    juce::Result sortResults(const juce::String &order) // Results menu > Sort results (search / name / type / date).
+    {
+        static const juce::StringArray orders{"search", "name", "type", "date"};
+        const int index = orders.indexOf(order);
+        if (index < 0)
+            return juce::Result::fail("browser.unknownSort: sort is search, name, type or date");
+        setResultSort(index);
+        return juce::Result::ok();
+    }
+    void showColumns(bool on) // Results menu > Show results as columns.
+    {
+        setDetailColumns(on);
+    }
     void searchTags(const juce::String &text) // Same as typing in the tag list's search box.
     {
         tagNameSearch.setText(text, juce::sendNotificationSync);

@@ -72,6 +72,16 @@ try:
     editor("browserTagSearch", text="")
     check({"Drum", "Low"} <= set(browser().get("visibleTags", [])), "An empty search shows every tag")
 
+    # Results menu: Sort results and Show results as columns.
+    for order in ("name", "type", "date", "search"):
+        check(not editor("browserSort", sort=order).get("isError") and browser().get("sort") == order, f"browser.sort orders results by {order}")
+    check(editor("browserSort", sort="size").get("isError"), "An unknown sort order is refused")
+    columns = browser().get("columns")
+    check(not editor("browserColumns", columns=not columns).get("isError") and browser().get("columns") is (not columns),
+          "browser.columns switches the column view")
+    editor("browserColumns", columns=columns)
+    check(browser().get("columns") is columns, "and back")
+
     # view.scroll: the editors' own scroll bars (Playlist zooms horizontally; the others only move).
     views = lambda: call("vibera_state")["editorViews"]
     scroll = lambda index, **a: raw("vibera_editor", dict(editor=index, action="scroll", **a))

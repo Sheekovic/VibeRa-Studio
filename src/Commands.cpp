@@ -471,6 +471,8 @@ const std::vector<CommandInfo> &commandRegistry()
         {"browser.tagFilter", "Browser select or clear a tag filter", Scope::browser, false, false, "vibera_editor"},
         {"browser.setTags", "Browser set a file's tags", Scope::browser, false, false, "vibera_editor"},
         {"browser.tagSearch", "Browser search the tag list", Scope::browser, false, false, "vibera_editor"},
+        {"browser.sort", "Browser sort results", Scope::browser, false, false, "vibera_editor"},
+        {"browser.columns", "Browser show results as columns", Scope::browser, false, false, "vibera_editor"},
         {"view.scroll", "Scroll / zoom an editor with its scroll bars", Scope::global, false, false, "vibera_editor"},
         {"mixer.insert.select", "Select a Mixer insert", Scope::mixer, false, false, "vibera_mixer"},
         {"browser.previewSeek", "Browser restart the preview at a position", Scope::browser, false, false, "vibera_editor"},

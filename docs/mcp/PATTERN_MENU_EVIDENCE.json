@@ -1,18 +1,18 @@
 {
   "passed": true,
-  "applicationSha256": "c56b1ffe7337226a4ecdcf7438a61f887e45b634539f81acabfcd0e29e96216f",
+  "applicationSha256": "82671cc098ddf41b8ff80a519906a190c28ac272314346db514b4998c8d5b071",
   "sourceInputs": {
     "scripts/verify-pattern-seek-options-mcp.py": "03d2ceccd2d971ae1c1cb559b47b8146dff5204b471bc5517f45778c4c238e14",
     "src/Studio.cpp": "3671d4cc7ba08a5c0119e4b59de13b17f2315aac1aadaa4f28dbd40d9a4a9ea0",
-    "src/Commands.cpp": "06f9d471a846ddda3c9ff9e76a4d6a94c2aa2850c75e02393da900c32c9976b0",
-    "src/StudioMcp.cpp": "df8a4ab0a9009b4229670eadb4969c197bd07b0620af472f1d9fcf35db403aae"
+    "src/Commands.cpp": "3a346ebe804c756d88da0f085f771655f93dde738009e56354d0e9b534cefc5a",
+    "src/StudioMcp.cpp": "9d50ec1b1dc89dad6d391d350c945e0673e499fe5ba7096798084fd188c9007e"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
     "Two clips of the first Pattern and one of the second",
     "Select in playlist selects exactly the Pattern's clips (pattern.selectInPlaylist)",
     "A Pattern without clips selects nothing and says so",
-    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ff649ed9)",
+    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ffd9a372)",
     "The Pattern keeps its name",
     "Random colour is one Undo step",
     "Remember seek time is off by default",
