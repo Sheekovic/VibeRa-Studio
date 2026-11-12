@@ -147,6 +147,13 @@ try:
     transport("midiInput", quantizeKeepDuration=False)
     check(midi().get("quantizeKeepDuration") is False, "vibera_transport midiInput turns it off again")
 
+    # Monitor volume (the gain itself is checked natively; this is the setting and its refusal).
+    check(state().get("monitorVolume") == 1, "Monitor volume is 100 % by default")
+    check(not transport("monitor", volume=.5).get("isError") and abs(state()["monitorVolume"] - .5) < 1e-6, "audio.monitorVolume sets 50 %")
+    check(transport("monitor", volume=2).get("isError"), "A monitor volume above 1 is refused")
+    transport("monitor", volume=1)
+    check(state().get("monitorVolume") == 1, "and returns to 100 %")
+
     # CPU load and the chord the selected notes spell.
     check(isinstance(state().get("cpuLoad"), (int, float)) and 0 <= state()["cpuLoad"] <= 1, f"CPU load reads back ({state().get('cpuLoad')})")
     call("vibera_select", {"pattern": first})

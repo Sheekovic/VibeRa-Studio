@@ -149,7 +149,9 @@ name field. Recording options: `transport.disarmOnStop` (default on; off keeps R
 and `transport.recordStartsPlayback` (arming Record while stopped also presses Play); read
 `state.disarmOnStop` / `state.recordStartsPlayback`. `transport.quantizeKeepDuration` (or `midiInput`
 `quantizeKeepDuration`) is Leave note duration: a quantized start keeps the played length
-(`state.midiInput.quantizeKeepDuration`). `state.cpuLoad` is the audio callback load 0..1 and
+(`state.midiInput.quantizeKeepDuration`). `vibera_transport {"action":"monitor","volume":0..1}` is Monitor volume: a listening-only gain on the
+live Master output (`state.monitorVolume`); exports, meters and the audio logger are unchanged.
+`state.cpuLoad` is the audio callback load 0..1 and
 `state.detectedChord` names the chord held on the typing keyboard / Drum Pads, else the chord the
 selected Piano roll notes spell ("" when none). Render and replace: `vibera_project {"action":"export",
 "pattern":ID,"placeClip":true,"replace":true}` renders the Pattern, places the audio clip at every

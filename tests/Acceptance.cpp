@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "StoppedEffectChangePlanAcceptance.h"
 #include "AudioLogger.h"
+#include "MonitorVolume.h"
 #include "NativeEffectModelAcceptance.h"
 #include "Commands.h"
 #include "AudioEngine.h"
@@ -359,6 +360,38 @@ static void audioLoggerTests(const juce::File &folder)
     require(exact, "the saved audio is the newest 2 s, both channels, in order");
     logger.disable();
     require(!logger.enabled() && logger.recordedSeconds() == 0, "disable frees the buffer");
+}
+static void monitorVolumeTests()
+{
+    // Listening-only gain: untouched at 1, one block of ramp to the target, then steady; back to 1.
+    auto &monitor = MonitorVolume::instance();
+    juce::AudioBuffer<float> block(2, 64);
+    auto fill = [&]
+    {
+        for (int ch = 0; ch < 2; ++ch)
+            juce::FloatVectorOperations::fill(block.getWritePointer(ch), 1.f, 64);
+    };
+    monitor.set(1.f);
+    fill();
+    monitor.apply(block, 0, 64);
+    require(block.getSample(0, 0) == 1.f && block.getSample(1, 63) == 1.f, "monitor volume 1 leaves the output untouched");
+    monitor.set(.5f);
+    fill();
+    monitor.apply(block, 0, 64);
+    require(block.getSample(0, 0) > .98f && block.getSample(0, 63) < .52f && block.getSample(0, 63) >= .5f &&
+                block.getSample(0, 31) < block.getSample(0, 30),
+            "monitor volume ramps to the new gain within one block (no step)");
+    fill();
+    monitor.apply(block, 0, 64);
+    require(std::abs(block.getSample(0, 0) - .5f) < 1.e-6f && std::abs(block.getSample(1, 63) - .5f) < 1.e-6f,
+            "monitor volume then holds the gain on both channels");
+    monitor.set(7.f);
+    require(monitor.get() == 1.f, "monitor volume is limited to 0..1");
+    fill();
+    monitor.apply(block, 0, 64);
+    fill();
+    monitor.apply(block, 0, 64);
+    require(block.getSample(0, 10) == 1.f, "monitor volume returns to unity");
 }
 static void scoreLogTests(const juce::File &folder)
 {
@@ -5685,6 +5718,7 @@ int main(int argc, char **argv)
         runStage("precisionPersistenceTests", [&] { precisionPersistenceTests(folder); });
         runStage("scoreLogTests", [&] { scoreLogTests(folder); });
         runStage("audioLoggerTests", [&] { audioLoggerTests(folder); });
+        runStage("monitorVolumeTests", [&] { monitorVolumeTests(); });
         runStage("midiScoreTests", [&] { midiScoreTests(folder); });
         runStage("midiScoreLiveTests", [&] { midiScoreLiveTests(folder); });
         runStage("scoreToolsTests", [&] { scoreToolsTests(folder); });

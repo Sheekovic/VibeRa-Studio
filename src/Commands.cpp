@@ -530,6 +530,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"channel.previewSample", "Preview the Channel's sample", Scope::sampler, false, false, "vibera_transport"},
         {"drumPads.hit", "Drum Pads: strike / release a pad", Scope::global, false, false, "vibera_transport"},
         {"midi.typingOptions", "Typing keyboard root octave and velocity", Scope::global, false, false, "vibera_transport"},
+        {"audio.monitorVolume", "Monitor volume (listening only)", Scope::global, false, false, "vibera_transport"},
         {"recording.audioInput", "Audio input recording options and recovered takes", Scope::global, false, false, "vibera_audioRecording"},
         {"transport.guide", "Metronome and count-in settings", Scope::global, false, true, "vibera_transport"},
         {"controller.binding", "Edit a controller mapping", Scope::global, false, true, "vibera_controller"},

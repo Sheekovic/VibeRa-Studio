@@ -3,6 +3,7 @@
 #include "LiveTimeline.h"
 #include "GraphControlRuntime.h"
 #include "AudioLogger.h"
+#include "MonitorVolume.h"
 #include "MixerMeter.h"
 #include "PreparedBalance.h"
 #include "PreparedStereo.h"
@@ -326,6 +327,8 @@ class AutomationGain final : public tracktion::Plugin
             runtime->follow += (std::min(1.f, peak) - runtime->follow) * coefficient;
             InsertLevels::instance().publish(runtime->insert, runtime->follow);
         }
+        if (runtime->insert == 0 && !fc.isRendering) // Monitor volume: last, live Master output only.
+            MonitorVolume::instance().apply(*fc.destBuffer, fc.bufferStartSample, fc.bufferNumSamples);
     }
 };
 } // namespace vibera

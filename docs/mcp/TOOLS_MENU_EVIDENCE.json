@@ -1,14 +1,14 @@
 {
   "passed": true,
-  "applicationSha256": "82671cc098ddf41b8ff80a519906a190c28ac272314346db514b4998c8d5b071",
+  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
   "sourceInputs": {
     "scripts/verify-record-filter-mcp.py": "8e4c8ed5b8456a924bf6ebd3dc362aee64eafd6b319bd14bf0002ff85d3da8dc",
     "scripts/verify-master-pitch-mcp.py": "6e657c587bc22d096a809612a39cc937d5aa99421f1a341ee053f3a7c1095af9",
     "scripts/verify-tools-menu-mcp.py": "5747c63078a45d0425a1ef9123996e3393fc12ec3dc85e7d3da0d8580f0381c7",
-    "src/Studio.cpp": "3671d4cc7ba08a5c0119e4b59de13b17f2315aac1aadaa4f28dbd40d9a4a9ea0",
+    "src/Studio.cpp": "16aa1eeeb86482c835994415e7dd32fa9fb42ae9a1c9755bcbe13a5cdae40f3c",
     "src/StudioSwing.cpp": "4bc0b2a1d05bf05ee22b9e17c3499d17c14053708d1f4b897f2fffe94c00b55c",
-    "src/StudioMcp.cpp": "9d50ec1b1dc89dad6d391d350c945e0673e499fe5ba7096798084fd188c9007e",
-    "src/Commands.cpp": "3a346ebe804c756d88da0f085f771655f93dde738009e56354d0e9b534cefc5a",
+    "src/StudioMcp.cpp": "24ae719a920820c8ff64d60d848a1ab58a46997df5b9367023e6f30665d01db1",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
     "src/AudioLogger.h": "ac1ddc5ac7f83ca99e5b505a5a17a8bde8b354dfeee90829971d91668c0f6ba3",
     "src/StudioUpdater.cpp": "ec148af166a087a21033e205687a40d70664a82d631a1482807f72979a8374bc",
     "src/StudioController.cpp": "9dd06d02171d401cfe8fa7c372fd0d1b75f6b42fa58bd1d5ae534902227efe57"

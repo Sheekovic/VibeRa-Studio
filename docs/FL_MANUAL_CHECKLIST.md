@@ -164,7 +164,7 @@ copy / paste already exist. New and still open items from these pages:
 | Recording quantize: Leave note duration | done | `transport.quantizeKeepDuration` / `vibera_transport midiInput quantizeKeepDuration`: a quantized start keeps the played length; Tools menu; MidiTake check in musical_acceptance, pattern_seek_options_mcp |
 | Recording quantize: Record to step sequencer | missing | |
 | Tempo: Half speed, nudge, tap Sync / Mute | missing | Tap tempo and tempo presets exist |
-| Monitor volume (listening only, not rendered) | missing | |
+| Monitor volume (listening only, not rendered) | done | `vibera_transport monitor` (`audio.monitorVolume`), Tools > Monitor volume; applied last on the live Master output with a one-block ramp, after the meter and the audio logger, never while rendering; `state.monitorVolume`; native gain check in musical_acceptance, pattern_seek_options_mcp. Not a listening test; the metronome and sample preview are not attenuated |
 | Time panel: Bar:Beat / Minute:Second display mode | done | `view.timeDisplay` (Tools menu) shows minutes:seconds from the tempo map; `state.timeDisplay`, `state.positionSeconds`; pattern_seek_options_mcp |
 | Output panel: CPU meter | done | CPU load of the audio callback in the top status line and `state.cpuLoad` (0 without a device); pattern_seek_options_mcp reads it back, not measured on a device here |
 | Output panel: oscilloscope, spectrograph, memory / polyphony meters | missing | Mixer meters and the Meter-wave view exist |

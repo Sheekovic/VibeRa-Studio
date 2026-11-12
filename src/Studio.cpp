@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "FlpImport.h"
 #include "Studio.h"
+#include "MonitorVolume.h"
 #include "SliceDetect.h"
 #include "AudioLogger.h"
 #include "VideoPlayer.h"
@@ -3764,6 +3765,14 @@ void Studio::toolsMenu()
     menu.addItem(255, "Show time as minutes:seconds", true, timeDisplaySeconds);
     menu.addItem(256, "Recording quantize: leave note duration", true, quantizeKeepDuration);
     {
+        // Monitor volume: what you hear only; exports, meters and the audio logger are unchanged.
+        juce::PopupMenu monitor;
+        const int current = juce::roundToInt(MonitorVolume::instance().get() * 100);
+        for (const int percent : {100, 75, 50, 25, 10})
+            monitor.addItem(400 + percent, juce::String(percent) + "%", true, current == percent);
+        menu.addSubMenu("Monitor volume (listening only, " + juce::String(current) + "%)", monitor);
+    }
+    {
         // FL Recording filter: what Record captures. Audio is the audio-input switch; automation
         // recording is armed separately on its control.
         juce::PopupMenu filter;
@@ -3869,6 +3878,13 @@ void Studio::toolsMenu()
             if (choice == 243)
             {
                 safe->audioInputButton.onClick();
+                return;
+            }
+            if (choice >= 410 && choice <= 500) // Monitor volume: 400 + percent.
+            {
+                MonitorVolume::instance().set(float(choice - 400) / 100.f);
+                safe->status = "Monitor volume " + juce::String(choice - 400) + "% (listening only)";
+                safe->repaint();
                 return;
             }
             if (choice >= 252 && choice <= 256)
