@@ -382,4 +382,23 @@ void Studio::verifyAutosave(const juce::File &folder, std::function<void(juce::R
             (*saveNext)();
         });
 }
+double Studio::processMemoryMb() const
+{
+#if JUCE_WINDOWS
+    // K32GetProcessMemoryInfo lives in kernel32; the layout is PROCESS_MEMORY_COUNTERS (psapi.h).
+    struct Counters
+    {
+        DWORD cb, PageFaultCount;
+        SIZE_T PeakWorkingSetSize, WorkingSetSize, QuotaPeakPagedPoolUsage, QuotaPagedPoolUsage,
+            QuotaPeakNonPagedPoolUsage, QuotaNonPagedPoolUsage, PagefileUsage, PeakPagefileUsage;
+    } counters{};
+    counters.cb = sizeof(counters);
+    using Query = BOOL(WINAPI *)(HANDLE, void *, DWORD);
+    if (const auto kernel = GetModuleHandleW(L"kernel32.dll"))
+        if (const auto query = reinterpret_cast<Query>(reinterpret_cast<void *>(GetProcAddress(kernel, "K32GetProcessMemoryInfo"))))
+            if (query(GetCurrentProcess(), &counters, counters.cb))
+                return double(counters.WorkingSetSize) / (1024. * 1024.);
+#endif
+    return 0;
+}
 } // namespace vibera

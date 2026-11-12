@@ -1,17 +1,17 @@
 {
   "passed": true,
-  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
+  "applicationSha256": "d1294a0feab1f80af93f239cf0ccab0e0343612633af6461d7c73f66c1478782",
   "sourceInputs": {
     "scripts/verify-pattern-render-replace-mcp.py": "3aa93566c3eb5e6f93b4ce85d2efba872b90e557504f990ae87a6595f2cb0b88",
     "src/ClipPicker.h": "1fec06802a2c49d4828e96e6183398611035d50ab55eec419fdb6203af8d2ce4",
-    "src/Studio.cpp": "f343f1c148a878ad84c35f2508e07c3f7f1511891f72accde8a9c433a876d814",
-    "src/StudioMcp.cpp": "b3f822fb77bc4048c3eb162a5a4d6ba095a7237c43e36f955946ae2c1dff56e1"
+    "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",
+    "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
     "Render and replace refuses a Pattern that is not placed",
     "Three placements of the Pattern, no audio clips",
-    "The render job completes ({'operation': 'ee9e27f3d7cd4f4b946160e95ab5ac25', 'kind': 'export', 'completionState': 'completed', 'message': 'Operation finished', 'path': 'E:\\\\Projects\\\\VibeRa Studio\\\\build\\\\module-qualification\\\\pattern-render-replace\\\\attempt-e0c582504338496b82e2bb7db17d0e2e\\\\Rendered\\\\Pattern 1.wav', 'projectIdentity': '85d00ac203834434abec2c6abe130063', 'sourceRevision': 8, 'fileExists': True, 'fileBytes': 1152104})",
+    "The render job completes ({'operation': 'd3cbe18a8da44634bd93323b09f4fdb4', 'kind': 'export', 'completionState': 'completed', 'message': 'Operation finished', 'path': 'E:\\\\Projects\\\\VibeRa Studio\\\\build\\\\module-qualification\\\\pattern-render-replace\\\\attempt-282e4d2e0fbe47c5ab2d372d060e5f13\\\\Rendered\\\\Pattern 1.wav', 'projectIdentity': '2908bf18bbf4441cad688fae0662d609', 'sourceRevision': 8, 'fileExists': True, 'fileBytes': 1152104})",
     "An audio clip sits at every placement of the Pattern ([0.0, 8.0, 16.0])",
     "They share a new track below the Pattern clips",
     "The Pattern clips are muted, not deleted",

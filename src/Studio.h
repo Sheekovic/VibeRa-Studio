@@ -543,6 +543,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     bool disarmOnStop = true;          // Recording option: Stop turns Record off (off keeps it armed).
     bool recordStartsPlayback = false; // Recording option: arming Record while stopped also presses Play.
     bool timeDisplaySeconds = false;   // Time display: minutes:seconds instead of the beat.
+    double processMemoryMb() const;    // This process's working set in MB (0 where the platform is not wired).
     double positionSeconds() const;    // Playhead in seconds (Song tempo map; base tempo in Pattern mode).
     juce::String detectedChord() const; // Chord spelled by the selected Piano roll notes ("" when none).
     std::optional<double> playStartBeat; // Playhead when Play was last pressed (for rememberSeekTime).

@@ -1,18 +1,18 @@
 {
   "passed": true,
-  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
+  "applicationSha256": "d1294a0feab1f80af93f239cf0ccab0e0343612633af6461d7c73f66c1478782",
   "sourceInputs": {
-    "scripts/verify-pattern-seek-options-mcp.py": "61e5fbe1fcb35776a43680e6a09ef19a2714fd95a3e6b6b505771e5e5ad7141f",
-    "src/Studio.cpp": "f343f1c148a878ad84c35f2508e07c3f7f1511891f72accde8a9c433a876d814",
-    "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
-    "src/StudioMcp.cpp": "b3f822fb77bc4048c3eb162a5a4d6ba095a7237c43e36f955946ae2c1dff56e1"
+    "scripts/verify-pattern-seek-options-mcp.py": "e078ebaa2a12e0eb073549045bde3e13f0c235e78983aa46f86e19b790f43822",
+    "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",
+    "src/Commands.cpp": "fd1e77c20a779dae187176d4093d3c0f75d2b4e928f818ed82b40ef2dd86d536",
+    "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
     "Two clips of the first Pattern and one of the second",
     "Select in playlist selects exactly the Pattern's clips (pattern.selectInPlaylist)",
     "A Pattern without clips selects nothing and says so",
-    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ff4bd967)",
+    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ff64d9b0)",
     "The Pattern keeps its name",
     "Random colour is one Undo step",
     "Remember seek time is off by default",
@@ -42,7 +42,11 @@
     "and returns to 100 %",
     "CPU load reads back (0.0)",
     "C E G reads back as C major (C major)",
-    "Two notes are not a chord"
+    "Two notes are not a chord",
+    "The output meter starts as a waveform",
+    "view.outputScopeMode switches the output meter to the spectrum",
+    "view.outputScopeMode switches it back to the waveform",
+    "state.memoryMb reads the process memory"
   ],
   "scope": "Isolated --mcp-test (no audio device); Pattern menu and transport option operations. Not native popup input, listening or hardware evidence.",
   "refreshedBy": "scripts/refresh-menu-evidence.py"

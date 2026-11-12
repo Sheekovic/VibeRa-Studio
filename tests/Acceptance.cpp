@@ -440,6 +440,21 @@ static void outputScopeTests()
                 shown[OutputScope::size - 5] == 0.f,
             "the scope keeps the mono mix of every eighth frame, newest last");
     require(std::abs(scope.peak() - .8f) < 1.e-6f, "the scope peak reads the largest stored sample");
+    // Spectrum: a 3 kHz sine at 48 kHz lands in one bar near 0 dB; silence reads empty bars.
+    std::array<float, OutputScope::rawSize> tone{};
+    for (int i = 0; i < OutputScope::rawSize; ++i)
+        tone[size_t(i)] = std::sin(juce::MathConstants<float>::twoPi * 64.f * float(i) / float(OutputScope::rawSize));
+    std::array<float, OutputScope::bars> bars{};
+    OutputScope::spectrum(tone, bars);
+    const auto loudest = int(std::max_element(bars.begin(), bars.end()) - bars.begin());
+    require(bars[size_t(loudest)] > .9f && loudest > 24 && loudest < 40 && bars[2] < .3f && bars[OutputScope::bars - 1] < .3f,
+            "a sine reads as one tall spectrum bar at its frequency and low bars elsewhere");
+    tone.fill(0.f);
+    OutputScope::spectrum(tone, bars);
+    require(*std::max_element(bars.begin(), bars.end()) == 0.f, "silence reads an empty spectrum");
+    scope.showSpectrum(true);
+    require(scope.spectrumShown(), "the spectrum mode switches on");
+    scope.showSpectrum(false);
     scope.clear();
     require(scope.peak() == 0.f, "clearing the scope empties it");
 }

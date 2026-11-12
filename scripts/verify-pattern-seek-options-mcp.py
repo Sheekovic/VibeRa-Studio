@@ -166,6 +166,15 @@ try:
     check(state().get("detectedChord") == "C major", f"C E G reads back as C major ({state().get('detectedChord')})")
     select(60, 62)
     check(state().get("detectedChord") == "", "Two notes are not a chord")
+
+    # Output meter beside the transport: click switches waveform / spectrum (view.outputScopeMode); memory reads back.
+    scope = lambda: call("vibera_state").get("outputScopeMode")
+    check(scope() == "wave", "The output meter starts as a waveform")
+    call("vibera_command", {"command": "view.outputScopeMode", "args": {}})
+    check(scope() == "spectrum", "view.outputScopeMode switches the output meter to the spectrum")
+    call("vibera_command", {"command": "view.outputScopeMode", "args": {}})
+    check(scope() == "wave", "view.outputScopeMode switches it back to the waveform")
+    check(call("vibera_state").get("memoryMb", 0) > 10, "state.memoryMb reads the process memory")
     passed = True
 finally:
     client.close()

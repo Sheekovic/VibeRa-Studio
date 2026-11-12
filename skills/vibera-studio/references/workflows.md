@@ -164,6 +164,8 @@ and `transport.recordStartsPlayback` (arming Record while stopped also presses P
 live Master output (`state.monitorVolume`); exports, meters and the audio logger are unchanged.
 `state.outputScopeShown` says whether the output oscilloscope beside the transport is visible and
 `state.outputScopePeak` is the peak of its newest 85 ms of Master output (0 without an audio device).
+`vibera_command view.outputScopeMode` switches that meter between waveform and spectrum
+(`state.outputScopeMode`: `wave` or `spectrum`); `state.memoryMb` is the process memory in MB.
 `state.voices` is the number of sampler voices in the last audio block (plugin instruments are not
 counted; 0 without an audio device). `state.cpuLoad` is the audio callback load 0..1 and
 `state.detectedChord` names the chord held on the typing keyboard / Drum Pads, else the chord the

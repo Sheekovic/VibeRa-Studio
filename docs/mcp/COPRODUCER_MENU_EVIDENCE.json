@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
+  "applicationSha256": "d1294a0feab1f80af93f239cf0ccab0e0343612633af6461d7c73f66c1478782",
   "sourceInputs": {
     "src/CoProducerPanel.h": "7186267e2593f49495595f4064541cbb118a960baba08ff02a58d66d01374470",
     "src/CoProducerChat.h": "51d8ec0875499c3388b18cb1cfc7ee447d706f5f0d33159ae8f6d58a3b3d293e",
     "src/StudioAi.cpp": "8a1651949afc3065d5ec1c24feec4d87af55cff35022767d7a888a92902d533f",
-    "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
+    "src/Commands.cpp": "fd1e77c20a779dae187176d4093d3c0f75d2b4e928f818ed82b40ef2dd86d536",
     "scripts/verify-coproducer-ideas-mcp.py": "24078cb4df3366bf8df9e617bd91d6336318348f9b95a5ff5d4b0c8892cda4cc",
     "scripts/verify-ai-producer-mcp.py": "f0ae2c53b4ad6c1b1bd46b2d8239f042cb1cb79a2db1e8d0fc34f5eb3c35778f"
   },

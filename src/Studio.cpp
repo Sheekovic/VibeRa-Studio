@@ -199,6 +199,7 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     tapTempoButton.onClick = [this] { tapTempo(); };
     addAndMakeVisible(tapTempoButton);
     addChildComponent(outputScope);
+    outputScope.onToggle = [this] { performAction("view.outputScopeMode"); };
     play.onClick = [this]
     {
         if (!audio.playing())
@@ -4722,6 +4723,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         showDrumPads();
         return true;
     }
+    if (action == "view.outputScopeMode")
+    {
+        auto &scope = OutputScope::instance();
+        scope.showSpectrum(!scope.spectrumShown());
+        status = scope.spectrumShown() ? "Output meter shows the spectrum" : "Output meter shows the waveform";
+        repaint();
+        return true;
+    }
     if (action == "transport.recordToSteps")
     {
         recordToSteps = !recordToSteps;
@@ -7296,6 +7305,7 @@ void Studio::timerCallback()
                                        juce::String(std::fmod(positionSeconds(), 60.), 2).paddedLeft('0', 5)
                                  : " | Beat " + juce::String(audio.positionBeat() + 1, 1)) +
                             (audio.cpuLoad() > 0 ? " | CPU " + juce::String(juce::roundToInt(audio.cpuLoad() * 100)) + "%" : juce::String()) +
+                            (processMemoryMb() > 0 ? " | RAM " + juce::String(juce::roundToInt(processMemoryMb())) + " MB" : juce::String()) +
                             (audio.playing() && PolyphonyMeter::instance().voices() > 0
                                  ? " | Voices " + juce::String(PolyphonyMeter::instance().voices())
                                  : juce::String()) +

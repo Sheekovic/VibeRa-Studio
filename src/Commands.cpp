@@ -444,6 +444,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"transport.waitRespectFilter", "Wait for input: respect recording filter", Scope::global, false, true, "action"},
         {"transport.quantizeKeepDuration", "Recording quantize: leave note duration", Scope::global, false, true, "action"},
         {"transport.recordToSteps", "Record to step sequencer", Scope::global, false, true, "action"},
+        {"view.outputScopeMode", "Output meter: waveform / spectrum", Scope::global, false, true, "action"},
         {"view.timeDisplay", "Show time as minutes:seconds / beats", Scope::global, false, true, "action"},
         {"pattern.findEmptyNoNaming", "Find next empty Pattern (no naming)", Scope::global, false, true, "action"},
         {"pattern.selectInPlaylist", "Select the Pattern's clips in the Playlist", Scope::patterns, false, true, "action"},
