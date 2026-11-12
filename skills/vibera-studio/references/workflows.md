@@ -124,7 +124,10 @@ automation recording is armed on its own control.
 Wait for input: `vibera_command transport.waitForInput` toggles it (`state.waitForInput`). With Rec
 armed, Play then opens the take at the playhead without starting (`state.waitingForInput`); the
 first MIDI or typing-keyboard note starts playback and is recorded at the take start. Stop (or
-Play) while waiting cancels the empty take.
+Play) while waiting cancels the empty take. Two options refine it (both on by default):
+`transport.waitOnlyWhenRecording` off makes plain Play wait for a note too, and
+`transport.waitRespectFilter` off makes armed recording wait even when Notes are not in the
+recording filter (`state.waitOnlyWhenRecording`, `state.waitRespectFilter`).
 
 Settings without ports: `vibera_transport {"action":"guide","countInBars":0..2,
 "sound":0..2 (Click/Wood/Beep),"gain":0..1,"metronome":bool}` (read back `countInBars`,

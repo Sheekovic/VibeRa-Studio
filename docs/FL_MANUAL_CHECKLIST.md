@@ -170,6 +170,6 @@ copy / paste already exist. New and still open items from these pages:
 | Output panel: oscilloscope, spectrograph, memory / polyphony meters | missing | Mixer meters and the Meter-wave view exist |
 | Multilink to controllers | missing | Single-control link, Link all parameters (Mixer track) and Last tweaked exist |
 | Chord panel (detected chords) | partial | The chord the selected Piano roll notes spell shows in the top status line and `state.detectedChord` (inversions read from the bass); keys held on the typing keyboard and Drum Pads are detected first (native check); notes from a hardware MIDI input are not; musical_acceptance, pattern_seek_options_mcp |
-| Wait for input: Only when recording / Respect recording filter | missing | Wait applies to armed recording |
+| Wait for input: Only when recording / Respect recording filter | done | Tools menu, `transport.waitOnlyWhenRecording` / `transport.waitRespectFilter`, `state.waitOnlyWhenRecording` / `state.waitRespectFilter`; with Only when recording off plain Play waits for the first note, with Respect recording filter off armed recording waits even when Notes are filtered out. record_filter_mcp checks the options, the waiting state and cancel; the note that ends the wait needs a real MIDI or typing key and is not checked |
 | Metronome: set Mixer channel | missing | Sounds and volume exist |
 | Toolbar editing, presets, Hint panel, window controls, language, online panels | n/a | Application shell of the reference program, not music workflow |

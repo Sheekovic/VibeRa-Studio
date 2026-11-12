@@ -557,6 +557,11 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     void saveAudioLogDialog();
     std::unique_ptr<juce::FileChooser> audioLogChooser;
     bool waitingForInput = false; // A take is open and the transport waits for that note.
+    // Wait for input options (FL right-click menu). Only when recording off: plain Play waits too.
+    // Respect recording filter off: armed recording waits for a note even when Notes are filtered out.
+    bool waitOnlyWhenRecording = true, waitRespectFilter = true;
+    bool waitingForPlay = false, waitBypass = false; // No take: the first note presses Play.
+    void armPlayWait(bool on);
     void armWaitForInput(bool on);
     void pollWaitForInput();
     juce::Result changeMacro(MacroConfigurationChange, const Macro &, const juce::String &id,

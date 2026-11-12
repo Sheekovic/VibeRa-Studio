@@ -81,8 +81,30 @@ void Studio::armWaitForInput(bool on)
         capture->waitArmed.store(on);
     }
 }
+void Studio::armPlayWait(bool on)
+{
+    waitingForPlay = on;
+    for (auto *capture : {&audio.midiInput.capture, &audio.typingInput.capture})
+    {
+        capture->playWaitTriggered.store(false);
+        capture->playWaitArmed.store(on);
+    }
+}
 void Studio::pollWaitForInput()
 {
+    if (waitingForPlay)
+    {
+        if (audio.playing())
+            armPlayWait(false); // Playback started another way.
+        else if (audio.midiInput.capture.playWaitTriggered.load() || audio.typingInput.capture.playWaitTriggered.load())
+        {
+            armPlayWait(false);
+            waitBypass = true; // The ordinary Play path: count-in, takes and refusals stay in one place.
+            if (play.onClick)
+                play.onClick();
+            waitBypass = false;
+        }
+    }
     if (!waitingForInput)
         return;
     if (!midiTaking)

@@ -69,6 +69,28 @@ try:
     call("vibera_command", {"command": "transport.waitForInput"})
     check(state().get("waitForInput") is False, "transport.waitForInput turns it off again")
 
+    # Wait for input options: Only when recording off makes plain Play wait for a note; Play or Stop cancels.
+    check(state().get("waitOnlyWhenRecording") is True and state().get("waitRespectFilter") is True, "Wait for input options read back their defaults")
+    call("vibera_command", {"command": "transport.waitForInput"})
+    call("vibera_transport", {"action": "play"})
+    waited = state().get("waitingForInput")
+    call("vibera_transport", {"action": "stop"})
+    check(waited is False, "Only when recording on: plain Play does not wait")
+    call("vibera_command", {"command": "transport.waitOnlyWhenRecording"})
+    check(state().get("waitOnlyWhenRecording") is False, "transport.waitOnlyWhenRecording turns the option off")
+    call("vibera_transport", {"action": "play"})
+    check(state().get("waitingForInput") is True and state().get("playing") is False, "Only when recording off: Play waits for a note instead of starting")
+    call("vibera_transport", {"action": "stop"})
+    check(state().get("waitingForInput") is False, "Stop cancels the wait")
+    call("vibera_transport", {"action": "play"})
+    call("vibera_command", {"command": "transport.waitOnlyWhenRecording"})
+    check(state().get("waitingForInput") is False and state().get("waitOnlyWhenRecording") is True, "Turning the option back on ends the wait")
+    call("vibera_command", {"command": "transport.waitRespectFilter"})
+    check(state().get("waitRespectFilter") is False, "transport.waitRespectFilter turns the option off")
+    call("vibera_command", {"command": "transport.waitRespectFilter"})
+    call("vibera_command", {"command": "transport.waitForInput"})
+    check(state().get("waitRespectFilter") is True and state().get("waitForInput") is False, "Both options and Wait for input are restored")
+
     # Audio logger: without an audio device it is refused truthfully; save refuses while off.
     logger = state().get("audioLogger", {})
     check(logger.get("enabled") is False and logger.get("recordedSeconds") == 0, "Audio logger reads back off")

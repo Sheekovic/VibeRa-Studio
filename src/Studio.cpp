@@ -272,6 +272,23 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
             repaint();
             return;
         }
+        if (waitingForPlay)
+        {
+            // Play again while waiting cancels the wait.
+            armPlayWait(false);
+            status = "Wait for input cancelled";
+            repaint();
+            return;
+        }
+        if (!audio.playing() && waitForInput && !waitBypass && !(recordArmed && recordNotes) &&
+            (recordArmed ? !waitRespectFilter : !waitOnlyWhenRecording))
+        {
+            armPlayWait(true);
+            status = recordArmed ? "Waiting for input: play a note to start recording (Stop cancels)"
+                                 : "Waiting for input: play a note to start playback (Stop cancels)";
+            repaint();
+            return;
+        }
         if (!audio.playing() && recordArmed && waitForInput && recordNotes)
         {
             // Wait for input: open the take at the stopped playhead; the first note starts it.
@@ -507,6 +524,11 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     stop.onClick = [this]
     {
         const bool keepArmed = !disarmOnStop && recordArmed; // Disarm on stop off: Record stays armed.
+        if (waitingForPlay)
+        {
+            armPlayWait(false);
+            status = "Wait for input cancelled";
+        }
         if (waitingForInput)
         {
             // Stop while waiting for input: no note arrived, so the empty take ends.
@@ -3759,6 +3781,8 @@ void Studio::toolsMenu()
     // IDs 240..251: clear of the Detach (210..214), Arrange windows (220..223) and update (225) items.
     menu.addItem(240, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
     menu.addItem(241, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
+    menu.addItem(257, "Wait for input: only when recording (off = Play waits too)", waitForInput, waitOnlyWhenRecording);
+    menu.addItem(258, "Wait for input: respect recording filter (off = wait even without Notes)", waitForInput, waitRespectFilter);
     menu.addItem(252, "Remember seek time (Stop returns to where Play started)", true, rememberSeekTime);
     menu.addItem(253, "Recording starts playback (Record also presses Play)", true, recordStartsPlayback);
     menu.addItem(254, "Disarm on stop (Stop turns Record off)", true, disarmOnStop);
@@ -3887,11 +3911,12 @@ void Studio::toolsMenu()
                 safe->repaint();
                 return;
             }
-            if (choice >= 252 && choice <= 256)
+            if (choice >= 252 && choice <= 258)
             {
                 safe->performAction(juce::StringArray{"transport.rememberSeek", "transport.recordStartsPlayback",
                                                       "transport.disarmOnStop", "view.timeDisplay",
-                                                      "transport.quantizeKeepDuration"}[choice - 252]);
+                                                      "transport.quantizeKeepDuration", "transport.waitOnlyWhenRecording",
+                                                      "transport.waitRespectFilter"}[choice - 252]);
                 return;
             }
             if (choice == 241)
@@ -4489,6 +4514,8 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "transport.waitForInput")
     {
         waitForInput = !waitForInput;
+        if (!waitForInput)
+            armPlayWait(false);
         if (!waitForInput && waitingForInput)
         {
             armWaitForInput(false);
@@ -4687,6 +4714,18 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
         status = action == "transport.recordStartsPlayback" ? (option ? "Record also starts playback" : "Record only arms")
                  : action == "transport.disarmOnStop"       ? (option ? "Stop turns Record off" : "Record stays armed after Stop")
                                                             : (option ? "Time shown as minutes:seconds" : "Time shown as beats");
+        repaint();
+        return true;
+    }
+    if (action == "transport.waitOnlyWhenRecording" || action == "transport.waitRespectFilter")
+    {
+        auto &option = action == "transport.waitOnlyWhenRecording" ? waitOnlyWhenRecording : waitRespectFilter;
+        option = !option;
+        armPlayWait(false);
+        status = action == "transport.waitOnlyWhenRecording"
+                     ? (option ? "Wait for input only when recording" : "Wait for input also before plain playback")
+                     : (option ? "Wait for input respects the recording filter"
+                               : "Wait for input ignores the recording filter");
         repaint();
         return true;
     }

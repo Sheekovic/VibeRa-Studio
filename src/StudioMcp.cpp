@@ -4514,7 +4514,9 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "exportOutputChannels", juce::StringArray{"stereo", "mono", "left", "right"}[audio.exportOutputChannels]);
     set(state, "exportDither", audio.exportDither);
     set(state, "audioLogger", audioLoggerState());
-    set(state, "waitingForInput", waitingForInput);
+    set(state, "waitingForInput", waitingForInput || waitingForPlay);
+    set(state, "waitOnlyWhenRecording", waitOnlyWhenRecording);
+    set(state, "waitRespectFilter", waitRespectFilter);
     set(state, "pianoNoteModes",
         static_cast<Editor *>(windows[1]->getContentComponent())
             ->noteModes(juce::JSON::parse("{\"action\":\"state\"}")));

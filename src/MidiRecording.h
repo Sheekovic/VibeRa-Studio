@@ -68,6 +68,9 @@ struct MidiCapture
     // stopped playhead and raises triggered; the control thread then starts the transport.
     // Events until the transport actually runs are kept at the same start position.
     std::atomic<bool> waitArmed{false}, waitTriggered{false};
+    // Wait for input without a take (Only when recording off, or the recording filter ignored):
+    // the first note-on raises playWaitTriggered and the control thread presses Play.
+    std::atomic<bool> playWaitArmed{false}, playWaitTriggered{false};
     void begin()
     {
         active = false;
@@ -78,6 +81,11 @@ struct MidiCapture
     }
     void push(Id channel, const MidiClock &clock, unsigned epoch, const unsigned char *bytes) noexcept
     {
+        if (playWaitArmed.load(std::memory_order_relaxed) && (bytes[0] & 0xf0) == 0x90 && bytes[2] != 0)
+        {
+            playWaitArmed.store(false);
+            playWaitTriggered.store(true);
+        }
         if (!active.load())
             return;
         auto generation = session.load();
