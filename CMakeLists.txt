@@ -1001,6 +1001,9 @@ set_tests_properties(piano_menu_mcp PROPERTIES TIMEOUT 180)
 add_test(NAME playlist_track_menu_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-playlist-track-menu-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/playlist_track_menu_mcp")
 set_tests_properties(playlist_track_menu_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME playlist_ruler_menu_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-playlist-ruler-menu-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/playlist_ruler_menu_mcp")
+set_tests_properties(playlist_ruler_menu_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME envelope_presets_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-envelope-presets-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/envelope_presets_mcp")
 set_tests_properties(envelope_presets_mcp PROPERTIES TIMEOUT 120)

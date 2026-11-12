@@ -6,72 +6,190 @@
       "folder": "tools-menu",
       "prefix": "toolsMenu: ",
       "merge": {
-        "recordFilter": {"script": "scripts/verify-record-filter-mcp.py", "folder": "record-filter"},
-        "masterPitch": {"script": "scripts/verify-master-pitch-mcp.py", "folder": "master-pitch"}
+        "recordFilter": {
+          "script": "scripts/verify-record-filter-mcp.py",
+          "folder": "record-filter"
+        },
+        "masterPitch": {
+          "script": "scripts/verify-master-pitch-mcp.py",
+          "folder": "master-pitch"
+        }
       },
-      "sources": ["scripts/verify-record-filter-mcp.py", "scripts/verify-master-pitch-mcp.py", "scripts/verify-tools-menu-mcp.py",
-                  "src/Studio.cpp", "src/StudioSwing.cpp", "src/StudioMcp.cpp", "src/Commands.cpp", "src/AudioLogger.h",
-                  "src/StudioUpdater.cpp", "src/StudioController.cpp"],
+      "sources": [
+        "scripts/verify-record-filter-mcp.py",
+        "scripts/verify-master-pitch-mcp.py",
+        "scripts/verify-tools-menu-mcp.py",
+        "src/Studio.cpp",
+        "src/StudioSwing.cpp",
+        "src/StudioMcp.cpp",
+        "src/Commands.cpp",
+        "src/AudioLogger.h",
+        "src/StudioUpdater.cpp",
+        "src/StudioController.cpp"
+      ],
       "scope": "Isolated --mcp-test; the registered operations the Tools menu items run. Not native popup input, listening or hardware evidence."
     },
     "docs/mcp/TOOLS_MENU_RELATED_EVIDENCE.json": {
-      "ctests": ["plugin_editors_mcp", "macros_mcp", "loudness_mcp", "chord_track_mcp", "audio_recording_mcp", "missing_media",
-                 "export_formats_mcp", "workspace_layout_mcp", "mcp_ui_actions"],
+      "ctests": [
+        "plugin_editors_mcp",
+        "macros_mcp",
+        "loudness_mcp",
+        "chord_track_mcp",
+        "audio_recording_mcp",
+        "missing_media",
+        "export_formats_mcp",
+        "workspace_layout_mcp",
+        "mcp_ui_actions"
+      ],
       "folder": "tools-menu",
-      "sources": ["src/Studio.cpp", "src/StudioMcp.cpp", "src/Commands.cpp", "scripts/verify-plugin-editors-mcp.py",
-                  "scripts/verify-macros-mcp.py", "scripts/verify-loudness-mcp.py", "scripts/verify-chord-track-mcp.py",
-                  "scripts/verify-audio-recording-mcp.py", "scripts/verify-export-formats-mcp.py"],
+      "sources": [
+        "src/Studio.cpp",
+        "src/StudioMcp.cpp",
+        "src/Commands.cpp",
+        "scripts/verify-plugin-editors-mcp.py",
+        "scripts/verify-macros-mcp.py",
+        "scripts/verify-loudness-mcp.py",
+        "scripts/verify-chord-track-mcp.py",
+        "scripts/verify-audio-recording-mcp.py",
+        "scripts/verify-export-formats-mcp.py"
+      ],
       "scope": "Registered tests that exercise the operations these Tools menu items run, each run alone on this binary."
     },
     "docs/mcp/MIXER_TRACK_MENU_EVIDENCE.json": {
       "script": "scripts/verify-mixer-track-menu-mcp.py",
       "folder": "mixer-track-menu",
-      "sources": ["scripts/verify-mixer-track-menu-mcp.py", "src/Studio.cpp", "src/MixerControls.h", "src/StudioMcp.cpp", "src/Commands.cpp"],
+      "sources": [
+        "scripts/verify-mixer-track-menu-mcp.py",
+        "src/Studio.cpp",
+        "src/MixerControls.h",
+        "src/StudioMcp.cpp",
+        "src/Commands.cpp"
+      ],
       "scope": "Isolated --mcp-test; the registered operations the Mixer track menu items run. Not native popup input, listening or hardware evidence."
     },
     "docs/mcp/MIXER_TRACK_MENU_RELATED_EVIDENCE.json": {
-      "ctests": ["mixer_chain_mcp", "mixer_effect_slots_mcp", "parallel_chains_mcp", "mixer_routing_mcp", "mixer_organisation_mcp"],
+      "ctests": [
+        "mixer_chain_mcp",
+        "mixer_effect_slots_mcp",
+        "parallel_chains_mcp",
+        "mixer_routing_mcp",
+        "mixer_organisation_mcp"
+      ],
       "folder": "mixer-track-menu",
-      "sources": ["src/Studio.cpp", "src/StudioMcp.cpp", "src/Commands.cpp", "scripts/verify-mixer-chain-mcp.py",
-                  "scripts/verify-mixer-effects-mcp.py", "scripts/verify-parallel-chains-mcp.py", "scripts/verify-mixer-routing-mcp.py"],
+      "sources": [
+        "src/Studio.cpp",
+        "src/StudioMcp.cpp",
+        "src/Commands.cpp",
+        "scripts/verify-mixer-chain-mcp.py",
+        "scripts/verify-mixer-effects-mcp.py",
+        "scripts/verify-parallel-chains-mcp.py",
+        "scripts/verify-mixer-routing-mcp.py"
+      ],
       "scope": "Registered tests that exercise the operations these Mixer track menu items run, each run alone on this binary."
     },
     "docs/mcp/RACK_MENU_EVIDENCE.json": {
       "script": "scripts/verify-rack-menu-mcp.py",
       "folder": "rack-menu",
-      "sources": ["scripts/verify-rack-menu-mcp.py", "src/StudioRack.cpp", "src/Studio.cpp", "src/StudioMcp.cpp", "src/Commands.cpp"],
+      "sources": [
+        "scripts/verify-rack-menu-mcp.py",
+        "src/StudioRack.cpp",
+        "src/Studio.cpp",
+        "src/StudioMcp.cpp",
+        "src/Commands.cpp"
+      ],
       "scope": "Isolated --mcp-test; the registered operations the Channel Rack menu items run. Not native popup input, listening or hardware evidence."
     },
     "docs/mcp/RACK_MENU_RELATED_EVIDENCE.json": {
-      "ctests": ["step_fill_mcp", "channel_solo_mcp", "channel_scoped_solo_mcp", "channel_management_mcp", "swing_mcp",
-                 "channel_appearance_mcp", "rack_groups_mcp"],
+      "ctests": [
+        "step_fill_mcp",
+        "channel_solo_mcp",
+        "channel_scoped_solo_mcp",
+        "channel_management_mcp",
+        "swing_mcp",
+        "channel_appearance_mcp",
+        "rack_groups_mcp"
+      ],
       "folder": "rack-menu",
-      "sources": ["src/StudioRack.cpp", "src/Studio.cpp", "src/StudioMcp.cpp", "src/Commands.cpp", "scripts/verify-rack-mcp.py",
-                  "scripts/verify-step-fill-mcp.py", "scripts/verify-channel-solo-mcp.py", "scripts/verify-channel-scoped-solo-mcp.py",
-                  "scripts/verify-channel-management-mcp.py", "scripts/verify-channel-appearance-mcp.py", "scripts/verify-swing-mcp.py"],
+      "sources": [
+        "src/StudioRack.cpp",
+        "src/Studio.cpp",
+        "src/StudioMcp.cpp",
+        "src/Commands.cpp",
+        "scripts/verify-rack-mcp.py",
+        "scripts/verify-step-fill-mcp.py",
+        "scripts/verify-channel-solo-mcp.py",
+        "scripts/verify-channel-scoped-solo-mcp.py",
+        "scripts/verify-channel-management-mcp.py",
+        "scripts/verify-channel-appearance-mcp.py",
+        "scripts/verify-swing-mcp.py"
+      ],
       "scope": "Registered tests that exercise the operations these Channel Rack menu items run, each run alone on this binary."
     },
     "docs/mcp/PIANO_MENU_EVIDENCE.json": {
       "script": "scripts/verify-piano-menu-mcp.py",
       "folder": "piano-menu",
-      "sources": ["scripts/verify-piano-menu-mcp.py", "src/StudioMidi.cpp", "src/Commands.cpp", "src/McpContracts.h", "src/StudioMcp.cpp"],
+      "sources": [
+        "scripts/verify-piano-menu-mcp.py",
+        "src/StudioMidi.cpp",
+        "src/Commands.cpp",
+        "src/McpContracts.h",
+        "src/StudioMcp.cpp"
+      ],
       "scope": "Isolated --mcp-test; the registered operations the Piano roll menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence."
     },
     "docs/mcp/PIANO_MENU_RELATED_EVIDENCE.json": {
-      "ctests": ["quantizer_mcp", "note_mute_mcp", "note_slice_mcp", "note_stretch_mcp", "expression_maps_mcp", "pattern_markers_mcp",
-                 "controller_interpolate_mcp", "midi_scale_snap_mcp", "mcp_semantics", "center_playhead_mcp"],
+      "ctests": [
+        "quantizer_mcp",
+        "note_mute_mcp",
+        "note_slice_mcp",
+        "note_stretch_mcp",
+        "expression_maps_mcp",
+        "pattern_markers_mcp",
+        "controller_interpolate_mcp",
+        "midi_scale_snap_mcp",
+        "mcp_semantics",
+        "center_playhead_mcp"
+      ],
       "folder": "piano-menu",
-      "sources": ["src/StudioMidi.cpp", "src/Commands.cpp", "src/StudioMcp.cpp", "scripts/verify-quantizer-mcp.py",
-                  "scripts/verify-note-mute-mcp.py", "scripts/verify-note-slice-mcp.py", "scripts/verify-note-stretch-mcp.py",
-                  "scripts/verify-expression-maps-mcp.py", "scripts/verify-pattern-markers-mcp.py",
-                  "scripts/verify-controller-interpolate-mcp.py", "tests/mcp_acceptance.py"],
+      "sources": [
+        "src/StudioMidi.cpp",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-quantizer-mcp.py",
+        "scripts/verify-note-mute-mcp.py",
+        "scripts/verify-note-slice-mcp.py",
+        "scripts/verify-note-stretch-mcp.py",
+        "scripts/verify-expression-maps-mcp.py",
+        "scripts/verify-pattern-markers-mcp.py",
+        "scripts/verify-controller-interpolate-mcp.py",
+        "tests/mcp_acceptance.py"
+      ],
       "scope": "Registered tests that exercise the operations these Piano roll menu items run, each run alone on this binary."
     },
     "docs/mcp/PLAYLIST_TRACK_MENU_EVIDENCE.json": {
       "script": "scripts/verify-playlist-track-menu-mcp.py",
       "folder": "playlist-track-menu",
-      "sources": ["scripts/verify-playlist-track-menu-mcp.py", "src/Editors.h", "src/Commands.cpp", "src/McpContracts.h", "src/StudioMcp.cpp"],
+      "sources": [
+        "scripts/verify-playlist-track-menu-mcp.py",
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/McpContracts.h",
+        "src/StudioMcp.cpp"
+      ],
       "scope": "Isolated --mcp-test; the registered operations the Playlist track menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence."
+    },
+    "docs/mcp/PLAYLIST_RULER_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-playlist-ruler-menu-mcp.py",
+      "folder": "playlist-ruler-menu",
+      "sources": [
+        "scripts/verify-playlist-ruler-menu-mcp.py",
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/AutomationCommands.cpp",
+        "src/McpContracts.h",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test; the registered operations the Playlist marker, tempo change and automation point menus run. Not native popup input, listening or hardware evidence."
     }
   }
 }

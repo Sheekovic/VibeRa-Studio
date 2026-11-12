@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 274; gaps: 156.
+Explicit UI inventory complete: False; known controls: 285; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1073,6 +1073,17 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `playlist.track.move` | track.move | vibera_command; reviewed |
 | `playlist.track.autoName` | track.autoName | vibera_command; reviewed |
 | `playlist.track.reset` | track.reset | vibera_command; reviewed |
+| `playlist.marker.rename` | marker.rename | vibera_command; reviewed |
+| `playlist.marker.move` | marker.move | vibera_command; reviewed |
+| `playlist.marker.action` | marker.action | vibera_command; reviewed |
+| `playlist.marker.delete` | marker.delete | vibera_command; reviewed |
+| `playlist.marker.addPair` | marker.addPair | vibera_command; reviewed |
+| `playlist.marker.navigate` | marker.next / marker.previous / marker.selectSection | vibera_command; reviewed |
+| `playlist.tempo.edit` | tempo.change.set | vibera_command; reviewed |
+| `playlist.tempo.delete` | tempo.change.delete | vibera_command; reviewed |
+| `playlist.automationPoint.move` | automation.point.move | vibera_command; reviewed |
+| `playlist.automationPoint.shape` | automation.point.shape | vibera_command; reviewed |
+| `playlist.automationPoint.delete` | automation.point.delete | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

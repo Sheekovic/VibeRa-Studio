@@ -1,0 +1,42 @@
+{
+  "passed": true,
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
+  "sourceInputs": {
+    "scripts/verify-playlist-ruler-menu-mcp.py": "897e2719362b43ad2896fc1f636db7bc7403717737f9eabe4461e1b0ea2e72a9",
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/AutomationCommands.cpp": "c90a54b42c0bda9e5dd93aae1ca29bfd1598ab42dc788c03c8e7a3db95cfc500",
+    "src/McpContracts.h": "7d455396593209469c6471b395fb76d8841b8647420d3a1fc0348cf141b16869",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "A marker at beat 4",
+    "Rename marker (marker.rename)",
+    "A marker name above 128 characters is refused",
+    "Move marker to the playhead position (marker.move)",
+    "Marker action 'loop' (marker.action)",
+    "Marker action 'skip' (marker.action)",
+    "Marker action 'pause' (marker.action)",
+    "Marker action 'start' (marker.action)",
+    "Marker action 'none' (marker.action)",
+    "An unknown marker action is refused",
+    "Markers at a time selection's edges (marker.addPair) [8.0, 16.0, 24.0]",
+    "Add pair is one Undo step",
+    "marker.next reports its outcome (completed)",
+    "marker.previous reports its outcome (failed)",
+    "marker.selectSection reports its outcome (completed)",
+    "Delete marker (marker.delete)",
+    "Delete marker is one Undo step",
+    "A tempo change at beat 8 ([{'id': 0, 'beat': 0.0, 'bpm': 120.0, 'ramp': False, 'seconds': 0.0}, {'id': 7, 'beat': 8.0, 'bpm': 140.0, 'ramp': False, 'seconds': 4.0}])",
+    "Edit tempo change (tempo.change.set)",
+    "Delete tempo change (tempo.change.delete)",
+    "Type in value / time moves the point (automation.point.move)",
+    "Hold shape (automation.point.shape)",
+    "An endpoint cannot be deleted",
+    "Delete point (automation.point.delete)",
+    "Delete point is one Undo step"
+  ],
+  "scope": "Isolated --mcp-test; the registered operations the Playlist marker, tempo change and automation point menus run. Not native popup input, listening or hardware evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
+}
