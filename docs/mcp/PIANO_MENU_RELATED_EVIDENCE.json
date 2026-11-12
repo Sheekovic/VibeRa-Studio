@@ -27,6 +27,7 @@
     "ctest pattern_markers_mcp passed (run alone)",
     "ctest quantizer_mcp passed (run alone)"
   ],
-  "sourceLog": "build/module-qualification/piano-menu/related-ctest.log",
-  "scope": "Registered tests that exercise the operations these Piano roll menu items run, each run alone on this binary."
+  "scope": "Registered tests that exercise the operations these Piano roll menu items run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/piano-menu/related-ctest.log"
 }

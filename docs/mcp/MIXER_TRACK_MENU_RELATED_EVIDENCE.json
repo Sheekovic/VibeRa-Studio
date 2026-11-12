@@ -18,6 +18,7 @@
     "ctest mixer_routing_mcp passed (run alone)",
     "ctest parallel_chains_mcp passed (run alone)"
   ],
-  "sourceLog": "build/module-qualification/mixer-track-menu/related-ctest.log",
-  "scope": "Registered tests that exercise the operations these Mixer track menu items run, each run alone on this binary."
+  "scope": "Registered tests that exercise the operations these Mixer track menu items run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/mixer-track-menu/related-ctest.log"
 }

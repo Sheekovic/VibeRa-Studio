@@ -31,5 +31,6 @@
     "Assign to free Mixer inserts gives each Channel its own insert (rack.assignFreeInserts, completed, [5, 6])",
     "Multi-output reports its outcome on the selected Channel (failed)"
   ],
-  "scope": "Isolated --mcp-test; the registered operations the Channel Rack menu items run. Not native popup input, listening or hardware evidence."
+  "scope": "Isolated --mcp-test; the registered operations the Channel Rack menu items run. Not native popup input, listening or hardware evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
 }

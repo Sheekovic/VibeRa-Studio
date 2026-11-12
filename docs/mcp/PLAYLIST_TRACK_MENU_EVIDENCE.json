@@ -34,5 +34,6 @@
     "Auto name reports its outcome (track.autoName, completed, Pattern 1)",
     "Reset track clears the name and colour (track.reset)"
   ],
-  "scope": "Isolated --mcp-test; the registered operations the Playlist track menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence."
+  "scope": "Isolated --mcp-test; the registered operations the Playlist track menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
 }

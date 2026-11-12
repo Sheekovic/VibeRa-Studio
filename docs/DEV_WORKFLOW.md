@@ -631,3 +631,12 @@ native OS acceptance fixtures have not been ported. Physical callback factory
 provenance is currently verified only on Windows. Linux/macOS hardware plugin
 transport therefore remains unqualified and refuses unknown callback bounds.
 No deadline, buffer or transport-bound relaxation establishes portability.
+
+## Menu inventory evidence (no full suite)
+
+`python scripts/refresh-menu-evidence.py [receipt name part ...]` reruns only the small tests listed in
+docs/mcp/MENU_EVIDENCE_SOURCES.json (one verify script per menu, plus related registered tests run alone
+through CTest), rewrites those receipts for the current sources and binary and repoints the
+SURFACE_INVENTORY entries that cite them. It refuses on any failing test or lost check. Run it after a
+source change that touches a listed input; add a manifest entry with each new menu batch. Evidence bound
+to a complete `dev.ps1 -Full` run (callback reviews, older inventory groups) is rebound only at a release.

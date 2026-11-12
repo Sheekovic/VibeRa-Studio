@@ -24,6 +24,7 @@
     "ctest step_fill_mcp passed (run alone)",
     "ctest swing_mcp passed (run alone)"
   ],
-  "sourceLog": "build/module-qualification/rack-menu/related-ctest.log",
-  "scope": "Registered tests that exercise the operations these Channel Rack menu items run, each run alone on this binary."
+  "scope": "Registered tests that exercise the operations these Channel Rack menu items run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/rack-menu/related-ctest.log"
 }

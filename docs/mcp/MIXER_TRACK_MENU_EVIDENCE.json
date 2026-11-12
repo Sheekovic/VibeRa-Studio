@@ -33,5 +33,6 @@
     "A second click disarms it",
     "Trim unused tracks removes the new empty track (mixer.trimUnused, 19 -> 18)"
   ],
-  "scope": "Isolated --mcp-test; the registered operations the Mixer track menu items run. Not native popup input, listening or hardware evidence."
+  "scope": "Isolated --mcp-test; the registered operations the Mixer track menu items run. Not native popup input, listening or hardware evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
 }

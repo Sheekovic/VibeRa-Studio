@@ -24,6 +24,7 @@
     "ctest plugin_editors_mcp passed (run alone)",
     "ctest workspace_layout_mcp passed (run alone)"
   ],
-  "sourceLog": "build/module-qualification/tools-menu/related-ctest.log",
-  "scope": "Registered tests that exercise the operations these Tools menu items run, each run alone on this binary. Not native popup input, listening or hardware evidence."
+  "scope": "Registered tests that exercise the operations these Tools menu items run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/tools-menu/related-ctest.log"
 }

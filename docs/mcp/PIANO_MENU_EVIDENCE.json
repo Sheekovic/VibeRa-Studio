@@ -58,5 +58,6 @@
     "Snap incoming MIDI to the scale guide toggles (view.snapIncomingMidi)",
     "Allow resizing from left reports its outcome (piano.resizeLeft)"
   ],
-  "scope": "Isolated --mcp-test; the registered operations the Piano roll menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence."
+  "scope": "Isolated --mcp-test; the registered operations the Piano roll menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
 }
