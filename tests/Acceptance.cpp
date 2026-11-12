@@ -1687,6 +1687,16 @@ static void midiRecordingTests(const juce::File &folder, const PluginSpec *plugi
     require(quantized.size() == 1 && quantized[0].beat == .25 && quantized[0].length == .25 &&
                 std::abs(quantized[0].velocity - 50.f / 127) < 1.e-6,
             "independent input start/end quantization, velocity and velocity-zero note-off");
+    take.begin(10, 0, 0, 120, 0, .25, .25, true);
+    take.add({1, .08, 10, 2, {0x90, 67, 90}});
+    take.add({1, .21, 10, 2, {0x80, 67, 0}});
+    auto kept = take.finish(.21);
+    require(kept.size() == 1 && kept[0].beat == .25 && std::abs(kept[0].length - .26) < 1.e-8,
+            "Leave note duration: the quantized start keeps the played length and skips end quantize");
+    require(score::detectChord({60, 64, 67}) == "C major" && score::detectChord({64, 67, 72}) == "C major" &&
+                score::detectChord({57, 60, 64}) == "A minor" && score::detectChord({60, 62}).isEmpty() &&
+                score::detectChord({60, 61, 62}).isEmpty(),
+            "Chord detection names triads and inversions and stays empty for non-chords");
     take.begin(9, 0, 0, 120, 0);
     take.add({1, 0, 8, 1, {0x90, 60, 100}});
     take.add({1, 0, 9, 1, {0x90, 60, 100}});

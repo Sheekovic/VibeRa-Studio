@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #include "Studio.h"
+#include "ScoreTools.h"
 #include "InstrumentWindow.h"
 #include "SamplerGestures.h"
 #include "SamplerControllerContracts.h"
@@ -36,6 +37,15 @@ bool Studio::navigateSamplerView(const juce::String &action)
         return false;
     range->navigation(action);
     return true;
+}
+juce::String Studio::detectedChord() const
+{
+    std::vector<int> pitches;
+    if (const auto *pattern = controller.project.pattern(selectedPattern))
+        for (const auto &note : pattern->notes)
+            if (std::find(selectedNotes.begin(), selectedNotes.end(), note.id) != selectedNotes.end())
+                pitches.push_back(note.pitch);
+    return score::detectChord(pitches);
 }
 double Studio::positionSeconds() const
 {

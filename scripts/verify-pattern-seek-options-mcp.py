@@ -138,6 +138,27 @@ try:
     used = {c["source"] for c in items("clips") if c["kind"] == "pattern"}
     check(found == "completed" and chosen != first and not [n for n in items("notes") if n.get("pattern") == chosen],
           f"Find next empty (no naming) selects an empty Pattern (pattern.findEmptyNoNaming, {first} -> {chosen})")
+
+    # Recording quantize: Leave note duration (the quantizing itself is checked natively on MidiTake).
+    midi = lambda: state()["midiInput"]
+    check(midi().get("quantizeKeepDuration") is False, "Leave note duration is off by default")
+    command("transport.quantizeKeepDuration")
+    check(midi().get("quantizeKeepDuration") is True, "transport.quantizeKeepDuration turns it on")
+    transport("midiInput", quantizeKeepDuration=False)
+    check(midi().get("quantizeKeepDuration") is False, "vibera_transport midiInput turns it off again")
+
+    # CPU load and the chord the selected notes spell.
+    check(isinstance(state().get("cpuLoad"), (int, float)) and 0 <= state()["cpuLoad"] <= 1, f"CPU load reads back ({state().get('cpuLoad')})")
+    call("vibera_select", {"pattern": first})
+    channel = state()["selectedChannel"]
+    for pitch in (60, 64, 67, 62):
+        command("notes.add", pattern=first, channel=channel, beat=0, length=1, pitch=pitch, value=.8)
+    by_pitch = {n["pitch"]: n["id"] for n in items("notes") if n["channel"] == channel}
+    select = lambda *pitches: call("vibera_selection", {"action": "set", "target": "notes", "ids": [by_pitch[p] for p in pitches]})
+    select(60, 64, 67)
+    check(state().get("detectedChord") == "C major", f"C E G reads back as C major ({state().get('detectedChord')})")
+    select(60, 62)
+    check(state().get("detectedChord") == "", "Two notes are not a chord")
     passed = True
 finally:
     client.close()

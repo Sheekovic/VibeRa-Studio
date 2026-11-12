@@ -3741,6 +3741,7 @@ void Studio::toolsMenu()
     menu.addItem(253, "Recording starts playback (Record also presses Play)", true, recordStartsPlayback);
     menu.addItem(254, "Disarm on stop (Stop turns Record off)", true, disarmOnStop);
     menu.addItem(255, "Show time as minutes:seconds", true, timeDisplaySeconds);
+    menu.addItem(256, "Recording quantize: leave note duration", true, quantizeKeepDuration);
     {
         // FL Recording filter: what Record captures. Audio is the audio-input switch; automation
         // recording is armed separately on its control.
@@ -3849,10 +3850,11 @@ void Studio::toolsMenu()
                 safe->audioInputButton.onClick();
                 return;
             }
-            if (choice >= 252 && choice <= 255)
+            if (choice >= 252 && choice <= 256)
             {
                 safe->performAction(juce::StringArray{"transport.rememberSeek", "transport.recordStartsPlayback",
-                                                      "transport.disarmOnStop", "view.timeDisplay"}[choice - 252]);
+                                                      "transport.disarmOnStop", "view.timeDisplay",
+                                                      "transport.quantizeKeepDuration"}[choice - 252]);
                 return;
             }
             if (choice == 241)
@@ -4629,6 +4631,14 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.drumPads")
     {
         showDrumPads();
+        return true;
+    }
+    if (action == "transport.quantizeKeepDuration")
+    {
+        quantizeKeepDuration = !quantizeKeepDuration;
+        status = quantizeKeepDuration ? "Recording quantize keeps the played note length"
+                                      : "Recording quantize: starts and ends as set in MIDI settings";
+        repaint();
         return true;
     }
     if (action == "transport.recordStartsPlayback" || action == "transport.disarmOnStop" || action == "view.timeDisplay")
@@ -6584,7 +6594,7 @@ void Studio::beginMidiTake(double leadSeconds)
         auto &capture = audio.midiInput.capture;
         midiTake.begin(capture.session.load() + 1, clock.seconds + elapsed + leadSeconds, beat,
                        controller.project.tempo, patternMode ? pattern->length : 0,
-                       quantizeRecordingStart ? snap : 0, quantizeRecordingEnd ? snap : 0);
+                       quantizeRecordingStart ? snap : 0, quantizeRecordingEnd ? snap : 0, quantizeKeepDuration);
         if (!patternMode && !controller.project.tempoChanges.empty())
             midiTake.useTempoMap(controller.project.songTempo(), songPosition);
         takePattern = selectedPattern;
@@ -7148,7 +7158,9 @@ void Studio::timerCallback()
                              : timeDisplaySeconds
                                  ? " | " + juce::String(int(positionSeconds()) / 60) + ":" +
                                        juce::String(std::fmod(positionSeconds(), 60.), 2).paddedLeft('0', 5)
-                                 : " | Beat " + juce::String(audio.positionBeat() + 1, 1)),
+                                 : " | Beat " + juce::String(audio.positionBeat() + 1, 1)) +
+                            (audio.cpuLoad() > 0 ? " | CPU " + juce::String(juce::roundToInt(audio.cpuLoad() * 100)) + "%" : juce::String()) +
+                            (detectedChord().isNotEmpty() ? " | Chord: " + detectedChord() : juce::String()),
                         juce::dontSendNotification);
     if (audio.rendering())
     {

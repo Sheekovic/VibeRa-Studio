@@ -442,6 +442,10 @@ class AudioEngine
         return bool(auditionSample);
     }
     juce::Result seekAudition(float fraction);
+    double cpuLoad() const // Share of the audio callback period spent processing, 0..1 (0 without a device).
+    {
+        return engine.getDeviceManager().deviceManager.getCpuUsage();
+    }
     std::uint64_t auditionRequestId() const
     {
         return auditionSerial;

@@ -161,13 +161,15 @@ copy / paste already exist. New and still open items from these pages:
 | Patterns menu: Render and replace | missing | Render exists (`vibera_project export` with `pattern` and `placeClip`); replacing the Pattern's Playlist clips with the audio clip does not |
 | Patterns menu: Find next empty (no naming) | done | `pattern.findEmptyNoNaming`; Pattern menu; pattern_seek_options_mcp |
 | Recording options: Recording starts playback / Disarm on stop | done | `transport.recordStartsPlayback`, `transport.disarmOnStop` (default on); Tools menu; `state.recordStartsPlayback` / `.disarmOnStop`; pattern_seek_options_mcp |
-| Recording quantize: Leave note duration / Record to step sequencer | missing | Start and end quantize exist |
+| Recording quantize: Leave note duration | done | `transport.quantizeKeepDuration` / `vibera_transport midiInput quantizeKeepDuration`: a quantized start keeps the played length; Tools menu; MidiTake check in musical_acceptance, pattern_seek_options_mcp |
+| Recording quantize: Record to step sequencer | missing | |
 | Tempo: Half speed, nudge, tap Sync / Mute | missing | Tap tempo and tempo presets exist |
 | Monitor volume (listening only, not rendered) | missing | |
 | Time panel: Bar:Beat / Minute:Second display mode | done | `view.timeDisplay` (Tools menu) shows minutes:seconds from the tempo map; `state.timeDisplay`, `state.positionSeconds`; pattern_seek_options_mcp |
-| Output panel: oscilloscope, spectrograph, CPU / memory / polyphony meters | missing | Mixer meters and the Meter-wave view exist |
+| Output panel: CPU meter | done | CPU load of the audio callback in the top status line and `state.cpuLoad` (0 without a device); pattern_seek_options_mcp reads it back, not measured on a device here |
+| Output panel: oscilloscope, spectrograph, memory / polyphony meters | missing | Mixer meters and the Meter-wave view exist |
 | Multilink to controllers | missing | Single-control link, Link all parameters (Mixer track) and Last tweaked exist |
-| Chord panel (detected chords) | missing | |
+| Chord panel (detected chords) | partial | The chord the selected Piano roll notes spell shows in the top status line and `state.detectedChord` (inversions read from the bass); live MIDI / typing-keyboard input is not detected yet; musical_acceptance, pattern_seek_options_mcp |
 | Wait for input: Only when recording / Respect recording filter | missing | Wait applies to armed recording |
 | Metronome: set Mixer channel | missing | Sounds and volume exist |
 | Toolbar editing, presets, Hint panel, window controls, language, online panels | n/a | Application shell of the reference program, not music workflow |

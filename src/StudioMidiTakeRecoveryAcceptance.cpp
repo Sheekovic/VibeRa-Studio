@@ -1534,7 +1534,9 @@ juce::Result Studio::verifyMidiTakeRecovery(const juce::File &folder)
                         term(now.midiUpdates == projection.midiUpdates, "midiUpdates");
                         term(channels, "projection channels");
                         term(audio.mixerGraphInitialisations() == stages, "mixer graph initialisations");
-                        term(audio.positionBeat() == position, "position");
+                        if (audio.positionBeat() != position) // Values help tell a jump from a clock drift.
+                            moved.add("position " + juce::String(position, 9) + " -> " + juce::String(audio.positionBeat(), 9) +
+                                      (playing ? " (playing)" : " (stopped)"));
                         term(audio.looping() == looping, "looping");
                         if (!moved.isEmpty())
                             throw std::runtime_error(("Group operation preserves actual take/session/clock/sample/native/device "

@@ -1,18 +1,18 @@
 {
   "passed": true,
-  "applicationSha256": "56e14fe436f958127986f9fa744d353036864f0eb7a5b88fbaa0a59cf4528e27",
+  "applicationSha256": "40cfa516459a5c1abaecf76eedf484724860b7089c1770c11e2cbb4c3078f5a1",
   "sourceInputs": {
-    "scripts/verify-pattern-seek-options-mcp.py": "55d278cc3e517356718116a3be86e0884a04915bf474be26ded6c2b9d7f24f94",
-    "src/Studio.cpp": "66cbff56fa75c8e0ba90b3abd2dc8c3b03d91151d01abbd69c9c87fc02e1bcad",
-    "src/Commands.cpp": "4bc96a37f94e45597a151e7fb1c57dc94b23abe049bc23a355b92c7e45eca114",
-    "src/StudioMcp.cpp": "a42d8c9614efa248e1af5a43357fd4866e18026326a0f005819385d2564aa14c"
+    "scripts/verify-pattern-seek-options-mcp.py": "03d2ceccd2d971ae1c1cb559b47b8146dff5204b471bc5517f45778c4c238e14",
+    "src/Studio.cpp": "f1b3030aa72fa9a6337943ed2d4854a01a75344e28c53a6cfb5cdc3acf16312e",
+    "src/Commands.cpp": "06f9d471a846ddda3c9ff9e76a4d6a94c2aa2850c75e02393da900c32c9976b0",
+    "src/StudioMcp.cpp": "df0d050d5b3ac023b61020d3a56572a96bdfd7bc9d225a24c838c6de6da10017"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
     "Two clips of the first Pattern and one of the second",
     "Select in playlist selects exactly the Pattern's clips (pattern.selectInPlaylist)",
     "A Pattern without clips selects nothing and says so",
-    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ff59d976)",
+    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ffd93c93)",
     "The Pattern keeps its name",
     "Random colour is one Undo step",
     "Remember seek time is off by default",
@@ -32,7 +32,13 @@
     "Time is shown as beats by default",
     "view.timeDisplay switches to minutes:seconds",
     "Beat 8 at 120.0 BPM reads back as 4.000 s",
-    "Find next empty (no naming) selects an empty Pattern (pattern.findEmptyNoNaming, 5 -> 8)"
+    "Find next empty (no naming) selects an empty Pattern (pattern.findEmptyNoNaming, 5 -> 8)",
+    "Leave note duration is off by default",
+    "transport.quantizeKeepDuration turns it on",
+    "vibera_transport midiInput turns it off again",
+    "CPU load reads back (0.0)",
+    "C E G reads back as C major (C major)",
+    "Two notes are not a chord"
   ],
   "scope": "Isolated --mcp-test (no audio device); Pattern menu and transport option operations. Not native popup input, listening or hardware evidence.",
   "refreshedBy": "scripts/refresh-menu-evidence.py"

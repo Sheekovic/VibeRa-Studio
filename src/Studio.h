@@ -537,10 +537,12 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Array<juce::MidiDeviceInfo> midiInputDevices;
     juce::Array<juce::MidiDeviceInfo> controlInputDevices, controlOutputDevices; // Same rule; vibera_controller ports rescans.
     bool rememberSeekTime = false; // Transport option: Stop returns to where Play was pressed, not to the start.
+    bool quantizeKeepDuration = false; // Recording quantize: a quantized start keeps the played note length.
     bool disarmOnStop = true;          // Recording option: Stop turns Record off (off keeps it armed).
     bool recordStartsPlayback = false; // Recording option: arming Record while stopped also presses Play.
     bool timeDisplaySeconds = false;   // Time display: minutes:seconds instead of the beat.
     double positionSeconds() const;    // Playhead in seconds (Song tempo map; base tempo in Pattern mode).
+    juce::String detectedChord() const; // Chord spelled by the selected Piano roll notes ("" when none).
     std::optional<double> playStartBeat; // Playhead when Play was last pressed (for rememberSeekTime).
     bool recordNotes = true;     // Recording filter: Record opens a MIDI note take (FL "Notes").
     juce::Result setAudioLogger(bool enabled, double minutes); // Tools > Audio logger.

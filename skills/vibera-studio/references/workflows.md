@@ -147,7 +147,10 @@ start. `pattern.selectInPlaylist` selects every Playlist clip of the selected Pa
 (`state.patterns[].colour`). `pattern.findEmptyNoNaming` selects the next empty Pattern without the
 name field. Recording options: `transport.disarmOnStop` (default on; off keeps Record armed after Stop)
 and `transport.recordStartsPlayback` (arming Record while stopped also presses Play); read
-`state.disarmOnStop` / `state.recordStartsPlayback`. `view.timeDisplay` switches the time display
+`state.disarmOnStop` / `state.recordStartsPlayback`. `transport.quantizeKeepDuration` (or `midiInput`
+`quantizeKeepDuration`) is Leave note duration: a quantized start keeps the played length
+(`state.midiInput.quantizeKeepDuration`). `state.cpuLoad` is the audio callback load 0..1 and
+`state.detectedChord` names the chord the selected Piano roll notes spell ("" when none). `view.timeDisplay` switches the time display
 between beats and minutes:seconds (`state.timeDisplay`; `state.positionSeconds` is always available).
 
 Drum Pads: `vibera_transport {"action":"drumPad","pad":1..16,"velocity":0..1}` strikes a pad (pad n

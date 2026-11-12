@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <map>
 #include <random>
+#include <set>
 
 // Piano Roll composition tools: chordify, arpeggiate, strum, humanize and scale snap.
 // Each works on chosen note indices of one Pattern and is applied by its canonical
@@ -15,6 +16,35 @@ struct Shape
     const char *name;
     std::vector<int> intervals; // Semitones above the root (chords) or pitch classes (scales).
 };
+inline const std::vector<Shape> &chordShapes();
+// Names the chord a set of pitches spells ("C major", "A min7"), trying the lowest note as the root
+// first so inversions of the same notes read from their bass; "" when no known shape fits.
+inline juce::String detectChord(std::vector<int> pitches)
+{
+    if (pitches.size() < 3)
+        return {};
+    std::sort(pitches.begin(), pitches.end());
+    std::set<int> classes;
+    for (const int pitch : pitches)
+        classes.insert(((pitch % 12) + 12) % 12);
+    if (classes.size() < 3)
+        return {};
+    static const char *names[]{"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+    std::vector<int> roots{((pitches.front() % 12) + 12) % 12};
+    for (const int c : classes)
+        if (c != roots.front())
+            roots.push_back(c);
+    for (const int root : roots)
+        for (const auto &shape : chordShapes())
+        {
+            std::set<int> wanted;
+            for (const int interval : shape.intervals)
+                wanted.insert((root + interval) % 12);
+            if (wanted == classes)
+                return juce::String(names[root]) + " " + shape.name;
+        }
+    return {};
+}
 inline const std::vector<Shape> &chordShapes()
 {
     static const std::vector<Shape> shapes{

@@ -150,6 +150,7 @@ class MidiTake
     std::vector<ControllerEvent> controls;
     std::optional<MidiCapture::Event> retainedEvent;
     double origin = 0, initialBeat = 0, beatsPerSecond = 2, loopLength = 0, startSnap = 0, endSnap = 0;
+    bool keepDuration = false; // Start quantize keeps each note's played length (end quantize is skipped).
     // Song takes through tempo changes: beats follow the map from the Song beat at `origin`.
     TempoMap songMap;
     double songBeatAtOrigin = 0;
@@ -170,8 +171,14 @@ class MidiTake
             return;
         const auto value = found->second;
         double start = value.beat;
-        if (startSnap > 0) start = std::round(start / startSnap) * startSnap;
-        if (endSnap > 0) end = std::round(end / endSnap) * endSnap;
+        if (startSnap > 0)
+        {
+            const double snapped = std::round(start / startSnap) * startSnap;
+            if (keepDuration)
+                end += snapped - start; // Leave note duration: the end follows the quantized start.
+            start = snapped;
+        }
+        if (endSnap > 0 && !keepDuration) end = std::round(end / endSnap) * endSnap;
         end = std::max(start + 1. / 960, end);
         // Storage was prepared BEFORE any held entry/epoch/event mutation.
         // Count first: quota/invalid duration preserves the entire held owner and
@@ -313,8 +320,9 @@ class MidiTake
         mapped = !map.constant();
     }
     void begin(unsigned generation, double seconds, double beat, double tempo, double loop,
-               double quantizeStart = 0, double quantizeEnd = 0)
+               double quantizeStart = 0, double quantizeEnd = 0, bool leaveDuration = false)
     {
+        keepDuration = leaveDuration;
         if (!std::isfinite(seconds) || !std::isfinite(beat) || !std::isfinite(tempo) || tempo <= 0 ||
             !std::isfinite(loop) || loop < 0 || !std::isfinite(quantizeStart) || quantizeStart < 0 ||
             !std::isfinite(quantizeEnd) || quantizeEnd < 0)
