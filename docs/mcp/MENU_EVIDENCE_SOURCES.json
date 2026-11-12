@@ -426,6 +426,34 @@
         "src/Commands.cpp"
       ],
       "scope": "Isolated --mcp-test; the registered operations the Picker Pattern menu runs. Not native popup, confirmation dialog or file dialog input."
+    },
+    "docs/mcp/AUDIO_INPUT_MENU_EVIDENCE.json": {
+      "ctests": [
+        "audio_recording_mcp"
+      ],
+      "folder": "audio-input-menu",
+      "sources": [
+        "src/StudioAudioTake.cpp",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-audio-recording-mcp.py"
+      ],
+      "scope": "Registered test that exercises the options the audio input button menu sets, run alone on this binary without an audio device. Not capture, monitoring or listening evidence."
+    },
+    "docs/mcp/CHANNEL_PRESET_MENU_EVIDENCE.json": {
+      "ctests": [
+        "rps_gaps_mcp",
+        "envelope_presets_mcp"
+      ],
+      "folder": "channel-preset-menu",
+      "sources": [
+        "src/StudioChannels.cpp",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-rps-gaps-mcp.py",
+        "scripts/verify-envelope-presets-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations the Channel preset menu items run, each run alone on this binary. Not native file dialog input."
     }
   }
 }

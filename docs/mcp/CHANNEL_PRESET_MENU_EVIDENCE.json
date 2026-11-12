@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "applicationSha256": "f4e62c93eeeaf4c039a5fb40a043b2f29e2fc113eca3607fc741021ea2fe9dd4",
+  "sourceInputs": {
+    "src/StudioChannels.cpp": "1021cb175b4c03e5f205c503069957b99fbc0dee97e8773aa3c969c331265408",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
+    "src/StudioMcp.cpp": "cb6e686d21aa261810220fa3d993009c949eb900bbcf14b67e2f0602bc754974",
+    "scripts/verify-rps-gaps-mcp.py": "5426f6ed1bbd515d2326358db2b48e20655414156c8b1085768305012d7b2bf9",
+    "scripts/verify-envelope-presets-mcp.py": "eb8ed2e9f198010328b0f118f078fca05521666ef7439e499c7408729f5a5a90"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest envelope_presets_mcp passed (run alone)",
+    "ctest rps_gaps_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations the Channel preset menu items run, each run alone on this binary. Not native file dialog input.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/channel-preset-menu/related-ctest.log"
+}
