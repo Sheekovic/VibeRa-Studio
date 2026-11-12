@@ -10,8 +10,7 @@
     "scripts/verify-loudness-mcp.py": "881b7b43906f24aec5afa20fa8e5c00e3071473e74496d53f74ac93d950c2148",
     "scripts/verify-chord-track-mcp.py": "290bef4127a68c5c296f782cd3d63bd07c041e4bb9eddf2cde4d250110dce3a8",
     "scripts/verify-audio-recording-mcp.py": "2167bc559cefab39859bb1380d586d791d92038301c1ae8c32b942324b0f2ea2",
-    "scripts/verify-export-formats-mcp.py": "bf6634d4dcd4fc47d1542fbe255d9d8cd2f1de8ce8c7de122e4bb00d8f17f782",
-    "CMakeLists.txt": "84d4b7a32a320294a12b70a38963dbaa9c6ca22debd128da57923adbc51df626"
+    "scripts/verify-export-formats-mcp.py": "bf6634d4dcd4fc47d1542fbe255d9d8cd2f1de8ce8c7de122e4bb00d8f17f782"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [

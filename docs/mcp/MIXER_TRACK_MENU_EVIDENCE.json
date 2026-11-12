@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "applicationSha256": "d9c084fd794e3e38e4b6316ddb5486ed41ce4adcb704d80fb2959cb27ecde748",
+  "sourceInputs": {
+    "scripts/verify-mixer-track-menu-mcp.py": "503497485880d4a09d66d7299d6bda2d039bb7702bbe2e207052f3b47fa09fae",
+    "src/Studio.cpp": "23133b1382167ce2ff23aa3f0f5d1089ca539bfc0b002b0db902e83a527d9376",
+    "src/MixerControls.h": "3790e3611c98d22ab5a5a76ac525a0ab789d4426ec898ffb2e4316f773059f49",
+    "src/StudioMcp.cpp": "6496a1c692cd6e476afc74c4e47415da74b65cdf447e81a583386df969e9af80",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "Create insert adds a Mixer track (mixer.insert.create, pending)",
+    "Track delay sets 12 ms (mixer.delay)",
+    "A delay above 500 ms is refused",
+    "EQ mid band +3 dB at 1 kHz (mixer.eq) [{'gainDb': 0.0, 'frequencyHz': 90.0}, {'gainDb': 3.0, 'frequencyHz': 1000.0}, {'gainDb': 0.0, 'frequencyHz': 8000.0}]",
+    "An EQ band above 2 is refused",
+    "Dock to left (mixer.dock)",
+    "Dock to right (mixer.dock)",
+    "Dock to middle (mixer.dock)",
+    "Reset track restores delay and dock (mixer.reset)",
+    "Reset track is one Undo step",
+    "The track is selected",
+    "mixer.selectChannelsRouted reports its outcome (failed)",
+    "mixer.selectRoutedHere reports its outcome (failed)",
+    "mixer.selectRoutedFrom reports its outcome (completed)",
+    "mixer.routeSelectedHere reports its outcome (failed)",
+    "mixer.routeSelectedHereOnly reports its outcome (failed)",
+    "mixer.spareStore reports its outcome (failed)",
+    "mixer.spareFlip reports its outcome (failed)",
+    "mixer.linkAll reports its outcome (completed)",
+    "Arm for rendering arms the track (mixer.renderArm) [46]",
+    "A second click disarms it",
+    "Trim unused tracks removes the new empty track (mixer.trimUnused, 19 -> 18)"
+  ],
+  "scope": "Isolated --mcp-test; the registered operations the Mixer track menu items run. Not native popup input, listening or hardware evidence."
+}

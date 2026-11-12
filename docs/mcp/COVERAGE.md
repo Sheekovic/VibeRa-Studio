@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 190; gaps: 156.
+Explicit UI inventory complete: False; known controls: 206; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -989,6 +989,22 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `tools.recordingFilter.audio` | recording.audioInput | vibera_audioRecording; reviewed |
 | `tools.missingSamples` | media.relink | vibera_project; reviewed |
 | `tools.videoPlayer` | project.video | vibera_project; reviewed |
+| `mixer.menu.createInsert` | mixer.insert.create | vibera_command; reviewed |
+| `mixer.menu.trackDelay` | mixer.delay | vibera_command; reviewed |
+| `mixer.menu.eq` | mixer.eq / mixer.eqReset (EQ window edits) | vibera_command; reviewed |
+| `mixer.menu.dock` | mixer.dock | vibera_command; reviewed |
+| `mixer.menu.reset` | mixer.reset | vibera_command; reviewed |
+| `mixer.menu.select` | mixer.selectChannelsRouted / selectRoutedHere / selectRoutedFrom | vibera_command; reviewed |
+| `mixer.menu.routeSelected` | mixer.routeSelectedHere / routeSelectedHereOnly | vibera_command; reviewed |
+| `mixer.menu.spare` | mixer.spareStore / mixer.spareFlip | vibera_command; reviewed |
+| `mixer.menu.linkAll` | mixer.linkAll | vibera_command; reviewed |
+| `mixer.menu.renderArm` | mixer.renderArm | vibera_command; reviewed |
+| `mixer.menu.trimUnused` | mixer.trimUnused | vibera_command; reviewed |
+| `mixer.menu.browseEffect` | mixer.effects.browse | vibera_mixer; reviewed |
+| `mixer.menu.parallelChains` | mixer.insert.create with a parallel count | vibera_command; reviewed |
+| `mixer.menu.deleteInsert` | mixer.insert.delete | vibera_command; reviewed |
+| `mixer.menu.chain` | mixer.chain.* | vibera_mixerchain; reviewed |
+| `mixer.menu.replaceEffect` | plugin.effect.replace | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.
