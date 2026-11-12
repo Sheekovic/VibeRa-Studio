@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "506b00527b2269205c42baff4ba3c822378c4b39738f8d219da9b312662d912a",
+  "applicationSha256": "f40f30e543d2ef4b9af4d6d9a6b85b9deccc5bf8c932095610846cb9615ace56",
   "sourceInputs": {
     "src/StudioMidi.cpp": "b12b4f612ad87466dad35d5f5f97956ddf894cdf3823727b9e66fe91c060f170",
-    "src/Commands.cpp": "77854fae31ad3b421921ef1900e7ac80b99cd3eb5d729614960789d61a72f22a",
-    "src/StudioMcp.cpp": "43f321fcdf9b5239d9c582b2c2af6df5697f63e777186e34f6345338c316cc1b",
+    "src/Commands.cpp": "4bc96a37f94e45597a151e7fb1c57dc94b23abe049bc23a355b92c7e45eca114",
+    "src/StudioMcp.cpp": "ad57c9d77563b10db579a7fb7bfa322e9dde300cdf667ecbbbcfd42f6bcffafb",
     "scripts/verify-quantizer-mcp.py": "da23699adb2e291355470f0e0cc866df9f200704d933bd8c942196639227b442",
     "scripts/verify-note-mute-mcp.py": "b5327c514065b5263da0ccf84be57eb71b278162d90f6654982b14a4d5e9b186",
     "scripts/verify-note-slice-mcp.py": "d2f5229b74df9c6d21db418a19bf56c22d959bdf698b97a576740f74d81b9064",

@@ -4,6 +4,9 @@ pattern.selectInPlaylist selects every Playlist clip of the selected Pattern; pa
 the selected Pattern a new opaque colour as one Undo step; transport.rememberSeek makes the first Stop
 return to where Play was pressed instead of the Song start (Stop again goes to the start). The instance
 has no audio device, so Play does not start: the remembered position is the one at the Play press.
+transport.disarmOnStop and transport.recordStartsPlayback are the recording options of the same manual
+page, view.timeDisplay switches the time display to minutes:seconds (state.positionSeconds) and
+pattern.findEmptyNoNaming is Find next empty without the name field.
 
 usage: python scripts/verify-pattern-seek-options-mcp.py [executable] [output folder]
 """
@@ -90,6 +93,51 @@ try:
     check(abs(position()) < 1e-9, "Stop again goes to the Song start")
     command("transport.rememberSeek")
     check(state().get("rememberSeekTime") is False, "The option turns off again")
+
+    # Recording options: Disarm on stop and Recording starts playback.
+    armed = lambda: state().get("recordArmed")
+    check(state().get("disarmOnStop") is True and state().get("recordStartsPlayback") is False, "Recording options read back their defaults")
+    command("transport.record")
+    check(armed() is True, "Record arms")
+    transport("stop")
+    check(armed() is False, "Disarm on stop on: Stop turns Record off")
+    command("transport.disarmOnStop")
+    command("transport.record")
+    transport("stop")
+    check(state().get("disarmOnStop") is False and armed() is True, "Disarm on stop off: Record stays armed after Stop")
+    command("transport.record")
+    check(armed() is False, "Record disarms by hand")
+    command("transport.disarmOnStop")
+    command("transport.recordStartsPlayback")
+    check(state().get("recordStartsPlayback") is True, "transport.recordStartsPlayback turns the option on")
+    command("transport.record")
+    # Without an audio device the Play this triggers cannot open a take, which disarms Record:
+    # that refusal shows Record pressed Play (with the option off Record simply stays armed).
+    check(armed() is False, "Recording starts playback: Record also presses Play (the take path runs and is refused without a device)")
+    transport("stop")
+    command("transport.recordStartsPlayback")
+    command("transport.record")
+    check(armed() is True, "Option off: Record only arms")
+    command("transport.record")
+
+    # Time display and position in seconds.
+    check(state().get("timeDisplay") == "beats", "Time is shown as beats by default")
+    command("view.timeDisplay")
+    check(state().get("timeDisplay") == "seconds", "view.timeDisplay switches to minutes:seconds")
+    call("vibera_transport", {"action": "song"})
+    transport("seek", beat=8)
+    tempo = state()["tempo"]
+    check(abs(state()["positionSeconds"] - 8 * 60 / tempo) < 1e-6, f"Beat 8 at {tempo} BPM reads back as {8 * 60 / tempo:.3f} s")
+    command("view.timeDisplay")
+    transport("stop")
+
+    # Find next empty (no naming).
+    call("vibera_select", {"pattern": first})
+    found = command("pattern.findEmptyNoNaming").get("completionState")
+    chosen = state()["selectedPattern"]
+    used = {c["source"] for c in items("clips") if c["kind"] == "pattern"}
+    check(found == "completed" and chosen != first and not [n for n in items("notes") if n.get("pattern") == chosen],
+          f"Find next empty (no naming) selects an empty Pattern (pattern.findEmptyNoNaming, {first} -> {chosen})")
     passed = True
 finally:
     client.close()

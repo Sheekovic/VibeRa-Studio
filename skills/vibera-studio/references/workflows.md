@@ -142,7 +142,11 @@ Transport and Pattern options: `vibera_command transport.rememberSeek` toggles R
 start. `pattern.selectInPlaylist` selects every Playlist clip of the selected Pattern (read
 `vibera_selection {"action":"state","target":"clips"}`; failed when it has none) and
 `pattern.randomColour` gives the selected Pattern a random opaque colour as one Undo step
-(`state.patterns[].colour`).
+(`state.patterns[].colour`). `pattern.findEmptyNoNaming` selects the next empty Pattern without the
+name field. Recording options: `transport.disarmOnStop` (default on; off keeps Record armed after Stop)
+and `transport.recordStartsPlayback` (arming Record while stopped also presses Play); read
+`state.disarmOnStop` / `state.recordStartsPlayback`. `view.timeDisplay` switches the time display
+between beats and minutes:seconds (`state.timeDisplay`; `state.positionSeconds` is always available).
 
 Drum Pads: `vibera_transport {"action":"drumPad","pad":1..16,"velocity":0..1}` strikes a pad (pad n
 plays the n-th sampler Channel: it becomes the selected input target and its root key is held on the

@@ -491,6 +491,8 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
             if (recordNotes)
                 beginMidiTake();
         }
+        else if (recordArmed && recordStartsPlayback)
+            play.onClick(); // Recording starts playback: arming while stopped also presses Play.
     };
     audio.midiInput.captureInterrupted = [this](Id channel, double seconds)
     {
@@ -503,6 +505,7 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     };
     stop.onClick = [this]
     {
+        const bool keepArmed = !disarmOnStop && recordArmed; // Disarm on stop off: Record stays armed.
         if (waitingForInput)
         {
             // Stop while waiting for input: no note arrived, so the empty take ends.
@@ -534,6 +537,11 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
         // The sealed audio take waits for the MIDI take's own history step, then follows it.
         if (audioTakePlacementPending)
             placeAudioTake();
+        if (keepArmed && !hasPendingMidiTake())
+        {
+            recordArmed = true;
+            record.setToggleState(true, juce::dontSendNotification);
+        }
     };
     undoButton.onClick = [this]
     {
@@ -3290,6 +3298,7 @@ void Studio::patternMenu()
     menu.addItem(6, "Delete...");
     menu.addItem(9, "Split by channel", !it->notes.empty());
     menu.addItem(10, "Transpose...", !it->notes.empty());
+    menu.addItem(13, "Find next empty (no naming)");
     menu.addItem(11, "Select in playlist");
     menu.addItem(12, "Random colour");
     menu.addSeparator();
@@ -3321,8 +3330,10 @@ void Studio::patternMenu()
             }
             else if (choice == 10)
                 safe->transposePattern();
-            else if (choice == 11 || choice == 12)
-                safe->performAction(choice == 11 ? "pattern.selectInPlaylist" : "pattern.randomColour");
+            else if (choice == 11 || choice == 12 || choice == 13)
+                safe->performAction(choice == 11   ? "pattern.selectInPlaylist"
+                                    : choice == 12 ? "pattern.randomColour"
+                                                   : "pattern.findEmptyNoNaming");
             else
             {
                 CommandArgs args;
@@ -3727,6 +3738,9 @@ void Studio::toolsMenu()
     menu.addItem(240, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
     menu.addItem(241, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
     menu.addItem(252, "Remember seek time (Stop returns to where Play started)", true, rememberSeekTime);
+    menu.addItem(253, "Recording starts playback (Record also presses Play)", true, recordStartsPlayback);
+    menu.addItem(254, "Disarm on stop (Stop turns Record off)", true, disarmOnStop);
+    menu.addItem(255, "Show time as minutes:seconds", true, timeDisplaySeconds);
     {
         // FL Recording filter: what Record captures. Audio is the audio-input switch; automation
         // recording is armed separately on its control.
@@ -3835,9 +3849,10 @@ void Studio::toolsMenu()
                 safe->audioInputButton.onClick();
                 return;
             }
-            if (choice == 252)
+            if (choice >= 252 && choice <= 255)
             {
-                safe->performAction("transport.rememberSeek");
+                safe->performAction(juce::StringArray{"transport.rememberSeek", "transport.recordStartsPlayback",
+                                                      "transport.disarmOnStop", "view.timeDisplay"}[choice - 252]);
                 return;
             }
             if (choice == 241)
@@ -4614,6 +4629,23 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.drumPads")
     {
         showDrumPads();
+        return true;
+    }
+    if (action == "transport.recordStartsPlayback" || action == "transport.disarmOnStop" || action == "view.timeDisplay")
+    {
+        auto &option = action == "transport.recordStartsPlayback" ? recordStartsPlayback
+                       : action == "transport.disarmOnStop"       ? disarmOnStop
+                                                                  : timeDisplaySeconds;
+        option = !option;
+        status = action == "transport.recordStartsPlayback" ? (option ? "Record also starts playback" : "Record only arms")
+                 : action == "transport.disarmOnStop"       ? (option ? "Stop turns Record off" : "Record stays armed after Stop")
+                                                            : (option ? "Time shown as minutes:seconds" : "Time shown as beats");
+        repaint();
+        return true;
+    }
+    if (action == "pattern.findEmptyNoNaming")
+    {
+        findEmptyPattern(false, false); // Like Find next empty, without opening the name field.
         return true;
     }
     if (action == "transport.rememberSeek")
@@ -7113,7 +7145,10 @@ void Studio::timerCallback()
                  " | Stop keeps take; Esc cancels";
     deviceLabel.setText(audio.deviceDescription() + "    " + (patternMode ? "Pattern" : "Song") +
                             (remaining > 0 ? " | Count-in " + juce::String(remaining, 1)
-                                           : " | Beat " + juce::String(audio.positionBeat() + 1, 1)),
+                             : timeDisplaySeconds
+                                 ? " | " + juce::String(int(positionSeconds()) / 60) + ":" +
+                                       juce::String(std::fmod(positionSeconds(), 60.), 2).paddedLeft('0', 5)
+                                 : " | Beat " + juce::String(audio.positionBeat() + 1, 1)),
                         juce::dontSendNotification);
     if (audio.rendering())
     {

@@ -37,6 +37,11 @@ bool Studio::navigateSamplerView(const juce::String &action)
     range->navigation(action);
     return true;
 }
+double Studio::positionSeconds() const
+{
+    const double beat = audio.positionBeat();
+    return patternMode ? beat * 60. / std::max(1., double(controller.project.tempo)) : controller.project.songSeconds(beat);
+}
 juce::File Studio::projectBackupsFolder() const
 {
     const auto folder = profileFile().getSiblingFile("backups");

@@ -1,18 +1,18 @@
 {
   "passed": true,
-  "applicationSha256": "506b00527b2269205c42baff4ba3c822378c4b39738f8d219da9b312662d912a",
+  "applicationSha256": "f40f30e543d2ef4b9af4d6d9a6b85b9deccc5bf8c932095610846cb9615ace56",
   "sourceInputs": {
-    "scripts/verify-pattern-seek-options-mcp.py": "08413e39e161762885d3a4c7a3d40e0ff88f831c42346dca445be295df31165d",
-    "src/Studio.cpp": "70c378f160664ecb731cf5f2d3d6b2881d41bfdbbfe39d63874fba0490dfba0b",
-    "src/Commands.cpp": "77854fae31ad3b421921ef1900e7ac80b99cd3eb5d729614960789d61a72f22a",
-    "src/StudioMcp.cpp": "43f321fcdf9b5239d9c582b2c2af6df5697f63e777186e34f6345338c316cc1b"
+    "scripts/verify-pattern-seek-options-mcp.py": "55d278cc3e517356718116a3be86e0884a04915bf474be26ded6c2b9d7f24f94",
+    "src/Studio.cpp": "66cbff56fa75c8e0ba90b3abd2dc8c3b03d91151d01abbd69c9c87fc02e1bcad",
+    "src/Commands.cpp": "4bc96a37f94e45597a151e7fb1c57dc94b23abe049bc23a355b92c7e45eca114",
+    "src/StudioMcp.cpp": "ad57c9d77563b10db579a7fb7bfa322e9dde300cdf667ecbbbcfd42f6bcffafb"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
     "Two clips of the first Pattern and one of the second",
     "Select in playlist selects exactly the Pattern's clips (pattern.selectInPlaylist)",
     "A Pattern without clips selects nothing and says so",
-    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ffd9af62)",
+    "Random colour gives the Pattern an opaque colour (pattern.randomColour, auto -> ff75d9b0)",
     "The Pattern keeps its name",
     "Random colour is one Undo step",
     "Remember seek time is off by default",
@@ -20,7 +20,19 @@
     "transport.rememberSeek turns the option on",
     "On: Stop returns to where Play was pressed (beat 8.0)",
     "Stop again goes to the Song start",
-    "The option turns off again"
+    "The option turns off again",
+    "Recording options read back their defaults",
+    "Record arms",
+    "Disarm on stop on: Stop turns Record off",
+    "Disarm on stop off: Record stays armed after Stop",
+    "Record disarms by hand",
+    "transport.recordStartsPlayback turns the option on",
+    "Recording starts playback: Record also presses Play (the take path runs and is refused without a device)",
+    "Option off: Record only arms",
+    "Time is shown as beats by default",
+    "view.timeDisplay switches to minutes:seconds",
+    "Beat 8 at 120.0 BPM reads back as 4.000 s",
+    "Find next empty (no naming) selects an empty Pattern (pattern.findEmptyNoNaming, 5 -> 8)"
   ],
   "scope": "Isolated --mcp-test (no audio device); Pattern menu and transport option operations. Not native popup input, listening or hardware evidence.",
   "refreshedBy": "scripts/refresh-menu-evidence.py"

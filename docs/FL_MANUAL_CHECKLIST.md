@@ -159,12 +159,12 @@ copy / paste already exist. New and still open items from these pages:
 | Patterns menu: Random color | done | `pattern.randomColour` (opaque random colour through `pattern.properties`, one Undo); Pattern menu; pattern_seek_options_mcp |
 | Stop: Remember seek time | done | `transport.rememberSeek`: the first Stop returns to where Play was pressed, Stop again to the start; Tools menu; `state.rememberSeekTime`; pattern_seek_options_mcp |
 | Patterns menu: Render and replace | missing | Render exists (`vibera_project export` with `pattern` and `placeClip`); replacing the Pattern's Playlist clips with the audio clip does not |
-| Patterns menu: Find next empty (no naming) | missing | The new-Pattern button already skips naming; there is no menu item or shortcut for it |
-| Recording options: Recording starts playback / Disarm on stop | missing | Stop always disarms; Record never starts playback |
+| Patterns menu: Find next empty (no naming) | done | `pattern.findEmptyNoNaming`; Pattern menu; pattern_seek_options_mcp |
+| Recording options: Recording starts playback / Disarm on stop | done | `transport.recordStartsPlayback`, `transport.disarmOnStop` (default on); Tools menu; `state.recordStartsPlayback` / `.disarmOnStop`; pattern_seek_options_mcp |
 | Recording quantize: Leave note duration / Record to step sequencer | missing | Start and end quantize exist |
 | Tempo: Half speed, nudge, tap Sync / Mute | missing | Tap tempo and tempo presets exist |
 | Monitor volume (listening only, not rendered) | missing | |
-| Time panel: Bar:Beat / Minute:Second display mode | partial | Position shows bars and beats |
+| Time panel: Bar:Beat / Minute:Second display mode | done | `view.timeDisplay` (Tools menu) shows minutes:seconds from the tempo map; `state.timeDisplay`, `state.positionSeconds`; pattern_seek_options_mcp |
 | Output panel: oscilloscope, spectrograph, CPU / memory / polyphony meters | missing | Mixer meters and the Meter-wave view exist |
 | Multilink to controllers | missing | Single-control link, Link all parameters (Mixer track) and Last tweaked exist |
 | Chord panel (detected chords) | missing | |

@@ -4455,6 +4455,10 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "masterPitch", controller.project.masterPitch);
     set(state, "waitForInput", waitForInput);
     set(state, "rememberSeekTime", rememberSeekTime);
+    set(state, "disarmOnStop", disarmOnStop);
+    set(state, "recordStartsPlayback", recordStartsPlayback);
+    set(state, "timeDisplay", timeDisplaySeconds ? "seconds" : "beats");
+    set(state, "positionSeconds", positionSeconds());
     set(state, "recordNotes", recordNotes);
     set(state, "exportOutputChannels", juce::StringArray{"stereo", "mono", "left", "right"}[audio.exportOutputChannels]);
     set(state, "exportDither", audio.exportDither);
