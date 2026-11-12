@@ -448,14 +448,7 @@ class ControllerPage final : public juce::Component, private juce::ListBoxModel,
             if (rebuilding || !owner)
                 return;
             const int a = input.getSelectedId() - 2, b = output.getSelectedId() - 2;
-            if (a >= 0 && a < inputs.size() && inputs[a].identifier == owner->audio.midiInput.identifier())
-            {
-                message.setText("Use a separate control port, or learn mappings on Performance input with "
-                                "control port Off.",
-                                juce::dontSendNotification);
-                return;
-            }
-            const auto result = owner->midiController.setPorts(
+            const auto result = owner->setControllerPorts(
                 a >= 0 && a < inputs.size() ? inputs[a].identifier : juce::String{},
                 b >= 0 && b < outputs.size() ? outputs[b].identifier : juce::String{});
             message.setText(result.wasOk() ? "Control ports updated" : result.getErrorMessage(),
@@ -482,33 +475,15 @@ class ControllerPage final : public juce::Component, private juce::ListBoxModel,
         {
             if (!owner)
                 return;
-            juce::String performance, control, feedback;
-            for (const auto &device : juce::MidiInput::getAvailableDevices())
-                if (device.name.containsIgnoreCase("LKMK3"))
-                {
-                    if (device.name.containsIgnoreCase("MIDIIN2"))
-                        control = device.identifier;
-                    else
-                        performance = device.identifier;
-                }
-            for (const auto &device : juce::MidiOutput::getAvailableDevices())
-                if (device.name.containsIgnoreCase("LKMK3") && device.name.containsIgnoreCase("MIDIOUT2"))
-                    feedback = device.identifier;
-            if (control.isEmpty() || feedback.isEmpty())
+            juce::String text;
+            const auto connected = owner->connectLaunchkey(text);
+            if (!connected.getErrorMessage().startsWith("controller.launchkeyNotFound"))
             {
-                message.setText("Launchkey MK3 DAW ports not found; select ports manually.",
-                                juce::dontSendNotification);
-                return;
+                input.clear(juce::dontSendNotification);
+                output.clear(juce::dontSendNotification);
+                refreshPorts();
             }
-            if (!performance.isEmpty() && owner->audio.midiInput.identifier() != performance)
-                owner->audio.midiInput.setDevice(performance);
-            auto result = owner->midiController.setPorts(control, feedback);
-            input.clear(juce::dontSendNotification);
-            output.clear(juce::dontSendNotification);
-            refreshPorts();
-            message.setText(result.wasOk() ? "Launchkey connected. Load MK3 preset to enable DAW mode."
-                                           : result.getErrorMessage(),
-                            juce::dontSendNotification);
+            message.setText(text, juce::dontSendNotification);
         };
         setSize(720, 800);
         refreshPorts();
@@ -526,10 +501,7 @@ class ControllerPage final : public juce::Component, private juce::ListBoxModel,
     {
         if (!owner)
             return;
-        owner->midiController.launchkeyPreset();
-        owner->midiController.save();
-        owner->midiController.setPorts(owner->midiController.inputIdentifier(),
-                                       owner->midiController.outputIdentifier());
+        owner->loadLaunchkeyPreset();
         list.updateContent();
         list.selectRow(0);
         message.setText("MK3 preset loaded; mappings remain customizable.", juce::dontSendNotification);

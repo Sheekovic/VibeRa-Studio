@@ -261,7 +261,7 @@ juce::var Studio::mcpTools()
       {"name":"vibera_snapshot","description":"Capture this instance as a bounded JUCE component PNG including the header. With channel: that local Channel's settings window instead (opened if needed) (page 0 Sample, 1 Envelope, 2 Miscellaneous). Not native PrintWindow, physical input or listening evidence.","inputSchema":{"type":"object","properties":{"channel":{"type":"integer","minimum":1},"page":{"type":"integer","minimum":0,"maximum":2}},"additionalProperties":false}},
       {"name":"vibera_key","description":"Run an allowed contextual shortcut through the real JUCE handler. File/dialog/macro commands and held typing-performance input are excluded. Not OS keyboard input.","inputSchema":{"type":"object","properties":{"key":{"type":"integer","minimum":1,"maximum":65535},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["key"],"additionalProperties":false}},
       {"name":"vibera_pointer","description":"Run paired down/drag/up or cancel through actual editor/child mouse handlers, or one wheel step (phase wheel, deltaY; positive is up/away). Logical editor pixels from state; left/right/middle/x1 buttons. Not global or physical mouse input.","inputSchema":{"type":"object","properties":{"editor":{"type":"integer","minimum":0,"maximum":3},"phase":{"type":"string","enum":["down","drag","up","cancel","wheel"]},"deltaY":{"type":"number","minimum":-4,"maximum":4},"x":{"type":"number"},"y":{"type":"number"},"button":{"type":"string","enum":["left","right","middle","x1"]},"clicks":{"type":"integer","minimum":1,"maximum":3},"ctrl":{"type":"boolean"},"shift":{"type":"boolean"},"alt":{"type":"boolean"}},"required":["editor","phase"],"additionalProperties":false}}
-      ,{"name":"vibera_controller","description":"Production state/setBinding use the same validated Settings mapping service. Full binding edits save atomically before metadata publication, never Project Undo or MIDI port reopen. Selected/fixed/banked source and explicit mixer.send destination are preserved; invocation validates actual project targets. Preset/configure/learn/cancel/inject remain owned --mcp-test diagnostics only; no production MIDI injection/ports/filesystem arguments.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["state","setBinding","removeBinding","preset","configure","learn","cancel","inject"]},"profile":{"type":"object"},"index":{"type":"integer","minimum":0,"maximum":511,"description":"setBinding: existing row or exact append(size), no gaps; at most512 mappings. removeBinding: the existing row to delete (later rows move up)."},"port":{"type":"integer","minimum":0,"maximum":1},"kind":{"type":"integer","minimum":0,"maximum":6},"channel":{"type":"integer","minimum":0,"maximum":16},"number":{"type":"integer","minimum":0,"maximum":127},"value":{"type":"integer","minimum":0,"maximum":16383},"binding":{"type":"object","description":"Complete mapping; authoritative schema supplied from MidiController validator."},"expectedProfile":{"type":"string","minLength":64,"maxLength":64,"pattern":"^[0-9a-f]{64}$","description":"Required for setBinding/removeBinding. Exact controllerProfileIdentity from state; binds runtime mappings and available saved bytes. Re-read after any mapping/bank/profile change."}},"required":["action"],"additionalProperties":false}}
+      ,{"name":"vibera_controller","description":"Production state/setBinding use the same validated Settings mapping service. Full binding edits save atomically before metadata publication, never Project Undo or MIDI port reopen. Selected/fixed/banked source and explicit mixer.send destination are preserved; invocation validates actual project targets. learn {index} arms MIDI Learn for an existing mapping row like the Learn button (the next control moved on the control port is bound; read controllerLearning), cancel disarms it. preset with replace:true loads the Launchkey MK3 mappings instead of the current ones and saves them (the confirmed Load preset of the page). ports {input, output} opens the control ports by identifier from controllerPorts.inputs / .outputs (empty = off), refused when input is the performance MIDI input; connectLaunchkey finds and opens the Launchkey MK3 DAW ports like the Connect button. Port actions open hardware MIDI ports. Configure/inject remain owned --mcp-test diagnostics only; no production MIDI injection or filesystem arguments.","inputSchema":{"type":"object","properties":{"action":{"type":"string","enum":["state","setBinding","removeBinding","preset","configure","learn","cancel","inject","ports","connectLaunchkey"]},"replace":{"type":"boolean","description":"preset: must be true; the current mappings are replaced."},"input":{"type":"string","maxLength":1024,"description":"ports: control input identifier (controllerPorts.inputs), empty = off."},"output":{"type":"string","maxLength":1024,"description":"ports: feedback output identifier (controllerPorts.outputs), empty = off."},"profile":{"type":"object"},"index":{"type":"integer","minimum":0,"maximum":511,"description":"setBinding: existing row or exact append(size), no gaps; at most512 mappings. removeBinding: the existing row to delete (later rows move up)."},"port":{"type":"integer","minimum":0,"maximum":1},"kind":{"type":"integer","minimum":0,"maximum":6},"channel":{"type":"integer","minimum":0,"maximum":16},"number":{"type":"integer","minimum":0,"maximum":127},"value":{"type":"integer","minimum":0,"maximum":16383},"binding":{"type":"object","description":"Complete mapping; authoritative schema supplied from MidiController validator."},"expectedProfile":{"type":"string","minLength":64,"maxLength":64,"pattern":"^[0-9a-f]{64}$","description":"Required for setBinding/removeBinding. Exact controllerProfileIdentity from state; binds runtime mappings and available saved bytes. Re-read after any mapping/bank/profile change."}},"required":["action"],"additionalProperties":false}}
     ])JSON");
     const auto additions = juce::JSON::parse(R"JSON([
       {"name":"vibera_picker","description":"Semantic Playlist Picker selection, filtering, navigation and source placement. Uses the same component model/canonical commands as UI, without mouse simulation.","inputSchema":{"type":"object","additionalProperties":false,"properties":{"action":{"type":"string","enum":["state","type","filter","groupFilter","select","place","width","visible","openRack","scroll"]},"kind":{"type":"string","enum":["pattern","audio","automation"]},"text":{"type":"string","maxLength":128},"ids":{"type":"array","maxItems":128,"uniqueItems":true,"items":{"type":"integer","minimum":1}},"beat":{"type":"number","minimum":0,"maximum":1000000,"default":0},"lane":{"type":"integer","minimum":0,"maximum":127,"default":0},"width":{"type":"integer","minimum":120,"maximum":280},"scrollY":{"type":"integer","minimum":0,"description":"Logical vertical pixels; maximumScrollY is returned in state."},"visible":{"type":"boolean"},"revision":{"type":"integer","minimum":0}},"required":["action"]}},
@@ -1620,6 +1620,32 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             for (const auto &command : commandRegistry())
                 if (command.userAction)
                     commands.add(command.id);
+            {
+                // Settings > Controller port lists and Learn state (ports / connectLaunchkey / learn / cancel).
+                auto ports = obj();
+                set(ports, "input", midiController.inputIdentifier());
+                set(ports, "output", midiController.outputIdentifier());
+                set(ports, "status", midiController.status());
+                juce::Array<juce::var> inputs, outputs;
+                for (const auto &device : juce::MidiInput::getAvailableDevices())
+                {
+                    auto entry = obj();
+                    set(entry, "name", device.name);
+                    set(entry, "identifier", device.identifier);
+                    inputs.add(entry);
+                }
+                for (const auto &device : juce::MidiOutput::getAvailableDevices())
+                {
+                    auto entry = obj();
+                    set(entry, "name", device.name);
+                    set(entry, "identifier", device.identifier);
+                    outputs.add(entry);
+                }
+                set(ports, "inputs", inputs);
+                set(ports, "outputs", outputs);
+                set(current, "controllerPorts", ports);
+                set(current, "controllerLearning", midiController.learnIndex);
+            }
             set(current, "controllerParameterActions", parameters);
             set(current, "controllerBindingCommands", commands);
             if (committed)
@@ -1675,13 +1701,65 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         }
         if (action.startsWith("samplerLearn"))
             return textResult(samplerControllerOperation(args));
+        if (action == "learn" || action == "cancel" || action == "preset" || action == "ports" ||
+            action == "connectLaunchkey")
+        {
+            // The Settings > Controller buttons, through the same Studio / MidiController calls.
+            const juce::StringArray allowed = action == "learn"    ? juce::StringArray{"action", "index"}
+                                              : action == "preset" ? juce::StringArray{"action", "replace"}
+                                              : action == "ports"  ? juce::StringArray{"action", "input", "output"}
+                                                                   : juce::StringArray{"action"};
+            for (const auto &property : args.getDynamicObject()->getProperties())
+                if (!allowed.contains(property.name.toString()))
+                    throw McpFailure("controller.invalidArguments", "Unknown argument for controller operation");
+            if (action == "learn")
+            {
+                if (!args.hasProperty("index") || midiController.bindings.empty())
+                    throw McpFailure("controller.invalidArguments", "learn requires the index of an existing mapping");
+                const int index = int(number(args, "index", -1));
+                if (index < 0 || index >= int(midiController.bindings.size()))
+                    throw McpFailure("controller.invalidArguments", "learn requires the index of an existing mapping");
+                midiController.armLearn(index);
+                if (midiController.learnIndex != index) // armLearn reports refusals in lastMessage.
+                    throw McpFailure("controller.learnRefused", midiController.lastMessage);
+            }
+            else if (action == "cancel")
+                midiController.cancelLearn();
+            else if (action == "preset")
+            {
+                if (!args.hasProperty("replace") || !bool(args["replace"]))
+                    throw McpFailure("controller.confirmationRequired",
+                                     "preset replaces the current mappings; pass replace:true");
+                loadLaunchkeyPreset();
+            }
+            else if (action == "ports")
+            {
+                const auto wantedInput = args["input"].toString(), wantedOutput = args["output"].toString();
+                bool inputKnown = wantedInput.isEmpty(), outputKnown = wantedOutput.isEmpty();
+                for (const auto &device : juce::MidiInput::getAvailableDevices())
+                    inputKnown = inputKnown || device.identifier == wantedInput;
+                for (const auto &device : juce::MidiOutput::getAvailableDevices())
+                    outputKnown = outputKnown || device.identifier == wantedOutput;
+                if (!inputKnown || !outputKnown)
+                    throw McpFailure("controller.unknownPort", "input/output are identifiers from controllerPorts");
+                if (const auto opened = setControllerPorts(wantedInput, wantedOutput); opened.failed())
+                    throw McpFailure("controller.portRefused", opened.getErrorMessage());
+            }
+            else
+            {
+                juce::String text;
+                if (const auto connected = connectLaunchkey(text); connected.failed())
+                    throw McpFailure(connected.getErrorMessage().startsWith("controller.launchkeyNotFound")
+                                         ? "controller.launchkeyNotFound"
+                                         : "controller.portRefused",
+                                     text);
+            }
+            return readback();
+        }
         if (!controllerTestMode)
             throw McpFailure("controller.diagnosticOnly",
-                             "Only state/setBinding and samplerLearn operations are production; MIDI "
-                             "injection/learn/preset/configure remain owned diagnostics");
-        if (action == "preset")
-            midiController.launchkeyPreset();
-        else if (action == "configure")
+                             "MIDI injection and configure remain owned diagnostics");
+        if (action == "configure")
         {
             const auto profile = args["profile"];
             if (profile["input"].toString().isNotEmpty() || profile["output"].toString().isNotEmpty())
@@ -1690,13 +1768,6 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
             if (result.failed())
                 throw std::runtime_error(result.getErrorMessage().toStdString());
         }
-        else if (action == "learn")
-        {
-            const int index = integer(args, "index", -1, 0, int(midiController.bindings.size()) - 1);
-            midiController.armLearn(index);
-        }
-        else if (action == "cancel")
-            midiController.cancelLearn();
         else if (action == "inject")
         {
             const int port = integer(args, "port", 1, 0, 1), kind = integer(args, "kind", 0, 0, 6);

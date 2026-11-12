@@ -1,10 +1,18 @@
 # MIDI controller binding configuration ? development source
 
 Discover vibera_controller on the connected executable. Production actions are
-state and setBinding. Preset, whole-profile configure, learn, cancel and inject
-remain owned --mcp-test diagnostics; no production MIDI injection, hardware-port
-selection or caller-selected settings filepath is provided. Arbitrary native
-plugin UI and physical MIDI operation are separate evidence.
+state, setBinding, removeBinding and the Settings > Controller buttons: learn
+{"index":row} arms MIDI Learn for an existing mapping (the next control moved on
+the control port is bound; state.controllerLearning is the armed row, -1 none),
+cancel disarms it, preset {"replace":true} replaces the mappings with the
+Launchkey MK3 preset and saves them, ports {"input":id,"output":id} opens the
+control ports by identifier from controllerPorts.inputs / .outputs (empty = off;
+refused when input is the performance MIDI input) and connectLaunchkey finds and
+opens the Launchkey MK3 DAW ports. ports and connectLaunchkey open hardware MIDI
+ports: ask the user before using them. Whole-profile configure and inject remain
+owned --mcp-test diagnostics; no production MIDI injection or caller-selected
+settings filepath is provided. Arbitrary native plugin UI and physical MIDI
+operation are separate evidence.
 
 Read {"action":"state"}. The previous whole-application state shape remains;
 controllerProfile contains actual saved-format1 metadata and bindings. Additional

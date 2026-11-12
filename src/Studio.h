@@ -167,6 +167,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
                                               const std::vector<Id> &);
     void showSamplerControllerLearn(Id, std::uint32_t);
     void samplerControllerLinksMenu(juce::Component *anchor = nullptr); // Menu under `anchor` when given.
+    // Settings > Controller actions shared with vibera_controller (ports / preset / connectLaunchkey).
+    juce::Result setControllerPorts(const juce::String &input, const juce::String &output);
+    void loadLaunchkeyPreset();
+    juce::Result connectLaunchkey(juce::String &message);
     void samplerControllerLinkDialog(Id);
     bool recordingNotes = false;
     bool quantizeRecordingStart = false, quantizeRecordingEnd = false;

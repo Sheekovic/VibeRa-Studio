@@ -5,7 +5,8 @@ calls as clicking a tag, the Edit tags dialog and Shift+click on the preview wav
 (vibera_transport midiInput device) is the Settings > MIDI device list; only closing the input and
 refusing an unknown identifier are exercised, no hardware port is opened. channel.previewSample
 (vibera_transport previewSample) is the Channel settings Preview button; drumPads.hit (vibera_transport
-drumPad) is striking a Drum Pads pad. Not a listening test.
+drumPad) is striking a Drum Pads pad. vibera_controller learn / cancel / preset / ports are the Settings >
+Controller buttons (no hardware port is opened). Not a listening or hardware test.
 
 usage: python scripts/verify-browser-midi-mcp.py [executable] [output folder]
 """
@@ -168,6 +169,27 @@ try:
           f"ideaState reads both back ({idea.get('installation')}, {idea.get('runtime')})")
     check(raw("vibera_ai", {"action": "ideaConfigure", "installation": str(library / "missing")}).get("isError"),
           "A missing installation folder is refused")
+
+    # Settings > Controller buttons: Learn / Cancel, Load preset (replace:true) and control ports.
+    # No hardware port is opened here: only closing the ports and refusals are exercised.
+    controller = lambda action, **a: raw("vibera_controller", dict(action=action, **a))
+    ports = call("vibera_controller", {"action": "state"})
+    check(isinstance(ports.get("controllerPorts", {}).get("inputs"), list) and ports.get("controllerLearning") == -1,
+          "Controller ports and Learn state read back")
+    refused = controller("preset")
+    check(refused.get("isError") and "confirmationRequired" in json.dumps(refused), "controller.preset needs replace:true")
+    loaded = controller("preset", replace=True)
+    rows = len(loaded.get("structuredContent", {}).get("controllerProfile", {}).get("bindings", []))
+    check(not loaded.get("isError") and rows > 0, f"controller.preset loads the Launchkey mappings ({rows} rows)")
+    armed = controller("learn", index=0)
+    check(not armed.get("isError") and armed["structuredContent"]["controllerLearning"] == 0, "controller.learn arms row 0")
+    check(controller("cancel")["structuredContent"]["controllerLearning"] == -1, "Cancel disarms MIDI Learn")
+    check(controller("learn", index=rows).get("isError"), "Learn on a missing row is refused")
+    unknown_port = controller("ports", input="no-such-port-" + uuid.uuid4().hex)
+    check(unknown_port.get("isError") and "unknownPort" in json.dumps(unknown_port), "An unknown control port is refused")
+    closed = controller("ports", input="", output="")
+    check(not closed.get("isError") and closed["structuredContent"]["controllerPorts"]["input"] == "",
+          "controller.ports with empty identifiers turns the control ports off")
 
     midi = call("vibera_state").get("midiInput", {})
     check(isinstance(midi.get("devices"), list) and "device" in midi, f"MIDI devices read back ({len(midi.get('devices', []))})")

@@ -2983,24 +2983,6 @@
     ],
     "reviewer": "Handler read 2026-11-10; the gesture performs exactly these canonical operations."
   },
-  "src/Studio.h:820:41ac5b7f77f0": {
-    "operations": [
-      "midi.typing",
-      "midi.typingOptions",
-      "transport.countIn",
-      "transport.guide",
-      "transport.metronome",
-      "view.settings"
-    ],
-    "reviewer": "Handler read 2026-11-10; the gesture performs exactly these canonical operations."
-  },
-  "src/Studio.h:837:95b0e2f679e5": {
-    "operations": [
-      "recording.audioInput",
-      "view.settings"
-    ],
-    "reviewer": "Handler read 2026-11-10; the gesture performs exactly these canonical operations."
-  },
   "src/Editors.h:65:544d49c83a4e": {
     "operations": [
       "channel.clone",
@@ -3042,22 +3024,6 @@
       "view.rackButtonsWide",
       "view.rackFocusSelected",
       "view.rackScrollToSelected"
-    ],
-    "reviewer": "Handler read 2026-11-10; the gesture opens rackGroupMenu / patternMenu, whose items perform exactly these canonical operations."
-  },
-  "src/Studio.h:1192:2d59b2dd3652": {
-    "operations": [
-      "channel.select",
-      "pattern.add",
-      "pattern.clone",
-      "pattern.delete",
-      "pattern.findEmpty",
-      "pattern.insert",
-      "pattern.move",
-      "pattern.properties",
-      "pattern.renameDialog",
-      "pattern.splitChannels",
-      "pattern.transpose"
     ],
     "reviewer": "Handler read 2026-11-10; the gesture opens rackGroupMenu / patternMenu, whose items perform exactly these canonical operations."
   },
@@ -3967,5 +3933,77 @@
       "channel.previewNote"
     ],
     "reviewer": "Handler read 2026-11-12; auditions one drum of the Drum Synth, the note preview MCP plays with channel.previewNote at that drum's pitch; the page selection is view-only."
+  },
+  "src/Studio.h:824:41ac5b7f77f0": {
+    "operations": [
+      "midi.typing",
+      "midi.typingOptions",
+      "transport.countIn",
+      "transport.guide",
+      "transport.metronome",
+      "view.settings"
+    ],
+    "reviewer": "Handler read 2026-11-10; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.h:841:95b0e2f679e5": {
+    "operations": [
+      "recording.audioInput",
+      "view.settings"
+    ],
+    "reviewer": "Handler read 2026-11-10; the gesture performs exactly these canonical operations."
+  },
+  "src/Studio.h:1196:2d59b2dd3652": {
+    "operations": [
+      "channel.select",
+      "pattern.add",
+      "pattern.clone",
+      "pattern.delete",
+      "pattern.findEmpty",
+      "pattern.insert",
+      "pattern.move",
+      "pattern.properties",
+      "pattern.renameDialog",
+      "pattern.splitChannels",
+      "pattern.transpose"
+    ],
+    "reviewer": "Handler read 2026-11-10; the gesture opens rackGroupMenu / patternMenu, whose items perform exactly these canonical operations."
+  },
+  "src/ControllerPage.h:381:3dd47c0c1328": {
+    "operations": [
+      "controller.binding",
+      "controller.learn"
+    ],
+    "reviewer": "Handler read 2026-11-12; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:392:36761538928d": {
+    "operations": [
+      "controller.learn"
+    ],
+    "reviewer": "Handler read 2026-11-12; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:457:d9dc270d86a3": {
+    "operations": [
+      "controller.ports"
+    ],
+    "reviewer": "Handler read 2026-11-12; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:457:4e425e243bdc": {
+    "operations": [
+      "controller.ports"
+    ],
+    "reviewer": "Handler read 2026-11-12; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:458:597bc7b894bb": {
+    "operations": [
+      "controller.preset"
+    ],
+    "reviewer": "Handler read 2026-11-12; the gesture performs exactly these canonical operations."
+  },
+  "src/ControllerPage.h:474:8c95c2700111": {
+    "operations": [
+      "controller.ports",
+      "midi.device"
+    ],
+    "reviewer": "Handler read 2026-11-12; the gesture performs exactly these canonical operations."
   }
 }

@@ -200,7 +200,33 @@ template <class StudioType> VIBERA_NOINLINE juce::Result verifyPublicMcp(StudioT
             stale = e.code == "controller.staleProfile";
         }
         check(stale, "Actual public service rejects stale profile token");
-        for (const auto &action : juce::StringArray{"preset", "configure", "learn", "cancel", "inject"})
+        // Learn / preset / ports are production (the Settings > Controller buttons) with guards:
+        // nothing below changes the mappings, so the final profile still equals the applied one.
+        const auto refusal = [&](juce::var args)
+        {
+            try
+            {
+                (void)studio.mcpCall("vibera_controller", args);
+            }
+            catch (const McpFailure &e)
+            {
+                return e.code;
+            }
+            return juce::String("completed");
+        };
+        check(refusal(request("preset")) == "controller.confirmationRequired",
+              "Production preset needs replace:true before it replaces mappings");
+        check(refusal(request("learn")) == "controller.invalidArguments", "Production learn needs an existing mapping index");
+        auto unknownPort = request("ports");
+        unknownPort.getDynamicObject()->setProperty("input", "no-such-control-port");
+        check(refusal(unknownPort) == "controller.unknownPort", "Production ports refuses an unknown identifier");
+        auto learn = request("learn");
+        learn.getDynamicObject()->setProperty("index", 0);
+        const auto armed = studio.mcpCall("vibera_controller", learn)["structuredContent"];
+        check(int(armed["controllerLearning"]) == 0, "Production learn arms the mapping row");
+        const auto disarmed = studio.mcpCall("vibera_controller", request("cancel"))["structuredContent"];
+        check(int(disarmed["controllerLearning"]) == -1, "Production cancel disarms MIDI Learn");
+        for (const auto &action : juce::StringArray{"configure", "inject"})
         {
             bool refused = false;
             try

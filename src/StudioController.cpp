@@ -37,6 +37,46 @@ bool Studio::navigateSamplerView(const juce::String &action)
     range->navigation(action);
     return true;
 }
+juce::Result Studio::setControllerPorts(const juce::String &input, const juce::String &output)
+{
+    // The control port must not be the performance input: its notes would also play the Channel.
+    if (input.isNotEmpty() && input == audio.midiInput.identifier())
+        return juce::Result::fail("Use a separate control port, or learn mappings on Performance input with "
+                                  "control port Off.");
+    return midiController.setPorts(input, output);
+}
+void Studio::loadLaunchkeyPreset()
+{
+    midiController.launchkeyPreset();
+    midiController.save();
+    midiController.setPorts(midiController.inputIdentifier(), midiController.outputIdentifier());
+}
+juce::Result Studio::connectLaunchkey(juce::String &message)
+{
+    juce::String performance, control, feedback;
+    for (const auto &device : juce::MidiInput::getAvailableDevices())
+        if (device.name.containsIgnoreCase("LKMK3"))
+        {
+            if (device.name.containsIgnoreCase("MIDIIN2"))
+                control = device.identifier;
+            else
+                performance = device.identifier;
+        }
+    for (const auto &device : juce::MidiOutput::getAvailableDevices())
+        if (device.name.containsIgnoreCase("LKMK3") && device.name.containsIgnoreCase("MIDIOUT2"))
+            feedback = device.identifier;
+    if (control.isEmpty() || feedback.isEmpty())
+    {
+        message = "Launchkey MK3 DAW ports not found; select ports manually.";
+        return juce::Result::fail("controller.launchkeyNotFound: " + message);
+    }
+    if (!performance.isEmpty() && audio.midiInput.identifier() != performance)
+        audio.midiInput.setDevice(performance);
+    const auto result = midiController.setPorts(control, feedback);
+    message = result.wasOk() ? juce::String("Launchkey connected. Load MK3 preset to enable DAW mode.")
+                             : result.getErrorMessage();
+    return result;
+}
 void Studio::invokeController(const ControllerInvocation &value)
 {
     if (value.automationSession && (!automationTouch || value.automationSession != automationTouch->session))
