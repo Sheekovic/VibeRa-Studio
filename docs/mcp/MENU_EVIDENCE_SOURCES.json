@@ -248,6 +248,45 @@
         "scripts/verify-ui-actions-mcp.py"
       ],
       "scope": "Registered tests that exercise the operations these Playlist clip menu items run, each run alone on this binary."
+    },
+    "docs/mcp/RACK_CHANNEL_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-rack-channel-menu-mcp.py",
+      "folder": "rack-channel-menu",
+      "sources": [
+        "scripts/verify-rack-channel-menu-mcp.py",
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/McpContracts.h",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test; the registered operations the Channel menu items run. Not native popup input, listening or hardware evidence."
+    },
+    "docs/mcp/RACK_CHANNEL_MENU_RELATED_EVIDENCE.json": {
+      "ctests": [
+        "sampler_voices_mcp",
+        "midi_receive_mcp",
+        "pattern_channel_loops_mcp",
+        "browser_midi_mcp",
+        "channel_appearance_mcp",
+        "step_fill_mcp",
+        "channel_management_mcp",
+        "swing_mcp"
+      ],
+      "folder": "rack-channel-menu",
+      "sources": [
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-sampler-voices-mcp.py",
+        "scripts/verify-midi-receive-mcp.py",
+        "scripts/verify-channel-loops-mcp.py",
+        "scripts/verify-browser-midi-mcp.py",
+        "scripts/verify-channel-appearance-mcp.py",
+        "scripts/verify-step-fill-mcp.py",
+        "scripts/verify-channel-management-mcp.py",
+        "scripts/verify-swing-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations these Channel menu items run, each run alone on this binary."
     }
   }
 }

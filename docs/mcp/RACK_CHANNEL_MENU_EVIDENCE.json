@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
+  "sourceInputs": {
+    "scripts/verify-rack-channel-menu-mcp.py": "18ca17d0232a71bdf990871cc1717fd1a7a2085d3015c2c55bc1cbc6f0b104e4",
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/McpContracts.h": "7d455396593209469c6471b395fb76d8841b8647420d3a1fc0348cf141b16869",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "Channel volume set to 0.3 (channel.gain)",
+    "Channel pan set left (channel.pan)",
+    "Centre pan returns the pan to 0",
+    "A volume above the range is refused",
+    "Store in spare state reports its outcome (channel.spareStore, completed)",
+    "Flip with spare state reports its outcome (channel.spareFlip, completed)",
+    "Flipping restores the stored volume 0.3",
+    "Per-note tuning: E and B half flat (channel.tuning) null",
+    "A tuning without twelve entries is refused",
+    "Custom scale reports its outcome (channel.scale, completed)",
+    "MTS-ESP tuning source reports its outcome (channel.mtsEsp, completed)",
+    "MPE is for plugin instruments: a sampler Channel is refused (channel.mpe, failed)"
+  ],
+  "scope": "Isolated --mcp-test; the registered operations the Channel menu items run. Not native popup input, listening or hardware evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
+}

@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
+  "sourceInputs": {
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816",
+    "scripts/verify-sampler-voices-mcp.py": "79673a106624b900a415650193003638b5f96f21f312c0404ffab33b797644f1",
+    "scripts/verify-midi-receive-mcp.py": "06909debda2b26611dee540cb342b3b1468ccd6f4f279ea9f589298ed24c8374",
+    "scripts/verify-channel-loops-mcp.py": "18967bf5ff44c2b04d0e6f6cecbc725c7d48a68ce6122fa7c380e436105c85e7",
+    "scripts/verify-browser-midi-mcp.py": "2f3856daa1f989f62bcb833ae597bd0aab7664a2aa8c286b5ce20b939968487e",
+    "scripts/verify-channel-appearance-mcp.py": "7b9dcc295df63839da8dcb2b24e080eb642bcdd9324c0964830955aef61abfd1",
+    "scripts/verify-step-fill-mcp.py": "a22908cc66aa16a4f84574fbc23576a315185705eaef2ef267d0c1a9fb60409b",
+    "scripts/verify-channel-management-mcp.py": "94e40d3a880a48446db932c676560b8d7bbe858f93d8f8797669f4f892e6e0d4",
+    "scripts/verify-swing-mcp.py": "737ce7f1e877c0664ac97ace2c83e4897f06bed745e4f38229a7eda17b20d0e8"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest browser_midi_mcp passed (run alone)",
+    "ctest channel_appearance_mcp passed (run alone)",
+    "ctest channel_management_mcp passed (run alone)",
+    "ctest midi_receive_mcp passed (run alone)",
+    "ctest pattern_channel_loops_mcp passed (run alone)",
+    "ctest sampler_voices_mcp passed (run alone)",
+    "ctest step_fill_mcp passed (run alone)",
+    "ctest swing_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations these Channel menu items run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/rack-channel-menu/related-ctest.log"
+}
