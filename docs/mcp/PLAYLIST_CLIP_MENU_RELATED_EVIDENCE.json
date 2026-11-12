@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
+  "sourceInputs": {
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/AutomationCommands.cpp": "c90a54b42c0bda9e5dd93aae1ca29bfd1598ab42dc788c03c8e7a3db95cfc500",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816",
+    "scripts/verify-playlist-tools-mcp.py": "06cda23286493e04c4ee2a5c2dea9689f54a5e2ffd5efcf6657b1014bb3f95ca",
+    "scripts/verify-unique-sample-mcp.py": "801336e4ca0b0e28fe04604abe02a802d40f0c55b9858966604260e2655e1d09",
+    "scripts/verify-audio-recording-mcp.py": "2167bc559cefab39859bb1380d586d791d92038301c1ae8c32b942324b0f2ea2",
+    "scripts/verify-ui-actions-mcp.py": "60c3e17cccf74b85088b4b27ddcb2021cebac472de9b356e1c255217550deaab"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest audio_recording_mcp passed (run alone)",
+    "ctest mcp_ui_actions passed (run alone)",
+    "ctest playlist_tools_mcp passed (run alone)",
+    "ctest unique_sample_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations these Playlist clip menu items run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/playlist-clip-menu/related-ctest.log"
+}

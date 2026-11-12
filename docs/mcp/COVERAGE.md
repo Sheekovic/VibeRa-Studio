@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 300; gaps: 156.
+Explicit UI inventory complete: False; known controls: 311; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1099,6 +1099,17 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `playlist.menu.timeSignature` | meter.change.add / meter.change.delete | vibera_command; reviewed |
 | `playlist.menu.groupClips` | clip.group / clip.ungroup | vibera_command; reviewed |
 | `playlist.menu.makeUnique` | clip.unique | vibera_command; reviewed |
+| `playlist.clip.chop` | clip.chop | vibera_command; reviewed |
+| `playlist.clip.quantize` | clip.quantize | vibera_command; reviewed |
+| `playlist.clip.splitChannels` | clip.splitChannels | vibera_command; reviewed |
+| `playlist.clip.merge` | clip.merge | vibera_command; reviewed |
+| `playlist.clip.mergeSimilar` | clip.mergeSimilar | vibera_command; reviewed |
+| `playlist.clip.rippleDelete` | clip.rippleDelete | vibera_command; reviewed |
+| `playlist.clip.automationTools` | automation.source.flip / automation.source.normalize / automation.source.smooth / automation.source.scale / automation.source.decimate / automation.source.filter / automation.source.fromAudio / automation.source.smoothUp / automation.source.tension / automation.source.sequence | vibera_command; reviewed |
+| `playlist.clip.mergeAutomation` | automation.merge | vibera_command; reviewed |
+| `playlist.clip.uniqueSample` | clip.uniqueSample | vibera_command; reviewed |
+| `playlist.clip.comp` | audio.comp / audio.fade | vibera_command; reviewed |
+| `playlist.clip.renamePattern` | pattern.renameDialog | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

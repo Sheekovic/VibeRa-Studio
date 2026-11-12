@@ -216,6 +216,38 @@
         "scripts/verify-clip-groups-mcp.py"
       ],
       "scope": "Registered tests that exercise the operations these Playlist menu items run, each run alone on this binary."
+    },
+    "docs/mcp/PLAYLIST_CLIP_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-playlist-clip-menu-mcp.py",
+      "folder": "playlist-clip-menu",
+      "sources": [
+        "scripts/verify-playlist-clip-menu-mcp.py",
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/McpContracts.h",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test; the registered operations the Playlist clip menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence."
+    },
+    "docs/mcp/PLAYLIST_CLIP_MENU_RELATED_EVIDENCE.json": {
+      "ctests": [
+        "playlist_tools_mcp",
+        "unique_sample_mcp",
+        "audio_recording_mcp",
+        "mcp_ui_actions"
+      ],
+      "folder": "playlist-clip-menu",
+      "sources": [
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/AutomationCommands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-playlist-tools-mcp.py",
+        "scripts/verify-unique-sample-mcp.py",
+        "scripts/verify-audio-recording-mcp.py",
+        "scripts/verify-ui-actions-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations these Playlist clip menu items run, each run alone on this binary."
     }
   }
 }
