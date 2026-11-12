@@ -468,6 +468,23 @@
         "tests/ControllerBindingAcceptance.h"
       ],
       "scope": "Registered native test with injected control messages and no hardware ports, run alone on this binary. Not hardware controller or Shift+click input evidence."
+    },
+    "docs/mcp/BROWSER_FILE_MENU_EVIDENCE.json": {
+      "ctests": [
+        "midi_import_mcp",
+        "normalize_mcp",
+        "rack_groups_mcp"
+      ],
+      "folder": "browser-file-menu",
+      "sources": [
+        "src/SampleFileBrowser.h",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-midi-import-mcp.py",
+        "scripts/verify-normalize-mcp.py",
+        "scripts/verify-rack-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations the Browser file menu runs, each run alone on this binary. Not native popup input; Show in folder and Move to Recycle Bin act on the operating system and have no project operation."
     }
   }
 }

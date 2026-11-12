@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
+  "sourceInputs": {
+    "src/SampleFileBrowser.h": "83e3c6f86b476f84eb3299e3a0b8c40a47ea9d669ea3091be28d1cc5a7190ce7",
+    "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
+    "src/StudioMcp.cpp": "a3e7d4532912076112c71d069c4d0adb5388bec967c1d40723625a621e1e980d",
+    "scripts/verify-midi-import-mcp.py": "ee9345c2f4211476ba6b3e958d28b380f5e8e0db592603dcbe632f4cf50f701d",
+    "scripts/verify-normalize-mcp.py": "092761d1de9ef65f85141e6ff78a0cb7dcf15fa81c3df52606dcc81545b2c0d8",
+    "scripts/verify-rack-mcp.py": "fd42583846c99887aedc4c37e74dcc92055c6517a4fab6f39a2efc688552720c"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest midi_import_mcp passed (run alone)",
+    "ctest normalize_mcp passed (run alone)",
+    "ctest rack_groups_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations the Browser file menu runs, each run alone on this binary. Not native popup input; Show in folder and Move to Recycle Bin act on the operating system and have no project operation.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/browser-file-menu/related-ctest.log"
+}
