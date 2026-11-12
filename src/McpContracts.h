@@ -440,6 +440,9 @@ inline juce::var commandArgumentSchema(const juce::String &id)
         if (id == "notes.controller.interpolate")
             return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{)" + common +
                                      R"(,"channel":{"type":"integer","minimum":1},"text":{"type":"string","enum":["cc","pitchBend","pressure"],"default":"cc"},"pitch":{"type":"integer","minimum":0,"maximum":127,"description":"CC number (cc only)."},"beat":{"type":"number","minimum":0,"description":"Range start (beats)."},"length":{"type":"number","exclusiveMinimum":0,"maximum":512,"description":"Range length (beats). The first and last events of the lane inside it stay; everything between becomes a straight line every 1/16 beat (one Undo)."}},"required":["channel","beat","length"]})");
+        if (id == "notes.controller.lfo")
+            return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{)" + common +
+                                     R"(,"channel":{"type":"integer","minimum":1},"text":{"type":"string","enum":["cc","pitchBend","pressure"],"default":"cc","description":"Lane the LFO replaces for this Channel."},"pitch":{"type":"integer","minimum":0,"maximum":127,"default":1,"description":"CC number for text cc (1 = mod wheel)."},"target":{"type":"integer","minimum":0,"maximum":3,"default":0,"description":"Shape: 0 sine, 1 triangle, 2 square, 3 saw."},"length":{"type":"number","minimum":0.25,"maximum":64,"description":"Period in beats."},"value":{"type":"number","exclusiveMinimum":0,"maximum":1,"description":"Depth around the centre."},"offset":{"type":"number","minimum":-1,"maximum":1,"default":0.5,"description":"Centre: 0..1 for CC / pressure, -1..1 for pitch bend. One point per 1/16 beat over the Pattern; one Undo step."}},"required":["channel","length","value"]})");
         return juce::JSON::parse(R"({"type":"object","additionalProperties":false,"properties":{)" + common +
                                  R"(,"target":{"type":"integer","minimum":1,"description":"Controller event ID to delete."}},"required":["target"]})");
     }
@@ -1180,6 +1183,9 @@ inline juce::var commandArgumentSchema(const juce::String &id)
                "connects to the next selected strictly later onset, leaving final onset lengths unchanged. "
                "Chop preserves pitch/velocity, first IDs and exact span. Both are one Undo and synchronous "
                "document completion; read notes with vibera_inspect.");
+    if (id == "notes.riff" || id == "notes.randomize") // The generators draw from a seed, like the menu's.
+        schema["properties"].getDynamicObject()->setProperty(
+            "seed", juce::JSON::parse(R"({"type":"integer","minimum":0,"maximum":2147483647,"default":1,"description":"Seed for the generated part; the same seed replays the same result."})"));
     if (id == "notes.chordify" || id == "notes.arpeggiate" || id == "notes.strum" || id == "notes.humanize" ||
         id == "notes.scaleSnap" || id == "notes.maqam")
     {

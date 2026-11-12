@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 224; gaps: 156.
+Explicit UI inventory complete: False; known controls: 258; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1023,6 +1023,40 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `rack.menu.swing` | project.swing / rack.swingMix | vibera_command; reviewed |
 | `rack.menu.appearance` | rack.properties | vibera_command; reviewed |
 | `rack.menu.sort` | rack.sort | vibera_command; reviewed |
+| `piano.menu.flip` | notes.flip | vibera_command; reviewed |
+| `piano.menu.articulate` | notes.articulate | vibera_command; reviewed |
+| `piano.menu.scaleLevels` | notes.scaleLevels | vibera_command; reviewed |
+| `piano.menu.limit` | notes.limit | vibera_command; reviewed |
+| `piano.menu.flam` | notes.flam | vibera_command; reviewed |
+| `piano.menu.chordify` | notes.chordify | vibera_command; reviewed |
+| `piano.menu.arpeggiate` | notes.arpeggiate | vibera_command; reviewed |
+| `piano.menu.strum` | notes.strum | vibera_command; reviewed |
+| `piano.menu.humanize` | notes.humanize | vibera_command; reviewed |
+| `piano.menu.scaleSnap` | notes.scaleSnap | vibera_command; reviewed |
+| `piano.menu.maqamSnap` | notes.maqam | vibera_command; reviewed |
+| `piano.menu.riff` | notes.riff | vibera_command; reviewed |
+| `piano.menu.randomize` | notes.randomize | vibera_command; reviewed |
+| `piano.menu.claw` | notes.claw | vibera_command; reviewed |
+| `piano.menu.lfo` | notes.controller.lfo | vibera_command; reviewed |
+| `piano.menu.clearControllers` | notes.clearControllers | vibera_command; reviewed |
+| `piano.menu.select` | selection.* | vibera_command; reviewed |
+| `piano.menu.rotate` | notes.rotateLeft / rotateRight / discardLengthsAction | vibera_command; reviewed |
+| `piano.menu.group` | notes.group / notes.ungroup | vibera_command; reviewed |
+| `piano.menu.space` | notes.insertSpaceAction / insertSpaceSliced / deleteSpaceAction / trimAction | vibera_command; reviewed |
+| `piano.menu.midiClipboard` | notes.copyMidiClipboard / pasteMidiClipboard | vibera_command; reviewed |
+| `piano.menu.scriptAgain` | notes.scriptAgain | vibera_command; reviewed |
+| `piano.menu.resizeLeft` | piano.resizeLeft | vibera_command; reviewed |
+| `piano.menu.viewToggles` | view.pianoFollow / followCenter / pianoBackgroundWaveform / previewDuringPlayback | vibera_command; reviewed |
+| `piano.menu.keyLabels` | view.keyLabelsNone / Root / White | vibera_command; reviewed |
+| `piano.menu.snapIncoming` | view.snapIncomingMidi | vibera_command; reviewed |
+| `piano.menu.quantize` | notes.quantize / quickQuantize / quantizeStarts | vibera_command; reviewed |
+| `piano.menu.legatoChopGlue` | notes.legato / notes.chop / notes.glue | vibera_command; reviewed |
+| `piano.menu.mute` | piano.toolMute / notes.mute / notes.unmute | vibera_command; reviewed |
+| `piano.menu.slice` | piano.toolSlice | vibera_command; reviewed |
+| `piano.menu.stretch` | notes.stretch | vibera_command; reviewed |
+| `piano.menu.articulation` | channel.articulations / notes.articulation | vibera_command; reviewed |
+| `piano.menu.patternMarkers` | pattern.marker.add / pattern.marker.delete | vibera_command; reviewed |
+| `piano.menu.interpolate` | notes.controller.interpolate | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

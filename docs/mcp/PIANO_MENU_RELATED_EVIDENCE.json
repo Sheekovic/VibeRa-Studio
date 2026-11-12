@@ -1,0 +1,32 @@
+{
+  "passed": true,
+  "applicationSha256": "8fec768a822c95af69925a125347d3622304fdc0ec6f659bd97714b12ffae2bb",
+  "sourceInputs": {
+    "src/StudioMidi.cpp": "b12b4f612ad87466dad35d5f5f97956ddf894cdf3823727b9e66fe91c060f170",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/StudioMcp.cpp": "6496a1c692cd6e476afc74c4e47415da74b65cdf447e81a583386df969e9af80",
+    "scripts/verify-quantizer-mcp.py": "da23699adb2e291355470f0e0cc866df9f200704d933bd8c942196639227b442",
+    "scripts/verify-note-mute-mcp.py": "b5327c514065b5263da0ccf84be57eb71b278162d90f6654982b14a4d5e9b186",
+    "scripts/verify-note-slice-mcp.py": "d2f5229b74df9c6d21db418a19bf56c22d959bdf698b97a576740f74d81b9064",
+    "scripts/verify-note-stretch-mcp.py": "2655752cc5d7697f144ca2a4bfce53bb655b36b7180919672be4846a90e85ecc",
+    "scripts/verify-expression-maps-mcp.py": "66fd7e701714e2d31d4910df0775b7baa4feeea9945bbe231823ed5a028a40af",
+    "scripts/verify-pattern-markers-mcp.py": "3d25aeadd16605bb99bc4fd30a41b80dfce5063febb14998c39ebbd70145b030",
+    "scripts/verify-controller-interpolate-mcp.py": "25543824f03a177dc8a776242f2e6cd02a6b00d2b179a6e89e821325ab556af0",
+    "tests/mcp_acceptance.py": "f1930fc4e40d6dd66a5a00d90b2dc006a3f578378a6f14dae3c28eece638fd85"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest center_playhead_mcp passed (run alone)",
+    "ctest controller_interpolate_mcp passed (run alone)",
+    "ctest expression_maps_mcp passed (run alone)",
+    "ctest mcp_semantics passed (run alone)",
+    "ctest midi_scale_snap_mcp passed (run alone)",
+    "ctest note_mute_mcp passed (run alone)",
+    "ctest note_slice_mcp passed (run alone)",
+    "ctest note_stretch_mcp passed (run alone)",
+    "ctest pattern_markers_mcp passed (run alone)",
+    "ctest quantizer_mcp passed (run alone)"
+  ],
+  "sourceLog": "build/module-qualification/piano-menu/related-ctest.log",
+  "scope": "Registered tests that exercise the operations these Piano roll menu items run, each run alone on this binary."
+}
