@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
+  "sourceInputs": {
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816",
+    "scripts/verify-clip-groups-mcp.py": "daa1907c8967b1faf253af6b4ca511c85d8fe645ea8d9408ccd0608e8806695a"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "ctest clip_groups_mcp passed (run alone)"
+  ],
+  "scope": "Registered tests that exercise the operations these Playlist menu items run, each run alone on this binary.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py",
+  "sourceLog": "build/module-qualification/playlist-menu/related-ctest.log"
+}

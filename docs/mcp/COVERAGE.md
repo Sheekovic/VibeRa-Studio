@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 285; gaps: 156.
+Explicit UI inventory complete: False; known controls: 300; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1084,6 +1084,21 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `playlist.automationPoint.move` | automation.point.move | vibera_command; reviewed |
 | `playlist.automationPoint.shape` | automation.point.shape | vibera_command; reviewed |
 | `playlist.automationPoint.delete` | automation.point.delete | vibera_command; reviewed |
+| `playlist.menu.undoRedo` | edit.undo / edit.redo | vibera_command; reviewed |
+| `playlist.menu.duplicate` | clip.duplicate | vibera_command; reviewed |
+| `playlist.menu.delete` | clip.delete | vibera_command; reviewed |
+| `playlist.menu.grouping` | playlist.grouping | vibera_command; reviewed |
+| `playlist.menu.follow` | playlist.follow / view.followCenter | vibera_command; reviewed |
+| `playlist.menu.stretchMode` | playlist.stretchMode | vibera_command; reviewed |
+| `playlist.menu.picker` | playlist.picker | vibera_command; reviewed |
+| `playlist.menu.arrangements` | arrangement.add / arrangement.clone / arrangement.rename / arrangement.delete / arrangement.select | vibera_command; reviewed |
+| `playlist.menu.addMarker` | marker.add | vibera_command; reviewed |
+| `playlist.menu.addMarkersEvery` | marker.addEvery | vibera_command; reviewed |
+| `playlist.menu.addTempoChange` | tempo.change.add | vibera_command; reviewed |
+| `playlist.menu.tempoCurve` | tempo.curve | vibera_command; reviewed |
+| `playlist.menu.timeSignature` | meter.change.add / meter.change.delete | vibera_command; reviewed |
+| `playlist.menu.groupClips` | clip.group / clip.ungroup | vibera_command; reviewed |
+| `playlist.menu.makeUnique` | clip.unique | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

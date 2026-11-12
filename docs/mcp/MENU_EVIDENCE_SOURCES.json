@@ -190,6 +190,32 @@
         "src/StudioMcp.cpp"
       ],
       "scope": "Isolated --mcp-test; the registered operations the Playlist marker, tempo change and automation point menus run. Not native popup input, listening or hardware evidence."
+    },
+    "docs/mcp/PLAYLIST_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-playlist-menu-mcp.py",
+      "folder": "playlist-menu",
+      "sources": [
+        "scripts/verify-playlist-menu-mcp.py",
+        "src/Editors.h",
+        "src/Studio.cpp",
+        "src/Commands.cpp",
+        "src/McpContracts.h",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test; the registered operations the Playlist menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence."
+    },
+    "docs/mcp/PLAYLIST_MENU_RELATED_EVIDENCE.json": {
+      "ctests": [
+        "clip_groups_mcp"
+      ],
+      "folder": "playlist-menu",
+      "sources": [
+        "src/Editors.h",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp",
+        "scripts/verify-clip-groups-mcp.py"
+      ],
+      "scope": "Registered tests that exercise the operations these Playlist menu items run, each run alone on this binary."
     }
   }
 }
