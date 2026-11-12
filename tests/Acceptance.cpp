@@ -2,6 +2,7 @@
 #include "StoppedEffectChangePlanAcceptance.h"
 #include "AudioLogger.h"
 #include "MonitorVolume.h"
+#include "PolyphonyMeter.h"
 #include "NativeEffectModelAcceptance.h"
 #include "Commands.h"
 #include "AudioEngine.h"
@@ -400,6 +401,25 @@ static void recordToStepsTests()
             "a recorded step replaces the step already on its slot instead of doubling it");
     c.undoEdit();
     require(c.project.pattern(pattern)->notes.size() == before, "the step take is one Undo step");
+}
+static void polyphonyMeterTests()
+{
+    // Polyphony meter: banks add once per block, the Master output publishes the sum.
+    auto &meter = PolyphonyMeter::instance();
+    meter.reset();
+    meter.publish();
+    unsigned first = 0, second = 0;
+    meter.add(3, first);
+    meter.add(3, first); // A second slice of the same block is not counted again.
+    meter.add(2, second);
+    require(meter.voices() == 0, "voices are not shown before the Master output publishes the block");
+    meter.publish();
+    require(meter.voices() == 5, "the published count sums every bank once per block");
+    meter.add(1, first);
+    meter.publish();
+    require(meter.voices() == 1, "the next block starts from zero");
+    meter.publish();
+    require(meter.voices() == 0, "a silent block reads zero");
 }
 static void monitorVolumeTests()
 {
@@ -5759,6 +5779,7 @@ int main(int argc, char **argv)
         runStage("scoreLogTests", [&] { scoreLogTests(folder); });
         runStage("audioLoggerTests", [&] { audioLoggerTests(folder); });
         runStage("monitorVolumeTests", [&] { monitorVolumeTests(); });
+        runStage("polyphonyMeterTests", [&] { polyphonyMeterTests(); });
         runStage("recordToStepsTests", [&] { recordToStepsTests(); });
         runStage("midiScoreTests", [&] { midiScoreTests(folder); });
         runStage("midiScoreLiveTests", [&] { midiScoreLiveTests(folder); });

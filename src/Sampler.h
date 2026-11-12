@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
 #include <juce_audio_formats/juce_audio_formats.h>
+#include "PolyphonyMeter.h"
 #include <array>
 #include <cmath>
 #include <algorithm>
@@ -747,10 +748,12 @@ class VoiceBank
                 break;
             }
     }
+    unsigned polyphonyBlock = 0; // Audio thread: last block this bank reported to the polyphony meter.
     void render(juce::AudioBuffer<float> &buffer, int start, int count) noexcept
     {
         if (!sample || count <= 0)
             return;
+        PolyphonyMeter::instance().add(activeVoices(), polyphonyBlock);
         if (std::none_of(voices.begin(), voices.end(), [](const auto &voice) { return voice.active; }))
         {
             // The common clock already owns every frame, even with no active voices.

@@ -2,6 +2,7 @@
 #include "ScoreTools.h"
 #include "Studio.h"
 #include "MonitorVolume.h"
+#include "PolyphonyMeter.h"
 #include "VideoPlayer.h"
 #include "MidiScore.h"
 #include "synth/SynthMcp.h"
@@ -4488,6 +4489,7 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "timeDisplay", timeDisplaySeconds ? "seconds" : "beats");
     set(state, "positionSeconds", positionSeconds());
     set(state, "cpuLoad", audio.cpuLoad());
+    set(state, "voices", PolyphonyMeter::instance().voices());
     set(state, "monitorVolume", double(MonitorVolume::instance().get()));
     {
         // Performance mode: pad assignments (0 = the n-th Pattern), saved scenes and launched Patterns.

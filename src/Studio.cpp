@@ -2,6 +2,7 @@
 #include "FlpImport.h"
 #include "Studio.h"
 #include "MonitorVolume.h"
+#include "PolyphonyMeter.h"
 #include "SliceDetect.h"
 #include "AudioLogger.h"
 #include "VideoPlayer.h"
@@ -7289,6 +7290,9 @@ void Studio::timerCallback()
                                        juce::String(std::fmod(positionSeconds(), 60.), 2).paddedLeft('0', 5)
                                  : " | Beat " + juce::String(audio.positionBeat() + 1, 1)) +
                             (audio.cpuLoad() > 0 ? " | CPU " + juce::String(juce::roundToInt(audio.cpuLoad() * 100)) + "%" : juce::String()) +
+                            (audio.playing() && PolyphonyMeter::instance().voices() > 0
+                                 ? " | Voices " + juce::String(PolyphonyMeter::instance().voices())
+                                 : juce::String()) +
                             (detectedChord().isNotEmpty() ? " | Chord: " + detectedChord() : juce::String()),
                         juce::dontSendNotification);
     if (audio.rendering())
