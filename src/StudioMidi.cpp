@@ -373,12 +373,13 @@ void Studio::midiFileMenu()
         // Expression map: articulations of the selected Channel, applied to the selected notes.
         juce::PopupMenu articulation;
         const auto *owner = controller.project.channel(selectedChannel);
-        articulation.addItem(43000, "Edit expression map (articulations and keyswitches)...", owner != nullptr);
+        // 43200..: clear of the note script examples (43000 + i) and script items (43100, 43101).
+        articulation.addItem(43200, "Edit expression map (articulations and keyswitches)...", owner != nullptr);
         articulation.addSeparator();
-        articulation.addItem(43001, "None", owner && !selectedNotes.empty());
+        articulation.addItem(43201, "None", owner && !selectedNotes.empty());
         if (owner)
             for (size_t k = 0; k < owner->articulations.size(); ++k)
-                articulation.addItem(43002 + int(k), owner->articulations[k].name + "  (" +
+                articulation.addItem(43202 + int(k), owner->articulations[k].name + "  (" +
                                                          articulationTriggerText(owner->articulations[k]) + ")",
                                      !selectedNotes.empty());
         menu.addSubMenu("Articulation (expression map)", articulation);
@@ -395,7 +396,7 @@ void Studio::midiFileMenu()
         {
             if (!safe)
                 return;
-            if (result == 43000)
+            if (result == 43200)
             {
                 const auto *owner = safe->controller.project.channel(noteTargets.channel);
                 if (!owner)
@@ -424,10 +425,10 @@ void Studio::midiFileMenu()
                                      true);
                 return;
             }
-            if (result > 43000 && result < 43000 + 2 + maximumArticulations)
+            if (result > 43200 && result < 43200 + 2 + maximumArticulations)
             {
                 auto a = noteTargets;
-                a.value = result - 43001;
+                a.value = result - 43201;
                 safe->command("notes.articulation", a);
                 return;
             }

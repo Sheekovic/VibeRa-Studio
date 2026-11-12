@@ -3715,26 +3715,27 @@ void Studio::toolsMenu()
     menu.addItem(206, "Create a chord progression...");
     menu.addItem(207, "Step record (write played notes at a cursor)", true, stepRecord);
     menu.addItem(209, "MIDI recording replaces notes (off = overdub)", true, midiRecordReplace);
-    menu.addItem(213, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
-    menu.addItem(214, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
+    // IDs 240..251: clear of the Detach (210..214), Arrange windows (220..223) and update (225) items.
+    menu.addItem(240, "Master pitch (" + juce::String(controller.project.masterPitch, 0) + " cents)...");
+    menu.addItem(241, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
     {
         // FL Recording filter: what Record captures. Audio is the audio-input switch; automation
         // recording is armed separately on its control.
         juce::PopupMenu filter;
-        filter.addItem(215, "Notes (MIDI take)", true, recordNotes);
-        filter.addItem(216, "Audio (audio input)", true, audioInput.enabled);
-        filter.addItem(217, "Automation: arm it on a Mixer/plugin control", false, automationRecordingActive());
+        filter.addItem(242, "Notes (MIDI take)", true, recordNotes);
+        filter.addItem(243, "Audio (audio input)", true, audioInput.enabled);
+        filter.addItem(244, "Automation: arm it on a Mixer/plugin control", false, automationRecordingActive());
         menu.addSubMenu("Recording filter", filter);
     }
     {
         juce::PopupMenu logger;
         const bool on = AudioLogger::instance().enabled();
-        logger.addItem(218, "Off", true, !on);
+        logger.addItem(245, "Off", true, !on);
         for (const int minutes : {1, 2, 5})
-            logger.addItem(218 + minutes, "Keep the last " + juce::String(minutes) + " minute" + (minutes > 1 ? "s" : ""),
+            logger.addItem(245 + minutes, "Keep the last " + juce::String(minutes) + " minute" + (minutes > 1 ? "s" : ""),
                            true, on && std::abs(AudioLogger::instance().capacitySeconds() - minutes * 60.) < 1);
         logger.addSeparator();
-        logger.addItem(225, "Save the logged audio...", on);
+        logger.addItem(251, "Save the logged audio...", on);
         menu.addSubMenu("Audio logger (master output)", logger);
     }
     menu.addItem(208, "Step record: insert a rest", stepRecord);
@@ -3799,33 +3800,33 @@ void Studio::toolsMenu()
                 }
                 return;
             }
-            if (choice == 213)
+            if (choice == 240)
                 return safe->masterPitchDialog();
-            if (choice == 218 || choice == 219 || choice == 220 || choice == 223)
+            if (choice == 245 || choice == 246 || choice == 247 || choice == 250)
             {
-                if (auto r = safe->setAudioLogger(choice != 218, choice - 218); r.failed())
+                if (auto r = safe->setAudioLogger(choice != 245, choice - 245); r.failed())
                     safe->status = r.getErrorMessage().fromFirstOccurrenceOf(": ", false, false);
                 else
-                    safe->status = choice == 218 ? "Audio logger off" : "Audio logger keeps the last " + juce::String(choice - 218) + " min of the master output";
+                    safe->status = choice == 245 ? "Audio logger off" : "Audio logger keeps the last " + juce::String(choice - 245) + " min of the master output";
                 safe->repaint();
                 return;
             }
-            if (choice == 225)
+            if (choice == 251)
             {
                 safe->saveAudioLogDialog();
                 return;
             }
-            if (choice == 215)
+            if (choice == 242)
             {
                 safe->performAction("transport.recordNotes");
                 return;
             }
-            if (choice == 216)
+            if (choice == 243)
             {
                 safe->audioInputButton.onClick();
                 return;
             }
-            if (choice == 214)
+            if (choice == 241)
             {
                 safe->performAction("transport.waitForInput");
                 return;
@@ -8765,8 +8766,8 @@ void Studio::effectMenu(int index)
     {
         // FX container: parallel chains fed from this insert, mixed back where it outputs.
         juce::PopupMenu parallel;
-        for (int count = 1; count <= 4; ++count)
-            parallel.addItem(10030 + count, juce::String(count) + (count == 1 ? " parallel chain" : " parallel chains"),
+        for (int count = 1; count <= 4; ++count) // IDs 10041..10044: clear of the File items 10028..10032.
+            parallel.addItem(10040 + count, juce::String(count) + (count == 1 ? " parallel chain" : " parallel chains"),
                              index != 0 && !mixerChainBusy());
         menu.addSubMenu("Add parallel chains (FX container)", parallel, index != 0);
     }
@@ -8915,11 +8916,11 @@ void Studio::effectMenu(int index)
                                safe->command("mixer.insert.create", {});
                                return;
                            }
-                           if (selected > 10030 && selected <= 10034)
+                           if (selected > 10040 && selected <= 10044)
                            {
                                CommandArgs a;
                                a.target = index;
-                               a.value = selected - 10030;
+                               a.value = selected - 10040;
                                safe->command("mixer.insert.create", a);
                                return;
                            }
