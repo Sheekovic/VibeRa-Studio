@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
+  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
   "sourceInputs": {
     "src/SamplerGestures.h": "27c6dcdf2ccd92f9677791a35af588f5680790ba3d5be85ab368df594ec51013",
     "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
-    "src/StudioMcp.cpp": "a3e7d4532912076112c71d069c4d0adb5388bec967c1d40723625a621e1e980d",
+    "src/StudioMcp.cpp": "b3f822fb77bc4048c3eb162a5a4d6ba095a7237c43e36f955946ae2c1dff56e1",
     "scripts/verify-sampler-tempo-mcp.py": "c315f34058a56433c7b37d0b444594b7296543c3fb32f622fb452eab1456ad4d",
     "scripts/verify-ui-actions-mcp.py": "60c3e17cccf74b85088b4b27ddcb2021cebac472de9b356e1c255217550deaab",
     "scripts/verify-browser-midi-mcp.py": "8b8148801d426e969f47eb7f20ad84f8f651088b9438839453f8759bb0c122cb"

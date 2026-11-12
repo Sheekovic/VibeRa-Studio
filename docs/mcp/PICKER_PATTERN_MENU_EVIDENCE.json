@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
+  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
   "sourceInputs": {
     "scripts/verify-picker-pattern-menu-mcp.py": "dfcbe585a3f03166dd34b04b38352e94b45e575e8c902ab7a6ab78999d9848c9",
     "src/ClipPicker.h": "1fec06802a2c49d4828e96e6183398611035d50ab55eec419fdb6203af8d2ce4",
     "src/PatternManagement.h": "8c97362f8d02f9a743a5de168cdf766ccb443169e7d14a704756875bb669a98c",
-    "src/Studio.cpp": "dc0649667ba3c3592208b75cbb13e0091ecb64dcf7a733be779ecfd64dc77c58",
+    "src/Studio.cpp": "f343f1c148a878ad84c35f2508e07c3f7f1511891f72accde8a9c433a876d814",
     "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611"
   },
   "sourceHashMode": "text-lf-v1",

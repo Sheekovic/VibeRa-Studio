@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #pragma once
 #include "Loudness.h"
+#include "OutputScope.h"
 #include "VocalPitch.h"
 #include "WindowForeground.h"
 #include "Commands.h"
@@ -1240,6 +1241,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     // Tap tempo: the average interval of the last taps (2 s apart starts over) sets the
     // tempo; one tapping session is one Undo step.
     juce::TextButton tapTempoButton{"Tap"};
+    OutputScopeView outputScope; // Master output waveform beside the transport, when the bar has room.
     std::vector<double> tapTimes;
     bool tapGesture = false;
     void tapTempo();

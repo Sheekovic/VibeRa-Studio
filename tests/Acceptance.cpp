@@ -3,6 +3,7 @@
 #include "AudioLogger.h"
 #include "MonitorVolume.h"
 #include "PolyphonyMeter.h"
+#include "OutputScope.h"
 #include "NativeEffectModelAcceptance.h"
 #include "Commands.h"
 #include "AudioEngine.h"
@@ -420,6 +421,27 @@ static void polyphonyMeterTests()
     require(meter.voices() == 1, "the next block starts from zero");
     meter.publish();
     require(meter.voices() == 0, "a silent block reads zero");
+}
+static void outputScopeTests()
+{
+    // Output oscilloscope: every 8th frame of the live Master output, newest last.
+    auto &scope = OutputScope::instance();
+    scope.clear();
+    juce::AudioBuffer<float> block(2, OutputScope::step * 4);
+    for (int i = 0; i < block.getNumSamples(); ++i)
+    {
+        block.setSample(0, i, float(i / OutputScope::step + 1) * .1f);
+        block.setSample(1, i, float(i / OutputScope::step + 1) * .3f);
+    }
+    scope.push(block, 0, block.getNumSamples());
+    std::array<float, OutputScope::size> shown{};
+    scope.read(shown);
+    require(std::abs(shown[OutputScope::size - 1] - .8f) < 1.e-6f && std::abs(shown[OutputScope::size - 4] - .2f) < 1.e-6f &&
+                shown[OutputScope::size - 5] == 0.f,
+            "the scope keeps the mono mix of every eighth frame, newest last");
+    require(std::abs(scope.peak() - .8f) < 1.e-6f, "the scope peak reads the largest stored sample");
+    scope.clear();
+    require(scope.peak() == 0.f, "clearing the scope empties it");
 }
 static void monitorVolumeTests()
 {
@@ -5779,6 +5801,7 @@ int main(int argc, char **argv)
         runStage("scoreLogTests", [&] { scoreLogTests(folder); });
         runStage("audioLoggerTests", [&] { audioLoggerTests(folder); });
         runStage("monitorVolumeTests", [&] { monitorVolumeTests(); });
+        runStage("outputScopeTests", [&] { outputScopeTests(); });
         runStage("polyphonyMeterTests", [&] { polyphonyMeterTests(); });
         runStage("recordToStepsTests", [&] { recordToStepsTests(); });
         runStage("midiScoreTests", [&] { midiScoreTests(folder); });

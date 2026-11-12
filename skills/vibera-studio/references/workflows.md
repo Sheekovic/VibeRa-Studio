@@ -162,6 +162,8 @@ and `transport.recordStartsPlayback` (arming Record while stopped also presses P
 `quantizeKeepDuration`) is Leave note duration: a quantized start keeps the played length
 (`state.midiInput.quantizeKeepDuration`). `vibera_transport {"action":"monitor","volume":0..1}` is Monitor volume: a listening-only gain on the
 live Master output (`state.monitorVolume`); exports, meters and the audio logger are unchanged.
+`state.outputScopeShown` says whether the output oscilloscope beside the transport is visible and
+`state.outputScopePeak` is the peak of its newest 85 ms of Master output (0 without an audio device).
 `state.voices` is the number of sampler voices in the last audio block (plugin instruments are not
 counted; 0 without an audio device). `state.cpuLoad` is the audio callback load 0..1 and
 `state.detectedChord` names the chord held on the typing keyboard / Drum Pads, else the chord the

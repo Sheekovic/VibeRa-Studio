@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
+  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
   "sourceInputs": {
     "src/StudioChannels.cpp": "1021cb175b4c03e5f205c503069957b99fbc0dee97e8773aa3c969c331265408",
     "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
-    "src/StudioMcp.cpp": "a3e7d4532912076112c71d069c4d0adb5388bec967c1d40723625a621e1e980d",
+    "src/StudioMcp.cpp": "b3f822fb77bc4048c3eb162a5a4d6ba095a7237c43e36f955946ae2c1dff56e1",
     "scripts/verify-rps-gaps-mcp.py": "5426f6ed1bbd515d2326358db2b48e20655414156c8b1085768305012d7b2bf9",
     "scripts/verify-envelope-presets-mcp.py": "eb8ed2e9f198010328b0f118f078fca05521666ef7439e499c7408729f5a5a90"
   },

@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
+  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
   "sourceInputs": {
     "src/CoProducerPanel.h": "7186267e2593f49495595f4064541cbb118a960baba08ff02a58d66d01374470",
     "src/CoProducerChat.h": "51d8ec0875499c3388b18cb1cfc7ee447d706f5f0d33159ae8f6d58a3b3d293e",

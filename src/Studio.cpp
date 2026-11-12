@@ -198,6 +198,7 @@ Studio::Studio(bool enableDevice, int explicitProviderFrames)
     tapTempoButton.setTooltip("Tap tempo: click in time with the music (two taps or more)");
     tapTempoButton.onClick = [this] { tapTempo(); };
     addAndMakeVisible(tapTempoButton);
+    addChildComponent(outputScope);
     play.onClick = [this]
     {
         if (!audio.playing())
@@ -915,6 +916,11 @@ void Studio::resized()
     place(clonePattern, compact ? 44 : 50);
     place(snapChoice, compact ? 80 : 94);
     int right = getWidth() - 12 - 4 * 84 - 78;
+    // The output oscilloscope takes the gap between the transport row and the window buttons.
+    const int scopeRoom = right - x - 12;
+    outputScope.setVisible(scopeRoom >= 84);
+    if (scopeRoom >= 84)
+        outputScope.setBounds(x + 6, 41, std::min(180, scopeRoom), 30);
     browserButton.setBounds(right, 41, 72, 30);
     right += 78;
     for (auto &b : editorButtons)

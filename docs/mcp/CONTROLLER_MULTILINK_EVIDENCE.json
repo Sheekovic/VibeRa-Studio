@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
+  "applicationSha256": "530db9a7cf4dcf3c4fbb3a4e936d9bce98499e021eabb54c41a5e28fc79748c1",
   "sourceInputs": {
     "src/MidiController.cpp": "591f9e54080f97ecbc25a04db12f307b00ef77e7930b9bb9855d5b26e92abaac",
     "src/MidiController.h": "66363f0bcb59d68415cb14d82acee5955ab7385328929445fcdb590290334932",
     "src/ControllerPage.h": "a81ff93d88e05684dec2021a05a29941432f211bda443ebf2bcd401e38dcc765",
-    "src/StudioMcp.cpp": "a3e7d4532912076112c71d069c4d0adb5388bec967c1d40723625a621e1e980d",
+    "src/StudioMcp.cpp": "b3f822fb77bc4048c3eb162a5a4d6ba095a7237c43e36f955946ae2c1dff56e1",
     "tests/ControllerBindingAcceptance.h": "3e84c0b63e29424216c12025b0fd487c7c33bb221ac288eec9299d82145de8cc"
   },
   "sourceHashMode": "text-lf-v1",

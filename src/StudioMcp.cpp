@@ -4508,6 +4508,8 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "positionSeconds", positionSeconds());
     set(state, "cpuLoad", audio.cpuLoad());
     set(state, "voices", PolyphonyMeter::instance().voices());
+    set(state, "outputScopePeak", double(OutputScope::instance().peak()));
+    set(state, "outputScopeShown", outputScope.isVisible());
     set(state, "monitorVolume", double(MonitorVolume::instance().get()));
     {
         // Performance mode: pad assignments (0 = the n-th Pattern), saved scenes and launched Patterns.
