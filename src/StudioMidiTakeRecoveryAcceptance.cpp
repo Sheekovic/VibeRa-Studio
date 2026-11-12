@@ -1495,6 +1495,14 @@ juce::Result Studio::verifyMidiTakeRecovery(const juce::File &folder)
                 MidiClock::Position clock;
                 check(audio.midiInput.recordingPosition(clock), "Actual group-take source clock readable");
                 check(!projection.channels.empty(), "Actual sampler source exists before group interaction");
+                // The transport position is an observer the engine refreshes on a timer: while playing it can
+                // catch up with blocks this fixture already pumped (seen as exactly 15 blocks, 0.16 beat).
+                // Playing: it may only move forward, and the exact audio source clock compared below carries
+                // the "nothing moved" claim. Stopped: it must not change at all.
+                const auto positionHeld = [&]
+                {
+                    return playing ? audio.positionBeat() >= position : audio.positionBeat() == position;
+                };
                 const auto unchangedTake = [&]
                 {
                     const auto now = audio.projectionDiagnostics();
@@ -1534,10 +1542,16 @@ juce::Result Studio::verifyMidiTakeRecovery(const juce::File &folder)
                         term(now.midiUpdates == projection.midiUpdates, "midiUpdates");
                         term(channels, "projection channels");
                         term(audio.mixerGraphInitialisations() == stages, "mixer graph initialisations");
-                        if (audio.positionBeat() != position) // Values help tell a jump from a clock drift.
+                        if (!positionHeld()) // Values help tell a jump from a clock drift.
                             moved.add("position " + juce::String(position, 9) + " -> " + juce::String(audio.positionBeat(), 9) +
                                       (playing ? " (playing)" : " (stopped)"));
                         term(audio.looping() == looping, "looping");
+                        {
+                            MidiClock::Position source;
+                            term(audio.midiInput.recordingPosition(source) && source.seconds == clock.seconds &&
+                                     source.playing == clock.playing && source.block == clock.block,
+                                 "audio source clock");
+                        }
                         if (!moved.isEmpty())
                             throw std::runtime_error(("Group operation preserves actual take/session/clock/sample/native/device "
                                                       "ownership; changed: " + moved.joinIntoString(", ")).toStdString());
@@ -1561,7 +1575,7 @@ juce::Result Studio::verifyMidiTakeRecovery(const juce::File &folder)
                             now.cache.preparations == projection.cache.preparations &&
                             now.midiUpdates == projection.midiUpdates && channels &&
                             now.channels.front().heldInputKeys == projection.channels.front().heldInputKeys &&
-                            audio.mixerGraphInitialisations() == stages && audio.positionBeat() == position &&
+                            audio.mixerGraphInitialisations() == stages && positionHeld() &&
                             audio.looping() == looping && audio.midiInput.recordingPosition(after) &&
                             after.seconds == clock.seconds && after.playing == clock.playing &&
                             after.block == clock.block,
