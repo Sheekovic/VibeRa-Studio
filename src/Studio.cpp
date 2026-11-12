@@ -3783,6 +3783,12 @@ void Studio::toolsMenu()
     menu.addItem(241, "Wait for input (recording starts on the first MIDI note)", true, waitForInput);
     menu.addItem(257, "Wait for input: only when recording (off = Play waits too)", waitForInput, waitOnlyWhenRecording);
     menu.addItem(258, "Wait for input: respect recording filter (off = wait even without Notes)", waitForInput, waitRespectFilter);
+    juce::PopupMenu tempoMenu;
+    tempoMenu.addItem(291, "Half speed", controller.project.tempo / 2 >= 20);
+    tempoMenu.addItem(292, "Double speed", controller.project.tempo * 2 <= 400);
+    tempoMenu.addItem(293, "Nudge up 1 BPM", controller.project.tempo + 1 <= 400);
+    tempoMenu.addItem(294, "Nudge down 1 BPM", controller.project.tempo - 1 >= 20);
+    menu.addSubMenu("Tempo (" + juce::String(controller.project.tempo, 2) + " BPM)", tempoMenu);
     menu.addItem(252, "Remember seek time (Stop returns to where Play started)", true, rememberSeekTime);
     menu.addItem(253, "Recording starts playback (Record also presses Play)", true, recordStartsPlayback);
     menu.addItem(254, "Disarm on stop (Stop turns Record off)", true, disarmOnStop);
@@ -3909,6 +3915,12 @@ void Studio::toolsMenu()
                 MonitorVolume::instance().set(float(choice - 400) / 100.f);
                 safe->status = "Monitor volume " + juce::String(choice - 400) + "% (listening only)";
                 safe->repaint();
+                return;
+            }
+            if (choice >= 291 && choice <= 294)
+            {
+                safe->performAction(juce::StringArray{"project.tempoHalf", "project.tempoDouble", "project.tempoNudgeUp",
+                                                      "project.tempoNudgeDown"}[choice - 291]);
                 return;
             }
             if (choice >= 252 && choice <= 258)
@@ -5021,6 +5033,28 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "mixer.insert.fromChainPreset")
     {
         addInsertFromChainPreset();
+        return true;
+    }
+    if (action == "project.tempoHalf" || action == "project.tempoDouble" || action == "project.tempoNudgeUp" ||
+        action == "project.tempoNudgeDown")
+    {
+        // FL tempo menu: half / double speed and a one-BPM nudge. Each is one ordinary tempo edit (one Undo step).
+        const double now = controller.project.tempo;
+        CommandArgs a;
+        a.value = action == "project.tempoHalf" ? now / 2 : action == "project.tempoDouble" ? now * 2
+                  : action == "project.tempoNudgeUp" ? now + 1 : now - 1;
+        if (a.value < 20 || a.value > 400)
+        {
+            status = "Tempo stays within 20 to 400 BPM";
+            repaint();
+            return false;
+        }
+        const auto revision = controller.revision;
+        command("project.tempo", a);
+        if (controller.revision == revision)
+            return false;
+        status = "Tempo " + juce::String(a.value, 2) + " BPM";
+        repaint();
         return true;
     }
     if (action == "project.tapTempo")

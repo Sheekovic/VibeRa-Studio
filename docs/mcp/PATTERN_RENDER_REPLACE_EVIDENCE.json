@@ -1,17 +1,17 @@
 {
   "passed": true,
-  "applicationSha256": "a4db076ab9638d3e7dc353470b9aa37408fda8668855b38f1281c3d515cb3bd3",
+  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
   "sourceInputs": {
     "scripts/verify-pattern-render-replace-mcp.py": "3aa93566c3eb5e6f93b4ce85d2efba872b90e557504f990ae87a6595f2cb0b88",
     "src/ClipPicker.h": "1fec06802a2c49d4828e96e6183398611035d50ab55eec419fdb6203af8d2ce4",
-    "src/Studio.cpp": "e83b59714c91c69c8a555f0e69ba3fa16ceebc674f9adb66600424a4008c4b37",
+    "src/Studio.cpp": "6a09817e279052e3a23d85215e01af241b2e37a97a42a1368638a962c278a146",
     "src/StudioMcp.cpp": "56283f29ecbda80e0914324aba6094ac80327d8bc12caa03c5005410e771ba8f"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [
     "Render and replace refuses a Pattern that is not placed",
     "Three placements of the Pattern, no audio clips",
-    "The render job completes ({'operation': 'ab978aca80fe4e65aa527bf04f65492c', 'kind': 'export', 'completionState': 'completed', 'message': 'Operation finished', 'path': 'E:\\\\Projects\\\\VibeRa Studio\\\\build\\\\module-qualification\\\\pattern-render-replace\\\\attempt-67067cd672a04234bc7d0d48f5da2bd5\\\\Rendered\\\\Pattern 1.wav', 'projectIdentity': '325c31225f8745cb8d4729a1de98adf7', 'sourceRevision': 8, 'fileExists': True, 'fileBytes': 1152104})",
+    "The render job completes ({'operation': '3f19a46aafff4a6f849cba58d3480959', 'kind': 'export', 'completionState': 'completed', 'message': 'Operation finished', 'path': 'E:\\\\Projects\\\\VibeRa Studio\\\\build\\\\module-qualification\\\\pattern-render-replace\\\\attempt-e9185b2fc3664eccb1e7bf90cfabc22a\\\\Rendered\\\\Pattern 1.wav', 'projectIdentity': 'aa9db793921c45e99e67d93b4689693b', 'sourceRevision': 8, 'fileExists': True, 'fileBytes': 1152104})",
     "An audio clip sits at every placement of the Pattern ([0.0, 8.0, 16.0])",
     "They share a new track below the Pattern clips",
     "The Pattern clips are muted, not deleted",

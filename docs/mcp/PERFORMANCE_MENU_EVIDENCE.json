@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "a4db076ab9638d3e7dc353470b9aa37408fda8668855b38f1281c3d515cb3bd3",
+  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
   "sourceInputs": {
     "scripts/verify-performance-pads-mcp.py": "76cfc02aab51837c593af402931404cbc0354a485c60dc9ed9469d9553f31fd6",
     "src/StudioAudioTake.cpp": "f1ef68e29c6c1e63fe5a4081f9317ca423bcf56cef0de5470bcab73202d91393",
     "src/Performance.h": "fecaa6ef2c8e5f1d0a3068a096a1f835072bdcf48b9c5ae43ae2d4abccc6a64d",
-    "src/Studio.cpp": "e83b59714c91c69c8a555f0e69ba3fa16ceebc674f9adb66600424a4008c4b37",
-    "src/Commands.cpp": "d4887db352e9d954076ed2c44b605198e8dedd4fc772fa2e1d470221c7702cf7",
+    "src/Studio.cpp": "6a09817e279052e3a23d85215e01af241b2e37a97a42a1368638a962c278a146",
+    "src/Commands.cpp": "323ece539f522e60741318522e821c14dc1937ddc97cb22f6711e6dc774f3abc",
     "src/StudioMcp.cpp": "56283f29ecbda80e0914324aba6094ac80327d8bc12caa03c5005410e771ba8f"
   },
   "sourceHashMode": "text-lf-v1",

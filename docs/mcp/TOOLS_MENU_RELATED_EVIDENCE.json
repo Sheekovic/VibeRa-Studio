@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "a4db076ab9638d3e7dc353470b9aa37408fda8668855b38f1281c3d515cb3bd3",
+  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
   "sourceInputs": {
-    "src/Studio.cpp": "e83b59714c91c69c8a555f0e69ba3fa16ceebc674f9adb66600424a4008c4b37",
+    "src/Studio.cpp": "6a09817e279052e3a23d85215e01af241b2e37a97a42a1368638a962c278a146",
     "src/StudioMcp.cpp": "56283f29ecbda80e0914324aba6094ac80327d8bc12caa03c5005410e771ba8f",
-    "src/Commands.cpp": "d4887db352e9d954076ed2c44b605198e8dedd4fc772fa2e1d470221c7702cf7",
+    "src/Commands.cpp": "323ece539f522e60741318522e821c14dc1937ddc97cb22f6711e6dc774f3abc",
     "scripts/verify-plugin-editors-mcp.py": "190e77c432300cb7281bd53b98189681ec6928a3f60bade9e71b04bdac8ef946",
     "scripts/verify-macros-mcp.py": "71040219417a8d96f72c90334cfc58b59ef388fc714471935d121bfd2318babd",
     "scripts/verify-loudness-mcp.py": "881b7b43906f24aec5afa20fa8e5c00e3071473e74496d53f74ac93d950c2148",

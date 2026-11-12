@@ -121,6 +121,10 @@ Recording filter: `vibera_command transport.recordNotes` toggles whether Record 
 note take (`state.recordNotes`, default on); audio takes follow the audio-input switch and
 automation recording is armed on its own control.
 
+Tempo steps: `vibera_command` `project.tempoHalf`, `project.tempoDouble`, `project.tempoNudgeUp` and
+`project.tempoNudgeDown` (1 BPM) edit the project tempo in one Undo step each; a result outside
+20..400 BPM is refused (`state.tempo`).
+
 Wait for input: `vibera_command transport.waitForInput` toggles it (`state.waitForInput`). With Rec
 armed, Play then opens the take at the playhead without starting (`state.waitingForInput`); the
 first MIDI or typing-keyboard note starts playback and is recorded at the take start. Stop (or

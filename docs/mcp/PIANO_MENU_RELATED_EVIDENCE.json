@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "applicationSha256": "a4db076ab9638d3e7dc353470b9aa37408fda8668855b38f1281c3d515cb3bd3",
+  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
   "sourceInputs": {
     "src/StudioMidi.cpp": "b12b4f612ad87466dad35d5f5f97956ddf894cdf3823727b9e66fe91c060f170",
-    "src/Commands.cpp": "d4887db352e9d954076ed2c44b605198e8dedd4fc772fa2e1d470221c7702cf7",
+    "src/Commands.cpp": "323ece539f522e60741318522e821c14dc1937ddc97cb22f6711e6dc774f3abc",
     "src/StudioMcp.cpp": "56283f29ecbda80e0914324aba6094ac80327d8bc12caa03c5005410e771ba8f",
     "scripts/verify-quantizer-mcp.py": "da23699adb2e291355470f0e0cc866df9f200704d933bd8c942196639227b442",
     "scripts/verify-note-mute-mcp.py": "b5327c514065b5263da0ccf84be57eb71b278162d90f6654982b14a4d5e9b186",

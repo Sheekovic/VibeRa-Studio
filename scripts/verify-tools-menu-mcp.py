@@ -116,6 +116,22 @@ try:
     check(not_available.get("isError") and "notAvailable" in json.dumps(not_available), "showOffer is refused with no release available")
     not_ready = raw("vibera_update", {"action": "offerInstall"})
     check(not_ready.get("isError") and "notReady" in json.dumps(not_ready), "offerInstall is refused with no download ready")
+
+    # Tempo submenu: half / double speed and a one-BPM nudge; each is one Undo step, 20..400 BPM.
+    act = lambda name: call("vibera_command", {"command": name, "args": {}}).get("completionState")
+    tempo = lambda: state()["tempo"]
+    call("vibera_command", {"command": "project.tempo", "args": {"value": 120}})
+    check(act("project.tempoHalf") == "completed" and tempo() == 60, "Tempo > Half speed halves the tempo (project.tempoHalf)")
+    call("vibera_command", {"command": "edit.undo", "args": {}})
+    check(tempo() == 120, "Half speed is one Undo step")
+    check(act("project.tempoDouble") == "completed" and tempo() == 240, "Tempo > Double speed doubles it (project.tempoDouble)")
+    check(act("project.tempoDouble") == "failed" and tempo() == 240, "Double speed past 400 BPM is refused and nothing changes")
+    check(act("project.tempoNudgeUp") == "completed" and tempo() == 241, "Tempo > Nudge up adds 1 BPM (project.tempoNudgeUp)")
+    check(act("project.tempoNudgeDown") == "completed" and act("project.tempoNudgeDown") == "completed" and tempo() == 239,
+          "Tempo > Nudge down removes 1 BPM (project.tempoNudgeDown)")
+    call("vibera_command", {"command": "project.tempo", "args": {"value": 30}})
+    check(act("project.tempoHalf") == "failed" and tempo() == 30, "Half speed below 20 BPM is refused")
+    call("vibera_command", {"command": "project.tempo", "args": {"value": 120}})
     passed = True
 finally:
     client.close()
