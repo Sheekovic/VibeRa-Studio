@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 206; gaps: 156.
+Explicit UI inventory complete: False; known controls: 224; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1005,6 +1005,24 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `mixer.menu.deleteInsert` | mixer.insert.delete | vibera_command; reviewed |
 | `mixer.menu.chain` | mixer.chain.* | vibera_mixerchain; reviewed |
 | `mixer.menu.replaceEffect` | plugin.effect.replace | vibera_command; reviewed |
+| `rack.menu.selectAll` | channel.select (Rack selection) | vibera_rack; reviewed |
+| `rack.menu.transpose` | rack.transpose | vibera_command; reviewed |
+| `rack.menu.zip` | rack.zip / rack.unzipAll | vibera_command; reviewed |
+| `rack.menu.move` | channel.moveUp / channel.moveDown | vibera_command; reviewed |
+| `rack.menu.colourSpread` | rack.colourSpread | vibera_command; reviewed |
+| `rack.menu.buttonWidth` | view.rackButtonsNarrow / Normal / Wide | vibera_command; reviewed |
+| `rack.menu.focusSelected` | view.rackFocusSelected | vibera_command; reviewed |
+| `rack.menu.scrollToSelected` | view.rackScrollToSelected | vibera_command; reviewed |
+| `rack.menu.assignFreeInserts` | rack.assignFreeInserts | vibera_command; reviewed |
+| `rack.menu.multiOutput` | channel.multiOutputs0..7 | vibera_command; reviewed |
+| `rack.menu.groups` | rack.group.* | vibera_rack; reviewed |
+| `rack.menu.fill` | steps.fill2 / 4 / 8 | vibera_command; reviewed |
+| `rack.menu.mute` | rack.muteSelected / rack.unmuteSelected / channel.unsolo | vibera_command; reviewed |
+| `rack.menu.muteLock` | rack.muteLock | vibera_command; reviewed |
+| `rack.menu.cloneDelete` | channel.clone / channel.delete | vibera_rack; reviewed |
+| `rack.menu.swing` | project.swing / rack.swingMix | vibera_command; reviewed |
+| `rack.menu.appearance` | rack.properties | vibera_command; reviewed |
+| `rack.menu.sort` | rack.sort | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

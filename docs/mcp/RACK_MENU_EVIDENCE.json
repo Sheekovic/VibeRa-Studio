@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "applicationSha256": "d9c084fd794e3e38e4b6316ddb5486ed41ce4adcb704d80fb2959cb27ecde748",
+  "sourceInputs": {
+    "scripts/verify-rack-menu-mcp.py": "8b71e29b448ea1e578672b84505b2488cabc7e499d138ff028e59a832a16eb44",
+    "src/StudioRack.cpp": "e6cf4833b86218a621f7cda8502b7cde426f34563b5b30c89f19123b46983459",
+    "src/Studio.cpp": "23133b1382167ce2ff23aa3f0f5d1089ca539bfc0b002b0db902e83a527d9376",
+    "src/StudioMcp.cpp": "6496a1c692cd6e476afc74c4e47415da74b65cdf447e81a583386df969e9af80",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "Select all visible Channels selects every visible row",
+    "Deselect Channels clears the selection",
+    "The first Channel has notes (8)",
+    "Transpose selected Channels moves the notes +2 (rack.transpose)",
+    "Transposing by 0 is refused",
+    "Transpose is one Undo step",
+    "Zip selected Channels zips both (rack.zip)",
+    "Unzip all clears them (rack.unzipAll)",
+    "Move up swaps the Channel with the one above (channel.moveUp)",
+    "Move down restores the order (channel.moveDown)",
+    "Gradient colours recolour the selected Channels (rack.colourSpread) [4292899941, 4284866707, 4289881568]",
+    "An unknown colour spread is refused",
+    "Colour spread is one Undo step",
+    "view.rackButtonsNarrow sets the Channel button width narrow",
+    "view.rackButtonsWide sets the Channel button width wide",
+    "view.rackButtonsNormal sets the Channel button width normal",
+    "Focus selected channel toggles (view.rackFocusSelected)",
+    "Scroll to the selected channel runs",
+    "Assign to free Mixer inserts gives each Channel its own insert (rack.assignFreeInserts, completed, [5, 6])",
+    "Multi-output reports its outcome on the selected Channel (failed)"
+  ],
+  "scope": "Isolated --mcp-test; the registered operations the Channel Rack menu items run. Not native popup input, listening or hardware evidence."
+}
