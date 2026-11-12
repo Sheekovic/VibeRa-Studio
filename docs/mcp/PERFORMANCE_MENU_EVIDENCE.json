@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "d1294a0feab1f80af93f239cf0ccab0e0343612633af6461d7c73f66c1478782",
+  "applicationSha256": "9337c3cdab73602ca4f38c8172ff7fddf8782dc1058f48ae08d5f56bce48c709",
   "sourceInputs": {
     "scripts/verify-performance-pads-mcp.py": "76cfc02aab51837c593af402931404cbc0354a485c60dc9ed9469d9553f31fd6",
     "src/StudioAudioTake.cpp": "f1ef68e29c6c1e63fe5a4081f9317ca423bcf56cef0de5470bcab73202d91393",

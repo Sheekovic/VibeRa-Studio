@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "d1294a0feab1f80af93f239cf0ccab0e0343612633af6461d7c73f66c1478782",
+  "applicationSha256": "9337c3cdab73602ca4f38c8172ff7fddf8782dc1058f48ae08d5f56bce48c709",
   "sourceInputs": {
     "scripts/verify-playlist-track-menu-mcp.py": "89b1436ca4acaba15019cf4578fd7bd8bb90d6a092d37d7211059e9bc74ec44c",
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",

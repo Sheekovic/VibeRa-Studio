@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "d1294a0feab1f80af93f239cf0ccab0e0343612633af6461d7c73f66c1478782",
+  "applicationSha256": "9337c3cdab73602ca4f38c8172ff7fddf8782dc1058f48ae08d5f56bce48c709",
   "sourceInputs": {
     "scripts/verify-mixer-organisation-menu-mcp.py": "977751bfbef0734188a81aad80323bbc4479b6e03a73a85b3ef4af0dce0c0ec5",
     "src/StudioMixerOrganisation.inc": "d12072676fab29593297208dd9f1a7786ee3c3911980f4f9dff5280a1df97577",

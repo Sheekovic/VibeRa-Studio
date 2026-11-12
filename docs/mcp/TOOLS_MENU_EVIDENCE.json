@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "d1294a0feab1f80af93f239cf0ccab0e0343612633af6461d7c73f66c1478782",
+  "applicationSha256": "9337c3cdab73602ca4f38c8172ff7fddf8782dc1058f48ae08d5f56bce48c709",
   "sourceInputs": {
     "scripts/verify-record-filter-mcp.py": "91d84791f660cb93c31317f57145871bc28b0a82075ef92b22f02dba9e6c771d",
     "scripts/verify-master-pitch-mcp.py": "6e657c587bc22d096a809612a39cc937d5aa99421f1a341ee053f3a7c1095af9",
