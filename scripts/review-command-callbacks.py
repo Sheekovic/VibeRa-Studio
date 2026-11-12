@@ -90,8 +90,16 @@ by_file = {}
 for key, entry in entries.items():
     by_file.setdefault(key.rsplit(":", 2)[0], []).append(key)
 outputs = {}
+# Studio.h and Studio.cpp share a stem: every surface file with that stem except the .cpp gets its
+# extension in the receipt name, whether or not the other file has reviews in this run.
+stems = {}
+for surface in state["customSurfaceCandidates"]:
+    stems.setdefault(Path(surface["surface"].rsplit(":", 2)[0]).stem.lower(), set()).add(surface["surface"].rsplit(":", 2)[0])
 for file, keys in by_file.items():
-    name = "docs/mcp/CALLBACK_" + re.sub(r"[^A-Za-z0-9]+", "_", Path(file).stem).upper() + "_EVIDENCE.json"
+    label = Path(file).stem
+    if len(stems.get(label.lower(), ())) > 1 and Path(file).suffix != ".cpp":
+        label += "_" + Path(file).suffix.lstrip(".")
+    name = "docs/mcp/CALLBACK_" + re.sub(r"[^A-Za-z0-9]+", "_", label).upper() + "_EVIDENCE.json"
     outputs[name] = dict(receipt, sourceInputs={file: inputs[file]})
     for key in keys:
         entries[key]["verification"]["receipt"] = name

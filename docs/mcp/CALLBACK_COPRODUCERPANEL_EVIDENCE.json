@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/CoProducerPanel.h": "bcd84ba2553e547f2f9547ba4b9a669f392ec5d04153842f5f9a57fb6187e657"
+    "src/CoProducerPanel.h": "7186267e2593f49495595f4064541cbb118a960baba08ff02a58d66d01374470"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
+  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -27,6 +27,7 @@
     "bounded_midi_compensation",
     "browser_collections_repeat_gui",
     "browser_live_gui",
+    "browser_midi_mcp",
     "browser_search",
     "callback_timing",
     "center_playhead_mcp",
@@ -54,7 +55,9 @@
     "development_workflow",
     "drop_targets_gui",
     "envelope_follower_mcp",
+    "envelope_presets_mcp",
     "export_formats_mcp",
+    "export_options_mcp",
     "expression_maps_mcp",
     "fixed_initialisation_lifecycle",
     "flp_import",
@@ -71,10 +74,12 @@
     "macros_mcp",
     "magic_lasso_mcp",
     "marker_actions_mcp",
+    "master_pitch_mcp",
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
     "midi_import_extras",
+    "midi_import_mcp",
     "midi_interchange_gui",
     "midi_receive_mcp",
     "midi_scale_snap_mcp",
@@ -244,6 +249,7 @@
     "project_number_text",
     "quantizer_mcp",
     "rack_groups_mcp",
+    "record_filter_mcp",
     "rps_gaps_mcp",
     "sampler_automation_mcp",
     "sampler_controller_links",
@@ -278,6 +284,7 @@
     "tempo_map",
     "tempo_warp_mcp",
     "tuning_render_mcp",
+    "unique_sample_mcp",
     "vibera_effects_dsp",
     "vibera_native_effect_model",
     "vibera_native_effects",
@@ -287,12 +294,24 @@
     "vibera_synth_host",
     "vibera_synth_mcp",
     "vibera_synth_processor",
-    "vocal_pitch_mcp"
+    "vocal_pitch_mcp",
+    "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-104843/affected-tests.log",
+  "sourceLog": "build/dev/20261110-103302/affected-tests.log",
   "rerunLogs": [
-    "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
+    "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
+    "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
+    "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
+    "build/dev/20261110-103302/rerun-isolated_parameters.log",
+    "build/dev/20261110-103302/rerun-gui_workflow.log",
+    "build/dev/20261110-103302/rerun-audio_playlist_live.log",
+    "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
+    "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
+    "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
+    "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
+    "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
+    "build/dev/20261110-103302/rerun2-musical_acceptance.log"
   ],
-  "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+  "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

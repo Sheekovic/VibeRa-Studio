@@ -1,10 +1,10 @@
 {
   "passed": true,
   "scope": "Channel appearance/sorting increment only; RPS-B/whole module/full FL coverage incomplete.",
-  "applicationSha256": "73f0842bfc956a5ce4399fce47d52298321167a18441f3c15c280e3df2e7924c",
+  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
-    "CMakeLists.txt": "7106469c5e77f821e7f55c8a6f54c06c18ae0df303b2add2aff54216c1b48667",
+    "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
     "src/ChannelAppearance.h": "faafef6e4bbf23a2248b9a7ab59181e49971d4eb9a931438d391bda1d6254a66",
     "src/ChannelAppearanceCommands.h": "40e091ce9062af41336e3f15fae1701943edef09bee157bc9a0eaf89aea30899",
     "src/ChannelAppearanceContracts.h": "6036566e5cc29a14db31c473dee2810b2ba0952de58f34db48600068e47b34bc",
@@ -12,13 +12,13 @@
     "src/Project.h": "751a4591af47b7552ff97041d44b5e07bc048cdac2c4853988e83b29133fd49f",
     "src/Project.cpp": "acae70f39d3fb5457665a11c65537ef59abcc49e19f3bf98bfea9063c375a7ad",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "bd0849dfa269669d175607d084fb736d500bc0da2cc8fa461b1d88a66b0e987c",
+    "src/Commands.cpp": "2871f29b02e2ecef366554ba57b23bfedfed84fa480060bfbc40a4b4fcbefc45",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
-    "src/Studio.h": "0c13467f3d53b195d013ec2c0ddc2cbdf79fc3ce75146f29b27ed5d48ef65f4d",
+    "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
     "src/Studio.cpp": "03747e59fef7226b5cb3ce8740994983c2c19c7266c7731072807675f32bd118",
     "src/StudioRack.cpp": "e6cf4833b86218a621f7cda8502b7cde426f34563b5b30c89f19123b46983459",
-    "src/StudioMcp.cpp": "09b70fe84b6be0cc1c78361b953570c39cc0801bb371fbd4d3f942dd83196adf",
+    "src/StudioMcp.cpp": "b357093d5c42d95d533a7816677dc5524bf77183b222a1016bb27432a097163b",
     "src/StudioMixerMacros.inc": "bfe64ba23bdefd22b12dd0b2c8bf5d26dc2dd97388f4c860f799db6bc75d858b",
     "src/MixerMacroContracts.h": "fc7586f10ea627f11ebacd087f21686a6bd73813b84fec8369359c531369b297",
     "src/Editors.h": "193b056351c8b5ecbc5866dd64e999e9c0c524344f1993857c558963576977b8",
@@ -41,9 +41,9 @@
     "src/RackContracts.h": "159b97e2f343ecad930117525eeac41525703f1a76ee85293fee134104ce9c24",
     "src/ChannelSolo.h": "4e892bbec7e947252ceb57c81e1e7075f210ff8a8051a89356f07ab4bff3534f",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "73f0842bfc956a5ce4399fce47d52298321167a18441f3c15c280e3df2e7924c",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "7bf25a4c46bb3cd2486d262ffbba2eacb29394fd9fe1df9be5a58a0623ee6eb1",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "40ea24f6ff2c80e0c5a7e7f50eaefc79031972f1754cd6585dd437c3286a409a"
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "326d1bb55bddf8071b9d48ffd8117431c00d4386147a4761aa4b8dd35177c4a1"
   },
   "checks": [
     "Actual UI Rack F2/dialog name/colour/icon commit and bulk/sort/Undo/Redo preserve held input in Pattern/Song; source component callbacks, not OS input.",
@@ -57,9 +57,22 @@
   "rawReceiptSha256": "3b071413a2f8e9f768cf6b64b3ee4c5b056e5e47785894072f4197daaa64b202",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-223545/affected-tests.log",
-    "rerunLogs": [],
-    "rerunNote": "",
-    "tests": 289
+    "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+    "rerunLogs": [
+      "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
+      "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
+      "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
+      "build/dev/20261110-103302/rerun-isolated_parameters.log",
+      "build/dev/20261110-103302/rerun-gui_workflow.log",
+      "build/dev/20261110-103302/rerun-audio_playlist_live.log",
+      "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
+      "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
+      "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
+      "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
+      "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
+      "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+    ],
+    "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+    "tests": 290
   }
 }

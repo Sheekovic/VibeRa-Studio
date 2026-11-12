@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "73f0842bfc956a5ce4399fce47d52298321167a18441f3c15c280e3df2e7924c",
+  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
   "sourceInputs": {
     "scripts/verify-plugins-page-mcp.py": "bcd86eac30636b7395ee70a71cbaa0fe6f92f73efe8594479e1414eb8e61a255",
     "src/PluginPage.h": "0f0d7330e4a645a5b47b72fe384846d0da40bef5473c58da9cb6b59a4e45c56b",
-    "src/StudioMcp.cpp": "09b70fe84b6be0cc1c78361b953570c39cc0801bb371fbd4d3f942dd83196adf",
+    "src/StudioMcp.cpp": "b357093d5c42d95d533a7816677dc5524bf77183b222a1016bb27432a097163b",
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
-    "src/Commands.cpp": "bd0849dfa269669d175607d084fb736d500bc0da2cc8fa461b1d88a66b0e987c",
+    "src/Commands.cpp": "2871f29b02e2ecef366554ba57b23bfedfed84fa480060bfbc40a4b4fcbefc45",
     "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c"
   },
   "sourceHashMode": "text-lf-v1",
@@ -19,15 +19,28 @@
     "channelTargetSelection: vibera_select selects the Channel",
     "mixerTargetSelection: the explicit mixer argument places the effect on track 3",
     "manualValue: the effect exposes its native parameters",
-    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': '612dd732abbd40b5874947b0f738c67c', 'revision': 3, 'operation': 'a90c051892e74c09b28b137183a2835d', 'kind': 'set', 'plugin': 46, 'requestedI",
+    "manualValue: vibera_plugin set reaches an acknowledged terminal outcome: {'projectIdentity': 'a9da0df599ca4a359e1349e9cdebd320', 'revision': 3, 'operation': 'ced4f126f25c4e4b9dee44988a57bba8', 'kind': 'set', 'plugin': 46, 'requestedI",
     "manualValue: the parameter edit enters project history"
   ],
   "scope": "Isolated --mcp-test; canonical equivalents of page-local drafts",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261109-223545/affected-tests.log",
-    "rerunLogs": [],
-    "rerunNote": "",
-    "tests": 289
+    "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+    "rerunLogs": [
+      "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
+      "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
+      "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
+      "build/dev/20261110-103302/rerun-isolated_parameters.log",
+      "build/dev/20261110-103302/rerun-gui_workflow.log",
+      "build/dev/20261110-103302/rerun-audio_playlist_live.log",
+      "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
+      "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
+      "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
+      "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
+      "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
+      "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+    ],
+    "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+    "tests": 290
   }
 }
