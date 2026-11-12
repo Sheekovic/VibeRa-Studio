@@ -4489,6 +4489,26 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
     set(state, "positionSeconds", positionSeconds());
     set(state, "cpuLoad", audio.cpuLoad());
     set(state, "monitorVolume", double(MonitorVolume::instance().get()));
+    {
+        // Performance mode: pad assignments (0 = the n-th Pattern), saved scenes and launched Patterns.
+        auto performance = obj();
+        juce::Array<juce::var> pads, scenes, launched;
+        for (const auto pattern : controller.project.padPatterns)
+            pads.add(juce::int64(pattern));
+        for (const auto &scene : controller.project.performanceScenes)
+        {
+            juce::Array<juce::var> members;
+            for (const auto pattern : scene)
+                members.add(juce::int64(pattern));
+            scenes.add(members);
+        }
+        for (const auto &[pattern, pad] : performancePads)
+            launched.add(juce::int64(pattern));
+        set(performance, "pads", pads);
+        set(performance, "scenes", scenes);
+        set(performance, "launched", launched);
+        set(state, "performance", performance);
+    }
     set(state, "detectedChord", detectedChord());
     set(state, "recordNotes", recordNotes);
     set(state, "exportOutputChannels", juce::StringArray{"stereo", "mono", "left", "right"}[audio.exportOutputChannels]);
@@ -4834,6 +4854,9 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
         set(p, "name", pattern.name);
         set(p, "group", pattern.group);
         set(p, "colour", pattern.colour ? juce::Colour(pattern.colour).toString() : juce::String("auto"));
+        set(p, "launchQuantum", pattern.launchQuantum);
+        set(p, "followAction", pattern.followAction);
+        set(p, "followAfter", pattern.followAfter);
         set(p, "length", pattern.length);
         set(p, "autoLength", pattern.autoLength);
         set(p, "numerator", pattern.numerator);

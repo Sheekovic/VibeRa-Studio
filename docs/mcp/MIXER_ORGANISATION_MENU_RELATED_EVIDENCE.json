@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
+  "applicationSha256": "f4e62c93eeeaf4c039a5fb40a043b2f29e2fc113eca3607fc741021ea2fe9dd4",
   "sourceInputs": {
     "src/StudioMixerOrganisation.inc": "d12072676fab29593297208dd9f1a7786ee3c3911980f4f9dff5280a1df97577",
     "src/MixerGroups.h": "1dfb974785defbe0d6bf0a554d54714675d9af1b1c3b77004de10a26a750ec41",

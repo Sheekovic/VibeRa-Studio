@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
+  "applicationSha256": "f4e62c93eeeaf4c039a5fb40a043b2f29e2fc113eca3607fc741021ea2fe9dd4",
   "sourceInputs": {
     "src/Studio.cpp": "16aa1eeeb86482c835994415e7dd32fa9fb42ae9a1c9755bcbe13a5cdae40f3c",
-    "src/StudioMcp.cpp": "24ae719a920820c8ff64d60d848a1ab58a46997df5b9367023e6f30665d01db1",
+    "src/StudioMcp.cpp": "cb6e686d21aa261810220fa3d993009c949eb900bbcf14b67e2f0602bc754974",
     "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
     "scripts/verify-mixer-chain-mcp.py": "e3be80fbb9eb4e3549e3830a201b356cdfd83c18c17bfa6e29c68366b6ac6f2d",
     "scripts/verify-mixer-effects-mcp.py": "a2c727cf3802cf09e8a25bc36789cf0ad0fa3e50f1985db667c31db725af181e",

@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "39daf26da52ec5805a17e4ad15d855a177d8a945ecde50184b5e9b26e4a0f152",
+  "applicationSha256": "f4e62c93eeeaf4c039a5fb40a043b2f29e2fc113eca3607fc741021ea2fe9dd4",
   "sourceInputs": {
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
     "src/AutomationCommands.cpp": "c90a54b42c0bda9e5dd93aae1ca29bfd1598ab42dc788c03c8e7a3db95cfc500",
-    "src/StudioMcp.cpp": "24ae719a920820c8ff64d60d848a1ab58a46997df5b9367023e6f30665d01db1",
+    "src/StudioMcp.cpp": "cb6e686d21aa261810220fa3d993009c949eb900bbcf14b67e2f0602bc754974",
     "scripts/verify-playlist-tools-mcp.py": "06cda23286493e04c4ee2a5c2dea9689f54a5e2ffd5efcf6657b1014bb3f95ca",
     "scripts/verify-unique-sample-mcp.py": "801336e4ca0b0e28fe04604abe02a802d40f0c55b9858966604260e2655e1d09",
     "scripts/verify-audio-recording-mcp.py": "2167bc559cefab39859bb1380d586d791d92038301c1ae8c32b942324b0f2ea2",

@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "applicationSha256": "f4e62c93eeeaf4c039a5fb40a043b2f29e2fc113eca3607fc741021ea2fe9dd4",
+  "sourceInputs": {
+    "scripts/verify-performance-pads-mcp.py": "76cfc02aab51837c593af402931404cbc0354a485c60dc9ed9469d9553f31fd6",
+    "src/StudioAudioTake.cpp": "f1ef68e29c6c1e63fe5a4081f9317ca423bcf56cef0de5470bcab73202d91393",
+    "src/Performance.h": "fecaa6ef2c8e5f1d0a3068a096a1f835072bdcf48b9c5ae43ae2d4abccc6a64d",
+    "src/Studio.cpp": "16aa1eeeb86482c835994415e7dd32fa9fb42ae9a1c9755bcbe13a5cdae40f3c",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db",
+    "src/StudioMcp.cpp": "cb6e686d21aa261810220fa3d993009c949eb900bbcf14b67e2f0602bc754974"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "Performance state reads back: nothing launched, default pads (3 Patterns)",
+    "In Pattern mode a pad is refused (Performance launches into the Song)",
+    "Pad 1 launches the first Pattern (performance.pad1) [5]",
+    "Pad 2 adds the second Pattern",
+    "Pressing pad 1 again stops its Pattern",
+    "Save launched Patterns as scene 3 (performance.saveScene)",
+    "Scene 9 is refused",
+    "Stop all clears the launched Patterns (performance.stopAll)",
+    "Launch scene 3 launches its Patterns (performance.scene3)",
+    "Assign Pattern to pad 5 (performance.assignPad)",
+    "Pad 5 now launches the assigned Pattern",
+    "Default resets the pad",
+    "Pad 17 is refused",
+    "Launch quantum: one beat (pattern.launchQuantum)",
+    "Follow action: next after 2 plays (pattern.followAction)",
+    "An unknown Follow action is refused",
+    "Follow action off",
+    "Delete empty unused Patterns reports its outcome (pattern.deleteEmpty, completed, 4 -> 2)"
+  ],
+  "scope": "Isolated --mcp-test without an audio device; the registered operations the Performance pads, pad menu and Scenes menu run. Launching only places clips: not playback, native popup input or listening evidence.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
+}

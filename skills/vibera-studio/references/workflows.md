@@ -313,7 +313,10 @@ Pad n is the n-th Pattern: `vibera_command {"command":"performance.pad3"}` toggl
 lists `pads` (pad, pattern, quantum) beside `launched`. `performance.saveScene`
 {value: 1..8, ids: Pattern IDs} stores a scene (project v52); `vibera_command
 performance.scene3` launches it and stops the other launched Patterns;
-`performance.stopAll` stops everything.
+`performance.stopAll` stops everything. `performance.assignPad` {value: 1..16, pattern: id or 0
+for the default} gives a pad its own Pattern; `pattern.followAction` {pattern, text: "" or an
+action such as "next", value: plays} chains pads. `state.performance` reads `pads`, `scenes` and
+`launched`; each `state.patterns` row has `launchQuantum`, `followAction` and `followAfter`.
 
 ## Project templates
 

@@ -401,6 +401,19 @@
         "scripts/verify-native-effects-mcp.py"
       ],
       "scope": "Registered tests that exercise the operations the Mixer effect slot menu runs, each run alone on this binary."
+    },
+    "docs/mcp/PERFORMANCE_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-performance-pads-mcp.py",
+      "folder": "performance-pads",
+      "sources": [
+        "scripts/verify-performance-pads-mcp.py",
+        "src/StudioAudioTake.cpp",
+        "src/Performance.h",
+        "src/Studio.cpp",
+        "src/Commands.cpp",
+        "src/StudioMcp.cpp"
+      ],
+      "scope": "Isolated --mcp-test without an audio device; the registered operations the Performance pads, pad menu and Scenes menu run. Launching only places clips: not playback, native popup input or listening evidence."
     }
   }
 }
