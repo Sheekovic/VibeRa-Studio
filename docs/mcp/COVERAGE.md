@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 173; gaps: 156.
+Explicit UI inventory complete: False; known controls: 190; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -972,6 +972,23 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `tools.backups.openFolder` | project.openBackupsFolder | vibera_command; reviewed |
 | `tools.update.settings` | app.update.settings | vibera_update; reviewed |
 | `tools.update.dialogs` | app.update.offer (approval dialogs stay with the user) | vibera_update; reviewed |
+| `tools.stepRecord` | transport.stepRecord | vibera_command; reviewed |
+| `tools.stepRecord.rest` | transport.stepRest | vibera_command; reviewed |
+| `tools.chordProgression` | view.chordProgression | vibera_command; reviewed |
+| `tools.arrange.tileDetached` | workspace.tileDetached | vibera_command; reviewed |
+| `tools.scoreLog.dump` | score.dump | vibera_command; reviewed |
+| `tools.detach` | view.editorWindow | vibera_editor; reviewed |
+| `tools.diagnostics` | project.diagnostics | vibera_project; reviewed |
+| `tools.templates.save` | project.saveTemplate | vibera_project; reviewed |
+| `tools.templates.new` | project.new with template | vibera_project; reviewed |
+| `tools.lastTweaked` | tools.lastTweaked.* | vibera_command; reviewed |
+| `tools.macroKnobs` | automation.macro.* | vibera_command; reviewed |
+| `tools.loudness` | project.loudness | vibera_project; reviewed |
+| `tools.chordTrack.write` | chord.fill | vibera_command; reviewed |
+| `tools.chordTrack.follow` | notes.followChords | vibera_command; reviewed |
+| `tools.recordingFilter.audio` | recording.audioInput | vibera_audioRecording; reviewed |
+| `tools.missingSamples` | media.relink | vibera_project; reviewed |
+| `tools.videoPlayer` | project.video | vibera_project; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

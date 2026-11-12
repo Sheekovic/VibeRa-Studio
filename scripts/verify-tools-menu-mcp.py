@@ -14,6 +14,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+import time
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,6 +75,33 @@ try:
     for name, key in (("project.openTemplatesFolder", "templates"), ("project.openBackupsFolder", "backups")):
         expected = "completed" if Path(folders[key]).is_dir() else "failed"
         check(command(name).get("completionState") == expected, f"{name} reports {expected} for its folder")
+
+    # Step record, chord progression window, detached tiling: each reports a real outcome.
+    for name in ("transport.stepRecord", "transport.stepRest", "transport.stepRecord", "view.chordProgression",
+                 "workspace.tileDetached", "score.dump"):
+        outcome = command(name).get("completionState")
+        check(outcome in ("completed", "failed"), f"{name} reports its outcome ({outcome})")
+
+    # Detach to another monitor / dock back (view.editorWindow).
+    check(not raw("vibera_editor", {"editor": 3, "action": "detach"}).get("isError"), "Detach Mixer runs (view.editorWindow)")
+    check(not raw("vibera_editor", {"editor": 3, "action": "dock"}).get("isError"), "and docks back")
+
+    # Diagnostics and templates.
+    report = output / "diagnostics.txt"
+    raw("vibera_project", {"action": "diagnostics", "path": str(report), "overwrite": True})
+    check(report.is_file() and report.stat().st_size > 100, "Export diagnostics writes the report (project.diagnostics)")
+    template = "tools-menu-" + uuid.uuid4().hex[:8]
+    saved = raw("vibera_project", {"action": "saveTemplate", "template": template})
+    check(not saved.get("isError"), "Save as template writes a template (project.saveTemplate)")
+    for _ in range(50):  # The save is an asynchronous job.
+        if template in call("vibera_project", {"action": "templates"}).get("templates", []):
+            break
+        time.sleep(.1)
+    check(template in call("vibera_project", {"action": "templates"}).get("templates", []), "The template is listed")
+    opened = raw("vibera_project", {"action": "new", "template": template, "discardChanges": True})
+    check(not opened.get("isError"), "New from template opens it (project.new)")
+    for candidate in Path(state()["folders"]["templates"]).glob(template + ".*"):
+        candidate.unlink()  # The test's own template only.
 
     # Updates: settings and the dialogs' refusals (nothing is checked or downloaded here).
     status = call("vibera_update", {"action": "status"})
