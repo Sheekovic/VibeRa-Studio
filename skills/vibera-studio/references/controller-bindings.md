@@ -5,8 +5,9 @@ state, setBinding, removeBinding and the Settings > Controller buttons: learn
 {"index":row} arms MIDI Learn for an existing mapping (the next control moved on
 the control port is bound; state.controllerLearning is the armed row, -1 none),
 cancel disarms it, preset {"replace":true} replaces the mappings with the
-Launchkey MK3 preset and saves them, ports {"input":id,"output":id} opens the
-control ports by identifier from controllerPorts.inputs / .outputs (empty = off;
+Launchkey MK3 preset and saves them, ports {"input":id,"output":id} rescans the MIDI ports and opens the
+control ports by identifier from controllerPorts.inputs / .outputs (the lists are
+filled by a ports call, not by state; empty = off;
 refused when input is the performance MIDI input) and connectLaunchkey finds and
 opens the Launchkey MK3 DAW ports. ports and connectLaunchkey open hardware MIDI
 ports: ask the user before using them. Whole-profile configure and inject remain

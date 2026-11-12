@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "applicationSha256": "f40f30e543d2ef4b9af4d6d9a6b85b9deccc5bf8c932095610846cb9615ace56",
+  "applicationSha256": "56e14fe436f958127986f9fa744d353036864f0eb7a5b88fbaa0a59cf4528e27",
   "sourceInputs": {
     "src/Studio.cpp": "66cbff56fa75c8e0ba90b3abd2dc8c3b03d91151d01abbd69c9c87fc02e1bcad",
-    "src/StudioMcp.cpp": "ad57c9d77563b10db579a7fb7bfa322e9dde300cdf667ecbbbcfd42f6bcffafb",
+    "src/StudioMcp.cpp": "a42d8c9614efa248e1af5a43357fd4866e18026326a0f005819385d2564aa14c",
     "src/Commands.cpp": "4bc96a37f94e45597a151e7fb1c57dc94b23abe049bc23a355b92c7e45eca114",
     "scripts/verify-plugin-editors-mcp.py": "190e77c432300cb7281bd53b98189681ec6928a3f60bade9e71b04bdac8ef946",
     "scripts/verify-macros-mcp.py": "71040219417a8d96f72c90334cfc58b59ef388fc714471935d121bfd2318babd",

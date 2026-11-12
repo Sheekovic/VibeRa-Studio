@@ -191,6 +191,7 @@ try:
     check(not closed.get("isError") and closed["structuredContent"]["controllerPorts"]["input"] == "",
           "controller.ports with empty identifiers turns the control ports off")
 
+    raw("vibera_transport", {"action": "midiInput"})  # Rescan: the device list is only refreshed by this action.
     midi = call("vibera_state").get("midiInput", {})
     check(isinstance(midi.get("devices"), list) and "device" in midi, f"MIDI devices read back ({len(midi.get('devices', []))})")
     check(not raw("vibera_transport", {"action": "midiInput", "device": ""}).get("isError")

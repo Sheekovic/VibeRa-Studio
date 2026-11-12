@@ -1,13 +1,13 @@
 {
   "passed": true,
-  "applicationSha256": "f40f30e543d2ef4b9af4d6d9a6b85b9deccc5bf8c932095610846cb9615ace56",
+  "applicationSha256": "56e14fe436f958127986f9fa744d353036864f0eb7a5b88fbaa0a59cf4528e27",
   "sourceInputs": {
     "scripts/verify-playlist-ruler-menu-mcp.py": "897e2719362b43ad2896fc1f636db7bc7403717737f9eabe4461e1b0ea2e72a9",
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Commands.cpp": "4bc96a37f94e45597a151e7fb1c57dc94b23abe049bc23a355b92c7e45eca114",
     "src/AutomationCommands.cpp": "c90a54b42c0bda9e5dd93aae1ca29bfd1598ab42dc788c03c8e7a3db95cfc500",
     "src/McpContracts.h": "7d455396593209469c6471b395fb76d8841b8647420d3a1fc0348cf141b16869",
-    "src/StudioMcp.cpp": "ad57c9d77563b10db579a7fb7bfa322e9dde300cdf667ecbbbcfd42f6bcffafb"
+    "src/StudioMcp.cpp": "a42d8c9614efa248e1af5a43357fd4866e18026326a0f005819385d2564aa14c"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [

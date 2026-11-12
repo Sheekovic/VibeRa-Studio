@@ -131,7 +131,9 @@ Settings without ports: `vibera_transport {"action":"guide","countInBars":0..2,
 `guideSound`, `guideGain`, `metronome`) and `{"action":"midiInput","midiChannel":0..16
 (0 all),"quantizeStart":bool,"quantizeEnd":bool}` (read back `state.midiInput`; refused during
 a take; a channel change sends All Notes Off). `midiInput` also takes `"device":<identifier from
-state.midiInput.devices>` (empty closes the input) like the Settings > MIDI device list; read back
+state.midiInput.devices>` (empty closes the input) like the Settings > MIDI device list. Each
+`midiInput` call rescans the inputs (call it with no fields first; `vibera_state` never enumerates
+devices itself); read back
 `state.midiInput.device` and `.deviceStatus`; unknown identifiers are refused. `{"action":"typing",
 "typingRoot":2..7,"typingVelocity":1..127}` is the Typing keys right-click menu (`state.typingKeys`).
 Fields left out stay as they are. These are local preferences, not Undo steps. Hardware capture

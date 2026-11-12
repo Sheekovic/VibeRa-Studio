@@ -1,14 +1,14 @@
 {
   "passed": true,
-  "applicationSha256": "f40f30e543d2ef4b9af4d6d9a6b85b9deccc5bf8c932095610846cb9615ace56",
+  "applicationSha256": "56e14fe436f958127986f9fa744d353036864f0eb7a5b88fbaa0a59cf4528e27",
   "sourceInputs": {
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Commands.cpp": "4bc96a37f94e45597a151e7fb1c57dc94b23abe049bc23a355b92c7e45eca114",
-    "src/StudioMcp.cpp": "ad57c9d77563b10db579a7fb7bfa322e9dde300cdf667ecbbbcfd42f6bcffafb",
+    "src/StudioMcp.cpp": "a42d8c9614efa248e1af5a43357fd4866e18026326a0f005819385d2564aa14c",
     "scripts/verify-sampler-voices-mcp.py": "79673a106624b900a415650193003638b5f96f21f312c0404ffab33b797644f1",
     "scripts/verify-midi-receive-mcp.py": "06909debda2b26611dee540cb342b3b1468ccd6f4f279ea9f589298ed24c8374",
     "scripts/verify-channel-loops-mcp.py": "18967bf5ff44c2b04d0e6f6cecbc725c7d48a68ce6122fa7c380e436105c85e7",
-    "scripts/verify-browser-midi-mcp.py": "2f3856daa1f989f62bcb833ae597bd0aab7664a2aa8c286b5ce20b939968487e",
+    "scripts/verify-browser-midi-mcp.py": "ddf6f02089f1ad42117f73d3b049e34475ae5a4c3bb82518d8a63fd35eb3dc4f",
     "scripts/verify-channel-appearance-mcp.py": "7b9dcc295df63839da8dcb2b24e080eb642bcdd9324c0964830955aef61abfd1",
     "scripts/verify-step-fill-mcp.py": "a22908cc66aa16a4f84574fbc23576a315185705eaef2ef267d0c1a9fb60409b",
     "scripts/verify-channel-management-mcp.py": "94e40d3a880a48446db932c676560b8d7bbe858f93d8f8797669f4f892e6e0d4",

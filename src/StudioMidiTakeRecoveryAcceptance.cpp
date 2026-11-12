@@ -1508,6 +1508,38 @@ juce::Result Studio::verifyMidiTakeRecovery(const juce::File &folder)
                                         now.channels[i].sample == projection.channels[i].sample &&
                                         now.channels[i].graphInitialisations ==
                                             projection.channels[i].graphInitialisations;
+                    {
+                        // Name the terms that changed, so a failure says what moved.
+                        juce::StringArray moved;
+                        const auto term = [&](bool same, const char *name)
+                        {
+                            if (!same)
+                                moved.add(name);
+                        };
+                        term(pendingMidiTake.get() == owner && midiTakeSerial() == serial, "take owner/serial");
+                        term(recordArmed == armed, "recordArmed");
+                        term(midiTaking == taking, "midiTaking");
+                        term(audio.playing() == playing, "playing");
+                        term(selectedChannel == source && selectedPattern == part && selectedInsert == 1, "selection");
+                        term(sameGroupNotes(midiTake.finishedNotes(), finished) && midiTake.heldCount() == held, "take notes");
+                        term(audio.midiInput.capture.session.load() == session &&
+                                 audio.midiInput.capture.active.load() == captureActive, "capture session");
+                        term(audio.midiInput.capture.read.load() == read && audio.midiInput.capture.write.load() == write,
+                             "capture read/write");
+                        term(device->starts == starts && device->stops == stops, "device starts/stops");
+                        term(now.edit == projection.edit && now.playbackContext == projection.playbackContext &&
+                                 now.replacements == projection.replacements, "projection edit/context");
+                        term(now.samplerCreations == projection.samplerCreations &&
+                                 now.cache.preparations == projection.cache.preparations, "sampler/cache preparations");
+                        term(now.midiUpdates == projection.midiUpdates, "midiUpdates");
+                        term(channels, "projection channels");
+                        term(audio.mixerGraphInitialisations() == stages, "mixer graph initialisations");
+                        term(audio.positionBeat() == position, "position");
+                        term(audio.looping() == looping, "looping");
+                        if (!moved.isEmpty())
+                            throw std::runtime_error(("Group operation preserves actual take/session/clock/sample/native/device "
+                                                      "ownership; changed: " + moved.joinIntoString(", ")).toStdString());
+                    }
                     check(
                         pendingMidiTake.get() == owner && midiTakeSerial() == serial &&
                             recordArmed == armed && midiTaking == taking && audio.playing() == playing &&

@@ -532,6 +532,10 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::String macroConfigurationGeneration() const;
     void masterPitchDialog(); // Tools > Master pitch: cents for every tunable instrument (project.masterPitch).
     bool waitForInput = false;   // Transport option: armed recording waits for the first MIDI note.
+    // MIDI inputs listed by the last explicit vibera_transport midiInput call. vibera_state only reads
+    // this cache: enumerating devices can pump the message loop, which must not happen inside every read.
+    juce::Array<juce::MidiDeviceInfo> midiInputDevices;
+    juce::Array<juce::MidiDeviceInfo> controlInputDevices, controlOutputDevices; // Same rule; vibera_controller ports rescans.
     bool rememberSeekTime = false; // Transport option: Stop returns to where Play was pressed, not to the start.
     bool disarmOnStop = true;          // Recording option: Stop turns Record off (off keeps it armed).
     bool recordStartsPlayback = false; // Recording option: arming Record while stopped also presses Play.
