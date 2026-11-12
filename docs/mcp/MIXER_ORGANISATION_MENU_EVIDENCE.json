@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
+  "applicationSha256": "2002a82b3fa617f0af3d70373ffc253432b7dbcacb651a8bc24f7048d41404c0",
   "sourceInputs": {
     "scripts/verify-mixer-organisation-menu-mcp.py": "977751bfbef0734188a81aad80323bbc4479b6e03a73a85b3ef4af0dce0c0ec5",
     "src/StudioMixerOrganisation.inc": "d12072676fab29593297208dd9f1a7786ee3c3911980f4f9dff5280a1df97577",
     "src/MixerGroups.h": "1dfb974785defbe0d6bf0a554d54714675d9af1b1c3b77004de10a26a750ec41",
-    "src/Commands.cpp": "323ece539f522e60741318522e821c14dc1937ddc97cb22f6711e6dc774f3abc",
-    "src/StudioMcp.cpp": "56283f29ecbda80e0914324aba6094ac80327d8bc12caa03c5005410e771ba8f"
+    "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
+    "src/StudioMcp.cpp": "cd1c590f547718dc601eb5ad0a713a6594d4fe593ec132bf381ff9dec3ff8302"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [

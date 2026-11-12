@@ -443,6 +443,7 @@ const std::vector<CommandInfo> &commandRegistry()
         {"transport.waitOnlyWhenRecording", "Wait for input: only when recording", Scope::global, false, true, "action"},
         {"transport.waitRespectFilter", "Wait for input: respect recording filter", Scope::global, false, true, "action"},
         {"transport.quantizeKeepDuration", "Recording quantize: leave note duration", Scope::global, false, true, "action"},
+        {"transport.recordToSteps", "Record to step sequencer", Scope::global, false, true, "action"},
         {"view.timeDisplay", "Show time as minutes:seconds / beats", Scope::global, false, true, "action"},
         {"pattern.findEmptyNoNaming", "Find next empty Pattern (no naming)", Scope::global, false, true, "action"},
         {"pattern.selectInPlaylist", "Select the Pattern's clips in the Playlist", Scope::patterns, false, true, "action"},
@@ -4187,6 +4188,9 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             }
             if (!next.channel(note.channel))
                 return missing();
+            if (id == "notes.record" && note.step) // Record to step sequencer: one step per slot.
+                std::erase_if(pat->notes, [&](const auto &old)
+                              { return old.step && old.channel == note.channel && std::abs(old.beat - note.beat) < .00001; });
             note.id = next.allocate();
             pat->notes.push_back(note);
         }

@@ -537,6 +537,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
     juce::Array<juce::MidiDeviceInfo> midiInputDevices;
     juce::Array<juce::MidiDeviceInfo> controlInputDevices, controlOutputDevices; // Same rule; vibera_controller ports rescans.
     bool rememberSeekTime = false; // Transport option: Stop returns to where Play was pressed, not to the start.
+    bool recordToSteps = false;        // Recording option: recorded notes become step sequencer steps.
     bool quantizeKeepDuration = false; // Recording quantize: a quantized start keeps the played note length.
     bool disarmOnStop = true;          // Recording option: Stop turns Record off (off keeps it armed).
     bool recordStartsPlayback = false; // Recording option: arming Record while stopped also presses Play.
@@ -1174,6 +1175,7 @@ class Studio final : public juce::Component, private juce::Timer, public juce::D
         double placementBeat = 0, placementOffset = 0, stopSeconds = 0;
         Phase phase = Phase::capturing;
         Error error = Error::none;
+        bool stepsApplied = false; // Record to step sequencer converted the notes once (retries keep them).
     };
     std::unique_ptr<PendingMidiTake> pendingMidiTake;
     std::uint64_t nextMidiTakeSerial = 0, lastMidiTakeSerial = 0, lastMidiTakeRevision = 0;

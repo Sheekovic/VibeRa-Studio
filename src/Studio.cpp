@@ -3794,6 +3794,7 @@ void Studio::toolsMenu()
     menu.addItem(254, "Disarm on stop (Stop turns Record off)", true, disarmOnStop);
     menu.addItem(255, "Show time as minutes:seconds", true, timeDisplaySeconds);
     menu.addItem(256, "Recording quantize: leave note duration", true, quantizeKeepDuration);
+    menu.addItem(295, "Record to step sequencer (recorded notes become steps)", true, recordToSteps);
     {
         // Monitor volume: what you hear only; exports, meters and the audio logger are unchanged.
         juce::PopupMenu monitor;
@@ -3915,6 +3916,11 @@ void Studio::toolsMenu()
                 MonitorVolume::instance().set(float(choice - 400) / 100.f);
                 safe->status = "Monitor volume " + juce::String(choice - 400) + "% (listening only)";
                 safe->repaint();
+                return;
+            }
+            if (choice == 295)
+            {
+                safe->performAction("transport.recordToSteps");
                 return;
             }
             if (choice >= 291 && choice <= 294)
@@ -4707,6 +4713,13 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action == "view.drumPads")
     {
         showDrumPads();
+        return true;
+    }
+    if (action == "transport.recordToSteps")
+    {
+        recordToSteps = !recordToSteps;
+        status = recordToSteps ? "Recorded notes become step sequencer steps" : "Recorded notes go to the Piano roll";
+        repaint();
         return true;
     }
     if (action == "transport.quantizeKeepDuration")
@@ -6860,7 +6873,13 @@ juce::Result Studio::retryMidiTake(std::uint64_t expectedSerial)
         if (!take.args.recordedNotes.empty() || !take.args.recordedControllers.empty())
         {
             take.phase = PendingMidiTake::Phase::applying;
-            take.args.replaceRecorded = midiRecordReplace;
+            if (recordToSteps && !take.stepsApplied)
+            {
+                const auto *target = controller.project.pattern(take.args.pattern);
+                recordedNotesToSteps(take.args.recordedNotes, takePatternMode && target ? target->length : 0);
+                take.stepsApplied = true;
+            }
+            take.args.replaceRecorded = midiRecordReplace && !recordToSteps;
             const auto result = controller.execute("notes.record", take.args); // NEVER move out.
             if (result.failed())
             {

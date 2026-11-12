@@ -424,4 +424,28 @@ class MidiTake
         return copy.finish(seconds);
     }
 };
+// Record to step sequencer: every recorded note becomes a step on the 1/16 grid (a quarter beat),
+// wrapped into `loop` beats when the take loops a Pattern. One step per Channel and slot; the first
+// note played on a slot keeps its pitch and velocity.
+inline void recordedNotesToSteps(std::vector<Note> &notes, double loop)
+{
+    std::set<std::pair<Id, long long>> seen;
+    std::vector<Note> steps;
+    steps.reserve(notes.size());
+    for (auto note : notes)
+    {
+        auto slot = std::llround(note.beat / .25);
+        if (loop >= .25)
+            slot %= std::max(1ll, std::llround(loop / .25));
+        if (slot < 0 || !seen.insert({note.channel, slot}).second)
+            continue;
+        note.beat = double(slot) * .25;
+        note.length = .25;
+        note.step = true;
+        note.muted = false;
+        steps.push_back(note);
+    }
+    std::stable_sort(steps.begin(), steps.end(), [](const Note &a, const Note &b) { return a.beat < b.beat; });
+    notes = std::move(steps);
+}
 } // namespace vibera

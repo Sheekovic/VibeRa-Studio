@@ -125,6 +125,10 @@ Tempo steps: `vibera_command` `project.tempoHalf`, `project.tempoDouble`, `proje
 `project.tempoNudgeDown` (1 BPM) edit the project tempo in one Undo step each; a result outside
 20..400 BPM is refused (`state.tempo`).
 
+Record to step sequencer: `vibera_command transport.recordToSteps` toggles it (`state.recordToSteps`).
+While on, a finished MIDI take is written as 1/16 steps (first note per Channel and slot, wrapped
+into a looped Pattern) instead of Piano roll notes; overdub rules do not erase other notes.
+
 Wait for input: `vibera_command transport.waitForInput` toggles it (`state.waitForInput`). With Rec
 armed, Play then opens the take at the playhead without starting (`state.waitingForInput`); the
 first MIDI or typing-keyboard note starts playback and is recorded at the take start. Stop (or

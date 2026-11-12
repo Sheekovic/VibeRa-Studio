@@ -91,6 +91,13 @@ try:
     call("vibera_command", {"command": "transport.waitForInput"})
     check(state().get("waitRespectFilter") is True and state().get("waitForInput") is False, "Both options and Wait for input are restored")
 
+    # Record to step sequencer: the option toggles and reads back (the conversion is a native check).
+    check(state().get("recordToSteps") is False, "Record to step sequencer is off by default")
+    call("vibera_command", {"command": "transport.recordToSteps"})
+    check(state().get("recordToSteps") is True, "transport.recordToSteps turns the option on")
+    call("vibera_command", {"command": "transport.recordToSteps"})
+    check(state().get("recordToSteps") is False, "transport.recordToSteps turns it off again")
+
     # Audio logger: without an audio device it is refused truthfully; save refuses while off.
     logger = state().get("audioLogger", {})
     check(logger.get("enabled") is False and logger.get("recordedSeconds") == 0, "Audio logger reads back off")

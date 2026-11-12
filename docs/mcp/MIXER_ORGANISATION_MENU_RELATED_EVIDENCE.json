@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
+  "applicationSha256": "2002a82b3fa617f0af3d70373ffc253432b7dbcacb651a8bc24f7048d41404c0",
   "sourceInputs": {
     "src/StudioMixerOrganisation.inc": "d12072676fab29593297208dd9f1a7786ee3c3911980f4f9dff5280a1df97577",
     "src/MixerGroups.h": "1dfb974785defbe0d6bf0a554d54714675d9af1b1c3b77004de10a26a750ec41",
-    "src/Commands.cpp": "323ece539f522e60741318522e821c14dc1937ddc97cb22f6711e6dc774f3abc",
+    "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
     "scripts/verify-mixer-organisation-mcp.py": "d757de9a8e5f76e25469dde8d2cbe0dcc066580e6a97bdf8085d3ee8a6b76dc4"
   },
   "sourceHashMode": "text-lf-v1",

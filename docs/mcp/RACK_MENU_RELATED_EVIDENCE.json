@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
+  "applicationSha256": "2002a82b3fa617f0af3d70373ffc253432b7dbcacb651a8bc24f7048d41404c0",
   "sourceInputs": {
     "src/StudioRack.cpp": "e6cf4833b86218a621f7cda8502b7cde426f34563b5b30c89f19123b46983459",
-    "src/Studio.cpp": "6a09817e279052e3a23d85215e01af241b2e37a97a42a1368638a962c278a146",
-    "src/StudioMcp.cpp": "56283f29ecbda80e0914324aba6094ac80327d8bc12caa03c5005410e771ba8f",
-    "src/Commands.cpp": "323ece539f522e60741318522e821c14dc1937ddc97cb22f6711e6dc774f3abc",
+    "src/Studio.cpp": "3f3dcabe8c905bbb60513dc2b484dbf843dc98376a1de9b5bcb28302a4fd55e0",
+    "src/StudioMcp.cpp": "cd1c590f547718dc601eb5ad0a713a6594d4fe593ec132bf381ff9dec3ff8302",
+    "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
     "scripts/verify-rack-mcp.py": "fd42583846c99887aedc4c37e74dcc92055c6517a4fab6f39a2efc688552720c",
     "scripts/verify-step-fill-mcp.py": "a22908cc66aa16a4f84574fbc23576a315185705eaef2ef267d0c1a9fb60409b",
     "scripts/verify-channel-solo-mcp.py": "d514c2a2bf08e5de8e429454e03bf386084538f1923b1c3ca0f48d090532ffe7",

@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "bd7142f19f4e9e3243a27e47dc920daf3d279f7f2f2734c091dcfc6114cefde3",
+  "applicationSha256": "2002a82b3fa617f0af3d70373ffc253432b7dbcacb651a8bc24f7048d41404c0",
   "sourceInputs": {
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
-    "src/Commands.cpp": "323ece539f522e60741318522e821c14dc1937ddc97cb22f6711e6dc774f3abc",
-    "src/StudioMcp.cpp": "56283f29ecbda80e0914324aba6094ac80327d8bc12caa03c5005410e771ba8f",
+    "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
+    "src/StudioMcp.cpp": "cd1c590f547718dc601eb5ad0a713a6594d4fe593ec132bf381ff9dec3ff8302",
     "scripts/verify-mixer-effects-mcp.py": "a2c727cf3802cf09e8a25bc36789cf0ad0fa3e50f1985db667c31db725af181e",
     "scripts/verify-plugin-editors-mcp.py": "190e77c432300cb7281bd53b98189681ec6928a3f60bade9e71b04bdac8ef946",
     "scripts/verify-native-effects-mcp.py": "6f7116bc7684e69395f92f2c4d9cf4b52f0e04c850878cda792cd32225f7dd3a"

@@ -361,6 +361,46 @@ static void audioLoggerTests(const juce::File &folder)
     logger.disable();
     require(!logger.enabled() && logger.recordedSeconds() == 0, "disable frees the buffer");
 }
+static void recordToStepsTests()
+{
+    // Record to step sequencer: recorded notes snap to the 1/16 grid as steps, one per Channel and slot.
+    std::vector<Note> notes{{0, 7, .27, .9, 64, .5f, false}, {0, 7, .21, .1, 67, .9f, false}, {0, 7, 1.13, .4, 60, .7f, false},
+                            {0, 8, .3, .2, 62, .6f, false},  {0, 7, 4.02, .3, 65, .8f, false}};
+    auto wrapped = notes;
+    recordedNotesToSteps(notes, 0);
+    require(notes.size() == 4 && notes[0].channel == 7 && notes[0].beat == .25 && notes[0].pitch == 64 && notes[0].step &&
+                notes[0].length == .25 && notes[1].channel == 8 && notes[1].beat == .25 && notes[2].beat == 1.25 &&
+                notes[3].beat == 4.,
+            "recorded notes become quarter-beat steps; the first note on a slot keeps its pitch");
+    recordedNotesToSteps(wrapped, 4);
+    require(wrapped.size() == 4 && wrapped[0].beat == 0. && wrapped[0].pitch == 65,
+            "a looped take wraps the steps into the Pattern length");
+    Controller c;
+    c.replace(Project::demo());
+    const auto pattern = c.project.patterns.front().id;
+    const auto channel = c.project.channels.front().id;
+    CommandArgs set;
+    set.pattern = pattern;
+    set.channel = channel;
+    set.beat = 3.75;
+    set.enabled = true;
+    require(c.execute("steps.set", set).wasOk(), "a step exists before the take");
+    const auto stepsAt = [&](double beat)
+    {
+        return std::count_if(c.project.pattern(pattern)->notes.begin(), c.project.pattern(pattern)->notes.end(),
+                             [&](const Note &n) { return n.step && n.channel == channel && std::abs(n.beat - beat) < 1e-6; });
+    };
+    const auto before = c.project.pattern(pattern)->notes.size();
+    CommandArgs take;
+    take.pattern = pattern;
+    take.recordedNotes = {{0, channel, 3.75, .25, 72, .9f, true}, {0, channel, 3.5, .25, 70, .9f, true}};
+    const bool had = stepsAt(3.5) > 0;
+    require(c.execute("notes.record", take).wasOk() && stepsAt(3.75) == 1 && stepsAt(3.5) == 1 &&
+                c.project.pattern(pattern)->notes.size() == before + (had ? 0 : 1),
+            "a recorded step replaces the step already on its slot instead of doubling it");
+    c.undoEdit();
+    require(c.project.pattern(pattern)->notes.size() == before, "the step take is one Undo step");
+}
 static void monitorVolumeTests()
 {
     // Listening-only gain: untouched at 1, one block of ramp to the target, then steady; back to 1.
@@ -5719,6 +5759,7 @@ int main(int argc, char **argv)
         runStage("scoreLogTests", [&] { scoreLogTests(folder); });
         runStage("audioLoggerTests", [&] { audioLoggerTests(folder); });
         runStage("monitorVolumeTests", [&] { monitorVolumeTests(); });
+        runStage("recordToStepsTests", [&] { recordToStepsTests(); });
         runStage("midiScoreTests", [&] { midiScoreTests(folder); });
         runStage("midiScoreLiveTests", [&] { midiScoreLiveTests(folder); });
         runStage("scoreToolsTests", [&] { scoreToolsTests(folder); });
