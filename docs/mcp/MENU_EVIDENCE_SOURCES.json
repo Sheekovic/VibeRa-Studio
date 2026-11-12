@@ -414,6 +414,18 @@
         "src/StudioMcp.cpp"
       ],
       "scope": "Isolated --mcp-test without an audio device; the registered operations the Performance pads, pad menu and Scenes menu run. Launching only places clips: not playback, native popup input or listening evidence."
+    },
+    "docs/mcp/PICKER_PATTERN_MENU_EVIDENCE.json": {
+      "script": "scripts/verify-picker-pattern-menu-mcp.py",
+      "folder": "picker-pattern-menu",
+      "sources": [
+        "scripts/verify-picker-pattern-menu-mcp.py",
+        "src/ClipPicker.h",
+        "src/PatternManagement.h",
+        "src/Studio.cpp",
+        "src/Commands.cpp"
+      ],
+      "scope": "Isolated --mcp-test; the registered operations the Picker Pattern menu runs. Not native popup, confirmation dialog or file dialog input."
     }
   }
 }

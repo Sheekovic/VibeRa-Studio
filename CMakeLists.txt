@@ -1025,6 +1025,9 @@ set_tests_properties(mixer_organisation_menu_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME performance_pads_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-performance-pads-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/performance_pads_mcp")
 set_tests_properties(performance_pads_mcp PROPERTIES TIMEOUT 120)
+add_test(NAME picker_pattern_menu_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-picker-pattern-menu-mcp.py"
+  "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/picker_pattern_menu_mcp")
+set_tests_properties(picker_pattern_menu_mcp PROPERTIES TIMEOUT 120)
 add_test(NAME envelope_presets_mcp COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/scripts/verify-envelope-presets-mcp.py"
   "$<TARGET_FILE:VibeRa>" "${CMAKE_CURRENT_BINARY_DIR}/envelope_presets_mcp")
 set_tests_properties(envelope_presets_mcp PROPERTIES TIMEOUT 120)

@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "applicationSha256": "f4e62c93eeeaf4c039a5fb40a043b2f29e2fc113eca3607fc741021ea2fe9dd4",
+  "sourceInputs": {
+    "scripts/verify-picker-pattern-menu-mcp.py": "dfcbe585a3f03166dd34b04b38352e94b45e575e8c902ab7a6ab78999d9848c9",
+    "src/ClipPicker.h": "1fec06802a2c49d4828e96e6183398611035d50ab55eec419fdb6203af8d2ce4",
+    "src/PatternManagement.h": "8c97362f8d02f9a743a5de168cdf766ccb443169e7d14a704756875bb669a98c",
+    "src/Studio.cpp": "16aa1eeeb86482c835994415e7dd32fa9fb42ae9a1c9755bcbe13a5cdae40f3c",
+    "src/Commands.cpp": "532fb7e1ef53b0df6615fed1834a1b30ff91a3450ba754dc9dc1eb54bcf4b5db"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "Group selected puts both Patterns in the filter group (pattern.group)",
+    "Ungroup selected clears only the chosen Pattern",
+    "A missing Pattern is refused and nothing changes",
+    "Grouping and ungrouping are one Undo step each",
+    "Rename / colour names the Pattern (pattern.properties)",
+    "A transparent Pattern colour is refused",
+    "Rename / colour is one Undo step",
+    "The demo Pattern has notes (36)",
+    "Transpose moves every note up an octave (pattern.transpose)",
+    "A transpose outside MIDI pitches is refused and nothing changes",
+    "An empty Pattern has nothing to transpose",
+    "Transpose is one Undo step",
+    "Clone selected Patterns adds two Patterns (pattern.cloneSelected)",
+    "The clones carry the notes",
+    "Delete selected Patterns removes them (pattern.deleteSelected)",
+    "Delete selected is one Undo step",
+    "Delete Patterns not in Playlist keeps only placed Patterns (pattern.deleteUnplaced, 1 left)",
+    "Delete Patterns not in Playlist is one Undo step",
+    "Delete empty unused Patterns removes the empty unplaced Pattern (pattern.deleteEmpty)",
+    "Delete empty unused Patterns is one Undo step"
+  ],
+  "scope": "Isolated --mcp-test; the registered operations the Picker Pattern menu runs. Not native popup, confirmation dialog or file dialog input.",
+  "refreshedBy": "scripts/refresh-menu-evidence.py"
+}

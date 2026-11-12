@@ -805,7 +805,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 68.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 367; gaps: 156.
+Explicit UI inventory complete: False; known controls: 374; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1177,6 +1177,13 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `performance.pad.assign` | performance.assignPad | vibera_command; reviewed |
 | `performance.pad.launchQuantum` | pattern.launchQuantum | vibera_command; reviewed |
 | `performance.pad.followAction` | pattern.followAction | vibera_command; reviewed |
+| `picker.pattern.group` | pattern.group | vibera_command; reviewed |
+| `picker.pattern.renameColour` | pattern.properties | vibera_command; reviewed |
+| `picker.pattern.transpose` | pattern.transpose | vibera_command; reviewed |
+| `picker.pattern.clone` | pattern.cloneSelected | vibera_command; reviewed |
+| `picker.pattern.delete` | pattern.deleteSelected | vibera_command; reviewed |
+| `picker.pattern.deleteUnplaced` | pattern.deleteUnplaced | vibera_command; reviewed |
+| `picker.pattern.deleteEmpty` | pattern.deleteEmpty | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.
