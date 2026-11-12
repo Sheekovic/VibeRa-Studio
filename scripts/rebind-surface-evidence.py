@@ -72,8 +72,26 @@ for op in inventory["operations"]:
             changed_ops += 1
         verification["inputs"] = new_inputs
 
-print(json.dumps(dict(receipts=len(receipts), operationsRebound=changed_ops, missing=sorted(missing), applied=args.apply)))
+# Reviewed callback surfaces that cite one of the rebound receipts follow it: same receipt, same
+# complete run. A surface whose own file is not among the receipt's inputs stays stale.
+reviewed_path = ROOT / "docs/mcp/REVIEWED_SURFACES.json"
+reviewed = json.loads(reviewed_path.read_text(encoding="utf-8-sig")) if reviewed_path.is_file() else {}
+changed_surfaces = 0
+for key, entry in reviewed.items():
+    verification = entry.get("verification") or {}
+    receipt_name = verification.get("receipt")
+    if verification.get("status") != "passed" or receipt_name not in receipts:
+        continue
+    new_inputs = receipts[receipt_name][1]["sourceInputs"]
+    if key.rsplit(":", 2)[0] in new_inputs and verification.get("inputs") != new_inputs:
+        verification["inputs"] = new_inputs
+        verification["sourceHashMode"] = receipts[receipt_name][1].get("sourceHashMode", "raw")
+        changed_surfaces += 1
+
+print(json.dumps(dict(receipts=len(receipts), operationsRebound=changed_ops, surfacesRebound=changed_surfaces,
+                      missing=sorted(missing), applied=args.apply)))
 if args.apply:
+    reviewed_path.write_text(json.dumps(reviewed, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     for path, receipt in receipts.values():
         path.write_text(json.dumps(receipt, indent=2) + "\n", encoding="utf-8")
     inventory_path.write_text(json.dumps(inventory, indent=2) + "\n", encoding="utf-8")

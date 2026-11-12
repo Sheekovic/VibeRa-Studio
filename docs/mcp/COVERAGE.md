@@ -773,7 +773,7 @@ Callback candidates require manual expansion into individual controls and gestur
 | `automation.plugin.macro.link` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 | `automation.macro.unlink` | command | vibera_state / vibera_inspect; operation-specific gaps require review | skills/vibera-studio/SKILL.md; per-operation verification incomplete |
 
-Custom callback candidates: 454; unreviewed: 40.
+Custom callback candidates: 454; unreviewed: 35.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
 Explicit UI inventory complete: False; known controls: 160; gaps: 0.
@@ -969,6 +969,9 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/AiPage.h:366:030de0e32604` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
 | `src/AiPage.h:376:626d844865cc` | ai.configure | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
 | `src/AiPage.h:381:35e3a5405545` | ai.panel | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_AIPAGE_EVIDENCE.json) |
+| `src/ChannelColourPicker.h:82:50e4ad1e68b6` | channel.properties, rack.properties | vibera_rack:state, vibera_inspect:channels | skills/vibera-studio/references/channel-appearance.md; [receipt](../../docs/mcp/CHANNEL_COLOUR_PICKER_EVIDENCE.json) |
+| `src/ChannelColourPicker.h:93:50be00219484` | channel.properties, rack.properties | vibera_rack:state, vibera_inspect:channels | skills/vibera-studio/references/channel-appearance.md; [receipt](../../docs/mcp/CHANNEL_COLOUR_PICKER_EVIDENCE.json) |
+| `src/ChannelColourPicker.h:97:70795a1af150` | channel.properties, rack.properties | vibera_rack:state, vibera_inspect:channels | skills/vibera-studio/references/channel-appearance.md; [receipt](../../docs/mcp/CHANNEL_COLOUR_PICKER_EVIDENCE.json) |
 | `src/ClipPicker.h:40:0677c6744d20` | picker.width | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
 | `src/ClipPicker.h:44:677823569f56` | picker.width | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
 | `src/ClipPicker.h:167:3e2fe6462e21` | picker.select | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_CLIPPICKER_EVIDENCE.json) |
@@ -1192,6 +1195,7 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/RackVelocityGraph.h:392:47a6ec64ed16` | steps.fine, steps.modX, steps.modY, steps.pan, steps.pitch, steps.release, steps.repeat, steps.shift, steps.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKVELOCITYGRAPH_EVIDENCE.json) |
 | `src/RackVelocityGraph.h:492:8b8a18f493cc` | steps.fine, steps.modX, steps.modY, steps.pan, steps.pitch, steps.release, steps.repeat, steps.shift, steps.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKVELOCITYGRAPH_EVIDENCE.json) |
 | `src/RackVelocityGraph.h:497:d2f3322eb5dd` | steps.fine, steps.modX, steps.modY, steps.pan, steps.pitch, steps.release, steps.repeat, steps.shift, steps.velocity | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_RACKVELOCITYGRAPH_EVIDENCE.json) |
+| `src/RackVelocityGraph.h:501:a5bce6016f9b` | rack.graph, steps.velocity, steps.pitch, steps.pan, steps.fine, steps.shift, steps.repeat, steps.release, steps.modX, steps.modY | vibera_rack:graph, vibera_inspect:notes, vibera_state:channels.sampler, vibera_gesture:state | skills/vibera-studio/references/sampler-modulation.md; [receipt](../../docs/mcp/SAMPLER_MODULATION_EVIDENCE.json) |
 | `src/SampleFileBrowser.h:102:45ccd61ba4bc` | browser.tagFilter | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
 | `src/SampleFileBrowser.h:582:fc7724e5a1b1` | browser.playPreview | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
 | `src/SampleFileBrowser.h:586:69adcd597b63` | browser.editTags, browser.playPreview, browser.toggleFavorite, channel.add, channel.source, notes.import | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_SAMPLEFILEBROWSER_EVIDENCE.json) |
@@ -1335,6 +1339,7 @@ Native mouse/hardware qualification is separate from component/MCP evidence.
 | `src/StudioQuantizer.cpp:324:1cfae7197d67` | notes.quantize | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOQUANTIZER_EVIDENCE.json) |
 | `src/StudioQuantizer.cpp:335:b9629998c0a6` | notes.quantize | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOQUANTIZER_EVIDENCE.json) |
 | `src/StudioQuantizer.cpp:336:a546ad81d0b0` | notes.quantize | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOQUANTIZER_EVIDENCE.json) |
+| `src/StudioRack.cpp:450:37d86e3d004d` | rack.group.create, rack.group.rename, rack.group.delete, rack.group.assign, rack.group.dialog, rack.group.previous, rack.group.next | vibera_rack:state | skills/vibera-studio/references/rack.md; [receipt](../../docs/mcp/RACK_GROUPS_EVIDENCE.json) |
 | `src/StudioVocalPitch.cpp:89:da04d61d68f9` | audio.vocalPitch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOVOCALPITCH_EVIDENCE.json) |
 | `src/StudioVocalPitch.cpp:90:142a5377b5c8` | audio.vocalPitch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOVOCALPITCH_EVIDENCE.json) |
 | `src/StudioVocalPitch.cpp:102:d8e65967097a` | audio.vocalPitch | vibera_state, vibera_inspect, vibera_commands | skills/vibera-studio/SKILL.md; [receipt](../../docs/mcp/CALLBACK_STUDIOVOCALPITCH_EVIDENCE.json) |
