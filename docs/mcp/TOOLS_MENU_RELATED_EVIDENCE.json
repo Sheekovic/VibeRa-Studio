@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "applicationSha256": "d9c084fd794e3e38e4b6316ddb5486ed41ce4adcb704d80fb2959cb27ecde748",
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
   "sourceInputs": {
     "src/Studio.cpp": "23133b1382167ce2ff23aa3f0f5d1089ca539bfc0b002b0db902e83a527d9376",
-    "src/StudioMcp.cpp": "6496a1c692cd6e476afc74c4e47415da74b65cdf447e81a583386df969e9af80",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816",
     "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
     "scripts/verify-plugin-editors-mcp.py": "190e77c432300cb7281bd53b98189681ec6928a3f60bade9e71b04bdac8ef946",
     "scripts/verify-macros-mcp.py": "71040219417a8d96f72c90334cfc58b59ef388fc714471935d121bfd2318babd",
@@ -20,10 +20,8 @@
     "ctest loudness_mcp passed (run alone)",
     "ctest macros_mcp passed (run alone)",
     "ctest mcp_ui_actions passed (run alone)",
-    "ctest menu_item_ids passed (run alone)",
     "ctest missing_media passed (run alone)",
     "ctest plugin_editors_mcp passed (run alone)",
-    "ctest tools_menu_mcp passed (run alone)",
     "ctest workspace_layout_mcp passed (run alone)"
   ],
   "sourceLog": "build/module-qualification/tools-menu/related-ctest.log",

@@ -794,7 +794,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 454; unreviewed: 37.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 258; gaps: 156.
+Explicit UI inventory complete: False; known controls: 274; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1057,6 +1057,22 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `piano.menu.articulation` | channel.articulations / notes.articulation | vibera_command; reviewed |
 | `piano.menu.patternMarkers` | pattern.marker.add / pattern.marker.delete | vibera_command; reviewed |
 | `piano.menu.interpolate` | notes.controller.interpolate | vibera_command; reviewed |
+| `playlist.track.rename` | track.rename | vibera_command; reviewed |
+| `playlist.track.colour` | track.colour | vibera_command; reviewed |
+| `playlist.track.mute` | track.mute | vibera_command; reviewed |
+| `playlist.track.solo` | track.solo | vibera_command; reviewed |
+| `playlist.track.lock` | track.lock | vibera_command; reviewed |
+| `playlist.track.height` | track.height | vibera_command; reviewed |
+| `playlist.track.group` | track.group | vibera_command; reviewed |
+| `playlist.track.collapse` | track.collapse | vibera_command; reviewed |
+| `playlist.track.instrument` | track.instrument | vibera_command; reviewed |
+| `playlist.track.audio` | track.audio | vibera_command; reviewed |
+| `playlist.track.insert` | track.insert | vibera_command; reviewed |
+| `playlist.track.clone` | track.clone | vibera_command; reviewed |
+| `playlist.track.delete` | track.delete | vibera_command; reviewed |
+| `playlist.track.move` | track.move | vibera_command; reviewed |
+| `playlist.track.autoName` | track.autoName | vibera_command; reviewed |
+| `playlist.track.reset` | track.reset | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.

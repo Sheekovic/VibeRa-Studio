@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
+  "sourceInputs": {
+    "scripts/verify-playlist-track-menu-mcp.py": "89b1436ca4acaba15019cf4578fd7bd8bb90d6a092d37d7211059e9bc74ec44c",
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
+    "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
+    "src/McpContracts.h": "7d455396593209469c6471b395fb76d8841b8647420d3a1fc0348cf141b16869",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816"
+  },
+  "sourceHashMode": "text-lf-v1",
+  "checks": [
+    "Two clips on tracks 1 and 2",
+    "Rename track (track.rename)",
+    "Track colour (track.colour)",
+    "A transparent track colour is refused",
+    "Mute track (track.mute)",
+    "Solo track mutes the other used tracks (track.solo)",
+    "Soloing it again unmutes every track",
+    "Lock track (track.lock)",
+    "Track height x2 (track.height)",
+    "A height above 3 is refused",
+    "Group with track above (track.group)",
+    "The first track has nothing above to group with",
+    "Collapse group (track.collapse)",
+    "Instrument track (track.instrument)",
+    "Audio track replaces the instrument owner (track.audio)",
+    "Insert track moves the later tracks down (track.insert)",
+    "Insert track is one Undo step",
+    "Clone track copies the track and its clips below it (track.clone) [(0, 0.0), (1, 0.0), (2, 0.0)] null",
+    "Delete track removes the track and its clips (track.delete)",
+    "Move track up swaps it with the track above (track.move)",
+    "The first track cannot move up",
+    "Auto name reports its outcome (track.autoName, completed, Pattern 1)",
+    "Reset track clears the name and colour (track.reset)"
+  ],
+  "scope": "Isolated --mcp-test; the registered operations the Playlist track menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence."
+}

@@ -2697,6 +2697,12 @@ juce::var Studio::mcpCall(const juce::String &name, const juce::var &args,
                 set(row, "name", track.name);
                 set(row, "colour", juce::int64(track.colour));
                 set(row, "muted", track.muted);
+                set(row, "locked", track.locked);
+                set(row, "height", track.height);
+                set(row, "groupedAbove", track.groupedAbove);
+                set(row, "collapsed", track.collapsed);
+                set(row, "channel", juce::int64(track.channel)); // Instrument track owner, 0 = free track.
+                set(row, "audio", track.audio);
                 append(row);
             }
         else if (entity == "clipGroups")

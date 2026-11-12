@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "8fec768a822c95af69925a125347d3622304fdc0ec6f659bd97714b12ffae2bb",
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
   "sourceInputs": {
     "scripts/verify-piano-menu-mcp.py": "1b78720e75eedd7c95e65e60efb28d91a04bbef53bbc43a0cc7cfe320a5f5d67",
     "src/StudioMidi.cpp": "b12b4f612ad87466dad35d5f5f97956ddf894cdf3823727b9e66fe91c060f170",
     "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97",
-    "src/McpContracts.h": "ff824291605ff2261a5652013d08f1efa0be9d35bdafe5236e4ac2115e7d7cb7",
-    "src/StudioMcp.cpp": "6496a1c692cd6e476afc74c4e47415da74b65cdf447e81a583386df969e9af80"
+    "src/McpContracts.h": "7d455396593209469c6471b395fb76d8841b8647420d3a1fc0348cf141b16869",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [

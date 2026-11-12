@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "d9c084fd794e3e38e4b6316ddb5486ed41ce4adcb704d80fb2959cb27ecde748",
+  "applicationSha256": "15caa311ae53eb851561356bc3321ad8cb2175951b795ec99b6cf3df17b2dbeb",
   "sourceInputs": {
     "scripts/verify-mixer-track-menu-mcp.py": "503497485880d4a09d66d7299d6bda2d039bb7702bbe2e207052f3b47fa09fae",
     "src/Studio.cpp": "23133b1382167ce2ff23aa3f0f5d1089ca539bfc0b002b0db902e83a527d9376",
     "src/MixerControls.h": "3790e3611c98d22ab5a5a76ac525a0ab789d4426ec898ffb2e4316f773059f49",
-    "src/StudioMcp.cpp": "6496a1c692cd6e476afc74c4e47415da74b65cdf447e81a583386df969e9af80",
+    "src/StudioMcp.cpp": "04abda64f824d8a447e7af1179f3cbe6d8ce0032d7cde3139c01eafe3642a816",
     "src/Commands.cpp": "a969e1273dfb72180444a98263af45a6573c32be759c035bf4e165f2275c7d97"
   },
   "sourceHashMode": "text-lf-v1",

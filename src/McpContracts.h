@@ -398,7 +398,9 @@ inline juce::var commandArgumentSchema(const juce::String &id)
             extra = R"(,"enabled":{"type":"boolean","description":"true makes it an audio track: audio recordings land on the first audio track with room (stacked passes use the tracks below it); false makes it a free track."})";
         else if (id == "track.instrumentClip")
             extra = R"(,"beat":{"type":"number","minimum":0,"description":"Where the new one-bar Pattern for the track's Channel is placed."})";
-        const auto required = id == "track.insert" || id == "track.delete" || id == "track.solo" ? R"(["lane"])"
+        const auto required = id == "track.insert" || id == "track.delete" || id == "track.solo" || id == "track.clone" ||
+                                      id == "track.autoName" || id == "track.reset" // These take the lane only.
+                                  ? R"(["lane"])"
                               : id == "track.rename"                      ? R"(["lane","text"])"
                               : id == "track.instrument"                  ? R"(["lane","channel"])"
                               : id == "track.instrumentClip"              ? R"(["lane","beat"])"
