@@ -1,13 +1,13 @@
 {
   "passed": true,
-  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "sourceInputs": {
     "scripts/verify-record-filter-mcp.py": "8e4c8ed5b8456a924bf6ebd3dc362aee64eafd6b319bd14bf0002ff85d3da8dc",
     "scripts/verify-master-pitch-mcp.py": "6e657c587bc22d096a809612a39cc937d5aa99421f1a341ee053f3a7c1095af9",
-    "src/Studio.cpp": "03747e59fef7226b5cb3ce8740994983c2c19c7266c7731072807675f32bd118",
+    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
     "src/StudioSwing.cpp": "4bc0b2a1d05bf05ee22b9e17c3499d17c14053708d1f4b897f2fffe94c00b55c",
-    "src/StudioMcp.cpp": "b357093d5c42d95d533a7816677dc5524bf77183b222a1016bb27432a097163b",
-    "src/Commands.cpp": "2871f29b02e2ecef366554ba57b23bfedfed84fa480060bfbc40a4b4fcbefc45",
+    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
+    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
     "src/AudioLogger.h": "ac1ddc5ac7f83ca99e5b505a5a17a8bde8b354dfeee90829971d91668c0f6ba3"
   },
   "sourceHashMode": "text-lf-v1",
@@ -38,22 +38,11 @@
   "scope": "Isolated --mcp-test; Tools menu options through their canonical commands. Audio logger on a real device is covered separately by scripts/verify-audio-logger-device.py; Wait for input with a physical keyboard is not qualified.",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
-      "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
-      "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
-      "build/dev/20261110-103302/rerun-isolated_parameters.log",
-      "build/dev/20261110-103302/rerun-gui_workflow.log",
-      "build/dev/20261110-103302/rerun-audio_playlist_live.log",
-      "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
-      "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
-      "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
-      "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
-      "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
-      "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
     "tests": 290
   }
 }

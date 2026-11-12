@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "sourceInputs": {
     "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
     "dependencies.lock.json": "ca72ca38891c5e03f749bfe523a04b7f173d59f26c4459c56ce99c28c1db62c6",
@@ -21,7 +21,7 @@
     "src/AutomationState.cpp": "f45588dc8d2366bab2081546e939c72a788694f31c42c978bb1cd97b9affaac3",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
     "src/ClipPicker.h": "dec6e2490fcbd35af00336be7efe897dd4f0c9dc04b7a740003c7197f471c7b4",
-    "src/Commands.cpp": "2871f29b02e2ecef366554ba57b23bfedfed84fa480060bfbc40a4b4fcbefc45",
+    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
@@ -47,7 +47,7 @@
     "src/SamplerSettings.h": "b8caf4fa414a4766e3177e65b4865060014720850501fc7a1763cf20a67c3206",
     "src/Settings.h": "bc213f35cd515e3aa42df1b9bd41344281b79d452b519f49446c779149e2ada4",
     "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
-    "src/StudioMcp.cpp": "b357093d5c42d95d533a7816677dc5524bf77183b222a1016bb27432a097163b",
+    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
     "src/StudioMixerControls.cpp": "8f6a4f91f0535c7499a8b1367933317a61af97e4fa14723d0223d09e94451cca",
     "src/StudioMixerMacros.inc": "bfe64ba23bdefd22b12dd0b2c8bf5d26dc2dd97388f4c860f799db6bc75d858b",
     "src/StudioRoutingCoordinator.inc": "57370882476f560a218251ea2556058b138a556ccc229f69f9afb28ff4d9b366",
@@ -79,22 +79,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
-      "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
-      "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
-      "build/dev/20261110-103302/rerun-isolated_parameters.log",
-      "build/dev/20261110-103302/rerun-gui_workflow.log",
-      "build/dev/20261110-103302/rerun-audio_playlist_live.log",
-      "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
-      "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
-      "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
-      "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
-      "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
-      "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
     "tests": 290
   }
 }

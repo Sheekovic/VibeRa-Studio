@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "sourceInputs": {
     "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
     "scripts/dev_support.py": "f4e99deebe8388b42ca4f74a68d4425a82c87b3f74f60cb64a76d43842c56a78",
@@ -16,7 +16,7 @@
     "src/AudioEngine.cpp": "f418ebdf0ccc877f938bdc89be6a925ed9d92927bb67aa905e35d7e21536061c",
     "src/AudioEngine.h": "10eca98c9e60f4bb2cccc03219ad8fb62c47b9f534acf3abcd2f44ac047dbe2a",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
-    "src/Commands.cpp": "2871f29b02e2ecef366554ba57b23bfedfed84fa480060bfbc40a4b4fcbefc45",
+    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
     "src/ControllerPage.h": "0eaeea82572f467f4ba4fe8fbc56999d8ab56681f983cd820b91c6a2d640b954",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
@@ -42,12 +42,12 @@
     "src/SamplerControllerContracts.h": "a2ab0a0bbedf9c588f40c76e34e155b7920a3c649e8723cfbbd35d5ba37a914a",
     "src/SamplerControllerLearn.h": "8de29889e82864e4838cd6e26d61e5f9f00506f9b991e49641ee4e96e7293571",
     "src/SamplerControllerLinks.h": "1493f0b53d2986fe84c379492785a1e2906ad39fe1b4831c06f3d62e9d2b3797",
-    "src/SamplerGestures.h": "684876c39caf75507d1668e6d0d559dfe6497d0b908ca74ac8fc23b0324c2a50",
+    "src/SamplerGestures.h": "78e1262076b45de5fb9cb3a956395753095a1679155aff3f159900c028708767",
     "src/SamplerModulationPanel.h": "4da9685c265105f41ddbd5d762ccc6747c384cecb606f142451b1944c2c42849",
     "src/SamplerModulationSettings.h": "26d887c347fbba1929e215b44bacac3028ec430f3542b0235432ad6fc0b30928",
     "src/SamplerSettings.h": "b8caf4fa414a4766e3177e65b4865060014720850501fc7a1763cf20a67c3206",
     "src/Settings.h": "bc213f35cd515e3aa42df1b9bd41344281b79d452b519f49446c779149e2ada4",
-    "src/Studio.cpp": "03747e59fef7226b5cb3ce8740994983c2c19c7266c7731072807675f32bd118",
+    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
     "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
     "src/StudioAutomationRecording.inc": "ff38f154fa499aadc398e7009b94e0cba9fde644bcc78f53bf5962b6bec84db1",
     "src/StudioController.cpp": "fc3246bc52f03a9f6a8e8841091ac58ccd74e8e08c2a943a9b0dd4c562a4c156",
@@ -75,22 +75,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
-      "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
-      "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
-      "build/dev/20261110-103302/rerun-isolated_parameters.log",
-      "build/dev/20261110-103302/rerun-gui_workflow.log",
-      "build/dev/20261110-103302/rerun-audio_playlist_live.log",
-      "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
-      "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
-      "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
-      "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
-      "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
-      "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
     "tests": 290
   }
 }

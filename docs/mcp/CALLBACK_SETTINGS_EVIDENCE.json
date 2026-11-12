@@ -4,7 +4,7 @@
     "src/Settings.h": "bc213f35cd515e3aa42df1b9bd41344281b79d452b519f49446c779149e2ada4"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "73f0842bfc956a5ce4399fce47d52298321167a18441f3c15c280e3df2e7924c",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -27,6 +27,7 @@
     "bounded_midi_compensation",
     "browser_collections_repeat_gui",
     "browser_live_gui",
+    "browser_midi_mcp",
     "browser_search",
     "callback_timing",
     "center_playhead_mcp",
@@ -296,8 +297,10 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-223545/affected-tests.log",
-  "rerunLogs": [],
-  "rerunNote": "",
+  "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+  "rerunLogs": [
+    "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+  ],
+  "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

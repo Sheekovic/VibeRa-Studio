@@ -1,7 +1,7 @@
 {
   "passed": true,
   "scope": "Channel appearance/sorting increment only; RPS-B/whole module/full FL coverage incomplete.",
-  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "sourceHashMode": "text-lf-v1",
   "sourceInputs": {
     "CMakeLists.txt": "07a4c9e0d0c6a72c2a7a0a8c162012d3892c191e8b5e11d508dc0bb7771b8eb4",
@@ -12,16 +12,16 @@
     "src/Project.h": "751a4591af47b7552ff97041d44b5e07bc048cdac2c4853988e83b29133fd49f",
     "src/Project.cpp": "acae70f39d3fb5457665a11c65537ef59abcc49e19f3bf98bfea9063c375a7ad",
     "src/Commands.h": "7ddda357ddf3b7ab02b18070189a9a247327a33b58337595d4bc1a58b8eb8644",
-    "src/Commands.cpp": "2871f29b02e2ecef366554ba57b23bfedfed84fa480060bfbc40a4b4fcbefc45",
+    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
     "src/Customization.h": "2902c075a79abdf1d4c8f313b52dcd1801ffef4b849d104ab4ac228af5c9cbd8",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
     "src/Studio.h": "ef8c4ce5e028ef66c8bb5d80aa94063067fb5e56cbce69758c4b51e51592d326",
-    "src/Studio.cpp": "03747e59fef7226b5cb3ce8740994983c2c19c7266c7731072807675f32bd118",
+    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
     "src/StudioRack.cpp": "e6cf4833b86218a621f7cda8502b7cde426f34563b5b30c89f19123b46983459",
-    "src/StudioMcp.cpp": "b357093d5c42d95d533a7816677dc5524bf77183b222a1016bb27432a097163b",
+    "src/StudioMcp.cpp": "b119a607c275addf2709d46152292d9756b86874f7b5dbcfd63ac4f1161a8ac2",
     "src/StudioMixerMacros.inc": "bfe64ba23bdefd22b12dd0b2c8bf5d26dc2dd97388f4c860f799db6bc75d858b",
     "src/MixerMacroContracts.h": "fc7586f10ea627f11ebacd087f21686a6bd73813b84fec8369359c531369b297",
-    "src/Editors.h": "193b056351c8b5ecbc5866dd64e999e9c0c524344f1993857c558963576977b8",
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Theme.h": "0d9241672d3dd6ac76c7501a5a5e9910a1328299905b9d73b1ef2579f2e93067",
     "src/Main.cpp": "c287d05fe487e8b5073f7268b34ef1050f9c1dc08c130e3f229e5be4e366039a",
     "src/McpContracts.h": "af57244721f218aac54bf644e5308405d8c62a3e81482ca89a0e7fad073c20e5",
@@ -41,9 +41,9 @@
     "src/RackContracts.h": "159b97e2f343ecad930117525eeac41525703f1a76ee85293fee134104ce9c24",
     "src/ChannelSolo.h": "4e892bbec7e947252ceb57c81e1e7075f210ff8a8051a89356f07ab4bff3534f",
     "src/ChannelManagement.h": "2da0249605a65996b98d0b206636f72585b7a7682ad825566072eb018278ff45",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "7bf25a4c46bb3cd2486d262ffbba2eacb29394fd9fe1df9be5a58a0623ee6eb1",
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "326d1bb55bddf8071b9d48ffd8117431c00d4386147a4761aa4b8dd35177c4a1"
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "722d1516f7dbbb17bfdf88e6b3f672d777d548bbe711c5c2a3b3f099a4e84785"
   },
   "checks": [
     "Actual UI Rack F2/dialog name/colour/icon commit and bulk/sort/Undo/Redo preserve held input in Pattern/Song; source component callbacks, not OS input.",
@@ -57,22 +57,11 @@
   "rawReceiptSha256": "3b071413a2f8e9f768cf6b64b3ee4c5b056e5e47785894072f4197daaa64b202",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
-      "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
-      "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
-      "build/dev/20261110-103302/rerun-isolated_parameters.log",
-      "build/dev/20261110-103302/rerun-gui_workflow.log",
-      "build/dev/20261110-103302/rerun-audio_playlist_live.log",
-      "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
-      "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
-      "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
-      "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
-      "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
-      "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
     "tests": 290
   }
 }

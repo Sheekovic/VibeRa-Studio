@@ -4,7 +4,7 @@
     "src/StudioPluginParameters.cpp": "a33157aa031568f5cb8b0e9176c347add29331ec37e2aa4bf0521fcce983785c"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "21fb7ec6cafccd2ed2ed8323404c3480b8585a0b60c382713dc28352ab037b3e",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -27,6 +27,7 @@
     "bounded_midi_compensation",
     "browser_collections_repeat_gui",
     "browser_live_gui",
+    "browser_midi_mcp",
     "browser_search",
     "callback_timing",
     "center_playhead_mcp",
@@ -54,7 +55,9 @@
     "development_workflow",
     "drop_targets_gui",
     "envelope_follower_mcp",
+    "envelope_presets_mcp",
     "export_formats_mcp",
+    "export_options_mcp",
     "expression_maps_mcp",
     "fixed_initialisation_lifecycle",
     "flp_import",
@@ -71,10 +74,12 @@
     "macros_mcp",
     "magic_lasso_mcp",
     "marker_actions_mcp",
+    "master_pitch_mcp",
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
     "midi_import_extras",
+    "midi_import_mcp",
     "midi_interchange_gui",
     "midi_receive_mcp",
     "midi_scale_snap_mcp",
@@ -244,6 +249,7 @@
     "project_number_text",
     "quantizer_mcp",
     "rack_groups_mcp",
+    "record_filter_mcp",
     "rps_gaps_mcp",
     "sampler_automation_mcp",
     "sampler_controller_links",
@@ -278,6 +284,7 @@
     "tempo_map",
     "tempo_warp_mcp",
     "tuning_render_mcp",
+    "unique_sample_mcp",
     "vibera_effects_dsp",
     "vibera_native_effect_model",
     "vibera_native_effects",
@@ -287,12 +294,13 @@
     "vibera_synth_host",
     "vibera_synth_mcp",
     "vibera_synth_processor",
-    "vocal_pitch_mcp"
+    "vocal_pitch_mcp",
+    "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-104843/affected-tests.log",
+  "sourceLog": "build/dev/20261112-120402/affected-tests.log",
   "rerunLogs": [
-    "build/dev/20261109-104843/rerun-step_velocity_mcp.log"
+    "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
   ],
-  "rerunNote": "full run build/dev/20261109-104843/affected-tests.log: failed ['step_velocity_mcp'], not reached []; each passed when run alone (build/dev/20261109-104843/rerun-step_velocity_mcp.log) with the same application",
+  "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }

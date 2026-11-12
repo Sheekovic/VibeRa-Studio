@@ -155,6 +155,11 @@ try:
 
     # CoProducer MIDI ideas: Models... / Runtime... (ai.idea.configure installation / runtime).
     call("vibera_ai", {"action": "panel", "visible": True, "tab": "midi"})
+    for _ in range(100):  # Opening the panel reads the project context; configure is refused while busy.
+        opened = call("vibera_ai", {"action": "ideaState"})
+        if not opened.get("idea", opened).get("busy"):
+            break
+        time.sleep(.1)
     configured = raw("vibera_ai", {"action": "ideaConfigure", "installation": str(library), "runtime": sys.executable})
     check(not configured.get("isError"), "ai.idea.configure takes an installation folder and a runtime: " + json.dumps(configured)[:160])
     idea = call("vibera_ai", {"action": "ideaState"})

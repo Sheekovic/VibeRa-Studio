@@ -1,23 +1,23 @@
 {
   "passed": true,
-  "applicationSha256": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "sourceInputs": {
-    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "326d1bb55bddf8071b9d48ffd8117431c00d4386147a4761aa4b8dd35177c4a1",
+    "build/windows/VibeRaTests_artefacts/Release/VibeRaTests.exe": "722d1516f7dbbb17bfdf88e6b3f672d777d548bbe711c5c2a3b3f099a4e84785",
     "build/windows/VibeRa_artefacts/Release/VibeRa Plugin Worker.exe": "7bf25a4c46bb3cd2486d262ffbba2eacb29394fd9fe1df9be5a58a0623ee6eb1",
-    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "a1a2f3df76b44038130b841620644ef86ddfe1d53e35afeb525e11ecb747ac23",
+    "build/windows/VibeRa_artefacts/Release/VibeRa Studio.exe": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
     "scripts/verify-mixer-controls-desktop.py": "96dc51a8941f3c8bcb5988372f63341651f1a11476ac9af856b866c796a98545",
     "scripts/verify-mixer-controls-mcp.py": "d7983a6c5cfbd76f8c29df43065edb52a6c52ba60270337faf6ec3700b0d5c2f",
     "skills/vibera-studio/references/mixer-controls.md": "05c7cd87ad2abb980af6f24d9c652656c3dc8aed754c9638795e8d9b8cdb7dce",
     "src/AudioEngine.h": "10eca98c9e60f4bb2cccc03219ad8fb62c47b9f534acf3abcd2f44ac047dbe2a",
-    "src/Commands.cpp": "2871f29b02e2ecef366554ba57b23bfedfed84fa480060bfbc40a4b4fcbefc45",
+    "src/Commands.cpp": "06fd03e3f9d87e03bbea263f06a8e248b6c0809e57aeb7299e8d8ac44331f6f7",
     "src/Customization.cpp": "62d02ce6d6fface286452ea018a46be700bd603bb9b75e3cdc136abdee9f6a4e",
-    "src/Editors.h": "193b056351c8b5ecbc5866dd64e999e9c0c524344f1993857c558963576977b8",
+    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/McpContracts.h": "af57244721f218aac54bf644e5308405d8c62a3e81482ca89a0e7fad073c20e5",
     "src/MixerControls.h": "3790e3611c98d22ab5a5a76ac525a0ab789d4426ec898ffb2e4316f773059f49",
     "src/PluginProtocol.h": "449df7d7f201c3af5adb5ad46a249db04d562d263a41a4873627fb42ea063d3d",
     "src/Project.h": "751a4591af47b7552ff97041d44b5e07bc048cdac2c4853988e83b29133fd49f",
     "src/Settings.h": "a2037345b07d29665ee512b2845de72f4e39653cd3f67c246e193f3a4714113b",
-    "src/Studio.cpp": "03747e59fef7226b5cb3ce8740994983c2c19c7266c7731072807675f32bd118",
+    "src/Studio.cpp": "7e808d67805f96cfed491f66c27868dbf4ae2fb7c26a7bd7e23ec3e2c9d0fd66",
     "src/StudioController.cpp": "7bb782f77c64a257f1d9aee6d298da68a0bde64a28b39d0190f2668bc6b90dcd",
     "src/StudioMixerControls.cpp": "8f6a4f91f0535c7499a8b1367933317a61af97e4fa14723d0223d09e94451cca",
     "src/StudioRackVelocity.cpp": "e5f1e7cedae1474f51a1b9868ddd446c2f7d17f9a4cbef03a1096f6693ec69d4",
@@ -35,22 +35,11 @@
   "scope": "Reissued from a complete passing regression; the original receipt folder no longer exists",
   "reboundBy": {
     "script": "scripts/rebind-surface-evidence.py",
-    "sourceLog": "build/dev/20261110-103302/affected-tests.log",
+    "sourceLog": "build/dev/20261112-120402/affected-tests.log",
     "rerunLogs": [
-      "build/dev/20261110-103302/rerun-mixer_app_zero_history.log",
-      "build/dev/20261110-103302/rerun-mixer_automation_take_gui.log",
-      "build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log",
-      "build/dev/20261110-103302/rerun-isolated_parameters.log",
-      "build/dev/20261110-103302/rerun-gui_workflow.log",
-      "build/dev/20261110-103302/rerun-audio_playlist_live.log",
-      "build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log",
-      "build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log",
-      "build/dev/20261110-103302/rerun2-mixer_audio_port.log",
-      "build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log",
-      "build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log",
-      "build/dev/20261110-103302/rerun2-musical_acceptance.log"
+      "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
     ],
-    "rerunNote": "full run build/dev/20261110-103302/affected-tests.log: failed ['audio_playlist_live', 'gui_workflow', 'guide_midi_input_mcp', 'isolated_parameters', 'midi_take_recovery_gui', 'mixer_app_zero_history', 'mixer_audio_port', 'mixer_automation_take_gui', 'mixer_native_identity_129_pattern', 'mixer_native_identity_129_song', 'mixer_prepared_source_hosts', 'musical_acceptance'], not reached []; each passed when run alone (build/dev/20261110-103302/rerun-mixer_app_zero_history.log, build/dev/20261110-103302/rerun-mixer_automation_take_gui.log, build/dev/20261110-103302/rerun-mixer_native_identity_129_song.log, build/dev/20261110-103302/rerun-isolated_parameters.log, build/dev/20261110-103302/rerun-gui_workflow.log, build/dev/20261110-103302/rerun-audio_playlist_live.log, build/dev/20261110-103302/rerun2-guide_midi_input_mcp.log, build/dev/20261110-103302/rerun2-midi_take_recovery_gui.log, build/dev/20261110-103302/rerun2-mixer_audio_port.log, build/dev/20261110-103302/rerun2-mixer_prepared_source_hosts.log, build/dev/20261110-103302/rerun2-mixer_native_identity_129_pattern.log, build/dev/20261110-103302/rerun2-musical_acceptance.log) with the same application",
+    "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
     "tests": 290
   }
 }

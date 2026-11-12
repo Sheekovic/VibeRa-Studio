@@ -1,10 +1,10 @@
 {
   "passed": true,
   "sourceInputs": {
-    "src/SamplerGestures.h": "684876c39caf75507d1668e6d0d559dfe6497d0b908ca74ac8fc23b0324c2a50"
+    "src/SamplerGestures.h": "78e1262076b45de5fb9cb3a956395753095a1679155aff3f159900c028708767"
   },
   "sourceHashMode": "raw",
-  "applicationSha256": "bc43191daa3db3b9bb5c15e71595d31ffed7dbfc4e07aa84fb3837b8de36cc80",
+  "applicationSha256": "509f447677cf7930e5ee3c261065909051e44f6e939d8ca5fc51cd393f48a1cc",
   "checks": [
     "accessibility_gui",
     "ai_claude_mcp",
@@ -27,6 +27,7 @@
     "bounded_midi_compensation",
     "browser_collections_repeat_gui",
     "browser_live_gui",
+    "browser_midi_mcp",
     "browser_search",
     "callback_timing",
     "center_playhead_mcp",
@@ -54,7 +55,9 @@
     "development_workflow",
     "drop_targets_gui",
     "envelope_follower_mcp",
+    "envelope_presets_mcp",
     "export_formats_mcp",
+    "export_options_mcp",
     "expression_maps_mcp",
     "fixed_initialisation_lifecycle",
     "flp_import",
@@ -71,6 +74,7 @@
     "macros_mcp",
     "magic_lasso_mcp",
     "marker_actions_mcp",
+    "master_pitch_mcp",
     "mcp_coverage_detector",
     "mcp_semantics",
     "mcp_ui_actions",
@@ -245,6 +249,7 @@
     "project_number_text",
     "quantizer_mcp",
     "rack_groups_mcp",
+    "record_filter_mcp",
     "rps_gaps_mcp",
     "sampler_automation_mcp",
     "sampler_controller_links",
@@ -279,6 +284,7 @@
     "tempo_map",
     "tempo_warp_mcp",
     "tuning_render_mcp",
+    "unique_sample_mcp",
     "vibera_effects_dsp",
     "vibera_native_effect_model",
     "vibera_native_effects",
@@ -291,8 +297,10 @@
     "vocal_pitch_mcp",
     "workspace_layout_mcp"
   ],
-  "sourceLog": "build/dev/20261109-174522/affected-tests.log",
-  "rerunLogs": [],
-  "rerunNote": "",
+  "sourceLog": "build/dev/20261112-120402/affected-tests.log",
+  "rerunLogs": [
+    "build/dev/20261112-120402/rerun-browser_midi_mcp.log"
+  ],
+  "rerunNote": "full run build/dev/20261112-120402/affected-tests.log: failed ['browser_midi_mcp'], not reached []; each passed when run alone (build/dev/20261112-120402/rerun-browser_midi_mcp.log) with the same application",
   "scope": "UI callbacks that directly invoke registered, MCP-mapped commands. Not native pointer input, listening or hardware evidence."
 }
