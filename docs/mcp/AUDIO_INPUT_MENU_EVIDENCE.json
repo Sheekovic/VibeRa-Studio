@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "d7046b2354186296257fa92d0f0e4380106146d9e044ded59043d8a3a30d4c7c",
+  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
   "sourceInputs": {
     "src/StudioAudioTake.cpp": "f1ef68e29c6c1e63fe5a4081f9317ca423bcf56cef0de5470bcab73202d91393",
     "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
-    "src/StudioMcp.cpp": "df2448b1d37b5914b31399830e8ada9d5ae0d32b32e4244a13e732b3e021ecd1",
+    "src/StudioMcp.cpp": "a3e7d4532912076112c71d069c4d0adb5388bec967c1d40723625a621e1e980d",
     "scripts/verify-audio-recording-mcp.py": "2167bc559cefab39859bb1380d586d791d92038301c1ae8c32b942324b0f2ea2"
   },
   "sourceHashMode": "text-lf-v1",

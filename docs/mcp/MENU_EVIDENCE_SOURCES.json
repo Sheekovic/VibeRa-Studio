@@ -454,6 +454,20 @@
         "scripts/verify-envelope-presets-mcp.py"
       ],
       "scope": "Registered tests that exercise the operations the Channel preset menu items run, each run alone on this binary. Not native file dialog input."
+    },
+    "docs/mcp/CONTROLLER_MULTILINK_EVIDENCE.json": {
+      "ctests": [
+        "controller_mapping_gui"
+      ],
+      "folder": "controller-multilink",
+      "sources": [
+        "src/MidiController.cpp",
+        "src/MidiController.h",
+        "src/ControllerPage.h",
+        "src/StudioMcp.cpp",
+        "tests/ControllerBindingAcceptance.h"
+      ],
+      "scope": "Registered native test with injected control messages and no hardware ports, run alone on this binary. Not hardware controller or Shift+click input evidence."
     }
   }
 }

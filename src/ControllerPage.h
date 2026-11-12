@@ -274,6 +274,13 @@ class ControllerPage final : public juce::Component, private juce::ListBoxModel,
         ports.setText("Control input / output | " + owner->midiController.status(),
                       juce::dontSendNotification);
         const bool learning = owner->midiController.learnIndex >= 0;
+        if (wasLearning && learning && owner->midiController.learnIndex != row &&
+            owner->midiController.learnIndex < int(owner->midiController.bindings.size()))
+        {
+            // Multilink moved on: follow the row that listens now.
+            list.selectRow(owner->midiController.learnIndex);
+            list.repaint();
+        }
         if (wasLearning && !learning)
         {
             selectedRowsChanged(row);
@@ -378,9 +385,27 @@ class ControllerPage final : public juce::Component, private juce::ListBoxModel,
                 row = -1;
         };
         apply.onClick = [this] { commit(); };
+        learn.setTooltip("Learn the selected mapping from one hardware control. Shift+click: Multilink, learn this row "
+                         "and every row below it in order");
         learn.onClick = [this]
         {
-            if (commit())
+            const bool multilink = juce::ModifierKeys::currentModifiers.isShiftDown();
+            if (!commit())
+                return;
+            if (multilink)
+            {
+                // Multilink: this row, then every row below it, one control each.
+                std::vector<int> rows;
+                for (int next = row; next < int(owner->midiController.bindings.size()); ++next)
+                    rows.push_back(next);
+                const auto armed = owner->midiController.armLearnSequence(rows);
+                wasLearning = armed.wasOk();
+                message.setText(armed.wasOk() ? "Multilink: move one control for this row, then one for each row below it. "
+                                                "Cancel Learn stops."
+                                              : armed.getErrorMessage(),
+                                juce::dontSendNotification);
+            }
+            else
             {
                 owner->midiController.armLearn(row);
                 wasLearning = true;

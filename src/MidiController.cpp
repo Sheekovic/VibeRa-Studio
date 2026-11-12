@@ -625,8 +625,22 @@ juce::Result MidiController::armLearn(int index, const juce::File &owned)
 {
     return armLearnImpl(index, &owned);
 }
+juce::Result MidiController::armLearnSequence(const std::vector<int> &rows, const juce::File *owned)
+{
+    if (rows.empty() || rows.size() > bindings.size())
+        return juce::Result::fail("controller.invalidIndex: Multilink needs existing Learn rows");
+    for (size_t i = 0; i < rows.size(); ++i)
+        if (rows[i] < 0 || rows[i] >= int(bindings.size()) ||
+            std::find(rows.begin(), rows.begin() + std::ptrdiff_t(i), rows[i]) != rows.begin() + std::ptrdiff_t(i))
+            return juce::Result::fail("controller.invalidIndex: Multilink rows must exist and be distinct");
+    if (auto armed = armLearnImpl(rows.front(), owned); armed.failed())
+        return armed;
+    learnQueue.assign(rows.begin() + 1, rows.end());
+    return juce::Result::ok();
+}
 void MidiController::cancelLearn()
 {
+    learnQueue.clear();
     learnIndex = -1;
     inbox.learning = false;
     learnExpectedProfile.clear();
@@ -692,10 +706,22 @@ void MidiController::drain()
                     continue;
                 }
                 const auto index = size_t(learnIndex);
+                auto rest = learnQueue; // A saved binding ends this Learn (and clears the queue).
+                const auto sequenceFile = learnFile;
                 const auto result = learnFile ? setBinding(index, binding, learnExpectedProfile, *learnFile)
                                               : setBinding(index, binding, learnExpectedProfile);
                 if (result.failed())
                     lastMessage = result.getErrorMessage();
+                else if (learnIndex < 0 && !rest.empty())
+                {
+                    // Multilink: the next row listens for the next control.
+                    const int next = rest.front();
+                    rest.erase(rest.begin());
+                    if (auto armed = armLearnImpl(next, sequenceFile ? &*sequenceFile : nullptr); armed.wasOk())
+                        learnQueue = std::move(rest);
+                    else
+                        lastMessage = armed.getErrorMessage();
+                }
                 continue; // Learning never executes the captured action.
             }
             auto projection = effective; // CONTROL lifetime pin across canonical/reentrant invoke.

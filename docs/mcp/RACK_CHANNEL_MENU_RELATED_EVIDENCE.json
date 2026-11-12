@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "d7046b2354186296257fa92d0f0e4380106146d9e044ded59043d8a3a30d4c7c",
+  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
   "sourceInputs": {
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
-    "src/StudioMcp.cpp": "df2448b1d37b5914b31399830e8ada9d5ae0d32b32e4244a13e732b3e021ecd1",
+    "src/StudioMcp.cpp": "a3e7d4532912076112c71d069c4d0adb5388bec967c1d40723625a621e1e980d",
     "scripts/verify-sampler-voices-mcp.py": "79673a106624b900a415650193003638b5f96f21f312c0404ffab33b797644f1",
     "scripts/verify-midi-receive-mcp.py": "06909debda2b26611dee540cb342b3b1468ccd6f4f279ea9f589298ed24c8374",
     "scripts/verify-channel-loops-mcp.py": "18967bf5ff44c2b04d0e6f6cecbc725c7d48a68ce6122fa7c380e436105c85e7",

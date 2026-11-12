@@ -1,10 +1,10 @@
 {
   "passed": true,
-  "applicationSha256": "d7046b2354186296257fa92d0f0e4380106146d9e044ded59043d8a3a30d4c7c",
+  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
   "sourceInputs": {
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Commands.cpp": "c97eec763e1a3af5a2becbe823647cb80e8b5c130f201d4bfde71aa1be72e611",
-    "src/StudioMcp.cpp": "df2448b1d37b5914b31399830e8ada9d5ae0d32b32e4244a13e732b3e021ecd1",
+    "src/StudioMcp.cpp": "a3e7d4532912076112c71d069c4d0adb5388bec967c1d40723625a621e1e980d",
     "scripts/verify-mixer-effects-mcp.py": "a2c727cf3802cf09e8a25bc36789cf0ad0fa3e50f1985db667c31db725af181e",
     "scripts/verify-plugin-editors-mcp.py": "190e77c432300cb7281bd53b98189681ec6928a3f60bade9e71b04bdac8ef946",
     "scripts/verify-native-effects-mcp.py": "6f7116bc7684e69395f92f2c4d9cf4b52f0e04c850878cda792cd32225f7dd3a"

@@ -142,6 +142,39 @@ VIBERA_NOINLINE inline juce::Result verify(const juce::File &output)
         juce::String sentinel = "do-not-replace";
         check(c->bindingProfileIdentity(output, sentinel).failed() && sentinel == "do-not-replace",
               "Unreadable profile identity preserves caller output and old mappings");
+        {
+            // Multilink: two rows learned in order, one control each, in an owned profile file.
+            const auto multiFile = output.getChildFile("original-multilink.json");
+            auto multiInbox = std::make_unique<MidiControlInput>();
+            auto m = std::make_unique<MidiController>(*multiInbox, false);
+            juce::String token;
+            auto first = original(), second = original();
+            second.number = first.number == 127 ? 126 : first.number + 1;
+            check(m->bindingProfileIdentity(multiFile, token).wasOk() && m->setBinding(0, first, token, multiFile).wasOk() &&
+                      m->bindingProfileIdentity(multiFile, token).wasOk() &&
+                      m->setBinding(1, second, token, multiFile).wasOk() && m->bindings.size() == 2,
+                  "Multilink fixture has two mappings");
+            check(m->armLearnSequence({1, 1}, &multiFile).failed() && m->learnIndex == -1,
+                  "Multilink refuses repeated rows");
+            check(m->armLearnSequence({0, 1}, &multiFile).wasOk() && m->learnIndex == 0 &&
+                      m->learnQueue == std::vector<int>{1},
+                  "Multilink arms the first row and queues the second");
+            multiInbox->observe(juce::MidiMessage::controllerEvent(1, 30, 70), 1);
+            m->drain();
+            check(m->bindings[0].number == 30 && m->learnIndex == 1 && m->learnQueue.empty(),
+                  "The first control is learned and the second row listens next");
+            multiInbox->observe(juce::MidiMessage::controllerEvent(1, 30, 71), 1);
+            m->drain();
+            check(m->learnIndex == 1 && m->bindings[1].number == second.number,
+                  "A control already mapped keeps the row listening");
+            multiInbox->observe(juce::MidiMessage::controllerEvent(1, 31, 72), 1);
+            m->drain();
+            check(m->bindings[1].number == 31 && m->learnIndex == -1 && !multiInbox->learning.load(),
+                  "The second control is learned and Multilink ends");
+            check(m->armLearnSequence({0, 1}, &multiFile).wasOk(), "Multilink arms again");
+            m->cancelLearn();
+            check(m->learnIndex == -1 && m->learnQueue.empty(), "Cancel Learn clears the Multilink queue");
+        }
         return juce::Result::ok();
     }
     catch (const std::exception &e)
@@ -226,6 +259,37 @@ template <class StudioType> VIBERA_NOINLINE juce::Result verifyPublicMcp(StudioT
         check(int(armed["controllerLearning"]) == 0, "Production learn arms the mapping row");
         const auto disarmed = studio.mcpCall("vibera_controller", request("cancel"))["structuredContent"];
         check(int(disarmed["controllerLearning"]) == -1, "Production cancel disarms MIDI Learn");
+        if (studio.midiController.bindings.size() >= 2)
+        {
+            auto multi = request("learn");
+            multi.getDynamicObject()->setProperty("indices", juce::Array<juce::var>{1, 0});
+            const auto queued = studio.mcpCall("vibera_controller", multi)["structuredContent"];
+            check(int(queued["controllerLearning"]) == 1 && queued["controllerLearnQueue"].size() == 1 &&
+                      int(queued["controllerLearnQueue"][0]) == 0,
+                  "Multilink arms the first row and queues the rest in order");
+            auto twice = request("learn");
+            twice.getDynamicObject()->setProperty("indices", juce::Array<juce::var>{0, 0});
+            check(refusal(twice) == "controller.invalidArguments", "Multilink refuses repeated rows");
+            const auto stopped = studio.mcpCall("vibera_controller", request("cancel"))["structuredContent"];
+            check(int(stopped["controllerLearning"]) == -1 && stopped["controllerLearnQueue"].size() == 0,
+                  "Cancel ends Multilink and clears the queue");
+        }
+        else
+        {
+            auto multi = request("learn");
+            multi.getDynamicObject()->setProperty("indices", juce::Array<juce::var>{0});
+            const auto queued = studio.mcpCall("vibera_controller", multi)["structuredContent"];
+            check(int(queued["controllerLearning"]) == 0 && queued["controllerLearnQueue"].size() == 0,
+                  "Multilink with one row arms it with an empty queue");
+            auto twice = request("learn");
+            twice.getDynamicObject()->setProperty("indices", juce::Array<juce::var>{0, 0});
+            check(refusal(twice) == "controller.invalidArguments", "Multilink refuses repeated rows");
+            auto beyond = request("learn");
+            beyond.getDynamicObject()->setProperty("indices", juce::Array<juce::var>{0, 400});
+            check(refusal(beyond) == "controller.invalidArguments", "Multilink refuses a missing row");
+            const auto stopped = studio.mcpCall("vibera_controller", request("cancel"))["structuredContent"];
+            check(int(stopped["controllerLearning"]) == -1, "Cancel ends Multilink");
+        }
         for (const auto &action : juce::StringArray{"configure", "inject"})
         {
             bool refused = false;

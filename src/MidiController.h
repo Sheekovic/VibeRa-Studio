@@ -165,6 +165,9 @@ class MidiController final : private juce::MidiInputCallback
     juce::String profile = "Generic MIDI Learn";
     juce::String lastMessage = "Move a control to see its MIDI message";
     int learnIndex = -1;
+    // Multilink: rows still to learn after learnIndex; each learned control arms the next row.
+    std::vector<int> learnQueue;
+    juce::Result armLearnSequence(const std::vector<int> &rows, const juce::File *ownedProfile = nullptr);
     int mixerBank = 0;
     int potMode = 3, faderMode = 1;
     void moveBank(int delta, int nonMasterCount = MixerNativeIdentity::capacity - 1)

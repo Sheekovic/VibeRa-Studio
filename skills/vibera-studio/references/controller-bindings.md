@@ -91,3 +91,11 @@ or semantic gaps remain separate; this increment closes the changed single-bindi
 Apply/send-target operation, not the full legacy controller/MCP campaign. Actual
 physical hardware, pickup response and production-port lifecycle need separate
 current qualification. Do not equate source/core metadata tests with those results.
+
+## Multilink
+
+`vibera_controller {"action":"learn","indices":[2,3,4]}` learns those existing rows in order, one
+hardware control each. `controllerLearning` is the row listening now and `controllerLearnQueue`
+the rows still waiting; a control that is already mapped keeps the row listening. `cancel` stops
+and clears the queue. In Settings > Controller, Shift+click MIDI Learn starts at the selected row
+and continues down the list.

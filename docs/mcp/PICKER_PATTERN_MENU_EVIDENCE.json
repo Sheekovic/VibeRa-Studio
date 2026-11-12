@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "d7046b2354186296257fa92d0f0e4380106146d9e044ded59043d8a3a30d4c7c",
+  "applicationSha256": "a105a3f32c422374fd1e92c0e5017617a43b9c7ca8a15d4f610255fdddfb047f",
   "sourceInputs": {
     "scripts/verify-picker-pattern-menu-mcp.py": "dfcbe585a3f03166dd34b04b38352e94b45e575e8c902ab7a6ab78999d9848c9",
     "src/ClipPicker.h": "1fec06802a2c49d4828e96e6183398611035d50ab55eec419fdb6203af8d2ce4",
