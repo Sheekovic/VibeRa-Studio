@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "2cb6c86b20f96cbc69fd531905c88d06097e97b301d0574ad42a08113e4c4de9",
+  "applicationSha256": "4871d4b83f832b6ec51b64b369371300291884464106cdde8e6c934de9c0a42b",
   "sourceInputs": {
     "scripts/verify-playlist-menu-mcp.py": "4fe11b7a2bf9c5be65e8590a7ad31fe7e5bea362ae667a89702eae59355a1e7f",
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
     "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",
-    "src/Commands.cpp": "58b5799bd42074bbadb840ed4085a01c930db2b36aaa8e2a847dc7ded6712859",
-    "src/McpContracts.h": "1723d44cb9280d6983930c9b1be63ed0137667c54570268b3347fd684540a890",
+    "src/Commands.cpp": "11b585bf3958387f9309d6ee0a5b932a51fbf60998e0a1cf9ea0c60675215aa7",
+    "src/McpContracts.h": "05e97aa5b318631cce83231be7cb7c3cb3faaf7fc0b030c7526d58fad0b38bff",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31"
   },
   "sourceHashMode": "text-lf-v1",

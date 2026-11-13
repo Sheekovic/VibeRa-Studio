@@ -1213,6 +1213,8 @@ inline juce::var commandArgumentSchema(const juce::String &id)
             set("text", R"({"type":"string","enum":["up","down","alternate"],"description":"up starts from the lowest note, down from the highest; alternate strums successive chords up, down, up..."})");
             set("length", R"({"type":"number","exclusiveMinimum":0,"maximum":1,"default":0.25,"description":"Delay between successive chord notes in beats; note ends stay."})");
             set("value", R"({"type":"number","minimum":0,"maximum":1,"default":0,"description":"Velocity taper toward the last strummed note."})");
+            set("offset", R"({"type":"number","minimum":-1,"maximum":1,"default":0,"description":"Tension: positive speeds the strum up toward its end, negative slows it down; 0 is even."})");
+            set("beat", R"({"type":"number","minimum":0,"maximum":1,"default":0,"description":"Trigger ahead: share of the strum played before the chord start (0 starts on it, 1 ends on it)."})");
         }
         if (id == "notes.humanize")
         {

@@ -298,9 +298,15 @@ inline juce::Result arpeggiate(Project &project, Pattern &pattern, const std::ve
 
 // Each chord's notes start `spread` beats after one another (low to high for "up", high
 // to low for "down"), keeping their ends; `taper` 0..1 softens each later note.
+// `tension` -1..1 bends the timing (positive: the strum speeds up, negative: it slows down) and
+// `ahead` 0..1 is the share of the strum played before the chord's start (trigger ahead).
 inline juce::Result strum(Pattern &pattern, const std::vector<size_t> &targets, const juce::String &direction,
-                          double spread, double taper)
+                          double spread, double taper, double tension = 0, double ahead = 0)
 {
+    if (!(tension >= -1 && tension <= 1))
+        return juce::Result::fail("Strum tension is -1..1");
+    if (!(ahead >= 0 && ahead <= 1))
+        return juce::Result::fail("Strum trigger ahead is 0..1");
     if (direction != "up" && direction != "down" && direction != "alternate")
         return juce::Result::fail("Strum direction is up, down or alternate");
     if (!(spread > 0 && spread <= 1))
@@ -317,13 +323,18 @@ inline juce::Result strum(Pattern &pattern, const std::vector<size_t> &targets, 
         if (direction == "down" || (direction == "alternate" && strummed % 2 == 1))
             std::reverse(group.begin(), group.end());
         ++strummed;
-        for (size_t k = 1; k < group.size(); ++k)
+        const double total = spread * double(group.size() - 1);
+        const double lead = std::min(ahead * total, pattern.notes[group[0]].beat); // Never before beat 0.
+        for (size_t k = lead > 0 ? 0 : 1; k < group.size(); ++k)
         {
             auto &note = pattern.notes[group[k]];
             const double end = note.beat + note.length;
-            note.beat += double(k) * spread;
+            // Tension 0 is the even k * spread; positive bunches the delays toward the end (speeding up).
+            const double place = std::pow(double(k) / double(group.size() - 1), std::pow(2., -tension));
+            note.beat += place * total - lead;
             note.length = std::max(1. / 64, end - note.beat);
-            note.velocity = juce::jlimit(.01f, 1.f, float(note.velocity * (1. - taper * double(k) / (group.size() - 1) * .5)));
+            if (k > 0)
+                note.velocity = juce::jlimit(.01f, 1.f, float(note.velocity * (1. - taper * double(k) / (group.size() - 1) * .5)));
             note.step = false;
         }
     }

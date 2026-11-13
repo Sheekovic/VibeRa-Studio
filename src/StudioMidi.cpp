@@ -240,6 +240,11 @@ void Studio::midiFileMenu()
         claw.addItem(41011, "Gate 1/16: xx.x");
         claw.addItem(41012, "Gate 1/8: x.x..x.");
         claw.addItem(41013, "Gate 1/16: x..x..x.");
+        claw.addSeparator();
+        claw.addItem(41014, "Trash every 2nd note, stretch the rest");
+        claw.addItem(41015, "Trash every 3rd note, stretch the rest");
+        claw.addItem(41016, "Trash every 4th note, stretch the rest");
+        claw.addItem(41017, "Trash every 2nd note, keep the gaps");
         menu.addSubMenu("Claw machine (slice into a rhythm)", claw);
     }
     {
@@ -326,6 +331,8 @@ void Studio::midiFileMenu()
         strum.addItem(3011, "Down, slow (1/32 per note)");
         strum.addItem(3020, "Alternate up / down, fast");
         strum.addItem(3021, "Alternate up / down, slow");
+        strum.addItem(3030, "Up, speeding up (tension)");
+        strum.addItem(3031, "Up, centred on the beat (trigger ahead)");
         menu.addSubMenu("Strum", strum);
         juce::PopupMenu human;
         human.addItem(4000, "Light");
@@ -496,6 +503,13 @@ void Studio::midiFileMenu()
                     args.value = result == 41000 ? .6 : result == 41001 ? .85 : .5;
                     args.seed = std::uint32_t(juce::Time::getMillisecondCounter());
                     safe->command("notes.riff", args);
+                }
+                else if (result >= 41014)
+                {
+                    args.text = "trash";
+                    args.value = result == 41017 ? 2 : result - 41012;
+                    args.enabled = result != 41017;
+                    safe->command("notes.claw", args);
                 }
                 else
                 {
@@ -774,7 +788,11 @@ void Studio::midiFileMenu()
                 else if (result < 4000)
                 {
                     id = "notes.strum";
-                    args.text = (result - 3000) / 10 == 0 ? "up" : (result - 3000) / 10 == 1 ? "down" : "alternate";
+                    args.text = (result - 3000) / 10 == 0 || result >= 3030 ? "up"
+                                : (result - 3000) / 10 == 1               ? "down"
+                                                                          : "alternate";
+                    args.offset = result == 3030 ? .6 : 0;
+                    args.beat = result == 3031 ? .5 : 0;
                     args.length = (result - 3000) % 10 == 0 ? .0625 : .125;
                     args.value = .3;
                 }

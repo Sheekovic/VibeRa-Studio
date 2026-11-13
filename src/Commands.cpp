@@ -4809,8 +4809,12 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             }
             else
             {
-                // Flam: a softer grace note args.length beats before each note.
-                if (!std::isfinite(a.length) || a.length < 1. / 128 || a.length > 1)
+                // Flam: a softer grace note args.length beats before each note; args.offset > 0 gives the
+                // time in milliseconds instead (absolute: the same at every tempo).
+                if (!std::isfinite(a.offset) || a.offset < 0 || a.offset > 250)
+                    return juce::Result::fail("Flam absolute time is 1..250 ms (0 uses beats)");
+                const double flamLength = a.offset > 0 ? a.offset / 1000. * next.tempo / 60. : a.length;
+                if (!std::isfinite(flamLength) || flamLength < 1. / 128 || flamLength > 1)
                     return juce::Result::fail("Flam offset is 1/128..1 beat");
                 if (!std::isfinite(a.value) || a.value <= 0 || a.value > 1)
                     return juce::Result::fail("Flam velocity is 0..1 of the main note");
@@ -4827,14 +4831,14 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     {
                         // On the beat: the quick stroke takes the original start and the note follows it.
                         auto &main = pat->notes[i];
-                        const double shift = std::min(a.length, main.length * .5);
+                        const double shift = std::min(flamLength, main.length * .5);
                         main.beat += shift;
                         main.length -= shift;
                         main.step = false;
                     }
                     else
-                        grace.beat = std::max(0., grace.beat - a.length);
-                    grace.length = std::min(grace.length, a.length);
+                        grace.beat = std::max(0., grace.beat - flamLength);
+                    grace.length = std::min(grace.length, flamLength);
                     grace.velocity = juce::jlimit(.01, 1., grace.velocity * a.value);
                     graces.push_back(grace);
                 }
@@ -4851,6 +4855,61 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     targets.push_back(i);
             if (targets.empty())
                 return juce::Result::fail("No notes to claw");
+            if (a.text == "trash")
+            {
+                // Trash every args.value-th note (chords count once); args.enabled stretches what is left
+                // over the original span, otherwise the gaps stay.
+                if (!std::isfinite(a.value) || std::floor(a.value) != a.value || a.value < 2 || a.value > 64)
+                    return juce::Result::fail("Claw trashes every 2nd..64th note");
+                std::stable_sort(targets.begin(), targets.end(),
+                                 [&](size_t x, size_t y) { return pat->notes[x].beat < pat->notes[y].beat; });
+                std::vector<std::vector<size_t>> groups;
+                for (auto i : targets)
+                    if (groups.empty() || std::abs(pat->notes[i].beat - pat->notes[groups.back().front()].beat) > 1.e-6)
+                        groups.push_back({i});
+                    else
+                        groups.back().push_back(i);
+                if (int(groups.size()) < int(a.value))
+                    return juce::Result::fail("Claw needs at least as many notes as the trash interval");
+                const double start = pat->notes[groups.front().front()].beat;
+                double end = start;
+                for (auto i : targets)
+                    end = std::max(end, pat->notes[i].beat + pat->notes[i].length);
+                double keptSpan = 0;
+                std::vector<std::pair<size_t, double>> kept; // Group index, its slot length.
+                std::set<Id> trashed;
+                for (size_t g = 0; g < groups.size(); ++g)
+                {
+                    const double slot = (g + 1 < groups.size() ? pat->notes[groups[g + 1].front()].beat : end) -
+                                        pat->notes[groups[g].front()].beat;
+                    if ((int(g) + 1) % int(a.value) == 0)
+                        for (auto i : groups[g])
+                            trashed.insert(pat->notes[i].id);
+                    else
+                    {
+                        kept.push_back({g, slot});
+                        keptSpan += slot;
+                    }
+                }
+                if (a.enabled && keptSpan > 1.e-9)
+                {
+                    const double scale = (end - start) / keptSpan;
+                    double cursor = start;
+                    for (const auto &[g, slot] : kept)
+                    {
+                        for (auto i : groups[g])
+                        {
+                            pat->notes[i].beat = cursor;
+                            pat->notes[i].length = std::max(1. / 64, pat->notes[i].length * scale);
+                            pat->notes[i].step = false;
+                        }
+                        cursor += slot * scale;
+                    }
+                }
+                std::erase_if(pat->notes, [&](const auto &n) { return trashed.contains(n.id); });
+            }
+            else
+            {
             if (!std::isfinite(a.length) || a.length < 1. / 32 || a.length > 4)
                 return juce::Result::fail("Claw step is 1/32..4 beats");
             const auto rhythm = a.text.isEmpty() ? juce::String("x.") : a.text;
@@ -4877,6 +4936,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             }
             std::erase_if(pat->notes, [&](const auto &n) { return removed.contains(n.id); });
             pat->notes.insert(pat->notes.end(), pieces.begin(), pieces.end());
+            }
         }
         if (id == "notes.riff")
         {
@@ -5073,7 +5133,7 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 id == "notes.chordify"     ? score::chordify(next, *pat, targets, a.text, int(a.value))
                 : id == "notes.arpeggiate" ? score::arpeggiate(next, *pat, targets, a.text, a.length,
                                                                 a.value > 0 ? a.value : 1., seed)
-                : id == "notes.strum"      ? score::strum(*pat, targets, a.text, a.length, a.value)
+                : id == "notes.strum"      ? score::strum(*pat, targets, a.text, a.length, a.value, a.offset, a.beat)
                 : id == "notes.humanize"   ? score::humanize(*pat, targets, a.beat, a.value, a.offset, seed)
                 : id == "notes.maqam"      ? score::maqamSnap(*pat, targets, a.text, ((a.pitch % 12) + 12) % 12)
                                            : score::scaleSnap(*pat, targets, a.text, ((a.pitch % 12) + 12) % 12);

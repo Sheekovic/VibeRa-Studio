@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "2cb6c86b20f96cbc69fd531905c88d06097e97b301d0574ad42a08113e4c4de9",
+  "applicationSha256": "4871d4b83f832b6ec51b64b369371300291884464106cdde8e6c934de9c0a42b",
   "sourceInputs": {
     "scripts/verify-record-filter-mcp.py": "91d84791f660cb93c31317f57145871bc28b0a82075ef92b22f02dba9e6c771d",
     "scripts/verify-master-pitch-mcp.py": "6e657c587bc22d096a809612a39cc937d5aa99421f1a341ee053f3a7c1095af9",
@@ -8,7 +8,7 @@
     "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",
     "src/StudioSwing.cpp": "1cb98ba0c682ba6e0b916841d30b215abc8aade9a7e566789f7aa9d77311b070",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31",
-    "src/Commands.cpp": "58b5799bd42074bbadb840ed4085a01c930db2b36aaa8e2a847dc7ded6712859",
+    "src/Commands.cpp": "11b585bf3958387f9309d6ee0a5b932a51fbf60998e0a1cf9ea0c60675215aa7",
     "src/AudioLogger.h": "ac1ddc5ac7f83ca99e5b505a5a17a8bde8b354dfeee90829971d91668c0f6ba3",
     "src/StudioUpdater.cpp": "ec148af166a087a21033e205687a40d70664a82d631a1482807f72979a8374bc",
     "src/StudioController.cpp": "4f30926562f26a80ace1312569b1e9db96c25073e798b3609a0404ce2619648b"

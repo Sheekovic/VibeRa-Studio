@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "2cb6c86b20f96cbc69fd531905c88d06097e97b301d0574ad42a08113e4c4de9",
+  "applicationSha256": "4871d4b83f832b6ec51b64b369371300291884464106cdde8e6c934de9c0a42b",
   "sourceInputs": {
     "src/MidiController.cpp": "591f9e54080f97ecbc25a04db12f307b00ef77e7930b9bb9855d5b26e92abaac",
     "src/MidiController.h": "66363f0bcb59d68415cb14d82acee5955ab7385328929445fcdb590290334932",

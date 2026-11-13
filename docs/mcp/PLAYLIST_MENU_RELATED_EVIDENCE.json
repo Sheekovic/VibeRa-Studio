@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "applicationSha256": "2cb6c86b20f96cbc69fd531905c88d06097e97b301d0574ad42a08113e4c4de9",
+  "applicationSha256": "4871d4b83f832b6ec51b64b369371300291884464106cdde8e6c934de9c0a42b",
   "sourceInputs": {
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
-    "src/Commands.cpp": "58b5799bd42074bbadb840ed4085a01c930db2b36aaa8e2a847dc7ded6712859",
+    "src/Commands.cpp": "11b585bf3958387f9309d6ee0a5b932a51fbf60998e0a1cf9ea0c60675215aa7",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31",
     "scripts/verify-clip-groups-mcp.py": "daa1907c8967b1faf253af6b4ca511c85d8fe645ea8d9408ccd0608e8806695a"
   },

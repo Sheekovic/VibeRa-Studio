@@ -176,6 +176,40 @@ try:
     rising = [c[0]["pitch"] < c[-1]["pitch"] for c in chords if len(c) == 3]
     check(len(rising) == 4 and rising == [True, False, True, False],
           f"Alternate strums successive chords up, down, up, down {rising}")
+
+    # More FL tool options: strum tension / trigger ahead, flam in milliseconds, claw trash every Nth note.
+    def strummed(**extra):
+        ids = reset()
+        done("notes.chordify", text="major", value=0, **target(ids))
+        state = done("notes.strum", text="up", length=.125, value=0, **extra, **target([n["id"] for n in notes()]))
+        first = sorted((n for n in notes() if n["beat"] < .9), key=lambda n: n["pitch"])
+        return state, [round(n["beat"], 6) for n in first]
+    check(strummed() == ("completed", [0, .125, .25]), "An even strum delays each chord note by the spread")
+    state, bent = strummed(offset=1)
+    check(state == "completed" and bent[0] == 0 and bent[2] == .25 and .125 < bent[1] < .25,
+          f"Positive strum tension speeds the strum up toward its end and keeps the first and last note (notes.strum offset) {bent}")
+    check(strummed(offset=2)[0] == "failed", "Strum tension outside -1..1 is refused")
+    ids = reset()
+    done("notes.chordify", text="major", value=0, **target([n["id"] for n in notes() if n["beat"] >= .9 and n["beat"] < 1.1]))
+    second = [n["id"] for n in notes() if .9 <= n["beat"] < 1.1]
+    check(done("notes.strum", text="up", length=.125, value=0, beat=.5, **target(second)) == "completed"
+          and sorted(round(n["beat"], 6) for n in notes() if n["id"] in second) == [.875, 1, 1.125],
+          "Strum trigger ahead centres the strum on the chord start (notes.strum beat)")
+    ids = reset()
+    before = {n["id"]: n for n in notes()}
+    check(done("notes.flam", length=.25, value=.6, offset=30, **target(ids)) == "completed" and len(notes()) == 8
+          and sorted(round(n["beat"], 6) for n in notes() if n["id"] not in before)[1:] == [round(b - .03 * 2, 6) for b in (1, 2, 3)],
+          "Flam absolute time: 30 ms is 0.06 beat at 120 BPM (notes.flam offset)")
+    check(done("notes.flam", length=.25, value=.6, offset=900, **target(ids)) == "failed", "A flam time above 250 ms is refused")
+    ids = reset()
+    check(done("notes.claw", text="trash", value=2, enabled=True, **target(ids)) == "completed"
+          and [(n["pitch"], round(n["beat"], 6)) for n in sorted(notes(), key=lambda n: n["beat"])] == [(60, 0), (67, 1.75)],
+          f"Claw trashes every 2nd note and stretches the rest over the span (notes.claw trash) {[(n['pitch'], n['beat'], n['length']) for n in notes()]}")
+    ids = reset()
+    check(done("notes.claw", text="trash", value=2, enabled=False, **target(ids)) == "completed"
+          and [(n["pitch"], n["beat"]) for n in sorted(notes(), key=lambda n: n["beat"])] == [(60, 0), (67, 2)],
+          "Claw trash without stretch keeps the gaps")
+    check(done("notes.claw", text="trash", value=9, **target(ids)) == "failed", "A trash interval longer than the notes is refused")
     passed = True
 finally:
     client.close()
