@@ -4492,7 +4492,7 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
     if (action.startsWith("browser."))
         return browser->viewAction(action);
     if (action.startsWith("playlist.") && action != "playlist.grouping" && action != "playlist.follow" &&
-        action != "playlist.stretchMode")
+        action != "playlist.stretchMode" && !action.startsWith("playlist.select"))
     {
         if (focus != Scope::playlist)
             return false;
@@ -5998,6 +5998,52 @@ bool Studio::performAction(const juce::String &action, const juce::KeyPress *typ
             return false;
         }
         static_cast<Editor *>(windows[1]->getContentComponent())->setTimeSelection(start, end);
+        return true;
+    }
+    if (action == "playlist.selectMuted" || action == "playlist.selectOverlapping" || action == "playlist.selectStacked")
+    {
+        // Playlist menu > Select: muted clips, clips that overlap an earlier clip on their track, or
+        // clips stacked exactly on another (same track, start and end). The first of each pile stays out.
+        struct Row
+        {
+            Id id;
+            int lane;
+            double beat, end;
+            bool muted;
+        };
+        std::vector<Row> rows;
+        const auto &p = controller.project;
+        for (const auto &c : p.placements)
+            rows.push_back({c.id, c.lane, c.beat, c.beat + c.length, c.muted});
+        for (const auto &c : p.audioPlacements)
+            rows.push_back({c.id, c.lane, c.beat, p.audioEndBeat(c.beat, c.duration), c.muted});
+        for (const auto &c : p.automation.placements)
+            rows.push_back({Id(c.id), c.lane, c.beat, c.beat + c.length, c.muted});
+        std::vector<Id> picked;
+        for (const auto &row : rows)
+        {
+            bool pick = action == "playlist.selectMuted" && row.muted;
+            if (action != "playlist.selectMuted")
+                for (const auto &other : rows)
+                {
+                    if (other.id == row.id || other.lane != row.lane)
+                        continue;
+                    const bool same = std::abs(other.beat - row.beat) < 1.e-9 && std::abs(other.end - row.end) < 1.e-9;
+                    const bool earlier = other.beat < row.beat - 1.e-9 || (std::abs(other.beat - row.beat) < 1.e-9 && other.id < row.id);
+                    if (action == "playlist.selectStacked" ? same && other.id < row.id
+                                                           : earlier && other.beat < row.end - 1.e-9 && row.beat < other.end - 1.e-9)
+                        pick = true;
+                }
+            if (pick)
+                picked.push_back(row.id);
+        }
+        focus = Scope::playlist;
+        selectItems(true, picked);
+        status = picked.empty() ? juce::String(action == "playlist.selectMuted"   ? "No muted clips"
+                                               : action == "playlist.selectStacked" ? "No stacked clips"
+                                                                                    : "No overlapping clips")
+                                : "Selected " + juce::String(int(picked.size())) + " clips";
+        repaint();
         return true;
     }
     if (action == "selection.invert")

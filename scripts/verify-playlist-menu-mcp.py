@@ -112,6 +112,23 @@ try:
           f"Time signature 3/4 from a bar (meter.change.add) {meters()}")
     change = max(meters(), key=lambda m: m.get("beat", 0))
     check(done("meter.change.delete", target=change["id"]) == "completed" and len(meters()) == base_count, "Remove the change at this bar (meter.change.delete)")
+
+    # Select submenu: muted, overlapping and stacked clips on a fresh arrangement.
+    call("vibera_project", {"action": "new", "template": "empty", "discardChanges": True})
+    pattern = state()["selectedPattern"]
+    for beat, lane, length in ((0, 0, 4), (2, 0, 4), (8, 0, 4), (8, 0, 4), (0, 1, 4)):
+        command("clip.add", pattern=pattern, beat=beat, lane=lane, length=length)
+    rows = sorted(items("clips"), key=lambda c: c["id"])
+    check(len(rows) == 5, f"Five test clips ({len(rows)})")
+    ids = [c["id"] for c in rows]
+    command("clip.mute", ids=[ids[4]], enabled=True)
+    picked = lambda: sorted(state()["selectedClips"])
+    action = lambda name: call("vibera_command", {"command": name, "args": {}}).get("completionState")
+    check(action("playlist.selectMuted") == "completed" and picked() == [ids[4]], f"Select muted clips picks the muted clip (playlist.selectMuted) {picked()}")
+    check(action("playlist.selectOverlapping") == "completed" and picked() == sorted([ids[1], ids[3]]),
+          f"Select overlapping clips picks the later clip of each overlap, not the other track (playlist.selectOverlapping) {picked()}")
+    check(action("playlist.selectStacked") == "completed" and picked() == [ids[3]],
+          f"Select stacked clips picks the copy on the same track, start and length (playlist.selectStacked) {picked()}")
     passed = True
 finally:
     client.close()

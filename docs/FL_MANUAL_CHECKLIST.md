@@ -197,3 +197,17 @@ copy / paste already exist. New and still open items from these pages:
 | Randomize: population, stack, portamento, merge same notes, levels | partial | Density stands for population; one note per step, no random portamento, merge or level wheels |
 | Chop: pattern file, time multiplier, absolute pattern, levels, group notes | partial | Quick chop at the snap step (`notes.chop`); no .fsc chop pattern, time multiplier, absolute / relative switch or grouping |
 | Articulate | not reviewed | The manual links no page for the Articulate tool; `notes.articulate` (staccato / legato lengths) exists |
+
+## Tenth pass (2026-11-13, playlist menu / track header menu / Channel options and Channel button menus)
+
+The Playlist menu items were read from a summary of the page, not word for word; the track header and
+Channel menus from the page text (the Channel button menu up to Burn MIDI to).
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Playlist Select: muted, overlapping and stacked clips | done | Playlist menu > Select (`playlist.selectMuted`, `playlist.selectOverlapping`, `playlist.selectStacked`), `state.selectedClips`; playlist_menu_mcp |
+| Playlist Edit, Tools, Group, Zoom, Time markers; track header menu; Channel options and Channel button menus | done | Checked item by item against the command registry: cut / copy / paste / duplicate, shift, insert / delete space, merge and merge similar, pitch and reverse audio clips, quick quantize, consolidate, export tracks and groups, clone tracks, select all similar clips, markers and time signatures, track rename / colour / auto name / reset / size / group / lock / mute clips / clone / move, Channel clone / delete / move / sort / group / colour / mute / transpose / swing / assign to free Mixer tracks / zip, fill and rotate steps |
+| Playlist View options (grid colour and contrast, track separators, behind clips, mini playlist preview, gain previews) | partial | Track height, auto-scroll and centred playhead exist; the other display switches are not built |
+| Playlist: drop audio on track headers modes, automatic crossfades switch, create variants when stretching | partial | Clip fades and stretch exist; these mode switches are not built |
+| Channel rack: Loop Starter, Patcherize, Create DirectWave instrument, declicking mode for selected, switch audio clip stretch engine | out of scope | Depend on FL-only plugins or engines |
+| Channel rack display options (button width, name alignment, auto resize, focus on playback, mixer track selectors) | partial | Channel Rack layout is fixed; Mixer target is shown per Channel |

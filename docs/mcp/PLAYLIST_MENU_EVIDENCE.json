@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "1d46532f203c1980737e5e5db2362c77cce3dcf60212f68b555a12663f20c8a5",
+  "applicationSha256": "72d8180268fc425963e12cc887d9ed6fbfebc775d8de61058b04703342b08b80",
   "sourceInputs": {
-    "scripts/verify-playlist-menu-mcp.py": "4fe11b7a2bf9c5be65e8590a7ad31fe7e5bea362ae667a89702eae59355a1e7f",
-    "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",
-    "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",
-    "src/Commands.cpp": "745be316a91b4315a4d3b10d01a5cfe6467cafe8b68a3d32fb6e26296eef9c03",
+    "scripts/verify-playlist-menu-mcp.py": "8e3cc34facda17cc46755c78cce62b5772af8fc02f8253e0abd37ac9e29240fc",
+    "src/Editors.h": "f3fdbf2aebd3b65b2524fd2e4af43fc77bef67a2f99e468143f826effb434f5a",
+    "src/Studio.cpp": "378d92a17676614e1ae024af9a485b14380068b7ac8ab08633c421e1687cd028",
+    "src/Commands.cpp": "170c28b1d30f5c4bdd3e66fe892d1c1f97d0d87a8ec2b5abd196ba6559eb7884",
     "src/McpContracts.h": "c079e0295d01fa40da18cbaaa17fcc493c9f3001ca9887ac941f9636d7716c2b",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31"
   },
@@ -39,7 +39,11 @@
     "Tempo curve over the time selection (tempo.curve, 19 changes)",
     "An unknown tempo curve shape is refused",
     "Time signature 3/4 from a bar (meter.change.add) [{'id': 0, 'beat': 0.0, 'numerator': 4, 'denominator': 4, 'bar': 1}, {'id': 32, 'beat': 16.0, 'numerator': 3, 'denominator': 4, 'bar': 5}]",
-    "Remove the change at this bar (meter.change.delete)"
+    "Remove the change at this bar (meter.change.delete)",
+    "Five test clips (5)",
+    "Select muted clips picks the muted clip (playlist.selectMuted) [10]",
+    "Select overlapping clips picks the later clip of each overlap, not the other track (playlist.selectOverlapping) [7, 9]",
+    "Select stacked clips picks the copy on the same track, start and length (playlist.selectStacked) [9]"
   ],
   "scope": "Isolated --mcp-test; the registered operations the Playlist menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence.",
   "refreshedBy": "scripts/refresh-menu-evidence.py"

@@ -1,12 +1,12 @@
 {
   "passed": true,
-  "applicationSha256": "1d46532f203c1980737e5e5db2362c77cce3dcf60212f68b555a12663f20c8a5",
+  "applicationSha256": "72d8180268fc425963e12cc887d9ed6fbfebc775d8de61058b04703342b08b80",
   "sourceInputs": {
     "scripts/verify-rack-menu-mcp.py": "8b71e29b448ea1e578672b84505b2488cabc7e499d138ff028e59a832a16eb44",
     "src/StudioRack.cpp": "e6cf4833b86218a621f7cda8502b7cde426f34563b5b30c89f19123b46983459",
-    "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",
+    "src/Studio.cpp": "378d92a17676614e1ae024af9a485b14380068b7ac8ab08633c421e1687cd028",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31",
-    "src/Commands.cpp": "745be316a91b4315a4d3b10d01a5cfe6467cafe8b68a3d32fb6e26296eef9c03"
+    "src/Commands.cpp": "170c28b1d30f5c4bdd3e66fe892d1c1f97d0d87a8ec2b5abd196ba6559eb7884"
   },
   "sourceHashMode": "text-lf-v1",
   "checks": [

@@ -105,3 +105,9 @@ Make unique as sample: `vibera_command clip.uniqueSample` with `target` = Audio 
 clip its own Channel on a fresh copy of its audio file (`<name> unique.wav` beside the original;
 other clips keep the original). One Undo step; the copied file stays on disk after Undo. Refused
 for anything that is not an Audio Clip with an existing file.
+
+## Selecting clips by state
+
+`vibera_command` `playlist.selectMuted`, `playlist.selectOverlapping` (the later clip of each overlap on a
+track) and `playlist.selectStacked` (a copy on the same track, start and length) replace the clip selection;
+read it back from `state.selectedClips`.

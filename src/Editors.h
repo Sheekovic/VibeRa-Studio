@@ -1725,6 +1725,11 @@ class Studio::Editor final : public juce::Component,
                                                                   : "One every " + juce::String(bars) + " bars");
                     menu.addSubMenu("Add markers", addMarkers);
                 }
+                juce::PopupMenu selectClips;
+                selectClips.addItem(3030, "Select muted clips");
+                selectClips.addItem(3031, "Select overlapping clips");
+                selectClips.addItem(3032, "Select stacked clips");
+                menu.addSubMenu("Select", selectClips);
                 menu.addItem(3020, "Export all playlist tracks (one WAV each)...", !s.playlistTrackLanes().empty());
                 menu.addItem(3021, "Export all playlist track groups (one WAV each)...", !s.playlistTrackLanes().empty());
                 const bool markers = !s.controller.project.markers.empty();
@@ -1816,6 +1821,13 @@ class Studio::Editor final : public juce::Component,
                                 a.value = result - 3000;
                                 safe->s.command("marker.addEvery", a);
                             }
+                            return;
+                        }
+                        if (result >= 3030 && result <= 3032)
+                        {
+                            safe->s.performAction(result == 3030   ? "playlist.selectMuted"
+                                                  : result == 3031 ? "playlist.selectOverlapping"
+                                                                   : "playlist.selectStacked");
                             return;
                         }
                         if (result >= 13 && result <= 15)
