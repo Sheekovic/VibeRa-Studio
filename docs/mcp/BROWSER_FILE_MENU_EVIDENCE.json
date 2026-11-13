@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "applicationSha256": "05d752c4d85f2bd1795d81afc7c69b6e6b908e8e5ee97d11f547dc974c5c9f87",
+  "applicationSha256": "2cb6c86b20f96cbc69fd531905c88d06097e97b301d0574ad42a08113e4c4de9",
   "sourceInputs": {
     "src/SampleFileBrowser.h": "83e3c6f86b476f84eb3299e3a0b8c40a47ea9d669ea3091be28d1cc5a7190ce7",
-    "src/Commands.cpp": "fd1e77c20a779dae187176d4093d3c0f75d2b4e928f818ed82b40ef2dd86d536",
+    "src/Commands.cpp": "58b5799bd42074bbadb840ed4085a01c930db2b36aaa8e2a847dc7ded6712859",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31",
     "scripts/verify-midi-import-mcp.py": "ee9345c2f4211476ba6b3e958d28b380f5e8e0db592603dcbe632f4cf50f701d",
     "scripts/verify-normalize-mcp.py": "092761d1de9ef65f85141e6ff78a0cb7dcf15fa81c3df52606dcc81545b2c0d8",

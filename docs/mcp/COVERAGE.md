@@ -813,7 +813,7 @@ Callback candidates require manual expansion into individual controls and gestur
 Custom callback candidates: 455; unreviewed: 83.
 See COVERAGE.json for every source anchor, fingerprint, mapping and review status.
 
-Explicit UI inventory complete: False; known controls: 385; gaps: 156.
+Explicit UI inventory complete: False; known controls: 388; gaps: 156.
 Known non-callback controls and incomplete whole-app inventory also keep readiness red.
 
 | Explicit control/workflow | Canonical path | MCP / verification |
@@ -1203,6 +1203,9 @@ Known non-callback controls and incomplete whole-app inventory also keep readine
 | `browser.file.sendToChannel` | channel.source | vibera_command; reviewed |
 | `browser.file.newChannel` | channel.add | vibera_command; reviewed |
 | `transport.outputMeter` | view.outputScopeMode | vibera_command; reviewed |
+| `piano.menu.flipKeepStarts` | notes.flip | vibera_command; reviewed |
+| `piano.menu.flamOnBeat` | notes.flam | vibera_command; reviewed |
+| `piano.menu.strumAlternate` | notes.strum | vibera_command; reviewed |
 
 Reviewed custom callbacks require passed receipts bound to current source/dependency hashes.
 Native mouse/hardware qualification is separate from component/MCP evidence.
