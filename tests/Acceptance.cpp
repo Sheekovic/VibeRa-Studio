@@ -458,6 +458,27 @@ static void outputScopeTests()
     scope.clear();
     require(scope.peak() == 0.f, "clearing the scope empties it");
 }
+static void heldKeysTests()
+{
+    // Keys held on a MIDI input name the chord: note-ons set, note-offs and velocity 0 clear.
+    HeldKeys keys;
+    const auto send = [&](unsigned char status, unsigned char data, unsigned char value)
+    {
+        const unsigned char bytes[3]{status, data, value};
+        keys.observe(bytes);
+    };
+    send(0x90, 62, 100);
+    send(0x91, 65, 90);
+    send(0x90, 69, 80);
+    require(keys.pitches() == std::vector<int>({62, 65, 69}) && score::detectChord(keys.pitches()) == "D minor",
+            "keys held on a MIDI input read back and spell their chord");
+    send(0x90, 65, 0);
+    send(0x80, 69, 0);
+    require(keys.pitches() == std::vector<int>({62}), "note-off and a zero-velocity note-on release their keys");
+    send(0x90, 127, 1);
+    send(0xb0, 123, 0);
+    require(keys.pitches().empty(), "all notes off clears the held keys");
+}
 static void monitorVolumeTests()
 {
     // Listening-only gain: untouched at 1, one block of ramp to the target, then steady; back to 1.
@@ -5816,6 +5837,7 @@ int main(int argc, char **argv)
         runStage("scoreLogTests", [&] { scoreLogTests(folder); });
         runStage("audioLoggerTests", [&] { audioLoggerTests(folder); });
         runStage("monitorVolumeTests", [&] { monitorVolumeTests(); });
+        runStage("heldKeysTests", [&] { heldKeysTests(); });
         runStage("outputScopeTests", [&] { outputScopeTests(); });
         runStage("polyphonyMeterTests", [&] { polyphonyMeterTests(); });
         runStage("recordToStepsTests", [&] { recordToStepsTests(); });

@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "9337c3cdab73602ca4f38c8172ff7fddf8782dc1058f48ae08d5f56bce48c709",
+  "applicationSha256": "05d752c4d85f2bd1795d81afc7c69b6e6b908e8e5ee97d11f547dc974c5c9f87",
   "sourceInputs": {
     "scripts/verify-playlist-menu-mcp.py": "4fe11b7a2bf9c5be65e8590a7ad31fe7e5bea362ae667a89702eae59355a1e7f",
     "src/Editors.h": "c15ce93eb63b4552fa862e21fa7f06382811317eb6fc778c1048ab4b049790a2",

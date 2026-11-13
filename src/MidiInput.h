@@ -46,6 +46,37 @@ struct MidiLane
         cutSignal->publish(sequence); // A cut cannot precede admission of its source MIDI event.
     }
 };
+// Keys held on a MIDI input, for the chord display: the MIDI callback sets and clears bits
+// (atomics only); the interface reads the pitches. All notes off / all sound off clear the set.
+struct HeldKeys final
+{
+    std::array<std::atomic<std::uint64_t>, 2> bits{};
+    void observe(const unsigned char *bytes) noexcept
+    {
+        const auto kind = bytes[0] & 0xf0;
+        const auto pitch = bytes[1] & 0x7f;
+        const auto bit = std::uint64_t(1) << (pitch & 63);
+        if (kind == 0x90 && bytes[2] != 0)
+            bits[size_t(pitch >> 6)].fetch_or(bit, std::memory_order_relaxed);
+        else if (kind == 0x80 || kind == 0x90)
+            bits[size_t(pitch >> 6)].fetch_and(~bit, std::memory_order_relaxed);
+        else if (kind == 0xb0 && (bytes[1] == 120 || bytes[1] == 123))
+            clear();
+    }
+    void clear() noexcept
+    {
+        bits[0].store(0, std::memory_order_relaxed);
+        bits[1].store(0, std::memory_order_relaxed);
+    }
+    std::vector<int> pitches() const
+    {
+        std::vector<int> held;
+        for (int pitch = 0; pitch < 128; ++pitch)
+            if (bits[size_t(pitch >> 6)].load(std::memory_order_relaxed) & (std::uint64_t(1) << (pitch & 63)))
+                held.push_back(pitch);
+        return held;
+    }
+};
 class MidiInputRouter final : public juce::MidiInputCallback
 {
     std::unique_ptr<juce::MidiInput> device;
@@ -123,6 +154,7 @@ class MidiInputRouter final : public juce::MidiInputCallback
     // move to the nearest allowed key (ties down) before monitoring and recording; the mapping is
     // fixed per key so every note-off matches its note-on. Lock-free; set by the control thread.
     std::atomic<std::uint32_t> scaleSnap{0};
+    HeldKeys heldKeys; // Keys down on this input right now (after the channel filter and scale snap).
     static int snapToScale(int key, std::uint32_t mask) noexcept
     {
         if (!(mask & (1u << 12)) || (mask & 0xfffu) == 0)

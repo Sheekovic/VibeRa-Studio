@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "applicationSha256": "9337c3cdab73602ca4f38c8172ff7fddf8782dc1058f48ae08d5f56bce48c709",
+  "applicationSha256": "05d752c4d85f2bd1795d81afc7c69b6e6b908e8e5ee97d11f547dc974c5c9f87",
   "sourceInputs": {
     "scripts/verify-mixer-track-menu-mcp.py": "503497485880d4a09d66d7299d6bda2d039bb7702bbe2e207052f3b47fa09fae",
     "src/Studio.cpp": "302c48e8098dba245057fb96b94455b5ed57fb8b93787a7b2dcbdfa81f36ce45",

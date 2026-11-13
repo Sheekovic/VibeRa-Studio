@@ -226,6 +226,7 @@ void MidiInputRouter::route(const juce::MidiMessage &message, bool monitor, bool
     if (const auto mask = scaleSnap.load(std::memory_order_relaxed);
         mask && size == 3 && ((bytes[0] & 0xf0) == 0x80 || (bytes[0] & 0xf0) == 0x90))
         bytes[1] = static_cast<unsigned char>(snapToScale(bytes[1], mask));
+    heldKeys.observe(bytes);
     ++readers;
     if (record && historyEnabled.load() && !receiver)
         history.push(historyChannel.load(), historyEpoch.load(), bytes);
