@@ -52,6 +52,13 @@ for receipt_name, source in manifest["receipts"].items():
         passed = set(re.findall(r"Test +#\d+: (\S+) \.+ +Passed", text))
         missing = sorted(set(source["ctests"]) - passed)
         if missing:
+            # Keep the failed run: the next refresh rewrites related-ctest.log.
+            import shutil, time
+            shutil.copyfile(log, log.with_name("related-ctest-failed-" + time.strftime("%Y%m%d-%H%M%S") + ".log"))
+            subprocess.run([str(tools()[1]), "-C", "Release", "--output-on-failure", "-R", "^(" + "|".join(missing) + ")$"],
+                           cwd=ROOT / "build/windows",
+                           stdout=log.with_name("related-ctest-failed-output.log").open("w", encoding="utf-8"),
+                           stderr=subprocess.STDOUT)
             sys.exit(f"Refused {receipt_name}: not passed alone: {missing} (see {log})")
         checks = sorted("ctest " + name + " passed (run alone)" for name in passed)
         extra = {"sourceLog": log.relative_to(ROOT).as_posix()}
