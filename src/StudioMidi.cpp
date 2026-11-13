@@ -323,6 +323,12 @@ void Studio::midiFileMenu()
             const char *labels[]{"Up", "Down", "Up-down", "Random"};
             arp.addSubMenu(labels[m], steps);
         }
+        juce::PopupMenu wide;
+        for (int st = 0; st < 4; ++st)
+            wide.addItem(2040 + st, juce::String("Up, ") + stepNames[st]);
+        for (int st = 0; st < 4; ++st)
+            wide.addItem(2050 + st, juce::String("Up-down, ") + stepNames[st]);
+        arp.addSubMenu("Over 2 octaves", wide);
         menu.addSubMenu("Arpeggiate", arp);
         juce::PopupMenu strum;
         strum.addItem(3000, "Up, fast (1/64 per note)");
@@ -781,7 +787,9 @@ void Studio::midiFileMenu()
                 {
                     const char *modes[]{"up", "down", "updown", "random"};
                     id = "notes.arpeggiate";
-                    args.text = modes[(result - 2000) / 10];
+                    // 2040..2053: the Over 2 octaves items (Up, Up-down).
+                    args.text = result >= 2050 ? "updown" : result >= 2040 ? "up" : modes[(result - 2000) / 10];
+                    args.offset = result >= 2040 ? 2 : 0;
                     args.length = .125 * std::pow(2., (result - 2000) % 10); // 1/32 note = 0.125 beat.
                     args.value = .9;
                 }

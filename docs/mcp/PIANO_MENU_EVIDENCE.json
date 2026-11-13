@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "4871d4b83f832b6ec51b64b369371300291884464106cdde8e6c934de9c0a42b",
+  "applicationSha256": "1d46532f203c1980737e5e5db2362c77cce3dcf60212f68b555a12663f20c8a5",
   "sourceInputs": {
-    "scripts/verify-piano-menu-mcp.py": "36f3c8435dd17c684c26d1ea33d0b70df7e62d4d3d863c14fee40dbc8d43bf71",
-    "src/StudioMidi.cpp": "88c19d4d0ca33a8f4b4dd29eb65ed14ec32f7e07926e0a336df754af997cfb4d",
-    "src/Commands.cpp": "11b585bf3958387f9309d6ee0a5b932a51fbf60998e0a1cf9ea0c60675215aa7",
-    "src/McpContracts.h": "05e97aa5b318631cce83231be7cb7c3cb3faaf7fc0b030c7526d58fad0b38bff",
+    "scripts/verify-piano-menu-mcp.py": "908c5e466e02ba676d131dcc2569b3a063ab6679bb0202a6f5cd7ad2e85780b2",
+    "src/StudioMidi.cpp": "dfd800b9e19120471abdde29cfd6217d1c8583eb841233ab352094ab362e4916",
+    "src/Commands.cpp": "745be316a91b4315a4d3b10d01a5cfe6467cafe8b68a3d32fb6e26296eef9c03",
+    "src/McpContracts.h": "c079e0295d01fa40da18cbaaa17fcc493c9f3001ca9887ac941f9636d7716c2b",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31"
   },
   "sourceHashMode": "text-lf-v1",
@@ -70,7 +70,12 @@
     "A flam time above 250 ms is refused",
     "Claw trashes every 2nd note and stretches the rest over the span (notes.claw trash) [(60, 0.0, 0.875), (67, 1.75, 0.875)]",
     "Claw trash without stretch keeps the gaps",
-    "A trash interval longer than the notes is refused"
+    "A trash interval longer than the notes is refused",
+    "Arpeggiate over 2 octaves runs (notes.arpeggiate offset)",
+    "The run climbs into the second octave [60, 64, 67, 72]",
+    "An arpeggio range above 4 octaves is refused",
+    "Randomize over 3 octaves spreads the notes across the range (notes.randomize offset) [55, 57, 64]..77",
+    "A randomize range above 4 octaves is refused"
   ],
   "scope": "Isolated --mcp-test; the registered operations the Piano roll menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence.",
   "refreshedBy": "scripts/refresh-menu-evidence.py"

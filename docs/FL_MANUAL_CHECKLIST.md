@@ -185,3 +185,15 @@ copy / paste already exist. New and still open items from these pages:
 | Strum: time and velocity tension, end section, trigger ahead, chop chords | partial | Time tension (`offset` -1..1) and trigger ahead (`beat` 0..1) on `notes.strum`, menu items Up, speeding up / Up, centred on the beat; spread and a linear velocity taper, note ends kept; piano_menu_mcp. No velocity tension curve, separate end-time section or chop chords |
 | Limit: key / scale, snap, wrap | partial | `notes.limit` folds by octaves into a range; key and scale snapping is the separate `notes.scale` / `notes.maqam` tool; no snap-direction or wrap option |
 | Claw machine: period, trash every, time distortion, remove short notes, stretch to compensate | partial | `notes.claw` text `trash` removes every `value`-th note (chords count once) and `enabled` stretches the rest over the original span, Claw menu > Trash every 2nd / 3rd / 4th note; the x/. rhythm gate stays; piano_menu_mcp. No time distortion; stretched notes are never shorter than 1/64 beat |
+
+## Ninth pass (2026-11-13, pianoroll_arpeggiate / pianoroll_qnt / pianoroll_random / pianoroll_chp pages)
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Arpeggiate: range in octaves, gate | done | `notes.arpeggiate` `offset` 1..4 octaves and `value` gate, Arpeggiate > Over 2 octaves; piano_menu_mcp |
+| Arpeggiate: pattern file, pattern mode, time multiplication, sync, levels, group notes | partial | Orders up, down, updown and random on a chosen step; no .fsc arpeggio pattern, flip / alternate pattern mode, block / chord sync, level mixing or grouping |
+| Quantize: start time, sensitivity, duration modes, groove template | done | `vibera_quantizer`: strength, sensitivity, duration strength, end / duration modes and grooves (quantizer and groove tests) |
+| Randomize: octave, range, key, scale, length, seed | done | `notes.randomize` scale, root, `offset` range 1..4 octaves, step length, density and seed; piano_menu_mcp |
+| Randomize: population, stack, portamento, merge same notes, levels | partial | Density stands for population; one note per step, no random portamento, merge or level wheels |
+| Chop: pattern file, time multiplier, absolute pattern, levels, group notes | partial | Quick chop at the snap step (`notes.chop`); no .fsc chop pattern, time multiplier, absolute / relative switch or grouping |
+| Articulate | not reviewed | The manual links no page for the Articulate tool; `notes.articulate` (staccato / legato lengths) exists |

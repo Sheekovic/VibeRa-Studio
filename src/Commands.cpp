@@ -5015,10 +5015,14 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             const double span = std::max(a.length, pat->length > 0 ? pat->length : 4.);
             if (span / a.length > 4096)
                 return juce::Result::fail("Too many steps to randomize");
+            // args.offset: range in octaves 1..4 (0 means 1); the top note is the root above the range.
+            if (!std::isfinite(a.offset) || std::floor(a.offset) != a.offset || a.offset < 0 || a.offset > 4)
+                return juce::Result::fail("Randomize range is 1..4 octaves");
+            const int range = a.offset == 0 ? 1 : int(a.offset);
             std::vector<int> pitches;
-            for (int octave = 0; octave < 2; ++octave)
+            for (int octave = 0; octave <= range; ++octave)
                 for (int interval : shape->intervals)
-                    if (octave == 0 || interval == 0)
+                    if ((octave < range || interval == 0) && a.pitch + octave * 12 + interval <= 127)
                         pitches.push_back(a.pitch + octave * 12 + interval);
             std::erase_if(pat->notes, [&](const auto &n) { return n.channel == a.channel; });
             juce::Random random(juce::int64(a.seed.value_or(1)));
@@ -5132,7 +5136,8 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
             const auto result =
                 id == "notes.chordify"     ? score::chordify(next, *pat, targets, a.text, int(a.value))
                 : id == "notes.arpeggiate" ? score::arpeggiate(next, *pat, targets, a.text, a.length,
-                                                                a.value > 0 ? a.value : 1., seed)
+                                                                a.value > 0 ? a.value : 1., seed,
+                                                                a.offset == 0 ? 1 : std::isfinite(a.offset) && std::floor(a.offset) == a.offset ? int(a.offset) : 0)
                 : id == "notes.strum"      ? score::strum(*pat, targets, a.text, a.length, a.value, a.offset, a.beat)
                 : id == "notes.humanize"   ? score::humanize(*pat, targets, a.beat, a.value, a.offset, seed)
                 : id == "notes.maqam"      ? score::maqamSnap(*pat, targets, a.text, ((a.pitch % 12) + 12) % 12)

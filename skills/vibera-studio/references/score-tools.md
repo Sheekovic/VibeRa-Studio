@@ -106,3 +106,5 @@ m7b5/6/m6/add9/maj9/m9/9/5, optional /bass (e.g. Am7, F#maj7, Bb/D).
 - `notes.flam` `offset` 1..250 gives the stroke time in milliseconds instead of beats.
 - `notes.claw` `text` `trash` with `value` N (2..64) removes every N-th note (a chord counts once);
   `enabled` true stretches the remaining notes over the original span, false keeps the gaps.
+- Range in octaves: `notes.arpeggiate` `offset` 2..4 repeats the chord in higher octaves before the order is
+  applied; `notes.randomize` `offset` 1..4 spreads the generated notes over that many octaves above the root.

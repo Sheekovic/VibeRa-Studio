@@ -210,6 +210,22 @@ try:
           and [(n["pitch"], n["beat"]) for n in sorted(notes(), key=lambda n: n["beat"])] == [(60, 0), (67, 2)],
           "Claw trash without stretch keeps the gaps")
     check(done("notes.claw", text="trash", value=9, **target(ids)) == "failed", "A trash interval longer than the notes is refused")
+
+    # Arpeggiate and Randomize range in octaves (FL Range).
+    ids = reset()
+    done("notes.chordify", text="major", value=0, **target([ids[0]]))
+    chord = [n["id"] for n in notes() if n["beat"] < .4]
+    for n in chord:
+        command("notes.resize", ids=[n], length=2) if False else None
+    check(done("notes.arpeggiate", text="up", length=.125, value=.9, offset=2, **target(chord)) == "completed", "Arpeggiate over 2 octaves runs (notes.arpeggiate offset)")
+    run = [n["pitch"] for n in sorted((n for n in notes() if n["beat"] < .9), key=lambda n: n["beat"])]
+    check(len(run) >= 4 and run[:4] == [60, 64, 67, 72], f"The run climbs into the second octave {run}")
+    check(done("notes.arpeggiate", text="up", length=.125, value=.9, offset=7, **target([n["id"] for n in notes()])) == "failed", "An arpeggio range above 4 octaves is refused")
+    reset()
+    check(done("notes.randomize", text="major", pitch=48, length=.25, value=1, seed=3, offset=3, pattern=pattern, channel=channel) == "completed"
+          and max(n["pitch"] for n in notes()) > 60 and all(48 <= n["pitch"] <= 84 for n in notes()),
+          f"Randomize over 3 octaves spreads the notes across the range (notes.randomize offset) {sorted(set(n['pitch'] for n in notes()))[:3]}..{max(n['pitch'] for n in notes())}")
+    check(done("notes.randomize", text="major", pitch=48, length=.25, value=1, seed=3, offset=9, pattern=pattern, channel=channel) == "failed", "A randomize range above 4 octaves is refused")
     passed = True
 finally:
     client.close()

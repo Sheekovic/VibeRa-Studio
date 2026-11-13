@@ -240,9 +240,12 @@ inline juce::Result chordify(Project &project, Pattern &pattern, const std::vect
 
 // Each chord (same Channel and onset) becomes a run of single notes across its longest
 // length: `step` beats apart, each `gate` of a step long. Modes: up, down, updown, random.
+// `octaves` 1..4 repeats the chord in higher octaves before the order is applied (the range).
 inline juce::Result arpeggiate(Project &project, Pattern &pattern, const std::vector<size_t> &targets,
-                               const juce::String &mode, double step, double gate, std::uint32_t seed)
+                               const juce::String &mode, double step, double gate, std::uint32_t seed, int octaves = 1)
 {
+    if (octaves < 1 || octaves > 4)
+        return juce::Result::fail("Arpeggio range is 1..4 octaves");
     if (!(step >= 1. / 64 && step <= 16))
         return juce::Result::fail("Arpeggio step is 1/64..16 beats");
     if (!(gate > 0 && gate <= 1))
@@ -264,6 +267,15 @@ inline juce::Result arpeggiate(Project &project, Pattern &pattern, const std::ve
             span = std::max(span, pattern.notes[index].length);
             removed.push_back(pattern.notes[index].id);
         }
+        const auto played = chord.size(); // The chord's own notes; the rest are octave copies.
+        for (int octave = 1; octave < octaves; ++octave)
+            for (size_t i = 0; i < played; ++i)
+                if (chord[i].pitch + 12 * octave <= 127)
+                {
+                    auto higher = chord[i];
+                    higher.pitch += 12 * octave;
+                    chord.push_back(higher);
+                }
         std::vector<size_t> order(chord.size());
         for (size_t i = 0; i < order.size(); ++i)
             order[i] = i;
@@ -281,7 +293,7 @@ inline juce::Result arpeggiate(Project &project, Pattern &pattern, const std::ve
                 std::shuffle(order.begin(), order.end(), random);
             auto note = chord[order[size_t(k) % order.size()]];
             // The chord's own IDs carry its first notes; later ones are new.
-            note.id = k < int(chord.size()) ? chord[size_t(k)].id : project.allocate();
+            note.id = k < int(played) ? chord[size_t(k)].id : project.allocate();
             note.beat = chord.front().beat + k * step;
             note.length = std::min(step * gate, chord.front().beat + span - note.beat);
             note.step = false;

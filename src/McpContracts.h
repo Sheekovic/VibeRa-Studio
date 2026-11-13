@@ -1207,6 +1207,7 @@ inline juce::var commandArgumentSchema(const juce::String &id)
             set("text", R"({"type":"string","enum":["up","down","updown","random"],"description":"Order of the chord notes."})");
             set("length", R"({"type":"number","minimum":0.015625,"maximum":16,"default":0.25,"description":"Step between arpeggio notes in beats; each chord fills its longest note."})");
             set("value", R"({"type":"number","minimum":0,"maximum":1,"default":1,"description":"Gate: note length as a fraction of the step (0 means 1)."})");
+            set("offset", R"({"type":"integer","minimum":0,"maximum":4,"default":0,"description":"Range in octaves: 2..4 repeats the chord in higher octaves before the order is applied (0 or 1: the chord only)."})");
         }
         if (id == "notes.strum")
         {

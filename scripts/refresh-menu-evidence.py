@@ -46,7 +46,7 @@ for receipt_name, source in manifest["receipts"].items():
         log = ROOT / "build/module-qualification" / source["folder"] / "related-ctest.log"
         log.parent.mkdir(parents=True, exist_ok=True)
         with log.open("w", encoding="utf-8") as out:
-            subprocess.run([str(tools()[1]), "-C", "Release", "-R", "^(" + "|".join(source["ctests"]) + ")$"],
+            subprocess.run([str(tools()[1]), "-C", "Release", "--output-on-failure", "-R", "^(" + "|".join(source["ctests"]) + ")$"],
                            cwd=ROOT / "build/windows", stdout=out, stderr=subprocess.STDOUT)
         text = log.read_text(encoding="utf-8", errors="replace")
         passed = set(re.findall(r"Test +#\d+: (\S+) \.+ +Passed", text))

@@ -1,9 +1,9 @@
 {
   "passed": true,
-  "applicationSha256": "4871d4b83f832b6ec51b64b369371300291884464106cdde8e6c934de9c0a42b",
+  "applicationSha256": "1d46532f203c1980737e5e5db2362c77cce3dcf60212f68b555a12663f20c8a5",
   "sourceInputs": {
     "src/SamplerGestures.h": "27c6dcdf2ccd92f9677791a35af588f5680790ba3d5be85ab368df594ec51013",
-    "src/Commands.cpp": "11b585bf3958387f9309d6ee0a5b932a51fbf60998e0a1cf9ea0c60675215aa7",
+    "src/Commands.cpp": "745be316a91b4315a4d3b10d01a5cfe6467cafe8b68a3d32fb6e26296eef9c03",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31",
     "scripts/verify-sampler-tempo-mcp.py": "c315f34058a56433c7b37d0b444594b7296543c3fb32f622fb452eab1456ad4d",
     "scripts/verify-ui-actions-mcp.py": "60c3e17cccf74b85088b4b27ddcb2021cebac472de9b356e1c255217550deaab",
