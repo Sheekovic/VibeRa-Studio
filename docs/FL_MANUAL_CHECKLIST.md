@@ -173,3 +173,15 @@ copy / paste already exist. New and still open items from these pages:
 | Wait for input: Only when recording / Respect recording filter | done | Tools menu, `transport.waitOnlyWhenRecording` / `transport.waitRespectFilter`, `state.waitOnlyWhenRecording` / `state.waitRespectFilter`; with Only when recording off plain Play waits for the first note, with Respect recording filter off armed recording waits even when Notes are filtered out. record_filter_mcp checks the options, the waiting state and cancel; the note that ends the wait needs a real MIDI or typing key and is not checked |
 | Metronome: set Mixer channel | deferred | Sounds and volume exist. The click plugin sits first on the Master track and the engine takes its timeline reference and count-in gate from there; moving it to another insert is an engine graph change, deferred as a structural limitation |
 | Toolbar editing, presets, Hint panel, window controls, language, online panels | n/a | Application shell of the reference program, not music workflow |
+
+## Eighth pass (2026-11-13, pianoroll_strum / pianoroll_flam / pianoroll_flip / pianoroll_limit / pianoroll_claw pages)
+
+| Item | Status | Notes |
+| --- | --- | --- |
+| Flip: Preserve start times | done | `notes.flip` text `horizontalStarts`, Piano roll menu > Flip horizontally, keep start times; piano_menu_mcp |
+| Flam: strokes before / on the original start | done | `notes.flam` text `before` (default) or `after` (the stroke takes the start, the note follows and keeps its end), Edit > Flam > On the beat; piano_menu_mcp |
+| Flam: absolute time, presets, group notes | partial | Tempo-based offset 1/128..1 beat and a velocity factor; no absolute-time mode, preset list or grouping of the result |
+| Strum: Alternate direction | done | `notes.strum` text `alternate` (chords only are counted), Strum > Alternate up / down; piano_menu_mcp |
+| Strum: time and velocity tension, end section, trigger ahead, chop chords | partial | Spread per note and a velocity taper, note ends kept; no tension curves, separate end-time section, trigger ahead or chop chords |
+| Limit: key / scale, snap, wrap | partial | `notes.limit` folds by octaves into a range; key and scale snapping is the separate `notes.scale` / `notes.maqam` tool; no snap-direction or wrap option |
+| Claw machine: period, trash every, time distortion, remove short notes, stretch to compensate | partial | `notes.claw` cuts notes into steps and keeps a typed x/. rhythm (period and trash pattern in one); no time distortion or stretch to compensate |

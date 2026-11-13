@@ -146,6 +146,36 @@ try:
     check(json.dumps(state().get("pianoGuide")) != guide, "Snap incoming MIDI to the scale guide toggles (view.snapIncomingMidi)")
     command("view.snapIncomingMidi")
     check(done("piano.resizeLeft") in ("completed", "failed"), "Allow resizing from left reports its outcome (piano.resizeLeft)")
+
+    # FL tool options: flip keeping start times, flam on the beat, alternating strum.
+    ids = reset()
+    before = {n["id"]: n for n in notes()}
+    starts = sorted(n["beat"] for n in before.values())
+    check(done("notes.flip", text="horizontalStarts", **target(ids)) == "completed"
+          and sorted(n["beat"] for n in notes()) == starts
+          and all(abs(n["length"] - before[n["id"]]["length"]) < 1e-9 for n in notes())
+          and [n["pitch"] for n in sorted(notes(), key=lambda n: n["beat"])] == [72, 67, 64, 60],
+          "Flip horizontally, keep start times: the starts mirror and every length stays (notes.flip horizontalStarts)")
+    ids = reset()
+    before = {n["id"]: n for n in notes()}
+    check(done("notes.flam", length=1 / 64, value=.6, text="after", **target(ids)) == "completed" and len(notes()) == 8
+          and all(abs(n["beat"] - before[n["id"]]["beat"] - 1 / 64) < 1e-9
+                  and abs(n["beat"] + n["length"] - before[n["id"]]["beat"] - before[n["id"]]["length"]) < 1e-9
+                  for n in notes() if n["id"] in before)
+          and sorted(n["beat"] for n in notes() if n["id"] not in before) == sorted(b["beat"] for b in before.values()),
+          "Flam on the beat: the stroke takes the original start and the note follows, keeping its end (notes.flam after)")
+    check(done("notes.flam", length=1 / 64, value=.6, text="sideways", **target(ids)) == "failed", "An unknown flam placement is refused")
+    ids = reset()
+    done("notes.chordify", text="major", value=0, **target(ids))
+    chordIds = [n["id"] for n in notes()]
+    check(done("notes.strum", text="alternate", length=.0625, value=0, **target(chordIds)) == "completed", "Strum alternate runs (notes.strum)")
+    groups = {}
+    for n in notes():
+        groups.setdefault(round(n["beat"] - (n["beat"] % 1 if n["beat"] % 1 < .5 else 0), 6), []).append(n)
+    chords = [sorted(groups[k], key=lambda n: n["beat"]) for k in sorted(groups)]
+    rising = [c[0]["pitch"] < c[-1]["pitch"] for c in chords if len(c) == 3]
+    check(len(rising) == 4 and rising == [True, False, True, False],
+          f"Alternate strums successive chords up, down, up, down {rising}")
     passed = True
 finally:
     client.close()

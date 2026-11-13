@@ -219,6 +219,8 @@ void Studio::midiFileMenu()
         juce::PopupMenu flam;
         flam.addItem(52, "Tight (1/64 beat)");
         flam.addItem(53, "Loose (1/32 beat)");
+        flam.addItem(76, "On the beat, tight (the note follows the stroke)");
+        flam.addItem(77, "On the beat, loose");
         edit.addSubMenu("Flam", flam);
         menu.addSubMenu("Edit", edit);
     }
@@ -291,6 +293,7 @@ void Studio::midiFileMenu()
     menu.addItem(68, "Paste from MIDI clipboard    Shift+Ctrl+V");
     menu.addItem(17, "Flip horizontally (reverse in time)");
     menu.addItem(18, "Flip vertically (mirror pitches)");
+    menu.addItem(78, "Flip horizontally, keep start times");
     // Composition tools act on the selection, or the whole Channel part without one.
     menu.addSeparator();
     {
@@ -321,6 +324,8 @@ void Studio::midiFileMenu()
         strum.addItem(3001, "Up, slow (1/32 per note)");
         strum.addItem(3010, "Down, fast (1/64 per note)");
         strum.addItem(3011, "Down, slow (1/32 per note)");
+        strum.addItem(3020, "Alternate up / down, fast");
+        strum.addItem(3021, "Alternate up / down, slow");
         menu.addSubMenu("Strum", strum);
         juce::PopupMenu human;
         human.addItem(4000, "Light");
@@ -693,7 +698,7 @@ void Studio::midiFileMenu()
                 safe->performAction(result == 54 ? "piano.resizeLeft" : "selection.timeAround");
                 return;
             }
-            if (result >= 40 && result <= 53)
+            if ((result >= 40 && result <= 53) || result == 76 || result == 77)
             {
                 safe->focus = Scope::piano;
                 const char *actions[]{"selection.random", "selection.odd", "selection.muted", "selection.overlapping",
@@ -713,8 +718,9 @@ void Studio::midiFileMenu()
                 }
                 else
                 {
-                    args.length = result == 52 ? 1. / 64 : 1. / 32;
+                    args.length = result == 52 || result == 76 ? 1. / 64 : 1. / 32;
                     args.value = .6;
+                    args.text = result >= 76 ? "after" : "before";
                     safe->command("notes.flam", args);
                 }
                 return;
@@ -728,11 +734,11 @@ void Studio::midiFileMenu()
                 safe->repaint();
                 return;
             }
-            if (result == 17 || result == 18)
+            if (result == 17 || result == 18 || result == 78)
             {
                 safe->focus = Scope::piano;
                 auto args = noteTargets;
-                args.text = result == 17 ? "horizontal" : "vertical";
+                args.text = result == 17 ? "horizontal" : result == 78 ? "horizontalStarts" : "vertical";
                 safe->command("notes.flip", args);
                 return;
             }
@@ -768,7 +774,7 @@ void Studio::midiFileMenu()
                 else if (result < 4000)
                 {
                     id = "notes.strum";
-                    args.text = (result - 3000) / 10 == 0 ? "up" : "down";
+                    args.text = (result - 3000) / 10 == 0 ? "up" : (result - 3000) / 10 == 1 ? "down" : "alternate";
                     args.length = (result - 3000) % 10 == 0 ? .0625 : .125;
                     args.value = .3;
                 }

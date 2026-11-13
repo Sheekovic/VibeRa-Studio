@@ -1210,7 +1210,7 @@ inline juce::var commandArgumentSchema(const juce::String &id)
         }
         if (id == "notes.strum")
         {
-            set("text", R"({"type":"string","enum":["up","down"],"description":"up starts from the lowest note, down from the highest."})");
+            set("text", R"({"type":"string","enum":["up","down","alternate"],"description":"up starts from the lowest note, down from the highest; alternate strums successive chords up, down, up..."})");
             set("length", R"({"type":"number","exclusiveMinimum":0,"maximum":1,"default":0.25,"description":"Delay between successive chord notes in beats; note ends stay."})");
             set("value", R"({"type":"number","minimum":0,"maximum":1,"default":0,"description":"Velocity taper toward the last strummed note."})");
         }

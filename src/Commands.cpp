@@ -4612,8 +4612,8 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
         {
             // Mirror the selection (or the Channel part) in time within its span, or in pitch
             // around the middle of its range.
-            if (a.text != "horizontal" && a.text != "vertical")
-                return juce::Result::fail("Flip is horizontal or vertical");
+            if (a.text != "horizontal" && a.text != "vertical" && a.text != "horizontalStarts")
+                return juce::Result::fail("Flip is horizontal, horizontalStarts or vertical");
             std::vector<size_t> targets;
             for (size_t i = 0; i < pat->notes.size(); ++i)
                 if (a.ids.empty() ? pat->notes[i].channel == a.channel : chosen(pat->notes[i].id))
@@ -4628,11 +4628,16 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 start = std::min(start, n.beat), end = std::max(end, n.beat + n.length);
                 low = std::min(low, n.pitch), high = std::max(high, n.pitch);
             }
+            double lastStart = start;
+            for (auto i : targets)
+                lastStart = std::max(lastStart, pat->notes[i].beat);
             for (auto i : targets)
             {
                 auto &n = pat->notes[i];
                 if (a.text == "horizontal")
                     n.beat = std::max(0., start + end - (n.beat + n.length));
+                else if (a.text == "horizontalStarts") // Preserve start times: the starts mirror, lengths stay.
+                    n.beat = std::max(0., start + lastStart - n.beat);
                 else
                     n.pitch = juce::jlimit(0, 127, low + high - n.pitch);
             }
@@ -4809,6 +4814,8 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                     return juce::Result::fail("Flam offset is 1/128..1 beat");
                 if (!std::isfinite(a.value) || a.value <= 0 || a.value > 1)
                     return juce::Result::fail("Flam velocity is 0..1 of the main note");
+                if (a.text.isNotEmpty() && a.text != "before" && a.text != "after")
+                    return juce::Result::fail("Flam placement is before or after");
                 if (pat->notes.size() + targets.size() > 100000)
                     return juce::Result::fail("The Pattern would exceed 100000 notes");
                 std::vector<Note> graces;
@@ -4816,7 +4823,17 @@ juce::Result Controller::executeInternal(const juce::String &id, const CommandAr
                 {
                     auto grace = pat->notes[i];
                     grace.id = next.allocate();
-                    grace.beat = std::max(0., grace.beat - a.length);
+                    if (a.text == "after")
+                    {
+                        // On the beat: the quick stroke takes the original start and the note follows it.
+                        auto &main = pat->notes[i];
+                        const double shift = std::min(a.length, main.length * .5);
+                        main.beat += shift;
+                        main.length -= shift;
+                        main.step = false;
+                    }
+                    else
+                        grace.beat = std::max(0., grace.beat - a.length);
                     grace.length = std::min(grace.length, a.length);
                     grace.velocity = juce::jlimit(.01, 1., grace.velocity * a.value);
                     graces.push_back(grace);

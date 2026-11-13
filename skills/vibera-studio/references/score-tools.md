@@ -92,3 +92,12 @@ m7b5/6/m6/add9/maj9/m9/9/5, optional /bass (e.g. Am7, F#maj7, Bb/D).
 - `notes.followChords {channel, pattern}` (or `ids`) moves notes to the nearest tone of the chord
   sounding at their Song position (the Pattern's first Playlist placement; ties go down); one Undo.
   The app shows chords on the Playlist ruler and in Tools > Chord Track.
+
+## Flip, flam and strum options
+
+- `notes.flip` `text`: `horizontal` (mirror in time), `horizontalStarts` (the start times mirror, every
+  length stays) or `vertical` (mirror pitches).
+- `notes.flam` `text`: `before` (default: a grace note `length` beats before each note) or `after` (the
+  grace note takes the original start; the note starts `length` later and keeps its end).
+- `notes.strum` `text`: `up`, `down` or `alternate` (successive chords up, down, up...; single notes are
+  not counted).

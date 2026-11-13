@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "applicationSha256": "05d752c4d85f2bd1795d81afc7c69b6e6b908e8e5ee97d11f547dc974c5c9f87",
+  "applicationSha256": "2cb6c86b20f96cbc69fd531905c88d06097e97b301d0574ad42a08113e4c4de9",
   "sourceInputs": {
-    "scripts/verify-piano-menu-mcp.py": "1b78720e75eedd7c95e65e60efb28d91a04bbef53bbc43a0cc7cfe320a5f5d67",
-    "src/StudioMidi.cpp": "b12b4f612ad87466dad35d5f5f97956ddf894cdf3823727b9e66fe91c060f170",
-    "src/Commands.cpp": "fd1e77c20a779dae187176d4093d3c0f75d2b4e928f818ed82b40ef2dd86d536",
-    "src/McpContracts.h": "7d455396593209469c6471b395fb76d8841b8647420d3a1fc0348cf141b16869",
+    "scripts/verify-piano-menu-mcp.py": "128524cc5c7ae2c04c39855cdbf70547411aa3490cb930836f30a3f74774fa47",
+    "src/StudioMidi.cpp": "8928c9ba8d444a70a0ecb052e9e4e94632dfc5cceb566f063f1b5460a9ae6c41",
+    "src/Commands.cpp": "58b5799bd42074bbadb840ed4085a01c930db2b36aaa8e2a847dc7ded6712859",
+    "src/McpContracts.h": "1723d44cb9280d6983930c9b1be63ed0137667c54570268b3347fd684540a890",
     "src/StudioMcp.cpp": "042b8aa3c0c9c403e4bb893b3bd5700d83890ab154b4a6bc80d5a64f82291c31"
   },
   "sourceHashMode": "text-lf-v1",
@@ -56,7 +56,12 @@
     "view.previewDuringPlayback toggles previewDuringPlayback",
     "Keyboard labels None / Root / White read back (['none', 'root', 'white'])",
     "Snap incoming MIDI to the scale guide toggles (view.snapIncomingMidi)",
-    "Allow resizing from left reports its outcome (piano.resizeLeft)"
+    "Allow resizing from left reports its outcome (piano.resizeLeft)",
+    "Flip horizontally, keep start times: the starts mirror and every length stays (notes.flip horizontalStarts)",
+    "Flam on the beat: the stroke takes the original start and the note follows, keeping its end (notes.flam after)",
+    "An unknown flam placement is refused",
+    "Strum alternate runs (notes.strum)",
+    "Alternate strums successive chords up, down, up, down [True, False, True, False]"
   ],
   "scope": "Isolated --mcp-test; the registered operations the Piano roll menu items run, with the menu's arguments. Not native popup input, listening or hardware evidence.",
   "refreshedBy": "scripts/refresh-menu-evidence.py"

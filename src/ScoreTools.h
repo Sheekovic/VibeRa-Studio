@@ -301,20 +301,22 @@ inline juce::Result arpeggiate(Project &project, Pattern &pattern, const std::ve
 inline juce::Result strum(Pattern &pattern, const std::vector<size_t> &targets, const juce::String &direction,
                           double spread, double taper)
 {
-    if (direction != "up" && direction != "down")
-        return juce::Result::fail("Strum direction is up or down");
+    if (direction != "up" && direction != "down" && direction != "alternate")
+        return juce::Result::fail("Strum direction is up, down or alternate");
     if (!(spread > 0 && spread <= 1))
         return juce::Result::fail("Strum spread is 0..1 beat per note");
     if (!(taper >= 0 && taper <= 1))
         return juce::Result::fail("Strum taper is 0..1");
     bool chords = false;
+    int strummed = 0; // Alternate: up, down, up... counting chords only (single notes are skipped).
     for (auto group : onsetGroups(pattern, targets))
     {
         if (group.size() < 2)
             continue;
         chords = true;
-        if (direction == "down")
+        if (direction == "down" || (direction == "alternate" && strummed % 2 == 1))
             std::reverse(group.begin(), group.end());
+        ++strummed;
         for (size_t k = 1; k < group.size(); ++k)
         {
             auto &note = pattern.notes[group[k]];
